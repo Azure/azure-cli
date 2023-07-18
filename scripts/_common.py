@@ -7,9 +7,6 @@
 
 # common utilities for scripts
 
-from __future__ import print_function
-
-
 def get_repo_root():
     """
     Returns the root path to this repository. The root is where .git folder is.

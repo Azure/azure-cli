@@ -5,7 +5,7 @@
 
 import argparse
 import unittest
-from six import StringIO
+from io import StringIO
 
 from azure.cli.core.commands.validators import (validate_key_value_pairs, validate_tag,
                                                 validate_tags)

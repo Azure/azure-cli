@@ -1,0 +1,4284 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_dns000001?api-version=2018-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001","name":"cli_test_dns000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-12-17T03:52:02Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '384'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:52:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "dhcpOptions": {}}}'
+    headers:
+      Accept:
+      - application/json, text/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '123'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/virtualNetworks/regvnet?api-version=2017-10-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"regvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/virtualNetworks/regvnet\",\r\n
+        \ \"etag\": \"W/\\\"e0a442e0-9ce9-462c-9912-10004fb0e5e4\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"c42530b8-4ef8-48e4-80d7-caf68493f9d3\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/7fe9cf3e-b546-46c3-96d7-4adf857ad72b?api-version=2017-10-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '770'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:52:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - de77cf88-b61f-49ea-a2a4-8baf35c40eb1
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/7fe9cf3e-b546-46c3-96d7-4adf857ad72b?api-version=2017-10-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:52:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 5341ec38-50a0-468f-8dbd-5c7c40c5866c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/virtualNetworks/regvnet?api-version=2017-10-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"regvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/virtualNetworks/regvnet\",\r\n
+        \ \"etag\": \"W/\\\"c04ce7e7-eb72-43cc-869d-038bbd278edf\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"c42530b8-4ef8-48e4-80d7-caf68493f9d3\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '771'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:52:14 GMT
+      etag:
+      - W/"c04ce7e7-eb72-43cc-869d-038bbd278edf"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 32ef7405-023e-4f2c-9cc1-24c50be9a5dc
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_dns000001?api-version=2018-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001","name":"cli_test_dns000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-12-17T03:52:02Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '384'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:52:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "dhcpOptions": {}}}'
+    headers:
+      Accept:
+      - application/json, text/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '123'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/virtualNetworks/resvnet?api-version=2017-10-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"resvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/virtualNetworks/resvnet\",\r\n
+        \ \"etag\": \"W/\\\"6cbd0038-38dd-4c35-ba8e-2c3ebc320988\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"995c19bf-e44f-433f-b683-47909a23d1b9\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/a5c0bfd3-4a2b-46e0-b9cb-7cf5084fa59d?api-version=2017-10-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '770'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:52:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - bd587d4c-2035-4eb2-97e9-052bed59c134
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/a5c0bfd3-4a2b-46e0-b9cb-7cf5084fa59d?api-version=2017-10-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:52:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 15974157-4708-4cc8-98bc-1cb229270770
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/virtualNetworks/resvnet?api-version=2017-10-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"resvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/virtualNetworks/resvnet\",\r\n
+        \ \"etag\": \"W/\\\"6e345772-d543-42e5-9e27-48850eb0935a\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"995c19bf-e44f-433f-b683-47909a23d1b9\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '771'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:52:24 GMT
+      etag:
+      - W/"6e345772-d543-42e5-9e27-48850eb0935a"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 51f35b16-6290-4a59-82f5-3cd5854ef882
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns zone list
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/dnszones?api-version=2016-04-01
+  response:
+    body:
+      string: '{"value":[{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_dns_zone2_import64bda7zdgcyv22isxb3t62flln7sun4n7f7cgweetahiwtzxgecsjuv\/providers\/Microsoft.Network\/dnszones\/zone2.com","name":"zone2.com","type":"Microsoft.Network\/dnszones","etag":"00000002-0000-0000-1c9c-5bf227d4d601","location":"global","tags":{},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-04.azure-dns.com.","ns2-04.azure-dns.net.","ns3-04.azure-dns.org.","ns4-04.azure-dns.info."],"numberOfRecordSets":23}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_dns_zone3_importzmpk3e3kuwzndwbsh7smkxgrc33urst3uu3bankkzj2gzkrud2lo4qb\/providers\/Microsoft.Network\/dnszones\/zone3.com","name":"zone3.com","type":"Microsoft.Network\/dnszones","etag":"00000002-0000-0000-e450-e4e127d4d601","location":"global","tags":{},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-06.azure-dns.com.","ns2-06.azure-dns.net.","ns3-06.azure-dns.org.","ns4-06.azure-dns.info."],"numberOfRecordSets":20}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_dns_zone4_importgn7ifvtlwq2drkjp2wslb4hcjvk2agcodmcdwq5hvd4nts77lbaed4m\/providers\/Microsoft.Network\/dnszones\/zone4.com","name":"zone4.com","type":"Microsoft.Network\/dnszones","etag":"00000002-0000-0000-1ccd-23e327d4d601","location":"global","tags":{},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-09.azure-dns.com.","ns2-09.azure-dns.net.","ns3-09.azure-dns.org.","ns4-09.azure-dns.info."],"numberOfRecordSets":21}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dnstsyrhvsmjjbjlt7gxhvi2yfepu5jeka7ohzifxd7olkcxodkmxtttj5uurjmsom\/providers\/Microsoft.Network\/dnszones\/myzone.com","name":"myzone.com","type":"Microsoft.Network\/dnszones","etag":"00000002-0000-0000-7ea7-aaff27d4d601","location":"global","tags":{},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-01.azure-dns.com.","ns2-01.azure-dns.net.","ns3-01.azure-dns.org.","ns4-01.azure-dns.info."],"numberOfRecordSets":5}}]}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '2248'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:52:27 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-entities-read:
+      - '59996'
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"tags": {"foo": "doo"}, "location": "global"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns zone create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '46'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --zone-type --registration-vnets --resolution-vnets --tags
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com","name":"myprivatezone.com","type":"Microsoft.Network\/dnszones","etag":"00000002-0000-0000-1da4-4e0e28d4d601","location":"global","tags":{"foo":"doo"},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-06.azure-dns.com.","ns2-06.azure-dns.net.","ns3-06.azure-dns.org.","ns4-06.azure-dns.info."],"numberOfRecordSets":2,"zoneType":"Public"}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '604'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:52:38 GMT
+      etag:
+      - 00000002-0000-0000-1da4-4e0e28d4d601
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns zone list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones?api-version=2016-04-01
+  response:
+    body:
+      string: '{"value":[{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com","name":"myprivatezone.com","type":"Microsoft.Network\/dnszones","etag":"00000002-0000-0000-1da4-4e0e28d4d601","location":"global","tags":{"foo":"doo"},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-06.azure-dns.com.","ns2-06.azure-dns.net.","ns3-06.azure-dns.org.","ns4-06.azure-dns.info."],"numberOfRecordSets":2}}]}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '596'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:52:39 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-entities-read:
+      - '59999'
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns zone update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --zone-type --registration-vnets --resolution-vnets --tags
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com","name":"myprivatezone.com","type":"Microsoft.Network\/dnszones","etag":"00000002-0000-0000-1da4-4e0e28d4d601","location":"global","tags":{"foo":"doo"},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-06.azure-dns.com.","ns2-06.azure-dns.net.","ns3-06.azure-dns.org.","ns4-06.azure-dns.info."],"numberOfRecordSets":2}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '584'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:52:42 GMT
+      etag:
+      - 00000002-0000-0000-1da4-4e0e28d4d601
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"tags": {"foo": "boo"}, "location": "global", "etag": "00000002-0000-0000-1da4-4e0e28d4d601",
+      "properties": {"maxNumberOfRecordSets": 10000, "numberOfRecordSets": 2}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns zone update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '167'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --zone-type --registration-vnets --resolution-vnets --tags
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com","name":"myprivatezone.com","type":"Microsoft.Network\/dnszones","etag":"00000003-0000-0000-1da4-4e0e28d4d601","location":"global","tags":{"foo":"boo"},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-06.azure-dns.com.","ns2-06.azure-dns.net.","ns3-06.azure-dns.org.","ns4-06.azure-dns.info."],"numberOfRecordSets":2,"zoneType":"Public"}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '604'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:52:48 GMT
+      etag:
+      - 00000003-0000-0000-1da4-4e0e28d4d601
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns zone update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --zone-type --registration-vnets --resolution-vnets
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com","name":"myprivatezone.com","type":"Microsoft.Network\/dnszones","etag":"00000003-0000-0000-1da4-4e0e28d4d601","location":"global","tags":{"foo":"boo"},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-06.azure-dns.com.","ns2-06.azure-dns.net.","ns3-06.azure-dns.org.","ns4-06.azure-dns.info."],"numberOfRecordSets":2}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '584'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:52:50 GMT
+      etag:
+      - 00000003-0000-0000-1da4-4e0e28d4d601
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"tags": {"foo": "boo"}, "location": "global", "etag": "00000003-0000-0000-1da4-4e0e28d4d601",
+      "properties": {"maxNumberOfRecordSets": 10000, "numberOfRecordSets": 2}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns zone update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '167'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --zone-type --registration-vnets --resolution-vnets
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com","name":"myprivatezone.com","type":"Microsoft.Network\/dnszones","etag":"00000004-0000-0000-1da4-4e0e28d4d601","location":"global","tags":{"foo":"boo"},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-06.azure-dns.com.","ns2-06.azure-dns.net.","ns3-06.azure-dns.org.","ns4-06.azure-dns.info."],"numberOfRecordSets":2,"zoneType":"Public"}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '604'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:52:52 GMT
+      etag:
+      - 00000004-0000-0000-1da4-4e0e28d4d601
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns zone show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com","name":"myprivatezone.com","type":"Microsoft.Network\/dnszones","etag":"00000004-0000-0000-1da4-4e0e28d4d601","location":"global","tags":{"foo":"boo"},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-06.azure-dns.com.","ns2-06.azure-dns.net.","ns3-06.azure-dns.org.","ns4-06.azure-dns.info."],"numberOfRecordSets":2}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '584'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:52:54 GMT
+      etag:
+      - 00000004-0000-0000-1da4-4e0e28d4d601
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"TTL": 3600}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set a create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '29'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --zone-name
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/A/myrsa?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/A\/myrsa","name":"myrsa","type":"Microsoft.Network\/dnszones\/A","etag":"791a506d-0989-416a-8f86-1cc2ba49833d","properties":{"fqdn":"myrsa.myprivatezone.com.","TTL":3600,"ARecords":[]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '399'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:52:55 GMT
+      etag:
+      - 791a506d-0989-416a-8f86-1cc2ba49833d
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11994'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set a add-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --zone-name --record-set-name --ipv4-address
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/A/myrsa?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/A\/myrsa","name":"myrsa","type":"Microsoft.Network\/dnszones\/A","etag":"791a506d-0989-416a-8f86-1cc2ba49833d","properties":{"fqdn":"myrsa.myprivatezone.com.","TTL":3600,"ARecords":[]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '399'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:52:56 GMT
+      etag:
+      - 791a506d-0989-416a-8f86-1cc2ba49833d
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnszones/myprivatezone.com/A/myrsa",
+      "name": "myrsa", "type": "Microsoft.Network/dnszones/A", "etag": "791a506d-0989-416a-8f86-1cc2ba49833d",
+      "properties": {"TTL": 3600, "ARecords": [{"ipv4Address": "10.0.0.10"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set a add-record
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '393'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --zone-name --record-set-name --ipv4-address
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/A/myrsa?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/A\/myrsa","name":"myrsa","type":"Microsoft.Network\/dnszones\/A","etag":"e2b57b5d-cdfe-4412-8e1a-0ddd91f62444","properties":{"fqdn":"myrsa.myprivatezone.com.","TTL":3600,"ARecords":[{"ipv4Address":"10.0.0.10"}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '426'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:52:58 GMT
+      etag:
+      - e2b57b5d-cdfe-4412-8e1a-0ddd91f62444
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11995'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set a add-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --zone-name --record-set-name --ipv4-address
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/A/myrsaalt?api-version=2016-04-01
+  response:
+    body:
+      string: '{"code":"NotFound","message":"The resource record ''myrsaalt'' does
+        not exist in resource group ''cli_test_dns000001'' of subscription ''0b1f6471-1bf0-4dda-aec3-cb9272f09590''."}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '229'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:00 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: '{"properties": {"TTL": 3600, "ARecords": [{"ipv4Address": "10.0.0.10"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set a add-record
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '73'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --zone-name --record-set-name --ipv4-address
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/A/myrsaalt?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/A\/myrsaalt","name":"myrsaalt","type":"Microsoft.Network\/dnszones\/A","etag":"0a1041ee-ddbd-4736-8abc-17ae3523bd54","properties":{"fqdn":"myrsaalt.myprivatezone.com.","TTL":3600,"ARecords":[{"ipv4Address":"10.0.0.10"}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '435'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:01 GMT
+      etag:
+      - 0a1041ee-ddbd-4736-8abc-17ae3523bd54
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11997'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"properties": {"TTL": 3600}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set aaaa create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '29'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --zone-name
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/AAAA/myrsaaaa?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/AAAA\/myrsaaaa","name":"myrsaaaa","type":"Microsoft.Network\/dnszones\/AAAA","etag":"062c9178-7368-4a11-a09f-5c1950356deb","properties":{"fqdn":"myrsaaaa.myprivatezone.com.","TTL":3600,"AAAARecords":[]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '417'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:03 GMT
+      etag:
+      - 062c9178-7368-4a11-a09f-5c1950356deb
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set aaaa add-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --zone-name --record-set-name --ipv6-address
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/AAAA/myrsaaaa?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/AAAA\/myrsaaaa","name":"myrsaaaa","type":"Microsoft.Network\/dnszones\/AAAA","etag":"062c9178-7368-4a11-a09f-5c1950356deb","properties":{"fqdn":"myrsaaaa.myprivatezone.com.","TTL":3600,"AAAARecords":[]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '417'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:04 GMT
+      etag:
+      - 062c9178-7368-4a11-a09f-5c1950356deb
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnszones/myprivatezone.com/AAAA/myrsaaaa",
+      "name": "myrsaaaa", "type": "Microsoft.Network/dnszones/AAAA", "etag": "062c9178-7368-4a11-a09f-5c1950356deb",
+      "properties": {"TTL": 3600, "AAAARecords": [{"ipv6Address": "2001:db8:0:1:1:1:1:1"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set aaaa add-record
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '419'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --zone-name --record-set-name --ipv6-address
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/AAAA/myrsaaaa?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/AAAA\/myrsaaaa","name":"myrsaaaa","type":"Microsoft.Network\/dnszones\/AAAA","etag":"e1097bc9-b52a-435c-ad6a-1cfc05b48986","properties":{"fqdn":"myrsaaaa.myprivatezone.com.","TTL":3600,"AAAARecords":[{"ipv6Address":"2001:db8:0:1:1:1:1:1"}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '455'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:06 GMT
+      etag:
+      - e1097bc9-b52a-435c-ad6a-1cfc05b48986
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11998'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set aaaa add-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --zone-name --record-set-name --ipv6-address
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/AAAA/myrsaaaaalt?api-version=2016-04-01
+  response:
+    body:
+      string: '{"code":"NotFound","message":"The resource record ''myrsaaaaalt'' does
+        not exist in resource group ''cli_test_dns000001'' of subscription ''0b1f6471-1bf0-4dda-aec3-cb9272f09590''."}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '232'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:07 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: '{"properties": {"TTL": 3600, "AAAARecords": [{"ipv6Address": "2001:db8:0:1:1:1:1:1"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set aaaa add-record
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '87'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --zone-name --record-set-name --ipv6-address
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/AAAA/myrsaaaaalt?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/AAAA\/myrsaaaaalt","name":"myrsaaaaalt","type":"Microsoft.Network\/dnszones\/AAAA","etag":"5ecd4b66-d4d8-446b-8d53-931b13ca0507","properties":{"fqdn":"myrsaaaaalt.myprivatezone.com.","TTL":3600,"AAAARecords":[{"ipv6Address":"2001:db8:0:1:1:1:1:1"}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '464'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:08 GMT
+      etag:
+      - 5ecd4b66-d4d8-446b-8d53-931b13ca0507
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11997'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"properties": {"TTL": 3600}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set cname create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '29'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --zone-name
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/CNAME/myrscname?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/CNAME\/myrscname","name":"myrscname","type":"Microsoft.Network\/dnszones\/CNAME","etag":"79dc14cd-4a71-4963-9924-dd4da59671fa","properties":{"fqdn":"myrscname.myprivatezone.com.","TTL":3600}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '405'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:10 GMT
+      etag:
+      - 79dc14cd-4a71-4963-9924-dd4da59671fa
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11997'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set cname set-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --zone-name --record-set-name --cname
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/CNAME/myrscname?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/CNAME\/myrscname","name":"myrscname","type":"Microsoft.Network\/dnszones\/CNAME","etag":"79dc14cd-4a71-4963-9924-dd4da59671fa","properties":{"fqdn":"myrscname.myprivatezone.com.","TTL":3600}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '405'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:11 GMT
+      etag:
+      - 79dc14cd-4a71-4963-9924-dd4da59671fa
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnszones/myprivatezone.com/CNAME/myrscname",
+      "name": "myrscname", "type": "Microsoft.Network/dnszones/CNAME", "etag": "79dc14cd-4a71-4963-9924-dd4da59671fa",
+      "properties": {"TTL": 3600, "CNAMERecord": {"cname": "mycname"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set cname set-record
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '402'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --zone-name --record-set-name --cname
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/CNAME/myrscname?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/CNAME\/myrscname","name":"myrscname","type":"Microsoft.Network\/dnszones\/CNAME","etag":"a6639818-b9ca-45c2-bae1-933a4c7074ad","properties":{"fqdn":"myrscname.myprivatezone.com.","TTL":3600,"CNAMERecord":{"cname":"mycname"}}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '439'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:13 GMT
+      etag:
+      - a6639818-b9ca-45c2-bae1-933a4c7074ad
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11997'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set cname set-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --zone-name --record-set-name --cname
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/CNAME/myrscnamealt?api-version=2016-04-01
+  response:
+    body:
+      string: '{"code":"NotFound","message":"The resource record ''myrscnamealt''
+        does not exist in resource group ''cli_test_dns000001'' of subscription ''0b1f6471-1bf0-4dda-aec3-cb9272f09590''."}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '233'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:14 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: '{"properties": {"TTL": 3600, "CNAMERecord": {"cname": "mycname"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set cname set-record
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '66'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --zone-name --record-set-name --cname
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/CNAME/myrscnamealt?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/CNAME\/myrscnamealt","name":"myrscnamealt","type":"Microsoft.Network\/dnszones\/CNAME","etag":"d4ff0822-c6b6-4697-969a-18a8b7afa563","properties":{"fqdn":"myrscnamealt.myprivatezone.com.","TTL":3600,"CNAMERecord":{"cname":"mycname"}}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '448'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:16 GMT
+      etag:
+      - d4ff0822-c6b6-4697-969a-18a8b7afa563
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11996'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"properties": {"TTL": 3600}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set mx create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '29'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --zone-name
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/MX/myrsmx?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/MX\/myrsmx","name":"myrsmx","type":"Microsoft.Network\/dnszones\/MX","etag":"b237884f-09a3-4e41-bb86-93f3bbf38bac","properties":{"fqdn":"myrsmx.myprivatezone.com.","TTL":3600,"MXRecords":[]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '405'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:17 GMT
+      etag:
+      - b237884f-09a3-4e41-bb86-93f3bbf38bac
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11998'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set mx add-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --zone-name --record-set-name --exchange --preference
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/MX/myrsmx?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/MX\/myrsmx","name":"myrsmx","type":"Microsoft.Network\/dnszones\/MX","etag":"b237884f-09a3-4e41-bb86-93f3bbf38bac","properties":{"fqdn":"myrsmx.myprivatezone.com.","TTL":3600,"MXRecords":[]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '405'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:18 GMT
+      etag:
+      - b237884f-09a3-4e41-bb86-93f3bbf38bac
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnszones/myprivatezone.com/MX/myrsmx",
+      "name": "myrsmx", "type": "Microsoft.Network/dnszones/MX", "etag": "b237884f-09a3-4e41-bb86-93f3bbf38bac",
+      "properties": {"TTL": 3600, "MXRecords": [{"preference": 13, "exchange": "12"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set mx add-record
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '406'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --zone-name --record-set-name --exchange --preference
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/MX/myrsmx?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/MX\/myrsmx","name":"myrsmx","type":"Microsoft.Network\/dnszones\/MX","etag":"fee60611-1233-4b52-a41a-75f697c7dc1f","properties":{"fqdn":"myrsmx.myprivatezone.com.","TTL":3600,"MXRecords":[{"exchange":"12","preference":13}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '438'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:20 GMT
+      etag:
+      - fee60611-1233-4b52-a41a-75f697c7dc1f
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11998'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set mx add-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --zone-name --record-set-name --exchange --preference
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/MX/myrsmxalt?api-version=2016-04-01
+  response:
+    body:
+      string: '{"code":"NotFound","message":"The resource record ''myrsmxalt'' does
+        not exist in resource group ''cli_test_dns000001'' of subscription ''0b1f6471-1bf0-4dda-aec3-cb9272f09590''."}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '230'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:21 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: '{"properties": {"TTL": 3600, "MXRecords": [{"preference": 13, "exchange":
+      "12"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set mx add-record
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '82'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --zone-name --record-set-name --exchange --preference
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/MX/myrsmxalt?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/MX\/myrsmxalt","name":"myrsmxalt","type":"Microsoft.Network\/dnszones\/MX","etag":"77ca7a42-3383-40e5-bc1f-a4a47240c029","properties":{"fqdn":"myrsmxalt.myprivatezone.com.","TTL":3600,"MXRecords":[{"exchange":"12","preference":13}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '447'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:22 GMT
+      etag:
+      - 77ca7a42-3383-40e5-bc1f-a4a47240c029
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11998'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"properties": {"TTL": 3600}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set ptr create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '29'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --zone-name
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/PTR/myrsptr?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/PTR\/myrsptr","name":"myrsptr","type":"Microsoft.Network\/dnszones\/PTR","etag":"7a4caac3-202a-4b56-a757-2097be207465","properties":{"fqdn":"myrsptr.myprivatezone.com.","TTL":3600,"PTRRecords":[]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '411'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:24 GMT
+      etag:
+      - 7a4caac3-202a-4b56-a757-2097be207465
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set ptr add-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --zone-name --record-set-name --ptrdname
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/PTR/myrsptr?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/PTR\/myrsptr","name":"myrsptr","type":"Microsoft.Network\/dnszones\/PTR","etag":"7a4caac3-202a-4b56-a757-2097be207465","properties":{"fqdn":"myrsptr.myprivatezone.com.","TTL":3600,"PTRRecords":[]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '411'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:26 GMT
+      etag:
+      - 7a4caac3-202a-4b56-a757-2097be207465
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnszones/myprivatezone.com/PTR/myrsptr",
+      "name": "myrsptr", "type": "Microsoft.Network/dnszones/PTR", "etag": "7a4caac3-202a-4b56-a757-2097be207465",
+      "properties": {"TTL": 3600, "PTRRecords": [{"ptrdname": "foobar.com"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set ptr add-record
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '401'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --zone-name --record-set-name --ptrdname
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/PTR/myrsptr?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/PTR\/myrsptr","name":"myrsptr","type":"Microsoft.Network\/dnszones\/PTR","etag":"f335e628-02e6-4d3f-a9e5-df83ef8521f6","properties":{"fqdn":"myrsptr.myprivatezone.com.","TTL":3600,"PTRRecords":[{"ptrdname":"foobar.com"}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '436'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:27 GMT
+      etag:
+      - f335e628-02e6-4d3f-a9e5-df83ef8521f6
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set ptr add-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --zone-name --record-set-name --ptrdname
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/PTR/myrsptralt?api-version=2016-04-01
+  response:
+    body:
+      string: '{"code":"NotFound","message":"The resource record ''myrsptralt'' does
+        not exist in resource group ''cli_test_dns000001'' of subscription ''0b1f6471-1bf0-4dda-aec3-cb9272f09590''."}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '231'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:29 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: '{"properties": {"TTL": 3600, "PTRRecords": [{"ptrdname": "foobar.com"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set ptr add-record
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '73'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --zone-name --record-set-name --ptrdname
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/PTR/myrsptralt?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/PTR\/myrsptralt","name":"myrsptralt","type":"Microsoft.Network\/dnszones\/PTR","etag":"1d1c167b-6048-4c1f-ad31-3d769d898139","properties":{"fqdn":"myrsptralt.myprivatezone.com.","TTL":3600,"PTRRecords":[{"ptrdname":"foobar.com"}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '445'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:30 GMT
+      etag:
+      - 1d1c167b-6048-4c1f-ad31-3d769d898139
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11998'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"properties": {"TTL": 3600}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set srv create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '29'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --zone-name
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/SRV/myrssrv?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/SRV\/myrssrv","name":"myrssrv","type":"Microsoft.Network\/dnszones\/SRV","etag":"628779ea-25ed-404b-9598-dd7321dc39db","properties":{"fqdn":"myrssrv.myprivatezone.com.","TTL":3600,"SRVRecords":[]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '411'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:32 GMT
+      etag:
+      - 628779ea-25ed-404b-9598-dd7321dc39db
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11997'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set srv add-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --zone-name --record-set-name --port --priority --target --weight
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/SRV/myrssrv?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/SRV\/myrssrv","name":"myrssrv","type":"Microsoft.Network\/dnszones\/SRV","etag":"628779ea-25ed-404b-9598-dd7321dc39db","properties":{"fqdn":"myrssrv.myprivatezone.com.","TTL":3600,"SRVRecords":[]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '411'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:33 GMT
+      etag:
+      - 628779ea-25ed-404b-9598-dd7321dc39db
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnszones/myprivatezone.com/SRV/myrssrv",
+      "name": "myrssrv", "type": "Microsoft.Network/dnszones/SRV", "etag": "628779ea-25ed-404b-9598-dd7321dc39db",
+      "properties": {"TTL": 3600, "SRVRecords": [{"priority": 1, "weight": 50, "port":
+      1234, "target": "target.com"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set srv add-record
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '442'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --zone-name --record-set-name --port --priority --target --weight
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/SRV/myrssrv?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/SRV\/myrssrv","name":"myrssrv","type":"Microsoft.Network\/dnszones\/SRV","etag":"395b3688-b073-46a9-bb1e-bfaf19e14895","properties":{"fqdn":"myrssrv.myprivatezone.com.","TTL":3600,"SRVRecords":[{"port":1234,"priority":1,"target":"target.com","weight":50}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '471'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:35 GMT
+      etag:
+      - 395b3688-b073-46a9-bb1e-bfaf19e14895
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11997'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set srv add-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --zone-name --record-set-name --port --priority --target --weight
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/SRV/myrssrvalt?api-version=2016-04-01
+  response:
+    body:
+      string: '{"code":"NotFound","message":"The resource record ''myrssrvalt'' does
+        not exist in resource group ''cli_test_dns000001'' of subscription ''0b1f6471-1bf0-4dda-aec3-cb9272f09590''."}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '231'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:37 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: '{"properties": {"TTL": 3600, "SRVRecords": [{"priority": 1, "weight": 50,
+      "port": 1234, "target": "target.com"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set srv add-record
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '114'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --zone-name --record-set-name --port --priority --target --weight
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/SRV/myrssrvalt?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/SRV\/myrssrvalt","name":"myrssrvalt","type":"Microsoft.Network\/dnszones\/SRV","etag":"d33ad63f-0123-4c40-bf14-d60e5db98d25","properties":{"fqdn":"myrssrvalt.myprivatezone.com.","TTL":3600,"SRVRecords":[{"port":1234,"priority":1,"target":"target.com","weight":50}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '480'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:38 GMT
+      etag:
+      - d33ad63f-0123-4c40-bf14-d60e5db98d25
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"properties": {"TTL": 3600}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set txt create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '29'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --zone-name
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/TXT/myrstxt?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/TXT\/myrstxt","name":"myrstxt","type":"Microsoft.Network\/dnszones\/TXT","etag":"1df4c2de-0d2b-4e59-ba2a-3c4a47e56e9c","properties":{"fqdn":"myrstxt.myprivatezone.com.","TTL":3600,"TXTRecords":[]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '411'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:40 GMT
+      etag:
+      - 1df4c2de-0d2b-4e59-ba2a-3c4a47e56e9c
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11994'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set txt add-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --zone-name --record-set-name --value
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/TXT/myrstxt?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/TXT\/myrstxt","name":"myrstxt","type":"Microsoft.Network\/dnszones\/TXT","etag":"1df4c2de-0d2b-4e59-ba2a-3c4a47e56e9c","properties":{"fqdn":"myrstxt.myprivatezone.com.","TTL":3600,"TXTRecords":[]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '411'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:42 GMT
+      etag:
+      - 1df4c2de-0d2b-4e59-ba2a-3c4a47e56e9c
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnszones/myprivatezone.com/TXT/myrstxt",
+      "name": "myrstxt", "type": "Microsoft.Network/dnszones/TXT", "etag": "1df4c2de-0d2b-4e59-ba2a-3c4a47e56e9c",
+      "properties": {"TTL": 3600, "TXTRecords": [{"value": ["some_text"]}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set txt add-record
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '399'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --zone-name --record-set-name --value
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/TXT/myrstxt?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/TXT\/myrstxt","name":"myrstxt","type":"Microsoft.Network\/dnszones\/TXT","etag":"8ca7f24a-18b8-4273-851e-645476de2c37","properties":{"fqdn":"myrstxt.myprivatezone.com.","TTL":3600,"TXTRecords":[{"value":["some_text"]}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '434'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:43 GMT
+      etag:
+      - 8ca7f24a-18b8-4273-851e-645476de2c37
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11993'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set txt add-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --zone-name --record-set-name --value
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/TXT/myrstxtalt?api-version=2016-04-01
+  response:
+    body:
+      string: '{"code":"NotFound","message":"The resource record ''myrstxtalt'' does
+        not exist in resource group ''cli_test_dns000001'' of subscription ''0b1f6471-1bf0-4dda-aec3-cb9272f09590''."}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '231'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:44 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '497'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: '{"properties": {"TTL": 3600, "TXTRecords": [{"value": ["some_text"]}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set txt add-record
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '71'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --zone-name --record-set-name --value
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/TXT/myrstxtalt?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/TXT\/myrstxtalt","name":"myrstxtalt","type":"Microsoft.Network\/dnszones\/TXT","etag":"35a440c9-63ce-4424-9cc6-86200ef194b5","properties":{"fqdn":"myrstxtalt.myprivatezone.com.","TTL":3600,"TXTRecords":[{"value":["some_text"]}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '443'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:46 GMT
+      etag:
+      - 35a440c9-63ce-4424-9cc6-86200ef194b5
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11998'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set a add-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --zone-name --record-set-name --ipv4-address
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/A/myrsa?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/A\/myrsa","name":"myrsa","type":"Microsoft.Network\/dnszones\/A","etag":"e2b57b5d-cdfe-4412-8e1a-0ddd91f62444","properties":{"fqdn":"myrsa.myprivatezone.com.","TTL":3600,"ARecords":[{"ipv4Address":"10.0.0.10"}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '426'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:47 GMT
+      etag:
+      - e2b57b5d-cdfe-4412-8e1a-0ddd91f62444
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnszones/myprivatezone.com/A/myrsa",
+      "name": "myrsa", "type": "Microsoft.Network/dnszones/A", "etag": "e2b57b5d-cdfe-4412-8e1a-0ddd91f62444",
+      "properties": {"TTL": 3600, "ARecords": [{"ipv4Address": "10.0.0.10"}, {"ipv4Address":
+      "10.0.0.11"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set a add-record
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '423'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --zone-name --record-set-name --ipv4-address
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/A/myrsa?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/A\/myrsa","name":"myrsa","type":"Microsoft.Network\/dnszones\/A","etag":"3441f409-6c69-4e6b-8f66-84c48f7d8291","properties":{"fqdn":"myrsa.myprivatezone.com.","TTL":3600,"ARecords":[{"ipv4Address":"10.0.0.10"},{"ipv4Address":"10.0.0.11"}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '454'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:48 GMT
+      etag:
+      - 3441f409-6c69-4e6b-8f66-84c48f7d8291
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11995'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set soa update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --zone-name --email --expire-time --minimum-ttl --refresh-time --retry-time
+        --serial-number
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/SOA/@?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/SOA\/@","name":"@","type":"Microsoft.Network\/dnszones\/SOA","etag":"322aac5b-67dd-4c2f-936e-45c9c10b0fd0","properties":{"fqdn":"myprivatezone.com.","TTL":3600,"SOARecord":{"email":"azuredns-hostmaster.microsoft.com","expireTime":2419200,"host":"ns1-06.azure-dns.com.","minimumTTL":300,"refreshTime":3600,"retryTime":300,"serialNumber":1}}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '554'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:50 GMT
+      etag:
+      - 322aac5b-67dd-4c2f-936e-45c9c10b0fd0
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set soa update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --zone-name --email --expire-time --minimum-ttl --refresh-time --retry-time
+        --serial-number
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/SOA/@?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/SOA\/@","name":"@","type":"Microsoft.Network\/dnszones\/SOA","etag":"322aac5b-67dd-4c2f-936e-45c9c10b0fd0","properties":{"fqdn":"myprivatezone.com.","TTL":3600,"SOARecord":{"email":"azuredns-hostmaster.microsoft.com","expireTime":2419200,"host":"ns1-06.azure-dns.com.","minimumTTL":300,"refreshTime":3600,"retryTime":300,"serialNumber":1}}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '554'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:51 GMT
+      etag:
+      - 322aac5b-67dd-4c2f-936e-45c9c10b0fd0
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '498'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnszones/myprivatezone.com/SOA/@",
+      "name": "@", "type": "Microsoft.Network/dnszones/SOA", "etag": "322aac5b-67dd-4c2f-936e-45c9c10b0fd0",
+      "properties": {"TTL": 3600, "SOARecord": {"host": "ns1-06.azure-dns.com.", "email":
+      "foo.com", "serialNumber": 123, "refreshTime": 60, "retryTime": 90, "expireTime":
+      30, "minimumTTL": 20}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set soa update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '506'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --zone-name --email --expire-time --minimum-ttl --refresh-time --retry-time
+        --serial-number
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/SOA/@?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/SOA\/@","name":"@","type":"Microsoft.Network\/dnszones\/SOA","etag":"9aaa57c9-9e1d-4825-bf2b-b94a5e87aa36","properties":{"fqdn":"myprivatezone.com.","TTL":3600,"SOARecord":{"email":"foo.com","expireTime":30,"host":"ns1-06.azure-dns.com.","minimumTTL":20,"refreshTime":60,"retryTime":90,"serialNumber":123}}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '521'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:52 GMT
+      etag:
+      - 9aaa57c9-9e1d-4825-bf2b-b94a5e87aa36
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set txt add-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -z -n -v
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/TXT/longtxt?api-version=2016-04-01
+  response:
+    body:
+      string: '{"code":"NotFound","message":"The resource record ''longtxt'' does
+        not exist in resource group ''cli_test_dns000001'' of subscription ''0b1f6471-1bf0-4dda-aec3-cb9272f09590''."}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '228'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:54 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: '{"properties": {"TTL": 3600, "TXTRecords": [{"value": ["012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234",
+      "56789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789"]}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set txt add-record
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '566'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -z -n -v
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/TXT/longtxt?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/TXT\/longtxt","name":"longtxt","type":"Microsoft.Network\/dnszones\/TXT","etag":"01b573a1-e5d0-4e8f-b084-e461f85e51cc","properties":{"fqdn":"longtxt.myprivatezone.com.","TTL":3600,"TXTRecords":[{"value":["012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234","56789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789"]}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '928'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:55 GMT
+      etag:
+      - 01b573a1-e5d0-4e8f-b084-e461f85e51cc
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11995'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns zone show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com","name":"myprivatezone.com","type":"Microsoft.Network\/dnszones","etag":"00000004-0000-0000-1da4-4e0e28d4d601","location":"global","tags":{"foo":"boo"},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-06.azure-dns.com.","ns2-06.azure-dns.net.","ns3-06.azure-dns.org.","ns4-06.azure-dns.info."],"numberOfRecordSets":17}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '585'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:57 GMT
+      etag:
+      - 00000004-0000-0000-1da4-4e0e28d4d601
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '497'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set a show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --zone-name
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/A/myrsa?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/A\/myrsa","name":"myrsa","type":"Microsoft.Network\/dnszones\/A","etag":"3441f409-6c69-4e6b-8f66-84c48f7d8291","properties":{"fqdn":"myrsa.myprivatezone.com.","TTL":3600,"ARecords":[{"ipv4Address":"10.0.0.10"},{"ipv4Address":"10.0.0.11"}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '454'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:53:59 GMT
+      etag:
+      - 3441f409-6c69-4e6b-8f66-84c48f7d8291
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -z
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/recordsets?api-version=2016-04-01
+  response:
+    body:
+      string: '{"value":[{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/NS\/@","name":"@","type":"Microsoft.Network\/dnszones\/NS","etag":"6bfbc740-7905-46b2-94f7-5da57b465da8","properties":{"fqdn":"myprivatezone.com.","TTL":172800,"NSRecords":[{"nsdname":"ns1-06.azure-dns.com."},{"nsdname":"ns2-06.azure-dns.net."},{"nsdname":"ns3-06.azure-dns.org."},{"nsdname":"ns4-06.azure-dns.info."}]}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/SOA\/@","name":"@","type":"Microsoft.Network\/dnszones\/SOA","etag":"9aaa57c9-9e1d-4825-bf2b-b94a5e87aa36","properties":{"fqdn":"myprivatezone.com.","TTL":3600,"SOARecord":{"email":"foo.com","expireTime":30,"host":"ns1-06.azure-dns.com.","minimumTTL":20,"refreshTime":60,"retryTime":90,"serialNumber":123}}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/TXT\/longtxt","name":"longtxt","type":"Microsoft.Network\/dnszones\/TXT","etag":"01b573a1-e5d0-4e8f-b084-e461f85e51cc","properties":{"fqdn":"longtxt.myprivatezone.com.","TTL":3600,"TXTRecords":[{"value":["012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234","56789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789"]}]}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/A\/myrsa","name":"myrsa","type":"Microsoft.Network\/dnszones\/A","etag":"3441f409-6c69-4e6b-8f66-84c48f7d8291","properties":{"fqdn":"myrsa.myprivatezone.com.","TTL":3600,"ARecords":[{"ipv4Address":"10.0.0.10"},{"ipv4Address":"10.0.0.11"}]}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/AAAA\/myrsaaaa","name":"myrsaaaa","type":"Microsoft.Network\/dnszones\/AAAA","etag":"e1097bc9-b52a-435c-ad6a-1cfc05b48986","properties":{"fqdn":"myrsaaaa.myprivatezone.com.","TTL":3600,"AAAARecords":[{"ipv6Address":"2001:db8:0:1:1:1:1:1"}]}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/AAAA\/myrsaaaaalt","name":"myrsaaaaalt","type":"Microsoft.Network\/dnszones\/AAAA","etag":"5ecd4b66-d4d8-446b-8d53-931b13ca0507","properties":{"fqdn":"myrsaaaaalt.myprivatezone.com.","TTL":3600,"AAAARecords":[{"ipv6Address":"2001:db8:0:1:1:1:1:1"}]}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/A\/myrsaalt","name":"myrsaalt","type":"Microsoft.Network\/dnszones\/A","etag":"0a1041ee-ddbd-4736-8abc-17ae3523bd54","properties":{"fqdn":"myrsaalt.myprivatezone.com.","TTL":3600,"ARecords":[{"ipv4Address":"10.0.0.10"}]}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/CNAME\/myrscname","name":"myrscname","type":"Microsoft.Network\/dnszones\/CNAME","etag":"a6639818-b9ca-45c2-bae1-933a4c7074ad","properties":{"fqdn":"myrscname.myprivatezone.com.","TTL":3600,"CNAMERecord":{"cname":"mycname"}}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/CNAME\/myrscnamealt","name":"myrscnamealt","type":"Microsoft.Network\/dnszones\/CNAME","etag":"d4ff0822-c6b6-4697-969a-18a8b7afa563","properties":{"fqdn":"myrscnamealt.myprivatezone.com.","TTL":3600,"CNAMERecord":{"cname":"mycname"}}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/MX\/myrsmx","name":"myrsmx","type":"Microsoft.Network\/dnszones\/MX","etag":"fee60611-1233-4b52-a41a-75f697c7dc1f","properties":{"fqdn":"myrsmx.myprivatezone.com.","TTL":3600,"MXRecords":[{"exchange":"12","preference":13}]}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/MX\/myrsmxalt","name":"myrsmxalt","type":"Microsoft.Network\/dnszones\/MX","etag":"77ca7a42-3383-40e5-bc1f-a4a47240c029","properties":{"fqdn":"myrsmxalt.myprivatezone.com.","TTL":3600,"MXRecords":[{"exchange":"12","preference":13}]}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/PTR\/myrsptr","name":"myrsptr","type":"Microsoft.Network\/dnszones\/PTR","etag":"f335e628-02e6-4d3f-a9e5-df83ef8521f6","properties":{"fqdn":"myrsptr.myprivatezone.com.","TTL":3600,"PTRRecords":[{"ptrdname":"foobar.com"}]}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/PTR\/myrsptralt","name":"myrsptralt","type":"Microsoft.Network\/dnszones\/PTR","etag":"1d1c167b-6048-4c1f-ad31-3d769d898139","properties":{"fqdn":"myrsptralt.myprivatezone.com.","TTL":3600,"PTRRecords":[{"ptrdname":"foobar.com"}]}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/SRV\/myrssrv","name":"myrssrv","type":"Microsoft.Network\/dnszones\/SRV","etag":"395b3688-b073-46a9-bb1e-bfaf19e14895","properties":{"fqdn":"myrssrv.myprivatezone.com.","TTL":3600,"SRVRecords":[{"port":1234,"priority":1,"target":"target.com","weight":50}]}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/SRV\/myrssrvalt","name":"myrssrvalt","type":"Microsoft.Network\/dnszones\/SRV","etag":"d33ad63f-0123-4c40-bf14-d60e5db98d25","properties":{"fqdn":"myrssrvalt.myprivatezone.com.","TTL":3600,"SRVRecords":[{"port":1234,"priority":1,"target":"target.com","weight":50}]}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/TXT\/myrstxt","name":"myrstxt","type":"Microsoft.Network\/dnszones\/TXT","etag":"8ca7f24a-18b8-4273-851e-645476de2c37","properties":{"fqdn":"myrstxt.myprivatezone.com.","TTL":3600,"TXTRecords":[{"value":["some_text"]}]}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/TXT\/myrstxtalt","name":"myrstxtalt","type":"Microsoft.Network\/dnszones\/TXT","etag":"35a440c9-63ce-4424-9cc6-86200ef194b5","properties":{"fqdn":"myrstxtalt.myprivatezone.com.","TTL":3600,"TXTRecords":[{"value":["some_text"]}]}}]}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '8300'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:54:00 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-entities-read:
+      - '59964'
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '498'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set txt list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -z
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/TXT?api-version=2016-04-01
+  response:
+    body:
+      string: '{"value":[{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/TXT\/longtxt","name":"longtxt","type":"Microsoft.Network\/dnszones\/TXT","etag":"01b573a1-e5d0-4e8f-b084-e461f85e51cc","properties":{"fqdn":"longtxt.myprivatezone.com.","TTL":3600,"TXTRecords":[{"value":["012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234","56789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789"]}]}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/TXT\/myrstxt","name":"myrstxt","type":"Microsoft.Network\/dnszones\/TXT","etag":"8ca7f24a-18b8-4273-851e-645476de2c37","properties":{"fqdn":"myrstxt.myprivatezone.com.","TTL":3600,"TXTRecords":[{"value":["some_text"]}]}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/TXT\/myrstxtalt","name":"myrstxtalt","type":"Microsoft.Network\/dnszones\/TXT","etag":"35a440c9-63ce-4424-9cc6-86200ef194b5","properties":{"fqdn":"myrstxtalt.myprivatezone.com.","TTL":3600,"TXTRecords":[{"value":["some_text"]}]}}]}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '1819'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:54:00 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-entities-read:
+      - '59997'
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set a remove-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --zone-name --record-set-name --ipv4-address
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/A/myrsa?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/A\/myrsa","name":"myrsa","type":"Microsoft.Network\/dnszones\/A","etag":"3441f409-6c69-4e6b-8f66-84c48f7d8291","properties":{"fqdn":"myrsa.myprivatezone.com.","TTL":3600,"ARecords":[{"ipv4Address":"10.0.0.10"},{"ipv4Address":"10.0.0.11"}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '454'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:54:02 GMT
+      etag:
+      - 3441f409-6c69-4e6b-8f66-84c48f7d8291
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '498'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnszones/myprivatezone.com/A/myrsa",
+      "name": "myrsa", "type": "Microsoft.Network/dnszones/A", "etag": "3441f409-6c69-4e6b-8f66-84c48f7d8291",
+      "properties": {"TTL": 3600, "ARecords": [{"ipv4Address": "10.0.0.11"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set a remove-record
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '393'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --zone-name --record-set-name --ipv4-address
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/A/myrsa?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/A\/myrsa","name":"myrsa","type":"Microsoft.Network\/dnszones\/A","etag":"7fe4693b-3d0f-4aee-a65d-0146014a7888","properties":{"fqdn":"myrsa.myprivatezone.com.","TTL":3600,"ARecords":[{"ipv4Address":"10.0.0.11"}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '426'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:54:03 GMT
+      etag:
+      - 7fe4693b-3d0f-4aee-a65d-0146014a7888
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11994'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set aaaa remove-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --zone-name --record-set-name --ipv6-address
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/AAAA/myrsaaaa?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/AAAA\/myrsaaaa","name":"myrsaaaa","type":"Microsoft.Network\/dnszones\/AAAA","etag":"e1097bc9-b52a-435c-ad6a-1cfc05b48986","properties":{"fqdn":"myrsaaaa.myprivatezone.com.","TTL":3600,"AAAARecords":[{"ipv6Address":"2001:db8:0:1:1:1:1:1"}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '455'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:54:05 GMT
+      etag:
+      - e1097bc9-b52a-435c-ad6a-1cfc05b48986
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set aaaa remove-record
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g --zone-name --record-set-name --ipv6-address
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/AAAA/myrsaaaa?api-version=2016-04-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '0'
+      date:
+      - Thu, 17 Dec 2020 03:54:07 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set cname remove-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --zone-name --record-set-name --cname
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/CNAME/myrscname?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/CNAME\/myrscname","name":"myrscname","type":"Microsoft.Network\/dnszones\/CNAME","etag":"a6639818-b9ca-45c2-bae1-933a4c7074ad","properties":{"fqdn":"myrscname.myprivatezone.com.","TTL":3600,"CNAMERecord":{"cname":"mycname"}}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '439'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:54:08 GMT
+      etag:
+      - a6639818-b9ca-45c2-bae1-933a4c7074ad
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set cname remove-record
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g --zone-name --record-set-name --cname
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/CNAME/myrscname?api-version=2016-04-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '0'
+      date:
+      - Thu, 17 Dec 2020 03:54:10 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set mx remove-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --zone-name --record-set-name --exchange --preference
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/MX/myrsmx?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/MX\/myrsmx","name":"myrsmx","type":"Microsoft.Network\/dnszones\/MX","etag":"fee60611-1233-4b52-a41a-75f697c7dc1f","properties":{"fqdn":"myrsmx.myprivatezone.com.","TTL":3600,"MXRecords":[{"exchange":"12","preference":13}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '438'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:54:11 GMT
+      etag:
+      - fee60611-1233-4b52-a41a-75f697c7dc1f
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set mx remove-record
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g --zone-name --record-set-name --exchange --preference
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/MX/myrsmx?api-version=2016-04-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '0'
+      date:
+      - Thu, 17 Dec 2020 03:54:13 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set ptr remove-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --zone-name --record-set-name --ptrdname
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/PTR/myrsptr?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/PTR\/myrsptr","name":"myrsptr","type":"Microsoft.Network\/dnszones\/PTR","etag":"f335e628-02e6-4d3f-a9e5-df83ef8521f6","properties":{"fqdn":"myrsptr.myprivatezone.com.","TTL":3600,"PTRRecords":[{"ptrdname":"foobar.com"}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '436'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:54:13 GMT
+      etag:
+      - f335e628-02e6-4d3f-a9e5-df83ef8521f6
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '498'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set ptr remove-record
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g --zone-name --record-set-name --ptrdname
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/PTR/myrsptr?api-version=2016-04-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '0'
+      date:
+      - Thu, 17 Dec 2020 03:54:16 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set srv remove-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --zone-name --record-set-name --port --priority --target --weight
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/SRV/myrssrv?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/SRV\/myrssrv","name":"myrssrv","type":"Microsoft.Network\/dnszones\/SRV","etag":"395b3688-b073-46a9-bb1e-bfaf19e14895","properties":{"fqdn":"myrssrv.myprivatezone.com.","TTL":3600,"SRVRecords":[{"port":1234,"priority":1,"target":"target.com","weight":50}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '471'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:54:17 GMT
+      etag:
+      - 395b3688-b073-46a9-bb1e-bfaf19e14895
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '498'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set srv remove-record
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g --zone-name --record-set-name --port --priority --target --weight
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/SRV/myrssrv?api-version=2016-04-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '0'
+      date:
+      - Thu, 17 Dec 2020 03:54:18 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set txt remove-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --zone-name --record-set-name --value
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/TXT/myrstxt?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/TXT\/myrstxt","name":"myrstxt","type":"Microsoft.Network\/dnszones\/TXT","etag":"8ca7f24a-18b8-4273-851e-645476de2c37","properties":{"fqdn":"myrstxt.myprivatezone.com.","TTL":3600,"TXTRecords":[{"value":["some_text"]}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '434'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:54:20 GMT
+      etag:
+      - 8ca7f24a-18b8-4273-851e-645476de2c37
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set txt remove-record
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g --zone-name --record-set-name --value
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/TXT/myrstxt?api-version=2016-04-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '0'
+      date:
+      - Thu, 17 Dec 2020 03:54:21 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set a show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --zone-name
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/A/myrsa?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/A\/myrsa","name":"myrsa","type":"Microsoft.Network\/dnszones\/A","etag":"7fe4693b-3d0f-4aee-a65d-0146014a7888","properties":{"fqdn":"myrsa.myprivatezone.com.","TTL":3600,"ARecords":[{"ipv4Address":"10.0.0.11"}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '426'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:54:23 GMT
+      etag:
+      - 7fe4693b-3d0f-4aee-a65d-0146014a7888
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set a remove-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --zone-name --record-set-name --ipv4-address
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/A/myrsa?api-version=2016-04-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/myprivatezone.com\/A\/myrsa","name":"myrsa","type":"Microsoft.Network\/dnszones\/A","etag":"7fe4693b-3d0f-4aee-a65d-0146014a7888","properties":{"fqdn":"myrsa.myprivatezone.com.","TTL":3600,"ARecords":[{"ipv4Address":"10.0.0.11"}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '426'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:54:24 GMT
+      etag:
+      - 7fe4693b-3d0f-4aee-a65d-0146014a7888
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '498'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set a remove-record
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g --zone-name --record-set-name --ipv4-address
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/A/myrsa?api-version=2016-04-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '0'
+      date:
+      - Thu, 17 Dec 2020 03:54:26 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set a show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --zone-name
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/A/myrsa?api-version=2016-04-01
+  response:
+    body:
+      string: '{"code":"NotFound","message":"The resource record ''myrsa'' does not
+        exist in resource group ''cli_test_dns000001'' of subscription ''0b1f6471-1bf0-4dda-aec3-cb9272f09590''."}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '226'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:54:27 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '497'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set a delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --zone-name -y
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/A/myrsa?api-version=2016-04-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - private
+      date:
+      - Thu, 17 Dec 2020 03:54:29 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 204
+      message: NoContent
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns record-set a show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --zone-name
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com/A/myrsa?api-version=2016-04-01
+  response:
+    body:
+      string: '{"code":"NotFound","message":"The resource record ''myrsa'' does not
+        exist in resource group ''cli_test_dns000001'' of subscription ''0b1f6471-1bf0-4dda-aec3-cb9272f09590''."}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '226'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:54:30 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '496'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns zone delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n -y
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/myprivatezone.com?api-version=2016-04-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsOperationStatuses/delzone637437740739514888e9d72fb6?api-version=2016-04-01
+      cache-control:
+      - private
+      content-length:
+      - '0'
+      date:
+      - Thu, 17 Dec 2020 03:54:33 GMT
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsOperationResults/delzone637437740739514888e9d72fb6?api-version=2016-04-01
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11998'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns zone delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -y
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-dns/2.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsOperationStatuses/delzone637437740739514888e9d72fb6?api-version=2016-04-01
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 03:54:38 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '498'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+version: 1

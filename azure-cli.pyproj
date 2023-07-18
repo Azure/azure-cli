@@ -12,7 +12,7 @@
     <OutputPath>.</OutputPath>
     <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <InterpreterId>MSBuild|{f0ce7f81-ab4f-4088-b037-81002e6ddc44}|$(MSBuildProjectFullPath)</InterpreterId>
+    <InterpreterId>MSBuild|{2151c13d-4041-4c88-bb0b-54ce1a741de6}|$(MSBuildProjectFullPath)</InterpreterId>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <CommandLineArguments>
     </CommandLineArguments>
@@ -23,8 +23,6 @@
     <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="azure-cli-command_modules-nspkg\azure\cli\command_modules\__init__.py" />
-    <Compile Include="azure-cli-command_modules-nspkg\setup.py" />
     <Compile Include="azure-cli-core\azure\cli\core\adal_authentication.py" />
     <Compile Include="azure-cli-core\azure\cli\core\azlogging.py" />
     <Compile Include="azure-cli-core\azure\cli\core\cloud.py" />
@@ -78,8 +76,6 @@
     <Compile Include="azure-cli-core\azure\cli\__init__.py" />
     <Compile Include="azure-cli-core\azure\__init__.py" />
     <Compile Include="azure-cli-core\setup.py" />
-    <Compile Include="azure-cli-nspkg\azure\cli\__init__.py" />
-    <Compile Include="azure-cli-nspkg\setup.py" />
     <Compile Include="azure-cli-testsdk\azure\cli\testsdk\base.py" />
     <Compile Include="azure-cli-testsdk\azure\cli\testsdk\checkers.py" />
     <Compile Include="azure-cli-testsdk\azure\cli\testsdk\decorators.py" />
@@ -167,7 +163,6 @@
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\custom.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\test_webapp_commands.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\test_webapp_commands_thru_mock.py" />
-    <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\vsts_cd_provider.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\_appservice_utils.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\_client_factory.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\_completers.py" />
@@ -503,6 +498,16 @@
     <Compile Include="command_modules\azure-cli-batch\azure\cli\command_modules\batch\_validators.py" />
     <Compile Include="command_modules\azure-cli-batch\azure\cli\command_modules\batch\__init__.py" />
     <Compile Include="command_modules\azure-cli-batch\setup.py" />
+    <Compile Include="command_modules\azure-cli-kusto\azure\cli\command_modules\kusto\commands.py" />
+    <Compile Include="command_modules\azure-cli-kusto\azure\cli\command_modules\kusto\custom.py" />
+    <Compile Include="command_modules\azure-cli-kusto\azure\cli\command_modules\kusto\tests\latest\test_kusto_commands.py" />
+    <Compile Include="command_modules\azure-cli-kusto\azure\cli\command_modules\kusto\_client_factory.py" />
+    <Compile Include="command_modules\azure-cli-kusto\azure\cli\command_modules\kusto\_help.py" />
+    <Compile Include="command_modules\azure-cli-kusto\azure\cli\command_modules\kusto\_params.py" />
+    <Compile Include="command_modules\azure-cli-kusto\azure\cli\command_modules\kusto\_validators.py" />
+    <Compile Include="command_modules\azure-cli-kusto\azure\cli\command_modules\kusto\__init__.py" />
+    <Compile Include="command_modules\azure-cli-kusto\azure_bdist_wheel.py" />
+    <Compile Include="command_modules\azure-cli-kusto\setup.py" />
     <Compile Include="command_modules\azure-cli-lab\azure\cli\command_modules\lab\commands.py" />
     <Compile Include="command_modules\azure-cli-lab\azure\cli\command_modules\lab\custom.py" />
     <Compile Include="command_modules\azure-cli-lab\azure\cli\command_modules\lab\tests\latest\test_lab.py" />
@@ -593,16 +598,6 @@
     <Compile Include="command_modules\azure-cli-redis\azure\cli\command_modules\redis\__init__.py" />
     <Compile Include="command_modules\azure-cli-redis\azure_bdist_wheel.py" />
     <Compile Include="command_modules\azure-cli-redis\setup.py" />
-    <Compile Include="command_modules\azure-cli-reservations\azure\cli\command_modules\reservations\commands.py" />
-    <Compile Include="command_modules\azure-cli-reservations\azure\cli\command_modules\reservations\custom.py" />
-    <Compile Include="command_modules\azure-cli-reservations\azure\cli\command_modules\reservations\tests\latest\test_reservations_commands.py" />
-    <Compile Include="command_modules\azure-cli-reservations\azure\cli\command_modules\reservations\_client_factory.py" />
-    <Compile Include="command_modules\azure-cli-reservations\azure\cli\command_modules\reservations\_exception_handler.py" />
-    <Compile Include="command_modules\azure-cli-reservations\azure\cli\command_modules\reservations\_help.py" />
-    <Compile Include="command_modules\azure-cli-reservations\azure\cli\command_modules\reservations\_params.py" />
-    <Compile Include="command_modules\azure-cli-reservations\azure\cli\command_modules\reservations\__init__.py" />
-    <Compile Include="command_modules\azure-cli-reservations\azure_bdist_wheel.py" />
-    <Compile Include="command_modules\azure-cli-reservations\setup.py" />
     <Compile Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\latest\test_api_check.py" />
     <Compile Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\latest\test_locks.py" />
     <Compile Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\latest\test_resource.py" />
@@ -634,10 +629,19 @@
     <Compile Include="command_modules\azure-cli-role\azure_bdist_wheel.py" />
     <Compile Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\commands.py" />
     <Compile Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\custom.py" />
-    <Compile Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\tests\latest\test_sf_commands.py" />
+    <Compile Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\operations\applications.py" />
+    <Compile Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\operations\managed_clusters.py" />
+    <Compile Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\operations\managed_node_types.py" />
+    <Compile Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\tests\latest\test_util.py" />
+    <Compile Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\tests\latest\test_sf_application.py" />
+    <Compile Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\tests\latest\test_sf_cluster.py" />
+    <Compile Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\tests\latest\test_sf_managed_cluster.py" />
+    <Compile Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\_arm_deployment_utils.py" />
     <Compile Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\_client_factory.py" />
     <Compile Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\_help.py" />
     <Compile Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\_params.py" />
+    <Compile Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\_sf_utils.py" />
+    <Compile Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\_validators.py" />
     <Compile Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\__init__.py" />
     <Compile Include="command_modules\azure-cli-servicefabric\setup.py" />
     <Compile Include="command_modules\azure-cli-sql\azure\cli\command_modules\sql\commands.py" />
@@ -760,10 +764,6 @@
     <Compile Include="command_modules\azure-cli-vm\setup.py" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="azure-cli-command_modules-nspkg\" />
-    <Folder Include="azure-cli-command_modules-nspkg\azure\" />
-    <Folder Include="azure-cli-command_modules-nspkg\azure\cli\" />
-    <Folder Include="azure-cli-command_modules-nspkg\azure\cli\command_modules\" />
     <Folder Include="azure-cli-core\" />
     <Folder Include="azure-cli-core\azure\" />
     <Folder Include="azure-cli-core\azure\cli\" />
@@ -772,9 +772,6 @@
     <Folder Include="azure-cli-core\azure\cli\core\extensions\" />
     <Folder Include="azure-cli-core\azure\cli\core\profiles\" />
     <Folder Include="azure-cli-core\azure\cli\core\tests\" />
-    <Folder Include="azure-cli-nspkg\" />
-    <Folder Include="azure-cli-nspkg\azure\" />
-    <Folder Include="azure-cli-nspkg\azure\cli\" />
     <Folder Include="azure-cli-testsdk\" />
     <Folder Include="azure-cli-testsdk\azure\" />
     <Folder Include="azure-cli-testsdk\azure\cli\" />
@@ -988,6 +985,12 @@
     <Folder Include="command_modules\azure-cli-batch\azure\cli\command_modules\batch\" />
     <Folder Include="command_modules\azure-cli-keyvault\azure\cli\command_modules\keyvault\tests\" />
     <Folder Include="command_modules\azure-cli-keyvault\azure\cli\command_modules\keyvault\tests\latest\" />
+    <Folder Include="command_modules\azure-cli-kusto\azure\" />
+    <Folder Include="command_modules\azure-cli-kusto\azure\cli\" />
+    <Folder Include="command_modules\azure-cli-kusto\azure\cli\command_modules\" />
+    <Folder Include="command_modules\azure-cli-kusto\azure\cli\command_modules\kusto\" />
+    <Folder Include="command_modules\azure-cli-kusto\azure\cli\command_modules\kusto\tests\" />
+    <Folder Include="command_modules\azure-cli-kusto\azure\cli\command_modules\kusto\tests\latest\" />
     <Folder Include="command_modules\azure-cli-lab\" />
     <Folder Include="command_modules\azure-cli-lab\azure\" />
     <Folder Include="command_modules\azure-cli-lab\azure\cli\" />
@@ -1023,13 +1026,6 @@
     <Folder Include="command_modules\azure-cli-redis\azure\cli\command_modules\redis\" />
     <Folder Include="command_modules\azure-cli-redis\azure\cli\command_modules\redis\tests\" />
     <Folder Include="command_modules\azure-cli-redis\azure\cli\command_modules\redis\tests\latest\" />
-    <Folder Include="command_modules\azure-cli-reservations\" />
-    <Folder Include="command_modules\azure-cli-reservations\azure\" />
-    <Folder Include="command_modules\azure-cli-reservations\azure\cli\" />
-    <Folder Include="command_modules\azure-cli-reservations\azure\cli\command_modules\" />
-    <Folder Include="command_modules\azure-cli-reservations\azure\cli\command_modules\reservations\" />
-    <Folder Include="command_modules\azure-cli-reservations\azure\cli\command_modules\reservations\tests\" />
-    <Folder Include="command_modules\azure-cli-reservations\azure\cli\command_modules\reservations\tests\latest\" />
     <Folder Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\" />
     <Folder Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\latest\" />
     <Folder Include="command_modules\azure-cli-role\azure\cli\command_modules\role\tests\" />
@@ -1039,8 +1035,10 @@
     <Folder Include="command_modules\azure-cli-servicefabric\azure\cli\" />
     <Folder Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\" />
     <Folder Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\" />
+    <Folder Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\operations\" />
     <Folder Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\template\" />
     <Folder Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\template\linux\" />
+    <Folder Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\template\service\" />
     <Folder Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\template\windows\" />
     <Folder Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\tests\" />
     <Folder Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\tests\latest\" />
@@ -1093,15 +1091,12 @@
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\tests\" />
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\tests\latest\" />
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\tests\latest\keyvault\" />
+    <Folder Include="C:\Git\Clients\CLI\azure-cli\src\command_modules\azure-cli-kusto\" />
+    <Folder Include="command_modules\azure-cli-kusto\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="azure-cli-command_modules-nspkg\HISTORY.rst" />
-    <Content Include="azure-cli-command_modules-nspkg\MANIFEST.in" />
-    <Content Include="azure-cli-command_modules-nspkg\README.rst" />
-    <Content Include="azure-cli-command_modules-nspkg\setup.cfg" />
     <Content Include="azure-cli-core\HISTORY.rst" />
     <Content Include="azure-cli-core\setup.cfg" />
-    <Content Include="azure-cli-nspkg\HISTORY.rst" />
     <Content Include="azure-cli-testsdk\HISTORY.rst" />
     <Content Include="azure-cli-testsdk\setup.cfg" />
     <Content Include="azure-cli\az.completion.sh" />
@@ -1256,6 +1251,7 @@
     <Content Include="command_modules\azure-cli-keyvault\azure\cli\command_modules\keyvault\tests\latest\policy_pending.json" />
     <Content Include="command_modules\azure-cli-keyvault\azure\cli\command_modules\keyvault\tests\latest\test_secret.txt" />
     <Content Include="command_modules\azure-cli-keyvault\HISTORY.rst" />
+    <Content Include="command_modules\azure-cli-kusto\HISTORY.rst" />
     <Content Include="command_modules\azure-cli-lab\azure\cli\command_modules\lab\tests\latest\docdbenv_parameters.json" />
     <Content Include="command_modules\azure-cli-lab\azure\cli\command_modules\lab\tests\latest\lab_template.json" />
     <Content Include="command_modules\azure-cli-lab\HISTORY.rst" />
@@ -1281,10 +1277,6 @@
     <Content Include="command_modules\azure-cli-network\HISTORY.rst" />
     <Content Include="command_modules\azure-cli-profile\HISTORY.rst" />
     <Content Include="command_modules\azure-cli-redis\HISTORY.rst" />
-    <Content Include="command_modules\azure-cli-reservations\HISTORY.rst" />
-    <Content Include="command_modules\azure-cli-reservations\MANIFEST.in" />
-    <Content Include="command_modules\azure-cli-reservations\README.rst" />
-    <Content Include="command_modules\azure-cli-reservations\setup.cfg" />
     <Content Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\latest\crossrg_deploy.json" />
     <Content Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\latest\param-validation-params.json" />
     <Content Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\latest\param-validation-ref-params.json" />
@@ -1295,6 +1287,9 @@
     <Content Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\latest\sample_policy_param_def.json" />
     <Content Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\latest\sample_policy_rule.json" />
     <Content Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\latest\sample_policy_set.json" />
+    <Content Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\latest\sample_policy_set_grouping.json" />
+    <Content Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\latest\sample_policy_groups_def.json" />
+    <Content Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\latest\sample_policy_groups_def2.json" />
     <Content Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\latest\simple_deploy.json" />
     <Content Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\latest\simple_deploy_parameters.json" />
     <Content Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\latest\test-object.json" />
@@ -1305,8 +1300,11 @@
     <Content Include="command_modules\azure-cli-role\HISTORY.rst" />
     <Content Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\template\linux\parameter.json" />
     <Content Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\template\linux\template.json" />
+    <Content Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\template\service\parameter.json" />
+    <Content Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\template\service\template.json" />
     <Content Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\template\windows\parameter.json" />
     <Content Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\template\windows\template.json" />
+    <Content Include="command_modules\azure-cli-servicefabric\azure\cli\command_modules\servicefabric\tests\policy.json" />
     <Content Include="command_modules\azure-cli-servicefabric\HISTORY.rst" />
     <Content Include="command_modules\azure-cli-servicefabric\setup.cfg" />
     <Content Include="command_modules\azure-cli-sql\HISTORY.rst" />

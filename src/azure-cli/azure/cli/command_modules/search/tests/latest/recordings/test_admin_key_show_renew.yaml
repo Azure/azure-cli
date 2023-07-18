@@ -1,0 +1,363 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/azure_search_cli_test000001?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001","name":"azure_search_cli_test000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-03-13T10:38:22Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '332'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Mar 2023 10:38:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "sku": {"name": "standard"}, "properties": {"replicaCount":
+      1, "partitionCount": 1, "hostingMode": "default", "publicNetworkAccess": "enabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '167'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - AZURECLI/2.46.0 azsdk-python-mgmt-search/9.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
+        US","properties":{"replicaCount":1,"partitionCount":1,"status":"running","statusDetails":"","provisioningState":"succeeded","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[],"disableLocalAuth":false,"authOptions":{"apiKeyOnly":{}}},"sku":{"name":"standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '610'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Mar 2023 10:38:32 GMT
+      elapsed-time:
+      - '7377'
+      etag:
+      - W/"datetime'2023-03-13T10%3A38%3A32.6768217Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 2e6a4d9c-c18b-11ed-a808-b7b53f28d5a3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search admin-key show
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --service-name -g
+      User-Agent:
+      - AZURECLI/2.46.0 azsdk-python-mgmt-search/9.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002/listAdminKeys?api-version=2022-09-01
+  response:
+    body:
+      string: '{"primaryKey":"rBOe8RlRMjGs3Z1yRt4DpT6BKLadmiz8eSmcUVBWwpAzSeCRh4ch","secondaryKey":"0AD5DaI169eawo3NXuXaHJyXolqoI7hUZH9ZXjFgwwAzSeCG4u16"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '139'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Mar 2023 10:38:33 GMT
+      elapsed-time:
+      - '126'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 33d4d02c-c18b-11ed-a808-b7b53f28d5a3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search admin-key renew
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --service-name -g --key-kind
+      User-Agent:
+      - AZURECLI/2.46.0 azsdk-python-mgmt-search/9.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002/regenerateAdminKey/primary?api-version=2022-09-01
+  response:
+    body:
+      string: '{"primaryKey":"XObeEv0CidBII6QM2ZR5vOTuC7A9I4I0MYCMyddjlTAzSeA5WaHN","secondaryKey":"0AD5DaI169eawo3NXuXaHJyXolqoI7hUZH9ZXjFgwwAzSeCG4u16"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '139'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Mar 2023 10:38:33 GMT
+      elapsed-time:
+      - '293'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 33d4d02d-c18b-11ed-a808-b7b53f28d5a3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1193'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search admin-key show
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --service-name -g
+      User-Agent:
+      - AZURECLI/2.46.0 azsdk-python-mgmt-search/9.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002/listAdminKeys?api-version=2022-09-01
+  response:
+    body:
+      string: '{"primaryKey":"XObeEv0CidBII6QM2ZR5vOTuC7A9I4I0MYCMyddjlTAzSeA5WaHN","secondaryKey":"0AD5DaI169eawo3NXuXaHJyXolqoI7hUZH9ZXjFgwwAzSeCG4u16"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '139'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Mar 2023 10:38:34 GMT
+      elapsed-time:
+      - '110'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 33d4d02e-c18b-11ed-a808-b7b53f28d5a3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1195'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search admin-key renew
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --service-name -g --key-kind
+      User-Agent:
+      - AZURECLI/2.46.0 azsdk-python-mgmt-search/9.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002/regenerateAdminKey/secondary?api-version=2022-09-01
+  response:
+    body:
+      string: '{"primaryKey":"XObeEv0CidBII6QM2ZR5vOTuC7A9I4I0MYCMyddjlTAzSeA5WaHN","secondaryKey":"wuHmHBhyOJRoCE6xxp3VQXxqvF7HKvOAKCT49HH8feAzSeBF0NiA"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '139'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Mar 2023 10:38:35 GMT
+      elapsed-time:
+      - '348'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 33d4d02f-c18b-11ed-a808-b7b53f28d5a3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search admin-key show
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --service-name -g
+      User-Agent:
+      - AZURECLI/2.46.0 azsdk-python-mgmt-search/9.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002/listAdminKeys?api-version=2022-09-01
+  response:
+    body:
+      string: '{"primaryKey":"XObeEv0CidBII6QM2ZR5vOTuC7A9I4I0MYCMyddjlTAzSeA5WaHN","secondaryKey":"wuHmHBhyOJRoCE6xxp3VQXxqvF7HKvOAKCT49HH8feAzSeBF0NiA"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '139'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Mar 2023 10:38:36 GMT
+      elapsed-time:
+      - '110'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 357b5c3e-c18b-11ed-a808-b7b53f28d5a3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+    status:
+      code: 200
+      message: OK
+version: 1

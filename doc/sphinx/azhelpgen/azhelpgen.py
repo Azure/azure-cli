@@ -5,13 +5,17 @@
 
 import argparse
 import json
+from unittest.mock import patch
 from os.path import expanduser
 from docutils import nodes
 from docutils.statemachine import ViewList
-from sphinx.util.compat import Directive
+try:
+    # Deprecated in 1.6 and removed in 1.7
+    from sphinx.util.compat import Directive
+except ImportError:
+    from docutils.parsers.rst import Directive  # pylint: disable=import-error
 from sphinx.util.nodes import nested_parse_with_titles
 
-from knack.help_files import helps
 
 from azure.cli.core import MainCommandsLoader, AzCli
 from azure.cli.core.commands import AzCliCommandInvoker
@@ -32,7 +36,8 @@ class AzHelpGenDirective(Directive):
                invocation_cls=AzCliCommandInvoker,
                parser_cls=AzCliCommandParser,
                help_cls=AzCliHelp)
-        create_invoker_and_load_cmds_and_args(az_cli)
+        with patch('getpass.getuser', return_value='your_system_user_login_name'):
+            create_invoker_and_load_cmds_and_args(az_cli)
         help_files = get_all_help(az_cli)
 
         doc_source_map = _load_doc_source_map()
@@ -46,7 +51,7 @@ class AzHelpGenDirective(Directive):
             if help_file.deprecate_info:
                 yield '{}:deprecated: {}'.format(INDENT, help_file.deprecate_info._get_message(help_file.deprecate_info))
             if not is_command:
-                top_group_name = help_file.command.split()[0] if help_file.command else 'az' 
+                top_group_name = help_file.command.split()[0] if help_file.command else 'az'
                 yield '{}:docsource: {}'.format(INDENT, doc_source_map[top_group_name] if top_group_name in doc_source_map else '')
             else:
                 top_command_name = help_file.command.split()[0] if help_file.command else ''
@@ -56,7 +61,7 @@ class AzHelpGenDirective(Directive):
 
             if is_command and help_file.parameters:
                group_registry = ArgumentGroupRegistry(
-                  [p.group_name for p in help_file.parameters if p.group_name]) 
+                  [p.group_name for p in help_file.parameters if p.group_name])
 
                for arg in sorted(help_file.parameters,
                                 key=lambda p: group_registry.get_group_priority(p.group_name)
@@ -87,14 +92,14 @@ class AzHelpGenDirective(Directive):
                             pass
                         yield '{}:default: {}'.format(DOUBLEINDENT, arg.default)
                     if arg.value_sources:
-                        yield '{}:source: {}'.format(DOUBLEINDENT, ', '.join(arg.value_sources))
+                        yield '{}:source: {}'.format(DOUBLEINDENT, ', '.join(_get_populator_commands(arg)))
                     yield ''
             yield ''
             if len(help_file.examples) > 0:
                for e in help_file.examples:
-                  yield '{}.. cliexample:: {}'.format(INDENT, e.name)
+                  yield '{}.. cliexample:: {}'.format(INDENT, e.short_summary)
                   yield ''
-                  yield DOUBLEINDENT + e.text.replace("\\", "\\\\")
+                  yield DOUBLEINDENT + e.command.replace("\\", "\\\\")
                   yield ''
 
     def run(self):
@@ -131,3 +136,13 @@ def _is_group(parser):
 
 def _get_parser_name(s):
     return (s._prog_prefix if hasattr(s, '_prog_prefix') else s.prog)[3:]
+
+
+def _get_populator_commands(param):
+    commands = []
+    for value_source in param.value_sources:
+        try:
+            commands.append(value_source["link"]["command"])
+        except KeyError:
+            continue
+    return commands

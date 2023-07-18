@@ -6,6 +6,61 @@ Before posting an issue, please review our list of [common issues](https://githu
 These are issues we have closed because we cannot address them within the CLI due to platform or language limitations.
 
 
+lsb_release does not return the correct base distribution version
+-----------------------------------------------------------------
+
+Some Ubuntu- or Debian-derived distributions such as Linux Mint may not return the correct version name from `lsb_release`. This value is used in the install process to determine the package to install. If you know the code name of the Ubuntu or Debian version your distribution is derived from, you can set the `AZ_REPO` value manually when [adding the repository](https://docs.microsoft.com/cli/azure/install-azure-cli-apt#set-release). Otherwise, look up information for your distribution on how to determine the base distribution code name and set `AZ_REPO` to the correct value.
+
+
+No package for your Debian-based distribution
+---------------------------------------------
+
+Sometimes it may be a while after a distribution is released before there's an Azure CLI package available for it. The Azure CLI is designed to be resilient with regards to future versions of dependencies and rely on as few of them as possible. If there's no package available for your base distribution, try a package for an earlier distribution.
+
+To do this, set the value of `AZ_REPO` manually when [adding the repository](https://docs.microsoft.com/cli/azure/install-azure-cli-apt#set-release). For Ubuntu distributions use the `bionic` repository, and for Debian distributions
+use `stretch`. Distributions released before Ubuntu Trusty and Debian Wheezy are not supported.
+
+
+Install on RHEL 7.6 or other YUM-managed systems without Python 3
+-----------------------------------------------------------------
+
+If you can, please upgrade your system to a version with official support for `python3` package. Otherwise, you need to first install a `python3` package, either [build from source](https://github.com/linux-on-ibm-z/docs/wiki/Building-Python-3.6.x) or install through some [additional repo](https://developers.redhat.com/blog/2018/08/13/install-python3-rhel/). Then you can download the package and install it without dependency.
+```bash
+$ sudo yum install yum-utils
+$ sudo yumdownloader azure-cli
+$ sudo rpm -ivh --nodeps azure-cli-*.rpm
+```
+
+
+Install on SLES 12 or other other zypper-managed systems without Python 3.6
+---------------------------------------------------------------------------
+
+On SLES 12, the default `python3` package is 3.4 and not supported by Azure CLI. You can first build a higher version `python3` from source. Then you can download the Azure CLI package and install it without dependency.
+```bash
+$ sudo zypper install -y gcc gcc-c++ make ncurses patch wget tar zlib-devel zlib
+# Download Python source code
+$ PYTHON_VERSION="3.6.9"
+$ PYTHON_SRC_DIR=$(mktemp -d)
+$ wget -qO- https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz | tar -xz -C "$PYTHON_SRC_DIR"
+# Build Python
+$ $PYTHON_SRC_DIR/*/configure --with-ssl
+$ make
+$ sudo make install
+# Download azure-cli package 
+$ AZ_VERSION=$(zypper --no-refresh info azure-cli |grep Version | awk -F': ' '{print $2}' | awk '{$1=$1;print}')
+$ wget https://packages.microsoft.com/yumrepos/azure-cli/azure-cli-$AZ_VERSION.x86_64.rpm
+# Install without dependency
+$ sudo rpm -ivh --nodeps azure-cli-$AZ_VERSION.x86_64.rpm
+```
+
+
+Completion is not working
+-------------------------
+#### MacOS
+
+The Homebrew formula of Azure CLI installs a completion file named `az` in the Homebrew-managed completions directory (default location is `/usr/local/etc/bash_completion.d/`). To enable completion, please follow Homebrew's instructions [here](https://docs.brew.sh/Shell-Completion).
+
+
 Upgrade from 0.1.0b10 causes 'KeyError: Azure' error
 ----------------------------------------------------
 
@@ -83,13 +138,23 @@ $ curl https://azurecliprod.blob.core.windows.net/install | bash
 Errors on install with cffi or cryptography
 -------------------------------------------
 
-If you get errors on install on **OS X**, upgrade pip by typing:
+If you get errors on installation on **OS X**, upgrade pip by typing:
 
 ```shell
     pip install --upgrade --force-reinstall pip
 ```
 
-If you get errors on install on **Debian or Ubuntu** such as the examples below,
+If you get errors on installation on **Fedora or CentOS** such as `No module named '_cffi_backend'`,
+install `python3-cffi` by typing:
+```shell
+    sudo yum install -y python3-cffi
+```
+If your system does not provide the `python3-cffi` RPM package, you can install the `cffi` package with `pip`:
+```shell
+    sudo pip3 install cffi --target /usr/lib64/az/lib/python3.6/site-packages/
+```
+
+If you get errors on installation on **Debian or Ubuntu** such as the examples below,
 install libssl-dev and libffi-dev by typing:
 
 ```shell

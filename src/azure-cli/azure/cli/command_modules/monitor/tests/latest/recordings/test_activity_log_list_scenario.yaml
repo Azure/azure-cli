@@ -1,0 +1,45 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor activity-log list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --start-time --end-time
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Insights/eventtypes/management/values?api-version=2015-04-01&$filter=eventTimestamp%20ge%202018-01-01T00%3A00%3A00%2B00%3A00%20and%20eventTimestamp%20le%202999-01-01T00%3A00%3A00%2B00%3A00
+  response:
+    body:
+      string: '{"code":"BadRequest","message":"The start time cannot be more than
+        90 days in the past."}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '89'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 08 Dec 2021 05:18:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 400
+      message: Bad Request
+version: 1

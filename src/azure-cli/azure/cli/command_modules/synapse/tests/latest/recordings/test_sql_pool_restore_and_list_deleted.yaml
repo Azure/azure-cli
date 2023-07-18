@@ -1,0 +1,992 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --workspace-name --resource-group --dest-name --time
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/testrestoresqlpool?api-version=2021-06-01
+  response:
+    body:
+      string: '{"properties":{"status":"Online","maxSizeBytes":263882790666240,"collation":"SQL_Latin1_General_CP1_CI_AS","restorePointInTime":"0001-01-01T00:00:00","creationDate":"2021-11-04T06:59:50.43Z","storageAccountType":"GRS","sourceDatabaseDeletionDate":"0001-01-01T00:00:00","provisioningState":"Succeeded"},"sku":{"name":"DW1000c","capacity":0},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/testrestoresqlpool","name":"testrestoresqlpool","type":"Microsoft.Synapse/workspaces/sqlPools","location":"eastus","tags":{}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '620'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 10:26:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus", "sku": {"name": "DW1000c"}, "properties": {"sourceDatabaseId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Sql/servers/testingsynapseworkspace/databases/testrestoresqlpool",
+      "restorePointInTime": "2021-11-04T07:02:09.000Z", "createMode": "PointInTimeRestore"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool restore
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '337'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name --workspace-name --resource-group --dest-name --time
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/destsqlpool000001?api-version=2021-06-01
+  response:
+    body:
+      string: '{"properties":{"maxSizeBytes":0,"restorePointInTime":"0001-01-01T00:00:00","creationDate":"0001-01-01T00:00:00","sourceDatabaseDeletionDate":"0001-01-01T00:00:00","provisioningState":"Provisioning"},"sku":{"name":"DW1000c","capacity":0},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/destsqlpool000001","name":"destsqlpool000001","type":"Microsoft.Synapse/workspaces/sqlPools"}'
+    headers:
+      access-control-allow-headers:
+      - Location
+      - Retry-After
+      access-control-expose-headers:
+      - Location
+      - Retry-After
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/operationStatuses/b01043f0-dd0c-447d-8ebd-365bfabcaf79?api-version=2021-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '481'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 10:26:54 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/operationResults/b01043f0-dd0c-447d-8ebd-365bfabcaf79?api-version=2021-06-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --workspace-name --resource-group --dest-name --time
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/operationStatuses/b01043f0-dd0c-447d-8ebd-365bfabcaf79?api-version=2021-06-01
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 10:27:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --workspace-name --resource-group --dest-name --time
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/operationStatuses/b01043f0-dd0c-447d-8ebd-365bfabcaf79?api-version=2021-06-01
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 10:27:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --workspace-name --resource-group --dest-name --time
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/operationStatuses/b01043f0-dd0c-447d-8ebd-365bfabcaf79?api-version=2021-06-01
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 10:28:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --workspace-name --resource-group --dest-name --time
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/operationStatuses/b01043f0-dd0c-447d-8ebd-365bfabcaf79?api-version=2021-06-01
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 10:28:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --workspace-name --resource-group --dest-name --time
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/operationStatuses/b01043f0-dd0c-447d-8ebd-365bfabcaf79?api-version=2021-06-01
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 10:29:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --workspace-name --resource-group --dest-name --time
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/operationStatuses/b01043f0-dd0c-447d-8ebd-365bfabcaf79?api-version=2021-06-01
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 10:29:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --workspace-name --resource-group --dest-name --time
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/operationStatuses/b01043f0-dd0c-447d-8ebd-365bfabcaf79?api-version=2021-06-01
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 10:30:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --workspace-name --resource-group --dest-name --time
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/operationStatuses/b01043f0-dd0c-447d-8ebd-365bfabcaf79?api-version=2021-06-01
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 10:30:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --workspace-name --resource-group --dest-name --time
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/operationStatuses/b01043f0-dd0c-447d-8ebd-365bfabcaf79?api-version=2021-06-01
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 10:31:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --workspace-name --resource-group --dest-name --time
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/operationStatuses/b01043f0-dd0c-447d-8ebd-365bfabcaf79?api-version=2021-06-01
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 10:31:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --workspace-name --resource-group --dest-name --time
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/operationStatuses/b01043f0-dd0c-447d-8ebd-365bfabcaf79?api-version=2021-06-01
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 10:32:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --workspace-name --resource-group --dest-name --time
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/operationStatuses/b01043f0-dd0c-447d-8ebd-365bfabcaf79?api-version=2021-06-01
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 10:32:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --workspace-name --resource-group --dest-name --time
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/operationStatuses/b01043f0-dd0c-447d-8ebd-365bfabcaf79?api-version=2021-06-01
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 10:33:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --workspace-name --resource-group --dest-name --time
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/destsqlpool000001?api-version=2021-06-01
+  response:
+    body:
+      string: '{"properties":{"status":"Online","maxSizeBytes":263882790666240,"collation":"SQL_Latin1_General_CP1_CI_AS","restorePointInTime":"0001-01-01T00:00:00","creationDate":"2021-11-04T10:32:15.7Z","storageAccountType":"GRS","sourceDatabaseDeletionDate":"0001-01-01T00:00:00","provisioningState":"Succeeded"},"sku":{"name":"DW1000c","capacity":0},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/destsqlpool000001","name":"destsqlpool000001","type":"Microsoft.Synapse/workspaces/sqlPools","location":"eastus"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '603'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 10:33:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --workspace-name --resource-group
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/destsqlpool000001?api-version=2021-06-01
+  response:
+    body:
+      string: '{"properties":{"status":"Online","maxSizeBytes":263882790666240,"collation":"SQL_Latin1_General_CP1_CI_AS","restorePointInTime":"0001-01-01T00:00:00","creationDate":"2021-11-04T10:32:15.7Z","storageAccountType":"GRS","sourceDatabaseDeletionDate":"0001-01-01T00:00:00","provisioningState":"Succeeded"},"sku":{"name":"DW1000c","capacity":0},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/destsqlpool000001","name":"destsqlpool000001","type":"Microsoft.Synapse/workspaces/sqlPools","location":"eastus"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '603'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 10:33:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name --workspace-name --resource-group --yes
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/destsqlpool000001?api-version=2021-06-01
+  response:
+    body:
+      string: ''
+    headers:
+      access-control-allow-headers:
+      - Location
+      - Retry-After
+      access-control-expose-headers:
+      - Location
+      - Retry-After
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/operationStatuses/ae9809b0-f771-43f0-8940-38a8da636c1b?api-version=2021-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 04 Nov 2021 10:33:27 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/operationResults/ae9809b0-f771-43f0-8940-38a8da636c1b?api-version=2021-06-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --workspace-name --resource-group --yes
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/operationStatuses/ae9809b0-f771-43f0-8940-38a8da636c1b?api-version=2021-06-01
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 10:33:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --workspace-name --resource-group --yes
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/operationStatuses/ae9809b0-f771-43f0-8940-38a8da636c1b?api-version=2021-06-01
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 10:34:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool list-deleted
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --workspace-name --resource-group
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/restorableDroppedSqlPools?api-version=2021-06-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/restorableDroppedSqlPools/destsqlpool4gf4,132804836382770000","name":"destsqlpool4gf4,132804836382770000","type":"Microsoft.Synapse/workspaces/restorableDroppedSqlPools","location":"East
+        US","properties":{"databaseName":"destsqlpool4gf4","edition":"DataWarehouse","maxSizeBytes":"263882790666240","serviceLevelObjective":"DW1000c","elasticPoolName":null,"creationDate":"2021-11-04T07:07:16.257Z","deletionDate":"2021-11-04T07:13:58.277Z","earliestRestoreDate":"2021-11-04T07:13:58.277Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/restorableDroppedSqlPools/destsqlpool000001,132804956326930000","name":"destsqlpool000001,132804956326930000","type":"Microsoft.Synapse/workspaces/restorableDroppedSqlPools","location":"East
+        US","properties":{"databaseName":"destsqlpool000001","edition":"DataWarehouse","maxSizeBytes":"263882790666240","serviceLevelObjective":"DW1000c","elasticPoolName":null,"creationDate":"2021-11-04T10:27:04.46Z","deletionDate":"2021-11-04T10:33:52.693Z","earliestRestoreDate":"2021-11-04T10:33:52.693Z"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1282'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 10:37:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

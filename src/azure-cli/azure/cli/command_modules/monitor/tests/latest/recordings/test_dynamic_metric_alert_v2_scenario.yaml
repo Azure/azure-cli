@@ -1,0 +1,180 @@
+interactions:
+- request:
+    body: '{"location": "global", "properties": {"groupShortName": "ag1", "enabled":
+      true, "emailReceivers": [], "smsReceivers": [], "webhookReceivers": [], "itsmReceivers":
+      [], "azureAppPushReceivers": [], "automationRunbookReceivers": [], "voiceReceivers":
+      [], "logicAppReceivers": [], "azureFunctionReceivers": [], "armRoleReceivers":
+      []}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor action-group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '331'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-monitor/0.11.0 Azure-SDK-For-Python AZURECLI/2.14.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag1?api-version=2019-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag1","type":"Microsoft.Insights/ActionGroups","name":"ag1","location":"Global","kind":null,"tags":null,"properties":{"groupShortName":"ag1","enabled":true,"emailReceivers":[],"smsReceivers":[],"webhookReceivers":[],"itsmReceivers":[],"azureAppPushReceivers":[],"automationRunbookReceivers":[],"voiceReceivers":[],"logicAppReceivers":[],"azureFunctionReceivers":[],"armRoleReceivers":[]},"identity":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '595'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 06 Nov 2020 06:57:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"location": "global", "properties": {"groupShortName": "ag2", "enabled":
+      true, "emailReceivers": [], "smsReceivers": [], "webhookReceivers": [], "itsmReceivers":
+      [], "azureAppPushReceivers": [], "automationRunbookReceivers": [], "voiceReceivers":
+      [], "logicAppReceivers": [], "azureFunctionReceivers": [], "armRoleReceivers":
+      []}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor action-group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '331'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-monitor/0.11.0 Azure-SDK-For-Python AZURECLI/2.14.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag2?api-version=2019-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag2","type":"Microsoft.Insights/ActionGroups","name":"ag2","location":"Global","kind":null,"tags":null,"properties":{"groupShortName":"ag2","enabled":true,"emailReceivers":[],"smsReceivers":[],"webhookReceivers":[],"itsmReceivers":[],"azureAppPushReceivers":[],"automationRunbookReceivers":[],"voiceReceivers":[],"logicAppReceivers":[],"azureFunctionReceivers":[],"armRoleReceivers":[]},"identity":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '595'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 06 Nov 2020 06:58:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"location": "global", "properties": {"description": "Test", "severity":
+      2, "enabled": true, "scopes": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Storage/storageAccounts/clitest000002"],
+      "evaluationFrequency": "PT1M", "windowSize": "PT5M", "criteria": {"odata.type":
+      "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria", "allOf": [{"name":
+      "cond0", "metricName": "transactions", "timeAggregation": "Total", "dimensions":
+      [], "criterionType": "DynamicThresholdCriterion", "operator": "GreaterThan",
+      "alertSensitivity": "Low", "failingPeriods": {"numberOfEvaluationPeriods": 6.0,
+      "minFailingPeriodsToAlert": 4.0}, "ignoreDataBefore": "2020-11-01T16:00:00.000Z"},
+      {"name": "cond1", "metricName": "SuccessE2ELatency", "timeAggregation": "Average",
+      "dimensions": [{"name": "ApiName", "operator": "Include", "values": ["GetBlob"]}],
+      "criterionType": "DynamicThresholdCriterion", "operator": "GreaterThan", "alertSensitivity":
+      "High", "failingPeriods": {"numberOfEvaluationPeriods": 2.0, "minFailingPeriodsToAlert":
+      1.0}}]}, "actions": [{"actionGroupId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag1"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor metrics alert create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1385'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --scopes --action --description --condition --condition
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-monitor/0.11.0 Azure-SDK-For-Python AZURECLI/2.14.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts/alert1?api-version=2018-03-01
+  response:
+    body:
+      string: '{"Code":"BadRequest","Message":"Error parsing request payload Activity
+        ID: b955af1f-e008-41c5-9003-4a219594fa86."}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '114'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 06 Nov 2020 06:58:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 400
+      message: BadRequest
+version: 1

@@ -3,6 +3,479 @@
 Release History
 ===============
 
+2.50.0
+++++++
+* `aaz`: Add short summary for `--location` when its default value comes from resource group (#26584)
+* `aaz`: Handle null property in error response (#26605)
+* `aaz`: Explicitly raise TypeError exception during LRO (#26634)
+* `aaz`: Parse and re-serialize query parameters within next link (#26768)
+
+2.49.0
+++++++
+* Dynamically install extensions without prompt when not in a TTY (#26219)
+
+2.48.1
+++++++
+* No changes
+
+2.48.0
+++++++
+* `aaz`: Support hidden secret properties of response in output (#26102)
+* `aaz`: Support `AAZPasswordArg` (#26134)
+* `aaz`: Support argument prompt input for simple type args (#26134)
+
+2.47.0
+++++++
+* `aaz`: Add support for changing subscription of `AAZCommand` in customization code (#25745)
+
+2.46.0
+++++++
+* Add announcement for WAM-based login (#25416)
+
+2.45.0
+++++++
+* `aaz`: Support AAZFileArg (#25075)
+* `aaz`: Support singular options of `AAZListArg` in shorthand syntax partial value expression (#25302)
+
+2.44.1
+++++++
+* No changes
+
+2.44.0
+++++++
+* `aaz`: Support subresource selector (#24827)
+* `aaz`: Improve generic update arguments to consist with previous behaviors (#24960)
+
+2.43.0
+++++++
+* `aaz`: Fix `has_value` function for list, dict and object arg types (#24625)
+* `aaz`: Support argument preview and experimental (#24637)
+* `aaz`: Add registered property for `AAZBaseArg` (#24640)
+* `aaz`: Add aazlist and aazdict args transform help functions (#24690)
+* `aaz`: Support camel case key in `AAZObjectType` (#24771)
+* Disable removing and updating system extension in Cloud Shell (#24361)
+
+2.42.0
+++++++
+* `aaz`: Support `FreeFormDictType` and `FreeFormDictArg` (#24183)
+* `aaz`: Support `configured_default` property in arguments (#24411)
+
+2.41.0
+++++++
+* Support Continuous Access Evaluation (#23635)
+* `aaz`: Support `yaml` file as value for compound arguments (#23817)
+* PREVIEW: Support Web Account Manager (WAM) login on Windows. To opt in, run `az config set core.allow_broker=true` (#23828)
+* `aaz`: Fix recursion depth exceeded for to_serialized_data of AAZObject (#23930)
+* `aaz`: Support customized life cycle callback functions for `AAZCommand` (#23949)
+* `aaz`: Fix two AAZObjects or AAZDicts comparison (#24035)
+* Revert #23514: Rename entry script `az.ps1` to `azps.ps1` (#24015)
+
+2.40.0
+++++++
+* `aaz`: Support using `cli_ctx` to initiate AAZCommand class (#23459)
+* `aaz`: Fix AAZBearerTokenCredentialPolicy to support MSIAuthenticationWrapper credential (#23471)
+* Allow adding dedicated key for collecting CLI Telemetry (#23530)
+* Add `az.ps1` entry script for PowerShell (#23514)
+* `aaz`: Support generic update arguments (#23701)
+* Add CLI survey invitation (#23460)
+
+2.39.0
+++++++
+* `az extension add`: Improve feedback shown to users when installation is unsuccessful (#22941)
+* `aaz`: Fix early exit for long running commands run with `--no-wait` parameter (#23092)
+* `aaz`: Feature Atomic Azure Command support argument validation (#23126)
+* `aaz`: Implement wait command (#23189)
+* `aaz`: Support blank value expression in `full value` of shorthand syntax (#23268)
+* `aaz`: Support `singular quota string` for special property names in `partial value` key of shorthand synatx (#23268)
+* `aaz`: Support `AAZDurationArg`, `AAZDateArg`, `AAZTimeArg`, `AAZDateTimeArg` and `AAZUuidArg` (#23280)
+* Support specifying `telemetry.push_interval_in_hours` to force push telemetry cache file (#23205)
+
+2.38.0
+++++++
+* Shorthand syntax: Simplify the escape character usage in Single Quotes String (#22607)
+
+2.37.0
+++++++
+* Codegen v2 support (#20967)
+* Support getting SSH certificate inside Cloud Shell (#22162)
+
+2.36.0
+++++++
+* Minor fixes
+
+2.35.0
+++++++
+* Minor fixes
+
+2.34.1
+++++++
+* No changes
+
+2.34.0
+++++++
+* Minor fixes
+
+2.33.1
+++++++
+* No changes
+
+2.33.0
+++++++
+* Drop `--query-examples` global argument (#20962)
+
+2.32.0
+++++++
+* Use optimistic locking for service principal entry reads (#20408)
+
+2.31.0
+++++++
+* Use MSAL HTTP cache (#20234)
+
+2.30.0
+++++++
+* [BREAKING CHANGE] ADAL to MSAL migration (#19853)
+
+2.29.1
+++++++
+* No changes
+
+2.29.0
+++++++
+* Add a global config `core.disable_progress_bar` by `az config` to allow users to disable progress bar globally in the automation scenario. (#19464)
+* It is supported to use the parameter `--only-show-errors` to disable progress bar. (#19464)
+
+2.28.1
+++++++
+* No changes
+
+2.28.0
+++++++
+* Conditional Access: Show `--scope` for `az login` message when failed to refresh the access token (#17738)
+
+2.27.2
+++++++
+* No changes
+
+2.27.1
+++++++
+* No changes
+
+2.27.0
+++++++
+* Minor fixes
+
+2.26.1
+++++++
+* No changes
+
+2.26.0
+++++++
+* Minor fixes
+
+2.25.0
+++++++
+* Fix #18360 and #18262: Write to stderr issue (#18414)
+
+2.24.2
+++++++
+* No changes
+
+2.24.1
+++++++
+* No changes
+
+2.24.0
+++++++
+* Fix issue #16798: Azure CLI output is corrupted! (#18065)
+
+2.23.0
+++++++
+* Display allowed values in error message when enum validation fails (#17621)
+* Refactor AzCommandGroup (#17387)
+* Add a linter rule for `service_name.json` (#17428)
+
+2.22.1
+++++++
+* Minor fixes
+
+2.22.0
+++++++
+* Add spinner progress bar for long running operation (#17262)
+* Add service_name.json (#17159)
+* Provide recommendation for JSON parsing error (#17445)
+* Add workaround for cross-tenant authentication with Track 2 SDKs (#16797)
+
+2.21.0
+++++++
+* Unify ADAL and MSAL error handler (#17072)
+* Add support for specifying minimum required version of an extension to work with the current core version (#16751)
+
+2.20.0
+++++++
+* Minor fixes
+
+2.19.1
+++++++
+* No changes
+
+2.19.0
+++++++
+* New error output: Support multiple failure recommendations with colorization (#16257)
+
+2.18.0
+++++++
+* Print INFO log from SDK (#15676)
+
+2.17.1
+++++++
+* No changes
+
+2.17.0
+++++++
+* Minor fixes
+
+2.16.0
+++++++
+* Add 2020-09-01-hybrid API profile for AzureStack (#15096)
+
+2.15.1
+++++++
+* Minor fixes
+
+2.15.0
+++++++
+* Upgrade azure-mgmt-core to 1.2.1 (#15780)
+
+2.14.2
+++++++
+* No changes
+
+2.14.1
+++++++
+* Minor fixes
+
+2.14.0
+++++++
+* Minor fixes
+
+2.13.0
+++++++
+* Minor fixes
+
+2.12.1
+++++++
+* No changes
+
+2.12.0
+++++++
+* Add a new global parameter `--query-examples` (#14765)
+* Fix #15025: MSIAuthenticationWrapper not working with azure.core (#15118)
+* Error message improvement (#14855)
+
+2.11.1
+++++++
+* Minor fixes
+
+2.11.0
+++++++
+* Minor improvement
+
+2.10.1
+++++++
+* Minor fixes
+
+2.10.0
+++++++
+* Minor fixes
+
+2.9.1
+++++++
+* Minor fixes
+
+2.9.0
+++++++
+* Fix get_token() issue in msi login and `expiresIn` key error in cloud shell login credentials for track 2 SDK related commands (#14187)
+
+2.8.0
+++++++
+* Add get_command_loader() entry to support to load customized CommandLoader (#13763)
+
+2.7.0
+++++++
+* Enable local context for location (#13682)
+
+2.6.0
+++++++
+* Update local context on/off status to global user level (#13277)
+
+2.5.1
+++++++
+* Minor fixes
+
+2.5.0
+++++++
+* Fix logging file fd leaking (#13102)
+* Fix core tests failed under certain profiles (#13136)
+* Use pkginfo to query metadata for Python Package (#12782)
+
+2.4.0
+++++++
+* Upgrade msrestazure to 0.6.3 (#12839)
+* Output more error details of exceptions if possible (#12945)
+* Support track1 and track2 mgmt SDK side by side (#12952)
+* Fix generic remove property NoneType exception (#12950)
+* `az --version`: Show command instruction and detailed instruction link when updates available (#12981)
+* Fix bug in core test test_parser that will affect exception stack while existing if argument parse raise Exception
+* Make CLI respect file logging configuration option: enable_log_file and AZURE_LOGGING_ENABLE_LOG_FILE env variable
+* Fix the name of extension of dev type is None if it has incompatibility problem with core
+
+2.3.1
+++++++
+* No changes
+
+2.3.0
+++++++
+* az cloud show: add application insights endpoint for public cloud
+* Enable local context for global resource group
+* PREVIEW: Add experimental tag to extension packages, command groups, commands and arguments
+* PREVIEW: Allow disabling color by setting `AZURE_CORE_NO_COLOR` environment variable to `True` or `[core] no_color=True` config
+* PREVIEW: Add `--only-show-errors` global argument to mute all warning, info and debug output. It can also be enabled by setting `AZURE_CORE_ONLY_SHOW_ERRORS` environment variable to `True` or `[core] only_show_errors=True` config
+
+2.2.0
+++++++
+* az cloud show: add application insights endpoint for China/US cloud
+
+2.1.0
+++++++
+* Support `--output yamlc` for colorized YAML
+
+2.0.81
+++++++
+* `get_raw_token`: Add `tenant` parameter to acquire token for the tenant directly, needless to specify a subscription
+
+2.0.80
+++++++
+* No changes
+
+2.0.79
+++++++
+* Fix #11586: `az login` is not recorded in server telemetry
+
+2.0.78
+++++++
+* Plug in HaTS survey
+
+2.0.77
+++++++
+* Add deprecate message for Python 2.7
+* Refine the help and error messages for `--ids`
+
+2.0.76
+++++++
+* no changes
+
+2.0.75
+++++++
+* Add syntax check for --set parameter in generic update command.
+* Fix #10760: `az login` fails if subscription name is None
+* Minor change in DeploymentOutputLongRunningOperation
+
+2.0.74
+++++++
+* Introduce Debian Buster package
+
+2.0.73
+++++++
+* Minor changes
+
+2.0.72
+++++++
+* no changes
+
+2.0.71
+++++++
+* Added ossrdbmsResourceId to cloud.py.
+* properly handle type errors caused by invalid JMESPath queries in core.util.handle_exception
+* `--query`: properly handle type errors caused by invalid JMESPath queries.
+
+2.0.70
+++++++
+* no changes
+
+2.0.69
+++++++
+* Fixed issue where `--subscription` would appear despite being suppressed on certain commands.
+
+2.0.68
+++++++
+* extension removal: surface io errors as warnings instead of verbose info
+
+2.0.67
+++++++
+* BREAKING CHANGE: `min_profile` kwarg is no longer supported. Use `resource_type` instead.
+
+2.0.66
+++++++
+* output: Fix bug where commands fail if `--output yaml` is used with `--query`
+
+2.0.65
+++++++
+* auth: polish common AAD service errors with actionables to overcome
+* Fixed issue where the CLI would load extensions that were not compatible with its core version.
+* Fix issue if clouds.config is corrupt
+
+2.0.64
+++++++
+* Upgrade to knack 0.6.1
+
+2.0.63
+++++++
+* Minor fixes
+
+2.0.62
+++++++
+* Fix issue where some extensions showed a version of "Unknown" and could not be updated.
+
+2.0.61
+++++++
+* Fix issues with dev extension incompatibility.
+* Error handling now points customers to issues page.
+
+2.0.60
+++++++
+* cloud set: fix a bogus error about subscription not found
+
+2.0.59
+++++++
+* Fix issue where in some instances using `--subscription NAME` would throw an exception.
+
+2.0.58
+++++++
+* `az --version` now displays a notification if you have packages that can be updated.
+* Fixes regression where `--ids` could no longer be used with JSON output.
+
+2.0.57
+++++++
+* Hot fix for issue 8399_.
+
+.. _8399: https://github.com/Azure/azure-cli/issues/8399
+
+2.0.56
+++++++
+* auth: enable tenant level account for managed service identity
+
+2.0.55
+++++++
+* `--output`: Introduce 'none' as an output format option.
+
+2.0.54
+++++++
+* Minor fixes
+
+2.0.53
+++++++
+* Minor fixes
+
 2.0.52
 ++++++
 * core: support cross tenant resource provisioning for multi-tenant service principal
@@ -76,8 +549,8 @@ Release History
 ++++++
 * Minor fixes
 
-2.0.36	
-++++++	
+2.0.36
+++++++
 * Minor fixes
 
 2.0.35

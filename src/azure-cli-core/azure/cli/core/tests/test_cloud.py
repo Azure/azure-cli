@@ -5,8 +5,9 @@
 
 import tempfile
 import unittest
-import mock
+from unittest import mock
 import multiprocessing
+import configparser
 
 from azure.cli.core.cloud import (Cloud,
                                   CloudEndpoints,
@@ -23,7 +24,10 @@ from azure.cli.core.cloud import (Cloud,
                                   KNOWN_CLOUDS,
                                   update_cloud,
                                   CloudEndpointNotSetException,
-                                  CannotUnregisterCloudException)
+                                  CannotUnregisterCloudException,
+                                  switch_active_cloud,
+                                  get_known_clouds,
+                                  HARD_CODED_CLOUD_LIST)
 
 from azure.cli.core._profile import Profile
 
@@ -60,7 +64,7 @@ class TestCloud(unittest.TestCase):
                 config_file:
             with mock.patch('azure.cli.core.cloud.get_custom_clouds', lambda: []):
                 add_cloud(cli, c)
-                config = cli.config.config_parser
+                config = configparser.ConfigParser()
                 config.read(config_file)
                 self.assertTrue(c.name in config.sections())
                 self.assertEqual(config.get(c.name, 'endpoint_resource_manager'), endpoint_rm)
@@ -89,7 +93,7 @@ class TestCloud(unittest.TestCase):
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
                 config_file:
             add_cloud(cli, c)
-            config = cli.config.config_parser
+            config = configparser.ConfigParser()
             config.read(config_file)
             self.assertTrue(c.name in config.sections())
             self.assertEqual(config.get(c.name, 'endpoint_resource_manager'), endpoint_rm)
@@ -109,7 +113,7 @@ class TestCloud(unittest.TestCase):
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
                 config_file:
             add_cloud(cli, c)
-            config = cli.config.config_parser
+            config = configparser.ConfigParser()
             config.read(config_file)
             self.assertTrue(c.name in config.sections())
             self.assertEqual(config.get(c.name, 'endpoint_resource_manager'), endpoint_rm)
@@ -128,7 +132,7 @@ class TestCloud(unittest.TestCase):
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
                 config_file:
             add_cloud(cli, c)
-            config = cli.config.config_parser
+            config = configparser.ConfigParser()
             config.read(config_file)
             self.assertTrue(c.name in config.sections())
             self.assertEqual(config.get(c.name, 'profile'), profile)
@@ -193,7 +197,7 @@ class TestCloud(unittest.TestCase):
     def test_modify_known_cloud(self):
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as config_file:
             cli = DummyCli()
-            config = cli.config.config_parser
+            config = configparser.ConfigParser()
             cloud_name = AZURE_PUBLIC_CLOUD.name
             cloud = get_cloud(cli, cloud_name)
             self.assertEqual(cloud.name, cloud_name)
@@ -216,15 +220,18 @@ class TestCloud(unittest.TestCase):
 
     def test_get_clouds_concurrent(self):
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as config_file:
-            pool_size = 100
+            # Max pool_size is 61, otherwise exception will be thrown on Python 3.8 Windows:
+            #     File "...Python38\lib\multiprocessing\connection.py", line 810, in _exhaustive_wait
+            #       res = _winapi.WaitForMultipleObjects(L, False, timeout)
+            #   ValueError: need at most 63 handles, got a sequence of length 102
+            pool_size = 20
             p = multiprocessing.Pool(pool_size)
             p.map(_helper_get_clouds, range(pool_size))
             p.close()
             p.join()
             # Check we can read the file with no exceptions
             cli = DummyCli()
-            config = cli.config
-            config.config_parser.read(config_file)
+            configparser.ConfigParser().read(config_file)
             for kc in KNOWN_CLOUDS:
                 get_cloud(cli, kc.name)
 
@@ -232,6 +239,31 @@ class TestCloud(unittest.TestCase):
         cli = DummyCli()
         self.assertTrue(cloud_is_registered(cli, AZURE_PUBLIC_CLOUD.name))
         self.assertFalse(cloud_is_registered(cli, 'MyUnknownCloud'))
+
+    @mock.patch('azure.cli.core.cloud._set_active_subscription', autospec=True)
+    def test_switch_active_cloud(self, subscription_setter):
+        cli = mock.MagicMock()
+        switch_active_cloud(cli, 'AzureGermanCloud')
+        self.assertEqual(cli.cloud.name, 'AzureGermanCloud')
+
+        switch_active_cloud(cli, 'AzureChinaCloud')
+        self.assertEqual(cli.cloud.name, 'AzureChinaCloud')
+
+    @unittest.skip('Blocks CI. Skip until arm service team fix vmImageAliasDoc url in metadata.')
+    @mock.patch.dict('os.environ', {'ARM_CLOUD_METADATA_URL': 'https://management.azure.com/metadata/endpoints?api-version=2019-05-01'})
+    def test_metadata_url_endpoints(self):
+        clouds = get_known_clouds(refresh=True)
+        for cloud in HARD_CODED_CLOUD_LIST:
+            metadata_url_cloud = next(c for c in clouds if c.name == cloud.name)
+            for k, v1 in cloud.endpoints.__dict__.items():
+                v2 = metadata_url_cloud.endpoints.__dict__[k]
+                if v1:
+                    self.assertEqual(v1.strip('/'), v2.strip('/'))
+                else:
+                    self.assertEqual(v1, v2)
+            for k, v1 in cloud.suffixes.__dict__.items():
+                v2 = metadata_url_cloud.suffixes.__dict__[k]
+                self.assertEqual(v1, v2)
 
 
 if __name__ == '__main__':

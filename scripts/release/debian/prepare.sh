@@ -4,7 +4,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-set -ex
+set -evx
 
 # Create the debian/ directory for building the azure-cli Debian package
 
@@ -57,7 +57,7 @@ Standards-Version: 3.9.5
 Homepage: https://github.com/azure/azure-cli
 
 Package: azure-cli
-Architecture: all
+Architecture: any
 Depends: \${shlibs:Depends}, \${misc:Depends}
 Description: Azure CLI
  A great cloud needs great tools; we're excited to introduce Azure CLI,
@@ -78,7 +78,7 @@ Azure CLI
 
 Copyright (c) Microsoft Corporation
 
-All rights reserved. 
+All rights reserved.
 
 MIT License
 
@@ -90,7 +90,7 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 EOM
 
-# TODO: Instead of "_ssl.cpython-36m-x86_64-linux-gnu.so" only, find all .so files with "find debian/azure-cli/opt/az -type f -name '*.so'"
+# TODO: Instead of "_ssl.cpython-310-x86_64-linux-gnu.so" only, find all .so files with "find debian/azure-cli/opt/az -type f -name '*.so'"
 
 cat > $debian_dir/rules << EOM
 #!/usr/bin/make -f
@@ -106,11 +106,11 @@ override_dh_install:
 ${TAB}mkdir -p debian/azure-cli/opt/az
 ${TAB}cp -a python_env/* debian/azure-cli/opt/az
 ${TAB}mkdir -p debian/azure-cli/usr/bin/
-${TAB}echo "\043!/usr/bin/env bash\n/opt/az/bin/python3 -Im azure.cli \"\044\100\"" > debian/azure-cli/usr/bin/az
+${TAB}echo "\043!/usr/bin/env bash\nbin_dir=\140cd \"\044(dirname \"\044BASH_SOURCE[0]\")\"; pwd\140\nAZ_INSTALLER=DEB \"\044bin_dir\"/../../opt/az/bin/python3 -Im azure.cli \"\044\100\"" > debian/azure-cli/usr/bin/az
 ${TAB}chmod 0755 debian/azure-cli/usr/bin/az
 ${TAB}mkdir -p debian/azure-cli/etc/bash_completion.d/
 ${TAB}cat ${completion_script} > debian/azure-cli/etc/bash_completion.d/azure-cli
-${TAB}dpkg-shlibdeps -v --warnings=7 -Tdebian/azure-cli.substvars -dDepends -edebian/azure-cli/opt/az/bin/python3 debian/azure-cli/opt/az/lib/python3.6/lib-dynload/_ssl.cpython-36m-x86_64-linux-gnu.so
+${TAB}dpkg-shlibdeps -v --warnings=7 -Tdebian/azure-cli.substvars -dDepends -edebian/azure-cli/opt/az/bin/python3 debian/azure-cli/opt/az/lib/python3.10/lib-dynload/_ssl.cpython-310-*-linux-gnu.so
 
 
 override_dh_strip:

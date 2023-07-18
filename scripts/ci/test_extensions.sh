@@ -18,8 +18,17 @@ export AZURE_CLI_DIAGNOSTICS_TELEMETRY=
 output=$(az extension list-available --query [].name -otsv)
 exit_code=0
 
+# azure-cli-ml: https://github.com/Azure/azure-cli-extensions/issues/826
+ignore_list='azure-cli-ml fzf arcappliance arcdata connectedk8s'
+
 for ext in $output; do
     echo
+    # Use regex to detect if $ext is in $ignore_list
+    if [[ $ignore_list =~ $ext ]]; then
+        echo "Ignore extension: $ext"
+        continue
+    fi
+
     echo "Verifying extension:" $ext
     az extension add -n $ext
     if [ $? != 0 ]
@@ -27,14 +36,15 @@ for ext in $output; do
         exit_code=1
         echo "Failed to load:" $ext
     fi
-    azdev verify load-all
-    if [ $? != 0 ]
-    then
-        exit_code=1
-        echo "Failed to verify:" $ext
-    fi
-    az extension remove -n $ext
-    echo $ext "extension has been removed."
 done
+
+pip list -v
+
+az self-test --debug
+if [ $? != 0 ]
+then
+    exit_code=1
+    echo "Failed to verify:" $ext
+fi
 
 exit $exit_code

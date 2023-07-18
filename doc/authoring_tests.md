@@ -10,7 +10,7 @@ For integration tests, we provide the `ScenarioTest` and `LiveScenarioTest` clas
 
 ### About replayable tests
 
-Azure CLI translates user inputs into Azure Python SDK calls which communicate with [Azure REST API](https://docs.microsoft.com/en-us/rest/api/). These HTTP communications are captured and recorded so the integration tests can be replayed in an automation environment without making actual HTTP calls. This ensures that the commands actually work against the service when they are recorded (and then can be re-run live to verify) and provides protection against regressions or breaking changes when they are played back.
+Azure CLI translates user inputs into Azure Python SDK calls which communicate with [Azure REST API](https://docs.microsoft.com/rest/api/). These HTTP communications are captured and recorded so the integration tests can be replayed in an automation environment without making actual HTTP calls. This ensures that the commands actually work against the service when they are recorded (and then can be re-run live to verify) and provides protection against regressions or breaking changes when they are played back.
 
 ### Nightly live test run
 
@@ -22,7 +22,7 @@ The rationale behind the nightly live test:
 2) The live scenario tests ensure the credibility of the tested scenario.
 3) The test recording tends to go stale. The sample it captures will eventually deviate from the actual traffic samples.
 4) The tests in playback mode does not verify the request body and it doesn't ensure the correct requests sequence.
-5) The unhealthy set of live tests prevent the CLI team from rebaselining tests rapidly.
+5) The unhealthy set of live tests prevent the Azure CLI team from rebaselining tests rapidly.
 6) Neglecting the live tests will reduce the quality and the credibility of the test bed.
 
 It is a requirement for the command owner to maintain their test in live mode.
@@ -35,6 +35,13 @@ It is a requirement for the command owner to maintain their test in live mode.
 * Tests __MUST__ be included for all new command modules and any new commands to existing test modules. PRs will be rejected outright if they do not include tests.
 * Name test methods in the following format: `test_<module>_<feature>`.
 * The scenario test must be able to run repeatedly in live mode. The feature owner is responsible of maintaining their scenario tests.
+
+### Scenario Test Best Practice
+
+* 100% commands coverage of module: Scenerio tests __MUST__ cover all commands in the module except the `wait` commands. Please use `azdev cmdcov {module}` to check command coverage of module. If cannot add a test because of some reason, please add missing_command_test_coverage in the linter_exclusions.yml.
+* 100% examples coverage of command: Scenerio tests __MUST__ coverage all examples of the command.
+* 100% arguments coverage of command: Scenerio tests should coverage all arguments in the command. Please use `azdev cmdcov {module} --level argument` to check argument coverage. If cannot add a test because of some reason, please add missing_parameter_test_coverage in the linter_exclusions.yml.
+* 100% boundary values coverage of argument: Scenerio tests should coverage boundary values of argument, especially `''` (empty string), `null`, `0` and `False` values. These values have different meanings, but will all resolve to `False` in conditional expressions (`if {variable}`) of Python. It's important to make sure they work as expected.
 
 ## Recording Tests
 
@@ -77,12 +84,13 @@ Here are some issues that may occur when authoring tests that you should be awar
   2. check your parameter aliasing (particularly if it complains that a required parameter is missing that you know is there)
  If your command makes use of concurrency, consider using unit tests, LiveScenarioTest, or, if practical, forcing the test to operate on a single thread for recording and playback.
 * **Paths**: When including paths in your tests as parameter values, always wrap them in double quotes. While this isn't necessary when running from the command line (depending on your shell environment), it will likely cause issues with the test framework.
+* **Defaults**: Ensure you don't have any defaults configured with `az configure` prior to running tests. Defaults can interfere with the expected test flow.
 
 ## Sample Scenario Tests
 
 ### Sample 1. Basic fixture
 
-```Python
+```python
 from azure.cli.testsdk import ScenarioTest
 
 class StorageAccountTests(ScenarioTest):
@@ -98,7 +106,7 @@ Notes:
 
 ### Sample 2. Validate the return value in JSON
 
-``` Python
+```python
 class StorageAccountTests(ScenarioTest):
     def test_list_storage_account(self):
         accounts_list = self.cmd('az storage account list').get_output_in_json()
@@ -115,7 +123,7 @@ which may not stand in a live test environment.
 
 ### Sample 3. Validate the return JSON value using JMESPath
 
-``` Python
+```python
 from azure.cli.testsdk import ScenarioTest
 
 class StorageAccountTests(ScenarioTest):
@@ -133,7 +141,7 @@ Notes:
 
 ### Sample 4. Prepare a resource group for a test
 
-``` Python
+```python
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
 class StorageAccountTests(ScenarioTest):
@@ -147,14 +155,14 @@ class StorageAccountTests(ScenarioTest):
 
 Notes:
 
-1. The preparers are executed before each test in the test class when `setUp` is executed. Any resources created in this way will be cleaned up after testing.
+1. The preparers are executed before each test in the test class when `setUp` is executed. Any resources created in this way will be cleaned up after testing. Unless you specify that a preparer use an existing resource via its associated environment variable. See [Test-Related Environment Variables](#test-related-environment-variables).
 2. The resource group name is injected into the test method as a parameter. By default `ResourceGroupPreparer` passes the value as the `resource_group` parameter. The target parameter can be customized (see following samples).
 3. The resource group will be deleted asynchronously for performance reason.
 4. The resource group will automatically be registered into the tests keyword arguments (`self.kwargs`) with the key default key of `rg`. This can then be directly plugged into the command string in `cmd` and into the verification step of the `check` method. The test infrastructure will automatically replace the values.
 
 ### Sample 5. Get more from ResourceGroupPreparer
 
-``` Python
+```python
 class StorageAccountTests(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location')
     def test_create_storage_account(self, group_name, group_location):
@@ -176,7 +184,7 @@ Notes:
 
 ### Sample 6. Random name and name mapping
 
-``` Python
+```python
 class StorageAccountTests(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_create_storage_account(self, resource_group, location):
@@ -214,7 +222,7 @@ For example, note names like 'clitest.rg000001' in the sample recording below:
 they aren't the names of the resources which are actually created in Azure.
 They're replaced before the requests are recorded.
 
-``` Yaml
+```Yaml
 - request:
     body: '{"location": "westus", "tags": {"use": "az-test"}}'
     headers:
@@ -253,7 +261,7 @@ to fully randomize the name.
 
 ### Sample 7. Prepare a storage account for tests
 
-``` Python
+```python
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 
 class StorageAccountTests(ScenarioTest):
@@ -268,17 +276,17 @@ class StorageAccountTests(ScenarioTest):
 Note:
 
 1. Like `ResourceGroupPreparer`, you can use `StorageAccountPreparer` to prepare a disposable storage account for the test. The account is deleted along with the resource group during test teardown.
-2. Creation of a storage account requires a resource group. Therefore `ResourceGroupPrepare` must be placed above `StorageAccountPreparer`, since preparers are designed to be executed from top to bottom. (The core preparer implementation is in the [AbstractPreparer](https://github.com/Azure/azure-python-devtools/blob/master/src/azure_devtools/scenario_tests/preparers.py) class in the [azure-devtools](https://pypi.python.org/pypi/azure-devtools) package.)
+2. Creation of a storage account requires a resource group. Therefore `ResourceGroupPrepare` must be placed above `StorageAccountPreparer`, since preparers are designed to be executed from top to bottom. (The core preparer implementation is in the `azure.cli.testsdk.scenario_tests.preparers.AbstractPreparer`.)
 3. The preparers communicate among themselves by adding values to the `kwargs` of the decorated methods. Therefore the `StorageAccountPreparer` uses the resource group created in the preceding `ResourceGroupPreparer`.
 4. The `StorageAccountPreparer` can be further customized to modify the parameters of the created storage account:
 
-``` Python
+```python
 @StorageAccountPreparer(sku='Standard_LRS', location='southcentralus', parameter_name='storage')
 ```
 
 ### Sample 8. Prepare multiple storage accounts for tests
 
-``` Python
+```python
 class StorageAccountTests(ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='account_1')
@@ -301,3 +309,30 @@ Note: This document's source uses
 to make diffs and updates clearer.
 -->
 
+### Sample 9. Assert Specific Error Occurs
+
+```python
+with self.assertRaisesRegexp(CLIError, "usage error: --vnet NAME --subnet NAME | --vnet ID --subnet NAME | --subnet ID"):
+            self.cmd('container create -g {rg} -n {container_group_name} --image nginx --vnet {vnet_name}')
+```
+
+The above syntax is the recommended way to test that a specific error occurs. You must pass the type of the error as well as a string used to match the error message. If the error is encountered, the text will be validated and, if matching, the command will be deemed a success (for testing purposes) and execution will continue. If the command does not yield the expected error, the test will fail.
+
+
+
+## Test-Related Environment Variables
+
+There are a few environment variables that modify the behaviour of the CLI's test infrastructure.
+
+As mentioned previously, **AZURE_TEST_RUN_LIVE** runs tests live, if it is set to a truthy value (e.g. "True"). It is preferable to use --live
+
+However there are other environment variables that alter the behavior of resource preparers such as the `ResourceGroupPreparer`, such as:
+1. **`AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME` and `AZURE_CLI_TEST_DEV_RESOURCE_GROUP_LOCATION`** : If set, the first environment variable specifies an existing resource group to be returned by the `ResourceGroupPreparer`. The specified resource group will not be deleted after the test. The second specifies the existing resource group's location, defaults to the location passed when calling `ResourceGroupPreparer`.
+2. **`AZURE_CLI_TEST_DEV_STORAGE_ACCOUNT_NAME`** : Specifies an existing storage account. Associated with the `StorageAccountPreparer`.
+3. **`AZURE_CLI_TEST_DEV_KEY_VAULT_NAME`** : Specifies an existing key vault name. Associated with the `KeyVaultPreparer`.
+5. **`AZURE_CLI_TEST_DEV_SP_NAME` and `AZURE_CLI_TEST_DEV_SP_PASSWORD`** : Specifies the name of an existing service principal and its password. Associated with the `RoleBasedServicePrincipalPreparer`.
+4. **`AZURE_CLI_TEST_DEV_APP_NAME`and `AZURE_CLI_TEST_DEV_APP_SECRET`** : Specifies an existing managed app and its secret (secret defaults to `None`). Associated with the `ManagedApplicationPreparer`.
+
+Setting these variables can reduce the time taken to run live tests new resource as the preparers don't have to create and delete new resources.
+
+> To learn more about these environment variables, please see the preparers' source code in [`/src/azure-cli-testsdk/azure/cli/testsdk/preparers.py`](https://github.com/Azure/azure-cli/blob/dev/src/azure-cli-testsdk/azure/cli/testsdk/preparers.py).

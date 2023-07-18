@@ -7,9 +7,13 @@ import argparse
 import time
 import random
 
-from knack.log import get_logger
-
 from azure.cli.core.profiles import ResourceType
+
+from knack.log import get_logger
+from knack.util import CLIError
+from knack.validators import DefaultStr, DefaultInt  # pylint: disable=unused-import
+
+JSON_RECOMMENDATION_MESSAGE = "Please provide a valid JSON file path or JSON string."
 
 logger = get_logger(__name__)
 
@@ -31,7 +35,7 @@ class IterateValue(list):
 
     Typical use is to allow multiple ID parameter to a show command etc.
     """
-    pass
+    pass  # pylint: disable=unnecessary-pass
 
 
 def validate_tags(ns):
@@ -70,27 +74,43 @@ def generate_deployment_name(namespace):
 def get_default_location_from_resource_group(cmd, namespace):
     if not namespace.location:
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        from msrestazure.azure_exceptions import CloudError
-        from knack.util import CLIError
 
+        # We don't use try catch here to let azure.cli.core.parser.AzCliCommandParser.validation_error
+        # handle exceptions, such as azure.core.exceptions.ResourceNotFoundError
         resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
-        try:
-            rg = resource_client.resource_groups.get(namespace.resource_group_name)
-        except CloudError as ex:
-            raise CLIError('error retrieving default location: {}'.format(ex.message))
+        rg = resource_client.resource_groups.get(namespace.resource_group_name)
         namespace.location = rg.location  # pylint: disable=no-member
+
         logger.debug("using location '%s' from resource group '%s'", namespace.location, rg.name)
 
 
 def validate_file_or_dict(string):
+    """Parse string as a JSON file or in-line JSON string."""
     import os
     string = os.path.expanduser(string)
-    if os.path.exists(string):
-        from azure.cli.core.util import get_file_json
-        return get_file_json(string)
+    try:
+        if os.path.exists(string):
+            from azure.cli.core.util import get_file_json
+            # Error 1: 'string' is an existing file path, but the file contains invalid JSON string
+            # ex has no recommendation
+            return get_file_json(string)
 
-    from azure.cli.core.util import shell_safe_json_parse
-    return shell_safe_json_parse(string)
+        # Error 2: If string ends with '.json', it can't be a JSON string, since a JSON string must ends with
+        # ], }, or ", so it must be JSON file, and we don't allow parsing it as in-line string
+        if string.endswith('.json'):
+            raise CLIError("JSON file does not exist: '{}'".format(string))
+
+        from azure.cli.core.util import shell_safe_json_parse
+        # Error 3: string is a non-existing file path or invalid JSON string
+        # ex has recommendations for shell interpretation
+        return shell_safe_json_parse(string)
+    except CLIError as ex:
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        new_ex = InvalidArgumentValueError(ex, recommendation=JSON_RECOMMENDATION_MESSAGE)
+        # Preserve the recommendation
+        if hasattr(ex, "recommendations"):
+            new_ex.set_recommendation(ex.recommendations)
+        raise new_ex from ex
 
 
 def validate_parameter_set(namespace, required, forbidden, dest_to_options=None, description=None):
@@ -101,8 +121,6 @@ def validate_parameter_set(namespace, required, forbidden, dest_to_options=None,
     included_forbidden = [x for x in forbidden if getattr(namespace, x) and
                           not hasattr(getattr(namespace, x), 'is_default')]
     if missing_required or included_forbidden:
-        from knack.util import CLIError
-
         def _dest_to_option(dest):
             try:
                 return dest_to_options[dest]
@@ -118,19 +136,3 @@ def validate_parameter_set(namespace, required, forbidden, dest_to_options=None,
             forbidden_string = ', '.join(_dest_to_option(x) for x in included_forbidden)
             error = '{}\n\tnot applicable: {}'.format(error, forbidden_string)
         raise CLIError(error)
-
-
-class DefaultStr(str):
-
-    def __new__(cls, *args, **kwargs):
-        instance = str.__new__(cls, *args, **kwargs)
-        instance.is_default = True
-        return instance
-
-
-class DefaultInt(int):
-
-    def __new__(cls, *args, **kwargs):
-        instance = int.__new__(cls, *args, **kwargs)
-        instance.is_default = True
-        return instance

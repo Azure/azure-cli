@@ -5,8 +5,6 @@
 
 """Verify the list of modules that should be included as part of the CLI install. """
 
-from __future__ import print_function
-
 import os
 import sys
 import json

@@ -9,19 +9,22 @@ import shlex
 import logging
 import inspect
 import unittest
+import tempfile
 
-from azure_devtools.scenario_tests import (IntegrationTestBase, ReplayableTest, SubscriptionRecordingProcessor,
-                                           OAuthRequestResponsesFilter, GeneralNameReplacer, LargeRequestBodyProcessor,
-                                           LargeResponseBodyProcessor, LargeResponseBodyReplacer, RequestUrlNormalizer,
-                                           live_only, DeploymentNameReplacer, patch_time_sleep_api, create_random_name)
+from .scenario_tests import (IntegrationTestBase, ReplayableTest, SubscriptionRecordingProcessor,
+                             LargeRequestBodyProcessor,
+                             LargeResponseBodyProcessor, LargeResponseBodyReplacer, RequestUrlNormalizer,
+                             GeneralNameReplacer,
+                             live_only, DeploymentNameReplacer, patch_time_sleep_api, create_random_name)
 
-from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID, ENV_SKIP_ASSERT
+from .scenario_tests.const import MOCKED_SUBSCRIPTION_ID, ENV_SKIP_ASSERT
 
 from .patches import (patch_load_cached_subscriptions, patch_main_exception_handler,
                       patch_retrieve_token_for_user, patch_long_run_operation_delay,
-                      patch_progress_controller)
+                      patch_progress_controller, patch_get_current_system_username)
 from .exceptions import CliExecutionError
-from .utilities import find_recording_dir, StorageAccountKeyReplacer
+from .utilities import (find_recording_dir, StorageAccountKeyReplacer, GraphClientPasswordReplacer,
+                        MSGraphClientPasswordReplacer, AADAuthRequestFilter)
 from .reverse_dependency import get_dummy_cli
 
 logger = logging.getLogger('azure.cli.testsdk')
@@ -43,16 +46,21 @@ class CheckerMixin(object):
             raise KeyError("Key '{}' not found in kwargs. Check spelling and ensure it has been registered."
                            .format(ex.args[0]))
 
-    def check(self, query, expected_results):
+    def check(self, query, expected_results, case_sensitive=True):
         from azure.cli.testsdk.checkers import JMESPathCheck
         query = self._apply_kwargs(query)
         expected_results = self._apply_kwargs(expected_results)
-        return JMESPathCheck(query, expected_results)
+        return JMESPathCheck(query, expected_results, case_sensitive)
 
     def exists(self, query):
         from azure.cli.testsdk.checkers import JMESPathCheckExists
         query = self._apply_kwargs(query)
         return JMESPathCheckExists(query)
+
+    def not_exists(self, query):
+        from azure.cli.testsdk.checkers import JMESPathCheckNotExists
+        query = self._apply_kwargs(query)
+        return JMESPathCheckNotExists(query)
 
     def greater_than(self, query, expected_results):
         from azure.cli.testsdk.checkers import JMESPathCheckGreaterThan
@@ -73,15 +81,18 @@ class CheckerMixin(object):
 
 class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
     def __init__(self, method_name, config_file=None, recording_name=None,
-                 recording_processors=None, replay_processors=None, recording_patches=None, replay_patches=None):
-        self.cli_ctx = get_dummy_cli()
+                 recording_processors=None, replay_processors=None, recording_patches=None, replay_patches=None,
+                 random_config_dir=False):
+        self.cli_ctx = get_dummy_cli(random_config_dir=random_config_dir)
+        self.random_config_dir = random_config_dir
         self.name_replacer = GeneralNameReplacer()
         self.kwargs = {}
         self.test_guid_count = 0
-        self._processors_to_reset = [StorageAccountKeyReplacer()]
+        self._processors_to_reset = [StorageAccountKeyReplacer(), GraphClientPasswordReplacer(),
+                                     MSGraphClientPasswordReplacer()]
         default_recording_processors = [
             SubscriptionRecordingProcessor(MOCKED_SUBSCRIPTION_ID),
-            OAuthRequestResponsesFilter(),
+            AADAuthRequestFilter(),
             LargeRequestBodyProcessor(),
             LargeResponseBodyProcessor(),
             DeploymentNameReplacer(),
@@ -128,6 +139,9 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
     def tearDown(self):
         for processor in self._processors_to_reset:
             processor.reset()
+        if self.random_config_dir:
+            from azure.cli.core.util import rmtree_with_retry
+            rmtree_with_retry(self.cli_ctx.config.config_dir)
         super(ScenarioTest, self).tearDown()
 
     def create_random_name(self, prefix, length):
@@ -147,7 +161,7 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
     def create_guid(self):
         import uuid
         self.test_guid_count += 1
-        moniker = '88888888-0000-0000-0000-00000000' + ("%0.4X" % self.test_guid_count)
+        moniker = '88888888-0000-0000-0000-00000000' + ("%0.4x" % self.test_guid_count)
 
         if self.in_recording:
             name = uuid.uuid4()
@@ -168,6 +182,38 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
         return subscription_id
 
 
+class LocalContextScenarioTest(ScenarioTest):
+    def __init__(self, method_name, config_file=None, recording_name=None, recording_processors=None,
+                 replay_processors=None, recording_patches=None, replay_patches=None, working_dir=None):
+        super(LocalContextScenarioTest, self).__init__(method_name, config_file, recording_name, recording_processors,
+                                                       replay_processors, recording_patches, replay_patches,
+                                                       random_config_dir=True)
+        if self.in_recording:
+            self.recording_patches.append(patch_get_current_system_username)
+        else:
+            self.replay_patches.append(patch_get_current_system_username)
+        self.original_working_dir = os.getcwd()
+        if working_dir:
+            self.working_dir = working_dir
+        else:
+            self.working_dir = tempfile.mkdtemp()
+
+    def setUp(self):
+        super(LocalContextScenarioTest, self).setUp()
+        self.cli_ctx.local_context.initialize()
+        os.chdir(self.working_dir)
+        self.cmd('config param-persist on')
+
+    def tearDown(self):
+        super(LocalContextScenarioTest, self).tearDown()
+        self.cmd('config param-persist off')
+        self.cmd('config param-persist delete --all --purge -y')
+        os.chdir(self.original_working_dir)
+        if os.path.exists(self.working_dir):
+            import shutil
+            shutil.rmtree(self.working_dir)
+
+
 @live_only()
 class LiveScenarioTest(IntegrationTestBase, CheckerMixin, unittest.TestCase):
 
@@ -175,6 +221,10 @@ class LiveScenarioTest(IntegrationTestBase, CheckerMixin, unittest.TestCase):
         super(LiveScenarioTest, self).__init__(method_name)
         self.cli_ctx = get_dummy_cli()
         self.kwargs = {}
+        self.test_resources_count = 0
+
+    def setUp(self):
+        patch_main_exception_handler(self)
 
     def cmd(self, command, checks=None, expect_failure=False):
         command = self._apply_kwargs(command)
@@ -189,6 +239,7 @@ class ExecutionResult(object):
         self.output = ''
         self.applog = ''
         self.command_coverage = {}
+        cli_ctx.data['_cache'] = None
 
         if os.environ.get(ENV_COMMAND_COVERAGE, None):
             with open(COVERAGE_FILE, 'a') as coverage_file:
@@ -203,7 +254,7 @@ class ExecutionResult(object):
             logger.error('Command "%s" => %d. (It did not fail as expected). %s\n', command,
                          self.exit_code, log_val)
             raise AssertionError('The command did not fail as it was expected.')
-        elif not expect_failure and self.exit_code != 0:
+        if not expect_failure and self.exit_code != 0:
             logger.error('Command "%s" => %d. %s\n', command, self.exit_code, log_val)
             raise AssertionError('The command failed. Exit code: {}'.format(self.exit_code))
 
@@ -236,7 +287,7 @@ class ExecutionResult(object):
         return self.json_value
 
     def _in_process_execute(self, cli_ctx, command, expect_failure=False):
-        from six import StringIO
+        from io import StringIO
         from vcr.errors import CannotOverwriteExistingCassetteException
 
         if command.startswith('az '):

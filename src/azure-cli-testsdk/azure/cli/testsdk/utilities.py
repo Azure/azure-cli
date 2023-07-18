@@ -6,7 +6,8 @@
 import os
 from contextlib import contextmanager
 
-from azure_devtools.scenario_tests import create_random_name as create_random_name_base, RecordingProcessor
+from .scenario_tests import (create_random_name as create_random_name_base, RecordingProcessor)
+from .scenario_tests.utilities import is_text_payload
 
 
 def create_random_name(prefix='clitest', length=24):
@@ -20,7 +21,7 @@ def find_recording_dir(test_file):
 
 @contextmanager
 def force_progress_logging():
-    from six import StringIO
+    from io import StringIO
     import logging
     from knack.log import get_logger
     from .reverse_dependency import get_commands_loggers
@@ -47,11 +48,16 @@ def force_progress_logging():
     az_logger.handlers[0].level = old_az_level
 
 
+def _byte_to_str(byte_or_str):
+    return str(byte_or_str, 'utf-8') if isinstance(byte_or_str, bytes) else byte_or_str
+
+
 class StorageAccountKeyReplacer(RecordingProcessor):
     """Replace the access token for service principal authentication in a response body."""
 
-    def __init__(self, replacement='veryFakedStorageAccountKey=='):
-        self._replacement = replacement
+    KEY_REPLACEMENT = 'veryFakedStorageAccountKey=='
+
+    def __init__(self):
         self._activated = False
         self._candidates = []
 
@@ -69,8 +75,8 @@ class StorageAccountKeyReplacer(RecordingProcessor):
             pass
         for candidate in self._candidates:
             if request.body:
-                body_string = str(request.body, 'utf-8') if isinstance(request.body, bytes) else request.body
-                request.body = body_string.replace(candidate, self._replacement)
+                body_string = _byte_to_str(request.body)
+                request.body = body_string.replace(candidate, self.KEY_REPLACEMENT)
         return request
 
     def process_response(self, response):
@@ -86,5 +92,134 @@ class StorageAccountKeyReplacer(RecordingProcessor):
                 pass
         for candidate in self._candidates:
             if response['body']['string']:
-                response['body']['string'] = str(response['body']['string']).replace(candidate, self._replacement)
+                body = response['body']['string']
+                response['body']['string'] = _byte_to_str(body)
+                response['body']['string'] = response['body']['string'].replace(candidate, self.KEY_REPLACEMENT)
         return response
+
+
+class GraphClientPasswordReplacer(RecordingProcessor):
+    """Replace the access token for service principal authentication in a response body."""
+
+    PWD_REPLACEMENT = 'ReplacedSPPassword123*'
+
+    def __init__(self):
+        self._activated = False
+
+    def reset(self):
+        self._activated = False
+
+    def process_request(self, request):  # pylint: disable=no-self-use
+        import re
+        import json
+
+        try:
+            # issue with how vcr.Request.body adds b' to text types if self.body is used.
+            if request.body and self.PWD_REPLACEMENT in str(request.body):
+                return request
+
+            pattern = r"[^/]+/applications$"
+            if re.search(pattern, request.path, re.I) and request.method.lower() == 'post':
+                self._activated = True
+                body = _byte_to_str(request.body)
+                body = json.loads(body)
+                for password_cred in body['passwordCredentials']:
+                    if password_cred['value']:
+                        body_string = _byte_to_str(request.body)
+                        request.body = body_string.replace(password_cred['value'], self.PWD_REPLACEMENT)
+
+        except (AttributeError, KeyError):
+            pass
+
+        return request
+
+    def process_response(self, response):
+        if self._activated:
+            try:
+                import json
+
+                body = json.loads(response['body']['string'])
+                for password_cred in body['passwordCredentials']:
+                    password_cred['value'] = password_cred['value'] or self.PWD_REPLACEMENT
+
+                response['body']['string'] = json.dumps(body)
+                self._activated = False
+
+            except (AttributeError, KeyError):
+                pass
+
+        return response
+
+
+class MSGraphClientPasswordReplacer(RecordingProcessor):
+    """Replace 'secretText' property in 'addPassword' API's response."""
+
+    PWD_REPLACEMENT = 'replaced-microsoft-graph-password'
+
+    def __init__(self):
+        self._activated = False
+
+    def reset(self):
+        self._activated = False
+
+    def process_request(self, request):
+        if request.path.endswith('/addPassword') and request.method.lower() == 'post':
+            self._activated = True
+        return request
+
+    def process_response(self, response):
+        if self._activated:
+            import json
+
+            body = json.loads(response['body']['string'])
+            body['secretText'] = self.PWD_REPLACEMENT
+
+            response['body']['string'] = json.dumps(body)
+            self._activated = False
+
+        return response
+
+
+class MSGraphNameReplacer(RecordingProcessor):
+    """If a name appears in URL, it should be percent-encoded, e.g.
+      - test-name+/ is encoded as test-name%2B%2F
+      - example@example.com is encoded as example%40example.com
+
+    Theoretically, GeneralNameReplacer should also follow this pattern, but since we haven't seen any ARM name that
+    is percent-encoded, we only replace percent-encoded names for MS Graph for better test performance.
+    """
+    def __init__(self, test_name, mock_name):
+        from urllib.parse import quote
+        self.test_name = test_name
+        self.test_name_encoded = quote(test_name, safe='')
+        self.mock_name = mock_name
+        self.mock_name_encoded = quote(mock_name, safe='')
+
+    def process_request(self, request):
+        request.uri = request.uri.replace(self.test_name_encoded, self.mock_name_encoded)
+
+        if request.body:
+            body = _byte_to_str(request.body)
+            request.body = body.replace(self.test_name, self.mock_name)
+
+        return request
+
+    def process_response(self, response):
+        if response['body']['string']:
+            response['body']['string'] = response['body']['string'].replace(self.test_name, self.mock_name)
+        return response
+
+
+class AADAuthRequestFilter(RecordingProcessor):
+    """Remove oauth authentication requests and responses from recording.
+    This is derived from OAuthRequestResponsesFilter.
+    """
+    def process_request(self, request):
+        # filter AAD requests like:
+        # Tenant discovery: GET
+        # https://login.microsoftonline.com/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/v2.0/.well-known/openid-configuration
+        # Get access token: POST
+        # https://login.microsoftonline.com/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/oauth2/v2.0/token
+        if request.uri.startswith('https://login.microsoftonline.com'):
+            return None
+        return request

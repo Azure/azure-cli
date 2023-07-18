@@ -1,0 +1,48 @@
+{
+    "issuerParameters": {
+        "certificateTransparency": null,
+        "name": "Self"
+    },
+    "keyProperties": {
+        "curve": null,
+        "exportable": true,
+        "keySize": 2048,
+        "keyType": "RSA",
+        "reuseKey": true
+    },
+    "lifetimeActions": [
+        {
+            "action": {
+                "actionType": "AutoRenew"
+            },
+            "trigger": {
+                "daysBeforeExpiry": 90
+            }
+        }
+    ],
+    "secretProperties": {
+        "contentType": "application/x-pkcs12"
+    },
+    "x509CertificateProperties": {
+        "keyUsage": [
+            "cRLSign",
+            "dataEncipherment",
+            "digitalSignature",
+            "keyEncipherment",
+            "keyAgreement",
+            "keyCertSign"
+        ],
+        "subject": "CN=CLIGetDefaultPolicy",
+        "subjectAlternativeNames": {
+            "dnsNames": [
+              "*.cdn-cli-test-4.azfdtest.xyz",
+              "*.cdn-cli-test-5.azfdtest.xyz"
+            ],
+            "emails": [
+              "hello@contoso.com"
+            ],
+            "upns": []
+        },
+        "validityInMonths": 12
+    }
+}

@@ -1,13 +1,58 @@
 [MASTER]
-ignore-patterns=test_*
+ignore=tests,generated,vendored_sdks,privates
+ignore-patterns=test.*,azure_devops_build.*
+ignore-paths=.*/command_modules/.*/aaz
 reports=no
 
 [MESSAGES CONTROL]
 # For all codes, run 'pylint --list-msgs' or go to 'https://pylint.readthedocs.io/en/latest/reference_guide/features.html'
-# locally-disabled: Warning locally suppressed using disable-msg
 # cyclic-import: because of https://github.com/PyCQA/pylint/issues/850
+# import-outside-toplevel: Lazy import to improve performance
+# locally-disabled: Warning locally suppressed using disable-msg
 # too-many-arguments: Due to the nature of the CLI many commands have large arguments set which reflect in large arguments set in corresponding methods.
-disable=missing-docstring,locally-disabled,fixme,cyclic-import,too-many-arguments,invalid-name,duplicate-code
+# consider-using-f-string: str.format is still a Python standard
+# unspecified-encoding: Allow using the system encoding, instead of forcing utf-8 to avoid opening errors
+disable=
+    arguments-out-of-order,
+    bad-option-value,
+    consider-using-with,
+    cyclic-import,
+    duplicate-code,
+    fixme,
+    import-outside-toplevel,
+    inconsistent-return-statements,
+    invalid-name,
+    invalid-str-returned,
+    locally-disabled,
+    missing-docstring,
+    missing-kwoa,
+    no-member,
+    no-value-for-parameter,
+    raise-missing-from,
+    subprocess-run-check,
+    super-with-arguments,
+    too-many-arguments,
+    too-many-function-args,
+    too-many-lines,
+    using-constant-test,
+    wrong-import-order,
+    consider-using-f-string,
+    unspecified-encoding,
+    use-maxsplit-arg,
+    arguments-renamed,
+    consider-using-in,
+    use-dict-literal,
+    consider-using-dict-items,
+    consider-using-enumerate,
+    redundant-u-string-prefix,
+    raising-bad-type,
+    unused-private-member,
+    used-before-assignment,
+    # These rules were added in Pylint >= 2.12, disable them to avoid making retroactive change
+    missing-timeout,
+    superfluous-parens,
+    implicit-str-concat,
+    unnecessary-dunder-call,
 
 [FORMAT]
 max-line-length=120
@@ -21,24 +66,8 @@ init-import=yes
 max-locals=25
 # Maximum number of branch for function / method body
 max-branches=20
+# Temporally disable this check as inline disable is not working, see https://github.com/pylint-dev/pylint/issues/8806
+max-statements=500
 
 [SIMILARITIES]
 min-similarity-lines=10
-
-[BASIC]
-# Naming hints based on PEP 8 (https://www.python.org/dev/peps/pep-0008/#naming-conventions).
-# Consider these guidelines and not hard rules. Read PEP 8 for more details.
-
-# The invalid-name checker must be **enabled** for these hints to be used.
-include-naming-hint=yes
-
-module-name-hint=lowercase (keep short; underscores are discouraged)
-const-name-hint=UPPER_CASE_WITH_UNDERSCORES
-class-name-hint=CapitalizedWords
-class-attribute-name-hint=lower_case_with_underscores
-attr-name-hint=lower_case_with_underscores
-method-name-hint=lower_case_with_underscores
-function-name-hint=lower_case_with_underscores
-argument-name-hint=lower_case_with_underscores
-variable-name-hint=lower_case_with_underscores
-inlinevar-name-hint=lower_case_with_underscores (short is OK)

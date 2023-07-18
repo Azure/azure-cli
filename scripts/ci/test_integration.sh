@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -ev
 
 . $(cd $(dirname $0); pwd)/artifacts.sh
 

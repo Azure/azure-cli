@@ -1,0 +1,25 @@
+{
+    "name": "trigger",
+    "properties": {
+        "annotations": [],
+        "runtimeState": "Stopped",
+        "pipeline": {
+            "pipelineReference": {
+                "referenceName": "Pipeline 1",
+                "type": "PipelineReference"
+            }
+        },
+        "type": "TumblingWindowTrigger",
+        "typeProperties": {
+            "frequency": "Minute",
+            "interval": 15,
+            "startTime": "2020-07-10T02:00:00Z",
+            "delay": "00:00:00",
+            "maxConcurrency": 50,
+            "retryPolicy": {
+                "intervalInSeconds": 30
+            },
+            "dependsOn": []
+        }
+    }
+}

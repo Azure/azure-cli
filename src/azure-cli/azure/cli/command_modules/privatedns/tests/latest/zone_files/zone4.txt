@@ -1,0 +1,60 @@
+; This zone file assumes the zone name is 'zone4.com'
+; Note, first record must be SOA.
+
+@ IN SOA ns1.zone4.com. hostmaster (
+			2003080800 ; se = serial number
+			12h ; ref = refresh
+			15m ; ret = update retry
+			3w ; ex = expiry
+			3h ; min = minimum
+			) ; Should have default TTL of 3600
+
+; Check $TTL is observed
+$ttl 300
+ttl-300 IN A 10.1.2.3 ; Should have TTL 300
+
+$TTL 0
+ttl-0 IN A 10.2.3.4 ; Should have TTL 0
+
+; Check $TTL can be overridden
+ttl-60 60 IN A 10.3.4.5 ; Should have TTL 60
+
+; Check various $TTL formats, cases
+$TTL 1w
+ttl-1w IN A 10.3.4.5 ; Should have TTL 1 week (604800)
+
+$TTL 1D
+ttl-1d IN A 10.7.8.9 ; Should have TTL 1 day (86400)
+
+$TTL 1h
+ttl-1h IN A 10.4.5.6 ; Should have TTL 1 hour (3600)
+
+$TTL 99S
+ttl-99s IN A 10.5.6.7 ; Should have TTL 99 seconds
+
+$TTL 100
+ttl-100 IN A 10.6.7.8 ; Should have TTL 100 seconds
+
+$TTL 6m
+ttl-6m IN A 10.8.9.0 ; Should have TTL 6 minutes (360)
+
+$TTL 1W2d3h4M5
+ttl-mix IN A 10.8.9.0 ; Should have TTL of 788645
+
+; Now repeat, specifying TTL on records instead of using $TTL
+xttl-1w 1w IN A 10.3.4.5 ; Should have TTL 1 week (604800)
+xttl-1d 1D IN A 10.7.8.9 ; Should have TTL 1 day (86400)
+xttl-1h 1h IN A 10.4.5.6 ; Should have TTL 1 hour (3600)
+xttl-99s 99s IN A 10.5.6.7 ; Should have TTL 99 seconds
+xttl-100 100 IN A 10.6.7.8 ; Should have TTL 100 seconds
+xttl-6m 6M IN A 10.8.9.0 ; Should have TTL 6 minutes (360)
+xttl-mix 2d1W3h4M5 IN A 10.9.9.9 ; Should have TTL of 788645
+
+; Check for conflicting TTLs on records with the same name
+c1 10 IN A 11.1.2.3
+c1 20 IN A 11.2.3.3 ; Same record set as c1 above, should use TTL 10 and give warning
+c2 10 IN A 11.2.3.4 ; Will have TTL of 5 because of the below record...
+
+$ORIGIN c2.zone4.com.
+$TTL 5
+@ IN A 11.5.6.7 ; Same record set as c2 above, should use TTL 5 for entire record set and give warning

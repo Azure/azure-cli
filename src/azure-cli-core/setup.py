@@ -5,19 +5,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
 from codecs import open
-from setuptools import setup
+from setuptools import setup, find_packages
 
-try:
-    from azure_bdist_wheel import cmdclass
-except ImportError:
-    from distutils import log as logger
+VERSION = "2.50.0"
 
-    logger.warn("Wheel is not available, disabling bdist_wheel hook")
-    cmdclass = {}
-
-VERSION = "2.0.52"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -42,71 +34,52 @@ CLASSIFIERS = [
     'Intended Audience :: Developers',
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
-    'Programming Language :: Python :: 2',
-    'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.4',
-    'Programming Language :: Python :: 3.5',
-    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
     'License :: OSI Approved :: MIT License',
 ]
 
-# TODO These dependencies should be updated to reflect only what this package needs
 DEPENDENCIES = [
-    'futures',
-    'adal>=1.2.0',
-    'argcomplete>=1.8.0',
-    'azure-cli-telemetry',
-    'colorama>=0.3.9',
-    'humanfriendly>=4.7',
+    'argcomplete~=3.1.1',
+    'azure-cli-telemetry==1.0.8.*',
+    'azure-mgmt-core>=1.2.0,<2',
+    'cryptography',
+    # On Linux, the distribution (Ubuntu, Debian, etc) and version are logged in telemetry
+    'distro; sys_platform == "linux"',
+    'humanfriendly~=10.0',
     'jmespath',
-    'knack==0.5.1',
-    'msrest>=0.4.4',
-    'msrestazure>=0.4.25',
-    'paramiko>=2.0.8',
-    'pip',
-    'pygments',
-    'PyJWT',
+    'knack~=0.10.1',
+    'msal-extensions~=1.0.0',
+    'msal[broker]==1.22.0',
+    'msrestazure~=0.6.4',
+    'packaging>=20.9',
+    'paramiko>=2.0.8,<4.0.0',
+    'pkginfo>=1.5.0.1',
+    # psutil can't install on cygwin: https://github.com/Azure/azure-cli/issues/9399
+    'psutil~=5.9; sys_platform != "cygwin"',
+    'PyJWT>=2.1.0',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
-    'pyyaml~=3.13',
-    'requests>=2.20.0',
-    'six',
-    'tabulate>=0.7.7,<=0.8.2',
-    'wheel==0.30.0',
-    'azure-mgmt-resource==2.0.0'
+    'requests[socks]'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
-with open('HISTORY.rst', 'r', encoding='utf-8') as f:
-    HISTORY = f.read()
 
 setup(
     name='azure-cli-core',
     version=VERSION,
     description='Microsoft Azure Command-Line Tools Core Module',
-    long_description=README + '\n\n' + HISTORY,
+    long_description=README,
     license='MIT',
     author='Microsoft Corporation',
     author_email='azpycli@microsoft.com',
     url='https://github.com/Azure/azure-cli',
     zip_safe=False,
     classifiers=CLASSIFIERS,
-    packages=[
-        'azure',
-        'azure.cli',
-        'azure.cli.core',
-        'azure.cli.core.commands',
-        'azure.cli.core.extension',
-        'azure.cli.core.profiles',
-    ],
+    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
-    extras_require={
-        ":python_version<'3.4'": ['enum34'],
-        ":python_version<'2.7.9'": ['pyopenssl', 'ndg-httpsclient', 'pyasn1'],
-        ":python_version<'3.0'": ['antlr4-python2-runtime'],
-        ":python_version>='3.0'": ['antlr4-python3-runtime']
-    },
-    package_data={'azure.cli.core': ['auth_landing_pages/*.html']},
-    cmdclass=cmdclass
+    python_requires='>=3.7.0',
+    package_data={'azure.cli.core': ['auth/landing_pages/*.html']}
 )

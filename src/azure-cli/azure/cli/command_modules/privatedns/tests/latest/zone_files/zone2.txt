@@ -1,0 +1,99 @@
+;
+;  Database file mytestzone.com.dns for Default zone scope in zone mytestzone.com.
+;      Zone version:  10
+;
+
+@                       IN  SOA zone2.com. hostmaster. (
+                        		10           ; serial number
+                        		900          ; refresh
+                        		600          ; retry
+                        		86400        ; expire
+                        		3600       ) ; default TTL
+
+;
+;  Zone records
+;
+
+spaces TXT "  a  " ; should preserve all quoted spaces (length 5)
+
+a2                      A	1.2.3.4
+                        A	2.3.4.5
+aaaa2                   AAAA 2001:cafe:130::100
+                        AAAA 2001:cafe:130::101
+doozie                  TXT	( "abcdefghijklmnopqrstuvwxyz" ; test comment
+                              "1234567890"
+                        	  "abcdefghijklmnopqrstuvwxyz"
+							  "1234567890" ; another comment
+                        	  "abcdefghijklmnopqrstuvwxyz"
+							  "1234567890" ) ; comments
+fee2                    CNAME	bar.com.
+                        CNAME	bar. ; This should be ignored and a warning given
+mail                    MX	10	mail1.mymail.com.
+                        MX	11	flooble.
+sip.tcp                 SRV	10 20 30	foobar.
+                        SRV 55 66 77	zoo.
+test-txt2               TXT "string 1"
+                        TXT "string 2"
+						
+aa	100	A 4.5.6.7  ; A record
+    200 A 6.7.8.9  ; Another A record, same record set, use the lower of the two TTLs
+	300 MX 1 foo.com ; MX record with name 'aa', TTL 300
+200		A 7.8.9.0	; A record with name 200
+
+longtxt  999 TXT "this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer...."
+longtxt2 100 TXT "01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789"
+
+myspf 100 SPF "this is an SPF record! Convert to TXT on import"
+@ 200 TXT "this is another SPF, this time as TXT"
+
+; PTR tests
+160.1                   PTR        foo.com.
+
+160.2                   PTR        foobar.com.
+160.2                   PTR        bar.com.
+
+160.3                   PTR        foo.com.
+						PTR        bar.com.
+
+; semicolon tests
+; single string, foobar
+t1                            TXT         foobar
+t2                            TXT         "foobar"
+
+; two strings
+t3                            TXT         "foo" "bar"
+
+; semicolon in string value
+t4                            TXT         "foo;bar"
+t5                            TXT         foo\;bar
+t6                            TXT         "foo\;bar"
+
+; string with quotes
+t7                            TXT         "\"quoted string\""
+
+; two strings, no quotes
+t8                            TXT         foo bar
+
+; multi-line
+t9                            TXT         ( "foo"
+                                                 "barr" )
+
+; with comments
+t10                          TXT         "foo bar"              ; comment
+t11                          TXT         foobar                  ; comment
+
+@                       TXT        ( "v=spf1 mx ip4:14.14.22.0/23 a:mail.trum.ch mx:mese.ch include:spf.mapp.com ?all" )
+
+base                   3600        A        194.124.202.114
+
+                        MX        10        be.xpiler.de.
+
+                        TXT        ( "v=spf1 mx include:_spf4.xcaign.de include:_spf6.xcaign.de -all" )
+
+                        TXT        ( "spf2.0/mfrom,pra mx ip4:15.19.14.0/24 ip4:8.8.11.4/27 ip4:9.16.20.19/26 -all" )
+
+even                   A        194.124.202.114
+
+                        MX        10        be.xpiler.de.
+
+                        TXT        ( "v=spf1 mx include:_spf4.xgn.de include:_spf6.xgn.de -all" )
