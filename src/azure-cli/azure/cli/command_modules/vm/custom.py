@@ -2933,7 +2933,7 @@ def remove_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate=No
             cert_url_pattern = '/' + cert_url_pattern + '/'
         for x in temp:
             x.vault_certificates = ([v for v in x.vault_certificates
-                                     if not(v.certificate_url and cert_url_pattern in v.certificate_url.lower())])
+                                     if not (v.certificate_url and cert_url_pattern in v.certificate_url.lower())])
         to_keep = [x for x in to_keep if x.vault_certificates]  # purge all groups w/o any cert entries
 
     vm.os_profile.secrets = to_keep
