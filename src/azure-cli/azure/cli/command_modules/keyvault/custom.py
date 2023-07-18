@@ -1155,7 +1155,9 @@ def verify_key(cmd, client, algorithm, digest, signature, name=None, version=Non
     SignatureAlgorithm = cmd.loader.get_sdk('SignatureAlgorithm', mod='crypto._enums',
                                             resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     crypto_client = client.get_cryptography_client(name, key_version=version)
-    return crypto_client.verify(SignatureAlgorithm(algorithm), digest.encode('utf-8'), base64.b64decode(signature.encode('utf-8')))
+    return crypto_client.verify(SignatureAlgorithm(algorithm),
+                                digest.encode('utf-8'),
+                                base64.b64decode(signature.encode('utf-8')))
 
 
 def backup_key(client, file_path, vault_base_url=None,

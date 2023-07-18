@@ -48,6 +48,7 @@ def load_arguments(self, _):
     KeyCurveName = self.get_sdk('KeyCurveName', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_enums')
     EncryptionAlgorithm = self.get_sdk('EncryptionAlgorithm', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='crypto._enums')
     SignatureAlgorithm = self.get_sdk('SignatureAlgorithm', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='crypto._enums')
+
     class CLIJsonWebKeyOperation(str, Enum):
         encrypt = "encrypt"
         decrypt = "decrypt"
