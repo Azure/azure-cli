@@ -298,7 +298,7 @@ def _get_bicep_installation_path(system):
 
 def _extract_version(text):
     semver_match = re.search(_semver_pattern, text)
-    return semver.Version.parse(semver_match.group(0)) if semver_match else None
+    return semver.VersionInfo.parse(semver_match.group(0)) if semver_match else None
 
 
 def _run_command(bicep_installation_path, args):
