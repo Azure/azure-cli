@@ -5462,7 +5462,7 @@ def add_github_actions(cmd, resource_group, name, repo, runtime=None, token=None
         cmd=cmd, resource_group=resource_group, name=name, slot=slot, is_linux=is_linux)
 
     app_runtime_string = None
-    if(app_runtime_info and app_runtime_info['display_name']):
+    if (app_runtime_info and app_runtime_info['display_name']):
         app_runtime_string = app_runtime_info['display_name']
 
     github_actions_version = None
