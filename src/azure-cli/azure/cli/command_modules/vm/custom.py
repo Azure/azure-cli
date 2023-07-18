@@ -895,7 +895,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               data_disk_delete_option=None, user_data=None, capacity_reservation_group=None, enable_hibernation=None,
               v_cpus_available=None, v_cpus_per_core=None, accept_term=None, disable_integrity_monitoring=False,
               os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None,
-              disk_controller_type=None):
+              disk_controller_type=None, disable_integrity_monitoring_autoupgrade=False):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -913,7 +913,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     # In the latest profile, the default public IP will be expected to be changed from Basic to Standard.
     # In order to avoid breaking change which has a big impact to users,
     # we use the hint to guide users to use Standard public IP to create VM in the first stage.
-    if public_ip_sku is None and cmd.cli_ctx.cloud.profile == 'latest':
+    if public_ip_sku is None and public_ip_address_type == 'new' and cmd.cli_ctx.cloud.profile == 'latest':
         logger.warning(
             'It is recommended to use parameter "--public-ip-sku Standard" to create new VM with Standard public IP. '
             'Please note that the default public IP used for VM creation will be changed from Basic to Standard '
@@ -1214,7 +1214,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                       type_handler_version=version,
                                       settings=None,
                                       auto_upgrade_minor_version=True,
-                                      enable_automatic_upgrade=None)
+                                      enable_automatic_upgrade=not disable_integrity_monitoring_autoupgrade)
         try:
             LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_extensions.begin_create_or_update(
                 resource_group_name, vm_name, 'GuestAttestation', ext))
@@ -2917,7 +2917,7 @@ def remove_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate=No
             cert_url_pattern = '/' + cert_url_pattern + '/'
         for x in temp:
             x.vault_certificates = ([v for v in x.vault_certificates
-                                     if not(v.certificate_url and cert_url_pattern in v.certificate_url.lower())])
+                                     if not (v.certificate_url and cert_url_pattern in v.certificate_url.lower())])
         to_keep = [x for x in to_keep if x.vault_certificates]  # purge all groups w/o any cert entries
 
     vm.os_profile.secrets = to_keep
@@ -3165,7 +3165,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None,
                 os_disk_delete_option=None, data_disk_delete_option=None, regular_priority_count=None,
                 regular_priority_percentage=None, disk_controller_type=None, nat_rule_name=None,
-                enable_osimage_notification=None, max_surge=None):
+                enable_osimage_notification=None, max_surge=None, disable_integrity_monitoring_autoupgrade=False):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -3572,7 +3572,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                                               settings=None,
                                               auto_upgrade_minor_version=True,
                                               provision_after_extensions=None,
-                                              enable_automatic_upgrade=None)
+                                              enable_automatic_upgrade=not disable_integrity_monitoring_autoupgrade)
         if not vmss.virtual_machine_profile.extension_profile:
             vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile(extensions=[])
         vmss.virtual_machine_profile.extension_profile.extensions.append(ext)

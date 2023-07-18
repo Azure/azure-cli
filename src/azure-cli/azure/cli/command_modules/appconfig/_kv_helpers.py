@@ -11,6 +11,7 @@ from difflib import Differ
 from itertools import filterfalse
 from json import JSONDecodeError
 from urllib.parse import urlparse
+from ._snapshot_custom_client import AppConfigSnapshotClient
 
 import chardet
 import javaproperties
@@ -28,15 +29,16 @@ from azure.cli.core.azclierror import (FileOperationError,
                                        InvalidArgumentValueError,
                                        ValidationError,
                                        AzureResponseError,
-                                       RequiredArgumentMissingError)
+                                       RequiredArgumentMissingError,
+                                       ResourceNotFoundError)
 
-from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles, AppServiceConstants, JsonDiff)
+from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles, AppServiceConstants, JsonDiff, StatusCodes)
 from ._utils import prep_label_filter_for_url_encoding, validate_feature_flag_name, validate_feature_flag_key
 from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting, QueryFields)
-from._featuremodels import (map_keyvalue_to_featureflag,
-                            map_featureflag_to_keyvalue,
-                            FeatureFlagValue)
+from ._featuremodels import (map_keyvalue_to_featureflag,
+                             map_featureflag_to_keyvalue,
+                             FeatureFlagValue)
 
 logger = get_logger(__name__)
 FEATURE_MANAGEMENT_KEYWORDS = ["FeatureManagement", "featureManagement", "feature_management", "feature-management"]
@@ -318,6 +320,7 @@ def __map_to_appservice_config_reference(key_value, endpoint, prefix):
 def __read_kv_from_config_store(azconfig_client,
                                 key=None,
                                 label=None,
+                                snapshot=None,
                                 datetime=None,
                                 fields=None,
                                 top=None,
@@ -325,6 +328,7 @@ def __read_kv_from_config_store(azconfig_client,
                                 cli_ctx=None,
                                 prefix_to_remove="",
                                 prefix_to_add=""):
+    # pylint: disable=too-many-branches too-many-statements
 
     # list_configuration_settings returns kv with null label when:
     # label = ASCII null 0x00 (or URL encoded %00)
@@ -342,13 +346,22 @@ def __read_kv_from_config_store(azconfig_client,
                 break
             query_fields.append(field.name.lower())
 
-    try:
-        configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key,
-                                                                             label_filter=label,
-                                                                             accept_datetime=datetime,
-                                                                             fields=query_fields)
-    except HttpResponseError as exception:
-        raise AzureResponseError('Failed to read key-value(s) that match the specified key and label. ' + str(exception))
+    if snapshot:
+        try:
+            configsetting_iterable = AppConfigSnapshotClient(azconfig_client).list_snapshot_kv(name=snapshot,
+                                                                                               fields=query_fields)
+
+        except HttpResponseError as exception:
+            raise AzureResponseError('Failed to read key-values(s) from snapshot {}. '.format(snapshot) + str(exception))
+
+    else:
+        try:
+            configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key,
+                                                                                 label_filter=label,
+                                                                                 accept_datetime=datetime,
+                                                                                 fields=query_fields)
+        except HttpResponseError as exception:
+            raise AzureResponseError('Failed to read key-value(s) that match the specified key and label. ' + str(exception))
 
     retrieved_kvs = []
     count = 0
@@ -391,6 +404,17 @@ def __read_kv_from_config_store(azconfig_client,
         count += 1
         if count >= top:
             return retrieved_kvs
+
+    # A request to list kvs of a non-existent snapshot returns an empty result.
+    # We first check if the snapshot exists before returning an empty result.
+    if snapshot and len(retrieved_kvs) == 0:
+        try:
+            _ = AppConfigSnapshotClient(azconfig_client).get_snapshot(name=snapshot)
+
+        except HttpResponseError as exception:
+            if exception.status_code == StatusCodes.NOT_FOUND:
+                raise ResourceNotFoundError("No snapshot with name '{}' was found.".format(snapshot))
+
     return retrieved_kvs
 
 
@@ -656,7 +680,7 @@ def __print_features_preview(old_json, new_json, strict=False, yes=False):
 
     diff_output = __find_ff_diff(old_json=old_json, new_json=new_json, strict=strict)
 
-    if diff_output == {}:
+    if not diff_output:
         logger.warning('\nThe target configuration already contains all feature flags in source. No changes will be made.')
         return False
 
@@ -675,7 +699,7 @@ def __print_kv_preview(old_json, new_json, strict=False, yes=False):
 
     diff_output = __find_kv_diff(old_json=old_json, new_json=new_json, strict=strict)
 
-    if diff_output == {}:
+    if not diff_output:
         logger.warning('\nTarget configuration already contains all key-values in source. No changes will be made.')
         return False
 
