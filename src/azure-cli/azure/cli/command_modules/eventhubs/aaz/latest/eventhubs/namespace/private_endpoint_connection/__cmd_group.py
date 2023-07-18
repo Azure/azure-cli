@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "eventhubs namespace private-endpoint-connection",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage eventhubs namespace private endpoint connection.
+    """eventhubs namespace private-endpoint-connection
     """
     pass
 

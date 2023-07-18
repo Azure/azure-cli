@@ -19,9 +19,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-01-01-preview",
+        "version": "2023-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/applicationgroups/{}", "2022-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/applicationgroups/{}", "2023-01-01-preview"],
         ]
     }
 
@@ -70,6 +70,11 @@ class Update(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.client_app_group_identifier = AAZStrArg(
+            options=["--client-app-group-id", "--client-app-group-identifier"],
+            arg_group="Properties",
+            help="The Unique identifier for application group.Supports SAS(SASKeyName=KeyName) or AAD(AADAppID=Guid)",
+        )
         _args_schema.is_enabled = AAZBoolArg(
             options=["--is-enabled"],
             arg_group="Properties",
@@ -87,7 +92,6 @@ class Update(AAZCommand):
         policies.Element = AAZObjectArg(
             nullable=True,
         )
-        cls._args_schema.policies._registered = False
 
         _element = cls._args_schema.policies.Element
         _element.throttling_policy = AAZObjectArg(
@@ -192,7 +196,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01-preview",
+                    "api-version", "2023-01-01-preview",
                     required=True,
                 ),
             }
@@ -279,7 +283,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01-preview",
+                    "api-version", "2023-01-01-preview",
                     required=True,
                 ),
             }
@@ -341,6 +345,7 @@ class Update(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
+                properties.set_prop("clientAppGroupIdentifier", AAZStrType, ".client_app_group_identifier", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("isEnabled", AAZBoolType, ".is_enabled")
                 properties.set_prop("policies", AAZListType, ".policies")
 

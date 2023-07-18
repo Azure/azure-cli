@@ -25,9 +25,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-01-01-preview",
+        "version": "2023-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}", "2022-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}", "2023-01-01-preview"],
         ]
     }
 
@@ -343,7 +343,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01-preview",
+                    "api-version", "2023-01-01-preview",
                     required=True,
                 ),
             }
@@ -388,7 +388,7 @@ class Create(AAZCommand):
                 properties.set_prop("alternateName", AAZStrType, ".alternate_name")
                 properties.set_prop("clusterArmId", AAZStrType, ".cluster_arm_id")
                 properties.set_prop("disableLocalAuth", AAZBoolType, ".disable_local_auth")
-                properties.set_prop("encryption", AAZObjectType, ".encryption")
+                properties.set_prop("encryption", AAZObjectType, ".encryption", typ_kwargs={"flags": {"client_flatten": True}})
                 properties.set_prop("isAutoInflateEnabled", AAZBoolType, ".enable_auto_inflate")
                 properties.set_prop("kafkaEnabled", AAZBoolType, ".kafka_enabled")
                 properties.set_prop("maximumThroughputUnits", AAZIntType, ".maximum_throughput_units")
@@ -409,7 +409,7 @@ class Create(AAZCommand):
 
             _elements = _builder.get(".properties.encryption.keyVaultProperties[]")
             if _elements is not None:
-                _elements.set_prop("identity", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                _elements.set_prop("identity", AAZObjectType)
                 _elements.set_prop("keyName", AAZStrType, ".key_name")
                 _elements.set_prop("keyVaultUri", AAZStrType, ".key_vault_uri")
                 _elements.set_prop("keyVersion", AAZStrType, ".key_version")
@@ -534,7 +534,12 @@ class Create(AAZCommand):
             properties.disable_local_auth = AAZBoolType(
                 serialized_name="disableLocalAuth",
             )
-            properties.encryption = AAZObjectType()
+            properties.encryption = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            properties.geo_data_replication = AAZObjectType(
+                serialized_name="geoDataReplication",
+            )
             properties.is_auto_inflate_enabled = AAZBoolType(
                 serialized_name="isAutoInflateEnabled",
             )
@@ -591,9 +596,7 @@ class Create(AAZCommand):
             key_vault_properties.Element = AAZObjectType()
 
             _element = cls._schema_on_200_201.properties.encryption.key_vault_properties.Element
-            _element.identity = AAZObjectType(
-                flags={"client_flatten": True},
-            )
+            _element.identity = AAZObjectType()
             _element.key_name = AAZStrType(
                 serialized_name="keyName",
             )
@@ -607,6 +610,26 @@ class Create(AAZCommand):
             identity = cls._schema_on_200_201.properties.encryption.key_vault_properties.Element.identity
             identity.user_assigned_identity = AAZStrType(
                 serialized_name="userAssignedIdentity",
+            )
+
+            geo_data_replication = cls._schema_on_200_201.properties.geo_data_replication
+            geo_data_replication.locations = AAZListType()
+            geo_data_replication.max_replication_lag_duration_in_seconds = AAZIntType(
+                serialized_name="maxReplicationLagDurationInSeconds",
+            )
+
+            locations = cls._schema_on_200_201.properties.geo_data_replication.locations
+            locations.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.properties.geo_data_replication.locations.Element
+            _element.cluster_arm_id = AAZStrType(
+                serialized_name="clusterArmId",
+            )
+            _element.location_name = AAZStrType(
+                serialized_name="locationName",
+            )
+            _element.role_type = AAZStrType(
+                serialized_name="roleType",
             )
 
             private_endpoint_connections = cls._schema_on_200_201.properties.private_endpoint_connections
