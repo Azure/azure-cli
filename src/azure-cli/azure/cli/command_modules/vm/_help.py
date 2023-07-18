@@ -940,11 +940,6 @@ examples:
         --location myLocation
 """
 
-helps['sig image-version'] = """
-type: group
-short-summary: Manage shared gallery image version with VM
-"""
-
 helps['sig image-version create'] = """
 type: command
 short-summary: create a new image version
@@ -1091,17 +1086,6 @@ examples:
     text: |
         az sig image-version list-shared --gallery-unique-name galleryUniqueName \\
         --gallery-image-definition MyImage --location myLocation --shared-to tenant
-"""
-
-helps['sig image-version show-shared'] = """
-type: command
-short-summary: Get an image version in a gallery shared directly to your subscription or tenant
-long-summary: Get an image version in a gallery shared directly to your subscription or tenant
-examples:
-  - name: Get an image version in a gallery shared directly to your subscription or tenant in the given location.
-    text: |
-        az sig image-version show-shared --gallery-unique-name galleryUniqueName \\
-        --gallery-image-definition MyImage --gallery-image-version 1.0.0 --location myLocation
 """
 
 helps['sig image-version update'] = """

@@ -536,7 +536,6 @@ def load_command_table(self, _):
         g.custom_command('list-community', 'sig_community_image_definition_list')
 
     with self.command_group('sig image-version', community_gallery_image_version_sdk, client_factory=cf_community_gallery_image_version, operation_group='shared_galleries', min_api='2022-01-03') as g:
-        g.command('show-community', 'get')
         g.custom_command('list-community', 'sig_community_image_version_list')
 
     with self.command_group('sig image-definition', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
@@ -595,7 +594,6 @@ def load_command_table(self, _):
                             operation_group='shared_galleries',
                             client_factory=cf_shared_gallery_image_version) as g:
         g.custom_command('list-shared', 'sig_shared_image_version_list')
-        g.command('show-shared', 'get')
 
     with self.command_group('sig gallery-application', compute_gallery_application_sdk, client_factory=cf_gallery_application, min_api='2021-07-01', operation_group='gallery_applications') as g:
         g.custom_command('create', 'gallery_application_create', supports_no_wait=True)
