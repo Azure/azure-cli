@@ -15,9 +15,9 @@
   <!-- Local WiX -->
   <PropertyGroup>
     <LocalWixRoot>artifacts\wix</LocalWixRoot>
-    <WixToolPath>$(LocalWixRoot)</WixToolPath>
+    <WixToolPath>$(MSBuildThisFileDirectory)$(LocalWixRoot)</WixToolPath>
     <WixTargetsPath Condition="Exists('$(WixToolPath)\Wix.targets')">$(WixToolPath)\Wix.targets</WixTargetsPath>
-    <WixTasksPath Condition="Exists('$(WixToolPath)\wixtasks.dll')">wixtasks.dll</WixTasksPath>
+    <WixTasksPath Condition="Exists('$(WixToolPath)\wixtasks.dll')">$(WixToolPath)\wixtasks.dll</WixTasksPath>
     <AzureCliSource>artifacts\cli</AzureCliSource>
     <LinkerAdditionalOptions>-fv</LinkerAdditionalOptions>
   </PropertyGroup>

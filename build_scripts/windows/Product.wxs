@@ -45,7 +45,6 @@
       <UpgradeVersion Property="WIX_UPGRADE_DETECTED" Maximum="$(var.ProductVersion)" IncludeMinimum="no" MigrateFeatures="yes" />
       <UpgradeVersion Property="WIX_DOWNGRADE_DETECTED" Minimum="$(var.ProductVersion)" IncludeMinimum="no" OnlyDetect="yes" />
     </Upgrade>
-    <Condition Message="A newer version of [ProductName] is already installed.">NOT WIX_DOWNGRADE_DETECTED</Condition>
     <InstallExecuteSequence>
       <RemoveExistingProducts After="InstallExecute" />
     </InstallExecuteSequence>
@@ -56,6 +55,9 @@
       <UpgradeVersion Property="WIX_X86_UPGRADE_DETECTED" Maximum="$(var.ProductVersion)" IncludeMinimum="yes" MigrateFeatures="yes" />
       <UpgradeVersion Property="WIX_X86_DOWNGRADE_DETECTED" Minimum="$(var.ProductVersion)" IncludeMinimum="no" OnlyDetect="yes" />
     </Upgrade>
+    <Condition Message="A newer version of [ProductName] is already installed.">NOT (WIX_DOWNGRADE_DETECTED OR WIX_X86_DOWNGRADE_DETECTED)</Condition>
+    <?else ?>
+    <Condition Message="A newer version of [ProductName] is already installed.">NOT WIX_DOWNGRADE_DETECTED</Condition>
     <?endif ?>
 
     <Media Id="1" Cabinet="WindowsAzureCLI.cab" EmbedCab="yes" CompressionLevel="high" />
