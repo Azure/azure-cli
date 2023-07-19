@@ -163,6 +163,9 @@ def storage_file_upload(client, local_file_path, content_settings=None,
 
 def _execute_in_parallel(max_workers, fn, args_list):
     from concurrent.futures import ThreadPoolExecutor, as_completed
+    if len(args_list) == 0:
+        return []
+    max_workers = min(max_workers, len(args_list))
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = [executor.submit(fn, *args) for args in args_list]
         return list(f.result() for f in as_completed(futures))
