@@ -986,17 +986,16 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # disable monitoring add-on
-        self.cmd('aks disable-addons -a monitoring -g {resource_group} -n {name}', checks=[
+        disable_addon_output = self.cmd('aks disable-addons -a monitoring -g {resource_group} -n {name}', checks=[
             self.check('addonProfiles.omsagent.enabled', False),
-            self.check('addonProfiles.omsagent.config', None)
-        ])
+        ]).get_output_in_json()
+        assert bool(disable_addon_output["addonProfiles"]["omsagent"]["config"]) == False
 
         # show again
-        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+        show_output = self.cmd('aks show -g {resource_group} -n {name}', checks=[
             self.check('addonProfiles.omsagent.enabled', False),
-            self.check('addonProfiles.omsagent.config', None)
-
-        ])
+        ]).get_output_in_json()
+        assert bool(show_output["addonProfiles"]["omsagent"]["config"]) == False
 
         # enable monitoring add-on
         self.cmd('aks enable-addons -a monitoring -g {resource_group} -n {name}', checks=[
@@ -3428,16 +3427,16 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # disable monitoring add-on
-        self.cmd('aks disable-addons -a monitoring -g {resource_group} -n {name}', checks=[
+        disable_addon_output = self.cmd('aks disable-addons -a monitoring -g {resource_group} -n {name}', checks=[
             self.check('addonProfiles.omsagent.enabled', False),
-            self.check('addonProfiles.omsagent.config', None)
-        ])
+        ]).get_output_in_json()
+        assert bool(disable_addon_output["addonProfiles"]["omsagent"]["config"]) == False
 
         # show again
-        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+        show_output = self.cmd('aks show -g {resource_group} -n {name}', checks=[
             self.check('addonProfiles.omsagent.enabled', False),
-            self.check('addonProfiles.omsagent.config', None)
-        ])
+        ]).get_output_in_json()
+        assert bool(show_output["addonProfiles"]["omsagent"]["config"]) == False
 
         # enable monitoring add-on
         self.cmd('aks enable-addons -a monitoring -g {resource_group} -n {name}', checks=[
@@ -5174,11 +5173,11 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         disable_cmd = 'aks disable-addons --addons confcom --resource-group={resource_group} --name={name} -o json'
-        self.cmd(disable_cmd, checks=[
+        disable_addon_output = self.cmd(disable_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('addonProfiles.ACCSGXDevicePlugin.enabled', False),
-            self.check('addonProfiles.ACCSGXDevicePlugin.config', None)
-        ])
+        ]).get_output_in_json()
+        assert bool(disable_addon_output["addonProfiles"]["ACCSGXDevicePlugin"]["config"]) == False
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
@@ -6615,11 +6614,11 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         disable_cmd = 'aks disable-addons --addons open-service-mesh --resource-group={resource_group} --name={name} -o json'
-        self.cmd(disable_cmd, checks=[
+        disable_addon_output = self.cmd(disable_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('addonProfiles.openServiceMesh.enabled', False),
-            self.check('addonProfiles.openServiceMesh.config', None)
-        ])
+        ]).get_output_in_json()
+        assert bool(disable_addon_output["addonProfiles"]["openServiceMesh"]["config"]) == False
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
@@ -6726,13 +6725,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         disable_cmd = 'aks disable-addons --addons azure-keyvault-secrets-provider --resource-group={resource_group} --name={name} -o json'
-        self.cmd(disable_cmd, checks=[
+        disable_addon_output = self.cmd(disable_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check(
                 'addonProfiles.azureKeyvaultSecretsProvider.enabled', False),
-            self.check(
-                'addonProfiles.azureKeyvaultSecretsProvider.config', None)
-        ])
+        ]).get_output_in_json()
+        assert bool(disable_addon_output["addonProfiles"]["azureKeyvaultSecretsProvider"]["config"]) == False
 
         enable_with_secret_rotation_cmd = 'aks enable-addons --addons azure-keyvault-secrets-provider --enable-secret-rotation --rotation-poll-interval 1h --resource-group={resource_group} --name={name} -o json'
         self.cmd(enable_with_secret_rotation_cmd, checks=[
