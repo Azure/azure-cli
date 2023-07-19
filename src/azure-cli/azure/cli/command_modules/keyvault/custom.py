@@ -2157,13 +2157,13 @@ def full_backup(cmd, client, token, storage_resource_uri=None, storage_account_n
 
 
 def full_restore(cmd, client, token, folder_to_restore, storage_resource_uri=None, storage_account_name=None,
-                 blob_container_name=None, hsm_name=None):  # pylint: disable=unused-argument
+                 blob_container_name=None, key_name=None, hsm_name=None):  # pylint: disable=unused-argument
     storage_account_parameters_check(storage_resource_uri, storage_account_name, blob_container_name)
     if not storage_resource_uri:
         storage_resource_uri = construct_storage_uri(
             cmd.cli_ctx.cloud.suffixes.storage_endpoint, storage_account_name, blob_container_name)
     folder_url = '{}/{}'.format(storage_resource_uri, folder_to_restore)
-    return client.begin_restore(folder_url, token)
+    return client.begin_restore(folder_url, token, key_name=key_name)
 # endregion
 
 
