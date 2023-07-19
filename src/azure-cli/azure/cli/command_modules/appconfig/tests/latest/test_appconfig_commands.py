@@ -19,7 +19,7 @@ from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants,
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse, RecordingProcessor
 from azure.cli.testsdk.scenario_tests.utilities import is_json_payload
 from azure.core.exceptions import ResourceNotFoundError
-from azure.cli.core.azclierror import ResourceNotFoundError as CliResourceNotFoundError
+from azure.cli.core.azclierror import ResourceNotFoundError as CliResourceNotFoundError, RequiredArgumentMissingError
 from azure.cli.core.util import shell_safe_json_parse
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -410,6 +410,10 @@ class AppConfigKVScenarioTest(ScenarioTest):
         revisions = self.cmd(
             'appconfig revision list -n {config_store_name} --key {key} --label *').get_output_in_json()
         assert len(revisions) == 3
+
+        # Confirm that delete action errors out for empty or whitespace key
+        with self.assertRaisesRegex(RequiredArgumentMissingError, "Key cannot be empty."):
+            self.cmd('appconfig kv delete -n {config_store_name} --key " " -y')
 
         # IN CLI, since we support delete by key/label filters, return is a list of deleted items
         deleted = self.cmd('appconfig kv delete -n {config_store_name} --key {key} --label {label} -y',
