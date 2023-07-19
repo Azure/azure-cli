@@ -4665,6 +4665,8 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     aux_subscriptions = _get_image_version_aux_subscription(managed_image, os_snapshot, data_snapshots)
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
 
+    soft_delete_recovery = managed_image is None and os_snapshot is None and os_vhd_uri is None
+
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     end_of_life_date = fix_gallery_image_date_info(end_of_life_date)
     if managed_image and not is_valid_resource_id(managed_image):
@@ -4695,8 +4697,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         profile.source = source
 
     if cmd.supported_api_version(min_api='2019-07-01', operation_group='gallery_image_versions'):
-        if not cmd.supported_api_version(min_api='2021-07-01', operation_group='gallery_image_versions') \
-                and managed_image is None and os_snapshot is None and os_vhd_uri is None:
+        if not cmd.supported_api_version(min_api='2021-07-01', operation_group='gallery_image_versions') and soft_delete_recovery:
             raise RequiredArgumentMissingError('usage error: Please provide --managed-image or --os-snapshot or --vhd')
         GalleryImageVersionStorageProfile = cmd.get_models('GalleryImageVersionStorageProfile')
         GalleryOSDiskImage = cmd.get_models('GalleryOSDiskImage')
@@ -4770,8 +4771,12 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
 
         storage_profile = GalleryImageVersionStorageProfile(source=source, os_disk_image=os_disk_image,
                                                             data_disk_images=data_disk_images)
-        image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}),
-                                     storage_profile=storage_profile)
+        if soft_delete_recovery:
+            image_version = ImageVersion(publishing_profile=None, location=location, tags=(tags or {}),
+                                         storage_profile=None)
+        else:
+            image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}),
+                                         storage_profile=storage_profile)
         if allow_replicated_location_deletion is not None:
             GalleryImageVersionSafetyProfile = cmd.get_models('GalleryImageVersionSafetyProfile',
                                                               operation_group='gallery_image_versions')
