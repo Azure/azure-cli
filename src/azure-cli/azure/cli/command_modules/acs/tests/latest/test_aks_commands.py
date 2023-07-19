@@ -3435,7 +3435,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # show again
         show_output = self.cmd('aks show -g {resource_group} -n {name}', checks=[
             self.check('addonProfiles.omsagent.enabled', False),
-        ])
+        ]).get_output_in_json()
         assert bool(show_output["addonProfiles"]["omsagent"]["config"]) == False
 
         # enable monitoring add-on
