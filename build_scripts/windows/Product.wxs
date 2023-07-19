@@ -7,6 +7,7 @@
   <?define ProductDescription = "Command-line tools for Azure." ?>
   <?define ProductAuthor = "Microsoft Corporation" ?>
   <?define ProductResources = ".\resources\" ?>
+  <?define UpgradeCode32 = "dff82af0-3f95-4ac9-8efd-948604fdb028" ?>
 
   <?if $(var.Platform) = "x64" ?>
   <?define AzureCliRegistryGuid = "90b6367e-4e15-4313-af33-a0ef459a56fc" ?>
@@ -16,6 +17,7 @@
   <?define RemoveAzureCLIFolderGuid = "7ce8a521-7429-4ded-9cce-0948e393cc83" ?>
   <?define RemoveCLIFolderGuid = "59fb416c-91d0-49aa-a185-d4330c435a93" ?>
   <?define UpgradeCode = "90762fec-9554-4729-a107-c6a8ea316698" ?>
+  <?define Architecture = "64-bit" ?>
 
   <?elseif $(var.Platform) = "x86" ?>
   <?define AzureCliRegistryGuid = "BDEEE50E-70D3-4990-BFF9-FCF8114AA701" ?>
@@ -24,14 +26,15 @@
   <?define ProgramFilesFolder = "ProgramFilesFolder" ?>
   <?define RemoveAzureCLIFolderGuid = "6AF97701-6A7A-4292-95D6-ED34CD4C97C0" ?>
   <?define RemoveCLIFolderGuid = "24DA394D-B03D-4623-A0D9-852DB51EF9F4" ?>
-  <?define UpgradeCode = "dff82af0-3f95-4ac9-8efd-948604fdb028" ?>
+  <?define UpgradeCode = $(var.UpgradeCode32) ?>
+  <?define Architecture = "32-bit" ?>
 
   <?else ?>
   <?error Unsupported platform "$(var.Platform)" ?>
   <?endif ?>
 
   <Product Id="*"
-           Name="$(var.ProductName)"
+           Name="$(var.ProductName) ($(var.Architecture))"
            Language="1033"
            Version="$(var.ProductVersion)"
            Manufacturer="$(var.ProductAuthor)"
@@ -50,14 +53,14 @@
     </InstallExecuteSequence>
 
     <!-- New product architectures should upgrade the original x86 product - even of the same version. -->
-    <?if $(var.UpgradeCode) != "dff82af0-3f95-4ac9-8efd-948604fdb028" ?>
-    <Upgrade Id="dff82af0-3f95-4ac9-8efd-948604fdb028">
+    <?if $(var.UpgradeCode) != $(var.UpgradeCode32) ?>
+    <Upgrade Id="$(var.UpgradeCode32)">
       <UpgradeVersion Property="WIX_X86_UPGRADE_DETECTED" Maximum="$(var.ProductVersion)" IncludeMaximum="yes" MigrateFeatures="yes" />
       <UpgradeVersion Property="WIX_X86_DOWNGRADE_DETECTED" Minimum="$(var.ProductVersion)" IncludeMinimum="no" OnlyDetect="yes" />
     </Upgrade>
-    <Condition Message="A newer version of [ProductName] is already installed.">NOT (WIX_DOWNGRADE_DETECTED OR WIX_X86_DOWNGRADE_DETECTED)</Condition>
+    <Condition Message="A newer version of $(var.ProductName) is already installed.">NOT (WIX_DOWNGRADE_DETECTED OR WIX_X86_DOWNGRADE_DETECTED)</Condition>
     <?else ?>
-    <Condition Message="A newer version of [ProductName] is already installed.">NOT WIX_DOWNGRADE_DETECTED</Condition>
+    <Condition Message="A newer version of $(var.ProductName) is already installed.">NOT WIX_DOWNGRADE_DETECTED</Condition>
     <?endif ?>
 
     <Media Id="1" Cabinet="WindowsAzureCLI.cab" EmbedCab="yes" CompressionLevel="high" />
