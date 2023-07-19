@@ -1094,7 +1094,7 @@ def create_security_automation_object(location, scopes, sources, actions, etag=N
     actionsAsObjectList = []
     for action in actions:
         if action['actionType'] == 'LogicApp':
-            actionAsObject = AutomationActionLogicApp(logic_app_resource_id=action['logicAppResourceId'], uri=action['ruleSets'])
+            actionAsObject = AutomationActionLogicApp(logic_app_resource_id=action['logicAppResourceId'], uri=action['uri'])
         elif action['actionType'] == 'EventHub':
             actionAsObject = AutomationActionEventHub(event_hub_resource_id=action['eventHubResourceId'], connection_string=action['connectionString'])
         elif action['actionType'] == 'Workspace':
