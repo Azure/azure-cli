@@ -338,6 +338,7 @@ def main():
 
 
 def get_remaining_tests():
+    # get residual resources after live test finished
     logger.info('Enter get_remaining_tests()')
     cmd = ['az', 'group', 'list', '--tag', 'module', '--query', '[][name, tags]']
     logger.info(cmd)
@@ -377,6 +378,7 @@ def get_remaining_tests():
 
 
 def summary_data(testdata):
+    # summary data by module and platform
     logger.info('Enter summary_data_by_module()')
     modules = [module[0].split('.')[0] for module in testdata.modules]
     data = []

@@ -23,6 +23,7 @@ variables:
 #  always: true
 
 stages:
+# Azure DevOps limits the number of jobs to 256, so it must be split according to the platform and placed in different stages.
 - stage: TestUbuntu
   displayName: Live Test on Ubuntu 2004
   condition: succeededOrFailed()
