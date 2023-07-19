@@ -484,7 +484,7 @@ parameters:
     short-summary: Enable KEDA workload auto-scaler.
   - name: --enable-azure-monitor-metrics
     type: bool
-    short-summary: Enable a kubernetes cluster with the Azure Monitor managed service for Prometheus integration enabled.
+    short-summary: Enable a kubernetes cluster with the Azure Monitor managed service for Prometheus integration.
   - name: --azure-monitor-workspace-resource-id
     type: string
     short-summary: Resource ID of the Azure Monitor Workspace
@@ -825,7 +825,7 @@ parameters:
     short-summary: Disable KEDA workload auto-scaler.
   - name: --enable-azure-monitor-metrics
     type: bool
-    short-summary: Enable a kubernetes cluster with the Azure Monitor managed service for Prometheus integration enabled.
+    short-summary: Enable a kubernetes cluster with the Azure Monitor managed service for Prometheus integration.
   - name: --azure-monitor-workspace-resource-id
     type: string
     short-summary: Resource ID of the Azure Monitor Workspace
