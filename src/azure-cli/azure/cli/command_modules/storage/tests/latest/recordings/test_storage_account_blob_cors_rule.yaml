@@ -1,0 +1,294 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account blob-service-properties cors-rule add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --allowed-origins --allowed-methods --allowed-headers --max-age
+      User-Agent:
+      - AZURECLI/2.48.1 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.7.9 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2022-09-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"cors":{"corsRules":[]},"deleteRetentionPolicy":{"allowPermanentDelete":false,"enabled":false}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '413'
+      content-type:
+      - application/json
+      date:
+      - Tue, 16 May 2023 09:32:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"cors": {"corsRules": [{"allowedOrigins": ["http://*.contoso.com",
+      "http://www.fabrikam.com"], "allowedMethods": ["PUT", "GET"], "maxAgeInSeconds":
+      200, "exposedHeaders": [], "allowedHeaders": ["x-ms-meta-data*"]}]}, "deleteRetentionPolicy":
+      {"enabled": false, "allowPermanentDelete": false}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account blob-service-properties cors-rule add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '309'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --allowed-origins --allowed-methods --allowed-headers --max-age
+      User-Agent:
+      - AZURECLI/2.48.1 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.7.9 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"cors":{"corsRules":[{"allowedOrigins":["http://*.contoso.com","http://www.fabrikam.com"],"allowedMethods":["PUT","GET"],"maxAgeInSeconds":200,"exposedHeaders":[],"allowedHeaders":["x-ms-meta-data*"]}]},"deleteRetentionPolicy":{"allowPermanentDelete":false,"enabled":false}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '544'
+      content-type:
+      - application/json
+      date:
+      - Tue, 16 May 2023 09:32:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account blob-service-properties cors-rule list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.48.1 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.7.9 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2022-09-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"cors":{"corsRules":[{"allowedOrigins":["http://*.contoso.com","http://www.fabrikam.com"],"allowedMethods":["PUT","GET"],"maxAgeInSeconds":200,"exposedHeaders":[""],"allowedHeaders":["x-ms-meta-data*"]}]},"deleteRetentionPolicy":{"allowPermanentDelete":false,"enabled":false}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '594'
+      content-type:
+      - application/json
+      date:
+      - Tue, 16 May 2023 09:32:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account blob-service-properties cors-rule clear
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.48.1 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.7.9 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2022-09-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"cors":{"corsRules":[{"allowedOrigins":["http://*.contoso.com","http://www.fabrikam.com"],"allowedMethods":["PUT","GET"],"maxAgeInSeconds":200,"exposedHeaders":[""],"allowedHeaders":["x-ms-meta-data*"]}]},"deleteRetentionPolicy":{"allowPermanentDelete":false,"enabled":false}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '594'
+      content-type:
+      - application/json
+      date:
+      - Tue, 16 May 2023 09:32:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"cors": {"corsRules": []}, "deleteRetentionPolicy": {"enabled":
+      false, "allowPermanentDelete": false}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account blob-service-properties cors-rule clear
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '119'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.48.1 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.7.9 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"cors":{"corsRules":[]},"deleteRetentionPolicy":{"allowPermanentDelete":false,"enabled":false}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '365'
+      content-type:
+      - application/json
+      date:
+      - Tue, 16 May 2023 09:32:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account blob-service-properties cors-rule list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.48.1 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.7.9 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2022-09-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"cors":{"corsRules":[]},"deleteRetentionPolicy":{"allowPermanentDelete":false,"enabled":false}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '413'
+      content-type:
+      - application/json
+      date:
+      - Tue, 16 May 2023 09:32:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

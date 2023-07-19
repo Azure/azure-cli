@@ -3,6 +3,35 @@
 Release History
 ===============
 
+2.50.0
+++++++
+* `aaz`: Add short summary for `--location` when its default value comes from resource group (#26584)
+* `aaz`: Handle null property in error response (#26605)
+* `aaz`: Explicitly raise TypeError exception during LRO (#26634)
+* `aaz`: Parse and re-serialize query parameters within next link (#26768)
+
+2.49.0
+++++++
+* Dynamically install extensions without prompt when not in a TTY (#26219)
+
+2.48.1
+++++++
+* No changes
+
+2.48.0
+++++++
+* `aaz`: Support hidden secret properties of response in output (#26102)
+* `aaz`: Support `AAZPasswordArg` (#26134)
+* `aaz`: Support argument prompt input for simple type args (#26134)
+
+2.47.0
+++++++
+* `aaz`: Add support for changing subscription of `AAZCommand` in customization code (#25745)
+
+2.46.0
+++++++
+* Add announcement for WAM-based login (#25416)
+
 2.45.0
 ++++++
 * `aaz`: Support AAZFileArg (#25075)

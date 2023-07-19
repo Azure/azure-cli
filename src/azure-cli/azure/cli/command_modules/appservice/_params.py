@@ -138,7 +138,7 @@ subscription than the app service environment, please use the resource ID for --
                    configured_default='appserviceplan', id_part='name', local_context_attribute=None)
 
     with self.argument_context('webapp create') as c:
-        c.argument('name', options_list=['--name', '-n'], help='name of the new web app',
+        c.argument('name', options_list=['--name', '-n'], help='Name of the new web app. Web app name can contain only allow alphanumeric characters and hyphens, it cannot start or end in a hyphen, and must be less than 64 characters.',
                    validator=validate_site_create,
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.SET],
                                                                  scopes=['webapp', 'cupertino']))
@@ -261,6 +261,7 @@ subscription than the app service environment, please use the resource ID for --
                        help='The name of the slot. Default to the productions slot if not specified')
         with self.argument_context(scope + ' config ssl') as c:
             c.argument('certificate_thumbprint', help='The ssl cert thumbprint')
+            c.argument('certificate_name', help='The name of the certificate.')
         with self.argument_context(scope + ' config appsettings') as c:
             c.argument('settings', nargs='+', help="space-separated app settings in a format of `<name>=<value>`")
             c.argument('setting_names', nargs='+', help="space-separated app setting names")
@@ -271,8 +272,6 @@ subscription than the app service environment, please use the resource ID for --
             c.argument('hostname', help='The custom domain name')
             c.argument('name', options_list=['--name', '-n'], help='Name of the web app.')
             c.argument('resource-group', options_list=['--resource-group', '-g'], help='Name of resource group.')
-        with self.argument_context(scope + ' config ssl show') as c:
-            c.argument('certificate_name', help='The name of the certificate')
         with self.argument_context(scope + ' config hostname') as c:
             c.argument('hostname', completer=get_hostname_completion_list,
                        help="hostname assigned to the site, such as custom domains", id_part='child_name_1')
@@ -357,6 +356,8 @@ subscription than the app service environment, please use the resource ID for --
                        arg_type=get_three_state_flag(return_label=True))
             c.argument('generic_configurations', nargs='+',
                        help='Provide site configuration list in a format of either `key=value` pair or `@<json_file>`. PowerShell and Windows Command Prompt users should use a JSON file to provide these configurations to avoid compatibility issues with escape characters.')
+            c.ignore('min_replicas')
+            c.ignore('max_replicas')
 
         with self.argument_context(scope + ' config container') as c:
             c.argument('websites_enable_app_service_storage', options_list=['--enable-app-service-storage', '-t'],
@@ -382,6 +383,8 @@ subscription than the app service environment, please use the resource ID for --
                    help='the container registry server username')
         c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-p'],
                    help='the container registry server password')
+        c.ignore('min_replicas')
+        c.ignore('max_replicas')
 
     with self.argument_context('functionapp config container') as c:
         c.argument('registry_server', options_list=['--registry-server', '-r', c.deprecate(target='--docker-registry-server-url', redirect='--registry-server')],
@@ -392,6 +395,8 @@ subscription than the app service environment, please use the resource ID for --
                    help='the container registry server username')
         c.argument('registry_password', options_list=['--registry-password', '-p', c.deprecate(target='--docker-registry-server-password', redirect='--registry-password')],
                    help='the container registry server password')
+        c.argument('min_replicas', type=int, help="The minimum number of replicas when create funtion app on container app", is_preview=True)
+        c.argument('max_replicas', type=int, help="The maximum number of replicas when create funtion app on container app", is_preview=True)
 
     with self.argument_context('webapp config connection-string list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
@@ -663,7 +668,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('dryrun', help="show summary of the create and deploy operation instead of executing it",
                    default=False, action='store_true')
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
-        c.argument('launch_browser', help="Launch the created app using the default browser", default=False,
+        c.argument('launch_browser', help="Launch the created app using the default browser. This is not supported in Azure Cloud Shell.", default=False,
                    action='store_true', options_list=['--launch-browser', '-b'])
         c.argument('logs',
                    help="Configure default logging required to enable viewing log stream immediately after launching the webapp",
@@ -695,15 +700,16 @@ subscription than the app service environment, please use the resource ID for --
 
     with self.argument_context('webapp deploy') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the webapp to deploy to.')
-        c.argument('src_path', options_list=['--src-path'], help='Path of the artifact to be deployed. Ex: "myapp.zip" or "/myworkspace/apps/myapp.war"')
-        c.argument('src_url', options_list=['--src-url'], help='URL of the artifact. The webapp will pull the artifact from this URL. Ex: "http://mysite.com/files/myapp.war?key=123"')
-        c.argument('target_path', options_list=['--target-path'], help='Absolute path that the artifact should be deployed to. Defaults to "home/site/wwwroot/" Ex: "/home/site/deployments/tools/", "/home/site/scripts/startup-script.sh".')
+        c.argument('src_path', help='Path of the artifact to be deployed. Ex: "myapp.zip" or "/myworkspace/apps/myapp.war"')
+        c.argument('src_url', help='URL of the artifact. The webapp will pull the artifact from this URL. Ex: "http://mysite.com/files/myapp.war?key=123"')
+        c.argument('target_path', help='Absolute path that the artifact should be deployed to. Defaults to "home/site/wwwroot/" Ex: "/home/site/deployments/tools/", "/home/site/scripts/startup-script.sh".')
         c.argument('artifact_type', options_list=['--type'], help='Used to override the type of artifact being deployed.', choices=['war', 'jar', 'ear', 'lib', 'startup', 'static', 'zip'])
-        c.argument('is_async', options_list=['--async'], help='If true, the artifact is deployed asynchronously. (The command will exit once the artifact is pushed to the web app.)', choices=['true', 'false'])
-        c.argument('restart', options_list=['--restart'], help='If true, the web app will be restarted following the deployment. Set this to false if you are deploying multiple artifacts and do not want to restart the site on the earlier deployments.', choices=['true', 'false'])
-        c.argument('clean', options_list=['--clean'], help='If true, cleans the target directory prior to deploying the file(s). Default value is determined based on artifact type.', choices=['true', 'false'])
-        c.argument('ignore_stack', options_list=['--ignore-stack'], help='If true, any stack-specific defaults are ignored.', choices=['true', 'false'])
-        c.argument('timeout', options_list=['--timeout'], help='Timeout for the deployment operation in milliseconds.')
+        c.argument('is_async', options_list=['--async'], help='If true, the artifact is deployed asynchronously. (The command will exit once the artifact is pushed to the web app.). Synchronous deployments are not yet supported when using "--src-url"', arg_type=get_three_state_flag())
+        c.argument('restart', help='If true, the web app will be restarted following the deployment. Set this to false if you are deploying multiple artifacts and do not want to restart the site on the earlier deployments.', arg_type=get_three_state_flag())
+        c.argument('clean', help='If true, cleans the target directory prior to deploying the file(s). Default value is determined based on artifact type.', arg_type=get_three_state_flag())
+        c.argument('ignore_stack', help='If true, any stack-specific defaults are ignored.', arg_type=get_three_state_flag())
+        c.argument('reset', help='Reset Java apps to the default parking page if set to true with no type specified.', arg_type=get_three_state_flag())
+        c.argument('timeout', type=int, help='Timeout for the deployment operation in milliseconds. Ignored when using "--src-url" since synchronous deployments are not yet supported when using "--src-url"')
         c.argument('slot', help="The name of the slot. Default to the productions slot if not specified.")
 
     with self.argument_context('functionapp deploy') as c:
@@ -725,9 +731,12 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('environment', help="Name of the container app environment.", is_preview=True)
         c.argument('image', options_list=['--image', '-i', c.deprecate(target='--deployment-container-image-name', redirect='--image')],
                    help='Container image, e.g. publisher/image-name:tag')
+        c.argument('registry_server', help="The container registry server hostname, e.g. myregistry.azurecr.io.", is_preview=True)
         c.argument('registry_username', options_list=['--registry-username', '-d', c.deprecate(target='--docker-registry-server-user', redirect='--registry-username')], help='The container registry server username.')
         c.argument('registry_password', options_list=['--registry-password', '-w', c.deprecate(target='--docker-registry-server-password', redirect='--registry-password')],
                    help='The container registry server password. Required for private registries.')
+        c.argument('min_replicas', type=int, help="The minimum number of replicas when create funtion app on container app", is_preview=True)
+        c.argument('max_replicas', type=int, help="The maximum number of replicas when create funtion app on container app", is_preview=True)
 
     with self.argument_context('functionapp cors credentials') as c:
         c.argument('enable', help='enable/disable access-control-allow-credentials', arg_type=get_three_state_flag())
@@ -1101,6 +1110,7 @@ subscription than the app service environment, please use the resource ID for --
                    help="Validation method for the custom domain.",
                    arg_type=get_enum_type(["cname-delegation", "dns-txt-token"]))
     with self.argument_context('staticwebapp appsettings') as c:
+        c.argument('environment_name', help="Name of the environment of static site")
         c.argument('setting_pairs', options_list=['--setting-names'],
                    help="Space-separated app settings in 'key=value' format. ",
                    nargs='*')

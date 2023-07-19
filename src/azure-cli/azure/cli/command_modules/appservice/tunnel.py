@@ -39,7 +39,7 @@ class TunnelWebSocket(WebSocket):
 
 # pylint: disable=no-member,too-many-instance-attributes,bare-except,no-self-use
 class TunnelServer:
-    def __init__(self, local_addr, local_port, remote_addr, remote_user_name, remote_password, instance):
+    def __init__(self, local_addr, local_port, remote_addr, auth_string, instance):
         self.local_addr = local_addr
         self.local_port = local_port
         if self.local_port != 0 and not self.is_port_open():
@@ -48,8 +48,7 @@ class TunnelServer:
             self.remote_addr = remote_addr[8:]
         else:
             self.remote_addr = remote_addr
-        self.remote_user_name = remote_user_name
-        self.remote_password = remote_password
+        self.auth_string = auth_string
         self.instance = instance
         self.client = None
         self.ws = None
@@ -64,12 +63,6 @@ class TunnelServer:
             logger.info('Auto-selecting port: %s', self.local_port)
         logger.info('Finished initialization')
 
-    def create_basic_auth(self):
-        from base64 import b64encode
-        basic_auth_string = '{}:{}'.format(self.remote_user_name, self.remote_password).encode()
-        basic_auth_string = b64encode(basic_auth_string).decode('utf-8')
-        return basic_auth_string
-
     def is_port_open(self):
         is_port_open = False
         with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
@@ -82,14 +75,8 @@ class TunnelServer:
 
     def is_webapp_up(self):
         import urllib3
-
-        try:
-            import urllib3.contrib.pyopenssl
-            urllib3.contrib.pyopenssl.inject_into_urllib3()
-        except ImportError:
-            pass
-
-        headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(self.remote_user_name, self.remote_password))
+        headers = urllib3.util.make_headers()
+        headers["authorization"] = self.auth_string
         url = 'https://{}{}'.format(self.remote_addr, '/AppServiceTunnel/Tunnel.ashx?GetStatus&GetStatusAPIVer=2')
         http = get_pool_manager(url)
         if self.instance is not None:
@@ -133,12 +120,11 @@ class TunnelServer:
     def _listen(self):
         self.sock.listen(100)
         index = 0
-        basic_auth_string = self.create_basic_auth()
         while True:
             self.client, _address = self.sock.accept()
             self.client.settimeout(60 * 60)
             host = 'wss://{}{}'.format(self.remote_addr, '/AppServiceTunnel/Tunnel.ashx')
-            basic_auth_header = ['Authorization: Basic {}'.format(basic_auth_string)]
+            basic_auth_header = [f"Authorization: {self.auth_string}"]
             if self.instance is not None:
                 basic_auth_header.append('Cookie: ARRAffinity=' + self.instance)
             cli_logger = get_logger()  # get CLI logger which has the level set through command lines

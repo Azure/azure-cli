@@ -927,6 +927,11 @@ backup restore restore-disks:
     storage_account_resource_group:
       rule_exclusions:
       - option_length_too_long
+backup vault create:
+  parameters:
+    cross_subscription_restore_state:
+      rule_exclusions:
+      - option_length_too_long
 backup vault backup-properties set:
   parameters:
     backup_storage_redundancy:
@@ -3444,6 +3449,9 @@ sql vm update:
     prompt:
       rule_exclusions:
       - no_parameter_defaults_for_update_commands
+    workspace_sub:
+      rule_exclusions:
+      - missing_parameter_test_coverage
 staticwebapp create:
   parameters:
     app_artifact_location:

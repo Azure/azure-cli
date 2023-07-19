@@ -21,7 +21,7 @@ from azure.cli.command_modules.acs._graph import resolve_object_id
 from azure.cli.command_modules.acs._helpers import get_property_from_dict_or_object
 from azure.cli.core.azclierror import AzCLIError, UnauthorizedError
 from azure.cli.core.profiles import ResourceType, get_sdk
-from azure.core.exceptions import HttpResponseError
+from azure.core.exceptions import HttpResponseError, ResourceExistsError
 from knack.log import get_logger
 from knack.prompting import prompt_y_n
 from msrestazure.azure_exceptions import CloudError
@@ -128,7 +128,7 @@ def add_role_assignment(cmd, role, service_principal_msi_id, is_service_principa
             )
             break
         except (CloudError, HttpResponseError) as ex:
-            if ex.message == "The role assignment already exists.":
+            if isinstance(ex, ResourceExistsError) or "The role assignment already exists." in ex.message:
                 break
             logger.info(ex.message)
         except Exception as ex:  # pylint: disable=broad-except
@@ -309,11 +309,11 @@ def ensure_aks_acr_role_assignment(cmd, assignee, registry_id, detach=False, is_
         if not delete_role_assignments(
             cmd.cli_ctx, "acrpull", assignee, scope=registry_id, is_service_principal=is_service_principal
         ):
-            raise AzCLIError("Could not delete role assignments for ACR. " "Are you an Owner on this subscription?")
+            raise AzCLIError("Could not delete role assignments for ACR. Are you an Owner on this subscription?")
         return
 
     if not add_role_assignment(cmd, "acrpull", assignee, scope=registry_id, is_service_principal=is_service_principal):
-        raise AzCLIError("Could not create a role assignment for ACR. " "Are you an Owner on this subscription?")
+        raise AzCLIError("Could not create a role assignment for ACR. Are you an Owner on this subscription?")
     return
 
 

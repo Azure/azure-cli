@@ -845,7 +845,7 @@ class VMCreateExistingOptions(ScenarioTest):
         self.cmd('network nsg show -n {nsg} -g {rg}',
                  checks=self.check('networkInterfaces[0].id.ends_with(@, \'{vm}VMNic\')', True))
         self.cmd('network nic show -n {vm}VMNic -g {rg}',
-                 checks=self.check('ipConfigurations[0].publicIpAddress.id.ends_with(@, \'{pubip}\')', True))
+                 checks=self.check('ipConfigurations[0].publicIPAddress.id.ends_with(@, \'{pubip}\')', True))
         self.cmd('vm show -n {vm} -g {rg}',
                  checks=self.check('storageProfile.osDisk.vhd.uri', 'https://{sa}.blob.core.windows.net/{container}/{disk}.vhd'))
 
@@ -898,7 +898,7 @@ class VMCreateExistingIdsOptions(ScenarioTest):
         self.cmd('network nsg show -n {nsg} -g {rg}',
                  checks=self.check('networkInterfaces[0].id.ends_with(@, \'{vm}VMNic\')', True))
         self.cmd('network nic show -n {vm}VMNic -g {rg}',
-                 checks=self.check('ipConfigurations[0].publicIpAddress.id.ends_with(@, \'{pubip}\')', True))
+                 checks=self.check('ipConfigurations[0].publicIPAddress.id.ends_with(@, \'{pubip}\')', True))
         self.cmd('vm show -n {vm} -g {rg}',
                  checks=self.check('storageProfile.osDisk.vhd.uri', 'https://{sa}.blob.core.windows.net/{container}/{disk}.vhd'))
 
@@ -1489,7 +1489,7 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
         self.cmd('network lb list -g {rg}', checks=self.check('[0].sku.name', 'Basic'))
         self.cmd('network public-ip list -g {rg}', checks=[
             self.check('[0].sku.name', 'Basic'),
-            self.check('[0].publicIpAllocationMethod', 'Dynamic')
+            self.check('[0].publicIPAllocationMethod', 'Dynamic')
         ])
 
         # but you can overrides the defaults
@@ -1498,7 +1498,7 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
                  checks=self.check('sku.name', 'Standard'))
         self.cmd('network public-ip show -g {rg} -n {ip}', checks=[
             self.check('sku.name', 'Standard'),
-            self.check('publicIpAllocationMethod', 'Static')
+            self.check('publicIPAllocationMethod', 'Static')
         ])
 
 
@@ -2183,6 +2183,77 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
                 self.assertTrue(parsed_2[k2].startswith(rg_prefix))
             else:
                 self.assertEqual(parsed_1[k1], parsed_2[k2])
+# endregion
+
+
+class VMGalleryImage(ScenarioTest):
+
+    @ResourceGroupPreparer(location='westus')
+    def test_gallery_image(self, resource_group):
+        self.kwargs.update({
+            'gallery': self.create_random_name('sig_', 10),
+            'image': 'image1',
+        })
+
+        self.cmd('sig create -g {rg} -r {gallery}', checks=[
+            self.check('location', 'westus'),
+            self.check('name', '{gallery}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+        self.cmd('sig list -g {rg}', checks=self.check('length(@)', 1))
+
+        self.cmd(
+            'sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1',
+            checks=self.check('name', self.kwargs['image']))
+        self.cmd('sig image-definition list -g {rg} --gallery-name {gallery}', checks=self.check('length(@)', 1))
+        res = self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image}',
+                       checks=self.check('name', self.kwargs['image'])).get_output_in_json()
+
+        self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
+        time.sleep(60)  # service end latency
+        self.cmd('sig delete -g {rg} --gallery-name {gallery}')
+# endregion
+
+
+class DiskAccessTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_access_', location='centraluseuap')
+    def test_disk_access(self, resource_group):
+        self.kwargs.update({
+            'loc': 'centraluseuap',
+            'diskaccess': 'mydiskaccess',
+            'disk': 'mydisk',
+            'snapshot': 'mysnapshot'
+        })
+
+        self.cmd('disk-access create -g {rg} -l {loc} -n {diskaccess} --no-wait')
+        self.cmd('disk-access wait --created -g {rg} -n {diskaccess}')
+        self.cmd('disk-access list -g {rg}', checks=[
+            self.check('length(@)', 1),
+            self.check('[0].name', '{diskaccess}'),
+            self.check('[0].location', '{loc}')
+        ])
+
+        self.cmd('disk-access update -g {rg} -n {diskaccess} --tags tag1=val1')
+        self.kwargs['disk_access_id'] = self.cmd('disk-access show -g {rg} -n {diskaccess}', checks=[
+            self.check('name', '{diskaccess}'),
+            self.check('location', '{loc}'),
+            self.check('tags.tag1', 'val1')
+        ]).get_output_in_json()['id']
+
+        self.cmd('disk create -g {rg} -n {disk} --size-gb 10 --network-access-policy AllowPrivate --disk-access {diskaccess}')
+
+        self.cmd('disk update -g {rg} -n {disk} --network-access-policy AllowPrivate --disk-access {disk_access_id}')
+
+        self.cmd('disk show -g {rg} -n {disk}', checks=[
+            self.check('name', '{disk}')
+        ])
+
+        self.cmd('disk delete -g {rg} -n {disk} --yes')
+        self.cmd('disk-access delete -g {rg} -n {diskaccess}')
+        self.cmd('disk-access list -g {rg}', checks=[
+            self.check('length(@)', 0)
+        ])
 # endregion
 
 # endregion

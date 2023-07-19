@@ -9,8 +9,7 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set,
                                                           cf_vmss, cf_vmss_vm,
                                                           cf_vm_sizes, cf_disks, cf_snapshots,
                                                           cf_disk_accesses, cf_images, cf_run_commands,
-                                                          cf_rolling_upgrade_commands, cf_galleries,
-                                                          cf_gallery_images, cf_gallery_image_versions,
+                                                          cf_galleries, cf_gallery_images, cf_gallery_image_versions,
                                                           cf_proximity_placement_groups,
                                                           cf_dedicated_hosts, cf_dedicated_host_groups,
                                                           cf_log_analytics_data_plane,
@@ -140,12 +139,6 @@ def load_command_table(self, _):
     compute_vmss_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#VirtualMachineScaleSetsOperations.{}',
         client_factory=cf_vmss,
-        operation_group='virtual_machine_scale_sets'
-    )
-
-    compute_vmss_rolling_upgrade_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineScaleSetRollingUpgradesOperations.{}',
-        client_factory=cf_rolling_upgrade_commands,
         operation_group='virtual_machine_scale_sets'
     )
 
@@ -279,10 +272,6 @@ def load_command_table(self, _):
     with self.command_group('disk-access', compute_disk_access_sdk, operation_group='disk_accesses', client_factory=cf_disk_accesses, min_api='2020-05-01') as g:
         g.custom_command('create', 'create_disk_access', supports_no_wait=True)
         g.generic_update_command('update', setter_name='set_disk_access', setter_type=compute_custom, supports_no_wait=True)
-        g.show_command('show', 'get')
-        g.custom_command('list', 'list_disk_accesses')
-        g.wait_command('wait')
-        g.command('delete', 'begin_delete')
 
     with self.command_group('image', compute_image_sdk, min_api='2016-04-30-preview') as g:
         g.custom_command('create', 'create_image', validator=process_image_create_namespace)
@@ -317,10 +306,21 @@ def load_command_table(self, _):
         g.custom_command('remove', 'remove_template_output', supports_local_cache=True)
         g.custom_command('clear', 'clear_template_output', supports_local_cache=True)
 
+    with self.command_group('image builder output versioning', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
+        g.custom_command('set', 'set_template_output_versioning', supports_local_cache=True)
+        g.custom_command('remove', 'remove_template_output_versioning', supports_local_cache=True)
+        g.custom_show_command('show', 'show_template_output_versioning', supports_local_cache=True)
+
     with self.command_group('image builder validator', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
         g.custom_command('add', 'add_template_validator', supports_local_cache=True)
         g.custom_command('remove', 'remove_template_validator', supports_local_cache=True)
         g.custom_show_command('show', 'show_template_validator', supports_local_cache=True)
+
+    with self.command_group('image builder optimizer', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
+        g.custom_command('add', 'add_or_update_template_optimizer', supports_local_cache=True)
+        g.custom_command('update', 'add_or_update_template_optimizer', supports_local_cache=True)
+        g.custom_command('remove', 'remove_template_optimizer', supports_local_cache=True)
+        g.custom_show_command('show', 'show_template_optimizer', supports_local_cache=True)
 
     with self.command_group('snapshot', compute_snapshot_sdk, operation_group='snapshots', min_api='2016-04-30-preview') as g:
         g.custom_command('create', 'create_snapshot', validator=process_snapshot_create_namespace, supports_no_wait=True)
@@ -400,16 +400,12 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_vm_encryption_status', table_transformer=transform_vm_encryption_show_table_output)
 
     with self.command_group('vm extension', compute_vm_extension_sdk) as g:
-        g.command('delete', 'begin_delete', supports_no_wait=True)
         g.custom_show_command('show', 'show_extensions', table_transformer=transform_extension_show_table_output)
         g.custom_command('set', 'set_extension', supports_no_wait=True)
         g.custom_command('list', 'list_extensions', table_transformer='[].' + transform_extension_show_table_output)
         g.wait_command('wait')
 
     with self.command_group('vm extension image', compute_vm_extension_image_sdk) as g:
-        g.show_command('show', 'get')
-        g.command('list-names', 'list_types')
-        g.command('list-versions', 'list_versions')
         g.custom_command('list', 'list_vm_extension_images')
 
     with self.command_group('vm image', compute_vm_image_sdk) as g:
@@ -460,13 +456,9 @@ def load_command_table(self, _):
 
     with self.command_group('vm host', compute_dedicated_host_sdk, client_factory=cf_dedicated_hosts,
                             min_api='2019-03-01') as g:
-        g.show_command('show', 'get')
         g.custom_command('get-instance-view', 'get_dedicated_host_instance_view')
         g.custom_command('create', 'create_dedicated_host')
-        g.command('list', 'list_by_host_group')
         g.generic_update_command('update', setter_name='begin_create_or_update')
-        g.command('restart', 'begin_restart', min_api='2021-07-01')
-        g.command('delete', 'begin_delete', confirmation=True)
 
     with self.command_group('vm host group', compute_dedicated_host_groups_sdk, client_factory=cf_dedicated_host_groups,
                             min_api='2019-03-01') as g:
@@ -535,20 +527,12 @@ def load_command_table(self, _):
         g.custom_command('update', 'vmss_run_command_update', supports_no_wait=True)
         g.custom_command('delete', 'vmss_run_command_delete', supports_no_wait=True, confirmation=True)
 
-    with self.command_group('vmss rolling-upgrade', compute_vmss_rolling_upgrade_sdk, min_api='2017-03-30') as g:
-        g.command('cancel', 'begin_cancel')
-        g.command('get-latest', 'get_latest')
-        g.command('start', 'begin_start_os_upgrade')
-
     with self.command_group('sig', compute_galleries_sdk, operation_group='galleries', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_image_gallery')
         g.custom_show_command('show', 'show_image_gallery')
-        g.custom_command('list', 'list_image_galleries')
-        g.command('delete', 'begin_delete')
         g.generic_update_command('update', setter_type=compute_custom, setter_name='update_image_galleries', setter_arg_name='gallery')
 
     with self.command_group('sig', community_gallery_sdk, client_factory=cf_community_gallery, operation_group='shared_galleries', min_api='2022-01-03') as g:
-        g.command('show-community', 'get')
         g.custom_command('list-community', 'sig_community_gallery_list')
 
     with self.command_group('sig image-definition', community_gallery_image_sdk, client_factory=cf_community_gallery_image, operation_group='shared_galleries', min_api='2022-01-03') as g:
@@ -561,9 +545,6 @@ def load_command_table(self, _):
 
     with self.command_group('sig image-definition', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_gallery_image')
-        g.command('list', 'list_by_gallery')
-        g.show_command('show', 'get')
-        g.command('delete', 'begin_delete')
         g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='gallery_image')
 
     with self.command_group('sig image-version', compute_gallery_image_versions_sdk, operation_group='gallery_image_versions', min_api='2018-06-01') as g:
@@ -582,7 +563,6 @@ def load_command_table(self, _):
     with self.command_group('sig', vm_shared_gallery) as g:
         g.custom_command('list-shared', 'sig_shared_gallery_list', client_factory=cf_shared_galleries,
                          operation_group='shared_galleries', min_api='2020-09-30')
-        g.command('show-shared', 'get', operation_group='shared_galleries', min_api='2020-09-30')
 
     vm_gallery_sharing_profile = CliCommandType(
         operations_tmpl=(
@@ -609,7 +589,6 @@ def load_command_table(self, _):
     with self.command_group('sig image-definition', vm_shared_gallery_image, min_api='2020-09-30', operation_group='shared_galleries',
                             client_factory=cf_shared_gallery_image) as g:
         g.custom_command('list-shared', 'sig_shared_image_definition_list')
-        g.command('show-shared', 'get')
 
     vm_shared_gallery_image_version = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations._shared_gallery_image_versions_operations#SharedGalleryImageVers'

@@ -15,7 +15,8 @@ from ._format import (configstore_credential_format,
                       featureflag_entry_format,
                       featurefilter_entry_format,
                       deleted_configstore_output_format,
-                      configstore_replica_output_format)
+                      configstore_replica_output_format,
+                      configstore_snapshot_output_format)
 
 
 def load_command_table(self, _):
@@ -50,6 +51,11 @@ def load_command_table(self, _):
         client_factory=cf_replicas
     )
 
+    configstore_snapshot_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.appconfig.snapshot#{}',
+        table_transformer=configstore_snapshot_output_format
+    )
+
     def get_custom_sdk(custom_module, client_factory, table_transformer):
         """Returns a CliCommandType instance with specified operation template based on the given custom module name.
         This is useful when the command is not defined in the default 'custom' module but instead in a module under
@@ -72,7 +78,7 @@ def load_command_table(self, _):
         g.show_command('show', 'show_configstore')
         g.show_command('show-deleted', 'show_deleted_configstore', table_transformer=deleted_configstore_output_format)
 
-    with self.command_group('appconfig replica', configstore_replica_util, is_preview=True) as g:
+    with self.command_group('appconfig replica', configstore_replica_util) as g:
         g.command('list', 'list_replica')
         g.command('create', 'create_replica')
         g.command('delete', 'delete_replica', confirmation=True)
@@ -126,3 +132,11 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_filter')
         g.custom_show_command('show', 'show_filter')
         g.custom_command('list', 'list_filter')
+
+    # Snapshot Commands
+    with self.command_group('appconfig snapshot', configstore_snapshot_util, is_preview=True) as g:
+        g.command('create', 'create_snapshot')
+        g.show_command('show', 'show_snapshot')
+        g.command('list', 'list_snapshots')
+        g.command('archive', 'archive_snapshot')
+        g.command('recover', 'recover_snapshot')

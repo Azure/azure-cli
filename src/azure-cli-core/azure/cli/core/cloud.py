@@ -425,6 +425,8 @@ HARD_CODED_CLOUD_LIST = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLO
 def get_known_clouds(refresh=False):
     if 'ARM_CLOUD_METADATA_URL' in os.environ:
         from azure.cli.core._session import CLOUD_ENDPOINTS
+        if not os.path.isdir(GLOBAL_CONFIG_DIR):
+            os.makedirs(GLOBAL_CONFIG_DIR)
         endpoints_file = os.path.join(GLOBAL_CONFIG_DIR, 'cloudEndpoints.json')
         CLOUD_ENDPOINTS.load(endpoints_file)
         if refresh:

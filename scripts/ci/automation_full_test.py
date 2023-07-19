@@ -31,10 +31,11 @@ fix_failure_tests = sys.argv[5].lower() == 'true' if len(sys.argv) >= 6 else Fal
 target = sys.argv[6].lower() if len(sys.argv) >= 7 else 'cli'
 working_directory = os.getenv('BUILD_SOURCESDIRECTORY') if target == 'cli' else f"{os.getenv('BUILD_SOURCESDIRECTORY')}/azure-cli-extensions"
 azdev_test_result_dir = os.path.expanduser("~/.azdev/env_config/mnt/vss/_work/1/s/env")
-python_version = os.environ.get('PYTHON_VERSION')
-job_name = os.environ.get('JOB_NAME')
-unique_job_name = ' '.join([job_name, python_version, profile, str(instance_idx)])
-pull_request_number = os.environ.get('PULL_REQUEST_NUMBER')
+python_version = os.environ.get('PYTHON_VERSION', None)
+job_name = os.environ.get('JOB_NAME', None)
+pull_request_number = os.environ.get('PULL_REQUEST_NUMBER', None)
+enable_pipeline_result = bool(job_name and python_version)
+unique_job_name = ' '.join([job_name, python_version, profile, str(instance_idx)]) if enable_pipeline_result else None
 cli_jobs = {
             'acr': 45,
             'acs': 62,
@@ -380,11 +381,16 @@ def build_pipeline_result():
             "Name": job_name,
             "Details": [
                 {
-                    "Profile": profile,
+                    "TestName": "AzureCLI-FullTest",
                     "Details": [
                         {
-                            "PythonVersion": python_version,
-                            "Details": []
+                            "Profile": profile,
+                            "Details": [
+                                {
+                                    "PythonVersion": python_version,
+                                    "Details": []
+                                }
+                            ]
                         }
                     ]
                 }
@@ -395,7 +401,7 @@ def build_pipeline_result():
         pipeline_result['pull_request_number'] = pull_request_number
 
     for k in selected_modules:
-        pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details'].append({
+        pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details'][0]['Details'].append({
             "Module": k,
             "Status": "Running",
             "Content": ""
@@ -440,13 +446,13 @@ def get_pipeline_result(test_result_fp, pipeline_result):
                 for failure in failures:
                     message = failure.attrib['message'].replace('\n', '<br>')
                     break
-                for i in pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details']:
+                for i in pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details'][0]['Details']:
                     if i['Module'] == module:
                         i['Status'] = 'Failed'
                         i['Content'] = build_markdown_content(state, test_case, message, line, i['Content'])
                         break
             else:
-                for i in pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details']:
+                for i in pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details'][0]['Details']:
                     if i['Module'] == module:
                         i['Status'] = 'Succeeded' if i['Status'] != 'Failed' else 'Failed'
                         break
@@ -562,20 +568,26 @@ class AutomaticScheduling(object):
                 serial_tests.append(k)
             else:
                 parallel_tests.append(k)
-        pipeline_result = build_pipeline_result()
-        if serial_tests:
-            azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{python_version}_{profile}_{instance_idx}.serial.xml")
-            cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', '--series'] + serial_tests + \
-                  ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '-o junit_family=xunit1 --durations=10 --tb=no']
-            serial_error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
-            pipeline_result = get_pipeline_result(azdev_test_result_fp, pipeline_result)
+        # Put the cloud module at the end of the serial execution
+        # Since it will cause the test_get_docker_credentials test to fail
+        # TODO: Find the root cause of the failure and modify the test code.
+        if 'cloud' in serial_tests:
+            serial_tests.remove('cloud')
+            serial_tests.append('cloud')
+        pipeline_result = build_pipeline_result() if enable_pipeline_result else None
         if parallel_tests:
             azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{python_version}_{profile}_{instance_idx}.parallel.xml")
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose'] + parallel_tests + \
                   ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '-o junit_family=xunit1 --durations=10 --tb=no']
             parallel_error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
-            pipeline_result = get_pipeline_result(azdev_test_result_fp, pipeline_result)
-        save_pipeline_result(pipeline_result)
+            pipeline_result = get_pipeline_result(azdev_test_result_fp, pipeline_result) if enable_pipeline_result else None
+        if serial_tests:
+            azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{python_version}_{profile}_{instance_idx}.serial.xml")
+            cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', '--series'] + serial_tests + \
+                  ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '-o junit_family=xunit1 --durations=10 --tb=no']
+            serial_error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
+            pipeline_result = get_pipeline_result(azdev_test_result_fp, pipeline_result) if enable_pipeline_result else None
+        save_pipeline_result(pipeline_result) if enable_pipeline_result else None
         return serial_error_flag or parallel_error_flag
 
     def run_extension_instance_modules(self, instance_modules):

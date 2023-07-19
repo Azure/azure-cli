@@ -12,7 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network local-gateway delete"
+    "network local-gateway delete",
 )
 class Delete(AAZCommand):
     """Delete a local VPN gateway.
@@ -65,7 +65,17 @@ class Delete(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         yield self.LocalNetworkGatewaysDelete(ctx=self.ctx)()
+        self.post_operations()
+
+    @register_callback
+    def pre_operations(self):
+        pass
+
+    @register_callback
+    def post_operations(self):
+        pass
 
     class LocalNetworkGatewaysDelete(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
@@ -151,6 +161,10 @@ class Delete(AAZCommand):
 
         def on_204(self, session):
             pass
+
+
+class _DeleteHelper:
+    """Helper class for Delete"""
 
 
 __all__ = ["Delete"]

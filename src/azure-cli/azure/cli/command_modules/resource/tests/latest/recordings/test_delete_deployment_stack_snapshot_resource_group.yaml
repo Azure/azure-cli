@@ -1,0 +1,1271 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --update-behavior --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.8.6 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002?api-version=2021-05-01-preview
+  response:
+    body:
+      string: "{\r\n  \"error\": {\r\n    \"code\": \"DeploymentStackResourceNotFound\",\r\n
+        \   \"message\": \"The deployment stack '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002'
+        could not be found.\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '342'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 Jan 2022 21:17:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {"foo": {"type": "string", "defaultValue":
+      "foo", "metadata": {"description": "description"}}, "bar": {"type": "string",
+      "defaultValue": "bar", "metadata": {"description": "description"}}}, "functions":
+      [], "variables": {}, "resources": [], "outputs": {"foo": {"type": "string",
+      "value": "[parameters(''foo'')]"}, "bar": {"type": "string", "value": "[parameters(''bar'')]"}}},
+      "parameters": {"foo": {"value": "abc"}, "bar": {"value": "xyz"}}, "updateBehavior":
+      "detachResources"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '642'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name --resource-group --update-behavior --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.8.6 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002?api-version=2021-05-01-preview
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"updateBehavior\": \"detachResources\",\r\n
+        \   \"parameters\": {\r\n      \"foo\": {\r\n        \"value\": \"abc\"\r\n
+        \     },\r\n      \"bar\": {\r\n        \"value\": \"xyz\"\r\n      }\r\n
+        \   },\r\n    \"template\": {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+        \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"foo\":
+        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"foo\",\r\n
+        \         \"metadata\": {\r\n            \"description\": \"description\"\r\n
+        \         }\r\n        },\r\n        \"bar\": {\r\n          \"type\": \"string\",\r\n
+        \         \"defaultValue\": \"bar\",\r\n          \"metadata\": {\r\n            \"description\":
+        \"description\"\r\n          }\r\n        }\r\n      },\r\n      \"functions\":
+        [],\r\n      \"variables\": {},\r\n      \"resources\": [],\r\n      \"outputs\":
+        {\r\n        \"foo\": {\r\n          \"type\": \"string\",\r\n          \"value\":
+        \"[parameters('foo')]\"\r\n        },\r\n        \"bar\": {\r\n          \"type\":
+        \"string\",\r\n          \"value\": \"[parameters('bar')]\"\r\n        }\r\n
+        \     }\r\n    },\r\n    \"managedResources\": [],\r\n    \"provisioningState\":
+        \"initializing\"\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2022-01-31T21:17:26.6973876Z\",\r\n
+        \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2022-01-31T21:17:26.6973876Z\"\r\n
+        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-delete-deployment-stack-snapshot-resource-group000002\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/5eecc412-95de-4960-9fc2-a8b8a99dc6ac?api-version=2021-05-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1753'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 Jan 2022 21:17:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --update-behavior --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.8.6 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/5eecc412-95de-4960-9fc2-a8b8a99dc6ac?api-version=2021-05-01-preview
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/5eecc412-95de-4960-9fc2-a8b8a99dc6ac\",\r\n
+        \ \"name\": \"5eecc412-95de-4960-9fc2-a8b8a99dc6ac\",\r\n  \"status\": \"succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '260'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 Jan 2022 21:17:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --update-behavior --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.8.6 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002?api-version=2021-05-01-preview
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"snapshotId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002/snapshots/2022-01-31-21-17-26-d6ad3\",\r\n
+        \   \"updateBehavior\": \"detachResources\",\r\n    \"deploymentId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-snaps-2022-01-31-21-17-26-d6ad3\",\r\n
+        \   \"parameters\": {\r\n      \"foo\": {\r\n        \"value\": \"abc\"\r\n
+        \     },\r\n      \"bar\": {\r\n        \"value\": \"xyz\"\r\n      }\r\n
+        \   },\r\n    \"template\": {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+        \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"foo\":
+        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"foo\",\r\n
+        \         \"metadata\": {\r\n            \"description\": \"description\"\r\n
+        \         }\r\n        },\r\n        \"bar\": {\r\n          \"type\": \"string\",\r\n
+        \         \"defaultValue\": \"bar\",\r\n          \"metadata\": {\r\n            \"description\":
+        \"description\"\r\n          }\r\n        }\r\n      },\r\n      \"functions\":
+        [],\r\n      \"variables\": {},\r\n      \"resources\": [],\r\n      \"outputs\":
+        {\r\n        \"foo\": {\r\n          \"type\": \"string\",\r\n          \"value\":
+        \"[parameters('foo')]\"\r\n        },\r\n        \"bar\": {\r\n          \"type\":
+        \"string\",\r\n          \"value\": \"[parameters('bar')]\"\r\n        }\r\n
+        \     }\r\n    },\r\n    \"managedResources\": [],\r\n    \"provisioningState\":
+        \"succeeded\"\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2022-01-31T21:17:26.6973876Z\",\r\n
+        \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2022-01-31T21:17:26.6973876Z\"\r\n
+        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-delete-deployment-stack-snapshot-resource-group000002\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2249'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 Jan 2022 21:17:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --update-behavior --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.8.6 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002?api-version=2021-05-01-preview
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"snapshotId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002/snapshots/2022-01-31-21-17-26-d6ad3\",\r\n
+        \   \"updateBehavior\": \"detachResources\",\r\n    \"deploymentId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-snaps-2022-01-31-21-17-26-d6ad3\",\r\n
+        \   \"parameters\": {\r\n      \"foo\": {\r\n        \"value\": \"abc\"\r\n
+        \     },\r\n      \"bar\": {\r\n        \"value\": \"xyz\"\r\n      }\r\n
+        \   },\r\n    \"template\": {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+        \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"foo\":
+        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"foo\",\r\n
+        \         \"metadata\": {\r\n            \"description\": \"description\"\r\n
+        \         }\r\n        },\r\n        \"bar\": {\r\n          \"type\": \"string\",\r\n
+        \         \"defaultValue\": \"bar\",\r\n          \"metadata\": {\r\n            \"description\":
+        \"description\"\r\n          }\r\n        }\r\n      },\r\n      \"functions\":
+        [],\r\n      \"variables\": {},\r\n      \"resources\": [],\r\n      \"outputs\":
+        {\r\n        \"foo\": {\r\n          \"type\": \"string\",\r\n          \"value\":
+        \"[parameters('foo')]\"\r\n        },\r\n        \"bar\": {\r\n          \"type\":
+        \"string\",\r\n          \"value\": \"[parameters('bar')]\"\r\n        }\r\n
+        \     }\r\n    },\r\n    \"managedResources\": [],\r\n    \"provisioningState\":
+        \"succeeded\"\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2022-01-31T21:17:26.6973876Z\",\r\n
+        \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2022-01-31T21:17:26.6973876Z\"\r\n
+        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-delete-deployment-stack-snapshot-resource-group000002\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2249'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 Jan 2022 21:17:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {"foo": {"type": "string", "defaultValue":
+      "foo", "metadata": {"description": "description"}}, "bar": {"type": "string",
+      "defaultValue": "bar", "metadata": {"description": "description"}}}, "functions":
+      [], "variables": {}, "resources": [], "outputs": {"foo": {"type": "string",
+      "value": "[parameters(''foo'')]"}, "bar": {"type": "string", "value": "[parameters(''bar'')]"}}},
+      "parameters": {"foo": {"value": "abc"}, "bar": {"value": "xyz"}}, "updateBehavior":
+      "detachResources"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '642'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name --resource-group --update-behavior --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.8.6 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002?api-version=2021-05-01-preview
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"updateBehavior\": \"detachResources\",\r\n
+        \   \"parameters\": {\r\n      \"foo\": {\r\n        \"value\": \"abc\"\r\n
+        \     },\r\n      \"bar\": {\r\n        \"value\": \"xyz\"\r\n      }\r\n
+        \   },\r\n    \"template\": {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+        \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"foo\":
+        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"foo\",\r\n
+        \         \"metadata\": {\r\n            \"description\": \"description\"\r\n
+        \         }\r\n        },\r\n        \"bar\": {\r\n          \"type\": \"string\",\r\n
+        \         \"defaultValue\": \"bar\",\r\n          \"metadata\": {\r\n            \"description\":
+        \"description\"\r\n          }\r\n        }\r\n      },\r\n      \"functions\":
+        [],\r\n      \"variables\": {},\r\n      \"resources\": [],\r\n      \"outputs\":
+        {\r\n        \"foo\": {\r\n          \"type\": \"string\",\r\n          \"value\":
+        \"[parameters('foo')]\"\r\n        },\r\n        \"bar\": {\r\n          \"type\":
+        \"string\",\r\n          \"value\": \"[parameters('bar')]\"\r\n        }\r\n
+        \     }\r\n    },\r\n    \"managedResources\": [],\r\n    \"provisioningState\":
+        \"initializing\"\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2022-01-31T21:17:26.6973876Z\",\r\n
+        \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2022-01-31T21:17:44.9152017Z\"\r\n
+        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-delete-deployment-stack-snapshot-resource-group000002\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/582bb07b-6033-4786-be9a-b3ed7bff8b67?api-version=2021-05-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1753'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 Jan 2022 21:17:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --update-behavior --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.8.6 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/582bb07b-6033-4786-be9a-b3ed7bff8b67?api-version=2021-05-01-preview
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/582bb07b-6033-4786-be9a-b3ed7bff8b67\",\r\n
+        \ \"name\": \"582bb07b-6033-4786-be9a-b3ed7bff8b67\",\r\n  \"status\": \"succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '260'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 Jan 2022 21:18:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --update-behavior --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.8.6 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002?api-version=2021-05-01-preview
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"snapshotId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002/snapshots/2022-01-31-21-17-44-8b7a4\",\r\n
+        \   \"updateBehavior\": \"detachResources\",\r\n    \"deploymentId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-snaps-2022-01-31-21-17-44-8b7a4\",\r\n
+        \   \"parameters\": {\r\n      \"foo\": {\r\n        \"value\": \"abc\"\r\n
+        \     },\r\n      \"bar\": {\r\n        \"value\": \"xyz\"\r\n      }\r\n
+        \   },\r\n    \"template\": {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+        \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"foo\":
+        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"foo\",\r\n
+        \         \"metadata\": {\r\n            \"description\": \"description\"\r\n
+        \         }\r\n        },\r\n        \"bar\": {\r\n          \"type\": \"string\",\r\n
+        \         \"defaultValue\": \"bar\",\r\n          \"metadata\": {\r\n            \"description\":
+        \"description\"\r\n          }\r\n        }\r\n      },\r\n      \"functions\":
+        [],\r\n      \"variables\": {},\r\n      \"resources\": [],\r\n      \"outputs\":
+        {\r\n        \"foo\": {\r\n          \"type\": \"string\",\r\n          \"value\":
+        \"[parameters('foo')]\"\r\n        },\r\n        \"bar\": {\r\n          \"type\":
+        \"string\",\r\n          \"value\": \"[parameters('bar')]\"\r\n        }\r\n
+        \     }\r\n    },\r\n    \"managedResources\": [],\r\n    \"provisioningState\":
+        \"succeeded\"\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2022-01-31T21:17:26.6973876Z\",\r\n
+        \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2022-01-31T21:17:44.9152017Z\"\r\n
+        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-delete-deployment-stack-snapshot-resource-group000002\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2249'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 Jan 2022 21:18:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack snapshot group show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --stack-name --resource-group
+      User-Agent:
+      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.8.6 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002/snapshots/2022-01-31-21-17-26-d6ad3?api-version=2021-05-01-preview
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"detachedResources\": [],\r\n    \"deletedResources\":
+        [],\r\n    \"failedResources\": [],\r\n    \"updateBehavior\": \"detachResources\",\r\n
+        \   \"deploymentId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-snaps-2022-01-31-21-17-26-d6ad3\",\r\n
+        \   \"parameters\": {\r\n      \"foo\": {\r\n        \"value\": \"abc\"\r\n
+        \     },\r\n      \"bar\": {\r\n        \"value\": \"xyz\"\r\n      }\r\n
+        \   },\r\n    \"template\": {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+        \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"foo\":
+        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"foo\",\r\n
+        \         \"metadata\": {\r\n            \"description\": \"description\"\r\n
+        \         }\r\n        },\r\n        \"bar\": {\r\n          \"type\": \"string\",\r\n
+        \         \"defaultValue\": \"bar\",\r\n          \"metadata\": {\r\n            \"description\":
+        \"description\"\r\n          }\r\n        }\r\n      },\r\n      \"functions\":
+        [],\r\n      \"variables\": {},\r\n      \"resources\": [],\r\n      \"outputs\":
+        {\r\n        \"foo\": {\r\n          \"type\": \"string\",\r\n          \"value\":
+        \"[parameters('foo')]\"\r\n        },\r\n        \"bar\": {\r\n          \"type\":
+        \"string\",\r\n          \"value\": \"[parameters('bar')]\"\r\n        }\r\n
+        \     }\r\n    },\r\n    \"managedResources\": [],\r\n    \"provisioningState\":
+        \"succeeded\"\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2022-01-31T21:17:26.6973876Z\",\r\n
+        \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2022-01-31T21:17:26.6973876Z\"\r\n
+        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002/snapshots/2022-01-31-21-17-26-d6ad3\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks/snapshots\",\r\n  \"name\":
+        \"2022-01-31-21-17-26-d6ad3\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2077'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 Jan 2022 21:18:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack snapshot group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --stack-name --resource-group --yes
+      User-Agent:
+      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.8.6 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002/snapshots/2022-01-31-21-17-26-d6ad3?api-version=2021-05-01-preview
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"detachedResources\": [],\r\n    \"deletedResources\":
+        [],\r\n    \"failedResources\": [],\r\n    \"updateBehavior\": \"detachResources\",\r\n
+        \   \"deploymentId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-snaps-2022-01-31-21-17-26-d6ad3\",\r\n
+        \   \"parameters\": {\r\n      \"foo\": {\r\n        \"value\": \"abc\"\r\n
+        \     },\r\n      \"bar\": {\r\n        \"value\": \"xyz\"\r\n      }\r\n
+        \   },\r\n    \"template\": {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+        \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"foo\":
+        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"foo\",\r\n
+        \         \"metadata\": {\r\n            \"description\": \"description\"\r\n
+        \         }\r\n        },\r\n        \"bar\": {\r\n          \"type\": \"string\",\r\n
+        \         \"defaultValue\": \"bar\",\r\n          \"metadata\": {\r\n            \"description\":
+        \"description\"\r\n          }\r\n        }\r\n      },\r\n      \"functions\":
+        [],\r\n      \"variables\": {},\r\n      \"resources\": [],\r\n      \"outputs\":
+        {\r\n        \"foo\": {\r\n          \"type\": \"string\",\r\n          \"value\":
+        \"[parameters('foo')]\"\r\n        },\r\n        \"bar\": {\r\n          \"type\":
+        \"string\",\r\n          \"value\": \"[parameters('bar')]\"\r\n        }\r\n
+        \     }\r\n    },\r\n    \"managedResources\": [],\r\n    \"provisioningState\":
+        \"succeeded\"\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2022-01-31T21:17:26.6973876Z\",\r\n
+        \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2022-01-31T21:17:26.6973876Z\"\r\n
+        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002/snapshots/2022-01-31-21-17-26-d6ad3\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks/snapshots\",\r\n  \"name\":
+        \"2022-01-31-21-17-26-d6ad3\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2077'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 Jan 2022 21:18:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack snapshot group delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name --stack-name --resource-group --yes
+      User-Agent:
+      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.8.6 (Windows-10-10.0.22000-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002/snapshots/2022-01-31-21-17-26-d6ad3?api-version=2021-05-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 31 Jan 2022 21:18:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack snapshot group list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --stack-name --resource-group
+      User-Agent:
+      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.8.6 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002/snapshots?api-version=2021-05-01-preview
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"properties\": {\r\n        \"detachedResources\":
+        [],\r\n        \"deletedResources\": [],\r\n        \"failedResources\": [],\r\n
+        \       \"updateBehavior\": \"detachResources\",\r\n        \"deploymentId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-snaps-2022-01-31-21-17-44-8b7a4\",\r\n
+        \       \"parameters\": {\r\n          \"foo\": {\r\n            \"value\":
+        \"abc\"\r\n          },\r\n          \"bar\": {\r\n            \"value\":
+        \"xyz\"\r\n          }\r\n        },\r\n        \"template\": {\r\n          \"$schema\":
+        \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+        \         \"contentVersion\": \"1.0.0.0\",\r\n          \"parameters\": {\r\n
+        \           \"foo\": {\r\n              \"type\": \"string\",\r\n              \"defaultValue\":
+        \"foo\",\r\n              \"metadata\": {\r\n                \"description\":
+        \"description\"\r\n              }\r\n            },\r\n            \"bar\":
+        {\r\n              \"type\": \"string\",\r\n              \"defaultValue\":
+        \"bar\",\r\n              \"metadata\": {\r\n                \"description\":
+        \"description\"\r\n              }\r\n            }\r\n          },\r\n          \"functions\":
+        [],\r\n          \"variables\": {},\r\n          \"resources\": [],\r\n          \"outputs\":
+        {\r\n            \"foo\": {\r\n              \"type\": \"string\",\r\n              \"value\":
+        \"[parameters('foo')]\"\r\n            },\r\n            \"bar\": {\r\n              \"type\":
+        \"string\",\r\n              \"value\": \"[parameters('bar')]\"\r\n            }\r\n
+        \         }\r\n        },\r\n        \"managedResources\": [],\r\n        \"provisioningState\":
+        \"succeeded\"\r\n      },\r\n      \"systemData\": {\r\n        \"createdBy\":
+        \"harshpatel@microsoft.com\",\r\n        \"createdByType\": \"User\",\r\n
+        \       \"createdAt\": \"2022-01-31T21:17:44.9152017Z\",\r\n        \"lastModifiedBy\":
+        \"harshpatel@microsoft.com\",\r\n        \"lastModifiedByType\": \"User\",\r\n
+        \       \"lastModifiedAt\": \"2022-01-31T21:17:44.9152017Z\"\r\n      },\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002/snapshots/2022-01-31-21-17-44-8b7a4\",\r\n
+        \     \"type\": \"Microsoft.Resources/deploymentStacks/snapshots\",\r\n      \"name\":
+        \"2022-01-31-21-17-44-8b7a4\"\r\n    }\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2354'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 Jan 2022 21:18:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --update-behavior --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.8.6 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002?api-version=2021-05-01-preview
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"snapshotId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002/snapshots/2022-01-31-21-17-44-8b7a4\",\r\n
+        \   \"updateBehavior\": \"detachResources\",\r\n    \"deploymentId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-snaps-2022-01-31-21-17-44-8b7a4\",\r\n
+        \   \"parameters\": {\r\n      \"foo\": {\r\n        \"value\": \"abc\"\r\n
+        \     },\r\n      \"bar\": {\r\n        \"value\": \"xyz\"\r\n      }\r\n
+        \   },\r\n    \"template\": {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+        \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"foo\":
+        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"foo\",\r\n
+        \         \"metadata\": {\r\n            \"description\": \"description\"\r\n
+        \         }\r\n        },\r\n        \"bar\": {\r\n          \"type\": \"string\",\r\n
+        \         \"defaultValue\": \"bar\",\r\n          \"metadata\": {\r\n            \"description\":
+        \"description\"\r\n          }\r\n        }\r\n      },\r\n      \"functions\":
+        [],\r\n      \"variables\": {},\r\n      \"resources\": [],\r\n      \"outputs\":
+        {\r\n        \"foo\": {\r\n          \"type\": \"string\",\r\n          \"value\":
+        \"[parameters('foo')]\"\r\n        },\r\n        \"bar\": {\r\n          \"type\":
+        \"string\",\r\n          \"value\": \"[parameters('bar')]\"\r\n        }\r\n
+        \     }\r\n    },\r\n    \"managedResources\": [],\r\n    \"provisioningState\":
+        \"succeeded\"\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2022-01-31T21:17:26.6973876Z\",\r\n
+        \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2022-01-31T21:17:44.9152017Z\"\r\n
+        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-delete-deployment-stack-snapshot-resource-group000002\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2249'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 Jan 2022 21:18:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {"foo": {"type": "string", "defaultValue":
+      "foo", "metadata": {"description": "description"}}, "bar": {"type": "string",
+      "defaultValue": "bar", "metadata": {"description": "description"}}}, "functions":
+      [], "variables": {}, "resources": [], "outputs": {"foo": {"type": "string",
+      "value": "[parameters(''foo'')]"}, "bar": {"type": "string", "value": "[parameters(''bar'')]"}}},
+      "parameters": {"foo": {"value": "abc"}, "bar": {"value": "xyz"}}, "updateBehavior":
+      "detachResources"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '642'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name --resource-group --update-behavior --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.8.6 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002?api-version=2021-05-01-preview
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"updateBehavior\": \"detachResources\",\r\n
+        \   \"parameters\": {\r\n      \"foo\": {\r\n        \"value\": \"abc\"\r\n
+        \     },\r\n      \"bar\": {\r\n        \"value\": \"xyz\"\r\n      }\r\n
+        \   },\r\n    \"template\": {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+        \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"foo\":
+        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"foo\",\r\n
+        \         \"metadata\": {\r\n            \"description\": \"description\"\r\n
+        \         }\r\n        },\r\n        \"bar\": {\r\n          \"type\": \"string\",\r\n
+        \         \"defaultValue\": \"bar\",\r\n          \"metadata\": {\r\n            \"description\":
+        \"description\"\r\n          }\r\n        }\r\n      },\r\n      \"functions\":
+        [],\r\n      \"variables\": {},\r\n      \"resources\": [],\r\n      \"outputs\":
+        {\r\n        \"foo\": {\r\n          \"type\": \"string\",\r\n          \"value\":
+        \"[parameters('foo')]\"\r\n        },\r\n        \"bar\": {\r\n          \"type\":
+        \"string\",\r\n          \"value\": \"[parameters('bar')]\"\r\n        }\r\n
+        \     }\r\n    },\r\n    \"managedResources\": [],\r\n    \"provisioningState\":
+        \"initializing\"\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2022-01-31T21:17:26.6973876Z\",\r\n
+        \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2022-01-31T21:18:05.3383171Z\"\r\n
+        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-delete-deployment-stack-snapshot-resource-group000002\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/b0e16ca5-4185-4d90-b014-3594da448302?api-version=2021-05-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1753'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 Jan 2022 21:18:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --update-behavior --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.8.6 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/b0e16ca5-4185-4d90-b014-3594da448302?api-version=2021-05-01-preview
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/b0e16ca5-4185-4d90-b014-3594da448302\",\r\n
+        \ \"name\": \"b0e16ca5-4185-4d90-b014-3594da448302\",\r\n  \"status\": \"succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '260'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 Jan 2022 21:18:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --update-behavior --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.8.6 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002?api-version=2021-05-01-preview
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"snapshotId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002/snapshots/2022-01-31-21-18-05-ce1ac\",\r\n
+        \   \"updateBehavior\": \"detachResources\",\r\n    \"deploymentId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-snaps-2022-01-31-21-18-05-ce1ac\",\r\n
+        \   \"parameters\": {\r\n      \"foo\": {\r\n        \"value\": \"abc\"\r\n
+        \     },\r\n      \"bar\": {\r\n        \"value\": \"xyz\"\r\n      }\r\n
+        \   },\r\n    \"template\": {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+        \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"foo\":
+        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"foo\",\r\n
+        \         \"metadata\": {\r\n            \"description\": \"description\"\r\n
+        \         }\r\n        },\r\n        \"bar\": {\r\n          \"type\": \"string\",\r\n
+        \         \"defaultValue\": \"bar\",\r\n          \"metadata\": {\r\n            \"description\":
+        \"description\"\r\n          }\r\n        }\r\n      },\r\n      \"functions\":
+        [],\r\n      \"variables\": {},\r\n      \"resources\": [],\r\n      \"outputs\":
+        {\r\n        \"foo\": {\r\n          \"type\": \"string\",\r\n          \"value\":
+        \"[parameters('foo')]\"\r\n        },\r\n        \"bar\": {\r\n          \"type\":
+        \"string\",\r\n          \"value\": \"[parameters('bar')]\"\r\n        }\r\n
+        \     }\r\n    },\r\n    \"managedResources\": [],\r\n    \"provisioningState\":
+        \"succeeded\"\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2022-01-31T21:17:26.6973876Z\",\r\n
+        \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2022-01-31T21:18:05.3383171Z\"\r\n
+        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-delete-deployment-stack-snapshot-resource-group000002\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2249'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 Jan 2022 21:18:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack snapshot group show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.8.6 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002/snapshots/2022-01-31-21-17-44-8b7a4?api-version=2021-05-01-preview
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"detachedResources\": [],\r\n    \"deletedResources\":
+        [],\r\n    \"failedResources\": [],\r\n    \"updateBehavior\": \"detachResources\",\r\n
+        \   \"deploymentId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-snaps-2022-01-31-21-17-44-8b7a4\",\r\n
+        \   \"parameters\": {\r\n      \"foo\": {\r\n        \"value\": \"abc\"\r\n
+        \     },\r\n      \"bar\": {\r\n        \"value\": \"xyz\"\r\n      }\r\n
+        \   },\r\n    \"template\": {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+        \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"foo\":
+        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"foo\",\r\n
+        \         \"metadata\": {\r\n            \"description\": \"description\"\r\n
+        \         }\r\n        },\r\n        \"bar\": {\r\n          \"type\": \"string\",\r\n
+        \         \"defaultValue\": \"bar\",\r\n          \"metadata\": {\r\n            \"description\":
+        \"description\"\r\n          }\r\n        }\r\n      },\r\n      \"functions\":
+        [],\r\n      \"variables\": {},\r\n      \"resources\": [],\r\n      \"outputs\":
+        {\r\n        \"foo\": {\r\n          \"type\": \"string\",\r\n          \"value\":
+        \"[parameters('foo')]\"\r\n        },\r\n        \"bar\": {\r\n          \"type\":
+        \"string\",\r\n          \"value\": \"[parameters('bar')]\"\r\n        }\r\n
+        \     }\r\n    },\r\n    \"managedResources\": [],\r\n    \"provisioningState\":
+        \"succeeded\"\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2022-01-31T21:17:44.9152017Z\",\r\n
+        \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2022-01-31T21:17:44.9152017Z\"\r\n
+        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002/snapshots/2022-01-31-21-17-44-8b7a4\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks/snapshots\",\r\n  \"name\":
+        \"2022-01-31-21-17-44-8b7a4\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2077'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 Jan 2022 21:18:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack snapshot group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --yes
+      User-Agent:
+      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.8.6 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002/snapshots/2022-01-31-21-17-44-8b7a4?api-version=2021-05-01-preview
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"detachedResources\": [],\r\n    \"deletedResources\":
+        [],\r\n    \"failedResources\": [],\r\n    \"updateBehavior\": \"detachResources\",\r\n
+        \   \"deploymentId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-snaps-2022-01-31-21-17-44-8b7a4\",\r\n
+        \   \"parameters\": {\r\n      \"foo\": {\r\n        \"value\": \"abc\"\r\n
+        \     },\r\n      \"bar\": {\r\n        \"value\": \"xyz\"\r\n      }\r\n
+        \   },\r\n    \"template\": {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+        \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"foo\":
+        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"foo\",\r\n
+        \         \"metadata\": {\r\n            \"description\": \"description\"\r\n
+        \         }\r\n        },\r\n        \"bar\": {\r\n          \"type\": \"string\",\r\n
+        \         \"defaultValue\": \"bar\",\r\n          \"metadata\": {\r\n            \"description\":
+        \"description\"\r\n          }\r\n        }\r\n      },\r\n      \"functions\":
+        [],\r\n      \"variables\": {},\r\n      \"resources\": [],\r\n      \"outputs\":
+        {\r\n        \"foo\": {\r\n          \"type\": \"string\",\r\n          \"value\":
+        \"[parameters('foo')]\"\r\n        },\r\n        \"bar\": {\r\n          \"type\":
+        \"string\",\r\n          \"value\": \"[parameters('bar')]\"\r\n        }\r\n
+        \     }\r\n    },\r\n    \"managedResources\": [],\r\n    \"provisioningState\":
+        \"succeeded\"\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2022-01-31T21:17:44.9152017Z\",\r\n
+        \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2022-01-31T21:17:44.9152017Z\"\r\n
+        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002/snapshots/2022-01-31-21-17-44-8b7a4\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks/snapshots\",\r\n  \"name\":
+        \"2022-01-31-21-17-44-8b7a4\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2077'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 Jan 2022 21:18:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack snapshot group delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --id --yes
+      User-Agent:
+      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.8.6 (Windows-10-10.0.22000-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002/snapshots/2022-01-31-21-17-44-8b7a4?api-version=2021-05-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 31 Jan 2022 21:18:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack snapshot group list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --stack-name --resource-group
+      User-Agent:
+      - AZURECLI/2.33.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.8.6 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002/snapshots?api-version=2021-05-01-preview
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"properties\": {\r\n        \"detachedResources\":
+        [],\r\n        \"deletedResources\": [],\r\n        \"failedResources\": [],\r\n
+        \       \"updateBehavior\": \"detachResources\",\r\n        \"deploymentId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-snaps-2022-01-31-21-18-05-ce1ac\",\r\n
+        \       \"parameters\": {\r\n          \"foo\": {\r\n            \"value\":
+        \"abc\"\r\n          },\r\n          \"bar\": {\r\n            \"value\":
+        \"xyz\"\r\n          }\r\n        },\r\n        \"template\": {\r\n          \"$schema\":
+        \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+        \         \"contentVersion\": \"1.0.0.0\",\r\n          \"parameters\": {\r\n
+        \           \"foo\": {\r\n              \"type\": \"string\",\r\n              \"defaultValue\":
+        \"foo\",\r\n              \"metadata\": {\r\n                \"description\":
+        \"description\"\r\n              }\r\n            },\r\n            \"bar\":
+        {\r\n              \"type\": \"string\",\r\n              \"defaultValue\":
+        \"bar\",\r\n              \"metadata\": {\r\n                \"description\":
+        \"description\"\r\n              }\r\n            }\r\n          },\r\n          \"functions\":
+        [],\r\n          \"variables\": {},\r\n          \"resources\": [],\r\n          \"outputs\":
+        {\r\n            \"foo\": {\r\n              \"type\": \"string\",\r\n              \"value\":
+        \"[parameters('foo')]\"\r\n            },\r\n            \"bar\": {\r\n              \"type\":
+        \"string\",\r\n              \"value\": \"[parameters('bar')]\"\r\n            }\r\n
+        \         }\r\n        },\r\n        \"managedResources\": [],\r\n        \"provisioningState\":
+        \"succeeded\"\r\n      },\r\n      \"systemData\": {\r\n        \"createdBy\":
+        \"harshpatel@microsoft.com\",\r\n        \"createdByType\": \"User\",\r\n
+        \       \"createdAt\": \"2022-01-31T21:18:05.3383171Z\",\r\n        \"lastModifiedBy\":
+        \"harshpatel@microsoft.com\",\r\n        \"lastModifiedByType\": \"User\",\r\n
+        \       \"lastModifiedAt\": \"2022-01-31T21:18:05.3383171Z\"\r\n      },\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-snapshot-resource-group000002/snapshots/2022-01-31-21-18-05-ce1ac\",\r\n
+        \     \"type\": \"Microsoft.Resources/deploymentStacks/snapshots\",\r\n      \"name\":
+        \"2022-01-31-21-18-05-ce1ac\"\r\n    }\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2354'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 Jan 2022 21:18:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

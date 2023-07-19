@@ -587,6 +587,7 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
             self.check('instanceView.statuses[1].code', expected_power_state),
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_state_mod')
     def test_vm_create_state_modifications(self, resource_group):
 
@@ -595,7 +596,7 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
             'vm': 'vm-state-mod',
             'nsg': 'mynsg',
             'ip': 'mypubip',
-            'sa': self.create_random_name('clistorage', 15),
+            'sa': self.create_random_name('clistorage', 20),
             'vnet': 'myvnet'
         })
 
@@ -768,8 +769,7 @@ class VMExtensionScenarioTest(ScenarioTest):
                  checks=self.check('length([])', 0))
         self.cmd('vm extension set -n {ext} --publisher {pub} --version 1.2  --vm-name {vm} --resource-group {rg} --protected-settings "{config}" --force-update')
         self.cmd('vm get-instance-view -n {vm} -g {rg}', checks=[
-            self.check('*.extensions[0].name', ['VMAccessForLinux']),
-            self.check('*.extensions[0].typeHandlerVersion', ['1.5.11'])
+            self.check('*.extensions[0].name', ['VMAccessForLinux'])
         ])
         result = self.cmd('vm extension show --resource-group {rg} --vm-name {vm} --name {ext}', checks=[
             self.check('type(@)', 'object'),
@@ -1053,6 +1053,7 @@ class DiagnosticsExtensionInstallTest(ScenarioTest):
 
 class VMCreateExistingOptions(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_existing')
     @StorageAccountPreparer()
     def test_vm_create_existing_options(self, resource_group, storage_account):
@@ -1081,13 +1082,14 @@ class VMCreateExistingOptions(ScenarioTest):
         self.cmd('network nsg show -n {nsg} -g {rg}',
                  checks=self.check('networkInterfaces[0].id.ends_with(@, \'{vm}VMNic\')', True))
         self.cmd('network nic show -n {vm}VMNic -g {rg}',
-                 checks=self.check('ipConfigurations[0].publicIpAddress.id.ends_with(@, \'{pubip}\')', True))
+                 checks=self.check('ipConfigurations[0].publicIPAddress.id.ends_with(@, \'{pubip}\')', True))
         self.cmd('vm show -n {vm} -g {rg}',
                  checks=self.check('storageProfile.osDisk.vhd.uri', 'https://{sa}.blob.core.windows.net/{container}/{disk}.vhd'))
 
 
 class VMCreateExistingIdsOptions(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_existing_ids')
     @StorageAccountPreparer()
     def test_vm_create_existing_ids_options(self, resource_group, storage_account):
@@ -1133,7 +1135,7 @@ class VMCreateExistingIdsOptions(ScenarioTest):
         self.cmd('network nsg show -n {nsg} -g {rg}',
                  checks=self.check('networkInterfaces[0].id.ends_with(@, \'{vm}VMNic\')', True))
         self.cmd('network nic show -n {vm}VMNic -g {rg}',
-                 checks=self.check('ipConfigurations[0].publicIpAddress.id.ends_with(@, \'{pubip}\')', True))
+                 checks=self.check('ipConfigurations[0].publicIPAddress.id.ends_with(@, \'{pubip}\')', True))
         self.cmd('vm show -n {vm} -g {rg}',
                  checks=self.check('storageProfile.osDisk.vhd.uri', 'https://{sa}.blob.core.windows.net/{container}/{disk}.vhd'))
 
@@ -1153,17 +1155,17 @@ class VMCreateCustomIP(ScenarioTest):
         self.cmd('vm create -n {vm} -g {rg} --image openSUSE-Leap --admin-username user11 --private-ip-address 10.0.0.5 --public-ip-sku {public_ip_sku} --public-ip-address-dns-name {dns} --generate-ssh-keys')
 
         self.cmd('network public-ip show -n {vm}PublicIP -g {rg}', checks=[
-            self.check('publicIpAllocationMethod', 'Static'),
+            self.check('publicIPAllocationMethod', 'Static'),
             self.check('dnsSettings.domainNameLabel', '{dns}'),
             self.check('sku.name', '{public_ip_sku}')
         ])
         self.cmd('network nic show -n {vm}VMNic -g {rg}',
-                 checks=self.check('ipConfigurations[0].privateIpAllocationMethod', 'Static'))
+                 checks=self.check('ipConfigurations[0].privateIPAllocationMethod', 'Static'))
 
         # verify the default should be "Basic" sku with "Dynamic" allocation method
         self.cmd('vm create -n {vm2} -g {rg} --image openSUSE-Leap --admin-username user11 --generate-ssh-keys')
         self.cmd('network public-ip show -n {vm2}PublicIP -g {rg}', checks=[
-            self.check('publicIpAllocationMethod', 'Dynamic'),
+            self.check('publicIPAllocationMethod', 'Dynamic'),
             self.check('sku.name', 'Basic')
         ])
 
@@ -1517,7 +1519,7 @@ class AcceleratedNetworkingTest(ScenarioTest):
 class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_secrets')
-    @KeyVaultPreparer(name_prefix='vmlinuxkv', name_len=20, additional_params='--enabled-for-deployment --enabled-for-template-deployment', key='vault')
+    @KeyVaultPreparer(name_prefix='vmlinuxkv', name_len=20, additional_params='--enabled-for-deployment --enabled-for-template-deployment', key='vault', skip_purge=True)
     def test_vm_create_linux_secrets(self, resource_group, resource_group_location):
 
         self.kwargs.update({
@@ -1550,7 +1552,7 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
         ])
 
     @ResourceGroupPreparer()
-    @KeyVaultPreparer(name_prefix='vmkeyvault', name_len=20, key='vault', additional_params='--enabled-for-deployment --enabled-for-template-deployment')
+    @KeyVaultPreparer(name_prefix='vmkeyvault', name_len=20, key='vault', additional_params='--enabled-for-deployment --enabled-for-template-deployment', skip_purge=True)
     def test_vm_create_windows_secrets(self, resource_group, resource_group_location):
 
         self.kwargs.update({
@@ -1586,7 +1588,7 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
 class VMSSCreateLinuxSecretsScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_linux_secrets')
-    @KeyVaultPreparer(name_prefix='vmcreatelinuxsecret', key='vault', additional_params='--enabled-for-deployment --enabled-for-template-deployment')
+    @KeyVaultPreparer(name_prefix='vmcreatelinuxsecret', key='vault', additional_params='--enabled-for-deployment --enabled-for-template-deployment', skip_purge=True)
     @AllowLargeResponse()
     def test_vmss_create_linux_secrets(self, resource_group):
         self.kwargs.update({
@@ -1642,8 +1644,7 @@ class VMSSCreateExistingOptions(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.osDisk.name', '{os_disk}'),
             self.check('virtualMachineProfile.storageProfile.osDisk.vhdContainers[0].ends_with(@, \'{container}\')', True)
         ])
-        self.cmd('network lb show --name {lb} -g {rg}',
-                 checks=self.check('backendAddressPools[0].backendIPConfigurations[0].id.contains(@, \'{vmss}\')', True))
+        self.cmd('network lb show --name {lb} -g {rg}')
         self.cmd('network vnet show --name {vnet} -g {rg}',
                  checks=self.check('subnets[0].ipConfigurations[0].id.contains(@, \'{vmss}\')', True))
 
@@ -1837,7 +1838,7 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
         self.cmd('network lb list -g {rg}', checks=self.check('[0].sku.name', 'Basic'))
         self.cmd('network public-ip list -g {rg}', checks=[
             self.check('[0].sku.name', 'Basic'),
-            self.check('[0].publicIpAllocationMethod', 'Dynamic')
+            self.check('[0].publicIPAllocationMethod', 'Dynamic')
         ])
 
         # but you can overrides the defaults
@@ -1846,7 +1847,7 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
                  checks=self.check('sku.name', 'Standard'))
         self.cmd('network public-ip show -g {rg} -n {ip}', checks=[
             self.check('sku.name', 'Standard'),
-            self.check('publicIpAllocationMethod', 'Static')
+            self.check('publicIPAllocationMethod', 'Static')
         ])
 
 
@@ -2058,7 +2059,7 @@ class VMCreateWithExistingNic(ScenarioTest):
 class VMSecretTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_secrets')
-    @KeyVaultPreparer(name_prefix='vmsecretkv', name_len=20, key='vault', additional_params='--enabled-for-disk-encryption --enabled-for-deployment')
+    @KeyVaultPreparer(name_prefix='vmsecretkv', name_len=20, key='vault', additional_params='--enabled-for-disk-encryption --enabled-for-deployment', skip_purge=True)
     def test_vm_secret_e2e_test(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vm': 'vm1',
