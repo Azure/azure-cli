@@ -160,8 +160,8 @@ class EHNamespaceEntityCURDScenarioTest(ScenarioTest):
         container = self.cmd(
             'storage container create -n {containername2} -g {rg} --account-name {storageaccount2}').get_output_in_json()
 
-        self.cmd(
-            'az role assignment create --assignee {id3} --role "Storage Blob Data Contributor" --scope {storageid2}')
+        '''self.cmd(
+            'az role assignment create --assignee {id3} --role "Storage Blob Data Contributor" --scope {storageid2}')'''
 
         self.cmd(
             'eventhubs namespace create --resource-group {rg} --name {namespacename2} --location {loc} --tags {tags} --sku Premium '
