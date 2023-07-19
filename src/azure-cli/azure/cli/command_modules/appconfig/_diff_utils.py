@@ -78,7 +78,7 @@ class KVComparer:
         try:
             return json.loads(value_string)
 
-        except Exception:  # pylint: disable=broad-except
+        except json.JSONDecodeError:
             return value_string
 
     @classmethod
