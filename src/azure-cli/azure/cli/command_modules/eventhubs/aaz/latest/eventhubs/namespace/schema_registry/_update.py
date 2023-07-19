@@ -79,12 +79,14 @@ class Update(AAZCommand):
         _args_schema.schema_compatibility = AAZStrArg(
             options=["--schema-compatibility"],
             arg_group="Properties",
+            help="Compatibility of Schema.",
             nullable=True,
             enum={"Backward": "Backward", "Forward": "Forward", "None": "None"},
         )
         _args_schema.schema_type = AAZStrArg(
             options=["--schema-type"],
             arg_group="Properties",
+            help="Type of Schema.",
             nullable=True,
             enum={"Avro": "Avro", "Unknown": "Unknown"},
         )
