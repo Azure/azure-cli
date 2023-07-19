@@ -699,7 +699,7 @@ examples:
   - name: Add a new endpoint "E2" of type EventHub to "MyIotHub" IoT Hub.
     text: >
         az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub --endpoint-name E2 --endpoint-type eventhub --endpoint-resource-group {ResourceGroup} --endpoint-subscription-id {SubscriptionId} --connection-string {ConnectionString}
-  - name: Add a new endpoint "S1" of type AzureStorageContainer to "MyIotHub" IoT Hub within the endpoint resource group "MyEndpointResourceGroup".
+  - name: Add a new endpoint "S1" of type AzureStorageContainer to the "MyIotHub" IoT Hub within the endpoint resource group "MyEndpointResourceGroup".
     text: |
         az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub \\
         --endpoint-name S1 --endpoint-type azurestoragecontainer --endpoint-resource-group MyEndpointResourceGroup \\
