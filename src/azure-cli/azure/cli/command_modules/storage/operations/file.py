@@ -161,6 +161,13 @@ def storage_file_upload(client, local_file_path, content_settings=None,
     return response
 
 
+def _execute_in_parallel(max_workers, fn, args_list):
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = [executor.submit(fn, *args) for args in args_list]
+        return list(f.result() for f in as_completed(futures))
+
+
 def storage_file_upload_batch(cmd, client, destination, source, destination_path=None, pattern=None, dryrun=False,
                               validate_content=False, content_settings=None, max_connections=1, metadata=None,
                               progress_callback=None):
@@ -207,15 +214,7 @@ def storage_file_upload_batch(cmd, client, destination, source, destination_path
 
     # 1. Upload files in parallel
     # 2. Return the list of uploaded files
-    from concurrent.futures import ThreadPoolExecutor, as_completed
-
-    with ThreadPoolExecutor(max_workers=max_connections) as executor:
-        futures = []
-        for src, dst in source_files:
-            futures.append(executor.submit(_upload_action, src, dst))
-
-        return list(f.result() for f in as_completed(futures))
-
+    return _execute_in_parallel(max_connections, _upload_action, source_files)
 
 
 def download_file(client, destination_path=None, timeout=None, max_connections=2, open_mode='wb', **kwargs):
