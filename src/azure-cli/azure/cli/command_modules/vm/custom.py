@@ -4631,8 +4631,7 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
                 if key == 'SecurityType':
                     if value == 'Standard':
                         continue
-                    else:
-                        standard_security = False
+                    standard_security = False
                 feature_list.append(GalleryImageFeature(name=key, value=value))
             except ValueError:
                 raise CLIError('usage error: --features KEY=VALUE [KEY=VALUE ...]')
