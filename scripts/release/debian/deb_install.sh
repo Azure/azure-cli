@@ -62,7 +62,7 @@ setup() {
             if [[ $DIST =~ "Ubuntu" ]]; then
                 CLI_REPO="jammy"
             elif [[ $DIST =~ "Debian" ]]; then
-                CLI_REPO="bullseye"
+                CLI_REPO="bookworm"
             elif [[ $DIST =~ "LinuxMint" ]]; then
                 CLI_REPO=$(cat /etc/os-release | grep -Po 'UBUNTU_CODENAME=\K.*') || true
                 if [[ -z $CLI_REPO ]]; then
