@@ -104,8 +104,10 @@ def update_container_rm(cmd, instance, metadata=None, public_access=None,
     blob_container = BlobContainer(
         metadata=metadata if metadata is not None else instance.metadata,
         public_access=public_access if public_access is not None else instance.public_access,
-        default_encryption_scope=instance.default_encryption_scope,
-        deny_encryption_scope_override=instance.deny_encryption_scope_override,
+        default_encryption_scope=default_encryption_scope
+        if default_encryption_scope is not None else instance.default_encryption_scope,
+        deny_encryption_scope_override=deny_encryption_scope_override
+        if deny_encryption_scope_override is not None else instance.deny_encryption_scope_override,
         enable_nfs_v3_all_squash=enable_nfs_v3_all_squash
         if enable_nfs_v3_all_squash is not None else instance.enable_nfs_v3_all_squash,
         enable_nfs_v3_root_squash=enable_nfs_v3_root_squash
