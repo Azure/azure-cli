@@ -200,7 +200,7 @@ def bicep_version_greater_than_or_equal_to(version):
     system = platform.system()
     installation_path = _get_bicep_installation_path(system)
     installed_version = _get_bicep_installed_version(installation_path)
-    parsed_version = parse(version)
+    parsed_version = semver.VersionInfo.parse(version)
     return installed_version >= parsed_version
 
 
