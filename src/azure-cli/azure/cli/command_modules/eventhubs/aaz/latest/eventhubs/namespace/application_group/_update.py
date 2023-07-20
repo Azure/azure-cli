@@ -70,11 +70,6 @@ class Update(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.client_app_group_identifier = AAZStrArg(
-            options=["--client-app-group-id", "--client-app-group-identifier"],
-            arg_group="Properties",
-            help="The Unique identifier for application group.Supports SAS(SASKeyName=KeyName) or AAD(AADAppID=Guid)",
-        )
         _args_schema.is_enabled = AAZBoolArg(
             options=["--is-enabled"],
             arg_group="Properties",
@@ -345,7 +340,6 @@ class Update(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("clientAppGroupIdentifier", AAZStrType, ".client_app_group_identifier", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("isEnabled", AAZBoolType, ".is_enabled")
                 properties.set_prop("policies", AAZListType, ".policies")
 
