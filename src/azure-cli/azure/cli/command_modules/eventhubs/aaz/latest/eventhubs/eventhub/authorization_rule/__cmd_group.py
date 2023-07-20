@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "eventhubs eventhub authorization-rule",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Eventhub authorization rule.
+    """eventhub authorization rule
     """
     pass
 
