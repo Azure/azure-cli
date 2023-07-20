@@ -626,7 +626,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
     if encryption_at_host is not None:
         vm_properties['securityProfile']['encryptionAtHost'] = encryption_at_host
 
-    # Provide backward compatibility. The defaults will be changed to Trusted Launch VMs in CLI in the future.
+    # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
+    # after changing the default values to Trusted Launch VMs in the future.
     if security_type is not None and security_type != "Standard":
         vm_properties['securityProfile']['securityType'] = security_type
 
@@ -1378,7 +1379,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if encryption_at_host:
         security_profile['encryptionAtHost'] = encryption_at_host
 
-    # Provide backward compatibility. The defaults will be changed to Trusted Launch VMs in CLI in the future.
+    # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
+    # after changing the default values to Trusted Launch VMs in the future.
     if security_type is not None and security_type != "Standard":
         security_profile['securityType'] = security_type
 

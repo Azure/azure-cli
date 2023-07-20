@@ -496,7 +496,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk.bursting_enabled = enable_bursting
     if edge_zone is not None:
         disk.extended_location = edge_zone
-    # Provide backward compatibility. The defaults will be changed to Trusted Launch VMs in CLI in the future.
+    # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
+    # after changing the default values to Trusted Launch VMs in the future.
     if security_type and security_type != 'Standard':
         disk.security_profile = {'securityType': security_type}
         if secure_vm_disk_encryption_set:
@@ -4620,7 +4621,8 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
             try:
                 key, value = item.split('=', 1)
                 # create Non-Trusted Launch VM Image
-                # Provide backward compatibility. The defaults will be changed to Trusted Launch VMs in CLI in the future.
+                # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
+                # after changing the default values to Trusted Launch VMs in the future.
                 if key == 'SecurityType' and value == 'Standard':
                     continue
                 feature_list.append(GalleryImageFeature(name=key, value=value))

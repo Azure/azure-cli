@@ -129,7 +129,7 @@ def load_arguments(self, _):
 
     enable_vtpm_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2020-12-01', help='Enable vTPM.')
     enable_secure_boot_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2020-12-01', help='Enable secure boot.')
-    # Provide backward compatibility. The defaults will be changed to Trusted Launch VMs in CLI in the future.
+    # The `Standard` is used for backward compatibility to allow customers to keep their current behavior after changing the default values to Trusted Launch VMs in the future.
     t_security = [x.value for x in self.get_models('SecurityTypes') or []] + ["Standard"]
     security_type = CLIArgumentType(arg_type=get_enum_type(t_security), min_api='2020-12-01', help='Specify the security type of the virtual machine.')
     gallery_image_name_type = CLIArgumentType(options_list=['--gallery-image-definition', '-i'], help='The name of the community gallery image definition from which the image versions are to be listed.', id_part='child_name_2')
@@ -179,7 +179,7 @@ def load_arguments(self, _):
 
     # region Disks
     with self.argument_context('disk', resource_type=ResourceType.MGMT_COMPUTE, operation_group='disks') as c:
-        # Provide backward compatibility. The defaults will be changed to Trusted Launch VMs in CLI in the future.
+        # The `Standard` is used for backward compatibility to allow customers to keep their current behavior after changing the default values to Trusted Launch VMs in the future.
         t_disk_security = [x.value for x in self.get_models('DiskSecurityTypes', operation_group='disks') or []] + ["Standard"]
 
         c.argument('zone', zone_type, min_api='2017-03-30', options_list=['--zone'])  # TODO: --size-gb currently has claimed -z. We can do a breaking change later if we want to.
