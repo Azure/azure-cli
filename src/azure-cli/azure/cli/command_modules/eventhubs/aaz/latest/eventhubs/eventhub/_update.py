@@ -153,15 +153,6 @@ class Update(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.message_retention_in_days = AAZIntArg(
-            options=["--message-retention-in-days"],
-            arg_group="Properties",
-            help="Number of days to retain the events for this Event Hub, value should be 1 to 7 days",
-            nullable=True,
-            fmt=AAZIntArgFormat(
-                minimum=1,
-            ),
-        )
         _args_schema.partition_count = AAZIntArg(
             options=["--partition-count"],
             arg_group="Properties",
@@ -435,7 +426,6 @@ class Update(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("captureDescription", AAZObjectType)
-                properties.set_prop("messageRetentionInDays", AAZIntType, ".message_retention_in_days")
                 properties.set_prop("partitionCount", AAZIntType, ".partition_count")
                 properties.set_prop("retentionDescription", AAZObjectType)
                 properties.set_prop("status", AAZStrType, ".status")
