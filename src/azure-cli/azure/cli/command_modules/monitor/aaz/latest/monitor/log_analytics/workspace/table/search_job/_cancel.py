@@ -12,26 +12,23 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "monitor log-analytics workspace list-usages",
+    "monitor log-analytics workspace table search-job cancel",
 )
-class ListUsages(AAZCommand):
-    """Get a list of usage metrics for a workspace.
-
-    :example: Get a list of usage metrics for a workspace.
-        az monitor log-analytics workspace list-usages --resource-group MyResourceGroup --workspace-name MyWorkspace
+class Cancel(AAZCommand):
+    """Cancel a log analytics workspace search results table query run.
     """
 
     _aaz_info = {
-        "version": "2020-08-01",
+        "version": "2022-10-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}/usages", "2020-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}/tables/{}/cancelsearch", "2022-10-01"],
         ]
     }
 
     def _handler(self, command_args):
         super()._handler(command_args)
         self._execute_operations()
-        return self._output()
+        return None
 
     _args_schema = None
 
@@ -47,10 +44,17 @@ class ListUsages(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
+        _args_schema.table_name = AAZStrArg(
+            options=["-n", "--name", "--table-name"],
+            help="The name of the table.",
+            required=True,
+            id_part="child_name_1",
+        )
         _args_schema.workspace_name = AAZStrArg(
-            options=["-n", "--name", "--workspace-name"],
+            options=["--workspace-name"],
             help="The name of the workspace.",
             required=True,
+            id_part="name",
             fmt=AAZStrArgFormat(
                 pattern="^[A-Za-z0-9][A-Za-z0-9-]+[A-Za-z0-9]$",
                 max_length=63,
@@ -61,7 +65,7 @@ class ListUsages(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        self.UsagesList(ctx=self.ctx)()
+        self.TablesCancelSearch(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -72,11 +76,7 @@ class ListUsages(AAZCommand):
     def post_operations(self):
         pass
 
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
-        return result
-
-    class UsagesList(AAZHttpOperation):
+    class TablesCancelSearch(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -90,13 +90,13 @@ class ListUsages(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/usages",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/tables/{tableName}/cancelSearch",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "GET"
+            return "POST"
 
         @property
         def error_format(self):
@@ -114,6 +114,10 @@ class ListUsages(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
+                    "tableName", self.ctx.args.table_name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
                     "workspaceName", self.ctx.args.workspace_name,
                     required=True,
                 ),
@@ -124,69 +128,18 @@ class ListUsages(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2020-08-01",
+                    "api-version", "2022-10-01",
                     required=True,
                 ),
             }
             return parameters
 
-        @property
-        def header_parameters(self):
-            parameters = {
-                **self.serialize_header_param(
-                    "Accept", "application/json",
-                ),
-            }
-            return parameters
-
         def on_200(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200
-            )
-
-        _schema_on_200 = None
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
-
-            cls._schema_on_200 = AAZObjectType()
-
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.value = AAZListType()
-
-            value = cls._schema_on_200.value
-            value.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element
-            _element.current_value = AAZFloatType(
-                serialized_name="currentValue",
-            )
-            _element.limit = AAZFloatType()
-            _element.name = AAZObjectType()
-            _element.next_reset_time = AAZStrType(
-                serialized_name="nextResetTime",
-            )
-            _element.quota_period = AAZStrType(
-                serialized_name="quotaPeriod",
-            )
-            _element.unit = AAZStrType()
-
-            name = cls._schema_on_200.value.Element.name
-            name.localized_value = AAZStrType(
-                serialized_name="localizedValue",
-            )
-            name.value = AAZStrType()
-
-            return cls._schema_on_200
+            pass
 
 
-class _ListUsagesHelper:
-    """Helper class for ListUsages"""
+class _CancelHelper:
+    """Helper class for Cancel"""
 
 
-__all__ = ["ListUsages"]
+__all__ = ["Cancel"]
