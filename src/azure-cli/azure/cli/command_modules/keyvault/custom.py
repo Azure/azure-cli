@@ -1143,6 +1143,23 @@ def decrypt_key(cmd, client, algorithm, value, iv=None, tag=None, aad=None,
                                  additional_authenticated_data=binascii.unhexlify(aad) if aad else None)
 
 
+def sign_key(cmd, client, algorithm, digest, name=None, version=None):
+    SignatureAlgorithm = cmd.loader.get_sdk('SignatureAlgorithm', mod='crypto._enums',
+                                            resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    crypto_client = client.get_cryptography_client(name, key_version=version)
+    return crypto_client.sign(SignatureAlgorithm(algorithm), digest.encode('utf-8'))
+
+
+def verify_key(cmd, client, algorithm, digest, signature, name=None, version=None):
+    import base64
+    SignatureAlgorithm = cmd.loader.get_sdk('SignatureAlgorithm', mod='crypto._enums',
+                                            resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    crypto_client = client.get_cryptography_client(name, key_version=version)
+    return crypto_client.verify(SignatureAlgorithm(algorithm),
+                                digest.encode('utf-8'),
+                                base64.b64decode(signature.encode('utf-8')))
+
+
 def backup_key(client, file_path, vault_base_url=None,
                key_name=None, hsm_name=None, identifier=None):  # pylint: disable=unused-argument
     backup = client.backup_key(vault_base_url, key_name).value
@@ -2157,13 +2174,13 @@ def full_backup(cmd, client, token, storage_resource_uri=None, storage_account_n
 
 
 def full_restore(cmd, client, token, folder_to_restore, storage_resource_uri=None, storage_account_name=None,
-                 blob_container_name=None, hsm_name=None):  # pylint: disable=unused-argument
+                 blob_container_name=None, key_name=None, hsm_name=None):  # pylint: disable=unused-argument
     storage_account_parameters_check(storage_resource_uri, storage_account_name, blob_container_name)
     if not storage_resource_uri:
         storage_resource_uri = construct_storage_uri(
             cmd.cli_ctx.cloud.suffixes.storage_endpoint, storage_account_name, blob_container_name)
     folder_url = '{}/{}'.format(storage_resource_uri, folder_to_restore)
-    return client.begin_restore(folder_url, token)
+    return client.begin_restore(folder_url, token, key_name=key_name)
 # endregion
 
 
