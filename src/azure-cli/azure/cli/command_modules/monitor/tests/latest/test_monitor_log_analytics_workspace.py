@@ -18,7 +18,7 @@ class TestLogProfileScenarios(ScenarioTest):
         self.cmd("monitor log-analytics workspace create -g {rg} -n {name} --tags clitest=myron", checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('retentionInDays', 30),
-            self.check('sku.name', 'pergb2018')
+            self.check('sku.name', 'PerGB2018')
         ])
 
         self.cmd("monitor log-analytics workspace update -g {rg} -n {name} --retention-time 100", checks=[
@@ -161,14 +161,14 @@ class TestLogProfileScenarios(ScenarioTest):
         self.cmd("monitor log-analytics workspace create -g {rg} -n {name} --tags clitest=myron", checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('retentionInDays', 30),
-            self.check('sku.name', 'pergb2018')
+            self.check('sku.name', 'PerGB2018')
         ])
 
         self.cmd('monitor log-analytics workspace linked-storage create '
                  '--type CustomLogs -g {rg} -n {name} --storage-accounts {sa_1}',
                  checks=[
                      self.check('storageAccountIds[0]', '{sa_id_1}'),
-                     self.check('name', 'customlogs')
+                     self.check('name', 'CustomLogs')
                  ])
 
         self.cmd('monitor log-analytics workspace linked-storage add '
@@ -196,14 +196,14 @@ class TestLogProfileScenarios(ScenarioTest):
         self.cmd("monitor log-analytics workspace create -g {rg} -n {name_2} --tags clitest=myron", checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('retentionInDays', 30),
-            self.check('sku.name', 'pergb2018')
+            self.check('sku.name', 'PerGB2018')
         ])
 
         self.cmd('monitor log-analytics workspace linked-storage create '
                  '--type AzureWatson -g {rg} -n {name} --storage-accounts {sa_1}',
                  checks=[
                      self.check('storageAccountIds[0]', '{sa_id_1}'),
-                     self.check('name', 'azurewatson')
+                     self.check('name', 'AzureWatson')
                  ])
 
         self.cmd('monitor log-analytics workspace linked-storage list '
@@ -258,7 +258,7 @@ class TestLogProfileScenarios(ScenarioTest):
         self.cmd("monitor log-analytics workspace create -g {rg} -n {name} --quota 1 --level 100 --sku CapacityReservation", checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('retentionInDays', 30),
-            self.check('sku.name', 'capacityreservation'),
+            self.check('sku.name', 'CapacityReservation'),
             self.check('sku.capacityReservationLevel', 100),
             self.check('workspaceCapping.dailyQuotaGb', 1.0)
         ])
@@ -290,7 +290,7 @@ class TestLogProfileScenarios(ScenarioTest):
         self.cmd("monitor log-analytics workspace recover -g {rg} -n {name}", checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('retentionInDays', 30),
-            self.check('sku.name', 'capacityreservation'),
+            self.check('sku.name', 'CapacityReservation'),
             self.check('sku.capacityReservationLevel', 200),
             self.check('workspaceCapping.dailyQuotaGb', 2.0)
         ])
@@ -298,7 +298,7 @@ class TestLogProfileScenarios(ScenarioTest):
         self.cmd("monitor log-analytics workspace show -g {rg} -n {name}", checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('retentionInDays', 30),
-            self.check('sku.name', 'capacityreservation'),
+            self.check('sku.name', 'CapacityReservation'),
             self.check('sku.capacityReservationLevel', 200),
             self.check('workspaceCapping.dailyQuotaGb', 2.0)
         ])
@@ -404,7 +404,7 @@ class TestLogProfileScenarios(ScenarioTest):
             checks=[
                 self.check('provisioningState', 'Succeeded'),
                 self.check('retentionInDays', 30),
-                self.check('sku.name', 'capacityreservation'),
+                self.check('sku.name', 'CapacityReservation'),
                 self.check('sku.capacityReservationLevel', 100),
                 self.check('workspaceCapping.dailyQuotaGb', 1.0)
             ])
@@ -511,7 +511,7 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check('schema.columns[1].name', 'TimeGenerated'),
             self.check('schema.columns[1].type', 'datetime'),
         ])
-        self.cmd('monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 50 --total-retention-time 80 --columns col2=guid', checks=[
+        self.cmd('monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 50 --total-retention-time 80 --columns col2=guid TimeGenerated=datetime', checks=[
             self.check('name', '{table_name}'),
             self.check('retentionInDays', 50),
             self.check('totalRetentionInDays', 80),
@@ -528,9 +528,9 @@ class TestLogProfileScenarios(ScenarioTest):
 
         self.cmd('monitor log-analytics workspace table search-job create -n {table2_name} -g {rg} --workspace-name {ws_name} --retention-time 50 --total-retention-time 80 --start-search-time "2021-08-01 05:29:18" --end-search-time "2021-08-02 05:29:18" --search-query "Heartbeat" --limit 1', checks=[
             self.check('name', '{table2_name}'),
-            self.check('schema.searchResults.query', 'Heartbeat'),
-            self.check('schema.searchResults.limit', 1),
-            self.check('schema.searchResults.sourceTable', "Heartbeat"),
+            self.check('searchResults.query', 'Heartbeat'),
+            self.check('searchResults.limit', 1),
+            self.check('searchResults.sourceTable', "Heartbeat"),
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_table_total_retention', location='WestEurope')
@@ -554,7 +554,7 @@ class TestLogProfileScenarios(ScenarioTest):
                 self.check('schema.columns[1].type', 'datetime'),
             ])
         self.cmd(
-            'monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --total-retention-time 400 --columns col2=guid',
+            'monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --total-retention-time 400 --columns col2=guid TimeGenerated=datetime',
             checks=[
                 self.check('name', '{table_name}'),
                 self.check('totalRetentionInDays', 400),

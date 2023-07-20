@@ -178,7 +178,7 @@ class WorkspaceTableUpdate(_WorkspaceTableUpdate):
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZIntArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.total_retention_time._fmt = AAZIntArgFormat(
+        args_schema.total_retention_in_days._fmt = AAZIntArgFormat(
             maximum=2556,
             minimum=4,
         )
@@ -279,9 +279,9 @@ def update_log_analytics_workspace_table(cmd, resource_group_name, workspace_nam
         "no_wait": no_wait,
     }
     if retention_in_days is not None:
-        command_args["retention_time"] = retention_in_days
+        command_args["retention_in_days"] = retention_in_days
     if total_retention_in_days is not None:
-        command_args["total_retention_time"] = total_retention_in_days
+        command_args["total_retention_in_days"] = total_retention_in_days
     if plan is not None:
         command_args["plan"] = plan
     if columns_list or description is not None:
