@@ -265,11 +265,6 @@ examples:
         az disk-encryption-set identity show --name MyDiskEncryptionSet --resource-group MyResourceGroup
 """
 
-helps['image'] = """
-type: group
-short-summary: Manage custom virtual machine images.
-"""
-
 helps['image create'] = """
 type: command
 short-summary: Create a custom Virtual Machine Image from managed disks or snapshots.
@@ -280,11 +275,6 @@ examples:
             --source /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/rg1/providers/Microsoft.Compute/snapshots/s1
   - name: Create an image by capturing an existing generalized virtual machine in the same resource group.
     text: az image create -g MyResourceGroup -n image1 --source MyVm1
-"""
-
-helps['image list'] = """
-type: command
-short-summary: List custom VM images.
 """
 
 helps['image builder'] = """
