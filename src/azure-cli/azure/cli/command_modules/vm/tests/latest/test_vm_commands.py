@@ -6326,7 +6326,7 @@ class VMGalleryImage(ScenarioTest):
         if self.is_live:
             time.sleep(30)
 
-        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image_name} '
+        self.cmd('sig image-version undelete -g {rg} --gallery-name {gallery} --gallery-image-definition {image_name} '
                  '--gallery-image-version {version}',
                  checks=[
                      self.check('location', resource_group_location),

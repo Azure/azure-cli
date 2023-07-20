@@ -1180,6 +1180,19 @@ examples:
         --set safetyProfile.allowDeletionOfReplicatedLocations=true
 """
 
+helps['sig image-version undelete'] = """
+type: command
+short-summary: Restore soft deleted Image Version
+long-summary: >
+    Operation will only be successful if used within a Gallery with soft-deletion on.
+examples:
+  - name: Restore a soft deleted Image Version
+    text: |
+        az sig image-version undelete --resource-group MyResourceGroup \\
+        --gallery-name MyGallery --gallery-image-definition MyImage \\
+        --gallery-image-version 1.1.1
+"""
+
 helps['sig image-version list-community'] = """
 type: command
 short-summary: List VM Image Versions in a gallery community
