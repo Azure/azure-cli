@@ -59,6 +59,7 @@ class Update(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z][a-zA-Z0-9-]{6,50}[a-zA-Z0-9]$",
                 max_length=50,
                 min_length=6,
             ),
@@ -70,30 +71,6 @@ class Update(AAZCommand):
         # define Arg Group "CaptureDescription"
 
         _args_schema = cls._args_schema
-        _args_schema.destination_name = AAZStrArg(
-            options=["--destination-name"],
-            arg_group="CaptureDescription",
-            help="Name for capture destination",
-            nullable=True,
-        )
-        _args_schema.archive_name_format = AAZStrArg(
-            options=["--archive-name-format"],
-            arg_group="CaptureDescription",
-            help="Blob naming convention for archive, e.g. {Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}. Here all the parameters (Namespace,EventHub .. etc) are mandatory irrespective of order",
-            nullable=True,
-        )
-        _args_schema.blob_container = AAZStrArg(
-            options=["--blob-container"],
-            arg_group="CaptureDescription",
-            help="Blob container Name",
-            nullable=True,
-        )
-        _args_schema.storage_account = AAZStrArg(
-            options=["--storage-account"],
-            arg_group="CaptureDescription",
-            help="Resource id of the storage account to be used to create the blobs",
-            nullable=True,
-        )
         _args_schema.enable_capture = AAZBoolArg(
             options=["--enable-capture"],
             arg_group="CaptureDescription",
@@ -132,7 +109,31 @@ class Update(AAZCommand):
         _args_schema.identity = AAZObjectArg(
             options=["--identity"],
             arg_group="Destination",
-            help="A value that indicates whether capture description is enabled.",
+            help="A value that indicates whether capture description is enabled. ",
+            nullable=True,
+        )
+        _args_schema.destination_name = AAZStrArg(
+            options=["--destination-name"],
+            arg_group="Destination",
+            help="Name for capture destination",
+            nullable=True,
+        )
+        _args_schema.archive_name_format = AAZStrArg(
+            options=["--archive-name-format"],
+            arg_group="Destination",
+            help="Blob naming convention for archive, e.g. {Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}. Here all the parameters (Namespace,EventHub .. etc) are mandatory irrespective of order",
+            nullable=True,
+        )
+        _args_schema.blob_container = AAZStrArg(
+            options=["--blob-container"],
+            arg_group="Destination",
+            help="Blob container Name",
+            nullable=True,
+        )
+        _args_schema.storage_account = AAZStrArg(
+            options=["--storage-account"],
+            arg_group="Destination",
+            help="Resource id of the storage account to be used to create the blobs",
             nullable=True,
         )
 
@@ -152,6 +153,15 @@ class Update(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.message_retention_in_days = AAZIntArg(
+            options=["--message-retention-in-days"],
+            arg_group="Properties",
+            help="Number of days to retain the events for this Event Hub, value should be 1 to 7 days",
+            nullable=True,
+            fmt=AAZIntArgFormat(
+                minimum=1,
+            ),
+        )
         _args_schema.partition_count = AAZIntArg(
             options=["--partition-count"],
             arg_group="Properties",
@@ -425,6 +435,7 @@ class Update(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("captureDescription", AAZObjectType)
+                properties.set_prop("messageRetentionInDays", AAZIntType, ".message_retention_in_days")
                 properties.set_prop("partitionCount", AAZIntType, ".partition_count")
                 properties.set_prop("retentionDescription", AAZObjectType)
                 properties.set_prop("status", AAZStrType, ".status")

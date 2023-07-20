@@ -55,6 +55,7 @@ class Create(AAZCommand):
             help="The Namespace name",
             required=True,
             fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z][a-zA-Z0-9-]{6,50}[a-zA-Z0-9]$",
                 max_length=50,
                 min_length=6,
             ),
@@ -66,26 +67,6 @@ class Create(AAZCommand):
         # define Arg Group "CaptureDescription"
 
         _args_schema = cls._args_schema
-        _args_schema.destination_name = AAZStrArg(
-            options=["--destination-name"],
-            arg_group="CaptureDescription",
-            help="Name for capture destination",
-        )
-        _args_schema.archive_name_format = AAZStrArg(
-            options=["--archive-name-format"],
-            arg_group="CaptureDescription",
-            help="Blob naming convention for archive, e.g. {Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}. Here all the parameters (Namespace,EventHub .. etc) are mandatory irrespective of order",
-        )
-        _args_schema.blob_container = AAZStrArg(
-            options=["--blob-container"],
-            arg_group="CaptureDescription",
-            help="Blob container Name",
-        )
-        _args_schema.storage_account = AAZStrArg(
-            options=["--storage-account"],
-            arg_group="CaptureDescription",
-            help="Resource id of the storage account to be used to create the blobs",
-        )
         _args_schema.enable_capture = AAZBoolArg(
             options=["--enable-capture"],
             arg_group="CaptureDescription",
@@ -120,6 +101,26 @@ class Create(AAZCommand):
             options=["--identity"],
             arg_group="Destination",
             help="A value that indicates whether capture description is enabled.",
+        )
+        _args_schema.destination_name = AAZStrArg(
+            options=["--destination-name"],
+            arg_group="Destination",
+            help="Name for capture destination",
+        )
+        _args_schema.archive_name_format = AAZStrArg(
+            options=["--archive-name-format"],
+            arg_group="Destination",
+            help="Blob naming convention for archive, e.g. {Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}. Here all the parameters (Namespace,EventHub .. etc) are mandatory irrespective of order",
+        )
+        _args_schema.blob_container = AAZStrArg(
+            options=["--blob-container"],
+            arg_group="Destination",
+            help="Blob container Name",
+        )
+        _args_schema.storage_account = AAZStrArg(
+            options=["--storage-account"],
+            arg_group="Destination",
+            help="Resource id of the storage account to be used to create the blobs",
         )
 
         identity = cls._args_schema.identity
