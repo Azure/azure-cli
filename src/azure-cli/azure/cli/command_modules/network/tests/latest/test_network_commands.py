@@ -4181,7 +4181,7 @@ class NetworkNicScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{rg}'),
             self.check('name', '{nic}')
         ])
-        self.cmd('network nic update -g {rg} -n {nic} --internal-dns-name noodle --ip-forwarding true --accelerated-networking false --dns-servers "" --network-security-group {nsg2}', checks=[
+        self.cmd('network nic update -g {rg} -n {nic} --internal-dns-name noodle --ip-forwarding true --accelerated-networking false --dns-servers "[]" --network-security-group {nsg2}', checks=[
             self.check('enableIPForwarding', True),
             self.check('enableAcceleratedNetworking', False),
             self.check('dnsSettings.internalDnsNameLabel', 'noodle'),
@@ -4196,6 +4196,27 @@ class NetworkNicScenarioTest(ScenarioTest):
 
         self.cmd('network nic delete --resource-group {rg} --name {nic}')
         self.cmd('network nic list -g {rg}', checks=self.is_empty())
+
+    @ResourceGroupPreparer(name_prefix='test_network_nic_auxiliary', location='eastus')
+    def test_network_nic_auxiliary(self, resource_group):
+        self.kwargs.update({
+            'vnet': self.create_random_name('vnet', 10),
+            'subnet': self.create_random_name('subnet', 10),
+            'nic': self.create_random_name('nic', 10),
+        })
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}')
+        self.cmd('network nic create -g {rg} -n {nic} --vnet-name {vnet} --subnet {subnet} --auxiliary-mode MaxConnections --auxiliary-sku A1 --accelerated-networking true --tags fastpathenabled=true', checks=[
+            self.check('NewNIC.auxiliaryMode', 'MaxConnections'),
+            self.check('NewNIC.auxiliarySku', 'A1'),
+            self.check('NewNIC.enableAcceleratedNetworking', True),
+            self.check('NewNIC.tags.fastpathenabled', 'true')
+        ])
+        self.cmd('network nic update -g {rg} -n {nic} --auxiliary-mode AcceleratedConnections --auxiliary-sku A2', checks=[
+            self.check('auxiliaryMode', 'AcceleratedConnections'),
+            self.check('auxiliarySku', 'A2'),
+            self.check('enableAcceleratedNetworking', True),
+            self.check('tags.fastpathenabled', 'true')
+        ])
 
 
 class NetworkNicAppGatewayScenarioTest(ScenarioTest):
