@@ -28,8 +28,7 @@ from azure.cli.core.azclierror import (
     ResourceNotFoundError,
     ValidationError,
     RequiredArgumentMissingError,
-    ArgumentUsageError,
-    InvalidArgumentValueError
+    ArgumentUsageError
 )
 
 from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
@@ -4801,6 +4800,7 @@ def undelete_image_version(cmd, resource_group_name, gallery_name, gallery_image
     gallery = client.galleries.get(resource_group_name, gallery_name)
     soft_delete = gallery.soft_delete_policy.is_soft_delete_enabled
     if not soft_delete:
+        from azure.cli.core.azclierror import InvalidArgumentValueError
         raise InvalidArgumentValueError('soft-deletion is not enabled in Gallery \'{}\''.format(gallery_name))
 
     image_version = ImageVersion(publishing_profile=None, location=location, tags=(tags or {}),
