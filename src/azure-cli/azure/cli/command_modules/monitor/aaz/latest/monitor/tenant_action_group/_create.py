@@ -92,8 +92,8 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="The list of email receivers that are part of this tenant action group.",
         )
-        _args_schema.enabled = AAZBoolArg(
-            options=["--enabled"],
+        _args_schema.enabled_tenant = AAZBoolArg(
+            options=["--enabled-tenant"],
             arg_group="Properties",
             help="Indicates whether this tenant action group is enabled. If a tenant action group is not enabled, then none of its receivers will receive communications.",
             default=True,
@@ -333,7 +333,7 @@ class Create(AAZCommand):
             if properties is not None:
                 properties.set_prop("azureAppPushReceivers", AAZListType, ".azure_app_push_receivers")
                 properties.set_prop("emailReceivers", AAZListType, ".email_receivers")
-                properties.set_prop("enabled", AAZBoolType, ".enabled", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("enabled", AAZBoolType, ".enabled_tenant", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("groupShortName", AAZStrType, ".group_short_name", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("smsReceivers", AAZListType, ".sms_receivers")
                 properties.set_prop("voiceReceivers", AAZListType, ".voice_receivers")
