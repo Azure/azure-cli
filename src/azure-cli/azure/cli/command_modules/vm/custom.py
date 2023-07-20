@@ -28,7 +28,8 @@ from azure.cli.core.azclierror import (
     ResourceNotFoundError,
     ValidationError,
     RequiredArgumentMissingError,
-    ArgumentUsageError
+    ArgumentUsageError,
+    InvalidArgumentValueError
 )
 
 from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
@@ -4793,10 +4794,14 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
 def undelete_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version,
                            location=None, tags=None, allow_replicated_location_deletion=None):
     ImageVersion = cmd.get_models('GalleryImageVersion')
-    aux_subscriptions = _get_image_version_aux_subscription(None, None, None)
-    client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
+    client = _compute_client_factory(cmd.cli_ctx)
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+
+    gallery = client.galleries.get(resource_group_name, gallery_name)
+    soft_delete = gallery.soft_delete_policy.is_soft_delete_enabled
+    if not soft_delete:
+        raise InvalidArgumentValueError('soft-deletion is not enabled in Gallery \'{}\''.format(gallery_name))
 
     image_version = ImageVersion(publishing_profile=None, location=location, tags=(tags or {}),
                                  storage_profile=None)
