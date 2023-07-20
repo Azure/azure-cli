@@ -218,24 +218,24 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         # single server which will be used for import
         ss_server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         location = 'westus2'
-        ss_storage_size = 51200
+        ss_storage_size_mb = 51200
         ss_version = '5.7'
-        self.cmd('{} server create -g {} -n {} -l {} --storage-size {} --version {}'.format(database_engine, resource_group, ss_server_name, location, ss_storage_size, ss_version))
+        self.cmd('{} server create -g {} -n {} -l {} --storage-size {} --version {}'.format(database_engine, resource_group, ss_server_name, location, ss_storage_size_mb, ss_version))
 
         # flexible server details
-        storage_size = 128
+        storage_size_gb = 128
         version = '5.7'
         sku_name = 'Standard_B1ms'
         tier = 'Burstable'
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         data_source_type = 'mysql_single'
         data_source = ss_server_name
-        mode = 'offline'
+        mode = 'Offline'
 
         self.cmd('{} flexible-server import create -g {} -n {} --sku-name {} --tier {} \
                   --storage-size {} -u {} --version {} --tags keys=3 \
                   --public-access None --location {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
-                                                                                                              resource_group, server_name, sku_name, tier, storage_size,
+                                                                                                              resource_group, server_name, sku_name, tier, storage_size_gb,
                                                                                                               'dbadmin', version, location, data_source_type, data_source, mode))
 
         basic_info = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name)).get_output_in_json()
@@ -245,17 +245,17 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.assertEqual(basic_info['sku']['name'], sku_name)
         self.assertEqual(basic_info['sku']['tier'], tier)
         self.assertEqual(basic_info['version'], version)
-        self.assertEqual(basic_info['storage']['storageSizeGb'], storage_size)
+        self.assertEqual(basic_info['storage']['storageSizeGb'], storage_size_gb)
 
         # deletion of flexible server created
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name), checks=NoneCheck())
 
         # size for flex server is less than single server
-        invalid_storage_szie = 32
+        invalid_storage_size_gb = 32
         self.cmd('{} flexible-server import create -g {} -n {} --sku-name {} --tier {} \
                   --storage-size {} -u {} --version {} --tags keys=3 \
                   --public-access None --location {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
-                                                                                                              resource_group, server_name, sku_name, tier, invalid_storage_szie,
+                                                                                                              resource_group, server_name, sku_name, tier, invalid_storage_size_gb,
                                                                                                               'dbadmin', version, location, data_source_type, data_source, mode),
                                                                                                               expect_failure=True)
 
@@ -264,7 +264,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server import create -g {} -n {} --sku-name {} --tier {} \
             --storage-size {} -u {} --version {} --tags keys=3 \
             --public-access None --location {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
-                                                                                                        resource_group, server_name, sku_name, tier, storage_size,
+                                                                                                        resource_group, server_name, sku_name, tier, storage_size_gb,
                                                                                                         'dbadmin', invalid_version, location, data_source_type, data_source, mode),
                                                                                                         expect_failure=True)
 
@@ -273,7 +273,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server import create -g {} -n {} --sku-name {} --tier {} \
             --storage-size {} -u {} --version {} --tags keys=3 \
             --public-access None --location {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
-                                                                                                        invalid_resource_group, server_name, sku_name, tier, storage_size,
+                                                                                                        invalid_resource_group, server_name, sku_name, tier, storage_size_gb,
                                                                                                         'dbadmin', version, location, data_source_type, data_source, mode),
                                                                                                         expect_failure=True)
 
@@ -282,7 +282,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server import create -g {} -n {} --sku-name {} --tier {} \
             --storage-size {} -u {} --version {} --tags keys=3 \
             --public-access None --location {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
-                                                                                                        resource_group, server_name, sku_name, tier, storage_size,
+                                                                                                        resource_group, server_name, sku_name, tier, storage_size_gb,
                                                                                                         'dbadmin', version, location, data_source_type, invalid_data_source_name, mode),
                                                                                                         expect_failure=True)
 
@@ -293,7 +293,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server import create -g {} -n {} --sku-name {} --tier {} \
             --storage-size {} -u {} --version {} --tags keys=3 \
             --public-access None --location {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
-                                                                                                        resource_group, server_name, sku_name, tier, storage_size,
+                                                                                                        resource_group, server_name, sku_name, tier, storage_size_gb,
                                                                                                         'dbadmin', version, location, data_source_type, invalid_data_source_resource_id, mode),
                                                                                                         expect_failure=True)
 
