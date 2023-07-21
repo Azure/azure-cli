@@ -2178,7 +2178,7 @@ def update_app_service_plan(instance, sku=None, number_of_workers=None, elastic_
 def show_plan(cmd, resource_group_name, name):
     from azure.cli.core.commands.client_factory import get_subscription_id
     client = web_client_factory(cmd.cli_ctx)
-    serverfarm_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/serverfarms/{}?api-version={}'
+    serverfarm_url_base = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/serverfarms/{}?api-version={}'
     subscription_id = get_subscription_id(cmd.cli_ctx)
     serverfarm_url = serverfarm_url_base.format(subscription_id, resource_group_name, name, client.DEFAULT_API_VERSION)
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + serverfarm_url
@@ -5462,7 +5462,7 @@ def add_github_actions(cmd, resource_group, name, repo, runtime=None, token=None
         cmd=cmd, resource_group=resource_group, name=name, slot=slot, is_linux=is_linux)
 
     app_runtime_string = None
-    if(app_runtime_info and app_runtime_info['display_name']):
+    if (app_runtime_info and app_runtime_info['display_name']):
         app_runtime_string = app_runtime_info['display_name']
 
     github_actions_version = None

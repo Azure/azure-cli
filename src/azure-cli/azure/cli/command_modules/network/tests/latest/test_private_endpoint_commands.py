@@ -4204,3 +4204,119 @@ class NetworkPrivateLinkCloudHsmClustersScenarioTest(ScenarioTest):
         # clear resources
         self.cmd('network private-endpoint delete -g {rg} -n {pe}')
         self.cmd('az resource delete --name {chsm_name} -g {rg} --resource-type {type}')
+
+class NetworkPrivateLinkCosmosDBPostgresScenarioTest(ScenarioTest):
+            
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_pg')
+    def test_private_link_resource_cosmosdb_postgres(self, resource_group):
+        self.kwargs.update({
+            'cluster_name': self.create_random_name(prefix='cli', length=10),
+            'loc': 'westus',
+            'storage': 131072,
+            'pass': 'aBcD1234!@#$',
+        })
+
+        self.cmd('az cosmosdb postgres cluster create '
+                '--name {cluster_name} -g {rg} -l {loc} --coordinator-v-cores 4 '
+                '--coordinator-server-edition "GeneralPurpose" --node-count 0 '
+                '--coordinator-storage-quota-in-mb {storage} '
+                '--administrator-login-password {pass} '
+                )
+        
+        self.cmd('az cosmosdb postgres cluster wait --created -n {cluster_name} -g {rg}')
+
+        self.cmd('az network private-link-resource list --name {cluster_name} --resource-group {rg} --type Microsoft.DBforPostgreSQL/serverGroupsv2',
+                 checks=[self.check('length(@)', 1), self.check('[0].properties.groupId', 'coordinator')])
+
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_pg', random_name_length=30)
+    def test_private_endpoint_connection_cosmosdb_postgres(self, resource_group):
+        from azure.mgmt.core.tools import resource_id
+        namespace = 'Microsoft.DBforPostgreSQL'
+        instance_type = 'serverGroupsv2'
+        resource_name = self.create_random_name(prefix='cli', length=10)
+        target_resource_id = resource_id(
+            subscription=self.get_subscription_id(),
+            resource_group=resource_group,
+            namespace=namespace,
+            type=instance_type,
+            name=resource_name,
+        )
+        self.kwargs.update({
+            'cluster_name': resource_name,
+            'target_resource_id': target_resource_id,
+            'loc': 'westus',
+            'storage': 131072,
+            'pass': 'aBcD1234!@#$',
+            'resource_type': 'Microsoft.DBforPostgreSQL/serverGroupsv2',
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24)
+        })
+
+        cluster = self.cmd('az cosmosdb postgres cluster create '
+                '--name {cluster_name} -g {rg} -l {loc} --coordinator-v-cores 4 '
+                '--coordinator-server-edition "GeneralPurpose" --node-count 0 '
+                '--coordinator-storage-quota-in-mb {storage} '
+                '--administrator-login-password {pass} '
+                ).get_output_in_json()
+        self.kwargs['cluster_id'] = cluster['id']
+        
+        self.cmd('az network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('az network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        target_private_link_resource = self.cmd('az network private-link-resource list --name {cluster_name} --resource-group {rg} --type {resource_type}').get_output_in_json()
+        self.kwargs.update({
+            'group_id': target_private_link_resource[0]['properties']['groupId']
+        })
+        # Create a private endpoint connection
+        pe = self.cmd(
+            'az network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} '
+            '--connection-name {pe_connection} --private-connection-resource-id {target_resource_id} '
+            '--group-id {group_id} --manual-request').get_output_in_json()
+        self.kwargs['pe_id'] = pe['id']
+        self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
+
+        # Show the connection at cosmos db side
+        list_private_endpoint_conn = self.cmd('az network private-endpoint-connection list --name {cluster_name} --resource-group {rg} --type {resource_type}').get_output_in_json()
+        self.kwargs.update({
+            "pec_id": list_private_endpoint_conn[0]['id']
+        })
+
+        self.kwargs.update({
+            "pec_name": self.kwargs['pec_id'].split('/')[-1]
+        })
+        self.cmd('az network private-endpoint-connection show --id {pec_id}',
+                 checks=self.check('id', '{pec_id}'))
+        self.cmd('az network private-endpoint-connection show --resource-name {cluster_name} -n {pec_name} -g {rg} --type {resource_type}')
+
+        self.cmd(
+            "az network private-endpoint-connection show --resource-name {cluster_name} -n {pec_name} -g {rg} --type {resource_type}",
+            checks=self.check('properties.privateLinkServiceConnectionState.status', 'Pending')
+        )
+
+        # Approve / reject private endpoint
+        self.kwargs.update({
+            'approval_desc': 'Approved.',
+            'rejection_desc': 'Rejected.'
+        })
+        self.cmd(
+            'az network private-endpoint-connection approve --resource-name {cluster_name} --resource-group {rg} --name {pec_name} --type {resource_type} '
+            '--description "{approval_desc}"', checks=[
+                self.check('properties.privateLinkServiceConnectionState.status', 'Approved')
+            ])
+        self.cmd('az network private-endpoint-connection reject --id {pec_id} '
+                 '--description "{rejection_desc}"',
+                 checks=[
+                     self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')
+                 ])
+        self.cmd('az network private-endpoint-connection list --name {cluster_name} --resource-group {rg} --type {resource_type}', checks=[
+            self.check('length(@)', 1)
+        ])
+
+        # Test delete
+        self.cmd('az network private-endpoint-connection delete --id {pec_id} -y')

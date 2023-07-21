@@ -497,8 +497,8 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     if enable_files_adds is not None:
         ActiveDirectoryProperties = cmd.get_models('ActiveDirectoryProperties')
         if enable_files_adds:  # enable AD
-            if not(domain_name and net_bios_domain_name and forest_name and domain_guid and domain_sid and
-                   azure_storage_sid):
+            if not (domain_name and net_bios_domain_name and forest_name and domain_guid and domain_sid and
+                    azure_storage_sid):
                 raise CLIError("To enable ActiveDirectoryDomainServicesForFile, user must specify all of: "
                                "--domain-name, --net-bios-domain-name, --forest-name, --domain-guid, --domain-sid and "
                                "--azure_storage_sid arguments in Azure Active Directory Properties Argument group.")

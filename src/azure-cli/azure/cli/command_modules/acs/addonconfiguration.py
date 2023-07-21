@@ -599,9 +599,9 @@ def validate_data_collection_settings(dataCollectionSettings):
         if isinstance(namspaces, list) is False:
             raise InvalidArgumentValueError('namespaces must be an array type')
     if 'enableContainerLogV2' in dataCollectionSettings.keys():
-        enableContainerLogV2Value = dataCollectionSettings["enableContainerLogV2"].lower()
-        if enableContainerLogV2Value not in ["true", "false"]:
-            raise InvalidArgumentValueError('enableContainerLogV2Value value MUST be either true or false')
+        enableContainerLogV2Value = dataCollectionSettings["enableContainerLogV2"]
+        if not isinstance(enableContainerLogV2Value, bool):
+            raise InvalidArgumentValueError('enableContainerLogV2Value value must be either true or false')
     if 'streams' in dataCollectionSettings.keys():
         streams = dataCollectionSettings["streams"]
         if isinstance(streams, list) is False:
