@@ -22,10 +22,10 @@ class ListDeletedWorkspaces(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-10-01",
+        "version": "2021-12-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.operationalinsights/deletedworkspaces", "2022-10-01"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/deletedworkspaces", "2022-10-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.operationalinsights/deletedworkspaces", "2021-12-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/deletedworkspaces", "2021-12-01-preview"],
         ]
     }
 
@@ -114,7 +114,7 @@ class ListDeletedWorkspaces(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-10-01",
+                    "api-version", "2021-12-01-preview",
                     required=True,
                 ),
             }
@@ -153,11 +153,12 @@ class ListDeletedWorkspaces(AAZCommand):
             value.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element
-            _element.etag = AAZStrType()
+            _element.e_tag = AAZStrType(
+                serialized_name="eTag",
+            )
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.identity = AAZObjectType()
             _element.location = AAZStrType(
                 flags={"required": True},
             )
@@ -173,35 +174,6 @@ class ListDeletedWorkspaces(AAZCommand):
             )
             _element.tags = AAZDictType()
             _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            identity = cls._schema_on_200.value.Element.identity
-            identity.principal_id = AAZStrType(
-                serialized_name="principalId",
-                flags={"read_only": True},
-            )
-            identity.tenant_id = AAZStrType(
-                serialized_name="tenantId",
-                flags={"read_only": True},
-            )
-            identity.type = AAZStrType(
-                flags={"required": True},
-            )
-            identity.user_assigned_identities = AAZDictType(
-                serialized_name="userAssignedIdentities",
-            )
-
-            user_assigned_identities = cls._schema_on_200.value.Element.identity.user_assigned_identities
-            user_assigned_identities.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.identity.user_assigned_identities.Element
-            _element.client_id = AAZStrType(
-                serialized_name="clientId",
-                flags={"read_only": True},
-            )
-            _element.principal_id = AAZStrType(
-                serialized_name="principalId",
                 flags={"read_only": True},
             )
 
@@ -271,14 +243,18 @@ class ListDeletedWorkspaces(AAZCommand):
             )
 
             private_link_scoped_resources = cls._schema_on_200.value.Element.properties.private_link_scoped_resources
-            private_link_scoped_resources.Element = AAZObjectType()
+            private_link_scoped_resources.Element = AAZObjectType(
+                flags={"read_only": True},
+            )
 
             _element = cls._schema_on_200.value.Element.properties.private_link_scoped_resources.Element
             _element.resource_id = AAZStrType(
                 serialized_name="resourceId",
+                flags={"read_only": True},
             )
             _element.scope_id = AAZStrType(
                 serialized_name="scopeId",
+                flags={"read_only": True},
             )
 
             sku = cls._schema_on_200.value.Element.properties.sku
@@ -309,21 +285,27 @@ class ListDeletedWorkspaces(AAZCommand):
             system_data = cls._schema_on_200.value.Element.system_data
             system_data.created_at = AAZStrType(
                 serialized_name="createdAt",
+                flags={"read_only": True},
             )
             system_data.created_by = AAZStrType(
                 serialized_name="createdBy",
+                flags={"read_only": True},
             )
             system_data.created_by_type = AAZStrType(
                 serialized_name="createdByType",
+                flags={"read_only": True},
             )
             system_data.last_modified_at = AAZStrType(
                 serialized_name="lastModifiedAt",
+                flags={"read_only": True},
             )
             system_data.last_modified_by = AAZStrType(
                 serialized_name="lastModifiedBy",
+                flags={"read_only": True},
             )
             system_data.last_modified_by_type = AAZStrType(
                 serialized_name="lastModifiedByType",
+                flags={"read_only": True},
             )
 
             tags = cls._schema_on_200.value.Element.tags
@@ -371,7 +353,7 @@ class ListDeletedWorkspaces(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-10-01",
+                    "api-version", "2021-12-01-preview",
                     required=True,
                 ),
             }
@@ -410,11 +392,12 @@ class ListDeletedWorkspaces(AAZCommand):
             value.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element
-            _element.etag = AAZStrType()
+            _element.e_tag = AAZStrType(
+                serialized_name="eTag",
+            )
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.identity = AAZObjectType()
             _element.location = AAZStrType(
                 flags={"required": True},
             )
@@ -430,35 +413,6 @@ class ListDeletedWorkspaces(AAZCommand):
             )
             _element.tags = AAZDictType()
             _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            identity = cls._schema_on_200.value.Element.identity
-            identity.principal_id = AAZStrType(
-                serialized_name="principalId",
-                flags={"read_only": True},
-            )
-            identity.tenant_id = AAZStrType(
-                serialized_name="tenantId",
-                flags={"read_only": True},
-            )
-            identity.type = AAZStrType(
-                flags={"required": True},
-            )
-            identity.user_assigned_identities = AAZDictType(
-                serialized_name="userAssignedIdentities",
-            )
-
-            user_assigned_identities = cls._schema_on_200.value.Element.identity.user_assigned_identities
-            user_assigned_identities.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.identity.user_assigned_identities.Element
-            _element.client_id = AAZStrType(
-                serialized_name="clientId",
-                flags={"read_only": True},
-            )
-            _element.principal_id = AAZStrType(
-                serialized_name="principalId",
                 flags={"read_only": True},
             )
 
@@ -528,14 +482,18 @@ class ListDeletedWorkspaces(AAZCommand):
             )
 
             private_link_scoped_resources = cls._schema_on_200.value.Element.properties.private_link_scoped_resources
-            private_link_scoped_resources.Element = AAZObjectType()
+            private_link_scoped_resources.Element = AAZObjectType(
+                flags={"read_only": True},
+            )
 
             _element = cls._schema_on_200.value.Element.properties.private_link_scoped_resources.Element
             _element.resource_id = AAZStrType(
                 serialized_name="resourceId",
+                flags={"read_only": True},
             )
             _element.scope_id = AAZStrType(
                 serialized_name="scopeId",
+                flags={"read_only": True},
             )
 
             sku = cls._schema_on_200.value.Element.properties.sku
@@ -566,21 +524,27 @@ class ListDeletedWorkspaces(AAZCommand):
             system_data = cls._schema_on_200.value.Element.system_data
             system_data.created_at = AAZStrType(
                 serialized_name="createdAt",
+                flags={"read_only": True},
             )
             system_data.created_by = AAZStrType(
                 serialized_name="createdBy",
+                flags={"read_only": True},
             )
             system_data.created_by_type = AAZStrType(
                 serialized_name="createdByType",
+                flags={"read_only": True},
             )
             system_data.last_modified_at = AAZStrType(
                 serialized_name="lastModifiedAt",
+                flags={"read_only": True},
             )
             system_data.last_modified_by = AAZStrType(
                 serialized_name="lastModifiedBy",
+                flags={"read_only": True},
             )
             system_data.last_modified_by_type = AAZStrType(
                 serialized_name="lastModifiedByType",
+                flags={"read_only": True},
             )
 
             tags = cls._schema_on_200.value.Element.tags
