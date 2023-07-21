@@ -122,3 +122,5 @@ FLEX_RUNTIMES = [
 ]
 
 FLEX_SUBNET_DELEGATION = "Microsoft.App/environments"
+
+DEFAULT_INSTANCE_SIZE = 2048

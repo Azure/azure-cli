@@ -80,7 +80,7 @@ from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERS
                          DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, LINUX_OS_NAME,
                          WINDOWS_OS_NAME, LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
                          WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, DEFAULT_CENTAURI_IMAGE,
-                         FLEX_RUNTIMES, FLEX_SUBNET_DELEGATION)
+                         FLEX_RUNTIMES, FLEX_SUBNET_DELEGATION, DEFAULT_INSTANCE_SIZE)
 from ._github_oauth import (get_github_access_token, cache_github_token)
 from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
 
@@ -3822,12 +3822,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                 'Please try again without the --os-type parameter or set --os-type to be linux.'
             )
 
-        if instance_size is None:
-            raise RequiredArgumentMissingError(
-                '--instance-size must be used with parameter --flexconsumption-location. '
-                'Please try again with the --instance-size parameter.'
-            )
-
         if functions_version != '4':
             raise ArgumentUsageError(
                 '--functions-version must be set to 4 for Azure Functions on the Flex Consumption plan. '
@@ -4099,8 +4093,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if maximum_instances:
         site_config.function_app_scale_limit = maximum_instances
 
-    if instance_size:
-        functionapp_def.container_size = instance_size
+    if flexconsumption_location is not None:
+        functionapp_def.container_size = instance_size or DEFAULT_INSTANCE_SIZE
 
     # temporary workaround for dotnet-isolated linux consumption apps
     if is_linux and consumption_plan_location is not None and runtime == 'dotnet-isolated':
