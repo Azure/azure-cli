@@ -340,9 +340,14 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         raise RequiredArgumentMissingError(
             'usage error: --upload-size-bytes should be used together with --upload-type')
 
-    log_message = 'Ignite (November) 2023 onwards "az disk create" command will deploy Gen2-Trusted Launch VM ' \
-                  'by default. To know more about the default change and Trusted Launch, ' \
-                  'please visit https://aka.ms/TLaD'
+    if security_type != "Standard":
+        log_message = 'Ignite (November) 2023 onwards "az disk create" command will deploy Gen2-Trusted Launch VM ' \
+                      'by default. To know more about the default change and Trusted Launch, ' \
+                      'please visit https://aka.ms/TLaD'
+    else:
+        log_message = 'Consider upgrading security for your workloads using Azure Trusted Launch VMs. ' \
+                      'To know more about Trusted Launch, please visit ' \
+                      'https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch.'
     if image_reference is not None:
         if not is_valid_resource_id(image_reference):
             # URN or name
@@ -502,10 +507,6 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk.security_profile = {'securityType': security_type}
         if secure_vm_disk_encryption_set:
             disk.security_profile['secure_vm_disk_encryption_set_id'] = secure_vm_disk_encryption_set
-    else:
-        logger.warning('Consider upgrading security for your workloads using Azure Trusted Launch VMs. '
-                       'To know more about Trusted Launch, please visit '
-                       'https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch.')
     if support_hibernation is not None:
         disk.supports_hibernation = support_hibernation
     if public_network_access is not None:
