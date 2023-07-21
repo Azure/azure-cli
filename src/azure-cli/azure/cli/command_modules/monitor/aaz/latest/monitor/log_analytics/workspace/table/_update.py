@@ -13,6 +13,9 @@ from azure.cli.core.aaz import *
 
 class Update(AAZCommand):
     """Update a Log Analytics workspace table.
+
+    :example: Update the properties of a Log Analytics workspace table.
+        az monitor log-analytics workspace table update --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable --retention-time 30
     """
 
     _aaz_info = {

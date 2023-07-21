@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Cancel(AAZCommand):
     """Cancel a log analytics workspace search results table query run.
+
+    :example: Cancel a log analytics workspace search results table query run.
+        az monitor log-analytics workspace table search-job cancel --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable_SRCH
     """
 
     _aaz_info = {

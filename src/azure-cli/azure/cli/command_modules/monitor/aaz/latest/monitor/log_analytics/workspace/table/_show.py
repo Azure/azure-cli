@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Get a Log Analytics workspace table.
+
+    :example: Get a Log Analytics workspace table
+        az monitor log-analytics workspace table show --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable
     """
 
     _aaz_info = {
