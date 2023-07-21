@@ -170,8 +170,7 @@ def load_command_table(self, _):
     with self.command_group('monitor log-analytics workspace', custom_command_type=log_analytics_workspace_custom) as g:
         g.custom_command('recover', 'recover_log_analytics_workspace', supports_no_wait=True)
 
-    with self.command_group('monitor log-analytics workspace table', custom_command_type=log_analytics_workspace_custom,
-                            is_preview=True) as g:
+    with self.command_group('monitor log-analytics workspace table', custom_command_type=log_analytics_workspace_custom) as g:
         g.custom_command('create', 'create_log_analytics_workspace_table', supports_no_wait=True)
         g.custom_command('update', 'update_log_analytics_workspace_table', supports_no_wait=True)
 
