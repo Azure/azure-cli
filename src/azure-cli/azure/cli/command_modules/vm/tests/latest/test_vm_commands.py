@@ -9524,7 +9524,9 @@ class CapacityReservationScenarioTest(ScenarioTest):
                  ])
 
         self.cmd('capacity reservation delete -c {reservation_group} -n {reservation_name} -g {rg} --yes')
-        time.sleep(60)
+        # make sure capacity reservation has been deleted before deleting capacity reservation group
+        if self.is_live:
+            time.sleep(60)
         self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
 
 
