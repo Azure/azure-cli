@@ -1057,7 +1057,7 @@ def _get_deployment_management_client(cli_ctx, aux_subscriptions=None, aux_tenan
 
 def _prepare_stacks_deny_settings(rcf, deny_settings_mode):
     deny_settings_mode = None if deny_settings_mode.lower() == "none" else deny_settings_mode
-    deny_settings_enum = None
+    deny_settings_enum = rcf.deployment_stacks.models.DenySettingsMode.none
     if deny_settings_mode:
         if deny_settings_mode.lower().replace(' ', '') == "denydelete":
             deny_settings_enum = rcf.deployment_stacks.models.DenySettingsMode.deny_delete
@@ -2306,7 +2306,9 @@ def create_deployment_stack_at_subscription(cmd, name, location, deny_settings_m
             if get_subscription_response.location != location:
                 raise CLIError("Cannot change location of an already existing stack at subscription scope.")
             # bypass if yes flag is true
-            _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum)
+            built_string = _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum)
+            if not built_string:
+                return
     except:  # pylint: disable=bare-except
         pass
 
@@ -2427,7 +2429,9 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, deny_se
     # build confirmation string
     try:
         if rcf.deployment_stacks.get_at_resource_group(resource_group, name):
-            _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum)
+            built_string = _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum)
+            if not built_string:
+                return
     except:  # pylint: disable=bare-except
         pass
 
@@ -2541,7 +2545,6 @@ def create_deployment_stack_at_management_group(cmd, management_group_id, name, 
 
     excluded_principals_array = _prepare_stacks_excluded_principals(deny_settings_excluded_principals)
     excluded_actions_array = _prepare_stacks_excluded_actions(deny_settings_excluded_actions)
-    excluded_principals_array = []
 
     tags = tags or {}
 
@@ -2554,7 +2557,9 @@ def create_deployment_stack_at_management_group(cmd, management_group_id, name, 
     try:
         get_mg_response = rcf.deployment_stacks.get_at_management_group(management_group_id, name)
         if get_mg_response:
-            _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum)
+            built_string = _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum)
+            if not built_string:
+                return
     except:  # pylint: disable=bare-except
         pass
 

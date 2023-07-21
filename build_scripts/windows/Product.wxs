@@ -7,19 +7,61 @@
   <?define ProductDescription = "Command-line tools for Azure." ?>
   <?define ProductAuthor = "Microsoft Corporation" ?>
   <?define ProductResources = ".\resources\" ?>
+  <?define UpgradeCode32 = "dff82af0-3f95-4ac9-8efd-948604fdb028" ?>
+
+  <?if $(var.Platform) = "x64" ?>
+  <?define AzureCliRegistryGuid = "90b6367e-4e15-4313-af33-a0ef459a56fc" ?>
+  <?define AzureCliSystemPathGuid = "12c8f0dc-0475-4814-93b6-fcbe82e89532" ?>
+  <?define AzureCliVersionGuid = "4df4882f-4604-4cdc-a0b4-bffc4b8c5967" ?>
+  <?define ProgramFilesFolder = "ProgramFiles64Folder" ?>
+  <?define RemoveAzureCLIFolderGuid = "7ce8a521-7429-4ded-9cce-0948e393cc83" ?>
+  <?define RemoveCLIFolderGuid = "59fb416c-91d0-49aa-a185-d4330c435a93" ?>
+  <?define UpgradeCode = "90762fec-9554-4729-a107-c6a8ea316698" ?>
+  <?define Architecture = "64-bit" ?>
+
+  <?elseif $(var.Platform) = "x86" ?>
+  <?define AzureCliRegistryGuid = "BDEEE50E-70D3-4990-BFF9-FCF8114AA701" ?>
+  <?define AzureCliSystemPathGuid = "3B60CA67-DB92-465A-BC96-3CA6CAEFF41B" ?>
+  <?define AzureCliVersionGuid = "A5647E93-02B7-4CED-802A-DDD7416E0231" ?>
+  <?define ProgramFilesFolder = "ProgramFilesFolder" ?>
+  <?define RemoveAzureCLIFolderGuid = "6AF97701-6A7A-4292-95D6-ED34CD4C97C0" ?>
+  <?define RemoveCLIFolderGuid = "24DA394D-B03D-4623-A0D9-852DB51EF9F4" ?>
+  <?define UpgradeCode = $(var.UpgradeCode32) ?>
+  <?define Architecture = "32-bit" ?>
+
+  <?else ?>
+  <?error Unsupported platform "$(var.Platform)" ?>
+  <?endif ?>
 
   <Product Id="*"
-           Name="$(var.ProductName)"
+           Name="$(var.ProductName) ($(var.Architecture))"
            Language="1033"
            Version="$(var.ProductVersion)"
            Manufacturer="$(var.ProductAuthor)"
-           UpgradeCode="dff82af0-3f95-4ac9-8efd-948604fdb028">
+           UpgradeCode="$(var.UpgradeCode)">
 
     <Package InstallerVersion="200"
              Compressed="yes"
              InstallScope="perMachine" />
 
-    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." Schedule="afterInstallExecute" />
+    <Upgrade Id="$(var.UpgradeCode)">
+      <UpgradeVersion Property="WIX_UPGRADE_DETECTED" Maximum="$(var.ProductVersion)" IncludeMaximum="no" MigrateFeatures="yes" />
+      <UpgradeVersion Property="WIX_DOWNGRADE_DETECTED" Minimum="$(var.ProductVersion)" IncludeMinimum="no" OnlyDetect="yes" />
+    </Upgrade>
+    <InstallExecuteSequence>
+      <RemoveExistingProducts After="InstallExecute" />
+    </InstallExecuteSequence>
+
+    <!-- New product architectures should upgrade the original x86 product - even of the same version. -->
+    <?if $(var.UpgradeCode) != $(var.UpgradeCode32) ?>
+    <Upgrade Id="$(var.UpgradeCode32)">
+      <UpgradeVersion Property="WIX_X86_UPGRADE_DETECTED" Maximum="$(var.ProductVersion)" IncludeMaximum="yes" MigrateFeatures="yes" />
+      <UpgradeVersion Property="WIX_X86_DOWNGRADE_DETECTED" Minimum="$(var.ProductVersion)" IncludeMinimum="no" OnlyDetect="yes" />
+    </Upgrade>
+    <Condition Message="A newer version of $(var.ProductName) is already installed.">NOT (WIX_DOWNGRADE_DETECTED OR WIX_X86_DOWNGRADE_DETECTED)</Condition>
+    <?else ?>
+    <Condition Message="A newer version of $(var.ProductName) is already installed.">NOT WIX_DOWNGRADE_DETECTED</Condition>
+    <?endif ?>
 
     <Media Id="1" Cabinet="WindowsAzureCLI.cab" EmbedCab="yes" CompressionLevel="high" />
 
@@ -61,7 +103,7 @@
 
   <Fragment>
     <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="ProgramFilesFolder">
+      <Directory Id="$(var.ProgramFilesFolder)">
         <Directory Id="SDKFOLDER" Name="Microsoft SDKs">
           <Directory Id="AZUREFOLDER" Name="Azure">
             <Directory Id="AZURECLIFOLDER" Name="CLI2">
@@ -78,17 +120,17 @@
     <ComponentGroup Id="AzureCliSettingsGroup">
       <Component Id="RemoveCLIFolder"
                  Directory="DynamicCliDir"
-                 Guid="{24DA394D-B03D-4623-A0D9-852DB51EF9F4}">
+                 Guid="$(var.RemoveCLIFolderGuid)">
         <RemoveFolder Id="DynamicCliDir" On="uninstall" />
       </Component>
       <Component Id="RemoveAzureCLIFolder"
                  Directory="AZURECLIFOLDER"
-                 Guid="{6AF97701-6A7A-4292-95D6-ED34CD4C97C0}">
+                 Guid="$(var.RemoveAzureCLIFolderGuid)">
         <RemoveFolder Id="AZURECLIFOLDER" On="uninstall" />
       </Component>
       <Component Id="AzureCliSystemPath"
                  Directory="DynamicCliDir"
-                 Guid="{3B60CA67-DB92-465A-BC96-3CA6CAEFF41B}">
+                 Guid="$(var.AzureCliSystemPathGuid)">
         <Environment Id="AzureCliAddedToPATH"
                      Name="PATH"
                      Value="[DynamicCliDir]wbin"
@@ -100,7 +142,7 @@
       </Component>
       <Component Id="AzureCliRegistry"
                  Directory="DynamicCliDir"
-                 Guid="{BDEEE50E-70D3-4990-BFF9-FCF8114AA701}">
+                 Guid="$(var.AzureCliRegistryGuid)">
         <RegistryValue Root="HKCU"
                        Key="Software\Microsoft\$(var.ProductName)"
                        Name="installed"
@@ -110,7 +152,7 @@
       </Component>
       <Component Id="AzureCliVersion"
                  Directory="DynamicCliDir"
-                 Guid="{A5647E93-02B7-4CED-802A-DDD7416E0231}">
+                 Guid="$(var.AzureCliVersionGuid)">
         <RegistryValue Root="HKLM"
                        Key="Software\Microsoft\$(var.ProductName)"
                        Name="version"
