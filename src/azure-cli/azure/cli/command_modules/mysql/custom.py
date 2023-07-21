@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-
+# import json
 import re
 from datetime import datetime, timedelta
 from dateutil.tz import tzutc
@@ -56,6 +56,53 @@ def server_list_custom_func(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
     return client.list()
+
+
+def flexible_server_threat_model_update(cmd, client, resource_group_name,
+                                        server_name,
+                                        defender_state,
+                                        advanced_threat_protection_name,
+                                        subscription_id=None
+                                        ):
+
+    allowed_defender_name_values = [mysql_flexibleservers.models.AdvancedThreatProtectionName.DEFAULT.value]
+    if advanced_threat_protection_name not in allowed_defender_name_values:
+        raise ValueError("Invalid defender protection name provided, Allowed value - {}".format(allowed_defender_name_values))
+
+    allowed_defender_state_values = [mysql_flexibleservers.models.AdvancedThreatProtectionState.ENABLED.value, mysql_flexibleservers.models.AdvancedThreatProtectionState.DISABLED.value]
+    if defender_state not in allowed_defender_state_values:
+        raise ValueError("Invalid defender state provided , Allowed value - {}".format(allowed_defender_state_values))
+
+    parameters = {
+        'state': defender_state
+    }
+    return client.begin_update(resource_group_name, server_name, advanced_threat_protection_name, parameters)
+
+
+def flexible_server_threat_model_list(cmd, client, resource_group_name, server_name, subscription_id=None):
+
+    if not resource_group_name:
+        raise ValueError("Invalid resource group name provided.")
+
+    if not server_name:
+        raise ValueError("Invalid server name provided.")
+
+    return client.list(resource_group_name, server_name)
+
+
+def flexible_server_threat_model_show(cmd, client, resource_group_name, server_name, advanced_threat_protection_name, subscription_id=None):
+
+    if resource_group_name is None:
+        raise ValueError("Invalid resource group name provided.")
+
+    if server_name is None:
+        raise ValueError("Invalid server name provided.")
+
+    allowed_defender_name_values = [mysql_flexibleservers.models.AdvancedThreatProtectionName.DEFAULT.value]
+    if advanced_threat_protection_name not in allowed_defender_name_values:
+        raise ValueError("Invalid defender protection name provided, Allowed value - {}".format(allowed_defender_name_values))
+
+    return client.get(resource_group_name, server_name, advanced_threat_protection_name)
 
 
 def firewall_rule_delete_func(cmd, client, resource_group_name, server_name, firewall_rule_name, yes=None):

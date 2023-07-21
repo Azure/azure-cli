@@ -13,7 +13,8 @@ from azure.cli.command_modules.mysql._client_factory import (
     cf_mysql_flexible_location_capabilities,
     cf_mysql_flexible_log,
     cf_mysql_flexible_backups,
-    cf_mysql_flexible_adadmin)
+    cf_mysql_flexible_adadmin,
+    cf_mysql_advanced_threat_protection)
 from ._transformers import (
     table_transform_output,
     table_transform_output_list_servers,
@@ -71,8 +72,20 @@ def load_command_table(self, _):
         client_factory=cf_mysql_flexible_adadmin
     )
 
+    mysql_advanced_threat_protection = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#AdvancedThreatProtectionSettingsOperations.{}',
+        client_factory=cf_mysql_advanced_threat_protection
+    )
+
     # MERU COMMANDS
     mysql_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.mysql.custom#{}')
+
+    with self.command_group('mysql flexible-server threat-protection', mysql_advanced_threat_protection,
+                            custom_command_type=mysql_custom,
+                            client_factory=cf_mysql_advanced_threat_protection) as g:
+        g.custom_command('update', 'flexible_server_threat_model_update')
+        g.custom_show_command('show', 'flexible_server_threat_model_show')
+        g.custom_command('list', 'flexible_server_threat_model_list', table_transformer=table_transform_output)
 
     with self.command_group('mysql flexible-server', mysql_flexible_servers_sdk,
                             custom_command_type=mysql_custom,
