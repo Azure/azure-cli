@@ -2,10 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=unused-argument
-from binascii import hexlify
-from os import urandom
-
 from knack.log import get_logger
 
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
