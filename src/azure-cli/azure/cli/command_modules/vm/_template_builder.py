@@ -633,10 +633,6 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
     # after changing the default values to Trusted Launch VMs in the future.
     if security_type is not None and security_type != "Standard":
         vm_properties['securityProfile']['securityType'] = security_type
-    else:
-        logger.warning('Consider upgrading security for your workloads using Azure Trusted Launch VMs. '
-                       'To know more about Trusted Launch, please visit '
-                       'https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch.')
 
     if enable_secure_boot is not None or enable_vtpm is not None:
         vm_properties['securityProfile']['uefiSettings'] = {
@@ -1390,10 +1386,6 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     # after changing the default values to Trusted Launch VMs in the future.
     if security_type is not None and security_type != "Standard":
         security_profile['securityType'] = security_type
-    else:
-        logger.warning('Consider upgrading security for your workloads using Azure Trusted Launch VMs. '
-                       'To know more about Trusted Launch, please visit '
-                       'https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch.')
 
     if enable_secure_boot is not None or enable_vtpm is not None:
         security_profile['uefiSettings'] = {
