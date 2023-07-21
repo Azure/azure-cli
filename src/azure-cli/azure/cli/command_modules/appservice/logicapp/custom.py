@@ -214,7 +214,7 @@ def scale_logicapp(cmd, resource_group_name, name, minimum_instance_count=None, 
                                  function_app_scale_limit=maximum_instance_count,
                                  minimum_elastic_instance_count=minimum_instance_count)
 
-
+# pylint: disable=unused-argument
 def update_logicapp_scale(cmd, resource_group_name, name, slot=None,
                           function_app_scale_limit=None,
                           minimum_elastic_instance_count=None):
