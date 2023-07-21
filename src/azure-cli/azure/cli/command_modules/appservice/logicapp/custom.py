@@ -52,7 +52,7 @@ def create_logicapp(cmd, resource_group_name, name, storage_account, plan=None,
     if not deployment_container_image_name:
         runtime = DEFAULT_LOGICAPP_RUNTIME
         if runtime_version is None:
-            runtime_version=DEFAULT_LOGICAPP_RUNTIME_VERSION
+            runtime_version = DEFAULT_LOGICAPP_RUNTIME_VERSION
 
     if deployment_source_url and deployment_local_git:
         raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
