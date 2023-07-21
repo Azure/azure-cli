@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "monitor log-analytics workspace table update",
-)
 class Update(AAZCommand):
     """Update a Log Analytics workspace table.
     """
@@ -26,8 +23,6 @@ class Update(AAZCommand):
     }
 
     AZ_SUPPORT_NO_WAIT = True
-
-    AZ_SUPPORT_GENERIC_UPDATE = True
 
     def _handler(self, command_args):
         super()._handler(command_args)
@@ -72,20 +67,17 @@ class Update(AAZCommand):
             options=["--plan"],
             arg_group="Properties",
             help="Instruct the system how to handle and charge the logs ingested to this table.",
-            nullable=True,
             enum={"Analytics": "Analytics", "Basic": "Basic"},
         )
-        _args_schema.restored_logs = AAZObjectArg(
-            options=["--restored-logs"],
+        _args_schema.restore = AAZObjectArg(
+            options=["--restore"],
             arg_group="Properties",
             help="Parameters of the restore operation that initiated this table.",
-            nullable=True,
         )
-        _args_schema.retention_in_days = AAZIntArg(
-            options=["--retention-in-days"],
+        _args_schema.retention_time = AAZIntArg(
+            options=["--retention-time"],
             arg_group="Properties",
             help="The table retention in days, between 4 and 730. Setting this property to -1 will default to the workspace retention.",
-            nullable=True,
             fmt=AAZIntArgFormat(
                 maximum=730,
                 minimum=4,
@@ -95,134 +87,107 @@ class Update(AAZCommand):
             options=["--schema"],
             arg_group="Properties",
             help="Table schema.",
-            nullable=True,
         )
-        _args_schema.search_results = AAZObjectArg(
-            options=["--search-results"],
+        _args_schema.search_job = AAZObjectArg(
+            options=["--search-job"],
             arg_group="Properties",
             help="Parameters of the search job that initiated this table.",
-            nullable=True,
         )
-        _args_schema.total_retention_in_days = AAZIntArg(
-            options=["--total-retention-in-days"],
+        _args_schema.total_retention_time = AAZIntArg(
+            options=["--total-retention-time"],
             arg_group="Properties",
             help="The table total retention in days, between 4 and 2555. Setting this property to -1 will default to table retention.",
-            nullable=True,
             fmt=AAZIntArgFormat(
                 maximum=2555,
                 minimum=4,
             ),
         )
 
-        restored_logs = cls._args_schema.restored_logs
-        restored_logs.end_restore_time = AAZDateTimeArg(
+        restore = cls._args_schema.restore
+        restore.end_restore_time = AAZDateTimeArg(
             options=["end-restore-time"],
             help="The timestamp to end the restore by (UTC).",
-            nullable=True,
         )
-        restored_logs.source_table = AAZStrArg(
+        restore.source_table = AAZStrArg(
             options=["source-table"],
             help="The table to restore data from.",
-            nullable=True,
         )
-        restored_logs.start_restore_time = AAZDateTimeArg(
+        restore.start_restore_time = AAZDateTimeArg(
             options=["start-restore-time"],
             help="The timestamp to start the restore from (UTC).",
-            nullable=True,
         )
 
         schema = cls._args_schema.schema
         schema.columns = AAZListArg(
             options=["columns"],
             help="A list of table custom columns.",
-            nullable=True,
         )
         schema.description = AAZStrArg(
             options=["description"],
             help="Table description.",
-            nullable=True,
         )
         schema.display_name = AAZStrArg(
             options=["display-name"],
             help="Table display name.",
-            nullable=True,
         )
         schema.name = AAZStrArg(
             options=["name"],
             help="Table name.",
-            nullable=True,
         )
 
         columns = cls._args_schema.schema.columns
-        columns.Element = AAZObjectArg(
-            nullable=True,
-        )
+        columns.Element = AAZObjectArg()
 
         _element = cls._args_schema.schema.columns.Element
         _element.data_type_hint = AAZStrArg(
             options=["data-type-hint"],
             help="Column data type logical hint.",
-            nullable=True,
             enum={"armPath": "armPath", "guid": "guid", "ip": "ip", "uri": "uri"},
         )
         _element.description = AAZStrArg(
             options=["description"],
             help="Column description.",
-            nullable=True,
         )
         _element.display_name = AAZStrArg(
             options=["display-name"],
             help="Column display name.",
-            nullable=True,
         )
         _element.name = AAZStrArg(
             options=["name"],
             help="Column name.",
-            nullable=True,
         )
         _element.type = AAZStrArg(
             options=["type"],
             help="Column data type.",
-            nullable=True,
             enum={"boolean": "boolean", "dateTime": "dateTime", "dynamic": "dynamic", "guid": "guid", "int": "int", "long": "long", "real": "real", "string": "string"},
         )
 
-        search_results = cls._args_schema.search_results
-        search_results.description = AAZStrArg(
+        search_job = cls._args_schema.search_job
+        search_job.description = AAZStrArg(
             options=["description"],
             help="Search job Description.",
-            nullable=True,
         )
-        search_results.end_search_time = AAZDateTimeArg(
+        search_job.end_search_time = AAZDateTimeArg(
             options=["end-search-time"],
             help="The timestamp to end the search by (UTC)",
-            nullable=True,
         )
-        search_results.limit = AAZIntArg(
+        search_job.limit = AAZIntArg(
             options=["limit"],
             help="Limit the search job to return up to specified number of rows.",
-            nullable=True,
         )
-        search_results.query = AAZStrArg(
+        search_job.query = AAZStrArg(
             options=["query"],
             help="Search job query.",
-            nullable=True,
         )
-        search_results.start_search_time = AAZDateTimeArg(
+        search_job.start_search_time = AAZDateTimeArg(
             options=["start-search-time"],
             help="The timestamp to start the search from (UTC)",
-            nullable=True,
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.TablesGet(ctx=self.ctx)()
-        self.pre_instance_update(self.ctx.vars.instance)
-        self.InstanceUpdateByJson(ctx=self.ctx)()
-        self.InstanceUpdateByGeneric(ctx=self.ctx)()
-        self.post_instance_update(self.ctx.vars.instance)
-        yield self.TablesCreateOrUpdate(ctx=self.ctx)()
+        yield self.TablesUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -233,106 +198,11 @@ class Update(AAZCommand):
     def post_operations(self):
         pass
 
-    @register_callback
-    def pre_instance_update(self, instance):
-        pass
-
-    @register_callback
-    def post_instance_update(self, instance):
-        pass
-
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class TablesGet(AAZHttpOperation):
-        CLIENT_TYPE = "MgmtClient"
-
-        def __call__(self, *args, **kwargs):
-            request = self.make_request()
-            session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [200]:
-                return self.on_200(session)
-
-            return self.on_error(session.http_response)
-
-        @property
-        def url(self):
-            return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/tables/{tableName}",
-                **self.url_parameters
-            )
-
-        @property
-        def method(self):
-            return "GET"
-
-        @property
-        def error_format(self):
-            return "MgmtErrorFormat"
-
-        @property
-        def url_parameters(self):
-            parameters = {
-                **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "tableName", self.ctx.args.table_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "workspaceName", self.ctx.args.workspace_name,
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def query_parameters(self):
-            parameters = {
-                **self.serialize_query_param(
-                    "api-version", "2022-10-01",
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def header_parameters(self):
-            parameters = {
-                **self.serialize_header_param(
-                    "Accept", "application/json",
-                ),
-            }
-            return parameters
-
-        def on_200(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200
-            )
-
-        _schema_on_200 = None
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
-
-            cls._schema_on_200 = AAZObjectType()
-            _UpdateHelper._build_schema_table_read(cls._schema_on_200)
-
-            return cls._schema_on_200
-
-    class TablesCreateOrUpdate(AAZHttpOperation):
+    class TablesUpdate(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -368,7 +238,7 @@ class Update(AAZCommand):
 
         @property
         def method(self):
-            return "PUT"
+            return "PATCH"
 
         @property
         def error_format(self):
@@ -422,52 +292,19 @@ class Update(AAZCommand):
         def content(self):
             _content_value, _builder = self.new_content_builder(
                 self.ctx.args,
-                value=self.ctx.vars.instance,
-            )
-
-            return self.serialize_content(_content_value)
-
-        def on_200(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200
-            )
-
-        _schema_on_200 = None
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
-
-            cls._schema_on_200 = AAZObjectType()
-            _UpdateHelper._build_schema_table_read(cls._schema_on_200)
-
-            return cls._schema_on_200
-
-    class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
-
-        def __call__(self, *args, **kwargs):
-            self._update_instance(self.ctx.vars.instance)
-
-        def _update_instance(self, instance):
-            _instance_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                value=instance,
-                typ=AAZObjectType
+                typ=AAZObjectType,
+                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("plan", AAZStrType, ".plan")
-                properties.set_prop("restoredLogs", AAZObjectType, ".restored_logs")
-                properties.set_prop("retentionInDays", AAZIntType, ".retention_in_days")
+                properties.set_prop("restoredLogs", AAZObjectType, ".restore")
+                properties.set_prop("retentionInDays", AAZIntType, ".retention_time")
                 properties.set_prop("schema", AAZObjectType, ".schema")
-                properties.set_prop("searchResults", AAZObjectType, ".search_results")
-                properties.set_prop("totalRetentionInDays", AAZIntType, ".total_retention_in_days")
+                properties.set_prop("searchResults", AAZObjectType, ".search_job")
+                properties.set_prop("totalRetentionInDays", AAZIntType, ".total_retention_time")
 
             restored_logs = _builder.get(".properties.restoredLogs")
             if restored_logs is not None:
@@ -502,15 +339,199 @@ class Update(AAZCommand):
                 search_results.set_prop("query", AAZStrType, ".query")
                 search_results.set_prop("startSearchTime", AAZStrType, ".start_search_time")
 
-            return _instance_value
+            return self.serialize_content(_content_value)
 
-    class InstanceUpdateByGeneric(AAZGenericInstanceUpdateOperation):
-
-        def __call__(self, *args, **kwargs):
-            self._update_instance_by_generic(
-                self.ctx.vars.instance,
-                self.ctx.generic_update_args
+        def on_200(self, session):
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200
             )
+
+        _schema_on_200 = None
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
+
+            cls._schema_on_200 = AAZObjectType()
+
+            _schema_on_200 = cls._schema_on_200
+            _schema_on_200.id = AAZStrType(
+                flags={"read_only": True},
+            )
+            _schema_on_200.name = AAZStrType(
+                flags={"read_only": True},
+            )
+            _schema_on_200.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _schema_on_200.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
+            _schema_on_200.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200.properties
+            properties.archive_retention_in_days = AAZIntType(
+                serialized_name="archiveRetentionInDays",
+                flags={"read_only": True},
+            )
+            properties.last_plan_modified_date = AAZStrType(
+                serialized_name="lastPlanModifiedDate",
+                flags={"read_only": True},
+            )
+            properties.plan = AAZStrType()
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+            properties.restored_logs = AAZObjectType(
+                serialized_name="restoredLogs",
+            )
+            properties.result_statistics = AAZObjectType(
+                serialized_name="resultStatistics",
+            )
+            properties.retention_in_days = AAZIntType(
+                serialized_name="retentionInDays",
+            )
+            properties.retention_in_days_as_default = AAZBoolType(
+                serialized_name="retentionInDaysAsDefault",
+                flags={"read_only": True},
+            )
+            properties.schema = AAZObjectType()
+            properties.search_results = AAZObjectType(
+                serialized_name="searchResults",
+            )
+            properties.total_retention_in_days = AAZIntType(
+                serialized_name="totalRetentionInDays",
+            )
+            properties.total_retention_in_days_as_default = AAZBoolType(
+                serialized_name="totalRetentionInDaysAsDefault",
+                flags={"read_only": True},
+            )
+
+            restored_logs = cls._schema_on_200.properties.restored_logs
+            restored_logs.azure_async_operation_id = AAZStrType(
+                serialized_name="azureAsyncOperationId",
+                flags={"read_only": True},
+            )
+            restored_logs.end_restore_time = AAZStrType(
+                serialized_name="endRestoreTime",
+            )
+            restored_logs.source_table = AAZStrType(
+                serialized_name="sourceTable",
+            )
+            restored_logs.start_restore_time = AAZStrType(
+                serialized_name="startRestoreTime",
+            )
+
+            result_statistics = cls._schema_on_200.properties.result_statistics
+            result_statistics.ingested_records = AAZIntType(
+                serialized_name="ingestedRecords",
+                flags={"read_only": True},
+            )
+            result_statistics.progress = AAZFloatType(
+                flags={"read_only": True},
+            )
+            result_statistics.scanned_gb = AAZFloatType(
+                serialized_name="scannedGb",
+                flags={"read_only": True},
+            )
+
+            schema = cls._schema_on_200.properties.schema
+            schema.categories = AAZListType(
+                flags={"read_only": True},
+            )
+            schema.columns = AAZListType()
+            schema.description = AAZStrType()
+            schema.display_name = AAZStrType(
+                serialized_name="displayName",
+            )
+            schema.labels = AAZListType(
+                flags={"read_only": True},
+            )
+            schema.name = AAZStrType()
+            schema.solutions = AAZListType(
+                flags={"read_only": True},
+            )
+            schema.source = AAZStrType(
+                flags={"read_only": True},
+            )
+            schema.standard_columns = AAZListType(
+                serialized_name="standardColumns",
+                flags={"read_only": True},
+            )
+            schema.table_sub_type = AAZStrType(
+                serialized_name="tableSubType",
+                flags={"read_only": True},
+            )
+            schema.table_type = AAZStrType(
+                serialized_name="tableType",
+                flags={"read_only": True},
+            )
+
+            categories = cls._schema_on_200.properties.schema.categories
+            categories.Element = AAZStrType()
+
+            columns = cls._schema_on_200.properties.schema.columns
+            columns.Element = AAZObjectType()
+            _UpdateHelper._build_schema_column_read(columns.Element)
+
+            labels = cls._schema_on_200.properties.schema.labels
+            labels.Element = AAZStrType()
+
+            solutions = cls._schema_on_200.properties.schema.solutions
+            solutions.Element = AAZStrType()
+
+            standard_columns = cls._schema_on_200.properties.schema.standard_columns
+            standard_columns.Element = AAZObjectType()
+            _UpdateHelper._build_schema_column_read(standard_columns.Element)
+
+            search_results = cls._schema_on_200.properties.search_results
+            search_results.azure_async_operation_id = AAZStrType(
+                serialized_name="azureAsyncOperationId",
+                flags={"read_only": True},
+            )
+            search_results.description = AAZStrType()
+            search_results.end_search_time = AAZStrType(
+                serialized_name="endSearchTime",
+            )
+            search_results.limit = AAZIntType()
+            search_results.query = AAZStrType()
+            search_results.source_table = AAZStrType(
+                serialized_name="sourceTable",
+                flags={"read_only": True},
+            )
+            search_results.start_search_time = AAZStrType(
+                serialized_name="startSearchTime",
+            )
+
+            system_data = cls._schema_on_200.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
+            )
+
+            return cls._schema_on_200
 
 
 class _UpdateHelper:
@@ -558,199 +579,6 @@ class _UpdateHelper:
         _schema.is_hidden = cls._schema_column_read.is_hidden
         _schema.name = cls._schema_column_read.name
         _schema.type = cls._schema_column_read.type
-
-    _schema_table_read = None
-
-    @classmethod
-    def _build_schema_table_read(cls, _schema):
-        if cls._schema_table_read is not None:
-            _schema.id = cls._schema_table_read.id
-            _schema.name = cls._schema_table_read.name
-            _schema.properties = cls._schema_table_read.properties
-            _schema.system_data = cls._schema_table_read.system_data
-            _schema.type = cls._schema_table_read.type
-            return
-
-        cls._schema_table_read = _schema_table_read = AAZObjectType()
-
-        table_read = _schema_table_read
-        table_read.id = AAZStrType(
-            flags={"read_only": True},
-        )
-        table_read.name = AAZStrType(
-            flags={"read_only": True},
-        )
-        table_read.properties = AAZObjectType(
-            flags={"client_flatten": True},
-        )
-        table_read.system_data = AAZObjectType(
-            serialized_name="systemData",
-            flags={"read_only": True},
-        )
-        table_read.type = AAZStrType(
-            flags={"read_only": True},
-        )
-
-        properties = _schema_table_read.properties
-        properties.archive_retention_in_days = AAZIntType(
-            serialized_name="archiveRetentionInDays",
-            flags={"read_only": True},
-        )
-        properties.last_plan_modified_date = AAZStrType(
-            serialized_name="lastPlanModifiedDate",
-            flags={"read_only": True},
-        )
-        properties.plan = AAZStrType()
-        properties.provisioning_state = AAZStrType(
-            serialized_name="provisioningState",
-            flags={"read_only": True},
-        )
-        properties.restored_logs = AAZObjectType(
-            serialized_name="restoredLogs",
-        )
-        properties.result_statistics = AAZObjectType(
-            serialized_name="resultStatistics",
-        )
-        properties.retention_in_days = AAZIntType(
-            serialized_name="retentionInDays",
-        )
-        properties.retention_in_days_as_default = AAZBoolType(
-            serialized_name="retentionInDaysAsDefault",
-            flags={"read_only": True},
-        )
-        properties.schema = AAZObjectType()
-        properties.search_results = AAZObjectType(
-            serialized_name="searchResults",
-        )
-        properties.total_retention_in_days = AAZIntType(
-            serialized_name="totalRetentionInDays",
-        )
-        properties.total_retention_in_days_as_default = AAZBoolType(
-            serialized_name="totalRetentionInDaysAsDefault",
-            flags={"read_only": True},
-        )
-
-        restored_logs = _schema_table_read.properties.restored_logs
-        restored_logs.azure_async_operation_id = AAZStrType(
-            serialized_name="azureAsyncOperationId",
-            flags={"read_only": True},
-        )
-        restored_logs.end_restore_time = AAZStrType(
-            serialized_name="endRestoreTime",
-        )
-        restored_logs.source_table = AAZStrType(
-            serialized_name="sourceTable",
-        )
-        restored_logs.start_restore_time = AAZStrType(
-            serialized_name="startRestoreTime",
-        )
-
-        result_statistics = _schema_table_read.properties.result_statistics
-        result_statistics.ingested_records = AAZIntType(
-            serialized_name="ingestedRecords",
-            flags={"read_only": True},
-        )
-        result_statistics.progress = AAZFloatType(
-            flags={"read_only": True},
-        )
-        result_statistics.scanned_gb = AAZFloatType(
-            serialized_name="scannedGb",
-            flags={"read_only": True},
-        )
-
-        schema = _schema_table_read.properties.schema
-        schema.categories = AAZListType(
-            flags={"read_only": True},
-        )
-        schema.columns = AAZListType()
-        schema.description = AAZStrType()
-        schema.display_name = AAZStrType(
-            serialized_name="displayName",
-        )
-        schema.labels = AAZListType(
-            flags={"read_only": True},
-        )
-        schema.name = AAZStrType()
-        schema.solutions = AAZListType(
-            flags={"read_only": True},
-        )
-        schema.source = AAZStrType(
-            flags={"read_only": True},
-        )
-        schema.standard_columns = AAZListType(
-            serialized_name="standardColumns",
-            flags={"read_only": True},
-        )
-        schema.table_sub_type = AAZStrType(
-            serialized_name="tableSubType",
-            flags={"read_only": True},
-        )
-        schema.table_type = AAZStrType(
-            serialized_name="tableType",
-            flags={"read_only": True},
-        )
-
-        categories = _schema_table_read.properties.schema.categories
-        categories.Element = AAZStrType()
-
-        columns = _schema_table_read.properties.schema.columns
-        columns.Element = AAZObjectType()
-        cls._build_schema_column_read(columns.Element)
-
-        labels = _schema_table_read.properties.schema.labels
-        labels.Element = AAZStrType()
-
-        solutions = _schema_table_read.properties.schema.solutions
-        solutions.Element = AAZStrType()
-
-        standard_columns = _schema_table_read.properties.schema.standard_columns
-        standard_columns.Element = AAZObjectType()
-        cls._build_schema_column_read(standard_columns.Element)
-
-        search_results = _schema_table_read.properties.search_results
-        search_results.azure_async_operation_id = AAZStrType(
-            serialized_name="azureAsyncOperationId",
-            flags={"read_only": True},
-        )
-        search_results.description = AAZStrType()
-        search_results.end_search_time = AAZStrType(
-            serialized_name="endSearchTime",
-        )
-        search_results.limit = AAZIntType()
-        search_results.query = AAZStrType()
-        search_results.source_table = AAZStrType(
-            serialized_name="sourceTable",
-            flags={"read_only": True},
-        )
-        search_results.start_search_time = AAZStrType(
-            serialized_name="startSearchTime",
-        )
-
-        system_data = _schema_table_read.system_data
-        system_data.created_at = AAZStrType(
-            serialized_name="createdAt",
-        )
-        system_data.created_by = AAZStrType(
-            serialized_name="createdBy",
-        )
-        system_data.created_by_type = AAZStrType(
-            serialized_name="createdByType",
-        )
-        system_data.last_modified_at = AAZStrType(
-            serialized_name="lastModifiedAt",
-        )
-        system_data.last_modified_by = AAZStrType(
-            serialized_name="lastModifiedBy",
-        )
-        system_data.last_modified_by_type = AAZStrType(
-            serialized_name="lastModifiedByType",
-        )
-
-        _schema.id = cls._schema_table_read.id
-        _schema.name = cls._schema_table_read.name
-        _schema.properties = cls._schema_table_read.properties
-        _schema.system_data = cls._schema_table_read.system_data
-        _schema.type = cls._schema_table_read.type
 
 
 __all__ = ["Update"]

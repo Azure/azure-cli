@@ -511,7 +511,7 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check('schema.columns[1].name', 'TimeGenerated'),
             self.check('schema.columns[1].type', 'datetime'),
         ])
-        self.cmd('monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 50 --total-retention-time 80 --columns col2=guid TimeGenerated=datetime', checks=[
+        self.cmd('monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 50 --total-retention-time 80 --columns col2=guid', checks=[
             self.check('name', '{table_name}'),
             self.check('retentionInDays', 50),
             self.check('totalRetentionInDays', 80),
@@ -554,7 +554,7 @@ class TestLogProfileScenarios(ScenarioTest):
                 self.check('schema.columns[1].type', 'datetime'),
             ])
         self.cmd(
-            'monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --total-retention-time 400 --columns col2=guid TimeGenerated=datetime',
+            'monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --total-retention-time 400 --columns col2=guid',
             checks=[
                 self.check('name', '{table_name}'),
                 self.check('totalRetentionInDays', 400),

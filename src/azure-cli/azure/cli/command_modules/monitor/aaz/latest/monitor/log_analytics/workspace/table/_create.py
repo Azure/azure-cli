@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "monitor log-analytics workspace table create",
-)
 class Create(AAZCommand):
     """Create a Log Analytics workspace table.
     """
