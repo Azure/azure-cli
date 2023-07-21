@@ -298,10 +298,10 @@ class TestCommandRegistration(unittest.TestCase):
         loader.load_command_table(["hello", "mod-only"])
         _check_index()
 
-        with mock.patch("azure.cli.core.__version__", "2.7.0"), mock.patch.object(cli.cloud, "profile", "2019-03-01-hybrid"):
+        with mock.patch.object(cli.cloud, "profile", "2019-03-01-hybrid"):
             def update_and_check_index():
                 loader.load_command_table(["hello", "mod-only"])
-                self.assertEqual(INDEX[CommandIndex._COMMAND_INDEX_VERSION], "2.7.0")
+                self.assertEqual(INDEX[CommandIndex._COMMAND_INDEX_VERSION], __version__)
                 self.assertEqual(INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE], "2019-03-01-hybrid")
                 self.assertDictEqual(INDEX[CommandIndex._COMMAND_INDEX], self.expected_command_index)
 
