@@ -14,7 +14,7 @@ from azure.cli.core.commands.parameters import (get_enum_type,
                                                 resource_group_name_type)
 from azure.cli.core.commands.validators import \
     get_default_location_from_resource_group
-from ._constants import ImportExportProfiles
+from ._constants import ImportExportProfiles, ImportMode
 
 from ._validators import (validate_appservice_name_or_id, validate_snapshot_query_fields,
                           validate_connection_string, validate_datetime,
@@ -180,6 +180,7 @@ def load_arguments(self, _):
         c.argument('yes', help="Do not prompt for preview.")
         c.argument('skip_features', help="Import only key values and exclude all feature flags. By default, all feature flags will be imported from file or appconfig. Not applicable for appservice.", arg_type=get_three_state_flag())
         c.argument('content_type', help='Content type of all imported items.')
+        c.argument('import_mode', arg_type=get_enum_type([ImportMode.ALL, ImportMode.IGNORE_MATCH]), help='If import mode is "ignore-match", source key-values that already exist at the destination will not be overwritten. Import mode "all" writes all key-values to the destination regardless of whether they exist or not.')
 
     with self.argument_context('appconfig kv import', arg_group='File') as c:
         c.argument('path', help='Local configuration file path. Required for file arguments.')
