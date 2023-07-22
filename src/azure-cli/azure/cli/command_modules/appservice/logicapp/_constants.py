@@ -7,36 +7,35 @@ LINUX_RUNTIMES = ['dotnet', 'node', 'python', 'java']
 WINDOWS_RUNTIMES = ['dotnet', 'node', 'java', 'powershell']
 
 DEFAULT_LOGICAPP_RUNTIME = 'node'
-DEFAULT_LOGICAPP_RUNTIME_VERSION = '18'
 DEFAULT_LOGICAPP_FUNCTION_VERSION = '4'
 
 # functions version -> runtime : default runtime version
 FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION = {
     '2': {
-        'node': '8',
+        'node': '~8',
         'dotnet': '2'
     },
     '3': {
-        'node': '12',
+        'node': '~16',
         'dotnet': '3'
     },
     '4': {
-        'node': '18',
+        'node': '~16',
         'dotnet': '6'
     }
 }
 # functions version -> runtime : runtime versions
 FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS = {
     '2': {
-        'node': ['8', '10'],
+        'node': ['~8', '~10'],
         'dotnet': ['2']
     },
     '3': {
-        'node': ['10', '12'],
+        'node': ['~14', '~16', '~18'],
         'dotnet': ['3']
     },
     '4': {
-        'node': ['14', '16', '18'],
+        'node': ['~16', '~18'],
         'dotnet': ['3', '6']
     }
 }

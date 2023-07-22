@@ -30,7 +30,6 @@ from azure.cli.command_modules.appservice.custom import (
 
 from ._constants import (DEFAULT_LOGICAPP_FUNCTION_VERSION,
                          DEFAULT_LOGICAPP_RUNTIME,
-                         DEFAULT_LOGICAPP_RUNTIME_VERSION,
                          FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION,
                          DOTNET_RUNTIME_VERSION_TO_DOTNET_LINUX_FX_VERSION)
 
@@ -48,15 +47,14 @@ def create_logicapp(cmd, resource_group_name, name, storage_account, plan=None,
     if not deployment_container_image_name:
         runtime = DEFAULT_LOGICAPP_RUNTIME
         if runtime_version is None:
-            runtime_version = DEFAULT_LOGICAPP_RUNTIME_VERSION
+            runtime_version = FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION[functions_version][runtime]
 
     if deployment_source_url and deployment_local_git:
         raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
 
     SiteConfig, Site, NameValuePair = cmd.get_models('SiteConfig', 'Site', 'NameValuePair')
 
-    docker_registry_server_url = parse_docker_image_name(
-        deployment_container_image_name)
+    docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
 
     site_config = SiteConfig(app_settings=[])
     logicapp_def = Site(location=None, site_config=site_config, tags=tags, https_only=https_only)
