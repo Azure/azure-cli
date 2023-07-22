@@ -4622,24 +4622,20 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
     feature_list = None
     if features:
         feature_list = []
-        standard_security = True
         for item in features.split():
             try:
                 key, value = item.split('=', 1)
                 # create Non-Trusted Launch VM Image
                 # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
                 # after changing the default values to Trusted Launch VMs in the future.
-                if key == 'SecurityType':
-                    if value == 'Standard':
-                        continue
-                    standard_security = False
+                if key == 'SecurityType' and value == 'Standard':
+                    logger.warning('Consider upgrading security for your workloads using Azure Trusted Launch VMs. '
+                                   'To know more about Trusted Launch, please visit '
+                                   'https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch.')
+                    continue
                 feature_list.append(GalleryImageFeature(name=key, value=value))
             except ValueError:
                 raise CLIError('usage error: --features KEY=VALUE [KEY=VALUE ...]')
-        if standard_security:
-            logger.warning('Consider upgrading security for your workloads using Azure Trusted Launch VMs. '
-                           'To know more about Trusted Launch, please visit '
-                           'https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch.')
 
     image = GalleryImage(identifier=GalleryImageIdentifier(publisher=publisher, offer=offer, sku=sku),
                          os_type=os_type, os_state=os_state, end_of_life_date=end_of_life_date,
