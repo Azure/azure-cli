@@ -173,7 +173,7 @@ class TestAddMaintenanceConfiguration(unittest.TestCase):
             "start_time": "00:00",
         }
 
-        err = ("Please specify --duration-hours for maintenance window.")
+        err = ("Please specify --duration for maintenance window.")
         with self.assertRaises(RequiredArgumentMissingError) as cm:
             aks_maintenanceconfiguration_update_internal(cmd, None, raw_parameters)
         self.assertEqual(str(cm.exception), err)
