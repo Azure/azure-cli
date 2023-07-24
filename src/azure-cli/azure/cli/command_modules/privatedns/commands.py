@@ -41,7 +41,7 @@ def load_command_table(self, _):
         from .custom import PrivateDNSLinkVNetCreate
         self.command_table["network private-dns link vnet create"] = PrivateDNSLinkVNetCreate(loader=self)
         self.command_table["network private-dns link vnet list"] = PrivateDNSLinkVNetList(loader=self, table_transformer=transform_privatedns_link_table_output)
-        self.command_table["network private-dns link vnet show"] = PrivateDNSLinkVNetList(loader=self, table_transformer=transform_privatedns_link_table_output)
+        self.command_table["network private-dns link vnet show"] = PrivateDNSLinkVNetShow(loader=self, table_transformer=transform_privatedns_link_table_output)
 
     with self.command_group('network private-dns record-set') as g:
         g.custom_command('list', 'list_privatedns_record_set', client_factory=cf_privatedns_mgmt_record_sets, transform=transform_privatedns_record_set_output, table_transformer=transform_privatedns_record_set_table_output)
