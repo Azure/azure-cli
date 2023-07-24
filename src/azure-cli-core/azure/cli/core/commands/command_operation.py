@@ -20,6 +20,7 @@ class BaseCommandOperation:
         self.merged_kwargs = merged_kwargs
         self.client_factory = merged_kwargs.get('client_factory')
         self.operation_group = merged_kwargs.get('operation_group')
+        self.ignore_api_version_folder = merged_kwargs.get('ignore_api_version_folder')
 
     @property
     def cli_ctx(self):
@@ -48,11 +49,12 @@ class BaseCommandOperation:
         from azure.cli.core.profiles import AZURE_API_PROFILES
         from azure.cli.core.profiles._shared import get_versioned_sdk_path
 
-        for rt in AZURE_API_PROFILES[self.cli_ctx.cloud.profile]:
-            if op_path.startswith(rt.import_prefix + '.'):
-                op_path = op_path.replace(rt.import_prefix,
-                                          get_versioned_sdk_path(self.cli_ctx.cloud.profile, rt,
-                                                                 operation_group=self.operation_group))
+        if not self.ignore_api_version_folder:
+            for rt in AZURE_API_PROFILES[self.cli_ctx.cloud.profile]:
+                if op_path.startswith(rt.import_prefix + '.'):
+                    op_path = op_path.replace(rt.import_prefix,
+                                              get_versioned_sdk_path(self.cli_ctx.cloud.profile, rt,
+                                                                     operation_group=self.operation_group))
 
         try:
             mod_to_import, attr_path = op_path.split('#')
