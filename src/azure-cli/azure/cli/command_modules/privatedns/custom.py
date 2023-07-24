@@ -281,37 +281,6 @@ def update_privatedns_zone(instance, tags=None):
     return instance
 
 
-def create_privatedns_link(cmd, resource_group_name, private_zone_name, virtual_network_link_name, virtual_network, registration_enabled, tags=None):
-    from azure.mgmt.privatedns import PrivateDnsManagementClient
-    from azure.mgmt.privatedns.models import VirtualNetworkLink
-    link = VirtualNetworkLink(location='global', tags=tags)
-
-    if registration_enabled is not None:
-        link.registration_enabled = registration_enabled
-        aux_subscription = parse_resource_id(virtual_network.id)['subscription']
-
-    if virtual_network is not None:
-        link.virtual_network = virtual_network
-
-    client = get_mgmt_service_client(cmd.cli_ctx, PrivateDnsManagementClient, aux_subscriptions=[aux_subscription]).virtual_network_links
-    return client.begin_create_or_update(resource_group_name, private_zone_name, virtual_network_link_name, link, if_none_match='*')
-
-
-def update_privatedns_link(cmd, resource_group_name, private_zone_name, virtual_network_link_name, registration_enabled=None, tags=None, if_match=None, **kwargs):
-    from azure.mgmt.privatedns import PrivateDnsManagementClient
-    link = kwargs['parameters']
-
-    if registration_enabled is not None:
-        link.registration_enabled = registration_enabled
-
-    if tags is not None:
-        link.tags = tags
-
-    aux_subscription = parse_resource_id(link.virtual_network.id)['subscription']
-    client = get_mgmt_service_client(cmd.cli_ctx, PrivateDnsManagementClient, aux_subscriptions=[aux_subscription]).virtual_network_links
-    return client.begin_update(resource_group_name, private_zone_name, virtual_network_link_name, link, if_match=if_match)
-
-
 class PrivateDNSLinkVNetCreate(_PrivateDNSLinkVNetCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):

@@ -5,7 +5,7 @@
 
 # pylint: disable=line-too-long
 from azure.cli.core.commands import CliCommandType
-from azure.cli.command_modules.privatedns._client_factory import (cf_privatedns_mgmt_zones, cf_privatedns_mgmt_virtual_network_links, cf_privatedns_mgmt_record_sets)
+from azure.cli.command_modules.privatedns._client_factory import (cf_privatedns_mgmt_zones, cf_privatedns_mgmt_record_sets)
 from azure.cli.command_modules.privatedns._format import (transform_privatedns_zone_table_output, transform_privatedns_link_table_output, transform_privatedns_record_set_output, transform_privatedns_record_set_table_output)
 
 
@@ -14,11 +14,6 @@ def load_command_table(self, _):
     network_privatedns_zone_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.privatedns.operations#PrivateZonesOperations.{}',
         client_factory=cf_privatedns_mgmt_zones
-    )
-
-    network_privatedns_virtual_network_link_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.privatedns.operations#VirtualNetworkLinksOperations.{}',
-        client_factory=cf_privatedns_mgmt_virtual_network_links
     )
 
     network_privatedns_record_set_sdk = CliCommandType(
