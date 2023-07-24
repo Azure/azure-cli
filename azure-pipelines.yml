@@ -186,6 +186,12 @@ jobs:
 
 - job: BuildWindowsMSI
   displayName: Build Windows MSI
+  strategy:
+    matrix:
+      x86:
+        Platform: x86
+      x64:
+        Platform: x64
 
   dependsOn: ExtractMetadata
   condition: succeeded()
@@ -200,6 +206,7 @@ jobs:
 
 
   - script: |
+      set ARCH=$(Platform)
       set /p CLI_VERSION=<$(System.ArtifactsDirectory)/metadata/version
       set
       
@@ -215,10 +222,16 @@ jobs:
     displayName: 'Publish Artifact: MSI'
     inputs:
       TargetPath: 'build_scripts/windows/out/'
-      ArtifactName: msi
+      ArtifactName: msi-$(Platform)
 
 - job: TestWindowsMSI
   displayName: Test Windows MSI
+  strategy:
+    matrix:
+      x86:
+        Platform: x86
+      x64:
+        Platform: x64
 
   dependsOn: BuildWindowsMSI
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
@@ -235,7 +248,7 @@ jobs:
     displayName: 'Download Build Artifacts'
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/msi'
-      artifactName: msi
+      artifactName: msi-$(Platform)
 
   - task: PowerShell@2
     displayName: Install and Load CLI

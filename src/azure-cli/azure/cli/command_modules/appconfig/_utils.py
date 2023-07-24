@@ -189,6 +189,28 @@ def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
     return azconfig_client
 
 
+def is_json_content_type(content_type):
+    if not content_type:
+        return False
+
+    content_type = content_type.strip().lower()
+    mime_type = content_type.split(';')[0].strip()
+
+    type_parts = mime_type.split('/')
+    if len(type_parts) != 2:
+        return False
+
+    (main_type, sub_type) = type_parts
+    if main_type != "application":
+        return False
+
+    sub_types = sub_type.split('+')
+    if "json" in sub_types:
+        return True
+
+    return False
+
+
 def validate_feature_flag_name(feature):
     if feature:
         INVALID_FEATURE_CHARACTERS = ("%", ":")
