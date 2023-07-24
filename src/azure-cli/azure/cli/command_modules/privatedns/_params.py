@@ -25,11 +25,6 @@ def load_arguments(self, _):
         c.argument('private_zone_name', name_arg_type, type=privatedns_zone_name_type)
         c.ignore('location')
 
-    with self.argument_context('network private-dns link') as c:
-        c.argument('virtual_network_link_name', name_arg_type, help='The name of the virtual network link to the specified Private DNS zone.')
-        c.argument('virtual_network', help='Name or ID of the virtual network.', options_list=('--virtual-network', '-v'), validator=get_vnet_validator)
-        c.argument('registration_enabled', help='Specify if the link is registration enabled.', options_list=('--registration-enabled', '-e'), arg_type=get_three_state_flag())
-
     with self.argument_context('network private-dns record-set') as c:
         c.argument('record_type', ignore_type, validator=validate_privatedns_record_type)
 
