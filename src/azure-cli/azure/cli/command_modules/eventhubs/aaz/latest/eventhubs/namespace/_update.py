@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-01-01-preview",
+        "version": "2023-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}", "2022-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}", "2023-01-01-preview"],
         ]
     }
 
@@ -366,7 +366,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01-preview",
+                    "api-version", "2023-01-01-preview",
                     required=True,
                 ),
             }
@@ -465,7 +465,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01-preview",
+                    "api-version", "2023-01-01-preview",
                     required=True,
                 ),
             }
@@ -563,7 +563,7 @@ class Update(AAZCommand):
 
             _elements = _builder.get(".properties.encryption.keyVaultProperties[]")
             if _elements is not None:
-                _elements.set_prop("identity", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                _elements.set_prop("identity", AAZObjectType)
                 _elements.set_prop("keyName", AAZStrType, ".key_name")
                 _elements.set_prop("keyVaultUri", AAZStrType, ".key_vault_uri")
                 _elements.set_prop("keyVersion", AAZStrType, ".key_version")
@@ -702,6 +702,9 @@ class _UpdateHelper:
             serialized_name="disableLocalAuth",
         )
         properties.encryption = AAZObjectType()
+        properties.geo_data_replication = AAZObjectType(
+            serialized_name="geoDataReplication",
+        )
         properties.is_auto_inflate_enabled = AAZBoolType(
             serialized_name="isAutoInflateEnabled",
         )
@@ -758,9 +761,7 @@ class _UpdateHelper:
         key_vault_properties.Element = AAZObjectType()
 
         _element = _schema_eh_namespace_read.properties.encryption.key_vault_properties.Element
-        _element.identity = AAZObjectType(
-            flags={"client_flatten": True},
-        )
+        _element.identity = AAZObjectType()
         _element.key_name = AAZStrType(
             serialized_name="keyName",
         )
@@ -774,6 +775,26 @@ class _UpdateHelper:
         identity = _schema_eh_namespace_read.properties.encryption.key_vault_properties.Element.identity
         identity.user_assigned_identity = AAZStrType(
             serialized_name="userAssignedIdentity",
+        )
+
+        geo_data_replication = _schema_eh_namespace_read.properties.geo_data_replication
+        geo_data_replication.locations = AAZListType()
+        geo_data_replication.max_replication_lag_duration_in_seconds = AAZIntType(
+            serialized_name="maxReplicationLagDurationInSeconds",
+        )
+
+        locations = _schema_eh_namespace_read.properties.geo_data_replication.locations
+        locations.Element = AAZObjectType()
+
+        _element = _schema_eh_namespace_read.properties.geo_data_replication.locations.Element
+        _element.cluster_arm_id = AAZStrType(
+            serialized_name="clusterArmId",
+        )
+        _element.location_name = AAZStrType(
+            serialized_name="locationName",
+        )
+        _element.role_type = AAZStrType(
+            serialized_name="roleType",
         )
 
         private_endpoint_connections = _schema_eh_namespace_read.properties.private_endpoint_connections
