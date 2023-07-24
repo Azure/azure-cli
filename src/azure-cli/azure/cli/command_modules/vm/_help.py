@@ -798,7 +798,7 @@ type: command
 short-summary: Update a proximity placement group
 parameters:
   - name: --include-colocation-status
-    short-summary: includeColocationStatus=true enables fetching the colocation status of all the resources in the 
+    short-summary: includeColocationStatus=true enables fetching the colocation status of all the resources in the
                    proximity placement group. Default value is None.
 examples:
   - name: Update a proximity placement group with specifying VM sizes that can be created.
@@ -3802,7 +3802,7 @@ short-summary: Get a list of all virtual machines in a VM scale sets.
 long-summary: Return a list of virtual machines managed by VMSS. For VMSS in Flexible Orchestration mode, please use "az vm list" to get full details.
 parameters:
   - name: --filter
-    short-summary: The filter to apply to the operation. Allowed values are 'startswith(instanceView/statuses/code, 'PowerState') eq true', 
+    short-summary: The filter to apply to the operation. Allowed values are 'startswith(instanceView/statuses/code, 'PowerState') eq true',
                    'properties/latestModelApplied eq true', 'properties/latestModelApplied eq false'. Default value is None.
   - name: --select
     short-summary: The list parameters. Allowed values are 'instanceView', 'instanceView/statuses'. Default value is None.
@@ -3858,7 +3858,7 @@ helps['restore-point wait'] = """
     short-summary: Place the CLI in a waiting state until a condition of the restore-point is met.
     parameters:
       - name: --expand
-        short-summary: The expand expression to apply on the operation. 'InstanceView' retrieves information 
+        short-summary: The expand expression to apply on the operation. 'InstanceView' retrieves information
                        about the run-time state of a restore point. 'instanceView' Default value is None.
     examples:
       - name: Pause executing next line of CLI script until the restore-point is successfully created.
@@ -3905,7 +3905,7 @@ helps['restore-point collection wait'] = """
     short-summary: Place the CLI in a waiting state until a condition of the restore-point-collection is met.
     parameters:
       - name: --expand
-        short-summary: The expand expression to apply on the operation. If expand=restorePoints, server will return all 
+        short-summary: The expand expression to apply on the operation. If expand=restorePoints, server will return all
                        contained restore points in the restorePointCollection. "restorePoints" Default value is None.
     examples:
       - name: Pause executing next line of CLI script until the restore-point-collection is successfully deleted.
