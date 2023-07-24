@@ -22,7 +22,7 @@ class Update(AAZCommand):
         az sql mi startstopschedule update --mi miName -g resourceGroup --subscription subscriptionId --schedule-list "[{'startDay':'Monday','startTime':'10:00 AM','stopDay':'Monday','stopTime':'12:00 AM'}]"
     :example: Add schedule items to the managed instance's start stop schedule.
         az sql mi startstopschedule update --ids resourceId --add schedule_list "{'startDay':'Monday','startTime':'10:00 AM','stopDay':'Monday','stopTime':'12:00 AM'}"
-    :example: Remove schedule items to the managed instance's start stop schedule.
+    :example: Remove schedule items from the managed instance's start stop schedule.
         az sql mi startstopschedule update --ids resourceId --remove schedule_list index(0 based)
     """
 

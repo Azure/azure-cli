@@ -1,0 +1,435 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-mgmt-sql/4.0.0b10 Python/3.8.10 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmilb5hsyvgolc22pa3zzf2urno3uwskko4us2mbcti2gebgawczstsm?api-version=2022-08-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Succeeded","fullyQualifiedDomainName":"clitestmilb5hsyvgolc22pa3zzf2urno3uwskko4us2mbcti2gebgawczstsm.e6076e7d5e5b.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-managed-instance-v2/subnets/ManagedInstance","state":"Ready","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"e6076e7d5e5b","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"minimalTlsVersion":"None","currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmilb5hsyvgolc22pa3zzf2urno3uwskko4us2mbcti2gebgawczstsm","name":"clitestmilb5hsyvgolc22pa3zzf2urno3uwskko4us2mbcti2gebgawczstsm","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1378'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 24 Jul 2023 12:55:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"description": "test description", "scheduleList": [{"startDay":
+      "Friday", "startTime": "10:00 AM", "stopDay": "Friday", "stopTime": "11:10 AM"}],
+      "timeZoneId": "UTC"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi startstopschedule create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '184'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --mi --subscription --schedule-list --description
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.17763-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmilb5hsyvgolc22pa3zzf2urno3uwskko4us2mbcti2gebgawczstsm/startStopSchedules/default?api-version=2022-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"description":"test description","timeZoneId":"UTC","scheduleList":[{"startDay":"Friday","startTime":"10:00","stopDay":"Friday","stopTime":"11:10"}],"nextRunAction":"Start","nextExecutionTime":"2023-07-28T10:00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmilb5hsyvgolc22pa3zzf2urno3uwskko4us2mbcti2gebgawczstsm/startStopSchedules/default","name":"default","type":"Microsoft.Sql/managedInstances/startStopSchedules"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '538'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 24 Jul 2023 12:55:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi startstopschedule update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --mi --subscription --add
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmilb5hsyvgolc22pa3zzf2urno3uwskko4us2mbcti2gebgawczstsm/startStopSchedules/default?api-version=2022-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"description":"test description","timeZoneId":"UTC","scheduleList":[{"startDay":"Friday","startTime":"10:00","stopDay":"Friday","stopTime":"11:10"}],"nextRunAction":"Start","nextExecutionTime":"2023-07-28T10:00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmilb5hsyvgolc22pa3zzf2urno3uwskko4us2mbcti2gebgawczstsm/startStopSchedules/default","name":"default","type":"Microsoft.Sql/managedInstances/startStopSchedules"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '538'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 24 Jul 2023 12:55:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"description": "test description", "scheduleList": [{"startDay":
+      "Friday", "startTime": "10:00", "stopDay": "Friday", "stopTime": "11:10"}, {"startDay":
+      "Monday", "startTime": "10:00 AM", "stopDay": "Monday", "stopTime": "11:10 AM"}],
+      "timeZoneId": "UTC"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi startstopschedule update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '272'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --mi --subscription --add
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.17763-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmilb5hsyvgolc22pa3zzf2urno3uwskko4us2mbcti2gebgawczstsm/startStopSchedules/default?api-version=2022-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"description":"test description","timeZoneId":"UTC","scheduleList":[{"startDay":"Friday","startTime":"10:00","stopDay":"Friday","stopTime":"11:10"},{"startDay":"Monday","startTime":"10:00","stopDay":"Monday","stopTime":"11:10"}],"nextRunAction":"Start","nextExecutionTime":"2023-07-28T10:00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmilb5hsyvgolc22pa3zzf2urno3uwskko4us2mbcti2gebgawczstsm/startStopSchedules/default","name":"default","type":"Microsoft.Sql/managedInstances/startStopSchedules"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '618'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 24 Jul 2023 12:55:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi startstopschedule update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --mi --subscription --schedule-list
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmilb5hsyvgolc22pa3zzf2urno3uwskko4us2mbcti2gebgawczstsm/startStopSchedules/default?api-version=2022-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"description":"test description","timeZoneId":"UTC","scheduleList":[{"startDay":"Friday","startTime":"10:00","stopDay":"Friday","stopTime":"11:10"},{"startDay":"Monday","startTime":"10:00","stopDay":"Monday","stopTime":"11:10"}],"nextRunAction":"Start","nextExecutionTime":"2023-07-28T10:00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmilb5hsyvgolc22pa3zzf2urno3uwskko4us2mbcti2gebgawczstsm/startStopSchedules/default","name":"default","type":"Microsoft.Sql/managedInstances/startStopSchedules"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '618'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 24 Jul 2023 12:55:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"description": "test description", "scheduleList": [{"startDay":
+      "Friday", "startTime": "10:00 AM", "stopDay": "Friday", "stopTime": "11:10 AM"}],
+      "timeZoneId": "UTC"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi startstopschedule update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '184'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --mi --subscription --schedule-list
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.17763-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmilb5hsyvgolc22pa3zzf2urno3uwskko4us2mbcti2gebgawczstsm/startStopSchedules/default?api-version=2022-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"description":"test description","timeZoneId":"UTC","scheduleList":[{"startDay":"Friday","startTime":"10:00","stopDay":"Friday","stopTime":"11:10"}],"nextRunAction":"Start","nextExecutionTime":"2023-07-28T10:00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmilb5hsyvgolc22pa3zzf2urno3uwskko4us2mbcti2gebgawczstsm/startStopSchedules/default","name":"default","type":"Microsoft.Sql/managedInstances/startStopSchedules"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '538'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 24 Jul 2023 12:55:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi startstopschedule show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --mi --subscription
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmilb5hsyvgolc22pa3zzf2urno3uwskko4us2mbcti2gebgawczstsm/startStopSchedules/default?api-version=2022-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"description":"test description","timeZoneId":"UTC","scheduleList":[{"startDay":"Friday","startTime":"10:00","stopDay":"Friday","stopTime":"11:10"}],"nextRunAction":"Start","nextExecutionTime":"2023-07-28T10:00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmilb5hsyvgolc22pa3zzf2urno3uwskko4us2mbcti2gebgawczstsm/startStopSchedules/default","name":"default","type":"Microsoft.Sql/managedInstances/startStopSchedules"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '538'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 24 Jul 2023 12:55:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi startstopschedule list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --mi --subscription
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmilb5hsyvgolc22pa3zzf2urno3uwskko4us2mbcti2gebgawczstsm/startStopSchedules?api-version=2022-11-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"description":"test description","timeZoneId":"UTC","scheduleList":[{"startDay":"Friday","startTime":"10:00","stopDay":"Friday","stopTime":"11:10"}],"nextRunAction":"Start","nextExecutionTime":"2023-07-28T10:00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmilb5hsyvgolc22pa3zzf2urno3uwskko4us2mbcti2gebgawczstsm/startStopSchedules/default","name":"default","type":"Microsoft.Sql/managedInstances/startStopSchedules"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '550'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 24 Jul 2023 12:55:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi startstopschedule delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g --mi --subscription --yes
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.17763-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmilb5hsyvgolc22pa3zzf2urno3uwskko4us2mbcti2gebgawczstsm/startStopSchedules/default?api-version=2022-11-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 24 Jul 2023 12:55:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -17,8 +17,8 @@ from azure.cli.core.aaz import *
 class Create(AAZCommand):
     """Create the managed instance's Start/Stop schedule.
 
-    :example: Remove schedule items to the managed instance's start stop schedule.
-        az sql mi startstopschedule create --mi miName -g resourceGroup --subscription subscriptionId--schedule-list "[{'startDay':'Monday','startTime':'10:00 AM','stopDay':'Monday','stopTime':'12:00 AM'}]"
+    :example: Create schedule for managed instance.
+        az sql mi startstopschedule create --mi miName -g resourceGroup --subscription subscriptionId --schedule-list "[{'startDay':'Monday','startTime':'10:00 AM','stopDay':'Monday','stopTime':'12:00 AM'}]"
     """
 
     _aaz_info = {
