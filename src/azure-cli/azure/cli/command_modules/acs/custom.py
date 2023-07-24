@@ -560,6 +560,7 @@ def aks_update(
     load_balancer_idle_timeout=None,
     nat_gateway_managed_outbound_ip_count=None,
     nat_gateway_idle_timeout=None,
+    outbound_type=None,
     auto_upgrade_channel=None,
     cluster_autoscaler_profile=None,
     uptime_sla=False,
