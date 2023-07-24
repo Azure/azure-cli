@@ -8,7 +8,7 @@ where:
 configuration:
   resourceManagementConfiguration:
     scheduledSearches:
-    - description: 
+    - description: Close stale issues
       frequencies:
       - daily:
           time: 1:0
@@ -23,7 +23,7 @@ configuration:
           days: 14
       actions:
       - closeIssue
-    - description: 
+    - description: Add no recent activity label to issues
       frequencies:
       - hourly:
           hour: 6
@@ -41,7 +41,7 @@ configuration:
           label: no-recent-activity
       - addReply:
           reply: Hi, we're sending this friendly reminder because we haven't heard back from you in a while. We need more information about this issue to help address it. Please be sure to give us your input within the next **7 days**. If we don't hear back from you within **14 days** of this comment the issue will be automatically closed. Thank you!
-    - description: 
+    - description: '[Resolve Workflow] Close Addressed Issues'
       frequencies:
       - hourly:
           hour: 6
