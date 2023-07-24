@@ -41,13 +41,12 @@ def load_command_table(self, _):
         g.generic_update_command('update', setter_name='begin_update', custom_func_name='update_privatedns_zone', supports_no_wait=True)
         g.wait_command('wait')
 
-    with self.command_group('network private-dns link vnet', network_privatedns_virtual_network_link_sdk) as g:
-        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
-        g.show_command('show', 'get', table_transformer=transform_privatedns_link_table_output)
-        g.command('list', 'list', table_transformer=transform_privatedns_link_table_output)
-        g.custom_command('create', 'create_privatedns_link', client_factory=cf_privatedns_mgmt_virtual_network_links, supports_no_wait=True)
-        g.generic_update_command('update', setter_name='update_privatedns_link', setter_type=network_privatedns_custom, supports_no_wait=True)
-        g.wait_command('wait')
+    with self.command_group("network private-dns link vnet"):
+        from .aaz.latest.network.private_dns.link.vnet import List as PrivateDNSLinkVNetList, Show as PrivateDNSLinkVNetShow
+        from .custom import PrivateDNSLinkVNetCreate
+        self.command_table["network private-dns link vnet create"] = PrivateDNSLinkVNetCreate(loader=self)
+        self.command_table["network private-dns link vnet list"] = PrivateDNSLinkVNetList(loader=self, table_transformer=transform_privatedns_link_table_output)
+        self.command_table["network private-dns link vnet show"] = PrivateDNSLinkVNetList(loader=self, table_transformer=transform_privatedns_link_table_output)
 
     with self.command_group('network private-dns record-set') as g:
         g.custom_command('list', 'list_privatedns_record_set', client_factory=cf_privatedns_mgmt_record_sets, transform=transform_privatedns_record_set_output, table_transformer=transform_privatedns_record_set_table_output)
