@@ -317,6 +317,13 @@ type: command
 short-summary: List custom VM images.
 """
 
+helps['image show'] = """
+type: command
+parameters:
+  - name: --expand
+    short-summary: The expand expression to apply on the operation. Default value is None.
+"""
+
 helps['image builder'] = """
 type: group
 short-summary: Manage and build image builder templates.
@@ -789,6 +796,10 @@ examples:
 helps['ppg update'] = """
 type: command
 short-summary: Update a proximity placement group
+parameters:
+  - name: --include-colocation-status
+    short-summary: includeColocationStatus=true enables fetching the colocation status of all the resources in the 
+                   proximity placement group. Default value is None.
 examples:
   - name: Update a proximity placement group with specifying VM sizes that can be created.
     text: |
@@ -1194,6 +1205,9 @@ examples:
 helps['sig image-version wait'] = """
 type: command
 short-summary: wait for image version related operation
+parameters:
+  - name: --expand
+    short-summary: The expand expression to apply on the operation. 'ReplicationStatus' Default value is None.
 examples:
   - name: wait for an image version gets updated
     text: |
@@ -1289,6 +1303,9 @@ examples:
 helps['sig update'] = """
 type: command
 short-summary: update a share image gallery.
+parameters:
+  - name: --select
+    short-summary: The select expression to apply on the operation. "Permissions" Default value is None.
 examples:
   - name: Enable gallery to be shared to subscription or tenant
     text: |
@@ -1735,6 +1752,9 @@ helps['vm deallocate'] = """
 type: command
 short-summary: Deallocate a VM so that computing resources are no longer allocated (charges no longer apply). The status will change from 'Stopped' to 'Stopped (Deallocated)'.
 long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/linux/capture-image'
+parameters:
+  - name: --hibernate
+    short-summary: Optional parameter to hibernate a virtual machine. (Feature in Preview). Default value is None.
 examples:
   - name: Deallocate, generalize, and capture a stopped virtual machine.
     text: |
@@ -1757,6 +1777,9 @@ examples:
 helps['vm delete'] = """
 type: command
 short-summary: Delete a VM.
+parameters:
+  - name: --force-deletion
+    short-summary: Optional parameter to force delete virtual machines. Default value is None.
 examples:
   - name: Delete a VM without a prompt for confirmation.
     text: >
@@ -3028,6 +3051,13 @@ examples:
     crafted: true
 """
 
+helps['vmss delete'] = """
+type: command
+parameters:
+  - name: --force-deletion
+    short-summary: Optional parameter to force delete a VM scale set. (Feature in Preview). Default value is None.
+"""
+
 helps['vmss delete-instances'] = """
 type: command
 short-summary: Delete VMs within a VMSS.
@@ -3770,6 +3800,14 @@ helps['vmss list-instances'] = """
 type: command
 short-summary: Get a list of all virtual machines in a VM scale sets.
 long-summary: Return a list of virtual machines managed by VMSS. For VMSS in Flexible Orchestration mode, please use "az vm list" to get full details.
+parameters:
+  - name: --filter
+    short-summary: The filter to apply to the operation. Allowed values are 'startswith(instanceView/statuses/code, 'PowerState') eq true', 
+                   'properties/latestModelApplied eq true', 'properties/latestModelApplied eq false'. Default value is None.
+  - name: --select
+    short-summary: The list parameters. Allowed values are 'instanceView', 'instanceView/statuses'. Default value is None.
+  - name: --expand
+    short-summary: The expand expression to apply to the operation. Allowed values are 'instanceView'. Default value is None.
 """
 
 helps['restore-point'] = """
@@ -3818,6 +3856,10 @@ disks are specified, all disks will be included."
 helps['restore-point wait'] = """
     type: command
     short-summary: Place the CLI in a waiting state until a condition of the restore-point is met.
+    parameters:
+      - name: --expand
+        short-summary: The expand expression to apply on the operation. 'InstanceView' retrieves information 
+                       about the run-time state of a restore point. 'instanceView' Default value is None.
     examples:
       - name: Pause executing next line of CLI script until the restore-point is successfully created.
         text: |-
@@ -3861,6 +3903,10 @@ helps['restore-point collection update'] = """
 helps['restore-point collection wait'] = """
     type: command
     short-summary: Place the CLI in a waiting state until a condition of the restore-point-collection is met.
+    parameters:
+      - name: --expand
+        short-summary: The expand expression to apply on the operation. If expand=restorePoints, server will return all 
+                       contained restore points in the restorePointCollection. "restorePoints" Default value is None.
     examples:
       - name: Pause executing next line of CLI script until the restore-point-collection is successfully deleted.
         text: |-

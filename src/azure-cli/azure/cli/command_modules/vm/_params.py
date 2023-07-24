@@ -235,9 +235,6 @@ def load_arguments(self, _):
         c.argument('image_name', arg_type=name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/images'))
         c.argument('tags', tags_type)
 
-    with self.argument_context('image show') as c:
-        c.argument('expand', help='The expand expression to apply on the operation. Default value is None.')
-
     with self.argument_context('image create') as c:
         # here we collpase all difference image sources to under 2 common arguments --os-disk-source --data-disk-sources
         c.argument('name', arg_type=name_arg_type, help='new image name')
@@ -482,12 +479,6 @@ def load_arguments(self, _):
     with self.argument_context('vm list') as c:
         c.argument('vmss', min_api='2021-11-01', help='List VM instances in a specific VMSS. Please specify the VMSS id or VMSS name')
 
-    with self.argument_context('vm deallocate') as c:
-        c.argument('hibernate', arg_type=get_three_state_flag(), help='Optional parameter to hibernate a virtual machine. (Feature in Preview). Default value is None.')
-
-    with self.argument_context('vm delete') as c:
-        c.argument('force_deletion', arg_type=get_three_state_flag(), help='Optional parameter to force delete virtual machines. Default value is None.')
-
     for scope in ['vm show', 'vm list']:
         with self.argument_context(scope) as c:
             c.argument('show_details', action='store_true', options_list=['--show-details', '-d'], help='show public ip address, FQDN, and power states. command will run slow')
@@ -699,18 +690,6 @@ def load_arguments(self, _):
         c.argument('instance_ids', nargs='+',
                    help='Space-separated list of VM instance ID. If missing, reimage all instances.',
                    options_list=['--instance-ids', c.deprecate(target='--instance-id', redirect='--instance-ids', hide=True)])
-
-    with self.argument_context('vmss delete') as c:
-        c.argument('force_deletion', arg_type=get_three_state_flag(), help='Optional parameter to force delete a VM scale set. (Feature in Preview). Default value is None.')
-
-    with self.argument_context('vmss list-instances') as c:
-        c.argument('filter',
-                   help="The filter to apply to the operation. Allowed values are 'startswith(instanceView/statuses/code, 'PowerState')"
-                        " eq true', 'properties/latestModelApplied eq true', 'properties/latestModelApplied eq false'. Default value is None.")
-        c.argument('select',
-                   help="The list parameters. Allowed values are 'instanceView', 'instanceView/statuses'. Default value is None.")
-        c.argument('expand',
-                   help="The expand expression to apply to the operation. Allowed values are 'instanceView'. Default value is None.")
 
     with self.argument_context('vmss create', operation_group='virtual_machine_scale_sets') as c:
         VirtualMachineEvictionPolicyTypes = self.get_models('VirtualMachineEvictionPolicyTypes', resource_type=ResourceType.MGMT_COMPUTE)
@@ -1266,7 +1245,6 @@ def load_arguments(self, _):
         c.argument('description', help='the description of the gallery')
 
     with self.argument_context('sig update') as c:
-        c.argument('select', help='The select expression to apply on the operation. "Permissions" Default value is None.')
         c.ignore('gallery')
 
     for scope in ['sig create', 'sig update']:
@@ -1336,9 +1314,6 @@ def load_arguments(self, _):
 
     with self.argument_context('sig image-version show') as c:
         c.argument('expand', help="The expand expression to apply on the operation, e.g. 'ReplicationStatus'")
-
-    with self.argument_context('sig image-version wait') as c:
-        c.argument('expand', help="The expand expression to apply on the operation. 'ReplicationStatus' Default value is None.")
 
     with self.argument_context('sig image-version show-shared') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
@@ -1468,9 +1443,6 @@ def load_arguments(self, _):
     for scope in ['ppg create', 'ppg update']:
         with self.argument_context(scope) as c:
             c.argument('intent_vm_sizes', nargs='*', min_api='2021-11-01', help="Specify possible sizes of virtual machines that can be created in the proximity placement group.")
-
-    with self.argument_context('ppg update') as c:
-        c.argument('include_colocation_status', help='includeColocationStatus=true enables fetching the colocation status of all the resources in the proximity placement group. Default value is None.')
 
     for scope, item in [('vm create', 'VM'), ('vmss create', 'VMSS'),
                         ('vm availability-set create', 'availability set'),
@@ -1617,8 +1589,6 @@ def load_arguments(self, _):
     with self.argument_context('restore-point wait') as c:
         c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
                    help='The name of the restore point.')
-        c.argument('expand', help="The expand expression to apply on the operation. 'InstanceView' retrieves "
-                                  "information about the run-time state of a restore point. 'instanceView' Default value is None.")
     # endRegion
 
     # region Restore point collection
@@ -1636,9 +1606,4 @@ def load_arguments(self, _):
         c.argument('expand', help='The expand expression to apply on the operation.',
                    deprecate_info=c.deprecate(hide=True))
         c.argument('restore_points', action='store_true', help='Show all contained restore points in the restore point collection.')
-
-    with self.argument_context('restore-point collection wait') as c:
-        c.argument('expand', help='The expand expression to apply on the operation. If expand=restorePoints, '
-                                  'server will return all contained restore points in the restorePointCollection. "restorePoints" Default value is None.')
-
     # endRegion
