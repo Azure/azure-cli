@@ -17,8 +17,6 @@ from azure.mgmt.security.models import (SecurityContact,
                                         Pricing,
                                         WorkspaceSetting,
                                         AdvancedThreatProtectionSetting,
-                                        RuleResultsInput,
-                                        RulesResultsInput,
                                         AlertSyncSettings,
                                         DataExportSettings,
                                         AlertsSuppressionRule,
@@ -33,6 +31,7 @@ from azure.mgmt.security.models import (SecurityContact,
                                         AutomationRuleSet,
                                         AutomationTriggeringRule,
                                         SettingName)
+from azure.mgmt.security.v2020_07_01_preview.models import (RuleResultsInput, RulesResultsInput)
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError)
 from msrestazure.tools import resource_id
@@ -1094,7 +1093,7 @@ def create_security_automation_object(location, scopes, sources, actions, etag=N
     actionsAsObjectList = []
     for action in actions:
         if action['actionType'] == 'LogicApp':
-            actionAsObject = AutomationActionLogicApp(logic_app_resource_id=action['logicAppResourceId'], uri=action['ruleSets'])
+            actionAsObject = AutomationActionLogicApp(logic_app_resource_id=action['logicAppResourceId'], uri=action['uri'])
         elif action['actionType'] == 'EventHub':
             actionAsObject = AutomationActionEventHub(event_hub_resource_id=action['eventHubResourceId'], connection_string=action['connectionString'])
         elif action['actionType'] == 'Workspace':
@@ -1137,7 +1136,7 @@ def get_security_automation_rules_object(rules):
 
 def sanitize_json_as_string(value: string):
     valueLength = len(value)
-    if((value[0] == '\'' and value[valueLength - 1] == '\'') or (value[0] == '\"' and value[valueLength - 1] == '\"')):
+    if ((value[0] == '\'' and value[valueLength - 1] == '\'') or (value[0] == '\"' and value[valueLength - 1] == '\"')):
         value = value[1:]
         value = value[:-1]
     return value

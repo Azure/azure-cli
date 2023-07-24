@@ -19,9 +19,9 @@ class ListReferences(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-07-01-preview",
+        "version": "2018-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/getdnsresourcereference", "2023-07-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/getdnsresourcereference", "2018-05-01"],
         ]
     }
 
@@ -116,7 +116,7 @@ class ListReferences(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-07-01-preview",
+                    "api-version", "2018-05-01",
                     required=True,
                 ),
             }
