@@ -204,6 +204,7 @@ class AKSManagedClusterModels(AKSAgentPoolModels):
             maintenance_configuration_models["DailySchedule"] = self.DailySchedule
             maintenance_configuration_models["WeeklySchedule"] = self.WeeklySchedule
             maintenance_configuration_models["AbsoluteMonthlySchedule"] = self.AbsoluteMonthlySchedule
+            maintenance_configuration_models["RelativeMonthlySchedule"] = self.RelativeMonthlySchedule
             maintenance_configuration_models["TimeSpan"] = self.TimeSpan
             maintenance_configuration_models["TimeInWeek"] = self.TimeInWeek
             self.__maintenance_configuration_models = SimpleNamespace(**maintenance_configuration_models)
