@@ -127,11 +127,11 @@ def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin
             if existing_ws.identity.user_assigned_identities:
                 for uami_id in user_assigned_identity_id:
                     userAssignedIdentities = UserAssignedManagedIdentity()
-                    existing_ws.identity.user_assigned_identities[uami_id]=userAssignedIdentities
-                identity=existing_ws.identity    
+                    existing_ws.identity.user_assigned_identities[uami_id] = userAssignedIdentities
+                identity = existing_ws.identity
             else:
+                keysList = []
                 for uami_id in user_assigned_identity_id:
-                    keysList=[]
                     keysList.append(uami_id)
                 userAssignedIdentities = UserAssignedManagedIdentity()
                 userAssignedIdentitiesdict = dict.fromkeys(keysList, userAssignedIdentities)
@@ -141,43 +141,31 @@ def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin
             for uami_id in user_assigned_identity_id:
                 if uami_id in keysList:
                     existing_ws.identity.user_assigned_identities[uami_id] = None
-            identity=existing_ws.identity
+            identity = existing_ws.identity
         elif user_assigned_identity_action == 'Set':
             if existing_ws.identity.user_assigned_identities:
                 keysList = list(existing_ws.identity.user_assigned_identities.keys())
                 for uami_id in user_assigned_identity_id:
                     if uami_id not in keysList:
                         userAssignedIdentities = UserAssignedManagedIdentity()
-                        existing_ws.identity.user_assigned_identities[uami_id]=userAssignedIdentities
+                        existing_ws.identity.user_assigned_identities[uami_id] = userAssignedIdentities
                 for key in keysList:
                     if key not in user_assigned_identity_id:
                         existing_ws.identity.user_assigned_identities[key] = None
-                identity=existing_ws.identity
+                identity = existing_ws.identity
             else:
+                keysList = []
                 for uami_id in user_assigned_identity_id:
-                    keysList=[]
                     keysList.append(uami_id)
                 userAssignedIdentities = UserAssignedManagedIdentity()
                 userAssignedIdentitiesdict = dict.fromkeys(keysList, userAssignedIdentities)
                 identity = ManagedIdentity(type="SystemAssigned,UserAssigned", user_assigned_identities=userAssignedIdentitiesdict)
-        values=[]
+        values = []
         for key in list(identity.user_assigned_identities.keys()):
             values.append(str(identity.user_assigned_identities[key]))
-        if len(set(values)) == 1 and None in values:
+        if len(set(values)) == 1 and 'None' in values:
             identity.type = "SystemAssigned"
             identity.user_assigned_identities = None
-
-        # if len(keysList) == 0:
-        #     identity_type = "SystemAssigned"
-        #     identity = ManagedIdentity(type=identity_type)
-        # if len(keysList) > 0:
-        #     identity_type = "SystemAssigned,UserAssigned"
-        #     userAssignedIdentities = UserAssignedManagedIdentity()
-        #     userAssignedIdentitiesdict = dict.fromkeys(keysList, userAssignedIdentities)
-        #     identity = ManagedIdentity(type=identity_type, user_assigned_identities=userAssignedIdentitiesdict)
-        #     print("=================show userAssignedIdentitiesdict======================")
-        #     print(userAssignedIdentitiesdict)
-        #     print("============end show===============")
 
     if allowed_aad_tenant_ids and '' in allowed_aad_tenant_ids:
         tenant_ids_list = []

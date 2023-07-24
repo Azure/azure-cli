@@ -3153,11 +3153,11 @@ class SynapseScenarioTests(ScenarioTest):
             ])
 
         self.cmd('az synapse workspace update --name {workspace} --resource-group {rg} '
-                 '--uami-action Remove --uami-id "{uami_id2}"', checks=[
+                 '--uami-action Remove --uami-id "{uami_id2}" "{uami_id1}"', checks=[
             self.check('name', self.kwargs['workspace']),
             self.check('type', 'Microsoft.Synapse/workspaces'),
             self.check('provisioningState', 'Succeeded'),
-            self.not_exists('identity.userAssignedIdentities[1]')
+            self.check('identity.userAssignedIdentities', None)
         ])
 
         self.cmd('az synapse workspace update --name {workspace} --resource-group {rg} '
@@ -3165,7 +3165,7 @@ class SynapseScenarioTests(ScenarioTest):
             self.check('name', self.kwargs['workspace']),
             self.check('type', 'Microsoft.Synapse/workspaces'),
             self.check('provisioningState', 'Succeeded'),
-            self.check('keys(identity.userAssignedIdentities)[1]', '{uami_id2}')
+            self.check('keys(identity.userAssignedIdentities)[0]', '{uami_id2}')
         ])
 
         self.cmd('az synapse workspace update --name {workspace} --resource-group {rg} '
