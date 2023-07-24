@@ -2894,7 +2894,7 @@ class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
 
 class NetworkPublicIpScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_public_ip')
+    @ResourceGroupPreparer(name_prefix='cli_test_public_ip', location="eastus2euap")
     def test_network_public_ip(self, resource_group):
         self.kwargs.update({
             'ip1': 'pubipdns',
@@ -2907,10 +2907,11 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
             'version': 'ipv4',
             'sku': 'standard'
         })
-        self.cmd('network public-ip create -g {rg} -n {ip1} --dns-name {dns} --allocation-method static', checks=[
+        self.cmd('network public-ip create -g {rg} -n {ip1} --dns-name {dns} --dns-name-scope TenantReuse --allocation-method static', checks=[
             self.check('publicIp.provisioningState', 'Succeeded'),
             self.check('publicIp.publicIPAllocationMethod', 'Static'),
-            self.check('publicIp.dnsSettings.domainNameLabel', '{dns}')
+            self.check('publicIp.dnsSettings.domainNameLabel', '{dns}'),
+            self.check('publicIp.dnsSettings.domainNameLabelScope', 'TenantReuse')
         ])
         self.cmd('network public-ip create -g {rg} -n {ip2}', checks=[
             self.check('publicIp.provisioningState', 'Succeeded'),
@@ -6450,7 +6451,7 @@ class NetworkExtendedLocation(ScenarioTest):
             'edge_name': 'microsoftrrdclab1'
         })
 
-        self.cmd('network public-ip create -g {rg} -n {ip1} --edge-zone {edge_name}',
+        self.cmd('network public-ip create -g {rg} -n {ip1} --edge-zone {edge_name} --sku Standard',
                  checks=self.check('publicIp.extendedLocation.name', '{edge_name}'))
 
     @ResourceGroupPreparer(name_prefix='test_network_public_ip_prefix_edge_zone', location='eastus2euap')
