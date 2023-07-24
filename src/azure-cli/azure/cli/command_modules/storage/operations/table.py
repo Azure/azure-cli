@@ -56,7 +56,7 @@ def list_tables(client, num_results=None, marker=None, show_next_marker=None):
 
 def exists(client, table_name):
     generator = client.query_tables("TableName eq '{}'".format(table_name))
-    return list(next(generator.by_page())) != []
+    return bool(list(next(generator.by_page())))
 
 
 # pylint: disable=redefined-builtin

@@ -44,7 +44,7 @@ class AAZShowHelp(BaseException):
             key = self.keys[idx]
             if isinstance(schema, AAZObjectArg):
                 try:
-                    schema = schema[key]
+                    schema = schema[key]  # pylint: disable=unsubscriptable-object
                 except AAZUndefinedValueError:
                     # show the help of current schema
                     break

@@ -35,7 +35,6 @@ CLASSIFIERS = [
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
@@ -44,7 +43,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'argcomplete~=3.1.1',
-    'azure-cli-telemetry==1.0.8.*',
+    'azure-cli-telemetry==1.1.0.*',
     'azure-mgmt-core>=1.2.0,<2',
     'cryptography',
     # On Linux, the distribution (Ubuntu, Debian, etc) and version are logged in telemetry

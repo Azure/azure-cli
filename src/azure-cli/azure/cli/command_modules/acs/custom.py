@@ -22,7 +22,7 @@ import time
 import uuid
 import webbrowser
 import zipfile
-from distutils.version import StrictVersion
+from distutils.version import StrictVersion  # pylint: disable=deprecated-module
 from urllib.error import URLError
 from urllib.request import urlopen
 
@@ -59,6 +59,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_VIRTUAL_NODE_SUBNET_NAME,
     DecoratorEarlyExitException,
 )
+
 from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
@@ -434,6 +435,7 @@ def aks_create(
     attach_acr=None,
     skip_subnet_role_assignment=False,
     node_resource_group=None,
+    k8s_support_plan=None,
     enable_defender=False,
     defender_config=None,
     disable_disk_driver=False,
@@ -478,6 +480,7 @@ def aks_create(
     node_count=3,
     nodepool_tags=None,
     nodepool_labels=None,
+    nodepool_taints=None,
     node_osdisk_type=None,
     node_osdisk_size=0,
     vm_set_type=None,
@@ -574,6 +577,7 @@ def aks_update(
     aad_tenant_id=None,
     aad_admin_group_object_ids=None,
     enable_oidc_issuer=False,
+    k8s_support_plan=None,
     windows_admin_password=None,
     enable_ahub=False,
     disable_ahub=False,
@@ -617,6 +621,7 @@ def aks_update(
     min_count=None,
     max_count=None,
     nodepool_labels=None,
+    nodepool_taints=None,
     # azure monitor profile
     enable_azure_monitor_metrics=False,
     azure_monitor_workspace_resource_id=None,
@@ -867,10 +872,10 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                       enable_sgxquotehelper=False,
                       enable_secret_rotation=False,
                       rotation_poll_interval=None,
-                      no_wait=False,
                       enable_msi_auth_for_monitoring=True,
                       enable_syslog=False,
-                      data_collection_settings=None,):
+                      data_collection_settings=None,
+                      no_wait=False,):
     instance = client.get(resource_group_name, name)
     msi_auth = False
     if instance.service_principal_profile.client_id == "msi":
@@ -2424,6 +2429,20 @@ def aks_nodepool_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-m
         allow_appending_values_to_same_key=True,
     )
     return client.create_or_update(resource_group_name, snapshot_name, snapshot, headers=aks_custom_headers)
+
+
+def aks_nodepool_snapshot_update(cmd, client, resource_group_name, snapshot_name, tags):   # pylint: disable=unused-argument
+    TagsObject = cmd.get_models(
+        "TagsObject",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="snapshots",
+    )
+    tagsObject = TagsObject(
+        tags=tags
+    )
+
+    snapshot = client.update_tags(resource_group_name, snapshot_name, tagsObject)
+    return snapshot
 
 
 def aks_nodepool_snapshot_show(cmd, client, resource_group_name, snapshot_name):   # pylint: disable=unused-argument
