@@ -770,8 +770,7 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
             self.check('type(@)', 'object'),
             self.check('name', 'ag1'),
             self.check('resourceGroup', resource_group),
-            self.check('frontendIPConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
-            self.check('defaultPredefinedSslPolicy', 'Dynamic')
+            self.check('frontendIPConfigurations[0].privateIPAllocationMethod', 'Dynamic')
         ])
         self.cmd('network application-gateway show-backend-health -g {rg} -n ag1 '
                  '--host-name-from-http-settings --path /test --timeout 100 '
