@@ -2735,6 +2735,9 @@ configuration:
         - titleContains:
             pattern: '\b([Ss][Tt][Oo][Rr][Aa][Gg][Ee])\b'
             isRegex: True
+        - bodyContains:
+            pattern: az storage
+            isRegex: True
       then:
       - addLabel:
           label: Auto-Assign
@@ -2784,7 +2787,7 @@ configuration:
             action: Opened
       then:
       - addLabel:
-          label: App Services
+          label: Logic App
       - assignTo:
           users:
           - archidda
@@ -3191,10 +3194,10 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: az devops
+            pattern: 'az \b(devops|repos)\b'
             isRegex: True
         - bodyContains:
-            pattern: az devops
+            pattern: 'az \b(devops|repos)\b'
             isRegex: True
       - or:
         - isAction:
@@ -3576,32 +3579,6 @@ configuration:
       - addLabel:
           label: RBAC
       description: '[role] Auto assign labels and reviewers based on PR title/description.'
-    - if:
-      - payloadType: Pull_Request
-      - isAction:
-          action: Opened
-      - or:
-        - titleContains:
-            pattern: '[Ll][Oo][Gg][Ii][Cc][Aa][Pp][Pp]'
-            isRegex: True
-        - titleContains:
-            pattern: '\b([Aa]pp ?[Ss]ervice)\b'
-            isRegex: True
-      then:
-      - addLabel:
-          label: Auto-Assign
-      - requestReview:
-          reviewer: wangzelin007
-      - requestReview:
-          reviewer: yonzhan
-      - requestReview:
-          reviewer: zhoxing-ms
-      - assignTo:
-          users:
-          - zhoxing-ms
-      - addLabel:
-          label: App Services
-      description: '[appservice] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Pull_Request
       - isAction:
@@ -4201,10 +4178,10 @@ configuration:
           action: Opened
       - or:
         - titleContains:
-            pattern: '\b([Ww][Ee][Bb][Aa][Pp][Pp])\b'
+            pattern: 'az webapp'
             isRegex: True
         - bodyContains:
-            pattern: '\b([Ww][Ee][Bb][Aa][Pp][Pp])\b'
+            pattern: 'az webapp'
             isRegex: True
       then:
       - addLabel:
@@ -4213,6 +4190,8 @@ configuration:
           reviewer: jsntcy
       - requestReview:
           reviewer: zhoxing-ms
+      - requestReview:
+          reviewer: yanzhudd
       - assignTo:
           users:
           - zhoxing-ms
@@ -4571,14 +4550,9 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: Backup
-      - assignTo:
-          users:
-          - zhoxing-ms
+          label: Recovery Services Backup
       - addLabel:
-          label: Azure CLI Team
-      - addLabel:
-          label: question
+          label: CXP Attention
       description: '[Backup] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
