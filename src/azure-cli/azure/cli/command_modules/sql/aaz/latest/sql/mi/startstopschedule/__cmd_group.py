@@ -8,6 +8,16 @@
 # pylint: skip-file
 # flake8: noqa
 
-from .__cmd_group import *
-from ._start import *
-from ._stop import *
+from azure.cli.core.aaz import *
+
+
+@register_command_group(
+    "sql mi start-stop-schedule",
+)
+class __CMDGroup(AAZCommandGroup):
+    """Manage the managed instance's start stop schedule.
+    """
+    pass
+
+
+__all__ = ["__CMDGroup"]
