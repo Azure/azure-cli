@@ -13,22 +13,21 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001","name":"test_manage_appgw_private_endpoint_without_standard000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-02-09T12:15:53Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001","name":"test_manage_appgw_private_endpoint_without_standard000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_manage_appgw_private_endpoint_without_standard","date":"2023-07-21T07:19:45Z","module":"network"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '392'
+      - '472'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:15:58 GMT
+      - Fri, 21 Jul 2023 07:19:50 GMT
       expires:
       - '-1'
       pragma:
@@ -43,8 +42,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "properties": {"idleTimeoutInMinutes": 4, "publicIPAddressVersion":
-      "IPv4", "publicIPAllocationMethod": "Dynamic"}}'
+    body: '{"location": "westus", "properties": {"idleTimeoutInMinutes": 4, "publicIPAllocationMethod":
+      "Dynamic"}}'
     headers:
       Accept:
       - application/json
@@ -55,38 +54,31 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '138'
+      - '104'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/publicIPAddresses/public_ip?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/publicIPAddresses/public_ip?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"public_ip\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/publicIPAddresses/public_ip\",\r\n
-        \ \"etag\": \"W/\\\"8d3dfe6f-fddd-4b0d-90a4-6fe6e8f9ac9a\\\"\",\r\n  \"location\":
-        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"2b3b425d-bb5e-4fa3-8d29-1fb8a87e68f5\",\r\n    \"publicIPAddressVersion\":
-        \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
-        4,\r\n    \"ipTags\": []\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
-        \ \"sku\": {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n
-        \ }\r\n}"
+      string: '{"name":"public_ip","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/publicIPAddresses/public_ip","etag":"W/\"26478e46-f338-4960-9bc8-54d01ae4020b\"","location":"westus","properties":{"provisioningState":"Updating","resourceGuid":"b0aee6cb-7cbc-4fac-bf43-f5e3ed056e08","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Dynamic","idleTimeoutInMinutes":4,"ipTags":[]},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Basic","tier":"Regional"}}'
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/83537110-3d82-41e0-b964-48127bd0a7da?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/34ef8104-4e0a-486c-9b5a-2612ed987784?api-version=2022-11-01
       cache-control:
       - no-cache
       content-length:
-      - '673'
+      - '572'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:16:04 GMT
+      - Fri, 21 Jul 2023 07:19:56 GMT
       expires:
       - '-1'
       pragma:
@@ -99,9 +91,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b3e1e6a2-b58c-423b-b426-7b0dfbea8cc1
+      - b85beac2-5471-4885-a2ce-413794da4ec8
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -119,21 +111,21 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/83537110-3d82-41e0-b964-48127bd0a7da?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/34ef8104-4e0a-486c-9b5a-2612ed987784?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+      string: '{"status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '29'
+      - '22'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:16:05 GMT
+      - Fri, 21 Jul 2023 07:19:57 GMT
       expires:
       - '-1'
       pragma:
@@ -150,7 +142,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b662659c-45aa-40db-bb49-be406ac886b7
+      - 0c1865a3-e5cc-476e-a88a-6fd5381f9146
     status:
       code: 200
       message: OK
@@ -168,30 +160,23 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/publicIPAddresses/public_ip?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/publicIPAddresses/public_ip?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"public_ip\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/publicIPAddresses/public_ip\",\r\n
-        \ \"etag\": \"W/\\\"d3fa2e69-6304-40f9-b79a-a867caeb15ed\\\"\",\r\n  \"location\":
-        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"2b3b425d-bb5e-4fa3-8d29-1fb8a87e68f5\",\r\n    \"publicIPAddressVersion\":
-        \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
-        4,\r\n    \"ipTags\": []\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
-        \ \"sku\": {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n
-        \ }\r\n}"
+      string: '{"name":"public_ip","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/publicIPAddresses/public_ip","etag":"W/\"325e8df2-4131-4a7d-a2e1-323a00dc5664\"","location":"westus","properties":{"provisioningState":"Succeeded","resourceGuid":"b0aee6cb-7cbc-4fac-bf43-f5e3ed056e08","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Dynamic","idleTimeoutInMinutes":4,"ipTags":[]},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Basic","tier":"Regional"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '674'
+      - '573'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:16:06 GMT
+      - Fri, 21 Jul 2023 07:19:57 GMT
       etag:
-      - W/"d3fa2e69-6304-40f9-b79a-a867caeb15ed"
+      - W/"325e8df2-4131-4a7d-a2e1-323a00dc5664"
       expires:
       - '-1'
       pragma:
@@ -208,7 +193,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 6eb31a8a-8601-40d8-a69f-0488bf0d650c
+      - fff6aeb9-2221-45fd-bf14-4e17269ce5e3
     status:
       code: 200
       message: OK
@@ -226,22 +211,21 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001","name":"test_manage_appgw_private_endpoint_without_standard000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-02-09T12:15:53Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001","name":"test_manage_appgw_private_endpoint_without_standard000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_manage_appgw_private_endpoint_without_standard","date":"2023-07-21T07:19:45Z","module":"network"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '392'
+      - '472'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:16:06 GMT
+      - Fri, 21 Jul 2023 07:20:00 GMT
       expires:
       - '-1'
       pragma:
@@ -269,55 +253,11 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27test_manage_appgw_private_endpoint_without_standard000001%27%20and%20name%20eq%20%27None%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FvirtualNetworks%27&api-version=2022-09-01
   response:
     body:
-      string: '{"value":[],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=resourceGroup+eq+%27test_manage_appgw_private_endpoint_without_standard000001%27+and+name+eq+%27None%27+and+resourceType+eq+%27Microsoft.Network%2fvirtualNetworks%27&api-version=2022-09-01&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU9FTTVOa1UtIiwibmV4dFJvd0tleSI6IjEhMTQwIU1FSXhSalkwTnpFeFFrWXdORVJFUVVGRlF6TkRRamt5TnpKR01EazFPVEJmUjFKTUxWbEpVMGhKVkVWVFZDMU5TVU5TVDFOUFJsUTZNa1ZUVkU5U1FVZEZPakpHVTFSUFVrRkhSVUZEUTA5VlRsUlRPakpHVkVWVFZFRk1WekV3TWpndFYwVlRWRlZUIn0%3d"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '594'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 09 Feb 2023 12:16:07 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network application-gateway create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --public-ip-address --priority
-      User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?api-version=2022-09-01&%24filter=resourceGroup+eq+%27test_manage_appgw_private_endpoint_without_standard000001%27+and+name+eq+%27None%27+and+resourceType+eq+%27Microsoft.Network%2FvirtualNetworks%27&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU9FTTVOa1UtIiwibmV4dFJvd0tleSI6IjEhMTQwIU1FSXhSalkwTnpFeFFrWXdORVJFUVVGRlF6TkRRamt5TnpKR01EazFPVEJmUjFKTUxWbEpVMGhKVkVWVFZDMU5TVU5TVDFOUFJsUTZNa1ZUVkU5U1FVZEZPakpHVTFSUFVrRkhSVUZEUTA5VlRsUlRPakpHVkVWVFZFRk1WekV3TWpndFYwVlRWRlZUIn0%3D
-  response:
-    body:
       string: '{"value":[]}'
     headers:
       cache-control:
@@ -327,7 +267,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:16:07 GMT
+      - Fri, 21 Jul 2023 07:20:02 GMT
       expires:
       - '-1'
       pragma:
@@ -355,65 +295,21 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27test_manage_appgw_private_endpoint_without_standard000001%27%20and%20name%20eq%20%27public_ip%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FpublicIPAddresses%27&api-version=2022-09-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/publicIPAddresses/public_ip","name":"public_ip","type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Basic","tier":"Regional"},"location":"westus"}],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=resourceGroup+eq+%27test_manage_appgw_private_endpoint_without_standard000001%27+and+name+eq+%27public_ip%27+and+resourceType+eq+%27Microsoft.Network%2fpublicIPAddresses%27&api-version=2022-09-01&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU9FTTVOa1UtIiwibmV4dFJvd0tleSI6IjEhMTQwIU1FSXhSalkwTnpFeFFrWXdORVJFUVVGRlF6TkRRamt5TnpKR01EazFPVEJmUjFKTUxWbEpVMGhKVkVWVFZDMU5TVU5TVDFOUFJsUTZNa1ZUVkU5U1FVZEZPakpHVTFSUFVrRkhSVUZEUTA5VlRsUlRPakpHVkVWVFZFRk1WekV3TWpndFYwVlRWRlZUIn0%3d"}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/publicIPAddresses/public_ip","name":"public_ip","type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Basic"},"location":"westus"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '915'
+      - '308'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:16:07 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network application-gateway create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --public-ip-address --priority
-      User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?api-version=2022-09-01&%24filter=resourceGroup+eq+%27test_manage_appgw_private_endpoint_without_standard000001%27+and+name+eq+%27public_ip%27+and+resourceType+eq+%27Microsoft.Network%2FpublicIPAddresses%27&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU9FTTVOa1UtIiwibmV4dFJvd0tleSI6IjEhMTQwIU1FSXhSalkwTnpFeFFrWXdORVJFUVVGRlF6TkRRamt5TnpKR01EazFPVEJmUjFKTUxWbEpVMGhKVkVWVFZDMU5TVU5TVDFOUFJsUTZNa1ZUVkU5U1FVZEZPakpHVTFSUFVrRkhSVUZEUTA5VlRsUlRPakpHVkVWVFZFRk1WekV3TWpndFYwVlRWRlZUIn0%3D
-  response:
-    body:
-      string: '{"value":[]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '12'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 09 Feb 2023 12:16:07 GMT
+      - Fri, 21 Jul 2023 07:20:03 GMT
       expires:
       - '-1'
       pragma:
@@ -435,7 +331,7 @@ interactions:
       "properties": {"addressSpace": {"addressPrefixes": ["10.0.0.0/16"]}, "subnets":
       [{"name": "default", "properties": {"addressPrefix": "10.0.0.0/24"}}]}}, {"type":
       "Microsoft.Network/applicationGateways", "name": "appgw", "location": "westus",
-      "tags": {}, "apiVersion": "2022-01-01", "dependsOn": ["Microsoft.Network/virtualNetworks/appgwVnet"],
+      "tags": {}, "apiVersion": "2022-05-01", "dependsOn": ["Microsoft.Network/virtualNetworks/appgwVnet"],
       "properties": {"backendAddressPools": [{"name": "appGatewayBackendPool"}], "backendHttpSettingsCollection":
       [{"name": "appGatewayBackendHttpSettings", "properties": {"Port": 80, "Protocol":
       "Http", "CookieBasedAffinity": "disabled", "connectionDraining": {"enabled":
@@ -472,16 +368,15 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/ag_deploy_jO6CWrWl0sLbBrTbkQ1oKq9YFMu2dvXA","name":"ag_deploy_jO6CWrWl0sLbBrTbkQ1oKq9YFMu2dvXA","type":"Microsoft.Resources/deployments","properties":{"templateHash":"6600082607613375586","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2023-02-09T12:16:13.7818008Z","duration":"PT0.0005588S","correlationId":"2b77e26c-07a8-4cc3-a862-26ce558678d9","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"applicationGateways","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/virtualNetworks/appgwVnet","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"appgwVnet"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw","resourceType":"Microsoft.Network/applicationGateways","resourceName":"appgw"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/ag_deploy_z4g2wqhXq5ylVHzHVeoZkxmsnpRxSV2h","name":"ag_deploy_z4g2wqhXq5ylVHzHVeoZkxmsnpRxSV2h","type":"Microsoft.Resources/deployments","properties":{"templateHash":"8794767612934318788","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2023-07-21T07:20:08.7013107Z","duration":"PT0.0005823S","correlationId":"64160754-d32e-4884-8ee1-fdd2011e7c77","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"applicationGateways","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/virtualNetworks/appgwVnet","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"appgwVnet"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw","resourceType":"Microsoft.Network/applicationGateways","resourceName":"appgw"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/ag_deploy_jO6CWrWl0sLbBrTbkQ1oKq9YFMu2dvXA/operationStatuses/08585256619147426265?api-version=2022-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/ag_deploy_z4g2wqhXq5ylVHzHVeoZkxmsnpRxSV2h/operationStatuses/08585116828788249230?api-version=2022-09-01
       cache-control:
       - no-cache
       content-length:
@@ -489,7 +384,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:16:14 GMT
+      - Fri, 21 Jul 2023 07:20:09 GMT
       expires:
       - '-1'
       pragma:
@@ -517,10 +412,9 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585256619147426265?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -532,7 +426,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:16:45 GMT
+      - Fri, 21 Jul 2023 07:20:10 GMT
       expires:
       - '-1'
       pragma:
@@ -560,10 +454,9 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585256619147426265?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -575,7 +468,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:17:15 GMT
+      - Fri, 21 Jul 2023 07:20:41 GMT
       expires:
       - '-1'
       pragma:
@@ -603,10 +496,9 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585256619147426265?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -618,7 +510,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:17:46 GMT
+      - Fri, 21 Jul 2023 07:21:12 GMT
       expires:
       - '-1'
       pragma:
@@ -646,10 +538,9 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585256619147426265?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -661,7 +552,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:18:17 GMT
+      - Fri, 21 Jul 2023 07:21:42 GMT
       expires:
       - '-1'
       pragma:
@@ -689,10 +580,9 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585256619147426265?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -704,7 +594,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:18:47 GMT
+      - Fri, 21 Jul 2023 07:22:14 GMT
       expires:
       - '-1'
       pragma:
@@ -732,10 +622,9 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585256619147426265?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -747,7 +636,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:19:17 GMT
+      - Fri, 21 Jul 2023 07:22:44 GMT
       expires:
       - '-1'
       pragma:
@@ -775,10 +664,9 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585256619147426265?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -790,7 +678,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:19:47 GMT
+      - Fri, 21 Jul 2023 07:23:14 GMT
       expires:
       - '-1'
       pragma:
@@ -818,10 +706,9 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585256619147426265?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -833,7 +720,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:20:18 GMT
+      - Fri, 21 Jul 2023 07:23:44 GMT
       expires:
       - '-1'
       pragma:
@@ -861,10 +748,9 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585256619147426265?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -876,7 +762,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:20:49 GMT
+      - Fri, 21 Jul 2023 07:24:16 GMT
       expires:
       - '-1'
       pragma:
@@ -904,10 +790,9 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585256619147426265?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -919,7 +804,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:21:20 GMT
+      - Fri, 21 Jul 2023 07:24:46 GMT
       expires:
       - '-1'
       pragma:
@@ -947,10 +832,9 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585256619147426265?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -962,7 +846,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:21:50 GMT
+      - Fri, 21 Jul 2023 07:25:16 GMT
       expires:
       - '-1'
       pragma:
@@ -990,10 +874,9 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585256619147426265?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1005,7 +888,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:22:21 GMT
+      - Fri, 21 Jul 2023 07:25:48 GMT
       expires:
       - '-1'
       pragma:
@@ -1033,10 +916,9 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585256619147426265?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1048,7 +930,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:22:51 GMT
+      - Fri, 21 Jul 2023 07:26:18 GMT
       expires:
       - '-1'
       pragma:
@@ -1076,10 +958,9 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585256619147426265?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1091,7 +972,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:23:22 GMT
+      - Fri, 21 Jul 2023 07:26:49 GMT
       expires:
       - '-1'
       pragma:
@@ -1119,10 +1000,9 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585256619147426265?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1134,7 +1014,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:23:52 GMT
+      - Fri, 21 Jul 2023 07:27:19 GMT
       expires:
       - '-1'
       pragma:
@@ -1162,10 +1042,9 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585256619147426265?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1177,7 +1056,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:24:23 GMT
+      - Fri, 21 Jul 2023 07:28:28 GMT
       expires:
       - '-1'
       pragma:
@@ -1205,10 +1084,9 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585256619147426265?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1220,7 +1098,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:24:53 GMT
+      - Fri, 21 Jul 2023 07:28:59 GMT
       expires:
       - '-1'
       pragma:
@@ -1248,10 +1126,9 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585256619147426265?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1263,7 +1140,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:25:24 GMT
+      - Fri, 21 Jul 2023 07:29:29 GMT
       expires:
       - '-1'
       pragma:
@@ -1291,10 +1168,9 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585256619147426265?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1306,7 +1182,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:25:55 GMT
+      - Fri, 21 Jul 2023 07:29:59 GMT
       expires:
       - '-1'
       pragma:
@@ -1334,10 +1210,9 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585256619147426265?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1349,7 +1224,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:26:25 GMT
+      - Fri, 21 Jul 2023 07:30:31 GMT
       expires:
       - '-1'
       pragma:
@@ -1377,10 +1252,9 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585256619147426265?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1392,7 +1266,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:26:55 GMT
+      - Fri, 21 Jul 2023 07:31:15 GMT
       expires:
       - '-1'
       pragma:
@@ -1420,10 +1294,9 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585256619147426265?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1435,7 +1308,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:27:26 GMT
+      - Fri, 21 Jul 2023 07:31:45 GMT
       expires:
       - '-1'
       pragma:
@@ -1463,10 +1336,9 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585256619147426265?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1478,7 +1350,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:27:57 GMT
+      - Fri, 21 Jul 2023 07:32:16 GMT
       expires:
       - '-1'
       pragma:
@@ -1506,10 +1378,9 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585256619147426265?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1521,7 +1392,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:28:27 GMT
+      - Fri, 21 Jul 2023 07:32:47 GMT
       expires:
       - '-1'
       pragma:
@@ -1549,10 +1420,9 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585256619147426265?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1564,7 +1434,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:28:57 GMT
+      - Fri, 21 Jul 2023 07:33:17 GMT
       expires:
       - '-1'
       pragma:
@@ -1592,10 +1462,9 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585256619147426265?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1607,7 +1476,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:29:28 GMT
+      - Fri, 21 Jul 2023 07:33:48 GMT
       expires:
       - '-1'
       pragma:
@@ -1635,10 +1504,303 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585256619147426265?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 21 Jul 2023 07:34:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --public-ip-address --priority
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 21 Jul 2023 07:34:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --public-ip-address --priority
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 21 Jul 2023 07:35:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --public-ip-address --priority
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 21 Jul 2023 07:35:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --public-ip-address --priority
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 21 Jul 2023 07:36:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --public-ip-address --priority
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 21 Jul 2023 07:36:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --public-ip-address --priority
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 21 Jul 2023 07:37:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --public-ip-address --priority
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585116828788249230?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -1650,7 +1812,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:29:59 GMT
+      - Fri, 21 Jul 2023 07:37:53 GMT
       expires:
       - '-1'
       pragma:
@@ -1678,22 +1840,21 @@ interactions:
       ParameterSetName:
       - -g -n --public-ip-address --priority
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/ag_deploy_jO6CWrWl0sLbBrTbkQ1oKq9YFMu2dvXA","name":"ag_deploy_jO6CWrWl0sLbBrTbkQ1oKq9YFMu2dvXA","type":"Microsoft.Resources/deployments","properties":{"templateHash":"6600082607613375586","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2023-02-09T12:29:46.5647759Z","duration":"PT13M32.7835339S","correlationId":"2b77e26c-07a8-4cc3-a862-26ce558678d9","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"applicationGateways","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/virtualNetworks/appgwVnet","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"appgwVnet"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw","resourceType":"Microsoft.Network/applicationGateways","resourceName":"appgw"}],"outputs":{"applicationGateway":{"type":"Object","value":{"provisioningState":"Succeeded","resourceGuid":"96ad1dc5-eac6-4141-a276-3342c32fb05d","sku":{"name":"Standard_Medium","tier":"Standard","capacity":2},"operationalState":"Running","gatewayIPConfigurations":[{"name":"appGatewayFrontendIP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/gatewayIPConfigurations/appGatewayFrontendIP","etag":"W/\"d938a427-d01d-4326-8444-9fda54d028fc\"","properties":{"provisioningState":"Succeeded","subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/virtualNetworks/appgwVnet/subnets/default"}},"type":"Microsoft.Network/applicationGateways/gatewayIPConfigurations"}],"sslCertificates":[],"authenticationCertificates":[],"frontendIPConfigurations":[{"name":"appGatewayFrontendIP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/frontendIPConfigurations/appGatewayFrontendIP","etag":"W/\"d938a427-d01d-4326-8444-9fda54d028fc\"","type":"Microsoft.Network/applicationGateways/frontendIPConfigurations","properties":{"provisioningState":"Succeeded","privateIPAllocationMethod":"Dynamic","publicIPAddress":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/publicIPAddresses/public_ip"},"httpListeners":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/httpListeners/appGatewayHttpListener"}]}}],"frontendPorts":[{"name":"appGatewayFrontendPort","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/frontendPorts/appGatewayFrontendPort","etag":"W/\"d938a427-d01d-4326-8444-9fda54d028fc\"","properties":{"provisioningState":"Succeeded","port":80,"httpListeners":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/httpListeners/appGatewayHttpListener"}]},"type":"Microsoft.Network/applicationGateways/frontendPorts"}],"backendAddressPools":[{"name":"appGatewayBackendPool","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/backendAddressPools/appGatewayBackendPool","etag":"W/\"d938a427-d01d-4326-8444-9fda54d028fc\"","properties":{"provisioningState":"Succeeded","backendAddresses":[],"requestRoutingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/requestRoutingRules/rule1"}]},"type":"Microsoft.Network/applicationGateways/backendAddressPools"}],"backendHttpSettingsCollection":[{"name":"appGatewayBackendHttpSettings","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/backendHttpSettingsCollection/appGatewayBackendHttpSettings","etag":"W/\"d938a427-d01d-4326-8444-9fda54d028fc\"","properties":{"provisioningState":"Succeeded","port":80,"protocol":"Http","cookieBasedAffinity":"Disabled","connectionDraining":{"enabled":false,"drainTimeoutInSec":1},"pickHostNameFromBackendAddress":false,"requestTimeout":30,"requestRoutingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/requestRoutingRules/rule1"}]},"type":"Microsoft.Network/applicationGateways/backendHttpSettingsCollection"}],"httpListeners":[{"name":"appGatewayHttpListener","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/httpListeners/appGatewayHttpListener","etag":"W/\"d938a427-d01d-4326-8444-9fda54d028fc\"","properties":{"provisioningState":"Succeeded","frontendIPConfiguration":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/frontendIPConfigurations/appGatewayFrontendIP"},"frontendPort":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/frontendPorts/appGatewayFrontendPort"},"protocol":"Http","hostNames":[],"requireServerNameIndication":false,"requestRoutingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/requestRoutingRules/rule1"}]},"type":"Microsoft.Network/applicationGateways/httpListeners"}],"urlPathMaps":[],"requestRoutingRules":[{"name":"rule1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/requestRoutingRules/rule1","etag":"W/\"d938a427-d01d-4326-8444-9fda54d028fc\"","properties":{"provisioningState":"Succeeded","ruleType":"Basic","httpListener":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/httpListeners/appGatewayHttpListener"},"backendAddressPool":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/backendAddressPools/appGatewayBackendPool"},"backendHttpSettings":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/backendHttpSettingsCollection/appGatewayBackendHttpSettings"}},"type":"Microsoft.Network/applicationGateways/requestRoutingRules"}],"probes":[],"rewriteRuleSets":[],"redirectConfigurations":[]}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/virtualNetworks/appgwVnet"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Resources/deployments/ag_deploy_z4g2wqhXq5ylVHzHVeoZkxmsnpRxSV2h","name":"ag_deploy_z4g2wqhXq5ylVHzHVeoZkxmsnpRxSV2h","type":"Microsoft.Resources/deployments","properties":{"templateHash":"8794767612934318788","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2023-07-21T07:37:34.7165432Z","duration":"PT17M26.0158148S","correlationId":"64160754-d32e-4884-8ee1-fdd2011e7c77","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"applicationGateways","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/virtualNetworks/appgwVnet","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"appgwVnet"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw","resourceType":"Microsoft.Network/applicationGateways","resourceName":"appgw"}],"outputs":{"applicationGateway":{"type":"Object","value":{"provisioningState":"Succeeded","resourceGuid":"724c44fb-a364-485e-aaf2-b40f5b08fa9c","sku":{"name":"Standard_Medium","tier":"Standard","family":"Generation_1","capacity":2},"operationalState":"Running","gatewayIPConfigurations":[{"name":"appGatewayFrontendIP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/gatewayIPConfigurations/appGatewayFrontendIP","etag":"W/\"60e6dcc7-c4c7-4403-9beb-8020b225f922\"","properties":{"provisioningState":"Succeeded","subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/virtualNetworks/appgwVnet/subnets/default"}},"type":"Microsoft.Network/applicationGateways/gatewayIPConfigurations"}],"sslCertificates":[],"authenticationCertificates":[],"frontendIPConfigurations":[{"name":"appGatewayFrontendIP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/frontendIPConfigurations/appGatewayFrontendIP","etag":"W/\"60e6dcc7-c4c7-4403-9beb-8020b225f922\"","type":"Microsoft.Network/applicationGateways/frontendIPConfigurations","properties":{"provisioningState":"Succeeded","privateIPAllocationMethod":"Dynamic","publicIPAddress":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/publicIPAddresses/public_ip"},"httpListeners":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/httpListeners/appGatewayHttpListener"}]}}],"frontendPorts":[{"name":"appGatewayFrontendPort","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/frontendPorts/appGatewayFrontendPort","etag":"W/\"60e6dcc7-c4c7-4403-9beb-8020b225f922\"","properties":{"provisioningState":"Succeeded","port":80,"httpListeners":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/httpListeners/appGatewayHttpListener"}]},"type":"Microsoft.Network/applicationGateways/frontendPorts"}],"backendAddressPools":[{"name":"appGatewayBackendPool","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/backendAddressPools/appGatewayBackendPool","etag":"W/\"60e6dcc7-c4c7-4403-9beb-8020b225f922\"","properties":{"provisioningState":"Succeeded","backendAddresses":[],"requestRoutingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/requestRoutingRules/rule1"}]},"type":"Microsoft.Network/applicationGateways/backendAddressPools"}],"backendHttpSettingsCollection":[{"name":"appGatewayBackendHttpSettings","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/backendHttpSettingsCollection/appGatewayBackendHttpSettings","etag":"W/\"60e6dcc7-c4c7-4403-9beb-8020b225f922\"","properties":{"provisioningState":"Succeeded","port":80,"protocol":"Http","cookieBasedAffinity":"Disabled","connectionDraining":{"enabled":false,"drainTimeoutInSec":1},"pickHostNameFromBackendAddress":false,"requestTimeout":30,"requestRoutingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/requestRoutingRules/rule1"}]},"type":"Microsoft.Network/applicationGateways/backendHttpSettingsCollection"}],"httpListeners":[{"name":"appGatewayHttpListener","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/httpListeners/appGatewayHttpListener","etag":"W/\"60e6dcc7-c4c7-4403-9beb-8020b225f922\"","properties":{"provisioningState":"Succeeded","frontendIPConfiguration":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/frontendIPConfigurations/appGatewayFrontendIP"},"frontendPort":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/frontendPorts/appGatewayFrontendPort"},"protocol":"Http","hostNames":[],"requireServerNameIndication":false,"requestRoutingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/requestRoutingRules/rule1"}]},"type":"Microsoft.Network/applicationGateways/httpListeners"}],"urlPathMaps":[],"requestRoutingRules":[{"name":"rule1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/requestRoutingRules/rule1","etag":"W/\"60e6dcc7-c4c7-4403-9beb-8020b225f922\"","properties":{"provisioningState":"Succeeded","ruleType":"Basic","httpListener":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/httpListeners/appGatewayHttpListener"},"backendAddressPool":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/backendAddressPools/appGatewayBackendPool"},"backendHttpSettings":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/backendHttpSettingsCollection/appGatewayBackendHttpSettings"}},"type":"Microsoft.Network/applicationGateways/requestRoutingRules"}],"probes":[],"rewriteRuleSets":[],"redirectConfigurations":[]}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/virtualNetworks/appgwVnet"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '8459'
+      - '8483'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:29:59 GMT
+      - Fri, 21 Jul 2023 07:37:53 GMT
       expires:
       - '-1'
       pragma:
@@ -1721,28 +1882,29 @@ interactions:
       ParameterSetName:
       - -g --gateway-name --name --frontend-ip --subnet --subnet-prefix
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw?api-version=2022-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"appgw\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw\",\r\n
-        \ \"etag\": \"W/\\\"d938a427-d01d-4326-8444-9fda54d028fc\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"60e6dcc7-c4c7-4403-9beb-8020b225f922\\\"\",\r\n  \"type\":
         \"Microsoft.Network/applicationGateways\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"96ad1dc5-eac6-4141-a276-3342c32fb05d\",\r\n    \"sku\":
+        \   \"resourceGuid\": \"724c44fb-a364-485e-aaf2-b40f5b08fa9c\",\r\n    \"sku\":
         {\r\n      \"name\": \"Standard_Medium\",\r\n      \"tier\": \"Standard\",\r\n
-        \     \"capacity\": 2\r\n    },\r\n    \"operationalState\": \"Running\",\r\n
-        \   \"gatewayIPConfigurations\": [\r\n      {\r\n        \"name\": \"appGatewayFrontendIP\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/gatewayIPConfigurations/appGatewayFrontendIP\",\r\n
-        \       \"etag\": \"W/\\\"d938a427-d01d-4326-8444-9fda54d028fc\\\"\",\r\n
+        \     \"family\": \"Generation_1\",\r\n      \"capacity\": 2\r\n    },\r\n
+        \   \"operationalState\": \"Running\",\r\n    \"gatewayIPConfigurations\":
+        [\r\n      {\r\n        \"name\": \"appGatewayFrontendIP\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/gatewayIPConfigurations/appGatewayFrontendIP\",\r\n
+        \       \"etag\": \"W/\\\"60e6dcc7-c4c7-4403-9beb-8020b225f922\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/virtualNetworks/appgwVnet/subnets/default\"\r\n
         \         }\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/gatewayIPConfigurations\"\r\n
         \     }\r\n    ],\r\n    \"sslCertificates\": [],\r\n    \"authenticationCertificates\":
         [],\r\n    \"frontendIPConfigurations\": [\r\n      {\r\n        \"name\":
         \"appGatewayFrontendIP\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/frontendIPConfigurations/appGatewayFrontendIP\",\r\n
-        \       \"etag\": \"W/\\\"d938a427-d01d-4326-8444-9fda54d028fc\\\"\",\r\n
+        \       \"etag\": \"W/\\\"60e6dcc7-c4c7-4403-9beb-8020b225f922\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/applicationGateways/frontendIPConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"publicIPAddress\":
@@ -1752,21 +1914,21 @@ interactions:
         \           }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n    \"frontendPorts\":
         [\r\n      {\r\n        \"name\": \"appGatewayFrontendPort\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/frontendPorts/appGatewayFrontendPort\",\r\n
-        \       \"etag\": \"W/\\\"d938a427-d01d-4326-8444-9fda54d028fc\\\"\",\r\n
+        \       \"etag\": \"W/\\\"60e6dcc7-c4c7-4403-9beb-8020b225f922\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"port\": 80,\r\n          \"httpListeners\": [\r\n            {\r\n
         \             \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/httpListeners/appGatewayHttpListener\"\r\n
         \           }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendPorts\"\r\n
         \     }\r\n    ],\r\n    \"backendAddressPools\": [\r\n      {\r\n        \"name\":
         \"appGatewayBackendPool\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/backendAddressPools/appGatewayBackendPool\",\r\n
-        \       \"etag\": \"W/\\\"d938a427-d01d-4326-8444-9fda54d028fc\\\"\",\r\n
+        \       \"etag\": \"W/\\\"60e6dcc7-c4c7-4403-9beb-8020b225f922\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"backendAddresses\": [],\r\n          \"requestRoutingRules\":
         [\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/requestRoutingRules/rule1\"\r\n
         \           }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/backendAddressPools\"\r\n
         \     }\r\n    ],\r\n    \"backendHttpSettingsCollection\": [\r\n      {\r\n
         \       \"name\": \"appGatewayBackendHttpSettings\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/backendHttpSettingsCollection/appGatewayBackendHttpSettings\",\r\n
-        \       \"etag\": \"W/\\\"d938a427-d01d-4326-8444-9fda54d028fc\\\"\",\r\n
+        \       \"etag\": \"W/\\\"60e6dcc7-c4c7-4403-9beb-8020b225f922\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"port\": 80,\r\n          \"protocol\": \"Http\",\r\n          \"cookieBasedAffinity\":
         \"Disabled\",\r\n          \"connectionDraining\": {\r\n            \"enabled\":
@@ -1776,7 +1938,7 @@ interactions:
         \           }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/backendHttpSettingsCollection\"\r\n
         \     }\r\n    ],\r\n    \"httpListeners\": [\r\n      {\r\n        \"name\":
         \"appGatewayHttpListener\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/httpListeners/appGatewayHttpListener\",\r\n
-        \       \"etag\": \"W/\\\"d938a427-d01d-4326-8444-9fda54d028fc\\\"\",\r\n
+        \       \"etag\": \"W/\\\"60e6dcc7-c4c7-4403-9beb-8020b225f922\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"frontendIPConfiguration\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/frontendIPConfigurations/appGatewayFrontendIP\"\r\n
         \         },\r\n          \"frontendPort\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/frontendPorts/appGatewayFrontendPort\"\r\n
@@ -1786,7 +1948,7 @@ interactions:
         \           }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/httpListeners\"\r\n
         \     }\r\n    ],\r\n    \"urlPathMaps\": [],\r\n    \"requestRoutingRules\":
         [\r\n      {\r\n        \"name\": \"rule1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/requestRoutingRules/rule1\",\r\n
-        \       \"etag\": \"W/\\\"d938a427-d01d-4326-8444-9fda54d028fc\\\"\",\r\n
+        \       \"etag\": \"W/\\\"60e6dcc7-c4c7-4403-9beb-8020b225f922\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"ruleType\": \"Basic\",\r\n          \"httpListener\": {\r\n            \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/httpListeners/appGatewayHttpListener\"\r\n
@@ -1801,13 +1963,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '8773'
+      - '8806'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:30:00 GMT
+      - Fri, 21 Jul 2023 07:37:55 GMT
       etag:
-      - W/"d938a427-d01d-4326-8444-9fda54d028fc"
+      - W/"60e6dcc7-c4c7-4403-9beb-8020b225f922"
       expires:
       - '-1'
       pragma:
@@ -1824,7 +1986,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c307af1c-8f58-4fb7-875b-3a1cb2e0695c
+      - 9983d35e-4093-495a-8c4d-09a546862f27
     status:
       code: 200
       message: OK
@@ -1842,39 +2004,40 @@ interactions:
       ParameterSetName:
       - -g --gateway-name --name --frontend-ip --subnet --subnet-prefix
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/virtualNetworks/appgwVnet?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"appgwVnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/virtualNetworks/appgwVnet\",\r\n
-        \ \"etag\": \"W/\\\"6ec4dfad-19ba-47d3-bf88-a4e1d010c509\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"e32f7956-7a20-4845-bdd0-0c63bd94e43f\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"1916e34e-76b0-447f-a077-969314b5ad2d\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"f2444ac3-1068-4ec5-bff5-551f9affee36\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"subnets\": [\r\n      {\r\n        \"name\": \"default\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/virtualNetworks/appgwVnet/subnets/default\",\r\n
-        \       \"etag\": \"W/\\\"6ec4dfad-19ba-47d3-bf88-a4e1d010c509\\\"\",\r\n
+        \       \"etag\": \"W/\\\"e32f7956-7a20-4845-bdd0-0c63bd94e43f\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"applicationGatewayIPConfigurations\":
         [\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/applicationGateways/appgw/gatewayIPConfigurations/appGatewayFrontendIP\"\r\n
         \           }\r\n          ],\r\n          \"delegations\": [],\r\n          \"privateEndpointNetworkPolicies\":
         \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
         \       },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
-        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"cloudServices\":
+        [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CSESARMRG-15B7FD2B-2770-4ACE-AEB1-A6D9CA7E3EF5/providers/Microsoft.Compute/cloudServices/15b7fd2b-2770-4ace-aeb1-a6d9ca7e3ef5\"\r\n
+        \     }\r\n    ],\r\n    \"enableDdosProtection\": false\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1670'
+      - '1930'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:30:01 GMT
+      - Fri, 21 Jul 2023 07:38:07 GMT
       etag:
-      - W/"6ec4dfad-19ba-47d3-bf88-a4e1d010c509"
+      - W/"e32f7956-7a20-4845-bdd0-0c63bd94e43f"
       expires:
       - '-1'
       pragma:
@@ -1891,7 +2054,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 869e15fd-196e-46d4-a784-9c2dd7dbd083
+      - bc80f356-8c49-448a-a078-23220c410ba8
     status:
       code: 200
       message: OK
@@ -1914,7 +2077,7 @@ interactions:
       ParameterSetName:
       - -g --gateway-name --name --frontend-ip --subnet --subnet-prefix
       User-Agent:
-      - AZURECLI/2.45.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_manage_appgw_private_endpoint_without_standard000001/providers/Microsoft.Network/virtualNetworks/appgwVnet/subnets/appgw_private_link_subnet_for_public?api-version=2022-01-01
   response:
@@ -1931,7 +2094,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Feb 2023 12:30:03 GMT
+      - Fri, 21 Jul 2023 07:38:09 GMT
       expires:
       - '-1'
       pragma:
@@ -1944,9 +2107,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 06850b57-9fc1-4e03-aa26-6263d2f5e980
+      - d8aeafd6-0f68-4d38-ba57-db42e3b57b27
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 400
       message: Bad Request
