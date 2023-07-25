@@ -1243,8 +1243,10 @@ def load_arguments(self, _):
 
     with self.argument_context('sig create') as c:
         c.argument('description', help='the description of the gallery')
+
     with self.argument_context('sig update') as c:
         c.ignore('gallery')
+
     for scope in ['sig create', 'sig update']:
         with self.argument_context(scope) as c:
             c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes),
@@ -1604,5 +1606,4 @@ def load_arguments(self, _):
         c.argument('expand', help='The expand expression to apply on the operation.',
                    deprecate_info=c.deprecate(hide=True))
         c.argument('restore_points', action='store_true', help='Show all contained restore points in the restore point collection.')
-
     # endRegion

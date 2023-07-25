@@ -5112,7 +5112,7 @@ def update_nw_flow_log_setter(client, watcher_rg, watcher_name, flow_log_name, p
 
 # region PublicIPAddresses
 def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
-                     allocation_method=None, dns_name=None,
+                     allocation_method=None, dns_name=None, dns_name_scope=None,
                      idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
                      public_ip_prefix=None, edge_zone=None, ip_address=None,
                      protection_mode=None, ddos_protection_plan=None):
@@ -5163,8 +5163,9 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
             public_ip_args['sku'] = 'Basic'
         public_ip_args['tier'] = tier
 
-    if dns_name or reverse_fqdn:
+    if dns_name or dns_name_scope or reverse_fqdn:
         public_ip_args['dns_name'] = dns_name
+        public_ip_args['dns_name_scope'] = dns_name_scope
         public_ip_args['reverse_fqdn'] = reverse_fqdn
 
     if edge_zone:

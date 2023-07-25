@@ -78,8 +78,7 @@ def transform_resource_list(result):
 def transform_stacks(result):
     return OrderedDict([('Name', result['name']),
                         ('State', result['provisioningState']),
-                        ('Last Modified', result['systemData']['lastModifiedAt']),
-                        ('Deployment Id', result['deploymentId'])])
+                        ('Last Modified', result['systemData']['lastModifiedAt'])])
 
 
 def transform_stacks_list(result):
@@ -91,7 +90,7 @@ def transform_stacks_list(result):
                 resources += reslist['id'] + ","
 
             res = OrderedDict([('Name', r['name']), ('State', r['provisioningState']),
-                              ('Last Modified', r['systemData']['lastModifiedAt']), ('Resource IDs', resources[:-1])])
+                              ('Last Modified', r['systemData']['lastModifiedAt'])])
             transformed.append(res)
     return transformed
 

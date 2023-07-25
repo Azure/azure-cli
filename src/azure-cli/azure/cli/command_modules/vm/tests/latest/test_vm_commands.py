@@ -4198,8 +4198,9 @@ class VMSSCreateExistingOptions(ScenarioTest):
         ])
         self.cmd('network lb show --name {lb} -g {rg}',
                  checks=self.check('backendAddressPools[0].backendIPConfigurations[0].id.contains(@, \'{vmss}\')', True))
-        self.cmd('network vnet show --name {vnet} -g {rg}',
-                 checks=self.check('subnets[0].ipConfigurations[0].id.contains(@, \'{vmss}\')', True))
+
+        subnet_ip_id = self.cmd('network vnet show --name {vnet} -g {rg}').get_output_in_json()['subnets'][0]['ipConfigurations'][0]['id']
+        self.assertTrue(self.kwargs['vmss'] in subnet_ip_id.lower())
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_with_delete_option', location='eastus')
     def test_vmss_create_with_delete_option(self, resource_group):
@@ -4265,8 +4266,8 @@ class VMSSCreateExistingIdsOptions(ScenarioTest):
         ])
         self.cmd('network lb show --name {lb} -g {rg}',
                  checks=self.check('backendAddressPools[0].backendIPConfigurations[0].id.contains(@, \'{vmss}\')', True))
-        self.cmd('network vnet show --name {vnet} -g {rg}',
-                 checks=self.check('subnets[0].ipConfigurations[0].id.contains(@, \'{vmss}\')', True))
+        subnet_ip_id = self.cmd('network vnet show --name {vnet} -g {rg}').get_output_in_json()['subnets'][0]['ipConfigurations'][0]['id']
+        self.assertTrue(self.kwargs['vmss'] in subnet_ip_id.lower())
 
 
 class VMSSVMsScenarioTest(ScenarioTest):
@@ -9530,6 +9531,9 @@ class CapacityReservationScenarioTest(ScenarioTest):
                  ])
 
         self.cmd('capacity reservation delete -c {reservation_group} -n {reservation_name} -g {rg} --yes')
+        # make sure capacity reservation has been deleted before deleting capacity reservation group
+        if self.is_live:
+            time.sleep(60)
         self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
 
 

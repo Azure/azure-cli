@@ -340,6 +340,24 @@ examples:
         --aad "101112131415161718191a1b1c1d1e1f" --iv "727b26f78e55cf4cd8d34216" --tag "f7207d02cead35a77a1c7e5f8af959e9"
 """
 
+helps['keyvault key sign'] = """
+type: command
+short-summary: Create a signature from a digest using a key that is stored in a Vault or HSM.
+examples:
+  - name: Create a signature from a digest using keyvault's key.
+    text: |
+        az keyvault key sign --name mykey --vault-name myvault --algorithm RS256 --digest "12345678901234567890123456789012"
+"""
+
+helps['keyvault key verify'] = """
+type: command
+short-summary: Verify a signature using the key that is stored in a Vault or HSM.
+examples:
+  - name: Verify a signature using keyvault's key.
+    text: |
+        az keyvault key verify --name mykey --vault-name myvault --algorithm RS256 --digest "12345678901234567890123456789012" --signature XXXYYYZZZ
+"""
+
 helps['keyvault key backup'] = """
 type: command
 short-summary: Request that a backup of the specified key be downloaded to the client.
