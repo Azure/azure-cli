@@ -152,6 +152,7 @@ class Update(AAZCommand):
 
         # define Arg Group "Properties"
 
+        _args_schema = cls._args_schema
         _args_schema.partition_count = AAZIntArg(
             options=["--partition-count"],
             arg_group="Properties",
