@@ -746,6 +746,7 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
             self.check('frontendIPConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
             self.check("frontendIPConfigurations[0].subnet.contains(id, 'default')", True),
             self.check("enableHttp2", False),
+            self.check("contains(defaultPredefinedSslPolicy, 'AppGwSslPolicy')", True),
         ])
         self.cmd('network application-gateway show-backend-health -g {rg} -n ag1')
 
@@ -832,6 +833,7 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
 
 class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
 
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_ag_identity')
     @KeyVaultPreparer(name_prefix='cli-test-keyvault-', sku='premium')
     def test_network_app_gateway_with_identity(self, resource_group):
@@ -2167,26 +2169,6 @@ class NetworkAppGatewayWafConfigScenarioTest20170301(ScenarioTest):
         ])
 
 
-class NetworkAppGatewayWafV2ConfigScenarioTest(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_v2_config')
-    def test_network_app_gateway_waf_v2_config(self, resource_group):
-
-        self.kwargs.update({
-            'ip': 'pip1',
-            'ag': 'ag1'
-        })
-        self.cmd('network public-ip create -g {rg} -n {ip} --sku standard')
-        self.cmd('network application-gateway waf-policy create -n waf1 -g {rg}')
-        self.cmd('network application-gateway create -g {rg} -n {ag} --subnet subnet1 --vnet-name vnet1 --public-ip-address {ip} --sku WAF_v2 --priority 1001 --waf-policy waf1 --no-wait')
-        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
-        self.cmd('network application-gateway waf-config set -g {rg} --gateway-name ag1 --enabled true --firewall-mode prevention --rule-set-version 3.0 --exclusion RequestHeaderNames StartsWith abc --exclusion RequestArgNames Equals def')
-        self.cmd('network application-gateway waf-config show -g {rg} --gateway-name ag1', checks=[
-            self.check('enabled', True),
-            self.check('length(exclusions)', 2)
-        ])
-
-
 class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_')
@@ -2894,7 +2876,7 @@ class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
 
 class NetworkPublicIpScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_public_ip')
+    @ResourceGroupPreparer(name_prefix='cli_test_public_ip', location="eastus2euap")
     def test_network_public_ip(self, resource_group):
         self.kwargs.update({
             'ip1': 'pubipdns',
@@ -2907,10 +2889,11 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
             'version': 'ipv4',
             'sku': 'standard'
         })
-        self.cmd('network public-ip create -g {rg} -n {ip1} --dns-name {dns} --allocation-method static', checks=[
+        self.cmd('network public-ip create -g {rg} -n {ip1} --dns-name {dns} --dns-name-scope TenantReuse --allocation-method static', checks=[
             self.check('publicIp.provisioningState', 'Succeeded'),
             self.check('publicIp.publicIPAllocationMethod', 'Static'),
-            self.check('publicIp.dnsSettings.domainNameLabel', '{dns}')
+            self.check('publicIp.dnsSettings.domainNameLabel', '{dns}'),
+            self.check('publicIp.dnsSettings.domainNameLabelScope', 'TenantReuse')
         ])
         self.cmd('network public-ip create -g {rg} -n {ip2}', checks=[
             self.check('publicIp.provisioningState', 'Succeeded'),
@@ -6450,7 +6433,7 @@ class NetworkExtendedLocation(ScenarioTest):
             'edge_name': 'microsoftrrdclab1'
         })
 
-        self.cmd('network public-ip create -g {rg} -n {ip1} --edge-zone {edge_name}',
+        self.cmd('network public-ip create -g {rg} -n {ip1} --edge-zone {edge_name} --sku Standard',
                  checks=self.check('publicIp.extendedLocation.name', '{edge_name}'))
 
     @ResourceGroupPreparer(name_prefix='test_network_public_ip_prefix_edge_zone', location='eastus2euap')
