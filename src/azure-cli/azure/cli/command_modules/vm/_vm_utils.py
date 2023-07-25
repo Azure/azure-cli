@@ -554,9 +554,8 @@ def trusted_launch_warning_log(namespace, generation_version, features):
     if not generation_version:
         return
 
-    log_message = 'Ignite (November) 2023 onwards "az vm/vmss create" command will deploy Gen2-Trusted ' \
-                  'Launch VM by default. To know more about the default change and Trusted Launch, ' \
-                  'please visit https://aka.ms/TLaD'
+    from ._constants import TLAD_DEFAULT_CHANGE_MSG
+    log_message = TLAD_DEFAULT_CHANGE_MSG.format('az vm/vmss create')
 
     from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE, UPGRADE_SECURITY_HINT
     if generation_version == 'V1':

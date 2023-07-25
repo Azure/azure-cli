@@ -14,6 +14,10 @@ UPGRADE_SECURITY_HINT = 'Consider upgrading security for your workloads using Az
                         'To know more about Trusted Launch, please visit ' \
                         'https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch.'
 
+TLAD_DEFAULT_CHANGE_MSG = 'Ignite (November) 2023 onwards "{}" command will deploy Gen2-Trusted ' \
+                          'Launch VM by default. To know more about the default change and Trusted Launch, ' \
+                          'please visit https://aka.ms/TLaD'
+
 # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
 # after changing the default values of `security_type` to Trusted Launch VMs in the future.
 COMPATIBLE_SECURITY_TYPE_VALUE = 'Standard'

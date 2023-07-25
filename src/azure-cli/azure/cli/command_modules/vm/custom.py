@@ -340,11 +340,9 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         raise RequiredArgumentMissingError(
             'usage error: --upload-size-bytes should be used together with --upload-type')
 
-    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE, UPGRADE_SECURITY_HINT
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE, UPGRADE_SECURITY_HINT, TLAD_DEFAULT_CHANGE_MSG
     if security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
-        log_message = 'Ignite (November) 2023 onwards "az disk create" command will deploy Gen2-Trusted Launch VM ' \
-                      'by default. To know more about the default change and Trusted Launch, ' \
-                      'please visit https://aka.ms/TLaD'
+        log_message = TLAD_DEFAULT_CHANGE_MSG.format('az disk create')
     else:
         log_message = UPGRADE_SECURITY_HINT
     if image_reference is not None:
