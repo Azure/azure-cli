@@ -661,6 +661,7 @@ def aks_update(
     load_balancer_idle_timeout=None,
     nat_gateway_managed_outbound_ip_count=None,
     nat_gateway_idle_timeout=None,
+    outbound_type=None,
     auto_upgrade_channel=None,
     cluster_autoscaler_profile=None,
     uptime_sla=False,
@@ -973,10 +974,10 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                       enable_sgxquotehelper=False,
                       enable_secret_rotation=False,
                       rotation_poll_interval=None,
-                      no_wait=False,
                       enable_msi_auth_for_monitoring=True,
                       enable_syslog=False,
-                      data_collection_settings=None,):
+                      data_collection_settings=None,
+                      no_wait=False,):
     instance = client.get(resource_group_name, name)
     msi_auth = False
     if instance.service_principal_profile.client_id == "msi":

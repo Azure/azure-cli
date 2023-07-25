@@ -18,6 +18,10 @@ from azure.cli.command_modules.acs._consts import (
     CONST_OS_SKU_AZURELINUX,
     CONST_OS_SKU_CBLMARINER,
     CONST_OS_SKU_MARINER,
+    CONST_OUTBOUND_TYPE_LOAD_BALANCER,
+    CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
+    CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+    CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
 )
 from azure.cli.core import keys
 from azure.cli.core.azclierror import (
@@ -716,3 +720,10 @@ def validate_start_time(namespace):
     found = start_time_regex.findall(namespace.start_time)
     if not found:
         raise InvalidArgumentValueError('--start-time must be in format "HH:mm". For example, "09:30" and "17:00".')
+
+def validate_outbound_type_in_update(namespace):
+    """validate outbound type in update operation"""
+    if namespace.outbound_type is not None and namespace.outbound_type not in [CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY, CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY, CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING]:
+        raise InvalidArgumentValueError(
+            f"Invalid outbound type {namespace.outbound_type}, supported values are loadBalancer, managedNATGateway, userAssignedNATGateway and userDefinedRouting")
+

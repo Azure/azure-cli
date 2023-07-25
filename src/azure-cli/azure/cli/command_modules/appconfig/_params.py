@@ -47,7 +47,7 @@ def load_arguments(self, _):
         nargs='+',
         help='Customize output fields for Snapshots',
         validator=validate_snapshot_query_fields,
-        arg_type=get_enum_type(['name', 'etag', 'status_code', 'retention_period', 'filters', 'status', 'created', 'expires', 'size', 'items_count', 'composition_type', 'tags'])
+        arg_type=get_enum_type(['name', 'etag', 'retention_period', 'filters', 'status', 'created', 'expires', 'size', 'items_count', 'composition_type', 'tags'])
     )
     filter_parameters_arg_type = CLIArgumentType(
         validator=validate_filter_parameters,
@@ -97,6 +97,12 @@ def load_arguments(self, _):
         validator=validate_snapshot_filters,
         nargs='+',
         help='Space-separated list of escaped JSON objects that represent the key and label filters used to build an App Configuration snapshot.'
+    )
+    snapshot_status_arg_type = CLIArgumentType(
+        options_list=['--status'],
+        arg_type=get_enum_type(['archived', 'failed', 'provisioning', 'ready']),
+        nargs='+',
+        help='Filter snapshots by their status. If no status specified, return all snapshots by default.'
     )
 
     # Used with data plane commands. These take either a store name or connection string argument.
@@ -250,7 +256,7 @@ def load_arguments(self, _):
         c.argument('secret_identifier', validator=validate_secret_identifier, help="ID of the Key Vault object. Can be found using 'az keyvault {collection} show' command, where collection is key, secret or certificate. To set reference to the latest version of your secret, remove version information from secret identifier.")
 
     with self.argument_context('appconfig kv delete') as c:
-        c.argument('key', help='Support star sign as filters, for instance * means all key and abc* means keys with abc as prefix.')
+        c.argument('key', validator=validate_key, help='Support star sign as filters, for instance * means all key and abc* means keys with abc as prefix.')
         c.argument('label', help="If no label specified, delete entry with null label. Support star sign as filters, for instance * means all label and abc* means labels with abc as prefix.")
 
     with self.argument_context('appconfig kv show') as c:
@@ -376,5 +382,5 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig snapshot list') as c:
         c.argument('snapshot_name', options_list=['--snapshot-name', '-s'], help='If no name specified, return all snapshots by default. Support star sign as filters, for instance abc* means snapshots with abc as prefix to the name.')
-        c.argument('status', help='Value used to filter snapshots by their status.')
+        c.argument('status', arg_type=snapshot_status_arg_type)
         c.argument('fields', arg_type=snapshot_fields_arg_type)

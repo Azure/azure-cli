@@ -19,6 +19,9 @@ class Update(AAZCommand):
 
     :example: Update properties of a web application firewall global configuration.
         az network application-gateway waf-policy policy-setting update --mode Prevention --policy-name MyPolicy --resource-group MyResourceGroup --state Disabled
+
+    :example: Update a web application firewall global configuration with scrubbing rules.
+        az network application-gateway waf-policy policy-setting update -g MyResourceGroup --policy-name MyPolicySetting --request-body-inspect-limit-in-kb 64 --file-upload-enforcement True --request-body-enforcement False --log-scrubbing-state Enabled --scrubbing-rules [{"state":"Enabled","match-variable":"RequestArgNames","selector-match-operator":"Equals","selector":"test"},{"state":"Enabled","match-variable":"RequestIPAddress","selector-match-operator":"EqualsAny","selector":null}]
     """
 
     _aaz_info = {

@@ -5260,6 +5260,102 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         # test list sql managed_instance in the subscription should be at least 1
         self.cmd('sql mi list', checks=[JMESPathCheckGreaterThan('length(@)', 0)])
 
+class SqlManagedInstanceStartStopMgmtScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
+    def test_sql_mi_startstop_mgmt(self):
+        rg = 'CustomerExperienceTeam_RG'
+        mi = 'clitestmilb5hsyvgolc22pa3zzf2urno3uwskko4us2mbcti2gebgawczstsm'
+        self.kwargs.update({
+            'rg': rg,
+            'mi': mi,
+        })
+        # check managed instance
+        self.cmd('sql mi show -g {rg} -n {mi}',
+        checks=[
+            JMESPathCheck('name', mi),
+            JMESPathCheck('resourceGroup', rg)])
+
+        # test the manual stop command
+        self.cmd('sql mi stop -g {rg} --mi {mi}',
+        checks=[
+            JMESPathCheck('name', mi),
+            JMESPathCheck('state', 'Stopped')])
+
+        # test the manual start command
+        self.cmd('sql mi start -g {rg} --mi {mi}',
+        checks=[
+            JMESPathCheck('name', mi),
+            JMESPathCheck('state', 'Ready')])
+        
+    @AllowLargeResponse()
+    def test_sql_mi_scheduledstartstop_mgmt(self):
+        rg = 'CustomerExperienceTeam_RG'
+        mi = 'clitestmilb5hsyvgolc22pa3zzf2urno3uwskko4us2mbcti2gebgawczstsm'
+        schedule = "[{'startDay':'Friday','startTime':'10:00 AM','stopDay':'Friday','stopTime':'11:10 AM'}]"
+        schedule_item = "{'startDay':'Monday','startTime':'10:00 AM','stopDay':'Monday','stopTime':'11:10 AM'}"
+        description = "test description"
+        self.kwargs.update({
+            'rg': rg,
+            'mi': mi,
+            'schedule': schedule,
+            'desc': description,
+            'schedule_item': schedule_item,
+        })
+        # check if test MI got created
+        self.cmd('sql mi show -g {rg} -n {mi}',
+        checks=[
+            JMESPathCheck('name', mi),
+            JMESPathCheck('resourceGroup', rg)])
+
+        # test the create schedule
+        self.cmd('az sql mi start-stop-schedule create -g {rg} --mi {mi} --schedule-list \"{schedule}\" --description \"{desc}\"',
+        checks=[
+            JMESPathCheck('name', 'default'),
+            JMESPathCheck('description', description),
+            JMESPathCheck('scheduleList[0].startDay', 'Friday'),
+            JMESPathCheck('scheduleList[0].startTime', '10:00'),
+            JMESPathCheck('scheduleList[0].stopDay', 'Friday'),
+            JMESPathCheck('scheduleList[0].stopTime', '11:10'),
+            JMESPathCheck('timeZoneId', 'UTC')])
+        
+        # test the update schedule - add item
+        self.cmd('az sql mi start-stop-schedule update -g {rg} --mi {mi} --add schedule_list \"{schedule_item}\"',
+        checks=[
+            JMESPathCheck('description', description),
+            JMESPathCheck('scheduleList[1].startDay', 'Monday'),
+            JMESPathCheck('scheduleList[1].startTime', '10:00'),
+            JMESPathCheck('scheduleList[1].stopDay', 'Monday'),
+            JMESPathCheck('scheduleList[1].stopTime', '11:10')])
+
+        # test the update schedule - overwrite schedule
+        self.cmd('az sql mi start-stop-schedule update -g {rg} --mi {mi} --schedule-list \"{schedule}\"',
+        checks=[
+            JMESPathCheck('scheduleList[0].startDay', 'Friday'),
+            JMESPathCheck('scheduleList[0].startTime', '10:00'),
+            JMESPathCheck('scheduleList[0].stopDay', 'Friday'),
+            JMESPathCheck('scheduleList[0].stopTime', '11:10')])
+
+        # test the show schedule
+        self.cmd('az sql mi start-stop-schedule show -g {rg} --mi {mi}',
+        checks=[
+            JMESPathCheck('description', description),
+            JMESPathCheck('scheduleList[0].startDay', 'Friday'),
+            JMESPathCheck('scheduleList[0].startTime', '10:00'),
+            JMESPathCheck('scheduleList[0].stopDay', 'Friday'),
+            JMESPathCheck('scheduleList[0].stopTime', '11:10')])
+        
+        # test the list schedule
+        self.cmd('az sql mi start-stop-schedule list -g {rg} --mi {mi}',
+        checks=[
+            JMESPathCheck('[0].description', description),
+            JMESPathCheck('[0].scheduleList[0].startDay', 'Friday'),
+            JMESPathCheck('[0].scheduleList[0].startTime', '10:00'),
+            JMESPathCheck('[0].scheduleList[0].stopDay', 'Friday'),
+            JMESPathCheck('[0].scheduleList[0].stopTime', '11:10')])
+
+        # test the delete schedule
+        self.cmd('az sql mi start-stop-schedule delete -g {rg} --mi {mi} --yes')
+
 class SqlManagedInstanceBackupStorageRedundancyTest(ScenarioTest):
     bsr_geo = "Geo"
 

@@ -407,9 +407,11 @@ class AppConfigSnapshotClient:
 
         _headers = kwargs.pop("headers", {}) or {}
 
+        status_filter = ",".join(status) if status else None
+
         initial_request = build_list_snapshots_request(
             name_filter=name,
-            status_filter=status,
+            status_filter=status_filter,
             select=fields,
             sync_token=self._sync_token,
             headers=_headers)

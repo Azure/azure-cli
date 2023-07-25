@@ -484,7 +484,7 @@ parameters:
     short-summary: Enable KEDA workload auto-scaler.
   - name: --enable-azure-monitor-metrics
     type: bool
-    short-summary: Enable Azure Monitor Metrics Profile
+    short-summary: Enable a kubernetes cluster with the Azure Monitor managed service for Prometheus integration.
   - name: --azure-monitor-workspace-resource-id
     type: string
     short-summary: Resource ID of the Azure Monitor Workspace
@@ -576,7 +576,7 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --network-plugin none
   - name: Create a kubernetes cluster with KEDA workload autoscaler enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-keda
-  - name: Create a kubernetes cluster with Azure Monitor Metrics enabled.
+  - name: Create a kubernetes cluster with the Azure Monitor managed service for Prometheus integration enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-monitor-metrics
 """
 
@@ -646,6 +646,10 @@ parameters:
     type: int
     short-summary: NAT gateway idle timeout in minutes.
     long-summary: Desired idle timeout for NAT gateway outbound flows, default is 4 minutes. Please specify a value in the range of [4, 120]. Valid for Standard SKU load balancer cluster with managedNATGateway outbound type only.
+  - name: --outbound-type
+    type: string
+    short-summary: How outbound traffic will be configured for a cluster.
+    long-summary: This option will change the way how the outbound connections are managed in the AKS cluster. Available options are loadbalancer, managedNATGateway, userAssignedNATGateway, userDefinedRouting. For custom vnet, loadbalancer, userAssignedNATGateway and userDefinedRouting are supported. For aks managed vnet, loadbalancer, managedNATGateway and userDefinedRouting are supported.
   - name: --auto-upgrade-channel
     type: string
     short-summary: Specify the upgrade channel for autoupgrade.
@@ -825,7 +829,7 @@ parameters:
     short-summary: Disable KEDA workload auto-scaler.
   - name: --enable-azure-monitor-metrics
     type: bool
-    short-summary: Enable Azure Monitor Metrics Profile
+    short-summary: Enable a kubernetes cluster with the Azure Monitor managed service for Prometheus integration.
   - name: --azure-monitor-workspace-resource-id
     type: string
     short-summary: Resource ID of the Azure Monitor Workspace

@@ -21,8 +21,7 @@ interactions:
       ParameterSetName:
       - -n -g --routing-method --unique-dns-name --custom-headers --status-code-ranges
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1?api-version=2022-04-01-preview
   response:
@@ -36,7 +35,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 03:24:52 GMT
+      - Fri, 21 Jul 2023 06:49:10 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -66,28 +65,29 @@ interactions:
       ParameterSetName:
       - -g -n --dns-name --query
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_traffic_manager_subnet000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001","name":"cli_test_traffic_manager_subnet000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-02-08T03:24:48Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001","name":"cli_test_traffic_manager_subnet000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_network_traffic_manager_subnet_routing","date":"2023-07-21T06:48:55Z","module":"network"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '352'
+      - '424'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 03:24:52 GMT
+      - Fri, 21 Jul 2023 06:49:11 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -95,8 +95,7 @@ interactions:
       message: OK
 - request:
     body: '{"location": "westus", "properties": {"dnsSettings": {"domainNameLabel":
-      "testpip000003"}, "idleTimeoutInMinutes": 4, "publicIPAddressVersion": "IPv4",
-      "publicIPAllocationMethod": "Dynamic"}}'
+      "testpip000003"}, "idleTimeoutInMinutes": 4, "publicIPAllocationMethod": "Dynamic"}}'
     headers:
       Accept:
       - application/json
@@ -107,41 +106,31 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '191'
+      - '157'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --dns-name --query
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"ip1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1\",\r\n
-        \ \"etag\": \"W/\\\"23a6a67b-305a-4155-9a18-d4a5ddb5823f\\\"\",\r\n  \"location\":
-        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"1a0ae801-e0e0-40c0-b281-1f0cf4d7f0f7\",\r\n    \"publicIPAddressVersion\":
-        \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
-        4,\r\n    \"dnsSettings\": {\r\n      \"domainNameLabel\": \"testpip000003\",\r\n
-        \     \"fqdn\": \"testpip000003.westus.cloudapp.azure.com\"\r\n    },\r\n
-        \   \"ipTags\": []\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
-        \ \"sku\": {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n
-        \ }\r\n}"
+      string: '{"name":"ip1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1","etag":"W/\"dbb0d4ff-a2d3-4386-8d98-f1573590b813\"","location":"westus","properties":{"provisioningState":"Updating","resourceGuid":"fcf74d40-baef-44d1-a495-b50cc53b7ed2","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Dynamic","idleTimeoutInMinutes":4,"dnsSettings":{"domainNameLabel":"testpip000003","fqdn":"testpip000003.westus.cloudapp.azure.com"},"ipTags":[]},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Basic","tier":"Regional"}}'
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/5f94b0f6-bead-4de3-8c0e-377056ca1c74?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/e2be9e1e-d0b7-4087-babf-4dbca4e0b6e9?api-version=2022-11-01
       cache-control:
       - no-cache
       content-length:
-      - '771'
+      - '639'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 03:24:55 GMT
+      - Fri, 21 Jul 2023 06:49:17 GMT
       expires:
       - '-1'
       pragma:
@@ -154,7 +143,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 79a82c1e-2e51-4400-b6d9-3977f2b82fdf
+      - b00fed39-4450-495f-a927-5972c52b9df9
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -174,22 +163,21 @@ interactions:
       ParameterSetName:
       - -g -n --dns-name --query
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/5f94b0f6-bead-4de3-8c0e-377056ca1c74?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/e2be9e1e-d0b7-4087-babf-4dbca4e0b6e9?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+      string: '{"status":"InProgress"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '30'
+      - '23'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 03:24:56 GMT
+      - Fri, 21 Jul 2023 06:49:18 GMT
       expires:
       - '-1'
       pragma:
@@ -206,7 +194,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 2e2c39d4-734a-4dd3-ac08-a7ec919e56ae
+      - 16b9b602-fa0b-4ac7-8131-13d42714ae33
     status:
       code: 200
       message: OK
@@ -224,22 +212,21 @@ interactions:
       ParameterSetName:
       - -g -n --dns-name --query
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/5f94b0f6-bead-4de3-8c0e-377056ca1c74?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/e2be9e1e-d0b7-4087-babf-4dbca4e0b6e9?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+      string: '{"status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '29'
+      - '22'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 03:24:59 GMT
+      - Fri, 21 Jul 2023 06:49:20 GMT
       expires:
       - '-1'
       pragma:
@@ -256,7 +243,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 488905af-0729-435b-a67e-a45f7d0dd3ec
+      - f84d746d-ffad-4a50-a94a-9cdb75818945
     status:
       code: 200
       message: OK
@@ -274,33 +261,23 @@ interactions:
       ParameterSetName:
       - -g -n --dns-name --query
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"ip1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1\",\r\n
-        \ \"etag\": \"W/\\\"b126976b-638c-4fcd-956a-173566fb9beb\\\"\",\r\n  \"location\":
-        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"1a0ae801-e0e0-40c0-b281-1f0cf4d7f0f7\",\r\n    \"publicIPAddressVersion\":
-        \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
-        4,\r\n    \"dnsSettings\": {\r\n      \"domainNameLabel\": \"testpip000003\",\r\n
-        \     \"fqdn\": \"testpip000003.westus.cloudapp.azure.com\"\r\n    },\r\n
-        \   \"ipTags\": []\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
-        \ \"sku\": {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n
-        \ }\r\n}"
+      string: '{"name":"ip1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1","etag":"W/\"e4178597-8c30-40ea-89fe-f13f8b7b7521\"","location":"westus","properties":{"provisioningState":"Succeeded","resourceGuid":"fcf74d40-baef-44d1-a495-b50cc53b7ed2","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Dynamic","idleTimeoutInMinutes":4,"dnsSettings":{"domainNameLabel":"testpip000003","fqdn":"testpip000003.westus.cloudapp.azure.com"},"ipTags":[]},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Basic","tier":"Regional"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '772'
+      - '640'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 03:24:59 GMT
+      - Fri, 21 Jul 2023 06:49:21 GMT
       etag:
-      - W/"b126976b-638c-4fcd-956a-173566fb9beb"
+      - W/"e4178597-8c30-40ea-89fe-f13f8b7b7521"
       expires:
       - '-1'
       pragma:
@@ -317,7 +294,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f2a80219-4d46-485e-bfaf-925d6802f450
+      - d81f84c4-ef86-4c82-9ff2-cda8cf05b5e0
     status:
       code: 200
       message: OK
@@ -335,8 +312,7 @@ interactions:
       ParameterSetName:
       - -n -g --status-code-ranges --custom-headers
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1?api-version=2022-04-01-preview
   response:
@@ -350,7 +326,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 03:25:00 GMT
+      - Fri, 21 Jul 2023 06:49:35 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -395,8 +371,7 @@ interactions:
       ParameterSetName:
       - -n -g --status-code-ranges --custom-headers
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1?api-version=2022-04-01-preview
   response:
@@ -410,7 +385,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 03:25:03 GMT
+      - Fri, 21 Jul 2023 06:49:45 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -449,8 +424,7 @@ interactions:
       ParameterSetName:
       - -n --profile-name -g --type --target-resource-id --subnets --custom-headers
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1/azureEndpoints/ep1?api-version=2022-04-01-preview
   response:
@@ -465,7 +439,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 03:25:04 GMT
+      - Fri, 21 Jul 2023 06:49:48 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -495,8 +469,7 @@ interactions:
       ParameterSetName:
       - -n --type --profile-name -g --subnets
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1/azureEndpoints/ep1?api-version=2022-04-01-preview
   response:
@@ -511,7 +484,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 03:25:05 GMT
+      - Fri, 21 Jul 2023 06:49:49 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -555,8 +528,7 @@ interactions:
       ParameterSetName:
       - -n --type --profile-name -g --subnets
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1/azureEndpoints/ep1?api-version=2022-04-01-preview
   response:
@@ -571,7 +543,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 03:25:05 GMT
+      - Fri, 21 Jul 2023 06:49:50 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -601,8 +573,7 @@ interactions:
       ParameterSetName:
       - -n --type --profile-name -g --subnets
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1/azureEndpoints/ep1?api-version=2022-04-01-preview
   response:
@@ -617,7 +588,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 03:25:06 GMT
+      - Fri, 21 Jul 2023 06:49:53 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -661,8 +632,7 @@ interactions:
       ParameterSetName:
       - -n --type --profile-name -g --subnets
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1/azureEndpoints/ep1?api-version=2022-04-01-preview
   response:
@@ -677,7 +647,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 03:25:06 GMT
+      - Fri, 21 Jul 2023 06:49:53 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:

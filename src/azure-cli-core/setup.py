@@ -43,7 +43,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'argcomplete~=3.1.1',
-    'azure-cli-telemetry==1.0.8.*',
+    'azure-cli-telemetry==1.1.0.*',
     'azure-mgmt-core>=1.2.0,<2',
     'cryptography',
     # On Linux, the distribution (Ubuntu, Debian, etc) and version are logged in telemetry
