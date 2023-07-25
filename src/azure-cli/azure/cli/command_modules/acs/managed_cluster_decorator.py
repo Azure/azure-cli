@@ -137,7 +137,7 @@ class AKSManagedClusterModels(AKSAgentPoolModels):
         self.__nat_gateway_models = None
         # holder for maintenance configuration related models
         self.__maintenance_configuration_models = None
-    
+
     @property
     def load_balancer_models(self) -> SimpleNamespace:
         """Get load balancer related models.
@@ -185,7 +185,7 @@ class AKSManagedClusterModels(AKSAgentPoolModels):
             self.__nat_gateway_models = SimpleNamespace(**nat_gateway_models)
         return self.__nat_gateway_models
 
-    @property 
+    @property
     def maintenance_configuration_models(self) -> SimpleNamespace:
         """Get maintenance configuration related models.
 
@@ -209,7 +209,8 @@ class AKSManagedClusterModels(AKSAgentPoolModels):
             maintenance_configuration_models["TimeInWeek"] = self.TimeInWeek
             self.__maintenance_configuration_models = SimpleNamespace(**maintenance_configuration_models)
         return self.__maintenance_configuration_models
-    
+
+
 # pylint: disable=too-few-public-methods
 class AKSManagedClusterParamDict(BaseAKSParamDict):
     """Store the original parameters passed in by aks series of commands as an internal dictionary.

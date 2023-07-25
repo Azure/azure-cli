@@ -29,6 +29,7 @@ from azure.cli.core.profiles import ResourceType
 
 logger = get_logger(__name__)
 
+
 def aks_maintenanceconfiguration_update_internal(cmd, client, raw_parameters):
     resource_group_name = raw_parameters.get("resource_group_name")
     cluster_name = raw_parameters.get("cluster_name")
@@ -62,7 +63,7 @@ def constructDefaultMaintenanceConfiguration(cmd, raw_parameters):
         raise RequiredArgumentMissingError('Please specify --weekday and --start-hour for default maintenance configuration, or use --config-file instead.')
     if schedule_type is not None:
         raise MutuallyExclusiveArgumentError('--schedule-type is not supported for default maintenance configuration.')
-    
+
     maintenance_configuration_models = AKSManagedClusterModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).maintenance_configuration_models
     TimeInWeek = (
         maintenance_configuration_models.TimeInWeek
@@ -105,9 +106,9 @@ def constructMaintenanceWindow(cmd, raw_parameters):
         raise RequiredArgumentMissingError('Please specify --start-time for maintenance window.')
     if duration_hours is None:
         raise RequiredArgumentMissingError('Please specify --duration for maintenance window.')
-    
+
     maintenance_configuration_models = AKSManagedClusterModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).maintenance_configuration_models
-    MaintenanceWindow =   (
+    MaintenanceWindow = (
         maintenance_configuration_models.MaintenanceWindow
     )
     maintenanceWindow = MaintenanceWindow(
@@ -131,7 +132,7 @@ def constructSchedule(cmd, raw_parameters):
 
     maintenance_configuration_models = AKSManagedClusterModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).maintenance_configuration_models
     schedule = (
-            maintenance_configuration_models.Schedule
+        maintenance_configuration_models.Schedule
     )
 
     if schedule_type == CONST_DAILY_MAINTENANCE_SCHEDULE:
@@ -155,7 +156,7 @@ def constructDailySchedule(cmd, interval_days, interval_weeks, interval_months, 
 
     maintenance_configuration_models = AKSManagedClusterModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).maintenance_configuration_models
     DailySchedule = (
-            maintenance_configuration_models.DailySchedule
+        maintenance_configuration_models.DailySchedule
     )
 
     dailySchedule = DailySchedule(
@@ -172,7 +173,7 @@ def constructWeeklySchedule(cmd, interval_days, interval_weeks, interval_months,
 
     maintenance_configuration_models = AKSManagedClusterModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).maintenance_configuration_models
     WeeklySchedule = (
-            maintenance_configuration_models.WeeklySchedule
+        maintenance_configuration_models.WeeklySchedule
     )
     weeklySchedule = WeeklySchedule(
         interval_weeks=interval_weeks,
@@ -189,7 +190,7 @@ def constructAbsoluteMonthlySchedule(cmd, interval_days, interval_weeks, interva
 
     maintenance_configuration_models = AKSManagedClusterModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).maintenance_configuration_models
     AbsoluteMonthlySchedule = (
-            maintenance_configuration_models.AbsoluteMonthlySchedule
+        maintenance_configuration_models.AbsoluteMonthlySchedule
     )
     absoluteMonthlySchedule = AbsoluteMonthlySchedule(
         interval_months=interval_months,
@@ -206,7 +207,7 @@ def constructRelativeMonthlySchedule(cmd, interval_days, interval_weeks, interva
 
     maintenance_configuration_models = AKSManagedClusterModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).maintenance_configuration_models
     RelativeMonthlySchedule = (
-            maintenance_configuration_models.RelativeMonthlySchedule
+        maintenance_configuration_models.RelativeMonthlySchedule
     )
     relativeMonthlySchedule = RelativeMonthlySchedule(
         interval_months=interval_months,
