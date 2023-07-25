@@ -2865,10 +2865,9 @@ def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, cert
     vm = get_vm_to_update(cmd, resource_group_name, vm_name)
 
     if '://' not in certificate:  # has a cert name rather a full url?
-        keyvault_client = create_keyvault_data_plane_client(cmd.cli_ctx)
-        cert_info = keyvault_client.get_certificate(
-            get_key_vault_base_url(cmd.cli_ctx, parse_resource_id(keyvault)['name']), certificate, '')
-        certificate = cert_info.sid
+        keyvault_client = create_keyvault_data_plane_client(cmd.cli_ctx, get_key_vault_base_url(cmd.cli_ctx, parse_resource_id(keyvault)['name']))
+        cert_info = keyvault_client.get_certificate(certificate)
+        certificate = cert_info.secret_id
 
     if not _is_linux_os(vm):
         certificate_store = certificate_store or 'My'
