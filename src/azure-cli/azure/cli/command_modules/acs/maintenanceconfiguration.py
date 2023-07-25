@@ -132,10 +132,10 @@ def constructSchedule(cmd, raw_parameters):
     week_index = raw_parameters.get("week_index")
 
     maintenance_configuration_models = AKSManagedClusterModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).maintenance_configuration_models
-    schedule = (
+    Schedule = (
         maintenance_configuration_models.Schedule
     )
-
+    schedule = Schedule()
     if schedule_type == CONST_DAILY_MAINTENANCE_SCHEDULE:
         schedule.daily = constructDailySchedule(cmd, interval_days, interval_weeks, interval_months, day_of_week, day_of_month, week_index)
     elif schedule_type == CONST_WEEKLY_MAINTENANCE_SCHEDULE:
