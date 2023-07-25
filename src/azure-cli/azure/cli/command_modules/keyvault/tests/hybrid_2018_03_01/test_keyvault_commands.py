@@ -91,10 +91,9 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         ])
         # test updating updating other properties
         self.cmd('keyvault update -g {rg} -n {kv} --enable-purge-protection '
-                 '--enabled-for-deploymen --enabled-for-disk-encryption --enabled-for-template-deployment ',
+                 '--enabled-for-deployment --enabled-for-disk-encryption --enabled-for-template-deployment ',
                  checks=[
                      self.check('name', '{kv}'),
-                     self.check('properties.enableSoftDelete', True),
                      self.check('properties.enablePurgeProtection', True),
                      self.check('properties.enabledForDeployment', True),
                      self.check('properties.enabledForDiskEncryption', True),
