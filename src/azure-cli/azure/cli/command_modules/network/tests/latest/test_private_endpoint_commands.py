@@ -4323,8 +4323,8 @@ class NetworkPrivateLinkCosmosDBPostgresScenarioTest(ScenarioTest):
 
 
 class NetworkPrivateLinkElasticSANScenarioTest(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_elastic_san')
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_elastic_san', location='eastus2euap')
     def test_private_link_resource_elasticsan(self):
         self.kwargs.update({
             "san_name": self.create_random_name('elastic-san', 24),
@@ -4332,6 +4332,7 @@ class NetworkPrivateLinkElasticSANScenarioTest(ScenarioTest):
             "volume_name": self.create_random_name('volume', 24),
             "loc": "eastus2euap"
         })
+        # self.cmd('extension add -n elastic-san')
         self.cmd('az elastic-san create -n {san_name} -g {rg} --tags {{key1810:aaaa}} -l {loc} '
                  '--base-size-tib 23 --extended-capacity-size-tib 14 '
                  '--sku {{name:Premium_LRS,tier:Premium}}')
@@ -4344,6 +4345,7 @@ class NetworkPrivateLinkElasticSANScenarioTest(ScenarioTest):
                  checks=[self.check('length(@)', 1), self.check('[0].properties.groupId', self.kwargs.get('vg_name'))])
         self.cmd('az elastic-san delete -g {rg} -n {san_name} -y')
 
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_elastic_san', random_name_length=30, location='eastus2euap')
     def test_private_endpoint_connection_elasticsan(self, resource_group):
         from azure.mgmt.core.tools import resource_id
@@ -4369,6 +4371,7 @@ class NetworkPrivateLinkElasticSANScenarioTest(ScenarioTest):
             'pe': self.create_random_name('cli-pe-', 24),
             'pe_connection': self.create_random_name('cli-pec-', 24)
         })
+        # self.cmd('extension add -n elastic-san')
 
         san = self.cmd('az elastic-san create -n {san_name} -g {rg} --tags {{key1810:aaaa}} -l {loc} '
                        '--base-size-tib 23 --extended-capacity-size-tib 14 '
