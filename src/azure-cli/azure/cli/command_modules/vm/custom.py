@@ -3624,16 +3624,17 @@ def _build_identities_info_from_system_user_assigned(cmd, mi_system_assigned, mi
     return identity_types, user_assigned_identities
 
 
-def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False, hibernate=None):
+def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False,
+                    enable_hibernation=None):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_ids and len(instance_ids) == 1:
         return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_deallocate,
-                           resource_group_name, vm_scale_set_name, instance_ids[0], hibernate=hibernate)
+                           resource_group_name, vm_scale_set_name, instance_ids[0], hibernate=enable_hibernation)
 
     VirtualMachineScaleSetVMInstanceIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceIDs')
     vm_instance_i_ds = VirtualMachineScaleSetVMInstanceIDs(instance_ids=instance_ids)
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_deallocate,
-                       resource_group_name, vm_scale_set_name, vm_instance_i_ds, hibernate=hibernate)
+                       resource_group_name, vm_scale_set_name, vm_instance_i_ds, hibernate=enable_hibernation)
 
 
 def delete_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
