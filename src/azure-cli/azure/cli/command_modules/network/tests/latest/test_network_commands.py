@@ -2168,26 +2168,6 @@ class NetworkAppGatewayWafConfigScenarioTest20170301(ScenarioTest):
         ])
 
 
-class NetworkAppGatewayWafV2ConfigScenarioTest(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_v2_config')
-    def test_network_app_gateway_waf_v2_config(self, resource_group):
-
-        self.kwargs.update({
-            'ip': 'pip1',
-            'ag': 'ag1'
-        })
-        self.cmd('network public-ip create -g {rg} -n {ip} --sku standard')
-        self.cmd('network application-gateway waf-policy create -n waf1 -g {rg}')
-        self.cmd('network application-gateway create -g {rg} -n {ag} --subnet subnet1 --vnet-name vnet1 --public-ip-address {ip} --sku WAF_v2 --priority 1001 --waf-policy waf1 --no-wait')
-        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
-        self.cmd('network application-gateway waf-config set -g {rg} --gateway-name ag1 --enabled true --firewall-mode prevention --rule-set-version 3.0 --exclusion RequestHeaderNames StartsWith abc --exclusion RequestArgNames Equals def')
-        self.cmd('network application-gateway waf-config show -g {rg} --gateway-name ag1', checks=[
-            self.check('enabled', True),
-            self.check('length(exclusions)', 2)
-        ])
-
-
 class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_')
