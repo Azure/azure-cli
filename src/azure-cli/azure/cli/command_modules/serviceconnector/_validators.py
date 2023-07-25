@@ -394,7 +394,7 @@ def validate_target_resource_id(cmd, namespace):
 
         target = get_target_resource_name(cmd)
         pattern = TARGET_RESOURCES.get(target)
-        matched = re.match(pattern, namespace.target_id, re.IGNORECASE)
+        matched = re.match(get_resource_regex(pattern), namespace.target_id, re.IGNORECASE)
         if matched:
             namespace.target_id = matched.group()
             return True
