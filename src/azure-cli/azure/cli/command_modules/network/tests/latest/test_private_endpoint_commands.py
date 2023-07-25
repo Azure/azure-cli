@@ -4324,20 +4324,25 @@ class NetworkPrivateLinkCosmosDBPostgresScenarioTest(ScenarioTest):
 
 class NetworkPrivateLinkElasticSANScenarioTest(ScenarioTest):
 
-    # @ResourceGroupPreparer(name_prefix='cli_test_elastic_san')
-    # def test_private_link_resource_elasticsan(self):
-    #     self.kwargs.update({
-    #         "san_name": self.create_random_name('elastic-san', 24),
-    #         "loc": "eastus2euap"
-    #     })
-    #     self.cmd('az elastic-san create -n {san_name} -g {rg} --tags {{key1810:aaaa}} -l {loc} '
-    #              '--base-size-tib 23 --extended-capacity-size-tib 14 '
-    #              '--sku {{name:Premium_LRS,tier:Premium}}')
-    #
-    #     self.cmd('az network private-link-resource list --name {san_name} --resource-group {rg} '
-    #              '--type Microsoft.ElasticSan/elasticSans',
-    #         checks=[self.check('length(@)', 1), self.check('[0].properties.groupId', 'elasticSans')])
-    #     self.cmd('az elastic-san delete -g {rg} -n {san_name} -y')
+    @ResourceGroupPreparer(name_prefix='cli_test_elastic_san')
+    def test_private_link_resource_elasticsan(self):
+        self.kwargs.update({
+            "san_name": self.create_random_name('elastic-san', 24),
+            "vg_name": self.create_random_name('volume-group', 24),
+            "volume_name": self.create_random_name('volume', 24),
+            "loc": "eastus2euap"
+        })
+        self.cmd('az elastic-san create -n {san_name} -g {rg} --tags {{key1810:aaaa}} -l {loc} '
+                 '--base-size-tib 23 --extended-capacity-size-tib 14 '
+                 '--sku {{name:Premium_LRS,tier:Premium}}')
+        self.cmd('az elastic-san volume-group create -e {san_name} -n {vg_name} -g {rg} '
+                 '--encryption EncryptionAtRestWithPlatformKey --protocol-type Iscsi')
+        self.cmd('az elastic-san volume create -g {rg} -e {san_name} -v {vg_name} -n {volume_name} --size-gib 2')
+
+        self.cmd('az network private-link-resource list --name {san_name} --resource-group {rg} '
+                 '--type Microsoft.ElasticSan/elasticSans',
+                 checks=[self.check('length(@)', 1), self.check('[0].properties.groupId', self.kwargs.get('vg_name'))])
+        self.cmd('az elastic-san delete -g {rg} -n {san_name} -y')
 
     @ResourceGroupPreparer(name_prefix='cli_test_elastic_san', random_name_length=30, location='eastus2euap')
     def test_private_endpoint_connection_elasticsan(self, resource_group):
@@ -4378,25 +4383,26 @@ class NetworkPrivateLinkElasticSANScenarioTest(ScenarioTest):
 
         self.kwargs.update({"subnet_id": subnet_id})
         self.cmd('az elastic-san volume-group create -e {san_name} -n {vg_name} -g {rg} '
-                 '--encryption EncryptionAtRestWithPlatformKey --protocol-type Iscsi '
-                 '--network-acls {{virtual-network-rules:[{{id:{subnet_id},action:Allow}}]}}')
+                 '--encryption EncryptionAtRestWithPlatformKey --protocol-type Iscsi')
 
         self.cmd('az elastic-san volume create -g {rg} -e {san_name} -v {vg_name} -n {volume_name} --size-gib 2')
 
-        # target_private_link_resource = self.cmd(
-        #     'az network private-link-resource list --name {san_id} --resource-group {rg} --type {resource_type}').get_output_in_json()
-
+        target_private_link_resource = self.cmd(
+            'az network private-link-resource list --name {san_name} --resource-group {rg} --type {resource_type}').get_output_in_json()
+        self.kwargs.update({
+            'group_id': target_private_link_resource[0]['properties']['groupId']
+        })
         # Create a private endpoint connection
         pe = self.cmd(
             'az network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} '
             '--connection-name {pe_connection} --private-connection-resource-id {target_resource_id} '
-            '--group-id {vg_name} --manual-request').get_output_in_json()
+            '--group-id {group_id} --manual-request').get_output_in_json()
         self.kwargs['pe_id'] = pe['id']
         self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
 
         # Show the connection at cosmos db side
         list_private_endpoint_conn = self.cmd(
-            'az network private-endpoint-connection list --name {san_id} --resource-group {rg} --type {resource_type}').get_output_in_json()
+            'az network private-endpoint-connection list --name {san_name} --resource-group {rg} --type {resource_type}').get_output_in_json()
         self.kwargs.update({
             "pec_id": list_private_endpoint_conn[0]['id']
         })
@@ -4407,10 +4413,10 @@ class NetworkPrivateLinkElasticSANScenarioTest(ScenarioTest):
         self.cmd('az network private-endpoint-connection show --id {pec_id}',
                  checks=self.check('id', '{pec_id}'))
         self.cmd(
-            'az network private-endpoint-connection show --resource-name {san_id} -n {pec_name} -g {rg} --type {resource_type}')
+            'az network private-endpoint-connection show --resource-name {san_name} -n {pec_name} -g {rg} --type {resource_type}')
 
         self.cmd(
-            "az network private-endpoint-connection show --resource-name {san_id} -n {pec_name} -g {rg} --type {resource_type}",
+            "az network private-endpoint-connection show --resource-name {san_name} -n {pec_name} -g {rg} --type {resource_type}",
             checks=self.check('properties.privateLinkServiceConnectionState.status', 'Pending')
         )
 
@@ -4420,7 +4426,7 @@ class NetworkPrivateLinkElasticSANScenarioTest(ScenarioTest):
             'rejection_desc': 'Rejected.'
         })
         self.cmd(
-            'az network private-endpoint-connection approve --resource-name {san_id} --resource-group {rg} --name {pec_name} --type {resource_type} '
+            'az network private-endpoint-connection approve --resource-name {san_name} --resource-group {rg} --name {pec_name} --type {resource_type} '
             '--description "{approval_desc}"', checks=[
                 self.check('properties.privateLinkServiceConnectionState.status', 'Approved')
             ])
@@ -4430,7 +4436,7 @@ class NetworkPrivateLinkElasticSANScenarioTest(ScenarioTest):
                      self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')
                  ])
         self.cmd(
-            'az network private-endpoint-connection list --name {san_id} --resource-group {rg} --type {resource_type}',
+            'az network private-endpoint-connection list --name {san_name} --resource-group {rg} --type {resource_type}',
             checks=[
                 self.check('length(@)', 1)
             ])
