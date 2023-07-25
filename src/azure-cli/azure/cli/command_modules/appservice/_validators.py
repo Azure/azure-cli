@@ -285,7 +285,7 @@ def _validate_ip_address_existence(cmd, namespace):
     scm_site = namespace.scm_site
     configs = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
     access_rules = configs.scm_ip_security_restrictions if scm_site else configs.ip_security_restrictions
-    ip_exists = [(lambda x: x.ip_address == namespace.ip_address)(x) for x in access_rules]
+    ip_exists = [x.ip_address == namespace.ip_address for x in access_rules]
     if True in ip_exists:
         raise ArgumentUsageError('IP address: ' + namespace.ip_address + ' already exists. '
                                  'Cannot add duplicate IP address values.')
@@ -521,11 +521,11 @@ def validate_registry_user(namespace):
     if namespace.environment and namespace.registry_username:
         if not namespace.registry_server or (not namespace.registry_password and ACR_IMAGE_SUFFIX not in namespace.registry_server):  # pylint: disable=line-too-long
             raise RequiredArgumentMissingError("Usage error: --registry-server, --registry-password and"
-                                               " --registry-username are required together if not using Azure Container Registry")
+                                               " --registry-username are required together if not using Azure Container Registry")  # pylint: disable=line-too-long
 
 
 def validate_registry_pass(namespace):
     if namespace.environment and namespace.registry_password:
         if not namespace.registry_server or (not namespace.registry_username and ACR_IMAGE_SUFFIX not in namespace.registry_server):  # pylint: disable=line-too-long
             raise RequiredArgumentMissingError("Usage error: --registry-server, --registry-password and"
-                                               " --registry-username are required together if not using Azure Container Registry")
+                                               " --registry-username are required together if not using Azure Container Registry")  # pylint: disable=line-too-long

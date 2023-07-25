@@ -22,7 +22,7 @@ import time
 import uuid
 import webbrowser
 import zipfile
-from distutils.version import StrictVersion
+from distutils.version import StrictVersion  # pylint: disable=deprecated-module
 from urllib.error import URLError
 from urllib.request import urlopen
 
@@ -872,10 +872,10 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                       enable_sgxquotehelper=False,
                       enable_secret_rotation=False,
                       rotation_poll_interval=None,
-                      no_wait=False,
                       enable_msi_auth_for_monitoring=True,
                       enable_syslog=False,
-                      data_collection_settings=None,):
+                      data_collection_settings=None,
+                      no_wait=False,):
     instance = client.get(resource_group_name, name)
     msi_auth = False
     if instance.service_principal_profile.client_id == "msi":

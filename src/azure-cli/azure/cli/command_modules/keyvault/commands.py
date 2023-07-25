@@ -198,6 +198,8 @@ def load_command_table(self, _):
         with self.command_group('keyvault key', data_key_entity.command_type) as g:
             g.keyvault_command('random', 'get_random_bytes', transform=transform_key_random_output)
             g.keyvault_command('rotate', 'rotate_key', transform=transform_key_output)
+            g.keyvault_custom('sign', 'sign_key')
+            g.keyvault_custom('verify', 'verify_key')
 
         with self.command_group('keyvault key rotation-policy', data_key_entity.command_type) as g:
             g.keyvault_command('show', 'get_key_rotation_policy', )

@@ -484,7 +484,7 @@ def _get_dotnet_main_project_csproj(dirPath):
     if len(ll) == 1:
         csproj_path = os.path.join(dirPath, ll[0])
     else:
-        raise Exception('{} should contain only one .csproj file'.format(dirPath))
+        raise Exception('{} should contain only one .csproj file'.format(dirPath))  # pylint: disable=broad-exception-raised
 
     return csproj_path
 
