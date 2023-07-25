@@ -427,6 +427,9 @@ parameters:
   - name: --node-resource-group
     type: string
     short-summary: The node resource group is the resource group where all customer's resources will be created in, such as virtual machines.
+  - name: --k8s-support-plan
+    type: string
+    short-summary: Choose from "KubernetesOfficial" or "AKSLongTermSupport", with "AKSLongTermSupport" you get 1 extra year of CVE patchs.
   - name: --enable-defender
     type: bool
     short-summary: Enable Microsoft Defender security profile.
@@ -481,7 +484,7 @@ parameters:
     short-summary: Enable KEDA workload auto-scaler.
   - name: --enable-azure-monitor-metrics
     type: bool
-    short-summary: Enable Azure Monitor Metrics Profile
+    short-summary: Enable a kubernetes cluster with the Azure Monitor managed service for Prometheus integration.
   - name: --azure-monitor-workspace-resource-id
     type: string
     short-summary: Resource ID of the Azure Monitor Workspace
@@ -497,6 +500,12 @@ parameters:
   - name: --enable-windows-recording-rules
     type: bool
     short-summary: Enable Windows Recording Rules when enabling the Azure Monitor Metrics addon
+  - name: --nodepool-taints
+    type: string
+    short-summary: The node taints for all node pool.
+  - name: --nodepool-labels
+    type: string
+    short-summary: The node labels for all node pool. See https://aka.ms/node-labels for syntax of labels.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -567,7 +576,7 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --network-plugin none
   - name: Create a kubernetes cluster with KEDA workload autoscaler enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-keda
-  - name: Create a kubernetes cluster with Azure Monitor Metrics enabled.
+  - name: Create a kubernetes cluster with the Azure Monitor managed service for Prometheus integration enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-monitor-metrics
 """
 
@@ -726,6 +735,9 @@ parameters:
   - name: --rotation-poll-interval
     type: string
     short-summary: Set interval of rotation poll. Use with azure-keyvault-secrets-provider addon.
+  - name: --k8s-support-plan
+    type: string
+    short-summary: Choose from "KubernetesOfficial" or "AKSLongTermSupport", with "AKSLongTermSupport" you get 1 extra year of CVE patchs.
   - name: --enable-windows-gmsa
     type: bool
     short-summary: Enable Windows gmsa on cluster.
@@ -813,7 +825,7 @@ parameters:
     short-summary: Disable KEDA workload auto-scaler.
   - name: --enable-azure-monitor-metrics
     type: bool
-    short-summary: Enable Azure Monitor Metrics Profile
+    short-summary: Enable a kubernetes cluster with the Azure Monitor managed service for Prometheus integration.
   - name: --azure-monitor-workspace-resource-id
     type: string
     short-summary: Resource ID of the Azure Monitor Workspace
@@ -832,6 +844,12 @@ parameters:
   - name: --disable-azure-monitor-metrics
     type: bool
     short-summary: Disable Azure Monitor Metrics Profile. This will delete all DCRA's associated with the cluster, any linked DCRs with the data stream = prometheus-stream and the recording rule groups created by the addon for this AKS cluster.
+  - name: --nodepool-taints
+    type: string
+    short-summary: The node taints for all node pool.
+  - name: --nodepool-labels
+    type: string
+    short-summary: The node labels for all node pool. See https://aka.ms/node-labels for syntax of labels.
 
 examples:
   - name: Reconcile the cluster back to its current state.
@@ -1554,6 +1572,16 @@ helps['aks nodepool snapshot show'] = """
 helps['aks nodepool snapshot list'] = """
     type: command
     short-summary: List nodepool snapshots.
+"""
+
+helps['aks nodepool snapshot update'] = """
+    type: command
+    short-summary: Update tags on a snapshot of a nodepool.
+    examples:
+        - name: Update tags on a nodepool snapshot.
+          text: az aks nodepool snapshot update -g MyResourceGroup -n snapshot1 --tags "foo=bar" "key1=val1"
+        - name: Clear tags on a nodepool snapshot.
+          text: az aks nodepool snapshot update -g MyResourceGroup -n snapshot1 --tags ""
 """
 
 helps['aks nodepool snapshot create'] = """

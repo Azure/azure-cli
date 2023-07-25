@@ -174,7 +174,7 @@ def _custom_functions(preview_versions):
                 for i, _ in enumerate(versions):
                     versions[i] = self._func_set_preview(versions[i])
                 return versions
-            except(TypeError, ValueError):
+            except (TypeError, ValueError):
                 return versions
 
         @functions.signature({'types': ['string']})
@@ -184,7 +184,7 @@ def _custom_functions(preview_versions):
                 if preview_versions.get(version, False):
                     return version + '(preview)'
                 return version
-            except(TypeError, ValueError):
+            except (TypeError, ValueError):
                 return version
 
     return CustomFunctions()

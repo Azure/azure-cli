@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.49.0"
+VERSION = "2.50.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -42,7 +42,6 @@ CLASSIFIERS = [
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
@@ -52,7 +51,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     "antlr4-python3-runtime~=4.9.3",
     'azure-appconfiguration~=1.1.1',
-    'azure-batch~=13.0.0',
+    'azure-batch~=14.0.0',
     'azure-cli-core=={}'.format(VERSION),
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-data-tables==12.4.0',
@@ -76,7 +75,7 @@ DEPENDENCIES = [
     'azure-mgmt-botservice~=2.0.0b3',
     'azure-mgmt-cdn==12.0.0',
     'azure-mgmt-cognitiveservices~=13.3.0',
-    'azure-mgmt-compute~=29.1.0',
+    'azure-mgmt-compute~=30.0.0',
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance==10.1.0',
     'azure-mgmt-containerregistry==10.1.0',
@@ -107,17 +106,17 @@ DEPENDENCIES = [
     'azure-mgmt-monitor~=5.0.0',
     'azure-mgmt-msi~=7.0.0',
     'azure-mgmt-netapp~=10.0.0',
-    'azure-mgmt-policyinsights~=1.1.0b2',
+    'azure-mgmt-policyinsights==1.1.0b4',
     'azure-mgmt-privatedns~=1.0.0',
-    'azure-mgmt-rdbms~=10.2.0b8',
+    'azure-mgmt-rdbms~=10.2.0b10',
     'azure-mgmt-recoveryservicesbackup~=6.0.0',
     'azure-mgmt-recoveryservices~=2.4.0',
     'azure-mgmt-redhatopenshift~=1.2.0',
     'azure-mgmt-redis~=14.1.0',
     'azure-mgmt-relay~=0.1.0',
-    'azure-mgmt-resource==23.0.1',
+    'azure-mgmt-resource==23.1.0b2',
     'azure-mgmt-search~=9.0',
-    'azure-mgmt-security==3.0.0',
+    'azure-mgmt-security==5.0.0',
     'azure-mgmt-servicebus~=8.2.0',
     'azure-mgmt-servicefabricmanagedclusters~=1.0.0',
     'azure-mgmt-servicelinker==1.2.0b1',

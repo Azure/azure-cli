@@ -157,6 +157,7 @@ def validate_assessment(namespace):
             assessment_day_of_week is not None or assessment_start_time_local is not None):
         is_assessment_schedule_provided = True
 
+    # Should we add new validations for workspace rg, name, agent rg here?
     # Validate conflicting settings
     if (enable_assessment_schedule is False and is_assessment_schedule_provided):
         raise InvalidArgumentValueError("Assessment schedule settings cannot be provided while enable-assessment-schedule is False")
@@ -521,7 +522,7 @@ def _find_role_id(cli_ctx):
     # This in fact shoud not happen.
     if len(app_role_id_map) < 3:
         requird_role_defs = [USER_READ_ALL, APPLICATION_READ_ALL, GROUP_MEMBER_READ_ALL]
-        missing_role_defs = [role for role in requird_role_defs if role not in app_role_id_map.keys()]
+        missing_role_defs = [role for role in requird_role_defs if role not in app_role_id_map]
         error_message = "Querying Microsoft Graph API failed to find the following roles: %s.", ", ".join(missing_role_defs)
         logger.warning(error_message)
 

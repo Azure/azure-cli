@@ -317,6 +317,13 @@ type: command
 short-summary: List custom VM images.
 """
 
+helps['image show'] = """
+type: command
+parameters:
+  - name: --expand
+    short-summary: The expand expression to apply on the operation. Default value is None.
+"""
+
 helps['image builder'] = """
 type: group
 short-summary: Manage and build image builder templates.
@@ -789,16 +796,15 @@ examples:
 helps['ppg update'] = """
 type: command
 short-summary: Update a proximity placement group
+parameters:
+  - name: --include-colocation-status
+    short-summary: includeColocationStatus=true enables fetching the colocation status of all the resources in the
+                   proximity placement group. Default value is None.
 examples:
   - name: Update a proximity placement group with specifying VM sizes that can be created.
     text: |
         az ppg update --name MyProximityPlacementGroup --resource-group MyResourceGroup \\
             --intent-vm-sizes Standard_E64s_v4 Standard_M416ms_v2
-"""
-
-helps['sig'] = """
-type: group
-short-summary: manage shared image gallery
 """
 
 helps['sig create'] = """
@@ -813,11 +819,6 @@ examples:
 helps['sig show'] = """
 type: command
 short-summary: Retrieve information about a Shared Image Gallery.
-"""
-
-helps['sig image-definition'] = """
-type: group
-short-summary: Manage shared gallery image with VM
 """
 
 helps['sig image-definition create'] = """
@@ -949,17 +950,6 @@ examples:
     text: |
         az sig image-definition list-shared --gallery-unique-name galleryUniqueName \\
         --location myLocation --shared-to tenant
-"""
-
-helps['sig image-definition show-shared'] = """
-type: command
-short-summary: Get a shared gallery image
-long-summary: Get a shared gallery image that has been shared directly to your subscription or tenant
-examples:
-  - name: Get an image definition in a gallery shared directly to your subscription or tenant in the given location.
-    text: |
-        az sig image-definition show-shared --gallery-unique-name galleryUniqueName \\
-        --gallery-image-definition myGalleryImageName --location myLocation
 """
 
 helps['sig image-definition update'] = """
@@ -1215,6 +1205,9 @@ examples:
 helps['sig image-version wait'] = """
 type: command
 short-summary: wait for image version related operation
+parameters:
+  - name: --expand
+    short-summary: The expand expression to apply on the operation. 'ReplicationStatus' Default value is None.
 examples:
   - name: wait for an image version gets updated
     text: |
@@ -1310,6 +1303,9 @@ examples:
 helps['sig update'] = """
 type: command
 short-summary: update a share image gallery.
+parameters:
+  - name: --select
+    short-summary: The select expression to apply on the operation. "Permissions" Default value is None.
 examples:
   - name: Enable gallery to be shared to subscription or tenant
     text: |
@@ -1756,6 +1752,9 @@ helps['vm deallocate'] = """
 type: command
 short-summary: Deallocate a VM so that computing resources are no longer allocated (charges no longer apply). The status will change from 'Stopped' to 'Stopped (Deallocated)'.
 long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/linux/capture-image'
+parameters:
+  - name: --hibernate
+    short-summary: Optional parameter to hibernate a virtual machine. (Feature in Preview). Default value is None.
 examples:
   - name: Deallocate, generalize, and capture a stopped virtual machine.
     text: |
@@ -1778,6 +1777,9 @@ examples:
 helps['vm delete'] = """
 type: command
 short-summary: Delete a VM.
+parameters:
+  - name: --force-deletion
+    short-summary: Optional parameter to force delete virtual machines. Default value is None.
 examples:
   - name: Delete a VM without a prompt for confirmation.
     text: >
@@ -1976,27 +1978,6 @@ examples:
     text: |
         az vm encryption show --name MyVirtualMachine --resource-group MyResourceGroup
     crafted: true
-"""
-
-helps['vm extension'] = """
-type: group
-short-summary: Manage extensions on VMs.
-long-summary: >
-    Extensions are small applications that provide post-deployment configuration and automation tasks on Azure virtual machines.
-    For example, if a virtual machine requires software installation, anti-virus protection, or Docker configuration, a VM extension
-    can be used to complete these tasks. Extensions can be bundled with a new virtual machine deployment or run against any existing system.
-"""
-
-helps['vm extension delete'] = """
-type: command
-short-summary: Remove an extension attached to a VM.
-examples:
-  - name: Use a VM name and extension to delete an extension from a VM.
-    text: az vm extension delete -g MyResourceGroup --vm-name MyVm -n extension_name
-  - name: Delete extensions with IDs containing the string "MyExtension" from a VM.
-    text: >
-        az vm extension delete --ids \\
-            $(az resource list --query "[?contains(name, 'MyExtension')].id" -o tsv)
 """
 
 helps['vm extension image list'] = """
@@ -3070,6 +3051,13 @@ examples:
     crafted: true
 """
 
+helps['vmss delete'] = """
+type: command
+parameters:
+  - name: --force-deletion
+    short-summary: Optional parameter to force delete a VM scale set. (Feature in Preview). Default value is None.
+"""
+
 helps['vmss delete-instances'] = """
 type: command
 short-summary: Delete VMs within a VMSS.
@@ -3812,6 +3800,14 @@ helps['vmss list-instances'] = """
 type: command
 short-summary: Get a list of all virtual machines in a VM scale sets.
 long-summary: Return a list of virtual machines managed by VMSS. For VMSS in Flexible Orchestration mode, please use "az vm list" to get full details.
+parameters:
+  - name: --filter
+    short-summary: The filter to apply to the operation. Allowed values are 'startswith(instanceView/statuses/code, 'PowerState') eq true',
+                   'properties/latestModelApplied eq true', 'properties/latestModelApplied eq false'. Default value is None.
+  - name: --select
+    short-summary: The list parameters. Allowed values are 'instanceView', 'instanceView/statuses'. Default value is None.
+  - name: --expand
+    short-summary: The expand expression to apply to the operation. Allowed values are 'instanceView'. Default value is None.
 """
 
 helps['restore-point'] = """
@@ -3860,6 +3856,10 @@ disks are specified, all disks will be included."
 helps['restore-point wait'] = """
     type: command
     short-summary: Place the CLI in a waiting state until a condition of the restore-point is met.
+    parameters:
+      - name: --expand
+        short-summary: The expand expression to apply on the operation. 'InstanceView' retrieves information
+                       about the run-time state of a restore point. 'instanceView' Default value is None.
     examples:
       - name: Pause executing next line of CLI script until the restore-point is successfully created.
         text: |-
@@ -3903,6 +3903,10 @@ helps['restore-point collection update'] = """
 helps['restore-point collection wait'] = """
     type: command
     short-summary: Place the CLI in a waiting state until a condition of the restore-point-collection is met.
+    parameters:
+      - name: --expand
+        short-summary: The expand expression to apply on the operation. If expand=restorePoints, server will return all
+                       contained restore points in the restorePointCollection. "restorePoints" Default value is None.
     examples:
       - name: Pause executing next line of CLI script until the restore-point-collection is successfully deleted.
         text: |-
