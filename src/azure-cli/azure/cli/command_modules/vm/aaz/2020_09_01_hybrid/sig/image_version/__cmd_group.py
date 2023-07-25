@@ -8,8 +8,16 @@
 # pylint: skip-file
 # flake8: noqa
 
-from .__cmd_group import *
-from ._delete import *
-from ._list import *
-from ._show import *
-from ._wait import *
+from azure.cli.core.aaz import *
+
+
+@register_command_group(
+    "sig image-version",
+)
+class __CMDGroup(AAZCommandGroup):
+    """Manage shared gallery image version with VM
+    """
+    pass
+
+
+__all__ = ["__CMDGroup"]
