@@ -12,14 +12,14 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "sql mi startstopschedule show",
+    "sql mi start-stop-schedule show",
 )
 class Show(AAZCommand):
     """Get the managed instance's Start/Stop schedule.
 
     :example: Get the managed instance's start stop schedule.
-        az sql mi startstopschedule show --ids resourceId
-        az sql mi startstopschedule show --mi miName -g resourceGroup --subscription subscriptionId
+        az sql mi start-stop-schedule show --ids resourceId
+        az sql mi start-stop-schedule show --mi miName -g resourceGroup --subscription subscriptionId
     """
 
     _aaz_info = {

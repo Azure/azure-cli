@@ -12,18 +12,18 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "sql mi startstopschedule update",
+    "sql mi start-stop-schedule update",
 )
 class Update(AAZCommand):
     """Update the managed instance's Start/Stop schedule.
 
     :example: Update (override) the managed instance's start stop schedule.
-        az sql mi startstopschedule update --ids resourceId --schedule-list "[{'startDay':'Monday','startTime':'10:00 AM','stopDay':'Monday','stopTime':'12:00 AM'}]"
-        az sql mi startstopschedule update --mi miName -g resourceGroup --subscription subscriptionId --schedule-list "[{'startDay':'Monday','startTime':'10:00 AM','stopDay':'Monday','stopTime':'12:00 AM'}]"
+        az sql mi start-stop-schedule update --ids resourceId --schedule-list "[{'startDay':'Monday','startTime':'10:00 AM','stopDay':'Monday','stopTime':'12:00 AM'}]"
+        az sql mi start-stop-schedule update --mi miName -g resourceGroup --subscription subscriptionId --schedule-list "[{'startDay':'Monday','startTime':'10:00 AM','stopDay':'Monday','stopTime':'12:00 AM'}]"
     :example: Add schedule items to the managed instance's start stop schedule.
-        az sql mi startstopschedule update --ids resourceId --add schedule_list "{'startDay':'Monday','startTime':'10:00 AM','stopDay':'Monday','stopTime':'12:00 AM'}"
+        az sql mi start-stop-schedule update --ids resourceId --add schedule_list "{'startDay':'Monday','startTime':'10:00 AM','stopDay':'Monday','stopTime':'12:00 AM'}"
     :example: Remove schedule items from the managed instance's start stop schedule.
-        az sql mi startstopschedule update --ids resourceId --remove schedule_list index(0 based)
+        az sql mi start-stop-schedule update --ids resourceId --remove schedule_list index(0 based)
     """
 
     _aaz_info = {

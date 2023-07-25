@@ -12,15 +12,15 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "sql mi startstopschedule delete",
+    "sql mi start-stop-schedule delete",
     confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
     """Delete the managed instance's Start/Stop schedule.
 
     :example: Delete a managed instance start stop schedule.
-        az sql mi startstopschedule delete --ids resourceId
-        az sql mi startstopschedule delete --mi miName -g resourceGroup --subscription subscriptionId
+        az sql mi start-stop-schedule delete --ids resourceId
+        az sql mi start-stop-schedule delete --mi miName -g resourceGroup --subscription subscriptionId
     """
 
     _aaz_info = {

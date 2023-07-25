@@ -12,7 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "sql mi startstopschedule",
+    "sql mi start-stop-schedule",
 )
 class __CMDGroup(AAZCommandGroup):
     """Manage the managed instance's start stop schedule.

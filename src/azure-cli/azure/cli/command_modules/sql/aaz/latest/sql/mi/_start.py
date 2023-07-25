@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "sql mi start",
 )
 class Start(AAZCommand):
-    """Starts the managed instance.
+    """Start the managed instance.
 
     :example: Start a managed instance.
         az sql mi start --ids resourceId
