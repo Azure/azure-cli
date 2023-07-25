@@ -340,14 +340,13 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         raise RequiredArgumentMissingError(
             'usage error: --upload-size-bytes should be used together with --upload-type')
 
-    if security_type != "Standard":
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE, UPGRADE_SECURITY_HINT
+    if security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
         log_message = 'Ignite (November) 2023 onwards "az disk create" command will deploy Gen2-Trusted Launch VM ' \
                       'by default. To know more about the default change and Trusted Launch, ' \
                       'please visit https://aka.ms/TLaD'
     else:
-        log_message = 'Consider upgrading security for your workloads using Azure Trusted Launch VMs. ' \
-                      'To know more about Trusted Launch, please visit ' \
-                      'https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch.'
+        log_message = UPGRADE_SECURITY_HINT
     if image_reference is not None:
         if not is_valid_resource_id(image_reference):
             # URN or name
@@ -500,7 +499,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk.extended_location = edge_zone
     # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
     # after changing the default values to Trusted Launch VMs in the future.
-    if security_type and security_type != 'Standard':
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
+    if security_type and security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
         disk.security_profile = {'securityType': security_type}
         if secure_vm_disk_encryption_set:
             disk.security_profile['secure_vm_disk_encryption_set_id'] = secure_vm_disk_encryption_set
@@ -4626,9 +4626,8 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
                 # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
                 # after changing the default values to Trusted Launch VMs in the future.
                 if key == 'SecurityType' and value == 'Standard':
-                    logger.warning('Consider upgrading security for your workloads using Azure Trusted Launch VMs. '
-                                   'To know more about Trusted Launch, please visit '
-                                   'https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch.')
+                    from ._constants import UPGRADE_SECURITY_HINT
+                    logger.warning(UPGRADE_SECURITY_HINT)
                     continue
                 feature_list.append(GalleryImageFeature(name=key, value=value))
             except ValueError:

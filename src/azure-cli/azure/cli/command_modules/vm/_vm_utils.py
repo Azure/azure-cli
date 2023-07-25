@@ -558,21 +558,18 @@ def trusted_launch_warning_log(namespace, generation_version, features):
                   'Launch VM by default. To know more about the default change and Trusted Launch, ' \
                   'please visit https://aka.ms/TLaD'
 
-    upgrade_hint = 'Consider upgrading security for your workloads using Azure Trusted Launch VMs. ' \
-                   'To know more about Trusted Launch, please visit ' \
-                   'https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch.'
-
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE, UPGRADE_SECURITY_HINT
     if generation_version == 'V1':
-        if namespace.security_type and namespace.security_type == 'Standard':
-            logger.warning(upgrade_hint)
+        if namespace.security_type and namespace.security_type == COMPATIBLE_SECURITY_TYPE_VALUE:
+            logger.warning(UPGRADE_SECURITY_HINT)
         else:
             logger.warning(log_message)
 
     if generation_version == 'V2' and is_trusted_launch_supported(features):
         if not namespace.security_type:
             logger.warning(log_message)
-        elif namespace.security_type == 'Standard':
-            logger.warning(upgrade_hint)
+        elif namespace.security_type == COMPATIBLE_SECURITY_TYPE_VALUE:
+            logger.warning(UPGRADE_SECURITY_HINT)
 
 
 def validate_update_vm_trusted_launch_supported(cmd, vm, os_disk_resource_group, os_disk_name):

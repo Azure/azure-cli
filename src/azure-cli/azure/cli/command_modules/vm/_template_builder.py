@@ -631,7 +631,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
 
     # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
     # after changing the default values to Trusted Launch VMs in the future.
-    if security_type is not None and security_type != "Standard":
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
+    if security_type is not None and security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
         vm_properties['securityProfile']['securityType'] = security_type
 
     if enable_secure_boot is not None or enable_vtpm is not None:
@@ -1384,7 +1385,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
 
     # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
     # after changing the default values to Trusted Launch VMs in the future.
-    if security_type is not None and security_type != "Standard":
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
+    if security_type is not None and security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
         security_profile['securityType'] = security_type
 
     if enable_secure_boot is not None or enable_vtpm is not None:

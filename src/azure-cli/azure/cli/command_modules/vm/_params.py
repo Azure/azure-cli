@@ -130,7 +130,8 @@ def load_arguments(self, _):
     enable_vtpm_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2020-12-01', help='Enable vTPM.')
     enable_secure_boot_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2020-12-01', help='Enable secure boot.')
     # The `Standard` is used for backward compatibility to allow customers to keep their current behavior after changing the default values to Trusted Launch VMs in the future.
-    t_security = [x.value for x in self.get_models('SecurityTypes') or []] + ["Standard"]
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
+    t_security = [x.value for x in self.get_models('SecurityTypes') or []] + [COMPATIBLE_SECURITY_TYPE_VALUE]
     security_type = CLIArgumentType(arg_type=get_enum_type(t_security), min_api='2020-12-01', help='Specify the security type of the virtual machine.')
     gallery_image_name_type = CLIArgumentType(options_list=['--gallery-image-definition', '-i'], help='The name of the community gallery image definition from which the image versions are to be listed.', id_part='child_name_2')
     gallery_image_name_version_type = CLIArgumentType(options_list=['--gallery-image-version', '-e'], help='The name of the gallery image version to be created. Needs to follow semantic version name pattern: The allowed characters are digit and period. Digits must be within the range of a 32-bit integer. Format: <MajorVersion>.<MinorVersion>.<Patch>', id_part='child_name_3')
@@ -180,7 +181,8 @@ def load_arguments(self, _):
     # region Disks
     with self.argument_context('disk', resource_type=ResourceType.MGMT_COMPUTE, operation_group='disks') as c:
         # The `Standard` is used for backward compatibility to allow customers to keep their current behavior after changing the default values to Trusted Launch VMs in the future.
-        t_disk_security = [x.value for x in self.get_models('DiskSecurityTypes', operation_group='disks') or []] + ["Standard"]
+        from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
+        t_disk_security = [x.value for x in self.get_models('DiskSecurityTypes', operation_group='disks') or []] + [COMPATIBLE_SECURITY_TYPE_VALUE]
 
         c.argument('zone', zone_type, min_api='2017-03-30', options_list=['--zone'])  # TODO: --size-gb currently has claimed -z. We can do a breaking change later if we want to.
         c.argument('disk_name', existing_disk_name, completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
