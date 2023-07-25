@@ -832,8 +832,7 @@ def load_arguments(self, _):
         c.argument('bicep_file', arg_type=CLIArgumentType(options_list=['--bicep-file', '-bf'],
                                                           completer=FilesCompleter(),
                                                           type=file_type,
-                                                          help="Path to the bicep template file (relative to the .bicepparam file) that will be referenced in the using declaration.")
-                  )
+                                                          help="Path to the bicep template file (relative to the .bicepparam file) that will be referenced in the using declaration."))
         c.argument('outdir', arg_type=bicep_outdir_type)
         c.argument('outfile', arg_type=bicep_outfile_type)
         c.argument('stdout', arg_type=bicep_stdout_type)
