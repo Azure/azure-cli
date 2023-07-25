@@ -88,9 +88,10 @@ def constructDedicatedMaintenanceConfiguration(cmd, raw_parameters):
         raise MutuallyExclusiveArgumentError('--weekday and --start-hour are only applicable to default maintenance configuration.')
 
     maintenance_configuration_models = AKSManagedClusterModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).maintenance_configuration_models
-    result = (
+    Result = (
         maintenance_configuration_models.MaintenanceConfiguration
     )
+    result = Result()
     result.maintenance_window = constructMaintenanceWindow(cmd, raw_parameters)
     return result
 

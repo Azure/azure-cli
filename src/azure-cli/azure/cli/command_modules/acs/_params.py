@@ -487,7 +487,7 @@ def load_arguments(self, _):
             c.argument('day_of_month', help='Specify on which date of the month the maintenance occurs for AbsoluteMonthly schedule.')
             c.argument('week_index', arg_type=get_enum_type(week_indexes),
                        help='Specify on which instance of the weekday specified in --day-of-week the maintenance occurs for RelativeMonthly schedule.')
-            c.argument('duration_hours', options_list=['--duration'], type=int,
+            c.argument('duration_hours', type=int, options_list=['--duration'], type=int,
                        help='The length of maintenance window. The value ranges from 4 to 24 hours.')
             c.argument('utc_offset', validator=validate_utc_offset,
                        help='The UTC offset in format +/-HH:mm. e.g. -08:00 or +05:30.')
