@@ -7,9 +7,9 @@
 # pylint: disable=too-many-statements
 from argcomplete.completers import FilesCompleter
 from knack.arguments import CLIArgumentType, ignore_type
-from azure.cli.core.commands.parameters import (get_three_state_flag, tags_type, file_type)
+from azure.cli.core.commands.parameters import (tags_type, file_type)
 from azure.cli.command_modules.privatedns._validators import (
-    privatedns_zone_name_type, get_vnet_validator, validate_privatedns_metadata, validate_privatedns_record_type)
+    privatedns_zone_name_type, validate_privatedns_metadata, validate_privatedns_record_type)
 
 
 def load_arguments(self, _):
@@ -24,11 +24,6 @@ def load_arguments(self, _):
     with self.argument_context('network private-dns zone') as c:
         c.argument('private_zone_name', name_arg_type, type=privatedns_zone_name_type)
         c.ignore('location')
-
-    with self.argument_context('network private-dns link') as c:
-        c.argument('virtual_network_link_name', name_arg_type, help='The name of the virtual network link to the specified Private DNS zone.')
-        c.argument('virtual_network', help='Name or ID of the virtual network.', options_list=('--virtual-network', '-v'), validator=get_vnet_validator)
-        c.argument('registration_enabled', help='Specify if the link is registration enabled.', options_list=('--registration-enabled', '-e'), arg_type=get_three_state_flag())
 
     with self.argument_context('network private-dns record-set') as c:
         c.argument('record_type', ignore_type, validator=validate_privatedns_record_type)
