@@ -1412,15 +1412,6 @@ examples:
     text: az vm auto-shutdown -g MyResourceGroup -n MyVm --off
 """
 
-helps['vm availability-set'] = """
-type: group
-short-summary: Group resources into availability sets.
-long-summary: >
-    To provide redundancy to an application, it is recommended to group two or more virtual machines in an availability set.
-    This configuration ensures that during either a planned or unplanned maintenance event, at least one virtual machine
-    will be available.
-"""
-
 helps['vm availability-set convert'] = """
 type: command
 short-summary: Convert an Azure Availability Set to contain VMs with managed disks.
@@ -1441,36 +1432,12 @@ examples:
     text: az vm availability-set create -n MyAvSet -g MyResourceGroup --platform-fault-domain-count 2 --platform-update-domain-count 2
 """
 
-helps['vm availability-set delete'] = """
-type: command
-short-summary: Delete an availability set.
-examples:
-  - name: Delete an availability set.
-    text: az vm availability-set delete -n MyAvSet -g MyResourceGroup
-"""
-
 helps['vm availability-set list'] = """
 type: command
 short-summary: List availability sets.
 examples:
   - name: List availability sets.
     text: az vm availability-set list -g MyResourceGroup
-"""
-
-helps['vm availability-set list-sizes'] = """
-type: command
-short-summary: List VM sizes for an availability set.
-examples:
-  - name: List VM sizes for an availability set.
-    text: az vm availability-set list-sizes -n MyAvSet -g MyResourceGroup
-"""
-
-helps['vm availability-set show'] = """
-type: command
-short-summary: Get information for an availability set.
-examples:
-  - name: Get information about an availability set.
-    text: az vm availability-set show -n MyAvSet -g MyResourceGroup
 """
 
 helps['vm availability-set update'] = """
