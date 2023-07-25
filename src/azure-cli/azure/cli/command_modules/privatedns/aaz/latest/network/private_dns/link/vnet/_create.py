@@ -81,7 +81,6 @@ class Create(AAZCommand):
             options=["--if-none-match"],
             arg_group="Parameters",
             help="Set to '*' to allow a new virtual network link to the Private DNS zone to be created, but to prevent updating an existing link. Other values will be ignored.",
-            default="*",
         )
         _args_schema.location = AAZResourceLocationArg(
             arg_group="Parameters",

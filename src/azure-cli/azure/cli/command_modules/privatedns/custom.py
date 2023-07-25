@@ -3,10 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
+# pylint: disable=line-too-long, disable=protected-access
 from collections import Counter, OrderedDict
 from knack.log import get_logger
-from msrestazure.tools import parse_resource_id
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -300,6 +299,7 @@ class PrivateDNSLinkVNetCreate(_PrivateDNSLinkVNetCreate):
     def pre_operations(self):
         args = self.ctx.args
         args.location = "global"
+        args.if_none_match = "*"
 
 
 def create_privatedns_record_set(cmd, resource_group_name, private_zone_name, relative_record_set_name, record_type, metadata=None, ttl=3600):

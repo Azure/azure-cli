@@ -21,11 +21,6 @@ def load_command_table(self, _):
         client_factory=cf_privatedns_mgmt_record_sets
     )
 
-    network_privatedns_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.privatedns.custom#{}',
-        client_factory=cf_privatedns_mgmt_record_sets
-    )
-
     with self.command_group('network private-dns zone', network_privatedns_zone_sdk) as g:
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.show_command('show', 'get', table_transformer=transform_privatedns_zone_table_output)

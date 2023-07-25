@@ -7,9 +7,9 @@
 # pylint: disable=too-many-statements
 from argcomplete.completers import FilesCompleter
 from knack.arguments import CLIArgumentType, ignore_type
-from azure.cli.core.commands.parameters import (get_three_state_flag, tags_type, file_type)
+from azure.cli.core.commands.parameters import (tags_type, file_type)
 from azure.cli.command_modules.privatedns._validators import (
-    privatedns_zone_name_type, get_vnet_validator, validate_privatedns_metadata, validate_privatedns_record_type)
+    privatedns_zone_name_type, validate_privatedns_metadata, validate_privatedns_record_type)
 
 
 def load_arguments(self, _):
