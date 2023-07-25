@@ -497,7 +497,6 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk.extended_location = edge_zone
     # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
     # after changing the default values to Trusted Launch VMs in the future.
-    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
     if security_type and security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
         disk.security_profile = {'securityType': security_type}
         if secure_vm_disk_encryption_set:

@@ -18,6 +18,7 @@ from azure.cli.core.commands.parameters import (
 from azure.cli.command_modules.vm._actions import _resource_not_exists
 from azure.cli.command_modules.vm._completers import (
     get_urn_aliases_completion_list, get_vm_size_completion_list, get_vm_run_command_completion_list)
+from azure.cli.command_modules.vm._constants import COMPATIBLE_SECURITY_TYPE_VALUE
 from azure.cli.command_modules.vm._validators import (
     validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vmss_disk,
     validate_asg_names_or_ids, validate_keyvault, _validate_proximity_placement_group,
@@ -130,7 +131,6 @@ def load_arguments(self, _):
     enable_vtpm_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2020-12-01', help='Enable vTPM.')
     enable_secure_boot_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2020-12-01', help='Enable secure boot.')
     # The `Standard` is used for backward compatibility to allow customers to keep their current behavior after changing the default values to Trusted Launch VMs in the future.
-    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
     t_security = [x.value for x in self.get_models('SecurityTypes') or []] + [COMPATIBLE_SECURITY_TYPE_VALUE]
     security_type = CLIArgumentType(arg_type=get_enum_type(t_security), min_api='2020-12-01', help='Specify the security type of the virtual machine.')
     gallery_image_name_type = CLIArgumentType(options_list=['--gallery-image-definition', '-i'], help='The name of the community gallery image definition from which the image versions are to be listed.', id_part='child_name_2')
@@ -181,7 +181,6 @@ def load_arguments(self, _):
     # region Disks
     with self.argument_context('disk', resource_type=ResourceType.MGMT_COMPUTE, operation_group='disks') as c:
         # The `Standard` is used for backward compatibility to allow customers to keep their current behavior after changing the default values to Trusted Launch VMs in the future.
-        from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
         t_disk_security = [x.value for x in self.get_models('DiskSecurityTypes', operation_group='disks') or []] + [COMPATIBLE_SECURITY_TYPE_VALUE]
 
         c.argument('zone', zone_type, min_api='2017-03-30', options_list=['--zone'])  # TODO: --size-gb currently has claimed -z. We can do a breaking change later if we want to.
