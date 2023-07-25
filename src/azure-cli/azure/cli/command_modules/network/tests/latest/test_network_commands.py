@@ -5984,10 +5984,9 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
             self.check('subnets[0].last', '11.0.0.0')
         ])
 
-    @record_only()
-    def test_network_traffi_manager_always_serve(self):
+    @ResourceGroupPreparer('cli_test_traffic_manager_always_serve')
+    def test_network_traffic_manager_always_serve(self, resource_group):
         self.kwargs.update({
-            "rg": "external_az_cli_testing",
             "profile": self.create_random_name("profile-", 12),
             "endpoint": self.create_random_name("endpoint-", 16),
             "dns": "mytrafficmanager001100a1",
