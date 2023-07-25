@@ -2792,13 +2792,11 @@ type: command
 short-summary: Build .bicepparam file.
 examples:
   - name: Build a .bicepparam file.
-    text: az bicep build --file {bicepparam_file}
+    text: az bicep build-params --file {bicepparam_file}
   - name: Build a .bicepparam file and print all output to stdout.
-    text: az bicep build --file {bicepparam_file} --stdout
+    text: az bicep build-params --file {bicepparam_file} --stdout
   - name: Build a .bicepparam file and save the result to the specified file.
-    text: az bicep build --file {bicepparam_file} --outfile {out_file}
-  - name: Build a .bicepparam file without restoring external modules.
-    text: az bicep build --file {bicepparam_file} --no-restore
+    text: az bicep build-params --file {bicepparam_file} --outfile {out_file}
 """
 
 helps['bicep format'] = """
@@ -2845,8 +2843,6 @@ examples:
     text: az bicep decompile-params --file {json_template_file} --outdir {out_dir}
   - name: Attempts to decompile a parameters .json file to .bicepparam and print all output to stdout and save the result to the specified file.
     text: az bicep decompile-params --file {json_template_file} --outfile {out_file}
-  - name: Attempts to decompile a parameters .json file to .bicepparam and overwrite existing file.
-    text: az bicep decompile-params --file {json_template_file} --force
 """
 
 helps['bicep publish'] = """

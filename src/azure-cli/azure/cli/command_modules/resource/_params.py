@@ -829,7 +829,7 @@ def load_arguments(self, _):
 
     with self.argument_context('bicep decompile-params') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the parameters file to build in the file system.")
-        c.argument('bicep_file', arg_type=CLIArgumentType(options_list=['--bicep-file', '-bf'],
+        c.argument('bicep_file', arg_type=CLIArgumentType(options_list=['--bicep-file'],
                                                           completer=FilesCompleter(),
                                                           type=file_type,
                                                           help="Path to the bicep template file (relative to the .bicepparam file) that will be referenced in the using declaration."))

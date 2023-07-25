@@ -4371,7 +4371,7 @@ def decompile_bicep_file(cmd, file, force=None):
     run_bicep_command(cmd.cli_ctx, args)
 
 
-def decompileparams_bicep_file(cmd, file, bicep_file=None, no_restore=None, outdir=None, outfile=None, stdout=None):
+def decompileparams_bicep_file(cmd, file, bicep_file=None, outdir=None, outfile=None, stdout=None):
     ensure_bicep_installation(cmd.cli_ctx)
 
     minimum_supported_version = "0.18.4"
@@ -4379,8 +4379,6 @@ def decompileparams_bicep_file(cmd, file, bicep_file=None, no_restore=None, outd
         args = ["decompile-params", file]
         if bicep_file:
             args += ["--bicep-file", bicep_file]
-        if no_restore:
-            args += ["--no-restore"]
         if outdir:
             args += ["--outdir", outdir]
         if outfile:
