@@ -3262,7 +3262,7 @@ class NetworkExpressRoutePortScenarioTest(ScenarioTest):
         self.kwargs['CAK_id'] = self.cmd('keyvault secret set --name {CAK_name} --vault-name {kv} --value {CAK_value}').get_output_in_json()['id']
         self.kwargs['CKN_id'] = self.cmd('keyvault secret set --name {CKN_name} --vault-name {kv} --value {CKN_value}').get_output_in_json()['id']
         identity = self.cmd('identity create -g {rg} -n {name}').get_output_in_json()
-        self.cmd('keyvault set-policy -n {kv} --secret-permissions get --object-id ' + identity['principalId'])
+        self.cmd('keyvault set-policy -n {kv} -g {rg} --secret-permissions get --object-id ' + identity['principalId'])
 
         self.cmd('network express-route port location list')
 
