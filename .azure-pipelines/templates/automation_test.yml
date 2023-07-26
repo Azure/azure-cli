@@ -70,7 +70,7 @@ steps:
         azdev test --no-exitfirst --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch) --cli-ci --profile ${{ parameters.profile }} --verbose --series --pytest-args "--durations=10"
       else
         echo "Running full test"
-        python scripts/ci/automation_full_test.py "${{ parameters.instance_cnt }}" "${{ parameters.instance_idx }}" "${{ parameters.profile }}" "$serial_modules" $(ENABLE_TRACEBACK)
+        python scripts/ci/automation_full_test.py "${{ parameters.instance_cnt }}" "${{ parameters.instance_idx }}" "${{ parameters.profile }}" "$serial_modules"
       fi
     displayName: "azdev test"
     env:
