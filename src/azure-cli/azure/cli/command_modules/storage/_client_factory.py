@@ -415,6 +415,7 @@ def cf_share_directory_client(cli_ctx, kwargs):
 
 def cf_share_file_client(cli_ctx, kwargs):
     if kwargs.get('file_url'):
+        from azure.cli.core.azclierror import RequiredArgumentMissingError
         t_file_client = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILESHARE, '_file_client#ShareFileClient')
         token_credential = kwargs.get('token_credential')
         enable_file_backup_request_intent = kwargs.pop('enable_file_backup_request_intent', None)
