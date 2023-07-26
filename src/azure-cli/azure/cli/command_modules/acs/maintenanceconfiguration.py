@@ -73,9 +73,10 @@ def constructDefaultMaintenanceConfiguration(cmd, raw_parameters):
     timeInWeek_dict["day"] = weekday
     timeInWeek_dict["hour_slots"] = [start_hour]
     timeInWeek = TimeInWeek(**timeInWeek_dict)
-    result = (
+    Result = (
         maintenance_configuration_models.MaintenanceConfiguration
     )
+    result = Result()
     result.time_in_week = [timeInWeek]
     result.not_allowed_time = []
     return result
