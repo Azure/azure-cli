@@ -31,8 +31,6 @@ steps:
       if [ "${{ parameters.EnableCompactAAZ }}" == 'True' ]; then
         python $CLI_REPO_PATH/scripts/compact_aaz.py
       fi
-      pip uninstall -y knack
-      pip install git+https://github.com/jiasli/knack@py311
     displayName: 'azdev setup'
     env:
       CLI_REPO_PATH: ${{ parameters.CLIRepoPath }}
