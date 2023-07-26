@@ -246,19 +246,25 @@ def identity_show(client, resource_group_name, account_name):
 
 def deployment_begin_create_or_update(
         client, resource_group_name, account_name, deployment_name,
-        sku_name, sku_capacity,
-        model_format, model_name, model_version):
+        model_format, model_name, model_version,
+        sku_name=None, sku_capacity=None,
+        scale_settings_scale_type=None, scale_settings_capacity=None):
     """
     Create a deployment for Azure Cognitive Services account.
     """
     dpy = Deployment()
-    dpy.sku = Sku(name=sku_name) 
-    dpy.sku.capacity = sku_capacity
     dpy.properties = DeploymentProperties()
     dpy.properties.model = DeploymentModel()
     dpy.properties.model.format = model_format
     dpy.properties.model.name = model_name
     dpy.properties.model.version = model_version
+    if sku_name is not None:
+        dpy.sku = Sku(name=sku_name) 
+        dpy.sku.capacity = sku_capacity
+    if scale_settings_scale_type is not None:
+        dpy.properties.scale_settings = DeploymentScaleSettings()
+        dpy.properties.scale_settings.scale_type = scale_settings_scale_type
+        dpy.properties.scale_settings.capacity = scale_settings_capacity
 
     return client.begin_create_or_update(resource_group_name, account_name, deployment_name, dpy, polling=False)
 
