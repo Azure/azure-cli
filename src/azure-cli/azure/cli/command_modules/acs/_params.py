@@ -62,8 +62,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_registry_name, validate_sku_tier, validate_snapshot_id,
     validate_snapshot_name, validate_spot_max_price, validate_ssh_key,
     validate_nodepool_taints, validate_vm_set_type, validate_vnet_subnet_id, validate_k8s_support_plan,
-    validate_utc_offset, validate_start_date, validate_start_time,
-    validate_outbound_type_in_update)
+    validate_utc_offset, validate_start_date, validate_start_time)
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
     get_resource_name_completion_list, get_three_state_flag, name_type,
@@ -329,7 +328,7 @@ def load_arguments(self, _):
         c.argument('load_balancer_idle_timeout', type=int, validator=validate_load_balancer_idle_timeout)
         c.argument('nat_gateway_managed_outbound_ip_count', type=int, validator=validate_nat_gateway_managed_outbound_ip_count)
         c.argument('nat_gateway_idle_timeout', type=int, validator=validate_nat_gateway_idle_timeout)
-        c.argument('outbound_type', arg_type=get_enum_type(outbound_types), validator=validate_outbound_type_in_update)
+        c.argument('outbound_type', arg_type=get_enum_type(outbound_types))
         c.argument('auto_upgrade_channel', arg_type=get_enum_type(auto_upgrade_channels))
         c.argument('cluster_autoscaler_profile', nargs='+', options_list=["--cluster-autoscaler-profile", "--ca-profile"],
                    help="Space-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
