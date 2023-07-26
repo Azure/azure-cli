@@ -47,7 +47,7 @@ class Delete(AAZCommand):
             help="The type of DNS record in this record set. Record sets of type SOA cannot be deleted (they are deleted when the DNS zone is deleted).",
             required=True,
             id_part="child_type_1",
-            enum={"A": "A", "AAAA": "AAAA", "CAA": "CAA", "CNAME": "CNAME", "MX": "MX", "NS": "NS", "PTR": "PTR", "SOA": "SOA", "SRV": "SRV", "TXT": "TXT"},
+            enum={"A": "A", "AAAA": "AAAA", "CAA": "CAA", "CNAME": "CNAME", "DS": "DS", "MX": "MX", "NAPTR": "NAPTR", "NS": "NS", "PTR": "PTR", "SOA": "SOA", "SRV": "SRV", "TLSA": "TLSA", "TXT": "TXT"},
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],

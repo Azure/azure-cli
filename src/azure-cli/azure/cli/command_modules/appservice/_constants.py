@@ -95,5 +95,5 @@ WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
     'powershell': 'FunctionApp/windows-powershell-functionapp-on-azure.yml',
 }
 
-DEFAULT_CENTAURI_IMAGE = 'azurefunctionstest.azurecr.io/azure-functions/dotnet7-quickstart-demo:1.0'
+DEFAULT_CENTAURI_IMAGE = 'mcr.microsoft.com/azure-functions/dotnet7-quickstart-demo:1.0'
 ACR_IMAGE_SUFFIX = ".azurecr.io"

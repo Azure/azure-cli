@@ -554,16 +554,40 @@ def trusted_launch_warning_log(namespace, generation_version, features):
     if not generation_version:
         return
 
-    log_message = 'Ignite (November) 2023 onwards "az vm/vmss create" command will deploy Gen2-Trusted ' \
-                  'Launch VM by default. To know more about the default change and Trusted Launch, ' \
-                  'please visit https://aka.ms/TLaD'
+    from ._constants import TLAD_DEFAULT_CHANGE_MSG
+    log_message = TLAD_DEFAULT_CHANGE_MSG.format('az vm/vmss create')
 
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE, UPGRADE_SECURITY_HINT
     if generation_version == 'V1':
-        logger.warning(log_message)
-
-    if generation_version == 'V2':
-        if is_trusted_launch_supported(features) and not namespace.security_type:
+        if namespace.security_type and namespace.security_type == COMPATIBLE_SECURITY_TYPE_VALUE:
+            logger.warning(UPGRADE_SECURITY_HINT)
+        else:
             logger.warning(log_message)
+
+    if generation_version == 'V2' and is_trusted_launch_supported(features):
+        if not namespace.security_type:
+            logger.warning(log_message)
+        elif namespace.security_type == COMPATIBLE_SECURITY_TYPE_VALUE:
+            logger.warning(UPGRADE_SECURITY_HINT)
+
+
+def validate_update_vm_trusted_launch_supported(cmd, vm, os_disk_resource_group, os_disk_name):
+    from azure.cli.command_modules.vm._client_factory import _compute_client_factory
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+
+    client = _compute_client_factory(cmd.cli_ctx).disks
+    os_disk_info = client.get(os_disk_resource_group, os_disk_name)
+    generation_version = os_disk_info.hyper_v_generation if hasattr(os_disk_info, 'hyper_v_generation') else None
+
+    if generation_version != "V2":
+        raise InvalidArgumentValueError(
+            "Trusted Launch security configuration can be enabled only with Azure Gen2 VMs. Please visit "
+            "https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch for more details.")
+
+    if vm.security_profile is not None and vm.security_profile.security_type == "ConfidentialVM":
+        raise InvalidArgumentValueError("{} is already configured with ConfidentialVM. "
+                                        "Security Configuration cannot be updated from ConfidentialVM to TrustedLaunch."
+                                        .format(vm.name))
 
 
 def display_region_recommendation(cmd, namespace):

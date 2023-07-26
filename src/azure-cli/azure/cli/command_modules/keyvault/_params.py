@@ -14,12 +14,12 @@ from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list, resource_group_name_type, tags_type, file_type, get_three_state_flag,
     get_enum_type)
 from azure.cli.core.util import get_json_object
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.profiles import ResourceType, get_api_version
 
 from azure.cli.command_modules.keyvault._completers import (
     get_keyvault_name_completion_list, get_keyvault_version_completion_list)
 from azure.cli.command_modules.keyvault._validators import (
-    datetime_type, certificate_type,
+    datetime_type, certificate_type, validate_retention_days_on_creation,
     get_vault_base_url_type, get_hsm_base_url_type, validate_key_import_type,
     validate_key_import_source, validate_key_type, validate_policy_permissions, validate_principal,
     validate_resource_group_name, validate_x509_certificate_chain,
@@ -27,7 +27,8 @@ from azure.cli.command_modules.keyvault._validators import (
     validate_vault_or_hsm, validate_key_id, validate_sas_definition_id, validate_storage_account_id,
     validate_storage_disabled_attribute, validate_deleted_vault_or_hsm_name, validate_encryption, validate_decryption,
     validate_vault_name_and_hsm_name, set_vault_base_url, validate_keyvault_resource_id,
-    process_hsm_name, KeyEncryptionDataType, process_key_release_policy)
+    process_hsm_name, KeyEncryptionDataType, process_key_release_policy, process_certificate_policy,
+    process_certificate_import)
 
 # CUSTOM CHOICE LISTS
 
@@ -38,14 +39,15 @@ key_format_values = certificate_format_values = ['PEM', 'DER']
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements, line-too-long
 def load_arguments(self, _):
     (JsonWebKeyOperation, SasTokenType,
-     SasDefinitionAttributes, SecretAttributes, CertificateAttributes, StorageAccountAttributes) = self.get_models(
+     SasDefinitionAttributes, StorageAccountAttributes) = self.get_models(
          'JsonWebKeyOperation', 'SasTokenType',
-         'SasDefinitionAttributes', 'SecretAttributes', 'CertificateAttributes', 'StorageAccountAttributes',
+         'SasDefinitionAttributes', 'StorageAccountAttributes',
          resource_type=ResourceType.DATA_KEYVAULT)
 
     JsonWebKeyType = self.get_sdk('KeyType', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_enums')
     KeyCurveName = self.get_sdk('KeyCurveName', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_enums')
     EncryptionAlgorithm = self.get_sdk('EncryptionAlgorithm', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='crypto._enums')
+    SignatureAlgorithm = self.get_sdk('SignatureAlgorithm', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='crypto._enums')
 
     class CLIJsonWebKeyOperation(str, Enum):
         encrypt = "encrypt"
@@ -166,7 +168,9 @@ def load_arguments(self, _):
         c.argument('no_self_perms', arg_type=get_three_state_flag(),
                    help='[Vault Only] Don\'t add permissions for the current user/service principal in the new vault.')
         c.argument('location', validator=get_default_location_from_resource_group)
-        c.argument('retention_days', help='Soft delete data retention days. It accepts >=7 and <=90.', default='90')
+        c.argument('retention_days', validator=validate_retention_days_on_creation,
+                   help='Soft delete data retention days. It accepts >=7 and <=90. '
+                        'Defaults to 90 for keyvault creation. Required for MHSM creation')
 
     with self.argument_context('keyvault create', arg_group='Network Rule') as c:
         c.argument('network_acls', type=validate_file_or_dict,
@@ -272,63 +276,6 @@ def load_arguments(self, _):
         c.argument('hsm_name', mgmt_plane_hsm_name_type)
     # endregion
 
-    # region Shared
-    for item in ['secret', 'certificate']:
-        with self.argument_context('keyvault ' + item, arg_group='Id') as c:
-            c.argument(item + '_name', options_list=['--name', '-n'], help='Name of the {}.'.format(item),
-                       id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
-            c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
-            c.argument(item + '_version', options_list=['--version', '-v'],
-                       help='The {} version. If omitted, uses the latest version.'.format(item), default='',
-                       required=False, completer=get_keyvault_version_completion_list(item))
-
-        for cmd in ['backup', 'decrypt', 'delete', 'download', 'encrypt', 'list-versions', 'set-attributes', 'show',
-                    'list']:
-            with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
-                try:
-                    if cmd in ['list']:
-                        c.extra('identifier', options_list=['--id'],
-                                help='Full URI of the Vault or HSM. '
-                                     'If specified all other \'Id\' arguments should be omitted.',
-                                validator=validate_vault_or_hsm)
-                    else:
-                        c.extra('identifier', options_list=['--id'],
-                                help='Id of the {}. '
-                                     'If specified all other \'Id\' arguments should be omitted.'.format(item),
-                                validator=validate_key_id(item))
-                except ValueError:
-                    pass
-                c.argument(item + '_name', help='Name of the {}. Required if --id is not specified.'.format(item),
-                           required=False)
-                c.argument('vault_base_url', vault_name_type, required=False,
-                           help='Name of the Key Vault. Required if --id is not specified.')
-                c.argument(item + '_version', required=False)
-
-        for cmd in ['purge', 'recover', 'show-deleted']:
-            with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
-                c.extra('identifier', options_list=['--id'],
-                        help='The recovery id of the {}. '
-                             'If specified all other \'Id\' arguments should be omitted.'.format(item),
-                        validator=validate_key_id('deleted' + item))
-                c.argument(item + '_name', help='Name of the {}. Required if --id is not specified.'.format(item),
-                           required=False)
-                c.argument('vault_base_url', help='Name of the Vault. Required if --id is not specified.',
-                           required=False)
-                c.argument(item + '_version', required=False)
-
-        for cmd in ['list', 'list-deleted']:
-            with self.argument_context('keyvault {} {}'.format(item, cmd)) as c:
-                c.argument('include_pending', arg_type=get_three_state_flag())
-
-            with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
-                if cmd in ['list-deleted']:
-                    c.extra('identifier', options_list=['--id'],
-                            help='Full URI of the Vault{}. '
-                                 'If specified all other \'Id\' arguments should be '
-                                 'omitted.'.format(' or HSM' if item == 'key' else ''),
-                            validator=validate_vault_or_hsm)
-    # endregion
-
     # region keys
     # keys track1
     with self.argument_context('keyvault key') as c:
@@ -413,7 +360,7 @@ def load_arguments(self, _):
                 help='Include managed keys. Default: false')
 
     # keys track2
-    for scope in ['create', 'import', 'set-attributes', 'show', 'encrypt', 'decrypt',
+    for scope in ['create', 'import', 'set-attributes', 'show', 'encrypt', 'decrypt', 'sign', 'verify',
                   'rotate', 'rotation-policy show', 'rotation-policy update']:
         with self.argument_context('keyvault key {}'.format(scope), arg_group='Id') as c:
             c.argument('name', options_list=['--name', '-n'], id_part='child_name_1',
@@ -494,6 +441,13 @@ def load_arguments(self, _):
         c.argument('aad', help='Optional data that is authenticated but not encrypted. For use with AES-GCM decryption.')
         c.argument('tag', help='The authentication tag generated during encryption. Required for only AES-GCM decryption.')
 
+    for scope in ['sign', 'verify']:
+        with self.argument_context('keyvault key {}'.format(scope)) as c:
+            c.argument('algorithm', options_list=['--algorithm', '-a'], arg_type=get_enum_type(SignatureAlgorithm),
+                       help='Algorithm identifier')
+            c.argument('digest', help='The value to sign')
+            c.argument('signature', help='signature to verify')
+
     with self.argument_context('keyvault key random') as c:
         c.extra('hsm_name', hsm_url_type, arg_group='Id', required=False)
         c.extra('identifier', options_list=['--id'], arg_group='Id',
@@ -528,11 +482,79 @@ def load_arguments(self, _):
                    help='The rotation policy file definition as JSON, or a path to a file containing JSON policy definition.')
     # endregion
 
-    # region KeyVault Secret
+    # region KeyVault shared between Secret and Certificate track2
+    for item in ['secret', 'certificate']:
+        for cmd in ['backup', 'decrypt', 'delete', 'download', 'encrypt', 'list-versions', 'set-attributes', 'show',
+                    'list', 'list-deleted']:
+            with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
+                try:
+                    if cmd in ['list', 'list-deleted']:
+                        c.extra('identifier', options_list=['--id'],
+                                help='Full URI of the Vault. '
+                                     'If specified all other \'Id\' arguments should be omitted.',
+                                validator=validate_vault_or_hsm)
+                    else:
+                        c.extra('identifier', options_list=['--id'],
+                                help='Id of the {}. '
+                                     'If specified all other \'Id\' arguments should be omitted.'.format(item),
+                                validator=validate_keyvault_resource_id(item))
+                except ValueError:
+                    pass
+                if item == 'secret':
+                    c.argument('name', options_list=['--name', '-n'], required=False,
+                               help='Name of the {}. Required if --id is not specified.'.format(item))
+                elif item == 'certificate':
+                    c.argument('{}_name'.format(item), options_list=['--name', '-n'], required=False,
+                               help='Name of the {}. Required if --id is not specified.'.format(item))
+                c.extra('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None,
+                        options_list=['--vault-name'], help='Name of the Key Vault. Required if --id is not specified')
+                c.argument('version', options_list=['--version', '-v'],
+                           help='The {} version. If omitted, uses the latest version.'.format(item), default='',
+                           required=False, arg_group='Id', completer=get_keyvault_version_completion_list(item))
+
+        for cmd in ['purge', 'recover', 'show-deleted']:
+            with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
+                c.extra('identifier', options_list=['--id'],
+                        help='The recovery id of the {}. '
+                             'If specified all other \'Id\' arguments should be omitted.'.format(item),
+                        validator=validate_keyvault_resource_id(item))
+                if item == 'secret':
+                    c.argument('name', options_list=['--name', '-n'], required=False,
+                               help='Name of the {}. Required if --id is not specified.'.format(item))
+                elif item == 'certificate':
+                    c.argument('{}_name'.format(item), options_list=['--name', '-n'], required=False,
+                               help='Name of the {}. Required if --id is not specified.'.format(item))
+                c.extra('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None,
+                        options_list=['--vault-name'], required=False,
+                        help='Name of the Vault. Required if --id is not specified.')
+                c.argument('version', required=False)
+
+        for scope in ['list', 'list-versions', 'list-deleted']:
+            with self.argument_context('keyvault {} {}'.format(item, scope)) as c:
+                c.extra('max_page_size', options_list=['--maxresults'], type=int,
+                        help='Maximum number of results to return in a page. '
+                             'If not specified, the service will return up to 25 results.')
+
+    with self.argument_context('keyvault secret list') as c:
+        c.extra('include_managed', arg_type=get_three_state_flag(), default=False,
+                help='Include managed secrets. Default: false')
+
+    for cmd in ['set', 'set-attributes']:
+        with self.argument_context('keyvault secret {}'.format(cmd)) as c:
+            c.extra('content_type', options_list=['--description', '--content-type'],
+                    help='Description of the secret contents (e.g. password, connection string, etc)')
+            c.extra('expires_on', options_list=['--expires'], type=datetime_type,
+                    help='Expiration UTC datetime (Y-m-d\'T\'H:M:S\'Z\').')
+            c.extra('not_before', type=datetime_type,
+                    help='Secret not usable before the provided UTC datetime (Y-m-d\'T\'H:M:S\'Z\').')
+            c.extra('tags', tags_type)
+
     with self.argument_context('keyvault secret set') as c:
-        c.argument('content_type', options_list=['--description', '--content-type'],
-                   help='Description of the secret contents (e.g. password, connection string, etc)')
-        c.attributes_argument('secret', SecretAttributes, create=True)
+        c.argument('name', options_list=['--name', '-n'], required=True, arg_group='Id',
+                   help='Name of the secret.')
+        c.extra('vault_base_url', vault_name_type, required=True, arg_group='Id',
+                type=get_vault_base_url_type(self.cli_ctx), id_part=None)
+        c.extra('disabled', help='Create secret in disabled state.', arg_type=get_three_state_flag())
 
     with self.argument_context('keyvault secret set', arg_group='Content Source') as c:
         c.argument('value', options_list=['--value'],
@@ -545,27 +567,23 @@ def load_arguments(self, _):
                      'and used during download to automatically encode the resulting file.')
 
     with self.argument_context('keyvault secret set-attributes') as c:
-        c.attributes_argument('secret', SecretAttributes)
+        c.extra('content_type', options_list=['--content-type'],
+                help='Type of the secret value such as a password.')
+        c.extra('enabled', help='Enable the secret.', arg_type=get_three_state_flag())
 
     with self.argument_context('keyvault secret download') as c:
-        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
-                   help='File to receive the secret contents.')
         c.argument('encoding', arg_type=get_enum_type(secret_encoding_values), options_list=['--encoding', '-e'],
                    help="Encoding of the secret. By default, will look for the 'file-encoding' tag on the secret. "
                         "Otherwise will assume 'utf-8'.", default=None)
 
-    for scope in ['backup', 'restore']:
+    for scope in ['download', 'backup', 'restore']:
         with self.argument_context('keyvault secret {}'.format(scope)) as c:
             c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
                        help='File to receive the secret contents.')
 
-    for scope in ['list', 'list-deleted', 'list-versions']:
-        with self.argument_context('keyvault secret {}'.format(scope)) as c:
-            c.argument('maxresults', options_list=['--maxresults'], type=int)
-
-    with self.argument_context('keyvault secret list') as c:
-        c.extra('include_managed', arg_type=get_three_state_flag(), default=False,
-                help='Include managed secrets. Default: false')
+    with self.argument_context('keyvault secret restore') as c:
+        c.extra('vault_base_url', vault_name_type, required=True, arg_group='Id',
+                type=get_vault_base_url_type(self.cli_ctx), id_part=None)
     # endregion
 
     # region keyvault security-domain
@@ -644,6 +662,8 @@ def load_arguments(self, _):
     with self.argument_context('keyvault restore start') as c:
         c.argument('folder_to_restore', options_list=['--backup-folder'],
                    help='Name of the blob container which contains the backup')
+        c.argument('key_name', options_list=['--key-name', '--key'],
+                   help='Name of a single key in the backup. When set, only this key will be restored')
 
     with self.argument_context('keyvault restore start', arg_group='Storage Id') as c:
         c.extra('storage_resource_uri', required=False,
@@ -726,16 +746,58 @@ def load_arguments(self, _):
     # endregion
 
     # KeyVault Certificate
-    with self.argument_context('keyvault certificate') as c:
-        c.argument('validity', type=int,
-                   help='Number of months the certificate is valid for. Overrides the value specified with --policy/-p')
+    with self.argument_context('keyvault certificate issuer admin') as c:
+        c.argument('email', help='Admin e-mail address. Must be unique within the vault.')
+        c.argument('name', help='Full admin name.')
+        c.argument('phone', help='Admin phone number.')
+        c.argument('first_name', help='Admin first name.')
+        c.argument('last_name', help='Admin last name.')
+    # endregion
 
-    # TODO: Remove workaround when https://github.com/Azure/azure-rest-api-specs/issues/1153 is fixed
+    # region KeyVault Certificate track2
     with self.argument_context('keyvault certificate create') as c:
-        c.attributes_argument('certificate', CertificateAttributes, True, ignore=['expires', 'not_before'])
+        c.argument('certificate_name', options_list=['--name', '-n'], required=True, arg_group='Id',
+                   help='Name of the certificate.')
+        c.extra('vault_base_url', vault_name_type, required=True, arg_group='Id',
+                type=get_vault_base_url_type(self.cli_ctx), id_part=None)
+        c.extra('disabled', help='Create certificate in disabled state.', arg_type=get_three_state_flag())
+        c.extra('validity', type=int,
+                help='Number of months the certificate is valid for. Overrides the value specified with --policy/-p')
+        c.argument('policy', options_list=['--policy', '-p'],
+                   help='JSON encoded policy definition. Use @{file} to load from a file(e.g. @my_policy.json).',
+                   type=get_json_object, validator=process_certificate_policy)
 
     with self.argument_context('keyvault certificate set-attributes') as c:
-        c.attributes_argument('certificate', CertificateAttributes, ignore=['expires', 'not_before'])
+        c.extra('enabled', help='Enable the certificate.', arg_type=get_three_state_flag())
+        c.extra('policy', options_list=['--policy', '-p'],
+                help='JSON encoded policy definition. Use @{file} to load from a file(e.g. @my_policy.json).',
+                type=get_json_object, validator=process_certificate_policy)
+        c.extra('tags', tags_type)
+
+    data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT)). \
+        replace('.', '_').replace('-', '_')
+
+    if data_api_version != "2016_10_01":
+        for cmd in ['list', 'list-deleted']:
+            with self.argument_context('keyvault certificate {}'.format(cmd)) as c:
+                c.extra('include_pending', arg_type=get_three_state_flag(),
+                        help='Specifies whether to include certificates which are not completely provisioned.')
+
+    with self.argument_context('keyvault certificate import') as c:
+        c.argument('certificate_name', options_list=['--name', '-n'], required=True, arg_group='Id',
+                   help='Name of the certificate.')
+        c.extra('vault_base_url', vault_name_type, required=True, arg_group='Id',
+                type=get_vault_base_url_type(self.cli_ctx), id_part=None)
+        c.argument('certificate_bytes', options_list=['--file', '-f'], completer=FilesCompleter(),
+                   help='PKCS12 file or PEM file containing the certificate and private key.',
+                   type=certificate_type)
+        c.extra('password', help="If the private key in certificate is encrypted, the password used for encryption.")
+        c.extra('disabled', arg_type=get_three_state_flag(), help='Import the certificate in disabled state.',
+                validator=process_certificate_import)
+        c.extra('policy', options_list=['--policy', '-p'],
+                help='JSON encoded policy definition. Use @{file} to load from a file(e.g. @my_policy.json).',
+                type=get_json_object, validator=process_certificate_policy)
+        c.extra('tags', tags_type)
 
     with self.argument_context('keyvault certificate backup') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
@@ -744,19 +806,8 @@ def load_arguments(self, _):
     with self.argument_context('keyvault certificate restore') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
                    help='Local certificate backup from which to restore certificate.')
-
-    for item in ['create', 'set-attributes', 'import']:
-        with self.argument_context('keyvault certificate ' + item) as c:
-            c.argument('certificate_policy', options_list=['--policy', '-p'],
-                       help='JSON encoded policy definition. Use @{file} to load from a file(e.g. @my_policy.json).',
-                       type=get_json_object)
-
-    with self.argument_context('keyvault certificate import') as c:
-        c.argument('certificate_data', options_list=['--file', '-f'], completer=FilesCompleter(),
-                   help='PKCS12 file or PEM file containing the certificate and private key.',
-                   type=certificate_type)
-        c.argument('password', help="If the private key in certificate is encrypted, the password used for encryption.")
-        c.extra('disabled', arg_type=get_three_state_flag(), help='Import the certificate in disabled state.')
+        c.extra('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None,
+                options_list=['--vault-name'], arg_group='Id', help='Name of the Key Vault.')
 
     with self.argument_context('keyvault certificate download') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
@@ -767,29 +818,32 @@ def load_arguments(self, _):
 
     # TODO: Fix once service side issue is fixed that there is no way to list pending certificates
     with self.argument_context('keyvault certificate pending') as c:
-        c.argument('certificate_name', options_list=['--name', '-n'], help='Name of the pending certificate.',
+        c.argument('certificate_name', options_list=['--name', '-n'], arg_group='Id',
+                   help='Name of the pending certificate.',
                    id_part='child_name_1', completer=None)
+
+    for item in ['merge', 'show', 'delete']:
+        with self.argument_context('keyvault certificate pending {}'.format(item)) as c:
+            c.extra('vault_base_url', vault_name_type, required=True, arg_group='Id',
+                    type=get_vault_base_url_type(self.cli_ctx), id_part=None)
 
     with self.argument_context('keyvault certificate pending merge') as c:
         c.argument('x509_certificates', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
                    help='File containing the certificate or certificate chain to merge.',
                    validator=validate_x509_certificate_chain)
-        c.attributes_argument('certificate', CertificateAttributes, True)
-
-    with self.argument_context('keyvault certificate pending cancel') as c:
-        c.ignore('cancellation_requested')
+        c.extra('disabled', arg_type=get_three_state_flag(), help='Create certificate in disabled state.',
+                validator=process_certificate_import)
+        c.extra('tags', tags_type)
 
     with self.argument_context('keyvault certificate contact') as c:
-        c.argument('contact_email', options_list=['--email'], help='Contact e-mail address. Must be unique.')
-        c.argument('contact_name', options_list=['--name'], help='Full contact name.')
-        c.argument('contact_phone', options_list=['--phone'], help='Contact phone number.')
+        c.argument('email', help='Contact e-mail address. Must be unique.')
+        c.argument('name', help='Full contact name.')
+        c.argument('phone', help='Contact phone number.')
 
-    with self.argument_context('keyvault certificate issuer admin') as c:
-        c.argument('email', help='Admin e-mail address. Must be unique within the vault.')
-        c.argument('name', help='Full admin name.')
-        c.argument('phone', help='Admin phone number.')
-        c.argument('first_name', help='Admin first name.')
-        c.argument('last_name', help='Admin last name.')
+    for item in ['list', 'add', 'delete']:
+        with self.argument_context('keyvault certificate contact {}'.format(item)) as c:
+            c.extra('vault_base_url', vault_name_type, required=True, arg_group='Id',
+                    type=get_vault_base_url_type(self.cli_ctx), id_part=None)
 
     with self.argument_context('keyvault certificate issuer') as c:
         c.argument('issuer_name', help='Certificate issuer name.')
@@ -807,10 +861,18 @@ def load_arguments(self, _):
         c.argument('admin_email')
         c.argument('admin_phone')
 
-    for item in ['list', 'list-deleted', 'list-versions']:
-        with self.argument_context('keyvault certificate {}'.format(item)) as c:
-            c.argument('maxresults', options_list=['--maxresults'], type=int)
+    for item in ['create', 'show', 'list', 'delete', 'update']:
+        with self.argument_context('keyvault certificate issuer {}'.format(item)) as c:
+            c.extra('vault_base_url', vault_name_type, required=True, arg_group='Id',
+                    type=get_vault_base_url_type(self.cli_ctx), id_part=None)
 
+    for item in ['add', 'list', 'delete']:
+        with self.argument_context('keyvault certificate issuer admin {}'.format(item)) as c:
+            c.extra('vault_base_url', vault_name_type, required=True, arg_group='Id',
+                    type=get_vault_base_url_type(self.cli_ctx), id_part=None)
+    # endregion
+
+    # region KeyVault Role
     with self.argument_context('keyvault role') as c:
         c.argument('scope',
                    help='scope at which the role assignment or definition applies to, '
@@ -865,3 +927,16 @@ def load_arguments(self, _):
         c.argument('name', hsm_name_type)
         c.argument('region_name', options_list=['--region-name', '--region', '-r'],
                    help='The region name.')
+
+    for item in ['list', 'show', 'update']:
+        with self.argument_context(f'keyvault setting {item}', arg_group='Id') as c:
+            c.extra('hsm_name', hsm_url_type)
+            c.extra('identifier', options_list=['--id'],
+                    help='Full URI of the HSM. If specified all other \'Id\' arguments should be omitted.',
+                    validator=process_hsm_name)
+
+    with self.argument_context('keyvault setting') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the setting.')
+        c.argument('value', help='Value of the setting.')
+        c.argument('setting_type', options_list=['--setting-type', '--type'],
+                   arg_type=get_enum_type(['boolean', 'string']), help='Type of the setting value.')

@@ -32,7 +32,8 @@ from azure.cli.command_modules.vm._validators import (
     process_disk_encryption_namespace, process_assign_identity_namespace,
     process_remove_identity_namespace, process_vm_secret_format, process_vm_vmss_stop, validate_vmss_update_namespace,
     process_vm_update_namespace, process_set_applications_namespace, process_vm_disk_attach_namespace,
-    process_image_version_create_namespace, process_image_version_update_namespace, process_ppg_create_namespace)
+    process_image_version_create_namespace, process_image_version_update_namespace,
+    process_image_version_undelete_namespace, process_ppg_create_namespace)
 
 from azure.cli.command_modules.vm._image_builder import (
     process_image_template_create_namespace, process_img_tmpl_output_add_namespace,
@@ -258,11 +259,7 @@ def load_command_table(self, _):
 
     with self.command_group('disk-encryption-set', compute_disk_encryption_set_sdk, operation_group='disk_encryption_sets', client_factory=cf_disk_encryption_set, min_api='2019-07-01') as g:
         g.custom_command('create', 'create_disk_encryption_set', supports_no_wait=True)
-        g.command('delete', 'begin_delete')
         g.generic_update_command('update', custom_func_name='update_disk_encryption_set', setter_arg_name='disk_encryption_set', setter_name='begin_create_or_update')
-        g.show_command('show', 'get')
-        g.custom_command('list', 'list_disk_encryption_sets')
-        g.command('list-associated-resources', 'list_associated_resources', min_api='2020-06-30')
 
     with self.command_group('disk-encryption-set identity', compute_disk_encryption_set_sdk, operation_group='disk_encryption_sets', client_factory=cf_disk_encryption_set, min_api='2022-03-02') as g:
         g.custom_command('assign', 'assign_disk_encryption_set_identity')
@@ -275,9 +272,6 @@ def load_command_table(self, _):
 
     with self.command_group('image', compute_image_sdk, min_api='2016-04-30-preview') as g:
         g.custom_command('create', 'create_image', validator=process_image_create_namespace)
-        g.custom_command('list', 'list_images')
-        g.show_command('show', 'get')
-        g.command('delete', 'begin_delete')
         g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_image')
 
     with self.command_group('image builder', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
@@ -306,10 +300,21 @@ def load_command_table(self, _):
         g.custom_command('remove', 'remove_template_output', supports_local_cache=True)
         g.custom_command('clear', 'clear_template_output', supports_local_cache=True)
 
+    with self.command_group('image builder output versioning', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
+        g.custom_command('set', 'set_template_output_versioning', supports_local_cache=True)
+        g.custom_command('remove', 'remove_template_output_versioning', supports_local_cache=True)
+        g.custom_show_command('show', 'show_template_output_versioning', supports_local_cache=True)
+
     with self.command_group('image builder validator', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
         g.custom_command('add', 'add_template_validator', supports_local_cache=True)
         g.custom_command('remove', 'remove_template_validator', supports_local_cache=True)
         g.custom_show_command('show', 'show_template_validator', supports_local_cache=True)
+
+    with self.command_group('image builder optimizer', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
+        g.custom_command('add', 'add_or_update_template_optimizer', supports_local_cache=True)
+        g.custom_command('update', 'add_or_update_template_optimizer', supports_local_cache=True)
+        g.custom_command('remove', 'remove_template_optimizer', supports_local_cache=True)
+        g.custom_show_command('show', 'show_template_optimizer', supports_local_cache=True)
 
     with self.command_group('snapshot', compute_snapshot_sdk, operation_group='snapshots', min_api='2016-04-30-preview') as g:
         g.custom_command('create', 'create_snapshot', validator=process_snapshot_create_namespace, supports_no_wait=True)
@@ -389,7 +394,6 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_vm_encryption_status', table_transformer=transform_vm_encryption_show_table_output)
 
     with self.command_group('vm extension', compute_vm_extension_sdk) as g:
-        g.command('delete', 'begin_delete', supports_no_wait=True)
         g.custom_show_command('show', 'show_extensions', table_transformer=transform_extension_show_table_output)
         g.custom_command('set', 'set_extension', supports_no_wait=True)
         g.custom_command('list', 'list_extensions', table_transformer='[].' + transform_extension_show_table_output)
@@ -530,21 +534,16 @@ def load_command_table(self, _):
         g.custom_command('list-community', 'sig_community_image_definition_list')
 
     with self.command_group('sig image-version', community_gallery_image_version_sdk, client_factory=cf_community_gallery_image_version, operation_group='shared_galleries', min_api='2022-01-03') as g:
-        g.command('show-community', 'get')
         g.custom_command('list-community', 'sig_community_image_version_list')
 
     with self.command_group('sig image-definition', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_gallery_image')
-        g.command('list', 'list_by_gallery')
-        g.show_command('show', 'get')
-        g.command('delete', 'begin_delete')
         g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='gallery_image')
 
     with self.command_group('sig image-version', compute_gallery_image_versions_sdk, operation_group='gallery_image_versions', min_api='2018-06-01') as g:
-        g.command('delete', 'begin_delete')
         g.show_command('show', 'get', table_transformer='{Name:name, ResourceGroup:resourceGroup, ProvisioningState:provisioningState, TargetRegions: publishingProfile.targetRegions && join(`, `, publishingProfile.targetRegions[*].name), EdgeZones: publishingProfile.targetExtendedLocations && join(`, `, publishingProfile.targetExtendedLocations[*].name), ReplicationState:replicationStatus.aggregatedState}')
-        g.command('list', 'list_by_gallery_image')
         g.custom_command('create', 'create_image_version', supports_no_wait=True, validator=process_image_version_create_namespace)
+        g.custom_command('undelete', 'undelete_image_version', supports_no_wait=True, min_api='2021-07-01', validator=process_image_version_undelete_namespace, is_preview=True)
         g.generic_update_command('update', getter_name='get_image_version_to_update', setter_arg_name='gallery_image_version', setter_name='update_image_version', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_image_version_update_namespace)
         g.wait_command('wait')
 
@@ -582,18 +581,15 @@ def load_command_table(self, _):
     with self.command_group('sig image-definition', vm_shared_gallery_image, min_api='2020-09-30', operation_group='shared_galleries',
                             client_factory=cf_shared_gallery_image) as g:
         g.custom_command('list-shared', 'sig_shared_image_definition_list')
-        g.command('show-shared', 'get')
 
     vm_shared_gallery_image_version = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations._shared_gallery_image_versions_operations#SharedGalleryImageVers'
-        'ionsOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#SharedGalleryImageVersionsOperations.{}',
         client_factory=cf_shared_gallery_image_version,
         operation_group='shared_galleries')
     with self.command_group('sig image-version', vm_shared_gallery_image_version, min_api='2020-09-30',
                             operation_group='shared_galleries',
                             client_factory=cf_shared_gallery_image_version) as g:
         g.custom_command('list-shared', 'sig_shared_image_version_list')
-        g.command('show-shared', 'get')
 
     with self.command_group('sig gallery-application', compute_gallery_application_sdk, client_factory=cf_gallery_application, min_api='2021-07-01', operation_group='gallery_applications') as g:
         g.custom_command('create', 'gallery_application_create', supports_no_wait=True)

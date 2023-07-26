@@ -205,14 +205,22 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     if encryption_key_type_for_table is not None or encryption_key_type_for_queue is not None:
         EncryptionServices = cmd.get_models('EncryptionServices')
         EncryptionService = cmd.get_models('EncryptionService')
-        params.encryption = Encryption()
-        params.encryption.services = EncryptionServices()
+        if params.encryption is None:
+            params.encryption = Encryption()
+        if params.encryption.services is None:
+            params.encryption.services = EncryptionServices()
         if encryption_key_type_for_table is not None:
             table_encryption_service = EncryptionService(enabled=True, key_type=encryption_key_type_for_table)
-            params.encryption.services.table = table_encryption_service
+            if isinstance(params.encryption.services, dict):
+                params.encryption.services["table"] = table_encryption_service
+            else:
+                params.encryption.services.table = table_encryption_service
         if encryption_key_type_for_queue is not None:
             queue_encryption_service = EncryptionService(enabled=True, key_type=encryption_key_type_for_queue)
-            params.encryption.services.queue = queue_encryption_service
+            if isinstance(params.encryption.services, dict):
+                params.encryption.services["queue"] = queue_encryption_service
+            else:
+                params.encryption.services.queue = queue_encryption_service
 
     if any([routing_choice, publish_microsoft_endpoints, publish_internet_endpoints]):
         RoutingPreference = cmd.get_models('RoutingPreference')
@@ -497,8 +505,8 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     if enable_files_adds is not None:
         ActiveDirectoryProperties = cmd.get_models('ActiveDirectoryProperties')
         if enable_files_adds:  # enable AD
-            if not(domain_name and net_bios_domain_name and forest_name and domain_guid and domain_sid and
-                   azure_storage_sid):
+            if not (domain_name and net_bios_domain_name and forest_name and domain_guid and domain_sid and
+                    azure_storage_sid):
                 raise CLIError("To enable ActiveDirectoryDomainServicesForFile, user must specify all of: "
                                "--domain-name, --net-bios-domain-name, --forest-name, --domain-guid, --domain-sid and "
                                "--azure_storage_sid arguments in Azure Active Directory Properties Argument group.")
@@ -944,6 +952,7 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
             if account_name == parse_resource_id(or_policy.source_account)['name']:
                 raise CLIError('ValueError: Please specify --policy-id with auto-generated policy id value on '
                                'destination account.')
+        raise ex
 
 
 def update_or_policy(client, parameters, resource_group_name, account_name, object_replication_policy_id=None,
@@ -1118,3 +1127,40 @@ def begin_failover(client, resource_group_name, account_name, failover_type=None
         """
         user_confirmation(message, yes)
     return client.begin_failover(resource_group_name=resource_group_name, account_name=account_name, failover_type=failover_type, **kwargs)
+
+
+def list_blob_cors_rules(client, resource_group_name, account_name):
+    blob_service_properties = client.get_service_properties(resource_group_name=resource_group_name,
+                                                            account_name=account_name)
+    if not blob_service_properties.cors or not blob_service_properties.cors.cors_rules:
+        return []
+    return blob_service_properties.cors.cors_rules
+
+
+# pylint: disable=dangerous-default-value
+def add_blob_cors_rule(cmd, client, resource_group_name, account_name, max_age_in_seconds,
+                       allowed_origins, allowed_methods, allowed_headers=[], exposed_headers=[]):
+    CorsRules, CorsRule = cmd.get_models('CorsRules', 'CorsRule')
+    blob_service_properties = client.get_service_properties(resource_group_name=resource_group_name,
+                                                            account_name=account_name)
+    if not blob_service_properties.cors or not blob_service_properties.cors.cors_rules:
+        blob_service_properties.cors = CorsRules(cors_rules=[])
+
+    new_rule = CorsRule(allowed_origins=allowed_origins, allowed_methods=allowed_methods,
+                        allowed_headers=allowed_headers, exposed_headers=exposed_headers,
+                        max_age_in_seconds=max_age_in_seconds)
+    blob_service_properties.cors.cors_rules.append(new_rule)
+    return client.set_service_properties(resource_group_name=resource_group_name,
+                                         account_name=account_name,
+                                         parameters=blob_service_properties).cors.cors_rules
+
+
+def clear_blob_cors_rules(cmd, client, resource_group_name, account_name):
+    blob_service_properties = client.get_service_properties(resource_group_name=resource_group_name,
+                                                            account_name=account_name)
+    CorsRules = cmd.get_models('CorsRules')
+    blob_service_properties.cors = CorsRules(cors_rules=[])
+    client.set_service_properties(resource_group_name=resource_group_name,
+                                  account_name=account_name,
+                                  parameters=blob_service_properties)
+    return []

@@ -7,6 +7,7 @@ from enum import Enum
 import json
 from knack.log import get_logger
 from azure.cli.core.util import shell_safe_json_parse
+from azure.cli.core.azclierror import InvalidArgumentValueError
 from ._models import KeyValue
 from ._constants import FeatureFlagConstants
 
@@ -171,7 +172,7 @@ def custom_serialize_conditions(conditions_dict):
     for key, value in conditions_dict.items():
         featurefilters = []
         for featurefilter in value:
-            featurefilters.append(str(featurefilter))
+            featurefilters.append(featurefilter.__dict__)
         featurefilterdict[key] = featurefilters
     return featurefilterdict
 
@@ -213,7 +214,7 @@ def map_featureflag_to_keyvalue(featureflag):
 
     except Exception as exception:
         error_msg = "Exception while converting feature flag to key value: {0}\n{1}".format(featureflag.key, exception)
-        raise Exception(error_msg)
+        raise Exception(error_msg)  # pylint: disable=broad-exception-raised
 
     return set_kv
 
@@ -314,7 +315,7 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
                                               enabled=feature_flag_dict.get('enabled', False),
                                               conditions=conditions)
 
-    except ValueError as exception:
+    except (InvalidArgumentValueError, TypeError, ValueError) as exception:
         error_msg = "Invalid value. Unable to decode the following JSON value: \n" +\
                     "key:{0} value:{1}\nFull exception: \n{2}".format(keyvalue.key, keyvalue.value, str(exception))
         raise ValueError(error_msg)
@@ -324,3 +325,13 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
         raise
 
     return feature_flag_value
+
+
+def is_feature_flag(kv):
+    # pylint: disable=line-too-long
+    '''
+    Helper function used to determine if a key-value is a feature flag
+    '''
+    if kv and kv.key and isinstance(kv.key, str) and kv.content_type and isinstance(kv.content_type, str):
+        return kv.key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX) and kv.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE
+    return False

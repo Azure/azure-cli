@@ -868,12 +868,15 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSAgentPoolContext(
             self.cmd,
-            AKSAgentPoolParamDict({"node_taints": "abc=xyz:123,123=456:abc"}),
+            AKSAgentPoolParamDict({"nodepool_taints": "abc=xyz:123,123=456:abc", "node_taints": "abc2=xyz2:123"}),
             self.models,
             DecoratorMode.CREATE,
             self.agentpool_decorator_mode,
         )
-        self.assertEqual(ctx_1.get_node_taints(), ["abc=xyz:123", "123=456:abc"])
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            self.assertEqual(ctx_1.get_node_taints(), ["abc=xyz:123", "123=456:abc"])
+        else:
+            self.assertEqual(ctx_1.get_node_taints(), ["abc2=xyz2:123"])
         agentpool = self.create_initialized_agentpool_instance(node_taints=[])
         ctx_1.attach_agentpool(agentpool)
         self.assertEqual(ctx_1.get_node_taints(), [])
@@ -881,7 +884,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         # custom
         ctx_2 = AKSAgentPoolContext(
             self.cmd,
-            AKSAgentPoolParamDict({"node_taints": ""}),
+            AKSAgentPoolParamDict({"nodepool_taints": "", "node_taints": ""}),
             self.models,
             DecoratorMode.UPDATE,
             self.agentpool_decorator_mode,
@@ -1871,6 +1874,7 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
                 "nodepool_tags": "test_nodepool_tags",
                 "tags": "test_tags",
                 "node_taints": "abc=xyz:123,123=456:abc",
+                "nodepool_taints": "abc=xyz:123,123=456:abc",
             },
             self.resource_type,
             self.agentpool_decorator_mode,
@@ -2409,6 +2413,7 @@ class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
                 "labels": "test_labels",
                 "tags": "test_tags",
                 "node_taints": "",
+                "nodepool_taints": "",
             },
             self.resource_type,
             self.agentpool_decorator_mode,

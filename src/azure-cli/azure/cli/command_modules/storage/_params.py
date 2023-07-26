@@ -228,7 +228,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         help='The tier value to set the blob to. For page blob, the tier correlates to the size of the blob '
              'and number of allowed IOPS. Possible values are P10, P15, P20, P30, P4, P40, P50, P6, P60, P70, P80 '
              'and this is only applicable to page blobs on premium storage accounts; For block blob, possible '
-             'values are Archive, Cool and Hot. This is only applicable to block blobs on standard storage accounts.'
+             'values are Archive, Cold, Cool, and Hot. This is only applicable to block blobs on standard '
+             'storage accounts.'
     )
     rehydrate_priority_type = CLIArgumentType(
         arg_type=get_enum_type(t_rehydrate_priority), options_list=('--rehydrate-priority', '-r'),
@@ -639,7 +640,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('tenant_id', help='The tenant id to add in network rule.', arg_group='Resource Access Rule',
                    min_api='2020-08-01-preview')
 
-    with self.argument_context('storage account blob-service-properties show',
+    with self.argument_context('storage account blob-service-properties',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('account_name', acct_name_type, id_part=None)
         c.argument('resource_group_name', required=False, validator=process_resource_group)
@@ -688,6 +689,20 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('enable_last_access_tracking', arg_type=get_three_state_flag(), min_api='2019-06-01',
                    options_list=['--enable-last-access-tracking', '-t'],
                    help='When set to true last access time based tracking policy is enabled.')
+
+    with self.argument_context('storage account blob-service-properties cors-rule',
+                               resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('max_age_in_seconds', options_list=['--max-age', '--max-age-in-seconds'], type=int,
+                   help='The number of seconds that the client/browser should cache a preflight response')
+        c.argument('allowed_origins', nargs='+', options_list=['--origins', '--allowed-origins'],
+                   help='Space-separated list of origin domains that will be allowed via CORS,'
+                        ' or "*" to allow all domains')
+        c.argument('allowed_methods', nargs='+', options_list=['--methods', '--allowed-methods'],
+                   help='Space-separated list of HTTP verbs (methods) allowed to be executed by the origin')
+        c.argument('allowed_headers', nargs='+',
+                   help='Space-separated list of headers allowed to be part of the cross-origin request')
+        c.argument('exposed_headers', nargs='+',
+                   help='Space-separated list of response headers to expose to CORS clients')
 
     with self.argument_context('storage account file-service-properties show',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -1688,6 +1703,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.ignore('enable_nfs_v3_root_squash')
             c.ignore('enable_nfs_v3_all_squash')
 
+    with self.argument_context('storage container-rm update', resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('default_encryption_scope', options_list=['--default-encryption-scope', '-d'],
+                   arg_group='Encryption Policy', min_api='2019-06-01',
+                   help='Default the container to use specified encryption scope for all writes.',
+                   deprecate_info=c.deprecate(hide=True, target='--default-encryption-scope', expiration="2.54"))
+        c.argument('deny_encryption_scope_override',
+                   options_list=['--deny-encryption-scope-override', '--deny-override'],
+                   arg_type=get_three_state_flag(), arg_group='Encryption Policy', min_api='2019-06-01',
+                   help='Block override of encryption scope from the container default.',
+                   deprecate_info=c.deprecate(hide=True, target='--deny-encryption-scope-override', expiration="2.54"))
+
     with self.argument_context('storage container-rm list', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('account_name', storage_account_type, id_part=None)
         c.argument('include_deleted', action='store_true',
@@ -2082,12 +2108,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Path of the local file to upload as the file content.')
         c.extra('no_progress', progress_type, validator=add_progress_callback)
         c.argument('max_connections', type=int, help='Maximum number of parallel connections to use.')
-        c.extra('share_name', share_name_type, required=True)
+        c.extra('share_name', share_name_type)
         c.argument('validate_content', action='store_true', min_api='2016-05-31',
                    help='If true, calculates an MD5 hash for each range of the file. The storage service checks the '
                         'hash of the content that has arrived with the hash that was sent. This is primarily valuable '
                         'for detecting bitflips on the wire if using http instead of https as https (the default) will '
                         'already validate. Note that this MD5 hash is not stored with the file.')
+        c.extra('file_url', help='The full endpoint URL to the File, including SAS token if used.')
 
     with self.argument_context('storage file url') as c:
         c.register_path_argument(fileshare=True)

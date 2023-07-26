@@ -157,6 +157,7 @@ def validate_assessment(namespace):
             assessment_day_of_week is not None or assessment_start_time_local is not None):
         is_assessment_schedule_provided = True
 
+    # Should we add new validations for workspace rg, name, agent rg here?
     # Validate conflicting settings
     if (enable_assessment_schedule is False and is_assessment_schedule_provided):
         raise InvalidArgumentValueError("Assessment schedule settings cannot be provided while enable-assessment-schedule is False")
@@ -415,6 +416,9 @@ def _send(cli_ctx, method, url, param=None, body=None):
             raise InvalidArgumentValueError(MICROSOFT_GRAPH_API_ERROR.format(ex)) from ex
 
         if r.text:
+            if 'InternalServerError' in r.text:
+                return None
+
             dic = r.json()
 
             # The result is a list. Add value to list_result.
@@ -441,9 +445,31 @@ def _send(cli_ctx, method, url, param=None, body=None):
 # https://graph.microsoft.com/v1.0/servicePrincipals/{principalId}/transitiveMemberOf/microsoft.graph.directoryRole
 # retrieve all directory role assigned to a service principal
 def _directory_role_list(cli_ctx, principal_id):
+    logger.debug("Retrieving transitive directory roles of a MSI from Graph API with server side filtering.")
     DIRECTORY_ROLE_URL = "/servicePrincipals/{}/transitiveMemberOf/microsoft.graph.directoryRole"
     try:
-        return _send(cli_ctx, "GET", DIRECTORY_ROLE_URL.format(principal_id))
+        role_list = _send(cli_ctx, "GET", DIRECTORY_ROLE_URL.format(principal_id))
+        if role_list is None:
+            logger.warning("Graph API server side filtering failed, Retry retrieving transitive directory roles of a MSI from Graph API with client side filtering. It is NOT a failure.")
+            role_list = _directory_role_list2(cli_ctx, principal_id)
+        return role_list
+    except Exception as ex:
+        raise InvalidArgumentValueError(MICROSOFT_GRAPH_API_ERROR.format(ex)) from ex
+
+
+# https://graph.microsoft.com/v1.0/servicePrincipals/{principalId}/transitiveMemberOf
+# Currently there is a bug in Graph API that causes internal server error in the Graph API service side filtering
+# when the MSI is a member of an AAD group. The ICM incident is as below:
+# https://portal.microsofticm.com/imp/v3/incidents/details/392112435/home
+#
+# This method is doing the same thing as _directory_role_list but via client side filtering.
+def _directory_role_list2(cli_ctx, principal_id):
+    DIRECTORY_ROLE_CLIENT_FILTERING_URL = "/servicePrincipals/{}/transitiveMemberOf"
+    try:
+        role_list = _send(cli_ctx, "GET", DIRECTORY_ROLE_CLIENT_FILTERING_URL.format(principal_id))
+
+        # Filter out the directory role
+        return [role for role in role_list if role["@odata.type"] == "#microsoft.graph.directoryRole"]
     except Exception as ex:
         raise InvalidArgumentValueError(MICROSOFT_GRAPH_API_ERROR.format(ex)) from ex
 
@@ -496,7 +522,7 @@ def _find_role_id(cli_ctx):
     # This in fact shoud not happen.
     if len(app_role_id_map) < 3:
         requird_role_defs = [USER_READ_ALL, APPLICATION_READ_ALL, GROUP_MEMBER_READ_ALL]
-        missing_role_defs = [role for role in requird_role_defs if role not in app_role_id_map.keys()]
+        missing_role_defs = [role for role in requird_role_defs if role not in app_role_id_map]
         error_message = "Querying Microsoft Graph API failed to find the following roles: %s.", ", ".join(missing_role_defs)
         logger.warning(error_message)
 
