@@ -5170,7 +5170,11 @@ class VMSSRunCommandScenarioTest(ScenarioTest):
             'run_cmd': self.create_random_name('cmd_', 10),
             'user': self.create_random_name('user-', 10)
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username {user} --generate-ssh-keys')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --security-type Standard --admin-username {user} --generate-ssh-keys')
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('name', '{vmss}'),
+            self.check('securityProfile', None),
+        ])
         instace_ids = self.cmd('vmss list-instances --resource-group {rg} --name {vmss} --query "[].instanceId"').get_output_in_json()
         self.kwargs.update({
             'instance_id': instace_ids[0]
@@ -5934,7 +5938,10 @@ class VMGalleryImage(ScenarioTest):
             'captured': self.create_random_name('captured', 15),
         })
         self.cmd('sig create -g {rg} --gallery-name {gallery}')
-        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --features SecurityType=Standard --os-type linux -p publisher1 -f offer1 -s sku1', checks=[
+            self.check('name', '{image}'),
+            self.check('features', None),
+        ])
         self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username clitest1 --generate-ssh-key --nsg-rule NONE')
         self.cmd('vm deallocate -g {rg} -n {vm}')
         self.cmd('vm generalize -g {rg} -n {vm}')
@@ -7306,9 +7313,10 @@ class VMCreateSpecialName(ScenarioTest):
             'vm': 'vm_1'
         })
 
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username azureuser --admin-password testPassword0 --authentication-type password --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username azureuser --admin-password testPassword0 --authentication-type password --security-type Standard --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('name', '{vm}'),
+            self.check('securityProfile', None),
             self.check('osProfile.computerName', 'vm1')
         ])
 
@@ -9914,7 +9922,10 @@ class DiskRPTestScenario(ScenarioTest):
             'snapshot1': self.create_random_name('snap', 10),
         })
 
-        self.cmd('disk create -n {disk} -g {rg} --size-gb 10')
+        self.cmd('disk create -n {disk} -g {rg} --security-type Standard --size-gb 10', checks=[
+            self.check('name', '{disk}'),
+            self.check('securityProfile', None),
+        ])
         self.cmd('snapshot create -n {snapshot} -g {rg} --incremental true --source {disk}', checks=[
             self.check('creationData.createOption', 'Copy')
         ])
