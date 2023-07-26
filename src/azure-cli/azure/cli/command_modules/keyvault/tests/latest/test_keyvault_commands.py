@@ -1188,7 +1188,7 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         key_perms = keyvault['properties']['accessPolicies'][0]['permissions']['keys']
         key_perms.extend(['rotate'])
         self.kwargs['key_perms'] = ' '.join(key_perms)
-        self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} --key-permissions {key_perms}')
+        self.cmd('keyvault set-policy -n {kv} -g {rg} --object-id {obj_id} --key-permissions {key_perms}')
 
         # create a key
         key = self.cmd('keyvault key create --vault-name {kv} -n {key} -p software',
@@ -2214,7 +2214,7 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
         ])
 
         # backup and then delete certificate
-        self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} '
+        self.cmd('keyvault set-policy -n {kv} -g {rg} --object-id {obj_id} '
                  '--certificate-permissions backup delete get restore list purge')
 
         bak_file = 'backup.cert'
