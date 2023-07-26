@@ -696,7 +696,7 @@ def validate_utc_offset(namespace):
     """Validates --utc-offset for aks maintenanceconfiguration add/update commands."""
     if namespace.utc_offset is None:
         return
-    # The regex here is used to match strings to the "+HH:MM" or "-HH:MM" time format. 
+    # The regex here is used to match strings to the "+HH:MM" or "-HH:MM" time format.
     # The complete regex breakdown is as follows:
     # ^ matches the start of the string and $ matches to the end of the string, respectively.
     # [+-] match to either + or -
@@ -711,7 +711,7 @@ def validate_start_date(namespace):
     """Validates --start-date for aks maintenanceconfiguration add/update commands."""
     if namespace.start_date is None:
         return
-    # The regex here is used to match strings to the "yyyy-MM-dd" date format. 
+    # The regex here is used to match strings to the "yyyy-MM-dd" date format.
     # The complete regex breakdown is as follows:
     # ^ matches the start of the string and $ matches to the end of the string, respectively.
     # ^\d{4}-\d{2}-\d{2} will match four digits, followed by a -, two digits, followed by a -. (example: 2023-01-01 which is January 1st 2023)
@@ -725,7 +725,7 @@ def validate_start_time(namespace):
     """Validates --start-time for aks maintenanceconfiguration add/update commands."""
     if namespace.start_time is None:
         return
-    # The regex here is used to match strings to the "HH:MM" or "HH:MM" time format. 
+    # The regex here is used to match strings to the "HH:MM" or "HH:MM" time format.
     # The complete regex breakdown is as follows:
     # ^ matches the start of the string and $ matches to the end of the string, respectively.
     # \d{2}:\d{2} will match to two digits followed by a colon and two digits. (example: 09:30 which is 9 hours and 30 minutes or 17:00 which is 17 hours and 00 minutes)
