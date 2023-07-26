@@ -6277,44 +6277,93 @@ class VMGalleryImage(ScenarioTest):
             self.check('sharingProfile.permissions', 'Private')
         ])
 
-
-    @ResourceGroupPreparer(location='westus')
-    def test_gallery_soft_delete(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_gallery_soft_delete_', location='westus')
+    def test_gallery_soft_delete(self, resource_group_location):
         self.kwargs.update({
-            'gallery_name': self.create_random_name('sig_', 10)
+            'vm': 'vm1',
+            'gallery': self.create_random_name('sig_', 10),
+            'image_name': self.create_random_name('img_', 10),
+            'version': '1.1.1',
         })
 
-        self.cmd('sig create -g {rg} -r {gallery_name} --soft-delete True', checks=[
+        self.cmd('sig create -g {rg} -r {gallery} --soft-delete True', checks=[
             self.check('location', 'westus'),
-            self.check('name', '{gallery_name}'),
+            self.check('name', '{gallery}'),
             self.check('resourceGroup', '{rg}'),
             self.check('softDeletePolicy.isSoftDeleteEnabled', True)
         ])
 
-        self.cmd('sig show -g {rg} -r {gallery_name} --sharing-groups', checks=[
+        self.cmd('sig show -g {rg} -r {gallery} --sharing-groups', checks=[
             self.check('location', 'westus'),
-            self.check('name', '{gallery_name}'),
+            self.check('name', '{gallery}'),
             self.check('resourceGroup', '{rg}'),
             self.check('softDeletePolicy.isSoftDeleteEnabled', True),
             self.check('sharingProfile.groups', None)
         ])
 
-        self.cmd('sig update -g {rg} -r {gallery_name} --soft-delete False', checks=[
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image_name} '
+                 '--os-type linux --os-state Specialized -p publisher1 -f offer1 -s sku1')
+
+        vm_id = self.cmd(
+            'vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --data-disk-sizes-gb 10 '
+            '--admin-username clitest1 --generate-ssh-key --nsg-rule NONE').get_output_in_json()['id']
+        self.kwargs.update({"vm_id": vm_id})
+
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image_name} '
+                 '--gallery-image-version {version} --virtual-machine {vm_id}',
+                 checks=[
+                     self.check('location', resource_group_location),
+                     self.check('name', '{version}'),
+                     self.check('provisioningState', 'Succeeded'),
+                     self.check('storageProfile.source.id', '{vm_id}'),
+                 ])
+        if self.is_live:
+            time.sleep(30)
+
+        self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image_name} '
+                 '--gallery-image-version {version}')
+        if self.is_live:
+            time.sleep(30)
+
+        self.cmd('sig image-version undelete -g {rg} --gallery-name {gallery} --gallery-image-definition {image_name} '
+                 '--gallery-image-version {version}',
+                 checks=[
+                     self.check('location', resource_group_location),
+                     self.check('name', '{version}'),
+                     self.check('provisioningState', 'Succeeded'),
+                     self.check('storageProfile.source.id', '{vm_id}'),
+                 ])
+        if self.is_live:
+            time.sleep(30)
+
+        self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image_name} '
+                 '--gallery-image-version {version}')
+
+        self.cmd('sig update -g {rg} -r {gallery} --soft-delete False', checks=[
             self.check('location', 'westus'),
-            self.check('name', '{gallery_name}'),
+            self.check('name', '{gallery}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('softDeletePolicy.isSoftDeleteEnabled', False)
+        ])
+        if self.is_live:
+            time.sleep(30)
+
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('sig image-version undelete -g {rg} --gallery-name {gallery} --gallery-image-definition {image_name} --gallery-image-version {version}')
+
+        self.cmd('sig show -g {rg} -r {gallery}', checks=[
+            self.check('location', 'westus'),
+            self.check('name', '{gallery}'),
             self.check('resourceGroup', '{rg}'),
             self.check('softDeletePolicy.isSoftDeleteEnabled', False)
         ])
 
-        self.cmd('sig show -g {rg} -r {gallery_name}', checks=[
-            self.check('location', 'westus'),
-            self.check('name', '{gallery_name}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('softDeletePolicy.isSoftDeleteEnabled', False)
-        ])
+        self.cmd('sig image-definition delete -g {rg} -r {gallery} --gallery-image-definition {image_name}')
+        if self.is_live:
+            time.sleep(30)
 
-        self.cmd('sig delete -g {rg} -r {gallery_name}')
-
+        self.cmd('sig delete -g {rg} -r {gallery}')
 
     @ResourceGroupPreparer(location='westus')
     def test_replication_mode(self, resource_group):
