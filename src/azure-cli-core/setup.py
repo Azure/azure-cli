@@ -80,6 +80,6 @@ setup(
     classifiers=CLASSIFIERS,
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
-    python_requires='>=3.7.0',
+    python_requires='>=3.8.0',
     package_data={'azure.cli.core': ['auth/landing_pages/*.html']}
 )
