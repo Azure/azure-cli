@@ -3881,7 +3881,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
                        environment=None, min_replicas=None, max_replicas=None, workspace=None,
                        always_ready_instances=None, maximum_instances=None, instance_size=None,
-                       flexconsumption_location="northcentralus(stage)"):
+                       flexconsumption_location=None):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         if flexconsumption_location is not None:
