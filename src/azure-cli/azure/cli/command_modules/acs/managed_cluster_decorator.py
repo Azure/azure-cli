@@ -41,7 +41,7 @@ from azure.cli.command_modules.acs._helpers import (
 )
 from azure.cli.command_modules.acs._loadbalancer import create_load_balancer_profile
 from azure.cli.command_modules.acs._loadbalancer import update_load_balancer_profile as _update_load_balancer_profile
-from azure.cli.command_modules.acs._natgateway import create_nat_gateway_profile, is_nat_gateway_profile_provided
+from azure.cli.command_modules.acs._natgateway import create_nat_gateway_profile
 from azure.cli.command_modules.acs._natgateway import update_nat_gateway_profile as _update_nat_gateway_profile
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._roleassignments import (
@@ -2037,13 +2037,14 @@ class AKSManagedClusterContext(BaseAKSContext):
         outbound_type = self.raw_param.get("outbound_type")
         # try to read the property value corresponding to the parameter from the `mc` object
         read_from_mc = False
-        if (
-            self.mc and
-            self.mc.network_profile and
-            self.mc.network_profile.outbound_type is not None
-        ):
-            outbound_type = self.mc.network_profile.outbound_type
-            read_from_mc = True
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.network_profile and
+                self.mc.network_profile.outbound_type is not None
+            ):
+                outbound_type = self.mc.network_profile.outbound_type
+                read_from_mc = True
 
         # skip dynamic completion & validation if option read_only is specified
         if read_only:
@@ -6422,6 +6423,33 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             )
         return mc
 
+    def update_outbound_type_in_network_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update outbound type of network profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        outboundType = self.context.get_outbound_type()
+        if outboundType:
+            vnet_subnet_id = self.context.get_vnet_subnet_id()
+            if vnet_subnet_id is None and outboundType not in [
+                CONST_OUTBOUND_TYPE_LOAD_BALANCER,
+                CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
+                CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
+            ]:
+                raise InvalidArgumentValueError("Invalid outbound type, supported values are loadBalancer,"
+                                                " managedNATGateway, userAssignedNATGateway and userDefinedRouting.")
+            if vnet_subnet_id is not None and outboundType not in [
+                CONST_OUTBOUND_TYPE_LOAD_BALANCER,
+                CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
+                CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
+            ]:
+                raise InvalidArgumentValueError("Invalid outbound type, supported values are loadBalancer,"
+                                                " managedNATGateway, userAssignedNATGateway and userDefinedRouting.")
+            mc.network_profile.outbound_type = outboundType
+        return mc
+
     def update_load_balancer_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Update load balancer profile for the ManagedCluster object.
 
@@ -6434,25 +6462,28 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 "Encounter an unexpected error while getting network profile from the cluster in the process of "
                 "updating its load balancer profile."
             )
-
-        load_balancer_managed_outbound_ip_count = self.context.get_load_balancer_managed_outbound_ip_count()
-        load_balancer_managed_outbound_ipv6_count = self.context.get_load_balancer_managed_outbound_ipv6_count()
-        load_balancer_outbound_ips = self.context.get_load_balancer_outbound_ips()
-        load_balancer_outbound_ip_prefixes = self.context.get_load_balancer_outbound_ip_prefixes()
-        load_balancer_outbound_ports = self.context.get_load_balancer_outbound_ports()
-        load_balancer_idle_timeout = self.context.get_load_balancer_idle_timeout()
-        # In the internal function "_update_load_balancer_profile", it will check whether the provided parameters
-        # have been assigned, and if there are any, the corresponding profile will be modified; otherwise, it will
-        # remain unchanged.
-        mc.network_profile.load_balancer_profile = _update_load_balancer_profile(
-            managed_outbound_ip_count=load_balancer_managed_outbound_ip_count,
-            managed_outbound_ipv6_count=load_balancer_managed_outbound_ipv6_count,
-            outbound_ips=load_balancer_outbound_ips,
-            outbound_ip_prefixes=load_balancer_outbound_ip_prefixes,
-            outbound_ports=load_balancer_outbound_ports,
-            idle_timeout=load_balancer_idle_timeout,
-            profile=mc.network_profile.load_balancer_profile,
-            models=self.models.load_balancer_models)
+        outbound_type = self.context.get_outbound_type()
+        if outbound_type and outbound_type != CONST_OUTBOUND_TYPE_LOAD_BALANCER:
+            mc.network_profile.load_balancer_profile = None
+        else:
+            load_balancer_managed_outbound_ip_count = self.context.get_load_balancer_managed_outbound_ip_count()
+            load_balancer_managed_outbound_ipv6_count = self.context.get_load_balancer_managed_outbound_ipv6_count()
+            load_balancer_outbound_ips = self.context.get_load_balancer_outbound_ips()
+            load_balancer_outbound_ip_prefixes = self.context.get_load_balancer_outbound_ip_prefixes()
+            load_balancer_outbound_ports = self.context.get_load_balancer_outbound_ports()
+            load_balancer_idle_timeout = self.context.get_load_balancer_idle_timeout()
+            # In the internal function "_update_load_balancer_profile", it will check whether the provided parameters
+            # have been assigned, and if there are any, the corresponding profile will be modified; otherwise, it will
+            # remain unchanged.
+            mc.network_profile.load_balancer_profile = _update_load_balancer_profile(
+                managed_outbound_ip_count=load_balancer_managed_outbound_ip_count,
+                managed_outbound_ipv6_count=load_balancer_managed_outbound_ipv6_count,
+                outbound_ips=load_balancer_outbound_ips,
+                outbound_ip_prefixes=load_balancer_outbound_ip_prefixes,
+                outbound_ports=load_balancer_outbound_ports,
+                idle_timeout=load_balancer_idle_timeout,
+                profile=mc.network_profile.load_balancer_profile,
+                models=self.models.load_balancer_models)
         return mc
 
     def update_nat_gateway_profile(self, mc: ManagedCluster) -> ManagedCluster:
@@ -6462,17 +6493,17 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
-        nat_gateway_managed_outbound_ip_count = self.context.get_nat_gateway_managed_outbound_ip_count()
-        nat_gateway_idle_timeout = self.context.get_nat_gateway_idle_timeout()
-        if is_nat_gateway_profile_provided(nat_gateway_managed_outbound_ip_count, nat_gateway_idle_timeout):
-            if not mc.network_profile:
-                raise UnknownError(
-                    "Unexpectedly get an empty network profile in the process of updating nat gateway profile."
-                )
-
+        if not mc.network_profile:
+            raise UnknownError(
+                "Unexpectedly get an empty network profile in the process of updating nat gateway profile."
+            )
+        outbound_type = self.context.get_outbound_type()
+        if outbound_type and outbound_type != CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY:
+            mc.network_profile.nat_gateway_profile = None
+        else:
             mc.network_profile.nat_gateway_profile = _update_nat_gateway_profile(
-                nat_gateway_managed_outbound_ip_count,
-                nat_gateway_idle_timeout,
+                self.context.get_nat_gateway_managed_outbound_ip_count(),
+                self.context.get_nat_gateway_idle_timeout(),
                 mc.network_profile.nat_gateway_profile,
                 models=self.models.nat_gateway_models,
             )
@@ -7103,6 +7134,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         self.process_attach_detach_acr(mc)
         # update sku (uptime sla)
         mc = self.update_sku(mc)
+        # update outbound type
+        mc = self.update_outbound_type_in_network_profile(mc)
         # update load balancer profile
         mc = self.update_load_balancer_profile(mc)
         # update nat gateway profile

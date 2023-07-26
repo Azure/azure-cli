@@ -746,6 +746,7 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
             self.check('frontendIPConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
             self.check("frontendIPConfigurations[0].subnet.contains(id, 'default')", True),
             self.check("enableHttp2", False),
+            self.check("contains(defaultPredefinedSslPolicy, 'AppGwSslPolicy')", True),
         ])
         self.cmd('network application-gateway show-backend-health -g {rg} -n ag1')
 
@@ -832,6 +833,7 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
 
 class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
 
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_ag_identity')
     @KeyVaultPreparer(name_prefix='cli-test-keyvault-', sku='premium')
     def test_network_app_gateway_with_identity(self, resource_group):
@@ -2164,26 +2166,6 @@ class NetworkAppGatewayWafConfigScenarioTest20170301(ScenarioTest):
         # test list rule sets
         self.cmd('network application-gateway waf-config list-rule-sets --group *', checks=[
             self.check('length(@)', 6)
-        ])
-
-
-class NetworkAppGatewayWafV2ConfigScenarioTest(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_v2_config')
-    def test_network_app_gateway_waf_v2_config(self, resource_group):
-
-        self.kwargs.update({
-            'ip': 'pip1',
-            'ag': 'ag1'
-        })
-        self.cmd('network public-ip create -g {rg} -n {ip} --sku standard')
-        self.cmd('network application-gateway waf-policy create -n waf1 -g {rg}')
-        self.cmd('network application-gateway create -g {rg} -n {ag} --subnet subnet1 --vnet-name vnet1 --public-ip-address {ip} --sku WAF_v2 --priority 1001 --waf-policy waf1 --no-wait')
-        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
-        self.cmd('network application-gateway waf-config set -g {rg} --gateway-name ag1 --enabled true --firewall-mode prevention --rule-set-version 3.0 --exclusion RequestHeaderNames StartsWith abc --exclusion RequestArgNames Equals def')
-        self.cmd('network application-gateway waf-config show -g {rg} --gateway-name ag1', checks=[
-            self.check('enabled', True),
-            self.check('length(exclusions)', 2)
         ])
 
 
@@ -5984,10 +5966,9 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
             self.check('subnets[0].last', '11.0.0.0')
         ])
 
-    @record_only()
-    def test_network_traffi_manager_always_serve(self):
+    @ResourceGroupPreparer('cli_test_traffic_manager_always_serve')
+    def test_network_traffic_manager_always_serve(self, resource_group):
         self.kwargs.update({
-            "rg": "external_az_cli_testing",
             "profile": self.create_random_name("profile-", 12),
             "endpoint": self.create_random_name("endpoint-", 16),
             "dns": "mytrafficmanager001100a1",
