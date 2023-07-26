@@ -1448,8 +1448,6 @@ def _validate_resource_inputs(resource_group_name, resource_provider_namespace,
         raise CLIError('--namespace is required')
 
 
-# region Custom Commands
-
 def list_resource_groups(cmd, tag=None):  # pylint: disable=no-self-use
     """ List resource groups, optionally filtered by a tag.
     :param str tag:tag to filter by in 'key[=value]' format
