@@ -218,7 +218,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'RegionInput', self.region_input)
         set_custom_properties(result, 'RegionIdentified', self.region_identified)
         set_custom_properties(result, 'AllowBroker', str(self.allow_broker))
-        set_custom_properties(result, 'MsalTelemetry', str(self.msal_telemetry))
+        set_custom_properties(result, 'MsalTelemetry', self.msal_telemetry)
 
         return result
 
