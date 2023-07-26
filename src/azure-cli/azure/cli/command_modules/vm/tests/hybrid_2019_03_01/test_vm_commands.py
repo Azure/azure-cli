@@ -2242,6 +2242,7 @@ class VMZoneScenarioTest(ScenarioTest):
         result = self.cmd('disk list -g {rg} -otable')
         table_output = set(result.output.splitlines()[2].split())
         self.assertTrue(set([resource_group, resource_group_location, self.kwargs['disk'], self.kwargs['zones']]).issubset(table_output))
+        self.cmd('disk delete -g {rg} -n {disk} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_zones', location='eastus2')
     @AllowLargeResponse(size_kb=99999)
