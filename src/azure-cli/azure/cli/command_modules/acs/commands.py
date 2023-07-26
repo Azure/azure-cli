@@ -96,7 +96,7 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'aks_maintenanceconfiguration_show')
         g.custom_command('add', 'aks_maintenanceconfiguration_add')
         g.custom_command('update', 'aks_maintenanceconfiguration_update')
-        g.custom_command('delete', 'aks_maintenanceconfiguration_delete', confirmation=True)
+        g.custom_command('delete', 'aks_maintenanceconfiguration_delete')
 
     # AKS agent pool commands
     with self.command_group('aks nodepool',
