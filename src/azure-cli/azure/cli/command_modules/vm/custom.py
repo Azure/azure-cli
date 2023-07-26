@@ -730,13 +730,6 @@ def grant_snapshot_access(cmd, resource_group_name, snapshot_name, duration_in_s
                          access_level=access_level)
 
 
-def list_snapshots(cmd, resource_group_name=None):
-    client = _compute_client_factory(cmd.cli_ctx)
-    if resource_group_name:
-        return client.snapshots.list_by_resource_group(resource_group_name)
-    return client.snapshots.list()
-
-
 def update_snapshot(cmd, resource_group_name, instance, sku=None, disk_encryption_set=None,
                     encryption_type=None, network_access_policy=None, disk_access=None, public_network_access=None,
                     accelerated_network=None, architecture=None):

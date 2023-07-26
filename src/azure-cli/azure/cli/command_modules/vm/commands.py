@@ -318,13 +318,8 @@ def load_command_table(self, _):
 
     with self.command_group('snapshot', compute_snapshot_sdk, operation_group='snapshots', min_api='2016-04-30-preview') as g:
         g.custom_command('create', 'create_snapshot', validator=process_snapshot_create_namespace, supports_no_wait=True)
-        g.command('delete', 'begin_delete')
         g.custom_command('grant-access', 'grant_snapshot_access')
-        g.custom_command('list', 'list_snapshots')
-        g.command('revoke-access', 'begin_revoke_access')
-        g.show_command('show', 'get')
         g.generic_update_command('update', custom_func_name='update_snapshot', setter_name='begin_create_or_update', setter_arg_name='snapshot', supports_no_wait=True)
-        g.wait_command('wait')
 
     with self.command_group('vm', compute_vm_sdk) as g:
         g.custom_command('identity assign', 'assign_vm_identity', validator=process_assign_identity_namespace)
