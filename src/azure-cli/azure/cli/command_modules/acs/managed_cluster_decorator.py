@@ -2065,7 +2065,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         outbound_type = self.raw_param.get("outbound_type")
         # try to read the property value corresponding to the parameter from the `mc` object
         read_from_mc = False
-        if self.decorator_mode == DecoratorMode.CREATE:
+        if outbound_type is None and self.decorator_mode != DecoratorMode.CREATE:
             if (
                 self.mc and
                 self.mc.network_profile and
