@@ -2108,12 +2108,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Path of the local file to upload as the file content.')
         c.extra('no_progress', progress_type, validator=add_progress_callback)
         c.argument('max_connections', type=int, help='Maximum number of parallel connections to use.')
-        c.extra('share_name', share_name_type, required=True)
+        c.extra('share_name', share_name_type)
         c.argument('validate_content', action='store_true', min_api='2016-05-31',
                    help='If true, calculates an MD5 hash for each range of the file. The storage service checks the '
                         'hash of the content that has arrived with the hash that was sent. This is primarily valuable '
                         'for detecting bitflips on the wire if using http instead of https as https (the default) will '
                         'already validate. Note that this MD5 hash is not stored with the file.')
+        c.extra('file_url', help='The full endpoint URL to the File, including SAS token if used.')
 
     with self.argument_context('storage file url') as c:
         c.register_path_argument(fileshare=True)
