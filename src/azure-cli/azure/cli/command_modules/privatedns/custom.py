@@ -3,16 +3,17 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
+# pylint: disable=line-too-long, disable=protected-access
 from collections import Counter, OrderedDict
 from knack.log import get_logger
-from msrestazure.tools import parse_resource_id
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.core.exceptions import HttpResponseError
+
+from .aaz.latest.network.private_dns.link.vnet import Create as _PrivateDNSLinkVNetCreate
 
 logger = get_logger(__name__)
 
@@ -279,35 +280,26 @@ def update_privatedns_zone(instance, tags=None):
     return instance
 
 
-def create_privatedns_link(cmd, resource_group_name, private_zone_name, virtual_network_link_name, virtual_network, registration_enabled, tags=None):
-    from azure.mgmt.privatedns import PrivateDnsManagementClient
-    from azure.mgmt.privatedns.models import VirtualNetworkLink
-    link = VirtualNetworkLink(location='global', tags=tags)
+class PrivateDNSLinkVNetCreate(_PrivateDNSLinkVNetCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.virtual_network._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/virtualNetworks/{}"
+        )
+        args_schema.registration_enabled._required = True
+        args_schema.virtual_network._required = True
+        args_schema.if_none_match._registered = False
+        args_schema.location._registered = False
 
-    if registration_enabled is not None:
-        link.registration_enabled = registration_enabled
-        aux_subscription = parse_resource_id(virtual_network.id)['subscription']
+        return args_schema
 
-    if virtual_network is not None:
-        link.virtual_network = virtual_network
-
-    client = get_mgmt_service_client(cmd.cli_ctx, PrivateDnsManagementClient, aux_subscriptions=[aux_subscription]).virtual_network_links
-    return client.begin_create_or_update(resource_group_name, private_zone_name, virtual_network_link_name, link, if_none_match='*')
-
-
-def update_privatedns_link(cmd, resource_group_name, private_zone_name, virtual_network_link_name, registration_enabled=None, tags=None, if_match=None, **kwargs):
-    from azure.mgmt.privatedns import PrivateDnsManagementClient
-    link = kwargs['parameters']
-
-    if registration_enabled is not None:
-        link.registration_enabled = registration_enabled
-
-    if tags is not None:
-        link.tags = tags
-
-    aux_subscription = parse_resource_id(link.virtual_network.id)['subscription']
-    client = get_mgmt_service_client(cmd.cli_ctx, PrivateDnsManagementClient, aux_subscriptions=[aux_subscription]).virtual_network_links
-    return client.begin_update(resource_group_name, private_zone_name, virtual_network_link_name, link, if_match=if_match)
+    def pre_operations(self):
+        args = self.ctx.args
+        args.location = "global"
+        args.if_none_match = "*"
 
 
 def create_privatedns_record_set(cmd, resource_group_name, private_zone_name, relative_record_set_name, record_type, metadata=None, ttl=3600):

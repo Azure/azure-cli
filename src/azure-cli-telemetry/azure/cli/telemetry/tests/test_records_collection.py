@@ -46,8 +46,8 @@ class TestRecordsCollection(unittest.TestCase):
         collection = RecordsCollection(last_send, self.work_dir)
         collection.snapshot_and_read()
 
-        # the threshold for pushing 'cache' file is 1 hour, so 'cache' file should not be moved
-        self.assert_cache_files_count(1)
+        # cache strategy has been dropped, so no `cache` file
+        self.assert_cache_files_count(0)
         # no new records since last_send
         self.assertEqual(0, len([r for r in collection]))
 

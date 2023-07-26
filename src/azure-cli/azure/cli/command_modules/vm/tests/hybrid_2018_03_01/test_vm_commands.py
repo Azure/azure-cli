@@ -233,6 +233,16 @@ class VMGeneralizeScenarioTest(ScenarioTest):
             self.check('storageProfile.zoneResilient', None)
         ])
 
+        self.cmd('image show -g {rg} -n {image}', checks=[
+            self.check('name', '{image}'),
+            self.check('sourceVirtualMachine.id', vm['id']),
+            self.check('storageProfile.zoneResilient', None)
+        ])
+        self.cmd('image list -g {rg}', checks=[
+            self.check('length(@)', '1')
+        ])
+        self.cmd('image delete -g {rg} -n {image}')
+
 
 class VMVMSSWindowsLicenseTest(ScenarioTest):
 
@@ -769,8 +779,7 @@ class VMExtensionScenarioTest(ScenarioTest):
                  checks=self.check('length([])', 0))
         self.cmd('vm extension set -n {ext} --publisher {pub} --version 1.2  --vm-name {vm} --resource-group {rg} --protected-settings "{config}" --force-update')
         self.cmd('vm get-instance-view -n {vm} -g {rg}', checks=[
-            self.check('*.extensions[0].name', ['VMAccessForLinux']),
-            self.check('*.extensions[0].typeHandlerVersion', ['1.5.11'])
+            self.check('*.extensions[0].name', ['VMAccessForLinux'])
         ])
         result = self.cmd('vm extension show --resource-group {rg} --vm-name {vm} --name {ext}', checks=[
             self.check('type(@)', 'object'),

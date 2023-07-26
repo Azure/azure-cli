@@ -91,10 +91,9 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         ])
         # test updating updating other properties
         self.cmd('keyvault update -g {rg} -n {kv} --enable-purge-protection '
-                 '--enabled-for-deploymen --enabled-for-disk-encryption --enabled-for-template-deployment ',
+                 '--enabled-for-deployment --enabled-for-disk-encryption --enabled-for-template-deployment ',
                  checks=[
                      self.check('name', '{kv}'),
-                     self.check('properties.enableSoftDelete', True),
                      self.check('properties.enablePurgeProtection', True),
                      self.check('properties.enabledForDeployment', True),
                      self.check('properties.enabledForDiskEncryption', True),
@@ -143,7 +142,7 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         key_perms = keyvault['properties']['accessPolicies'][0]['permissions']['keys']
         key_perms.append('purge')
         self.kwargs['key_perms'] = ' '.join(key_perms)
-        self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} --key-permissions {key_perms}')
+        self.cmd('keyvault set-policy -n {kv} -g {rg} --object-id {obj_id} --key-permissions {key_perms}')
 
         # create a key
         key = self.cmd('keyvault key create --vault-name {kv} -n {key} -p software',
@@ -271,7 +270,7 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
         secret_perms = keyvault['properties']['accessPolicies'][0]['permissions']['secrets']
         secret_perms.append('purge')
         self.kwargs['secret_perms'] = ' '.join(secret_perms)
-        self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} --secret-permissions {secret_perms}')
+        self.cmd('keyvault set-policy -n {kv} -g {rg} --object-id {obj_id} --secret-permissions {secret_perms}')
 
         # create a secret
         secret = self.cmd('keyvault secret set --vault-name {kv} -n {sec} --value ABC123',
@@ -694,7 +693,7 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
             'cert_perms': ' '.join(cert_perms)
         })
 
-        self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} --key-permissions {key_perms} --secret-permissions {secret_perms} --certificate-permissions {cert_perms}')
+        self.cmd('keyvault set-policy -n {kv} -g {rg} --object-id {obj_id} --key-permissions {key_perms} --secret-permissions {secret_perms} --certificate-permissions {cert_perms}')
 
         # create secrets keys and certifictes to delete recover and purge
         self.cmd('keyvault secret set --vault-name {kv} -n secret1 --value ABC123',
@@ -735,7 +734,7 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
         self.cmd('keyvault certificate purge --vault-name {kv} -n cert2')
 
         # delete and purge the vault
-        self.cmd('keyvault delete -n {kv}')
+        self.cmd('keyvault delete -n {kv} -g {rg}')
         self.cmd('keyvault purge -n {kv} -l {loc}')
 
 

@@ -122,7 +122,7 @@ class BaseAKSParamDict:
         return self.__store.items()
 
     def __format_count(self):
-        untouched_keys = [x for x in self.__store.keys() if x not in self.__count.keys()]
+        untouched_keys = [x for x in self.__store if x not in self.__count]
         for k in untouched_keys:
             self.__count[k] = 0
 

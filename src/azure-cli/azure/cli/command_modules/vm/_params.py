@@ -18,6 +18,7 @@ from azure.cli.core.commands.parameters import (
 from azure.cli.command_modules.vm._actions import _resource_not_exists
 from azure.cli.command_modules.vm._completers import (
     get_urn_aliases_completion_list, get_vm_size_completion_list, get_vm_run_command_completion_list)
+from azure.cli.command_modules.vm._constants import COMPATIBLE_SECURITY_TYPE_VALUE
 from azure.cli.command_modules.vm._validators import (
     validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vmss_disk,
     validate_asg_names_or_ids, validate_keyvault, _validate_proximity_placement_group,
@@ -129,7 +130,9 @@ def load_arguments(self, _):
 
     enable_vtpm_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2020-12-01', help='Enable vTPM.')
     enable_secure_boot_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2020-12-01', help='Enable secure boot.')
-    security_type = CLIArgumentType(arg_type=get_enum_type(self.get_models('SecurityTypes')), min_api='2020-12-01', help='Specify the security type of the virtual machine.')
+    # The `Standard` is used for backward compatibility to allow customers to keep their current behavior after changing the default values to Trusted Launch VMs in the future.
+    t_security = [x.value for x in self.get_models('SecurityTypes') or []] + [COMPATIBLE_SECURITY_TYPE_VALUE]
+    security_type = CLIArgumentType(arg_type=get_enum_type(t_security), min_api='2020-12-01', help='Specify the security type of the virtual machine.')
     gallery_image_name_type = CLIArgumentType(options_list=['--gallery-image-definition', '-i'], help='The name of the community gallery image definition from which the image versions are to be listed.', id_part='child_name_2')
     gallery_image_name_version_type = CLIArgumentType(options_list=['--gallery-image-version', '-e'], help='The name of the gallery image version to be created. Needs to follow semantic version name pattern: The allowed characters are digit and period. Digits must be within the range of a 32-bit integer. Format: <MajorVersion>.<MinorVersion>.<Patch>', id_part='child_name_3')
     public_gallery_name_type = CLIArgumentType(help='The public name of community gallery.', id_part='child_name_1')
@@ -177,6 +180,9 @@ def load_arguments(self, _):
 
     # region Disks
     with self.argument_context('disk', resource_type=ResourceType.MGMT_COMPUTE, operation_group='disks') as c:
+        # The `Standard` is used for backward compatibility to allow customers to keep their current behavior after changing the default values to Trusted Launch VMs in the future.
+        t_disk_security = [x.value for x in self.get_models('DiskSecurityTypes', operation_group='disks') or []] + [COMPATIBLE_SECURITY_TYPE_VALUE]
+
         c.argument('zone', zone_type, min_api='2017-03-30', options_list=['--zone'])  # TODO: --size-gb currently has claimed -z. We can do a breaking change later if we want to.
         c.argument('disk_name', existing_disk_name, completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
         c.argument('name', arg_type=name_arg_type)
@@ -197,7 +203,7 @@ def load_arguments(self, _):
         c.argument('logical_sector_size', type=int, help='Logical sector size in bytes for Ultra disks. Supported values are 512 ad 4096. 4096 is the default.')
         c.argument('tier', help='Performance tier of the disk (e.g, P4, S10) as described here: https://azure.microsoft.com/pricing/details/managed-disks/. Does not apply to Ultra disks.')
         c.argument('edge_zone', edge_zone_type)
-        c.argument('security_type', arg_type=get_enum_type(self.get_models('DiskSecurityTypes', operation_group='disks')), help='The security type of the VM. Applicable for OS disks only.', min_api='2020-12-01')
+        c.argument('security_type', arg_type=get_enum_type(t_disk_security), help='The security type of the VM. Applicable for OS disks only.', min_api='2020-12-01')
         c.argument('support_hibernation', arg_type=get_three_state_flag(), help='Indicate the OS on a disk supports hibernation.', min_api='2020-12-01')
         c.argument('architecture', arg_type=get_enum_type(self.get_models('Architecture', operation_group='disks')), min_api='2021-12-01', help='CPU architecture.')
         c.argument('data_access_auth_mode', arg_type=get_enum_type(['AzureActiveDirectory', 'None']), min_api='2021-12-01', help='Specify the auth mode when exporting or uploading to a disk or snapshot.')
@@ -1006,6 +1012,7 @@ def load_arguments(self, _):
             c.argument('disable_integrity_monitoring', action='store_true', min_api='2020-12-01', help='Disable the default behavior of installing guest attestation extension and enabling System Assigned Identity for Trusted Launch enabled VMs and VMSS.')
             c.argument('os_disk_security_encryption_type', arg_type=get_enum_type(self.get_models('SecurityEncryptionTypes')), min_api='2021-11-01', help='Specify the encryption type of the OS managed disk.')
             c.argument('os_disk_secure_vm_disk_encryption_set', min_api='2021-11-01', help='Specify the customer managed disk encryption set resource ID or name for the managed disk that is used for customer managed key encrypted Confidential VM OS disk and VM guest blob.')
+            c.argument('disable_integrity_monitoring_autoupgrade', action='store_true', min_api='2020-12-01', help='Disable auto upgrade of guest attestation extension for Trusted Launch enabled VMs and VMSS.')
 
         with self.argument_context(scope, arg_group='Authentication') as c:
             c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')
@@ -1179,10 +1186,9 @@ def load_arguments(self, _):
         c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], help='gallery image definition')
         c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'], help='gallery image version')
 
-    for scope in ['sig show', 'sig image-definition show', 'sig image-definition delete']:
-        with self.argument_context(scope) as c:
-            c.argument('gallery_name', options_list=['--gallery-name', '-r'], id_part='name', help='gallery name')
-            c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], id_part='child_name_1', help='gallery image definition')
+    with self.argument_context('sig show') as c:
+        c.argument('gallery_name', options_list=['--gallery-name', '-r'], id_part='name', help='gallery name')
+        c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], id_part='child_name_1', help='gallery image definition')
 
     with self.argument_context('sig show') as c:
         c.argument('select', help='The select expression to apply on the operation.')
@@ -1241,18 +1247,12 @@ def load_arguments(self, _):
         c.argument('marker', arg_type=marker_type)
         c.argument('show_next_marker', action='store_true', help='Show nextMarker in result when specified.')
 
-    with self.argument_context('sig image-definition show-shared') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
-        c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
-                   id_part='child_name_1')
-        c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], type=str, help='The name '
-                   'of the Shared Gallery Image Definition from which the Image Versions are to be listed.',
-                   id_part='child_name_2')
-
     with self.argument_context('sig create') as c:
         c.argument('description', help='the description of the gallery')
+
     with self.argument_context('sig update') as c:
         c.ignore('gallery')
+
     for scope in ['sig create', 'sig update']:
         with self.argument_context(scope) as c:
             c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes),
@@ -1278,9 +1278,12 @@ def load_arguments(self, _):
         c.argument('gallery_image_version_name', options_list=['--gallery-image-version', '-e', deprecated_option],
                    help='Gallery image version in semantic version pattern. The allowed characters are digit and period. Digits must be within the range of a 32-bit integer, e.g. `<MajorVersion>.<MinorVersion>.<Patch>`')
 
+    for scope in ['sig image-version create', 'sig image-version undelete']:
+        with self.argument_context(scope, resource_type=ResourceType.MGMT_COMPUTE, operation_group='gallery_image_versions') as c:
+            c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'],
+                       help='Gallery image version in semantic version pattern. The allowed characters are digit and period. Digits must be within the range of a 32-bit integer, e.g. `<MajorVersion>.<MinorVersion>.<Patch>`')
+
     with self.argument_context('sig image-version create', resource_type=ResourceType.MGMT_COMPUTE, operation_group='gallery_image_versions') as c:
-        c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'],
-                   help='Gallery image version in semantic version pattern. The allowed characters are digit and period. Digits must be within the range of a 32-bit integer, e.g. `<MajorVersion>.<MinorVersion>.<Patch>`')
         c.argument('description', help='the description of the gallery image version')
         c.argument('managed_image', help='image name(if in the same resource group) or resource id')
         c.argument('os_snapshot', help='Name or ID of OS disk snapshot')
@@ -1343,6 +1346,9 @@ def load_arguments(self, _):
                        help='Space-separated list of regions, edge zones, replica counts and storage types. Use <region>=<edge zone>[=<replica count>][=<storage account type>] to optionally set the replica count and/or storage account type for each region. '
                             'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used. '
                             'If "--target-edge-zones None" is specified, the target extended locations will be cleared.')
+
+    for scope in ['sig image-version create', 'sig image-version update', 'sig image-version undelete']:
+        with self.argument_context(scope, operation_group='gallery_image_versions') as c:
             c.argument('allow_replicated_location_deletion', arg_type=get_three_state_flag(), min_api='2022-03-03', help='Indicate whether or not removing this gallery image version from replicated regions is allowed.')
 
     with self.argument_context('sig list-community') as c:
@@ -1612,5 +1618,4 @@ def load_arguments(self, _):
         c.argument('expand', help='The expand expression to apply on the operation.',
                    deprecate_info=c.deprecate(hide=True))
         c.argument('restore_points', action='store_true', help='Show all contained restore points in the restore point collection.')
-
     # endRegion
