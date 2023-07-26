@@ -463,7 +463,8 @@ def set_broker_info(allow_broker):
 
 @decorators.suppress_all_exceptions()
 def set_msal_telemetry(msal_telemetry):
-    _session.msal_telemetry = msal_telemetry
+    if not _session.msal_telemetry:
+        _session.msal_telemetry = msal_telemetry
 
 
 @decorators.suppress_all_exceptions()
