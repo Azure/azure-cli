@@ -88,7 +88,6 @@ def import_zone(cmd, resource_group_name, private_zone_name, file_name):
     cum_records = 0
 
     from azure.mgmt.privatedns import PrivateDnsManagementClient
-    from azure.mgmt.privatedns.models import PrivateZone
     client = get_mgmt_service_client(cmd.cli_ctx, PrivateDnsManagementClient)
 
     print('== BEGINNING ZONE IMPORT: {} ==\n'.format(private_zone_name), file=sys.stderr)
