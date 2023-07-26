@@ -4615,6 +4615,7 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
 
     feature_list = None
     if features:
+        from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE, UPGRADE_SECURITY_HINT
         feature_list = []
         for item in features.split():
             try:
@@ -4622,8 +4623,7 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
                 # create Non-Trusted Launch VM Image
                 # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
                 # after changing the default values to Trusted Launch VMs in the future.
-                if key == 'SecurityType' and value == 'Standard':
-                    from ._constants import UPGRADE_SECURITY_HINT
+                if key == 'SecurityType' and value == COMPATIBLE_SECURITY_TYPE_VALUE:
                     logger.warning(UPGRADE_SECURITY_HINT)
                     continue
                 feature_list.append(GalleryImageFeature(name=key, value=value))
