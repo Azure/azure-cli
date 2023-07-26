@@ -445,7 +445,7 @@ def get_pipeline_result(test_result_fp, pipeline_result):
                 line = testcase.attrib['file'] + ':' + testcase.attrib['line']
                 # only get first failure
                 for failure in failures:
-                    message = failure.attrib['message'].replace('\n', '<br>')
+                    message = failure.attrib['message'].replace('\n', '<br>').replace(' ', '&nbsp;')
                     break
                 for i in pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details'][0]['Details']:
                     if i['Module'] == module:
