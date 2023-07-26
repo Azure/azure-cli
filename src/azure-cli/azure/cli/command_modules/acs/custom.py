@@ -438,7 +438,7 @@ def aks_maintenanceconfiguration_update(
             break
     if not found:
         raise ResourceNotFoundError("Maintenance configuration '{}' doesn't exist."
-            "use 'aks maintenanceconfiguration list' to get current list of maitenance configurations".format(config_name))
+                                    "use 'aks maintenanceconfiguration list' to get current list of maitenance configurations".format(config_name))
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
     return aks_maintenanceconfiguration_update_internal(cmd, client, raw_parameters)
