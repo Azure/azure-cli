@@ -39,6 +39,7 @@ class CliTelemetryClient:
             if not client:
                 continue
 
+            self._logger.info('Add %d record(s) to client %s for uploading: %s', len(records), instrumentation_key, records)
             for record in records:
                 name = record.get('name')
                 if not name:
