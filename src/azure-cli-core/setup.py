@@ -50,7 +50,7 @@ DEPENDENCIES = [
     'distro; sys_platform == "linux"',
     'humanfriendly~=10.0',
     'jmespath',
-    'knack~=0.10.1',
+    'knack~=0.11.0',
     'msal-extensions~=1.0.0',
     'msal[broker]==1.22.0',
     'msrestazure~=0.6.4',
