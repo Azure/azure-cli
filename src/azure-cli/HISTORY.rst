@@ -45,6 +45,12 @@ Release History
 * Remove `az batch job all-statistics` and `az batch pool all-statistics` which no longer worked in the past (#26766)
 * `az batch pool create`: Add new parameter `--enable-accelerated-networking` to determine whether this pool should enable accelerated networking (#26766)
 
+**Cognitive Services**
+
+* `az cognitiveservices account deployment create`: Add `--sku-name` and `--sku-capacity` parameters (#26995)
+* `az cognitiveservices usage`: Add new command `list` (#26995)
+* `az cognitiveservices model`: Add new command `list` (#26995)
+
 **Compute**
 
 * `az vm/vmss create`: Enable auto upgrade of guest attestation extension by default for Trusted Launch enabled VMs and VMSS (#26878)
