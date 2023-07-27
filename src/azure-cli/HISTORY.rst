@@ -16,7 +16,7 @@ Release History
 * `az aks enable-addons`: Fix the default value of option `--enable-msi-auth-for-monitoring` being overwritten to `False` when specified (#26844)
 * `az aks update`: Add new parameter `--outbound-type` to support cluster outbound type. (#26975)
 * `az aks maintenanceconfiguration list`: Add new command to list all maintenance windows in a cluster (#26758)
-* `az aks maintenanceconfiguration show`: Add new command to display a specific maintenance windows of a cluster (#26758)
+* `az aks maintenanceconfiguration show`: Add new command to display a specific maintenance window of a cluster (#26758)
 * `az aks maintenanceconfiguration add`: Add new command to add a new maintenance window configuration for a cluster (#26758)
 * `az aks maintenanceconfiguration update`: Add new command to update an existing maintenance window configuration of a cluster (#26758)
 * `az aks maintenanceconfiguration delete`: Add new command to delete an existing maintenance window configuration of a cluster (#26758)
