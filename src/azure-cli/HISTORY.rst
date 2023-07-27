@@ -31,7 +31,7 @@ Release History
 
 **App Service**
 
-* Fix #26214: Missing leading slash causes web app and plan commands to fail for s-clouds (#26921)
+* Fix #26214: `az webapp config container set`: Fix the bug caused by missing leading slash causes web app and plan commands to fail for s-clouds (#26921)
 * Fix #26601: `az functionapp create`: Throw error for consumption function app created with vnet (#26792)
 * Fix #21133: `az webapp/functionapp config ssl bind/unbind`: Search for matching certificates in the subscription by App Service Plan Id (#26617)
 
