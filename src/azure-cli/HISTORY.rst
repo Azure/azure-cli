@@ -38,7 +38,7 @@ Release History
 **ARM**
 
 * `az stack`: Fix the bug that the required `--deny-settings-mode` parameter should not return None (should be a string) (#26900)
-* `az stack`: Fix the bug that the `--deny-settings-excluded-principals` parameter was accidentally being reset (#26900)
+* `az stack`: Fix the bug that the `--deny-settings-excluded-principals` parameter was accidentally reset (#26900)
 
 **Batch**
 
