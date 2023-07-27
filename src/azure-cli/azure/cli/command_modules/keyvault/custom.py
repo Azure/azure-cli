@@ -1551,35 +1551,7 @@ def create_certificate(client, certificate_name, policy,
     client.begin_create_certificate(
         certificate_name=certificate_name, policy=policy, enabled=not disabled, tags=tags).result()
 
-    if policy.issuer_name.lower() == 'unknown':
-        # return immediately for a pending certificate
-        return client.get_certificate_operation(certificate_name)
-
-    # otherwise loop until the certificate creation is complete
-    while True:
-        check = client.get_certificate_operation(certificate_name)
-        if check.status != 'inProgress':
-            logger.info(
-                "Long-running operation 'keyvault certificate create' finished with result %s.",
-                check)
-            return check
-        try:
-            time.sleep(10)
-        except KeyboardInterrupt:
-            logger.info("Long-running operation wait cancelled.")
-            raise
-        except Exception as client_exception:
-            telemetry.set_exception(exception=client_exception, fault_type='cert-create-error',
-                                    summary='Unexpected client exception during cert creation')
-            message = getattr(client_exception, 'message', client_exception)
-
-            try:
-                ex_message = json.loads(client_exception.response.text)  # pylint: disable=no-member
-                message = str(message) + ' ' + ex_message['error']['details'][0]['message']
-            except:  # pylint: disable=bare-except
-                pass
-
-            raise CLIError('{}'.format(message))
+    return client.get_certificate_operation(certificate_name)
 
 
 def _asn1_to_iso8601(asn1_date):
