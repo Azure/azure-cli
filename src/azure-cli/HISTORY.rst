@@ -67,7 +67,7 @@ Release History
 
 **Key Vault**
 
-* `az keyvault restore start`: Add `--key-name` to support selective key restore (#26907)
+* `az keyvault restore start`: Add `--key-name` to support selective key restoring (#26907)
 * `az keyvault key sign/verify`: Add new commands to support signing with keyvault key and verify the signature (#26922)
 
 **MySQL**
