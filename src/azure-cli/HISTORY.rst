@@ -42,7 +42,7 @@ Release History
 
 **Batch**
 
-* Remove `az batch job all-statistics` and `az batch pool all-statistics` which no longer worked in the past (#26766)
+* `az batch job/pool all-statistics`: Remove no longer worked commands (#26766)
 * `az batch pool create`: Add new parameter `--enable-accelerated-networking` to determine whether this pool should enable accelerated networking (#26766)
 
 **Cognitive Services**
