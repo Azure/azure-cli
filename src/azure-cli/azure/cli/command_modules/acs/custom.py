@@ -551,6 +551,7 @@ def aks_create(
     enable_image_cleaner=False,
     image_cleaner_interval_hours=None,
     enable_keda=False,
+    enable_vpa=False,
     # addons
     enable_addons=None,
     workspace_resource_id=None,
@@ -712,6 +713,8 @@ def aks_update(
     http_proxy_config=None,
     enable_keda=False,
     disable_keda=False,
+    enable_vpa=False,
+    disable_vpa=False,
     # addons
     enable_secret_rotation=False,
     disable_secret_rotation=False,
