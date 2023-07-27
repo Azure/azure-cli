@@ -1549,7 +1549,7 @@ def create_certificate(client, certificate_name, policy,
     logger.info("Starting long-running operation 'keyvault certificate create'")
 
     client.begin_create_certificate(
-        certificate_name=certificate_name, policy=policy, enabled=not disabled, tags=tags)
+        certificate_name=certificate_name, policy=policy, enabled=not disabled, tags=tags).result()
 
     if policy.issuer_name.lower() == 'unknown':
         # return immediately for a pending certificate
