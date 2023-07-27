@@ -22,7 +22,6 @@ from azure.cli.command_modules.keyvault.security_domain.security_domain import D
 from azure.cli.command_modules.keyvault.security_domain.shared_secret import SharedSecret
 from azure.cli.command_modules.keyvault.security_domain.sp800_108 import KDF
 from azure.cli.command_modules.keyvault.security_domain.utils import Utils
-from azure.cli.core import telemetry
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError,\
     MutuallyExclusiveArgumentError
 from azure.cli.core.profiles import ResourceType, AZURE_API_PROFILES, SDKProfile
@@ -1548,7 +1547,10 @@ def create_certificate(client, certificate_name, policy,
                        disabled=False, tags=None):
     logger.info("Starting long-running operation 'keyvault certificate create'")
 
-    poller = client.begin_create_certificate(certificate_name=certificate_name, policy=policy, enabled=not disabled, tags=tags)
+    poller = client.begin_create_certificate(certificate_name=certificate_name,
+                                             policy=policy,
+                                             enabled=not disabled,
+                                             tags=tags)
     if policy.issuer_name.lower() == 'unknown':
         # return immediately for a pending certificate
         return client.get_certificate_operation(certificate_name)
