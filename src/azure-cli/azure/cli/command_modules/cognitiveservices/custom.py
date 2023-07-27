@@ -259,7 +259,7 @@ def deployment_begin_create_or_update(
     dpy.properties.model.name = model_name
     dpy.properties.model.version = model_version
     if sku_name is not None:
-        dpy.sku = Sku(name=sku_name) 
+        dpy.sku = Sku(name=sku_name)
         dpy.sku.capacity = sku_capacity
     if scale_settings_scale_type is not None:
         dpy.properties.scale_settings = DeploymentScaleSettings()
