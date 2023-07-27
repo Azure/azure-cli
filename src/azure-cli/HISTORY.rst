@@ -10,7 +10,7 @@ Release History
 
 * `az aks nodepool snapshot update`: Add aks nodepool snapshot update command (#26790)
 * `az aks create`: Add new parameter `--k8s-support-plan` to support LTS onboarding, also add new tier enum `premium` (#26795)
-* `az aks update`: Support to enable/disable LTS via new parameter `--k8s-support-plan` (#26795)
+* `az aks update`: Support enabling/disabling LTS via new parameter `--k8s-support-plan` (#26795)
 * `az aks create`: Add node taint support when create cluster use `az aks` command (#26837)
 * `az aks update`: Add update node taint support on cluster level use `az aks` command (#26837)
 * `az aks enable-addons`: Fix the default value of option `--enable-msi-auth-for-monitoring` being overwritten to `False` when specified (#26844)
