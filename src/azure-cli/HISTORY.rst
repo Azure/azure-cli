@@ -104,7 +104,7 @@ Release History
 
 **Storage**
 
-* `az storage container-rm update`: `--default-encryption-scope` and `--deny-encryption-scope-override` should not be specified during update (#26948)
+* `az storage container-rm update`: `--default-encryption-scope` and `--deny-encryption-scope-override` should not be specified during updating (#26948)
 * Fix #22704: `az storage account create`: `--encryption-key-type-for-queue` and `--encryption-key-type-for-table` no longer remove other settings (#26853)
 * Fix #26587: `az storage file upload`: Add `--file-url` to support supplying the url instead of share/file name (#26997)
 
