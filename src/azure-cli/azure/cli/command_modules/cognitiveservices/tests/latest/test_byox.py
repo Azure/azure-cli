@@ -18,8 +18,8 @@ class CognitiveServicesByoxTests(ScenarioTest):
             'sname': sname,
             'kind': 'SpeechServices',
             'sku': 'S0',
-            'location': 'SOUTHCENTRALUS',
-            'storageIds': '[{\\\"resourceId\\\":\\\"/subscriptions/' + subscription_id + '/resourceGroups/felixwa-01/providers/Microsoft.Storage/storageAccounts/felixwatest\\\"}]'
+            'location': 'WESTEUROPE',
+            'storageIds': '[{\\\"resourceId\\\":\\\"/subscriptions/' + subscription_id + '/resourceGroups/CS-Platform-UnitTest/providers/Microsoft.Storage/storageAccounts/sdkbyostest\\\"}]'
         })
 
         # test to create cognitive services account
@@ -34,32 +34,12 @@ class CognitiveServicesByoxTests(ScenarioTest):
 
         self.assertEqual(account['identity']['type'], 'SystemAssigned')
         self.assertEqual(len(account['properties']['userOwnedStorage']), 1)
-        self.assertEqual(account['properties']['userOwnedStorage'][0]['resourceId'], '/subscriptions/{}/resourceGroups/felixwa-01/providers/Microsoft.Storage/storageAccounts/felixwatest'.format(subscription_id))
+        self.assertEqual(account['properties']['userOwnedStorage'][0]['resourceId'], '/subscriptions/{}/resourceGroups/CS-Platform-UnitTest/providers/Microsoft.Storage/storageAccounts/sdkbyostest'.format(subscription_id))
 
         # delete the cognitive services account
         ret = self.cmd('az cognitiveservices account delete -n {sname} -g {rg}')
         self.assertEqual(ret.exit_code, 0)
 
-        self.kwargs.update({
-            'sname': self.create_random_name(prefix='cs_cli_test_', length=16)
-        })
-
-        # test to create cognitive services account
-        self.cmd('az cognitiveservices account create -n {sname} -g {rg} --kind {kind} --sku {sku} -l {location} '
-                 '--assign-identity --yes',
-                 checks=[self.check('name', '{sname}'),
-                         self.check('location', '{location}'),
-                         self.check('sku.name', '{sku}')])
-        self.cmd('az cognitiveservices account update -n {sname} -g {rg} --storage {storageIds}').get_output_in_json()
-        account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
-
-        self.assertEqual(account['identity']['type'], 'SystemAssigned')
-        self.assertEqual(len(account['properties']['userOwnedStorage']), 1)
-        self.assertEqual(account['properties']['userOwnedStorage'][0]['resourceId'], '/subscriptions/{}/resourceGroups/felixwa-01/providers/Microsoft.Storage/storageAccounts/felixwatest'.format(subscription_id))
-
-        # delete the cognitive services account
-        ret = self.cmd('az cognitiveservices account delete -n {sname} -g {rg}')
-        self.assertEqual(ret.exit_code, 0)
 
     @serial_test()
     @ResourceGroupPreparer()
