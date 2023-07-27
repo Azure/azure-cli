@@ -51,44 +51,126 @@ class AlertAddEncryption(argparse._AppendAction):
         return keyVaultObject
 
 
+class AlertAddVirtualNetwork(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        action = self.get_action(values, option_string)
+        super(AlertAddVirtualNetwork, self).__call__(parser, namespace, action, option_string)
+
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+        from azure.cli.core import CLIError
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        VirtualNetworkList = {}
+        for (k, v) in (x.split('=', 1) for x in values):
+            if k == 'id':
+                VirtualNetworkList["id"] = v
+            elif k == 'ignore-missing-endpoint':
+                if v == "true" or v == "True" or v == "TRUE":
+                    VirtualNetworkList["ignore_missing_endpoint"] = True
+                else:
+                    VirtualNetworkList["ignore_missing_endpoint"] = False
+            else:
+                raise InvalidArgumentValueError("Invalid Argument for:'{}' Only allowed arguments are 'id, ignore-missing-endpoint'".format(option_string))
+
+        if VirtualNetworkList["id"] is None:
+            raise CLIError('id is mandatory properties')
+
+        return VirtualNetworkList
+
+
+class AlertAddIpRule(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        action = self.get_action(values, option_string)
+        super(AlertAddIpRule, self).__call__(parser, namespace, action, option_string)
+
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+        from azure.cli.core import CLIError
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        IpRuleList = {}
+        for (k, v) in (x.split('=', 1) for x in values):
+            if k == 'ip-address':
+                IpRuleList["ip-address"] = v
+            elif k == 'action':
+                IpRuleList["action"] = v
+            else:
+                raise InvalidArgumentValueError(
+                    "Invalid Argument for:'{}' Only allowed arguments are 'ip-address, action'".format(option_string))
+
+        if IpRuleList["ip-address"] is None:
+            raise CLIError('ip-address is mandatory properties')
+
+        if "action" not in IpRuleList:
+            IpRuleList["action"] = 'Allow'
+        return IpRuleList
+
+
 class ConstructPolicy(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
         super(ConstructPolicy, self).__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
-        from azure.mgmt.eventhub.v2022_01_01_preview.models import ThrottlingPolicy
-        from azure.cli.core import CLIError
+        from azure.cli.core.azclierror import RequiredArgumentMissingError
         from azure.cli.core.azclierror import InvalidArgumentValueError
-        from azure.cli.command_modules.eventhubs.constants import INCOMING_BYTES, INCOMING_MESSAGES, OUTGOING_MESSAGES, OUTGOING_BYTES
+        from azure.cli.core import CLIError
+        from azure.cli.command_modules.eventhubs.constants import INCOMING_MESSAGES
+        from azure.cli.command_modules.eventhubs.constants import INCOMING_BYTES
+        from azure.cli.command_modules.eventhubs.constants import OUTGOING_BYTES
+        from azure.cli.command_modules.eventhubs.constants import OUTGOING_MESSAGES
+
+        throttling_policy = {
+            "name": None,
+            "type": "ThrottlingPolicy",
+            "throttling_policy": {
+                "rate_limit_threshold": None,
+                "metric_id": None
+            }
+        }
 
         for (k, v) in (x.split('=', 1) for x in values):
             if k == 'name':
-                name = v
+                throttling_policy["name"] = v
 
             elif k == 'rate-limit-threshold':
                 if v.isdigit() is False:
                     raise CLIError('rate-limit-threshold should be an integer')
-                rate_limit_threshold = int(v)
+                throttling_policy["throttling_policy"]["rate_limit_threshold"] = int(v)
 
             elif k == 'metric-id':
                 if v.lower() == INCOMING_MESSAGES.lower():
-                    metric_id = INCOMING_MESSAGES
+                    throttling_policy["throttling_policy"]["metric_id"] = INCOMING_MESSAGES
                 elif v.lower() == INCOMING_BYTES.lower():
-                    metric_id = INCOMING_BYTES
+                    throttling_policy["throttling_policy"]["metric_id"] = INCOMING_BYTES
                 elif v.lower() == OUTGOING_MESSAGES.lower():
-                    metric_id = OUTGOING_MESSAGES
+                    throttling_policy["throttling_policy"]["metric_id"] = OUTGOING_MESSAGES
                 elif v.lower() == OUTGOING_BYTES.lower():
-                    metric_id = OUTGOING_BYTES
+                    throttling_policy["throttling_policy"]["metric_id"] = OUTGOING_BYTES
                 else:
                     raise CLIError('Only allowed values for metric_id are: {0}, {1}, {2}, {3}'.format(INCOMING_MESSAGES, INCOMING_BYTES, OUTGOING_MESSAGES, OUTGOING_BYTES))
 
             else:
                 raise InvalidArgumentValueError("Invalid Argument for:'{}' Only allowed arguments are 'name, rate-limit-threshold and metric-id'".format(option_string))
+        if (throttling_policy["name"] is None) or (throttling_policy["throttling_policy"].get("rate_limit_threshold", None) is None) or (throttling_policy["throttling_policy"].get("metric_id", None) is None):
+            raise RequiredArgumentMissingError('Throttling policies is missing one of these parameters:name, metric-id, rate-limit-threshold')
 
-        if (name is None) or (metric_id is None) or (rate_limit_threshold is None):
-            raise CLIError('One of the throttling policies is missing one of these parameters: name, metric-id, rate-limit-threshold')
+        return throttling_policy
 
-        throttlingPolicy = ThrottlingPolicy(name=name, rate_limit_threshold=rate_limit_threshold, metric_id=metric_id)
 
-        return throttlingPolicy
+class ConstructPolicyName(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        action = self.get_action(values, option_string)
+        super(ConstructPolicyName, self).__call__(parser, namespace, action, option_string)
+
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+        from azure.cli.core.azclierror import RequiredArgumentMissingError
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        policy = {}
+        for (k, v) in (x.split('=', 1) for x in values):
+            if k == 'name':
+                policy["name"] = v
+            else:
+                raise InvalidArgumentValueError(
+                    "Invalid Argument for:'{}' Only allowed arguments are 'name' ".format(option_string))
+        if policy["name"] is None:
+            raise RequiredArgumentMissingError('Throttling policies is missing the parameters: name')
+
+        return policy

@@ -5,7 +5,6 @@
 
 from azure.cli.command_modules.acs._client_factory import (
     cf_agent_pools,
-    cf_container_services,
     cf_managed_clusters,
     cf_snapshots,
 )
@@ -26,14 +25,6 @@ from azure.cli.core.profiles import ResourceType
 
 # pylint: disable=too-many-statements
 def load_command_table(self, _):
-
-    container_services_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.containerservice.operations.'
-                        '_container_services_operations#ContainerServicesOperations.{}',
-        operation_group='container_services',
-        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-        client_factory=cf_container_services
-    )
 
     managed_clusters_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.operations.'
@@ -86,8 +77,6 @@ def load_command_table(self, _):
         g.custom_command('use-dev-spaces', 'aks_use_dev_spaces', deprecate_info=g.deprecate())
         g.custom_command('remove-dev-spaces', 'aks_remove_dev_spaces', deprecate_info=g.deprecate())
         g.custom_command('operation-abort', 'aks_operation_abort', supports_no_wait=True)
-
-    with self.command_group('aks', container_services_sdk, client_factory=cf_container_services) as g:
         g.custom_command('get-versions', 'aks_get_versions',
                          table_transformer=aks_versions_table_format)
 
@@ -142,6 +131,7 @@ def load_command_table(self, _):
                               table_transformer=aks_show_nodepool_snapshot_table_format)
         g.custom_command('create', 'aks_nodepool_snapshot_create', supports_no_wait=True)
         g.custom_command('delete', 'aks_nodepool_snapshot_delete', supports_no_wait=True)
+        g.custom_command('update', 'aks_nodepool_snapshot_update')
         g.wait_command('wait')
 
     with self.command_group('aks oidc-issuer', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:

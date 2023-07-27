@@ -91,15 +91,7 @@ class NSGRuleCreate(_NsgRule.Create):
 class NSGRuleUpdate(_NsgRule.Update):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZListArgFormat, AAZResourceIdArgFormat
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
+        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.destination_asgs = AAZListArg(
             options=["--destination-asgs"],
@@ -107,7 +99,6 @@ class NSGRuleUpdate(_NsgRule.Update):
             help="Space-separated list of application security group names or IDs. Limited by backend server, "
                  "temporarily this argument only supports one application security group name or ID.",
             nullable=True,
-            fmt=EmptyListArgFormat(),
         )
         args_schema.destination_asgs.Element = AAZResourceIdArg(
             nullable=True,
@@ -122,7 +113,6 @@ class NSGRuleUpdate(_NsgRule.Update):
             help="Space-separated list of application security group names or IDs. Limited by backend server, "
                  "temporarily this argument only supports one application security group name or ID.",
             nullable=True,
-            fmt=EmptyListArgFormat(),
         )
         args_schema.source_asgs.Element = AAZResourceIdArg(
             nullable=True,

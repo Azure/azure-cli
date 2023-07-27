@@ -30,7 +30,7 @@ long-summary: >4
     The operating system disk is created from an image, and both the operating system disk and the image are actually virtual hard disks (VHDs)
     stored in an Azure storage account. Virtual machines also can have one or more data disks, that are also stored as VHDs.
 
-    Azure Unmanaged Data Disks have a maximum size of 4095 GB. To use didks larger than 4095 GB use [Azure Managed Disks](https://docs.microsoft.com/azure/virtual-machines/managed-disks-overview)
+    Azure Unmanaged Data Disks have a maximum size of 4095 GB. To use disks larger than 4095 GB use [Azure Managed Disks](https://docs.microsoft.com/azure/virtual-machines/managed-disks-overview)
 
 """
 
@@ -55,7 +55,7 @@ examples:
         az disk create -g MyResourceGroup -n MyDisk --size-gb 10 --location eastus2 --zone 1
   - name: Create a disk from image.
     text: >
-        az disk create -g MyResourceGroup -n MyDisk --image-reference Canonical:UbuntuServer:18.04-LTS:18.04.202002180
+        az disk create -g MyResourceGroup -n MyDisk --image-reference Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest
   - name: Create a disk from the OS Disk of a compute gallery image version
     text: >
         az disk create -g MyResourceGroup -n MyDisk --gallery-image-reference /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Compute/galleries/myGallery/images/myImage/versions/1.0.0
@@ -160,11 +160,6 @@ examples:
     crafted: true
 """
 
-helps['disk-access'] = """
-type: group
-short-summary: Manage disk access resources.
-"""
-
 helps['disk-access create'] = """
 type: command
 short-summary: Create a disk access resource.
@@ -181,33 +176,6 @@ examples:
   - name: Update a disk access resource.
     text: >
         az disk-access update -g MyResourceGroup -n MyDiskAccess --tags tag1=val1 tag2=val2
-"""
-
-helps['disk-access list'] = """
-type: command
-short-summary: List disk access resources.
-examples:
-  - name: List all disk access reosurces in a resource group.
-    text: |
-        az disk-access list -g MyResourceGroup
-"""
-
-helps['disk-access show'] = """
-type: command
-short-summary: Get information of a disk access resource.
-examples:
-  - name: Get information of a disk access reosurce.
-    text: |
-        az disk-access show -g MyResourceGroup -n MyDiskAccess
-"""
-
-helps['disk-access delete'] = """
-type: command
-short-summary: Delete a disk access resource.
-examples:
-  - name: Delete a disk access reosurce.
-    text: |
-        az disk-access delete -g MyResourceGroup -n MyDiskAccess
 """
 
 helps['disk-access wait'] = """
@@ -363,10 +331,10 @@ parameters:
       - az vm image list
       - az vm image show
 examples:
-  - name: Create an image builder template from an UbuntuLTS 18.04 image. Distribute it as a managed image and a shared image gallery image version. Specify the staging resource group id as the image template that will be used to build the image.
+  - name: Create an image builder template from an Ubuntu2204 image. Distribute it as a managed image and a shared image gallery image version. Specify the staging resource group id as the image template that will be used to build the image.
     text: |
         scripts="https://my-script-url.net/customize_script.sh"
-        imagesource="Canonical:UbuntuServer:18.04-LTS:18.04.201903060"
+        imagesource="Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest"
 
         az image builder create --image-source $imagesource -n myTemplate -g myGroup \\
             --scripts $scripts --managed-image-destinations image_1=westus \\
@@ -506,6 +474,51 @@ examples:
         az image builder validator show -n myTemplate -g myGroup --defer
 """
 
+helps['image builder optimizer'] = """
+type: group
+short-summary: Manage image builder template optimizer.
+"""
+
+helps['image builder optimizer add'] = """
+type: command
+short-summary: Add optimizer to an existing image builder template.
+long-summary: Must be used with --defer
+examples:
+  - name: Add optimizer for improving VM boot time by optimizing the final customized image output.
+    text: |
+        az image builder optimizer add -n myTemplate -g myGroup --enable-vm-boot true --defer
+"""
+
+helps['image builder optimizer update'] = """
+type: command
+short-summary: Update an optimizer from an existing image builder template.
+long-summary: Must be used with --defer
+examples:
+  - name: Update an optimizer from an existing image builder template.
+    text: |
+        az image builder optimizer update -n myTemplate -g myGroup --enable-vm-boot true --defer
+"""
+
+helps['image builder optimizer remove'] = """
+type: command
+short-summary: Remove optimizer from an existing image builder template.
+long-summary: Must be used with --defer
+examples:
+  - name: Remove optimizer from an existing image builder template.
+    text: |
+        az image builder optimizer remove -n myTemplate -g myGroup --defer
+"""
+
+helps['image builder optimizer show'] = """
+type: command
+short-summary: Show optimizer of an existing image builder template.
+long-summary: Must be used with --defer
+examples:
+  - name: Show optimizer of an existing image builder template.
+    text: |
+        az image builder optimizer show -n myTemplate -g myGroup --defer
+"""
+
 helps['image builder identity'] = """
 type: group
 short-summary: Manage identities of an image builder template.
@@ -585,6 +598,10 @@ examples:
         az image builder output add -n mytemplate -g my-group \\
             --output-name my_vhd_image --is-vhd  --defer
 
+  - name: Add a VHD distributor with specifying storage uri to an image template in the cli object cache.
+    text: |
+        az image builder output add -n mytemplate -g my-group \\
+            --output-name my_vhd_image --is-vhd --vhd-uri https://mystorageaccount.blob.core.windows.net/container/path_to_vhd_file --defer
 """
 
 helps['image builder output clear'] = """
@@ -597,6 +614,51 @@ helps['image builder output remove'] = """
 type: command
 short-summary: Remove an image builder output distributor from an image builder template.
 long-summary: Must be used with --defer
+"""
+
+helps['image builder output versioning'] = """
+type: group
+short-summary: Manage image builder template output versioner.
+long-summary: >
+    Describe how to generate new x.y.z version number for distribution.
+"""
+
+helps['image builder output versioning set'] = """
+type: command
+short-summary: Set the image builder output versioner of an image builder template.
+long-summary: Must be used with --defer.
+examples:
+  - name: Set the image builder output versioner generating version number that will be latest based on existing version numbers.
+    text: |
+        az image builder output versioning set -n MyTemplate -g MyResourceGroup --output-name MyVhdImage --scheme Latest --defer
+
+  - name: Set the image builder output versioner generating version number that will be latest based on specified major version.
+    text: |
+        az image builder output versioning set -n MyTemplate -g MyResourceGroup --output-name MyVhdImage --scheme Latest --major 1 --defer
+
+  - name: Set the image builder output versioner generating version number based on version number of source image.
+    text: |
+        az image builder output versioning set -n MyTemplate -g MyResourceGroup --output-name MyVhdImage --scheme Source --defer
+"""
+
+helps['image builder output versioning remove'] = """
+type: command
+short-summary: Remove all versioning options on specified outputs.
+long-summary: Must be used with --defer
+examples:
+  - name: Remove the image builder output versioner of specified outputs.
+    text: |
+        az image builder output versioning remove -n MyTemplate -g MyResourceGroup --output-name MyVhdImage --defer
+"""
+
+helps['image builder output versioning show'] = """
+type: command
+short-summary: Show versioning options on specified outputs.
+long-summary: Must be used with --defer
+examples:
+  - name: Show the image builder output versioner of specified outputs.
+    text: |
+        az image builder output versioning show -n MyTemplate -g MyResourceGroup --output-name MyVhdImage --defer
 """
 
 helps['image builder run'] = """
@@ -734,11 +796,6 @@ examples:
             --intent-vm-sizes Standard_E64s_v4 Standard_M416ms_v2
 """
 
-helps['sig'] = """
-type: group
-short-summary: manage shared image gallery
-"""
-
 helps['sig create'] = """
 type: command
 short-summary: Create a shared image gallery.
@@ -751,11 +808,6 @@ examples:
 helps['sig show'] = """
 type: command
 short-summary: Retrieve information about a Shared Image Gallery.
-"""
-
-helps['sig image-definition'] = """
-type: group
-short-summary: Manage shared gallery image with VM
 """
 
 helps['sig image-definition create'] = """
@@ -828,6 +880,20 @@ examples:
         --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
         --os-type linux --os-state Specialized \\
         --features SecurityType=ConfidentialVM
+  - name: Create an image definition for images that can be used to create Gen2 or TrustedLaunchSupported VMs.
+    text: |
+        az sig image-definition create --resource-group MyResourceGroup \\
+        --gallery-name MyGallery --gallery-image-definition MyImage \\
+        --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
+        --os-type linux --os-state Specialized \\
+        --features SecurityType=TrustedLaunchSupported
+  - name: Create an image definition for images that can be used to create Gen2, TrustedLaunch, or Confidential VMs.
+    text: |
+        az sig image-definition create --resource-group MyResourceGroup \\
+        --gallery-name MyGallery --gallery-image-definition MyImage \\
+        --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
+        --os-type linux --os-state Specialized \\
+        --features SecurityType=TrustedLaunchAndConfidentialVmSupported
   - name: Create an image definition and indicate end of life date
     text: |
         az sig image-definition create --resource-group MyResourceGroup \\
@@ -873,17 +939,6 @@ examples:
     text: |
         az sig image-definition list-shared --gallery-unique-name galleryUniqueName \\
         --location myLocation --shared-to tenant
-"""
-
-helps['sig image-definition show-shared'] = """
-type: command
-short-summary: Get a shared gallery image
-long-summary: Get a shared gallery image that has been shared directly to your subscription or tenant
-examples:
-  - name: Get an image definition in a gallery shared directly to your subscription or tenant in the given location.
-    text: |
-        az sig image-definition show-shared --gallery-unique-name galleryUniqueName \\
-        --gallery-image-definition myGalleryImageName --location myLocation
 """
 
 helps['sig image-definition update'] = """
@@ -1179,15 +1234,6 @@ examples:
         az sig list-community --location myLocation --marker nextMarker
 """
 
-helps['sig list'] = """
-type: command
-short-summary: list share image galleries.
-examples:
-  - name: List shared galleries by subscription id.
-    text: |
-        az sig list-shared --location myLocation
-"""
-
 helps['sig share'] = """
 type: group
 short-summary: Manage gallery sharing profile
@@ -1238,16 +1284,6 @@ examples:
   - name: Place the CLI in a waiting state until the gallery sharing object is updated.
     text: |
         az sig share wait --updated --resource-group MyResourceGroup --gallery-name Gallery
-"""
-
-helps['sig show-shared'] = """
-type: command
-short-summary: Get a gallery that has been shared directly to your subscription or tenant
-long-summary: Get a gallery that has been shared directly to your subscription or tenant
-examples:
-  - name: Get a gallery that has been shared directly to your subscription or tenant in the given location.
-    text: |
-        az sig show-shared --gallery-unique-name galleryUniqueName --location myLocation
 """
 
 helps['sig update'] = """
@@ -1604,6 +1640,7 @@ parameters:
     type: string
     short-summary: >
         The name of the operating system image as a URN alias, URN, custom image name or ID, custom image version ID, or VHD blob URI. In addition, it also supports shared gallery image.
+        Please use the image alias including the version of the distribution you want to use. For example: please use Debian11 instead of Debian.'
         This parameter is required unless using `--attach-os-disk.` Valid URN format: "Publisher:Offer:Sku:Version". For more information, see https://docs.microsoft.com/azure/virtual-machines/linux/cli-ps-findimage
     populator-commands:
       - az vm image list
@@ -1617,9 +1654,9 @@ parameters:
   - name: --computer-name
     short-summary: The host OS name of the virtual machine. Defaults to the name of the VM.
 examples:
-  - name: Create a default Ubuntu VM with automatic SSH authentication.
+  - name: Create a default Ubuntu2204 VM with automatic SSH authentication.
     text: >
-        az vm create -n MyVm -g MyResourceGroup --image UbuntuLTS
+        az vm create -n MyVm -g MyResourceGroup --image Ubuntu2204
   - name: Create a default RedHat VM with automatic SSH authentication using an image URN.
     text: >
         az vm create -n MyVm -g MyResourceGroup --image RedHat:RHEL:7-RAW:7.4.2018010506
@@ -1644,20 +1681,20 @@ examples:
   - name: Create a VM by attaching to an unmanaged operating system disk from a VHD blob uri.
     text: >
         az vm create -g MyResourceGroup -n MyVm --attach-os-disk https://vhd1234.blob.core.windows.net/vhds/osdisk1234.vhd --os-type linux --use-unmanaged-disk
-  - name: 'Create an Ubuntu Linux VM using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/linux/using-cloud-init.'
+  - name: 'Create an Debian11 VM using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/linux/using-cloud-init.'
     text: >
-        az vm create -g MyResourceGroup -n MyVm --image debian --custom-data MyCloudInitScript.yml
-  - name: Create a Debian VM with SSH key authentication and a public DNS entry, located on an existing virtual network and availability set.
+        az vm create -g MyResourceGroup -n MyVm --image Debian11 --custom-data MyCloudInitScript.yml
+  - name: Create a Debian11 VM with SSH key authentication and a public DNS entry, located on an existing virtual network and availability set.
     text: |
-        az vm create -n MyVm -g MyResourceGroup --image debian --vnet-name MyVnet --subnet subnet1 \\
+        az vm create -n MyVm -g MyResourceGroup --image Debian11 --vnet-name MyVnet --subnet subnet1 \\
             --availability-set MyAvailabilitySet --public-ip-address-dns-name MyUniqueDnsName \\
             --ssh-key-values @key-file
   - name: Create a simple Ubuntu Linux VM with a public IP address, DNS entry, two data disks (10GB and 20GB), and then generate ssh key pairs.
     text: |
         az vm create -n MyVm -g MyResourceGroup --public-ip-address-dns-name MyUniqueDnsName \\
-            --image ubuntults --data-disk-sizes-gb 10 20 --size Standard_DS2_v2 \\
+            --image Ubuntu2204 --data-disk-sizes-gb 10 20 --size Standard_DS2_v2 \\
             --generate-ssh-keys
-  - name: Create a Debian VM using Key Vault secrets.
+  - name: Create a Debian11 VM using Key Vault secrets.
     text: >
         az keyvault certificate create --vault-name vaultname -n cert1 \\
           -p "$(az keyvault certificate get-default-policy)"
@@ -1669,23 +1706,23 @@ examples:
 
 
         az vm create -g group-name -n vm-name --admin-username deploy  \\
-          --image debian --secrets "$vm_secrets"
+          --image debian11 --secrets "$vm_secrets"
   - name: Create a CentOS VM with a system assigned identity. The VM will have a 'Contributor' role with access to a storage account.
     text: >
-        az vm create -n MyVm -g rg1 --image centos --assign-identity [system] --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1 --role Contributor
-  - name: Create a debian VM with a user assigned identity.
+        az vm create -n MyVm -g rg1 --image CentOS85Gen2 --assign-identity [system] --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1 --role Contributor
+  - name: Create a Debian11 VM with a user assigned identity.
     text: >
-        az vm create -n MyVm -g rg1 --image debian --assign-identity /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
-  - name: Create a debian VM with both system and user assigned identity.
+        az vm create -n MyVm -g rg1 --image Debian11 --assign-identity /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
+  - name: Create a Debian11 VM with both system and user assigned identity.
     text: >
-        az vm create -n MyVm -g rg1 --image debian --assign-identity [system] /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
+        az vm create -n MyVm -g rg1 --image Debian11 --assign-identity [system] /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
   - name: Create a VM in an availability zone in the current resource group's region.
     supported-profiles: latest
     text: >
-        az vm create -n MyVm -g MyResourceGroup --image Centos --zone 1
+        az vm create -n MyVm -g MyResourceGroup --image CentOS85Gen2 --zone 1
   - name: Create multiple VMs. In this example, 3 VMs are created. They are MyVm0, MyVm1, MyVm2.
     text: >
-        az vm create -n MyVm -g MyResourceGroup --image centos --count 3
+        az vm create -n MyVm -g MyResourceGroup --image CentOS85Gen2 --count 3
   - name: Create a VM from shared gallery image
     text: >
         az vm create -n MyVm -g MyResourceGroup --image /SharedGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
@@ -1920,32 +1957,6 @@ examples:
     crafted: true
 """
 
-helps['vm extension'] = """
-type: group
-short-summary: Manage extensions on VMs.
-long-summary: >
-    Extensions are small applications that provide post-deployment configuration and automation tasks on Azure virtual machines.
-    For example, if a virtual machine requires software installation, anti-virus protection, or Docker configuration, a VM extension
-    can be used to complete these tasks. Extensions can be bundled with a new virtual machine deployment or run against any existing system.
-"""
-
-helps['vm extension delete'] = """
-type: command
-short-summary: Remove an extension attached to a VM.
-examples:
-  - name: Use a VM name and extension to delete an extension from a VM.
-    text: az vm extension delete -g MyResourceGroup --vm-name MyVm -n extension_name
-  - name: Delete extensions with IDs containing the string "MyExtension" from a VM.
-    text: >
-        az vm extension delete --ids \\
-            $(az resource list --query "[?contains(name, 'MyExtension')].id" -o tsv)
-"""
-
-helps['vm extension image'] = """
-type: group
-short-summary: Find the available VM extensions for a subscription and region.
-"""
-
 helps['vm extension image list'] = """
 type: command
 short-summary: List the information on available extensions.
@@ -1959,55 +1970,6 @@ examples:
         az vm extension image list --query \\
             "[?starts_with(publisher, 'Microsoft.Azure.App')].publisher" \\
             -o tsv | sort -u | xargs -I{} az vm extension image list-names --publisher {} -l westus
-"""
-
-helps['vm extension image list-names'] = """
-type: command
-short-summary: List the names of available extensions.
-examples:
-  - name: Find Docker extensions by publisher and location.
-    text: >
-        az vm extension image list-names --publisher Microsoft.Azure.Extensions \\
-            -l westus --query "[?starts_with(name, 'Docker')]"
-  - name: Find CustomScript extensions by publisher and location.
-    text: >
-        az vm extension image list-names --publisher Microsoft.Azure.Extensions \\
-            -l westus --query "[?starts_with(name, 'Custom')]"
-"""
-
-helps['vm extension image list-versions'] = """
-type: command
-short-summary: List the versions for available extensions.
-examples:
-  - name: Find the available versions for the Docker extension.
-    text: >
-        az vm extension image list-versions --publisher Microsoft.Azure.Extensions \\
-            -l westus -n DockerExtension -o table
-"""
-
-helps['vm extension image show'] = """
-type: command
-short-summary: Display information for an extension.
-examples:
-  - name: Show the CustomScript extension version 2.0.2.
-    text: >
-        az vm extension image show -l westus -n CustomScript \\
-          --publisher Microsoft.Azure.Extensions --version 2.0.2
-  - name: Show the latest version of the Docker extension.
-    text: >
-        publisher=Microsoft.Azure.Extensions
-
-        extension=DockerExtension
-
-        location=westus
-
-
-        latest=$(az vm extension image list-versions \\
-          --publisher ${publisher} -l ${location} -n ${extension} \\
-          --query "[].name" -o tsv | sort | tail -n 1)
-
-        az vm extension image show -l ${location} \\
-          --publisher ${publisher} -n ${extension} --version ${latest}
 """
 
 helps['vm extension list'] = """
@@ -2160,26 +2122,6 @@ examples:
 helps['vm host group update'] = """
 type: command
 short-summary: Update a dedicated host group.
-"""
-
-helps['vm host list'] = """
-type: command
-short-summary: List dedicated hosts.
-examples:
-  - name: List dedicated hosts. (autogenerated)
-    text: |
-        az vm host list --host-group my-host-group --resource-group my-rg
-    crafted: true
-"""
-
-helps['vm host show'] = """
-type: command
-short-summary: Get the details of a dedicated host.
-examples:
-  - name: Get the details of a dedicated host (autogenerated)
-    text: |
-        az vm host show --host-group my-host-group --name MyDedicatedHost --resource-group MyResourceGroup
-    crafted: true
 """
 
 helps['vm host update'] = """
@@ -2763,7 +2705,7 @@ examples:
         vm_secrets=$(az vm secret format -s "$secrets")
 
         az vm create -g group-name -n vm-name --admin-username deploy  \\
-          --image debian --secrets "$vm_secrets"
+          --image Debian11 --secrets "$vm_secrets"
 """
 
 helps['vm secret list'] = """
@@ -3000,7 +2942,8 @@ parameters:
     type: string
     short-summary: >
         The name of the operating system image as a URN alias, URN, custom image name or ID, or VHD blob URI. In addition, it also supports shared gallery image.
-        Valid URN format: "Publisher:Offer:Sku:Version".
+        Please use the image alias including the version of the distribution you want to use. For example: please use Debian11 instead of Debian.'
+        This parameter is required unless using `--attach-os-disk.` Valid URN format: "Publisher:Offer:Sku:Version". For more information, see https://docs.microsoft.com/azure/virtual-machines/linux/cli-ps-findimage
     populator-commands:
       - az vm image list
       - az vm image show
@@ -3014,18 +2957,18 @@ examples:
   - name: Create a Linux VM scale set with an auto-generated ssh key pair, a public IP address, a DNS entry, an existing load balancer, and an existing virtual network.
     text: |
         az vmss create -n MyVmss -g MyResourceGroup --public-ip-address-dns-name my-globally-dns-name \\
-            --load-balancer MyLoadBalancer --vnet-name MyVnet --subnet MySubnet --image UbuntuLTS \\
+            --load-balancer MyLoadBalancer --vnet-name MyVnet --subnet MySubnet --image Ubuntu2204 \\
             --generate-ssh-keys
   - name: Create a Linux VM scale set from a custom image using the default existing public SSH key.
     text: >
         az vmss create -n MyVmss -g MyResourceGroup --image MyImage
   - name: Create a Linux VM scale set with a load balancer and custom DNS servers. Each VM has a public-ip address and a custom domain name.
     text: >
-        az vmss create -n MyVmss -g MyResourceGroup --image centos \\
+        az vmss create -n MyVmss -g MyResourceGroup --image CentOS85Gen2 \\
             --public-ip-per-vm --vm-domain-name myvmss --dns-servers 10.0.0.6 10.0.0.5
   - name: 'Create a Linux VM scale set using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/linux/using-cloud-init'
     text: >
-        az vmss create -g MyResourceGroup -n MyVmss --image debian --custom-data MyCloudInitScript.yml
+        az vmss create -g MyResourceGroup -n MyVmss --image Debian11 --custom-data MyCloudInitScript.yml
   - name: Create a VMSS from a generalized gallery image version.
     text: >
         az vmss create -g MyResourceGroup -n MyVmss --image /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Compute/galleries/myGallery/images/myImage/versions/1.0.0
@@ -3035,7 +2978,7 @@ examples:
   - name: Create a VMSS from the latest version of a gallery image
     text: >
         az vmss create -g MyResourceGroup -n MyVmss --image /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Compute/galleries/myGallery/images/myImage
-  - name: Create a Debian VM scaleset using Key Vault secrets.
+  - name: Create a Debian11 VM scaleset using Key Vault secrets.
     text: >
         az keyvault certificate create --vault-name vaultname -n cert1 \\
           -p "$(az keyvault certificate get-default-policy)"
@@ -3047,23 +2990,23 @@ examples:
 
 
         az vmss create -g group-name -n vm-name --admin-username deploy  \\
-          --image debian --secrets "$vm_secrets"
+          --image Debian11 --secrets "$vm_secrets"
   - name: Create a VM scaleset with system assigned identity. The VM will have a 'Contributor' Role with access to a storage account.
     text: >
-        az vmss create -n MyVmss -g MyResourceGroup --image centos --assign-identity --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1 --role Contributor
-  - name: Create a debian VM scaleset with a user assigned identity.
+        az vmss create -n MyVmss -g MyResourceGroup --image CentOS85Gen2 --assign-identity --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1 --role Contributor
+  - name: Create a Debian11 VM scaleset with a user assigned identity.
     text: >
-        az vmss create -n MyVmss -g rg1 --image debian --assign-identity  /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
-  - name: Create a debian VM scaleset with both system and user assigned identity.
+        az vmss create -n MyVmss -g rg1 --image Debian11 --assign-identity  /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
+  - name: Create a Debian11 VM scaleset with both system and user assigned identity.
     text: >
-        az vmss create -n MyVmss -g rg1 --image debian --assign-identity  [system] /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
+        az vmss create -n MyVmss -g rg1 --image Debian11 --assign-identity  [system] /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
   - name: Create a single zone VM scaleset in the current resource group's region
     supported-profiles: latest
     text: >
-        az vmss create -n MyVmss -g MyResourceGroup --image Centos --zones 1
+        az vmss create -n MyVmss -g MyResourceGroup --image CentOS85Gen2 --zones 1
   - name: Create a VMSS that supports SpotRestore.
     text: >
-        az vmss create -n MyVmss -g MyResourceGroup  --location NorthEurope --instance-count 2 --image Centos --priority Spot --eviction-policy Deallocate --single-placement-group --enable-spot-restore True --spot-restore-timeout PT1H
+        az vmss create -n MyVmss -g MyResourceGroup  --location NorthEurope --instance-count 2 --image CentOS85Gen2 --priority Spot --eviction-policy Deallocate --single-placement-group --enable-spot-restore True --spot-restore-timeout PT1H
   - name: Create a VMSS from shared gallery image.
     text: >
         az vmss create -n MyVmss -g MyResourceGroup --image /SharedGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
@@ -3405,11 +3348,6 @@ examples:
     crafted: true
 """
 
-helps['vmss rolling-upgrade'] = """
-type: group
-short-summary: Manage rolling upgrades.
-"""
-
 helps['vmss run-command'] = """
 type: group
 short-summary: Manage run commands on a Virtual Machine Scale Set.
@@ -3739,11 +3677,6 @@ type: group
 short-summary: Manage capacity.
 """
 
-helps['capacity reservation group'] = """
-type: group
-short-summary: Manage capacity reservation group.
-"""
-
 helps['capacity reservation group create'] = """
 type: command
 short-summary: Create capacity reservation group.
@@ -3782,16 +3715,6 @@ examples:
     text: az capacity reservation group list -g MyResourceGroup
   - name: List the capacity reservation groups containing VM instances and VMSS instance which are associated to capacity reservation group
     text: az capacity reservation group list -g MyResourceGroup --vm-instance --vmss-instance
-"""
-
-helps['capacity'] = """
-type: group
-short-summary: Manage capacity.
-"""
-
-helps['capacity reservation'] = """
-type: group
-short-summary: Manage capacity reservation.
 """
 
 helps['capacity reservation create'] = """
@@ -3883,7 +3806,7 @@ disks are specified, all disks will be included."
                --collection-name "rpcName" --name "rpName"
       - name: Create a restore point with --consistency-mode CrashConsistent
         text: |-
-               az vm create -n vm -g rg --image UbuntuLTS --tag EnableCrashConsistentRestorePoint=True
+               az vm create -n vm -g rg --image Ubuntu2204 --tag EnableCrashConsistentRestorePoint=True
 
                az restore-point collection create --source-id "/subscriptions/{subscription-id}/resourceGroups/myResourceGroup/providers/Microsoft.Compute/virtualMachines/myVM"\
                 -g rg --collection-name "myRpc"

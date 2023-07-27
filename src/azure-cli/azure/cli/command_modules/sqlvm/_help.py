@@ -176,12 +176,15 @@ examples:
   - name: Update a SQL virtual machine to enable schedule with weekly interval for SQL best practice assessment when VM is already associated with a Log Analytics workspace.
     text: >
         az sql vm update -n sqlvm -g myresourcegroup --assessment-weekly-interval 1 --assessment-day-of-week monday --assessment-start-time-local '19:30'
-  - name: Update a SQL virtual machine to enable schedule with monthly occurrence for SQL best practice assessment while associating with a Log Analytics workspace.
+  - name: Update a SQL virtual machine to enable schedule with monthly occurrence for SQL best practice assessment while associating with a Log Analytics workspace and assigning a Resource group for the Agent resources.
     text: >
-        az sql vm update -n sqlvm -g myresourcegroup --workspace-name myLogAnalyticsWorkspace --workspace-rg myRg --assessment-monthly-occurrence 1 --assessment-day-of-week monday --assessment-start-time-local '19:30'
-  - name: Update a SQL virtual machine to enable SQL best practices assessment without setting a schedule for running assessment on-demand
+        az sql vm update -n sqlvm -g myresourcegroup --workspace-name myLogAnalyticsWorkspace --workspace-rg myRg --agent-rg myRg2 --assessment-monthly-occurrence 1 --assessment-day-of-week monday --assessment-start-time-local '19:30'
+  - name: Update a SQL virtual machine to enable SQL best practices assessment without setting a schedule for running assessment on-demand. Must provide Log Analytics workspace and a Resource group for deploying the Agent resources.
     text: >
-        az sql vm update -n sqlvm -g myresourcegroup --enable-assessment true
+        az sql vm update -n sqlvm -g myresourcegroup --enable-assessment true --workspace-name myLogAnalyticsWorkspace --workspace-rg myRg --agent-rg myRg2
+  - name: Update a SQL virtual machine to enable SQL best practices assessment while associating with a Log Analytics Workspace in a different subscription
+    text: >
+        az sql vm update -n sqlvm -g myresourcegroup --enable-assessment true --workspace-name myLogAnalyticsWorkspace --workspace-rg myRg --workspace-sub myLogAnalyticsWorkspaceSubName --agent-rg myRg2
 """
 
 helps['sql vm enable-azure-ad-auth'] = """
