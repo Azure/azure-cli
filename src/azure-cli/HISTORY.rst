@@ -62,7 +62,7 @@ Release History
 
 **Cosmos DB**
 
-* `az cosmosdb restore`: Add `--assign-identity` and `--default-identity` to allow PITR restore with identity (#26867)
+* `az cosmosdb restore`: Add `--assign-identity` and `--default-identity` to allow PITR restoring with identity (#26867)
 * `az cosmosdb postgres`: Add new command groups to support Cosmos DB for PostgreSQL (#26729)
 
 **Key Vault**
