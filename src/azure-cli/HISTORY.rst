@@ -54,7 +54,7 @@ Release History
 **Compute**
 
 * `az vm/vmss create`: Enable auto upgrading of guest attestation extension by default for Trusted Launch enabled VMs and VMSS (#26878)
-* `az vm/vmss create`: Add new parameter `--disable-integrity-monitoring-autoupgrade` to support disabling auto upgrade of guest attestation extension for Trusted Launch enabled VMs and VMSS (#26878)
+* `az vm/vmss create`: Add new parameter `--disable-integrity-monitoring-autoupgrade` to support disabling auto upgrading of guest attestation extension for Trusted Launch enabled VMs and VMSS (#26878)
 * `az sig image-version undelete`: Add new command to support softdeleted image recovery (#26943)
 * `az vm/vmss/disk create`: Add new option `Standard` for `--security-type` for backward compatibility (#26892)
 * `az sig image-definition create`: Add new option `Standard` for `--security-type` for backward compatibility (#26892)
