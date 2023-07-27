@@ -3885,12 +3885,14 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         if flexconsumption_location is not None:
-            logger.warning("No functions version specified so defaulting to 4. In the future, specifying a version will "
-                           "be required. To create a 4.x function you would pass in the flag `--functions-version 4`")
+            logger.warning("No functions version specified so defaulting to 4. In the future, specifying a "
+                           "version will be required. To create a 4.x function you would pass in the flag "
+                           "`--functions-version 4`")
             functions_version = '4'
         else:
-            logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
-                        "be required. To create a 3.x function you would pass in the flag `--functions-version 3`")
+            logger.warning("No functions version specified so defaulting to 3. In the future, specifying a "
+                           "version will be required. To create a 3.x function you would pass in the flag "
+                           "`--functions-version 3`")
             functions_version = '3'
     if deployment_source_url and deployment_local_git:
         raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
@@ -3959,10 +3961,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     deployment_source_branch = deployment_source_branch or 'master'
 
     from azure.mgmt.web.models import Site
-    SiteConfig, NameValuePair, SiteConfigPropertiesDictionary = cmd.get_models(
+    SiteConfig, NameValuePair = cmd.get_models(
         'SiteConfig',
-        'NameValuePair',
-        'SiteConfigPropertiesDictionary')
+        'NameValuePair')
     disable_app_insights = (disable_app_insights == "true")
 
     site_config = SiteConfig(app_settings=[])
@@ -4096,7 +4097,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
     runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=(not is_linux))
     matched_runtime = runtime_helper.resolve("dotnet" if not runtime else runtime,
-                                                runtime_version, functions_version, is_linux)
+                                             runtime_version, functions_version, is_linux)
 
     site_config_dict = matched_runtime.site_config_dict
     app_settings_dict = matched_runtime.app_settings_dict
@@ -4232,11 +4233,11 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
     if app_insights_key is not None:
         site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
-                                                        value=app_insights_key))
+                                                      value=app_insights_key))
     elif app_insights is not None:
         instrumentation_key = get_app_insights_key(cmd.cli_ctx, resource_group_name, app_insights)
         site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
-                                                        value=instrumentation_key))
+                                                      value=instrumentation_key))
     elif disable_app_insights or not matched_runtime.app_insights:
         # set up dashboard if no app insights
         site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
@@ -4374,7 +4375,7 @@ def try_create_application_insights(cmd, functionapp):
     ai_resource_group_name = functionapp.resource_group
     ai_name = functionapp.name
     # Temporary change for testing
-    ai_location =  functionapp.location.replace("(stage)", "").replace("stage", "")
+    ai_location = functionapp.location.replace("(stage)", "").replace("stage", "")
 
     app_insights_client = get_mgmt_service_client(cmd.cli_ctx, ApplicationInsightsManagementClient)
     ai_properties = {
@@ -4906,7 +4907,7 @@ def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=Non
     }
 
 
-def _vnet_delegation_check(cmd,subnet_subscription_id, vnet_resource_group, vnet_name, subnet_name,
+def _vnet_delegation_check(cmd, subnet_subscription_id, vnet_resource_group, vnet_name, subnet_name,
                            subnet_service_delegation="Microsoft.Web/serverFarms"):
     from azure.cli.core.commands.client_factory import get_subscription_id
 
