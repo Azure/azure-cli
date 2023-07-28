@@ -12,23 +12,24 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "vmss extension image list-names",
+    "vmss list-skus",
 )
-class ListNames(AAZCommand):
-    """List a list of virtual machine extension image types.
+class ListSkus(AAZCommand):
+    """List a list of SKUs available for your VM scale set, including the minimum and maximum VM instances allowed for each SKU.
     """
 
     _aaz_info = {
-        "version": "2022-08-01",
+        "version": "2023-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers/{}/artifacttypes/vmextension/types", "2022-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachinescalesets/{}/skus", "2023-03-01"],
         ]
     }
 
+    AZ_SUPPORT_PAGINATION = True
+
     def _handler(self, command_args):
         super()._handler(command_args)
-        self._execute_operations()
-        return self._output()
+        return self.build_paging(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -41,21 +42,19 @@ class ListNames(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.location = AAZResourceLocationArg(
+        _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
-            id_part="name",
         )
-        _args_schema.publisher_name = AAZStrArg(
-            options=["-p", "--publisher", "--publisher-name"],
-            help="Image publisher name.",
+        _args_schema.vm_scale_set_name = AAZStrArg(
+            options=["-n", "--name", "--vm-scale-set-name"],
+            help="The name of the VM scale set.",
             required=True,
-            id_part="child_name_1",
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.VirtualMachineExtensionImagesListTypes(ctx=self.ctx)()
+        self.VirtualMachineScaleSetsListSkus(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -67,10 +66,11 @@ class ListNames(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
+        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
+        next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
+        return result, next_link
 
-    class VirtualMachineExtensionImagesListTypes(AAZHttpOperation):
+    class VirtualMachineScaleSetsListSkus(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -84,7 +84,7 @@ class ListNames(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/locations/{location}/publishers/{publisherName}/artifacttypes/vmextension/types",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/{vmScaleSetName}/skus",
                 **self.url_parameters
             )
 
@@ -100,15 +100,15 @@ class ListNames(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "location", self.ctx.args.location,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "publisherName", self.ctx.args.publisher_name,
+                    "resourceGroupName", self.ctx.args.resource_group,
                     required=True,
                 ),
                 **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "vmScaleSetName", self.ctx.args.vm_scale_set_name,
                     required=True,
                 ),
             }
@@ -118,7 +118,7 @@ class ListNames(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-08-01",
+                    "api-version", "2023-03-01",
                     required=True,
                 ),
             }
@@ -148,57 +148,53 @@ class ListNames(AAZCommand):
             if cls._schema_on_200 is not None:
                 return cls._schema_on_200
 
-            cls._schema_on_200 = AAZListType()
+            cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.Element = AAZObjectType()
+            _schema_on_200.next_link = AAZStrType(
+                serialized_name="nextLink",
+            )
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
 
-            _element = cls._schema_on_200.Element
-            _element.id = AAZStrType(
+            value = cls._schema_on_200.value
+            value.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element
+            _element.capacity = AAZObjectType()
+            _element.resource_type = AAZStrType(
+                serialized_name="resourceType",
                 flags={"read_only": True},
             )
-            _element.location = AAZStrType(
-                flags={"required": True},
+            _element.sku = AAZObjectType()
+
+            capacity = cls._schema_on_200.value.Element.capacity
+            capacity.default_capacity = AAZIntType(
+                serialized_name="defaultCapacity",
+                flags={"read_only": True},
             )
-            _element.name = AAZStrType(
-                flags={"required": True, "read_only": True},
+            capacity.maximum = AAZIntType(
+                flags={"read_only": True},
             )
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
+            capacity.minimum = AAZIntType(
+                flags={"read_only": True},
             )
-            _element.tags = AAZDictType()
-            _element.type = AAZStrType(
+            capacity.scale_type = AAZStrType(
+                serialized_name="scaleType",
                 flags={"read_only": True},
             )
 
-            properties = cls._schema_on_200.Element.properties
-            properties.compute_role = AAZStrType(
-                serialized_name="computeRole",
-                flags={"required": True},
-            )
-            properties.handler_schema = AAZStrType(
-                serialized_name="handlerSchema",
-                flags={"required": True},
-            )
-            properties.operating_system = AAZStrType(
-                serialized_name="operatingSystem",
-                flags={"required": True},
-            )
-            properties.supports_multiple_extensions = AAZBoolType(
-                serialized_name="supportsMultipleExtensions",
-            )
-            properties.vm_scale_set_enabled = AAZBoolType(
-                serialized_name="vmScaleSetEnabled",
-            )
-
-            tags = cls._schema_on_200.Element.tags
-            tags.Element = AAZStrType()
+            sku = cls._schema_on_200.value.Element.sku
+            sku.capacity = AAZIntType()
+            sku.name = AAZStrType()
+            sku.tier = AAZStrType()
 
             return cls._schema_on_200
 
 
-class _ListNamesHelper:
-    """Helper class for ListNames"""
+class _ListSkusHelper:
+    """Helper class for ListSkus"""
 
 
-__all__ = ["ListNames"]
+__all__ = ["ListSkus"]

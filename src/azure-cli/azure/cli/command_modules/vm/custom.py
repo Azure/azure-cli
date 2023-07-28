@@ -3693,13 +3693,6 @@ def get_vmss_instance_view(cmd, resource_group_name, vm_scale_set_name, instance
     return client.virtual_machine_scale_sets.get_instance_view(resource_group_name, vm_scale_set_name)
 
 
-def list_vmss(cmd, resource_group_name=None):
-    client = _compute_client_factory(cmd.cli_ctx)
-    if resource_group_name:
-        return client.virtual_machine_scale_sets.list(resource_group_name)
-    return client.virtual_machine_scale_sets.list_all()
-
-
 def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_name):
     from msrestazure.tools import parse_resource_id
 

@@ -25,7 +25,8 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set,
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
     transform_sku_for_table_output, transform_disk_show_table_output, transform_extension_show_table_output,
-    get_vmss_table_output_transformer, transform_vm_encryption_show_table_output, transform_log_analytics_query_output)
+    get_vmss_table_output_transformer, transform_vm_encryption_show_table_output, transform_log_analytics_query_output,
+    transform_vmss_list_with_zones_table_output, transform_vmss_list_without_zones_table_output)
 from azure.cli.command_modules.vm._validators import (
     process_vm_create_namespace, process_vmss_create_namespace, process_image_create_namespace,
     process_disk_create_namespace, process_snapshot_create_namespace,
@@ -468,27 +469,29 @@ def load_command_table(self, _):
         g.custom_command('application list', 'list_vmss_applications', min_api='2021-07-01')
         g.custom_command('create', 'create_vmss', transform=DeploymentOutputLongRunningOperation(self.cli_ctx, 'Starting vmss create'), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_vmss_create_namespace, exception_handler=handle_template_based_exception)
         g.custom_command('deallocate', 'deallocate_vmss', supports_no_wait=True)
-        g.command('delete', 'begin_delete', supports_no_wait=True)
         g.custom_command('delete-instances', 'delete_vmss_instances', supports_no_wait=True)
         g.custom_command('get-instance-view', 'get_vmss_instance_view', table_transformer='{ProvisioningState:statuses[0].displayStatus, PowerState:statuses[1].displayStatus}')
-        g.custom_command('list', 'list_vmss', table_transformer=get_vmss_table_output_transformer(self))
-        g.command('list-instances', 'list', command_type=compute_vmss_vm_sdk)
         g.custom_command('list-instance-connection-info', 'list_vmss_instance_connection_info')
         g.custom_command('list-instance-public-ips', 'list_vmss_instance_public_ips')
-        g.command('list-skus', 'list_skus')
         g.custom_command('reimage', 'reimage_vmss', supports_no_wait=True, min_api='2017-03-30')
-        g.command('perform-maintenance', 'begin_perform_maintenance', min_api='2017-12-01')
         g.custom_command('restart', 'restart_vmss', supports_no_wait=True)
         g.custom_command('scale', 'scale_vmss', supports_no_wait=True)
         g.custom_show_command('show', 'get_vmss', table_transformer=get_vmss_table_output_transformer(self, False))
-        g.command('simulate-eviction', 'simulate_eviction', command_type=compute_vmss_vm_sdk, min_api='2019-12-01')
         g.custom_command('start', 'start_vmss', supports_no_wait=True)
         g.custom_command('stop', 'stop_vmss', supports_no_wait=True, validator=process_vm_vmss_stop)
         g.generic_update_command('update', getter_name='get_vmss_modified', setter_name='update_vmss', supports_no_wait=True, command_type=compute_custom, validator=validate_vmss_update_namespace)
         g.custom_command('update-instances', 'update_vmss_instances', supports_no_wait=True)
         g.wait_command('wait', getter_name='get_vmss', getter_type=compute_custom)
-        g.command('get-os-upgrade-history', 'get_os_upgrade_history', min_api='2018-10-01')
         g.custom_command('set-orchestration-service-state', 'set_orchestration_service_state', supports_no_wait=True)
+
+        from azure.cli.command_modules.vm._vm_utils import import_aaz_by_profile
+        VMSS = import_aaz_by_profile(self.cli_ctx.cloud.profile, "vmss")
+        if self.supported_api_version(min_api='2017-03-30'):
+            self.command_table['vmss list'] = VMSS.List(loader=self,
+                                                        table_transformer=transform_vmss_list_with_zones_table_output)
+        else:
+            self.command_table['vmss list'] = VMSS.List(loader=self,
+                                                        table_transformer=transform_vmss_list_without_zones_table_output)
 
     with self.command_group('vmss diagnostics', compute_vmss_sdk) as g:
         g.custom_command('set', 'set_vmss_diagnostics_extension')
