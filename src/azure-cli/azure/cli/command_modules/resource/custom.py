@@ -415,7 +415,7 @@ class JsonCTemplatePolicy(SansIOHTTPPolicy):
             template = http_request.data["properties"]["template"]
             del http_request.data["properties"]["template"]
 
-            # templateLink nad template cannot exist at the same time in deployment_dry_run mode
+            # templateLink and template cannot exist at the same time in deployment_dry_run mode
             if "templateLink" in http_request.data["properties"].keys():
                 del http_request.data["properties"]["templateLink"]
 
