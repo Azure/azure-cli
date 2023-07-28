@@ -1825,6 +1825,7 @@ def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-ar
     _validate_vmss_update_automatic_repairs(cmd, namespace)
     _validate_capacity_reservation_group(cmd, namespace)
     _validate_vm_vmss_update_ephemeral_placement(cmd, namespace)
+    _validate_vmss_hyper_v_generation(cmd, namespace)
 # endregion
 
 
@@ -2572,6 +2573,20 @@ def _validate_vm_vmss_update_ephemeral_placement(cmd, namespace):  # pylint: dis
         if source == 'vmss' and not vm_sku:
             raise ArgumentUsageError('usage error: --ephemeral-os-disk-placement is only configurable when '
                                      '--vm-sku is specified.')
+
+
+def _validate_vmss_hyper_v_generation(cmd, namespace):
+    if namespace.security_type is not None:
+        client = _compute_client_factory(cmd.cli_ctx)
+        vmss = client.virtual_machine_scale_sets.get(namespace.resource_group_name, namespace.name)
+        from ._vm_utils import get_hyper_v_generation_from_vmss
+        image_ref = vmss.virtual_machine_profile.storage_profile.image_reference
+        location = vmss.location
+        hyper_v_generation = get_hyper_v_generation_from_vmss(cmd.cli_ctx, image_ref, location)
+        if hyper_v_generation == "V1":
+            logger.warning("Trusted Launch security type is supported on Hyper-V Generation 2 OS Images. "
+                           "To know more please visit "
+                           "https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch")
 
 
 def _validate_community_gallery_legal_agreement_acceptance(cmd, namespace):

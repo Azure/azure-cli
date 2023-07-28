@@ -541,6 +541,43 @@ def raise_unsupported_error_for_flex_vmss(vmss, error_message):
         raise ArgumentUsageError(error_message)
 
 
+def get_hyper_v_generation_from_vmss(cli_ctx, image_ref, location):
+    if image_ref.id:
+        from ._client_factory import _compute_client_factory
+        image_info = parse_gallery_image_id(image_ref.id)
+        client = _compute_client_factory(cli_ctx, subscription_id=image_info[0]).gallery_images
+        gallery_image_info = client.get(
+            resource_group_name=image_info[1], gallery_name=image_info[2], gallery_image_name=image_info[3])
+        return gallery_image_info.hyper_v_generation if hasattr(gallery_image_info, 'hyper_v_generation') else None
+
+    if image_ref.shared_gallery_image_id is not None:
+        from ._client_factory import cf_shared_gallery_image
+        image_info = parse_shared_gallery_image_id(image_ref.shared_gallery_image_id)
+        gallery_image_info = cf_shared_gallery_image(cli_ctx).get(
+            location=location, gallery_unique_name=image_info[0], gallery_image_name=image_info[1])
+        return gallery_image_info.hyper_v_generation if hasattr(gallery_image_info, 'hyper_v_generation') else None
+
+    if image_ref.community_gallery_image_id is not None:
+        from ._client_factory import cf_community_gallery_image
+        image_info = parse_community_gallery_image_id(image_ref.community_gallery_image_id)
+        gallery_image_info = cf_community_gallery_image(cli_ctx).get(
+            location=location, public_gallery_name=image_info[0], gallery_image_name=image_info[1])
+        return gallery_image_info.hyper_v_generation if hasattr(gallery_image_info, 'hyper_v_generation') else None
+
+    if image_ref.offer and image_ref.publisher and image_ref.sku and image_ref.version:
+        from ._client_factory import cf_vm_image
+        version = image_ref.version
+        if version.lower() == 'latest':
+            from ._actions import _get_latest_image_version
+            version = _get_latest_image_version(cli_ctx, location, image_ref.publisher, image_ref.offer,
+                                                image_ref.sku)
+        vm_image_info = cf_vm_image(cli_ctx, '').get(
+            location, image_ref.publisher, image_ref.offer, image_ref.sku, version)
+        return vm_image_info.hyper_v_generation if hasattr(vm_image_info, 'hyper_v_generation') else None
+
+    return None
+
+
 def is_trusted_launch_supported(supported_features):
     if not supported_features:
         return False
