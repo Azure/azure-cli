@@ -1069,6 +1069,7 @@ jobs:
       fi
 
 - job: CodegenCoverage
+  condition: and(succeededOrFailed(), in(variables['Build.Reason'], 'BatchedCI'))
   displayName: "Codegen Coverage"
   pool:
     name: ${{ variables.ubuntu_pool }}
@@ -1091,7 +1092,20 @@ jobs:
       # CLI repo only
       azdev statistics list-command-table CLI --statistics-only
       # CLI + EXT repos
-      azdev statistics list-command-table --statistics-only
+      azdev statistics list-command-table --statistics-only > /tmp/codegen_report.json
+      # azure-kusto is not compatible with azure-cli
+      # so we need run azdev statistics before installing azure-kusto to avoid the error `No module named azure.cli`
+      pip install azure-kusto-data azure-kusto-ingest
+      python scripts/ci/codegen_report.py
+    env:
+      BUILD_ID: $(Build.BuildId)
+      BUILD_BRANCH: $(Build.SourceBranchName)
+      KUSTO_CLIENT_ID: $(KUSTO_CLIENT_ID)
+      KUSTO_CLIENT_SECRET: $(KUSTO_CLIENT_SECRET)
+      KUSTO_CLUSTER: $(KUSTO_CLUSTER)
+      KUSTO_DATABASE: $(KUSTO_DATABASE)
+      KUSTO_TABLE: $(KUSTO_TABLE)
+      KUSTO_TENANT_ID: $(KUSTO_TENANT_ID)
 
 - job: VerifySphinxDocumentGenerator
   displayName: "Verify Sphinx Document Generator"
