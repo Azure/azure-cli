@@ -713,7 +713,7 @@ short-summary: Manage CDN WAF.
 long-summary: >
     WAF on Azure CDN from Microsoft is currently in public preview and is provided with a preview service level agreement.
     Certain features may not be supported or may have constrained capabilities.
-    See the Supplemental Terms of Use for Microsoft Azure Previews (https://azure.microsoft.com/en-us/support/legal/preview-supplemental-terms/) for details.
+    See the Supplemental Terms of Use for Microsoft Azure Previews (https://azure.microsoft.com/support/legal/preview-supplemental-terms/) for details.
 """
 
 helps['cdn waf policy'] = """
@@ -1054,7 +1054,7 @@ examples:
 
 helps['afd'] = """
 type: group
-short-summary: Manage Azure Front Door Standard/Premium. For classical Azure Front Door, please refer https://docs.microsoft.com/en-us/cli/azure/network/front-door?view=azure-cli-latest
+short-summary: Manage Azure Front Door Standard/Premium. For classical Azure Front Door, please refer https://learn.microsoft.com/cli/azure/network/front-door?view=azure-cli-latest
 """
 
 helps['afd profile'] = """

@@ -29,7 +29,7 @@ class ConditionalAccessScenarioTest(LiveScenarioTest):
 
         The result ATs are checked per
           Microsoft identity platform access tokens
-          https://docs.microsoft.com/en-us/azure/active-directory/develop/access-tokens
+          https://learn.microsoft.com/azure/active-directory/develop/access-tokens
 
         Following claims are checked:
           - aud (Audience): https://tools.ietf.org/html/rfc7519#section-4.1.3

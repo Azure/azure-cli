@@ -105,19 +105,19 @@ def load_arguments(self, _):
         c.argument('optional_claims', arg_group='JSON property', type=validate_file_or_dict,
                    help="Application developers can configure optional claims in their Azure AD applications to "
                         "specify the claims that are sent to their application by the Microsoft security token "
-                        "service. For more information, see https://docs.microsoft.com/azure/active-directory/develop"
+                        "service. For more information, see https://learn.microsoft.com/azure/active-directory/develop"
                         "/active-directory-optional-claims. " + JSON_PROPERTY_HELP)
 
     with self.argument_context('ad app owner list') as c:
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the application')
 
     with self.argument_context('ad app permission') as c:
-        # https://docs.microsoft.com/en-us/graph/api/resources/requiredresourceaccess
+        # https://learn.microsoft.com/graph/api/resources/requiredresourceaccess
         c.argument('api',
                    help='requiredResourceAccess.resourceAppId - '
                         'The unique identifier for the resource that the application requires access to. '
                         'This should be equal to the appId declared on the target resource application.')
-        # https://docs.microsoft.com/en-us/graph/api/resources/resourceaccess
+        # https://learn.microsoft.com/graph/api/resources/resourceaccess
         c.argument('api_permissions', nargs='+',
                    help='Space-separated list of {id}={type}. '
                         "{id} is resourceAccess.id - The unique identifier for one of the oauth2PermissionScopes or "

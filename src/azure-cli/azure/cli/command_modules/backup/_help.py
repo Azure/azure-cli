@@ -38,7 +38,7 @@ helps['backup container re-register'] = """
 type: command
 short-summary: Reset the registration details for a given container.
 examples:
-  - name: Reset the registration details for a given container. To be used only in error scenarios as specified here (https://docs.microsoft.com/azure/backup/backup-sql-server-azure-troubleshoot#re-registration-failures). Understand the failure symptoms and causes before attempting re-registration.
+  - name: Reset the registration details for a given container. To be used only in error scenarios as specified here (https://learn.microsoft.com/azure/backup/backup-sql-server-azure-troubleshoot#re-registration-failures). Understand the failure symptoms and causes before attempting re-registration.
     text: az backup container re-register --resource-group MyResourceGroup --vault-name MyVault --container-name MyContainer --workload-type MSSQL --backup-management-type AzureWorkload --yes
 """
 

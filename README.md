@@ -10,7 +10,7 @@ Take a test run now from [Azure Cloud Shell](https://portal.azure.com/#cloudshel
 
 ## Installation
 
-Please refer to the [install guide](https://docs.microsoft.com/cli/azure/install-azure-cli) for detailed install instructions.
+Please refer to the [install guide](https://learn.microsoft.com/cli/azure/install-azure-cli) for detailed install instructions.
 
 A list of common install issues and their resolutions are available at [install troubleshooting](https://github.com/Azure/azure-cli/blob/dev/doc/install_troubleshooting.md).
 
@@ -28,7 +28,7 @@ $ az [ group ] [ subgroup ] [ command ] {parameters}
 
 ### Get Started
 
-Please refer to the ["get started" guide](https://docs.microsoft.com/cli/azure/get-started-with-az-cli2) for in-depth instructions.
+Please refer to the ["get started" guide](https://learn.microsoft.com/cli/azure/get-started-with-az-cli2) for in-depth instructions.
 
 For usage and help content, pass in the `-h` parameter, for example:
 
@@ -87,21 +87,21 @@ For scripting purposes, we output certain exit codes for differing scenarios.
 
 ### Common scenarios and use Azure CLI effectively
 
-Please check [Tips for using Azure CLI effectively](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively). It describes some common scenarios:
+Please check [Tips for using Azure CLI effectively](https://learn.microsoft.com/cli/azure/use-cli-effectively). It describes some common scenarios:
 
-- [Output formatting (json, table, or tsv)](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#output-formatting-json-table-or-tsv)
-- [Pass values from one command to another](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#pass-values-from-one-command-to-another)
-- [Async operations](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#async-operations)
-- [Generic update arguments](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#generic-update-arguments)
-- [Generic resource commands - `az resource`](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#generic-resource-commands---az-resource)
-- [REST API command - `az rest`](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#rest-api-command---az-rest)
-- [Quoting issues](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#quoting-issues)
-- [Work behind a proxy](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#work-behind-a-proxy)
-- [Concurrent builds](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#concurrent-builds)
+- [Output formatting (json, table, or tsv)](https://learn.microsoft.com/cli/azure/use-cli-effectively#output-formatting-json-table-or-tsv)
+- [Pass values from one command to another](https://learn.microsoft.com/cli/azure/use-cli-effectively#pass-values-from-one-command-to-another)
+- [Async operations](https://learn.microsoft.com/cli/azure/use-cli-effectively#async-operations)
+- [Generic update arguments](https://learn.microsoft.com/cli/azure/use-cli-effectively#generic-update-arguments)
+- [Generic resource commands - `az resource`](https://learn.microsoft.com/cli/azure/use-cli-effectively#generic-resource-commands---az-resource)
+- [REST API command - `az rest`](https://learn.microsoft.com/cli/azure/use-cli-effectively#rest-api-command---az-rest)
+- [Quoting issues](https://learn.microsoft.com/cli/azure/use-cli-effectively#quoting-issues)
+- [Work behind a proxy](https://learn.microsoft.com/cli/azure/use-cli-effectively#work-behind-a-proxy)
+- [Concurrent builds](https://learn.microsoft.com/cli/azure/use-cli-effectively#concurrent-builds)
 
 ### More samples and snippets
 
-For more usage examples, take a look at our [GitHub samples repo](http://github.com/Azure/azure-cli-samples) or [https://docs.microsoft.com/cli/azure/overview](https://docs.microsoft.com/cli/azure/overview).
+For more usage examples, take a look at our [GitHub samples repo](http://github.com/Azure/azure-cli-samples) or [https://learn.microsoft.com/cli/azure/overview](https://learn.microsoft.com/cli/azure/overview).
 
 ### Write and run commands in Visual Studio Code
 

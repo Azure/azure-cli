@@ -93,7 +93,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
             if command_group == 'postgres':
                 c.argument('version', default='11',
-                           help='Server major version. https://docs.microsoft.com/en-us/azure/postgresql/single-server/concepts-supported-versions')
+                           help='Server major version. https://learn.microsoft.com/azure/postgresql/single-server/concepts-supported-versions')
             else:
                 c.argument('version', help='Server major version.')
 

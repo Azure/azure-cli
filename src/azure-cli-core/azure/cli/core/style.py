@@ -12,7 +12,7 @@ Design spec:
 https://devdivdesignguide.azurewebsites.net/command-line-interface/color-guidelines-for-command-line-interface/
 
 Console Virtual Terminal Sequences:
-https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#text-formatting
+https://learn.microsoft.com/windows/console/console-virtual-terminal-sequences#text-formatting
 
 For a complete demo, see `src/azure-cli/azure/cli/command_modules/util/custom.py` and run `az demo style`.
 """

@@ -18,7 +18,7 @@ from azure.cli.core.aaz import *
 class __CMDGroup(AAZCommandGroup):
     """Manage and configure load balancers.
 
-    To learn more about Azure Load Balancer visit https://learn.microsoft.com/en-us/azure/load-balancer/quickstart-load-balancer-standard-public-cli.
+    To learn more about Azure Load Balancer visit https://learn.microsoft.com/azure/load-balancer/quickstart-load-balancer-standard-public-cli.
     """
     pass
 

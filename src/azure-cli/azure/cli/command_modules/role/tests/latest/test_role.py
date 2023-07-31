@@ -349,7 +349,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
                 # Test bring-your-own assignment name
                 self.kwargs['assignment_name'] = self.create_guid()
                 # Directly use GUID to avoid querying definition ID and reduce recording YAML size
-                # https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
+                # https://learn.microsoft.com/azure/role-based-access-control/built-in-roles
                 self.kwargs['reader_guid'] = 'acdd72a7-3385-48ef-bd42-f606fba81ae7'
                 self.kwargs['assignment_id'] = self.cmd('role assignment create --assignee {upn} --role {reader_guid} '
                                                         '--name {assignment_name}').get_output_in_json()['id']

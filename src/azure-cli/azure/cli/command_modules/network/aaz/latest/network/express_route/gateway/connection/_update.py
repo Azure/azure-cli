@@ -69,7 +69,7 @@ class Update(AAZCommand):
         )
         _args_schema.internet_security = AAZBoolArg(
             options=["--internet-security"],
-            help="Enable internet security. A virtual hub can have the ability to propagate a learned default route to this ExpressRoute connection. This ref https://review.docs.microsoft.com/en-us/azure/virtual-wan/effective-routes-virtual-hub?branch=pr-en-us-91866#aboutdefaultroute might be helpful.",
+            help="Enable internet security. A virtual hub can have the ability to propagate a learned default route to this ExpressRoute connection. This ref https://review.learn.microsoft.com/azure/virtual-wan/effective-routes-virtual-hub?branch=pr-en-us-91866#aboutdefaultroute might be helpful.",
             nullable=True,
         )
         _args_schema.routing_weight = AAZIntArg(

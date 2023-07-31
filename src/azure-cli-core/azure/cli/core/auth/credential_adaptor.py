@@ -23,7 +23,7 @@ class CredentialAdaptor:
         :param resource: AAD resource for Track 1 only
         :param auxiliary_credentials: Credentials from .msal_authentication for cross tenant authentication.
             Details about cross tenant authentication:
-            https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/authenticate-multi-tenant
+            https://learn.microsoft.com/azure/azure-resource-manager/management/authenticate-multi-tenant
         """
 
         self._credential = credential

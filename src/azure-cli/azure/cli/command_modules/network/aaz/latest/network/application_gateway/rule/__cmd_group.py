@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class __CMDGroup(AAZCommandGroup):
     """Evaluate probe information and define HTTP/HTTPS routing rules.
 
-    For more information, visit https://learn.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-customize-waf-rules-cli.
+    For more information, visit https://learn.microsoft.com/azure/web-application-firewall/ag/application-gateway-customize-waf-rules-cli.
     """
     pass
 

@@ -98,11 +98,11 @@ def _validate_asp_sku(sku, app_service_environment, zone_redundant):
         if not app_service_environment:
             raise ValidationError("The pricing tier 'Isolated' is not allowed for this app service plan. "
                                   "Use this link to learn more: "
-                                  "https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
+                                  "https://learn.microsoft.com/azure/app-service/overview-hosting-plans")
     else:
         if app_service_environment:
             raise ValidationError("Only pricing tier 'Isolated' is allowed in this app service plan. Use this link to "
-                                  "learn more: https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
+                                  "learn more: https://learn.microsoft.com/azure/app-service/overview-hosting-plans")
 
 
 def validate_asp_create(namespace):
