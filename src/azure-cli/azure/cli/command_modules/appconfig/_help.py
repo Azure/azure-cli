@@ -159,6 +159,8 @@ examples:
     text: az appconfig kv export -d appconfig --endpoint https://myappconfiguration.azconfig.io --auth-mode login --dest-endpoint https://anotherappconfiguration.azconfig.io --dest-auth-mode login --key * --label * --preserve-labels
   - name: Export all keys and feature flags with label test using appconfig/kvset profile.
     text: az appconfig kv export -n MyAppConfiguration --label test -d file --path D:/abc.json --format json --profile appconfig/kvset
+  - name: Export all key values to another App Configuration from a snapshot of the source configuration
+    text: az appconfig kv export -n MyAppConfiguration -d appconfig --dest-name AnotherAppConfiguration --snapshot MySnapshot
 """
 
 helps['appconfig kv import'] = """

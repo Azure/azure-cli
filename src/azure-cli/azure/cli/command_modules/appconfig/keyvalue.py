@@ -220,6 +220,7 @@ def export_config(cmd,
                   skip_keyvault=False,
                   auth_mode="key",
                   endpoint=None,
+                  snapshot=None,
                   # to-file parameters
                   path=None,
                   format_=None,
@@ -237,6 +238,10 @@ def export_config(cmd,
                   # to-app-service parameters
                   appservice_account=None,
                   export_as_reference=False):
+
+    if snapshot and (key or label):
+        raise CLIErrors.MutuallyExclusiveArgumentError("'snapshot' cannot be specified with 'key', 'label' filters.")
+
     src_features = []
     dest_features = []
     dest_kvs = []
@@ -262,6 +267,7 @@ def export_config(cmd,
                                           key=key,
                                           label=label if label else SearchFilterOptions.EMPTY_LABEL,
                                           prefix_to_remove=prefix if not export_as_reference else "",
+                                          snapshot=snapshot,
                                           cli_ctx=cmd.cli_ctx if resolve_keyvault else None)
 
     if skip_keyvault:

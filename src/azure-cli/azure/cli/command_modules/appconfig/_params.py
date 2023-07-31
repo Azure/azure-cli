@@ -217,6 +217,7 @@ def load_arguments(self, _):
         c.argument('yes', help="Do not prompt for preview.")
         c.argument('skip_features', help="Export items excluding all feature flags. By default, all features with the specified label will be exported to file or appconfig. Not applicable for appservice.", arg_type=get_three_state_flag())
         c.argument('skip_keyvault', help="Export items excluding all key vault references. By default, all key vault references with the specified label will be exported.", arg_type=get_three_state_flag())
+        c.argument('snapshot', help="List all keys in a given snapshot of the App Configuration store. If no snapshot is specified, the keys currently in the store are listed.", is_preview=True)
 
     with self.argument_context('appconfig kv export', arg_group='File') as c:
         c.argument('path', help='Local configuration file path. Required for file arguments.')
