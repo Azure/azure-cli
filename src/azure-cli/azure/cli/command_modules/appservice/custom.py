@@ -4553,20 +4553,23 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, slot
     headers = get_scm_site_headers(cmd.cli_ctx, name, rg_name, slot)
     total_trials = (int(timeout) // 2) if timeout else 450
     num_trials = 0
+    # Indicates whether the status has been non empty in previous calls
+    has_response = False
     while num_trials < total_trials:
         time.sleep(2)
         response = requests.get(deployment_status_url, headers=headers,
                                 verify=not should_disable_connection_verify())
         try:
             res_dict = response.json()
+            if res_dict.get('status') is None and has_response:
+                raise CLIError("Failed to retrieve deployment status. Please visit {}".format(deployment_status_url))
+            elif res_dict.get('status') is not None and not has_response:
+                has_response = True
         except json.decoder.JSONDecodeError:
             logger.warning("Deployment status endpoint %s returns malformed data. Retrying...", deployment_status_url)
             res_dict = {}
         finally:
             num_trials = num_trials + 1
-
-        if res_dict.get('status') is None:
-            raise CLIError("Failed to retrieve deployment status. Please visit {}".format(deployment_status_url))
 
         status = res_dict.get('status', 0)
 
