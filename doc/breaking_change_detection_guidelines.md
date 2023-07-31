@@ -45,7 +45,7 @@ By the way, both these two commands can add `--only-break` to just pull the brea
 
 ### Analysis
 
-The diff result will be origanized as a combination of following base structure:
+The diff result will be organized as a combination of following base structure:
 ```
 {
     "cmd_name": "command name",
