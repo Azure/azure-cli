@@ -13,22 +13,21 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001","name":"cli_test_vmss_create_w_ag000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-05-25T14:07:39Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001","name":"cli_test_vmss_create_w_ag000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_vmss_create_with_app_gateway","date":"2023-07-11T08:30:04Z","module":"vm"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '340'
+      - '397'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:07:39 GMT
+      - Tue, 11 Jul 2023 08:30:07 GMT
       expires:
       - '-1'
       pragma:
@@ -56,14 +55,13 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-compute/29.1.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions?$top=1&$orderby=name%20desc&api-version=2022-11-01
   response:
     body:
-      string: "[\r\n  {\r\n    \"location\": \"westus\",\r\n    \"name\": \"0.20230222.1299\",\r\n
-        \   \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20230222.1299\"\r\n
+      string: "[\r\n  {\r\n    \"location\": \"westus\",\r\n    \"name\": \"0.20230601.1398\",\r\n
+        \   \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20230601.1398\"\r\n
         \ }\r\n]"
     headers:
       cache-control:
@@ -73,7 +71,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:07:39 GMT
+      - Tue, 11 Jul 2023 08:30:08 GMT
       expires:
       - '-1'
       pragma:
@@ -108,10 +106,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-compute/29.1.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions/0.20230222.1299?api-version=2022-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions/0.20230601.1398?api-version=2022-11-01
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
@@ -123,19 +120,18 @@ interactions:
         \"True\"\r\n      },\r\n      {\r\n        \"name\": \"DiskControllerTypes\",\r\n
         \       \"value\": \"SCSI\"\r\n      },\r\n      {\r\n        \"name\": \"IsHibernateSupported\",\r\n
         \       \"value\": \"False\"\r\n      }\r\n    ],\r\n    \"osDiskImage\":
-        {\r\n      \"operatingSystem\": \"Linux\",\r\n      \"sizeInGb\": 30,\r\n
-        \     \"sizeInBytes\": 32212255232\r\n    },\r\n    \"dataDiskImages\": []\r\n
-        \ },\r\n  \"location\": \"westus\",\r\n  \"name\": \"0.20230222.1299\",\r\n
-        \ \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20230222.1299\"\r\n}"
+        {\r\n      \"operatingSystem\": \"Linux\",\r\n      \"sizeInBytes\": 32212255232\r\n
+        \   },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\": \"westus\",\r\n
+        \ \"name\": \"0.20230601.1398\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20230601.1398\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1031'
+      - '1008'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:07:40 GMT
+      - Tue, 11 Jul 2023 08:30:10 GMT
       expires:
       - '-1'
       pragma:
@@ -170,8 +166,7 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/virtualNetworks?api-version=2022-01-01
   response:
@@ -185,13 +180,15 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:07:40 GMT
+      - Tue, 11 Jul 2023 08:30:10 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -211,8 +208,7 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/applicationGateways/apt1?api-version=2022-01-01
   response:
@@ -228,7 +224,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:07:41 GMT
+      - Tue, 11 Jul 2023 08:30:11 GMT
       expires:
       - '-1'
       pragma:
@@ -256,14 +252,13 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-compute/29.1.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions?$top=1&$orderby=name%20desc&api-version=2022-11-01
   response:
     body:
-      string: "[\r\n  {\r\n    \"location\": \"westus\",\r\n    \"name\": \"0.20230222.1299\",\r\n
-        \   \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20230222.1299\"\r\n
+      string: "[\r\n  {\r\n    \"location\": \"westus\",\r\n    \"name\": \"0.20230601.1398\",\r\n
+        \   \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20230601.1398\"\r\n
         \ }\r\n]"
     headers:
       cache-control:
@@ -273,7 +268,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:07:41 GMT
+      - Tue, 11 Jul 2023 08:30:12 GMT
       expires:
       - '-1'
       pragma:
@@ -308,10 +303,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-compute/29.1.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions/0.20230222.1299?api-version=2022-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions/0.20230601.1398?api-version=2022-11-01
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
@@ -323,19 +317,18 @@ interactions:
         \"True\"\r\n      },\r\n      {\r\n        \"name\": \"DiskControllerTypes\",\r\n
         \       \"value\": \"SCSI\"\r\n      },\r\n      {\r\n        \"name\": \"IsHibernateSupported\",\r\n
         \       \"value\": \"False\"\r\n      }\r\n    ],\r\n    \"osDiskImage\":
-        {\r\n      \"operatingSystem\": \"Linux\",\r\n      \"sizeInGb\": 30,\r\n
-        \     \"sizeInBytes\": 32212255232\r\n    },\r\n    \"dataDiskImages\": []\r\n
-        \ },\r\n  \"location\": \"westus\",\r\n  \"name\": \"0.20230222.1299\",\r\n
-        \ \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20230222.1299\"\r\n}"
+        {\r\n      \"operatingSystem\": \"Linux\",\r\n      \"sizeInBytes\": 32212255232\r\n
+        \   },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\": \"westus\",\r\n
+        \ \"name\": \"0.20230601.1398\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20230601.1398\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1031'
+      - '1008'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:07:41 GMT
+      - Tue, 11 Jul 2023 08:30:13 GMT
       expires:
       - '-1'
       pragma:
@@ -370,14 +363,13 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-compute/29.1.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions?$top=1&$orderby=name%20desc&api-version=2022-11-01
   response:
     body:
-      string: "[\r\n  {\r\n    \"location\": \"westus\",\r\n    \"name\": \"0.20230222.1299\",\r\n
-        \   \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20230222.1299\"\r\n
+      string: "[\r\n  {\r\n    \"location\": \"westus\",\r\n    \"name\": \"0.20230601.1398\",\r\n
+        \   \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20230601.1398\"\r\n
         \ }\r\n]"
     headers:
       cache-control:
@@ -387,7 +379,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:07:41 GMT
+      - Tue, 11 Jul 2023 08:30:14 GMT
       expires:
       - '-1'
       pragma:
@@ -422,10 +414,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-compute/29.1.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions/0.20230222.1299?api-version=2022-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions/0.20230601.1398?api-version=2022-11-01
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
@@ -437,19 +428,18 @@ interactions:
         \"True\"\r\n      },\r\n      {\r\n        \"name\": \"DiskControllerTypes\",\r\n
         \       \"value\": \"SCSI\"\r\n      },\r\n      {\r\n        \"name\": \"IsHibernateSupported\",\r\n
         \       \"value\": \"False\"\r\n      }\r\n    ],\r\n    \"osDiskImage\":
-        {\r\n      \"operatingSystem\": \"Linux\",\r\n      \"sizeInGb\": 30,\r\n
-        \     \"sizeInBytes\": 32212255232\r\n    },\r\n    \"dataDiskImages\": []\r\n
-        \ },\r\n  \"location\": \"westus\",\r\n  \"name\": \"0.20230222.1299\",\r\n
-        \ \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20230222.1299\"\r\n}"
+        {\r\n      \"operatingSystem\": \"Linux\",\r\n      \"sizeInBytes\": 32212255232\r\n
+        \   },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\": \"westus\",\r\n
+        \ \"name\": \"0.20230601.1398\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20230601.1398\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1031'
+      - '1008'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:07:43 GMT
+      - Tue, 11 Jul 2023 08:30:16 GMT
       expires:
       - '-1'
       pragma:
@@ -459,6 +449,10 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
@@ -496,18 +490,18 @@ interactions:
       ''/backendAddressPools/vmss1LBBEPool'')]"}, "backendHttpSettings": {"id": "[concat(variables(''appGwID''),
       ''/backendHttpSettingsCollection/appGwBackendHttpSettings'')]"}}}]}}, {"type":
       "Microsoft.Compute/virtualMachineScaleSets", "name": "vmss1", "location": "westus",
-      "tags": {}, "apiVersion": "2022-11-01", "dependsOn": ["Microsoft.Network/virtualNetworks/vmss1VNET",
+      "tags": {}, "apiVersion": "2023-03-01", "dependsOn": ["Microsoft.Network/virtualNetworks/vmss1VNET",
       "Microsoft.Network/applicationGateways/apt1"], "properties": {"overprovision":
       true, "upgradePolicy": {"mode": "manual", "rollingUpgradePolicy": {}}, "singlePlacementGroup":
       null, "virtualMachineProfile": {"storageProfile": {"osDisk": {"createOption":
       "FromImage", "caching": "ReadWrite", "managedDisk": {"storageAccountType": null}},
       "imageReference": {"publisher": "Debian", "offer": "debian-10", "sku": "10",
-      "version": "latest"}}, "osProfile": {"computerNamePrefix": "vmss18499", "adminUsername":
+      "version": "latest"}}, "osProfile": {"computerNamePrefix": "vmss1c126", "adminUsername":
       "clittester", "linuxConfiguration": {"disablePasswordAuthentication": true,
       "ssh": {"publicKeys": [{"path": "/home/clittester/.ssh/authorized_keys", "keyData":
       "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==
       test@example.com\n"}]}}}, "networkProfile": {"networkInterfaceConfigurations":
-      [{"name": "vmss18499Nic", "properties": {"ipConfigurations": [{"name": "vmss18499IPConfig",
+      [{"name": "vmss1c126Nic", "properties": {"ipConfigurations": [{"name": "vmss1c126IPConfig",
       "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET/subnets/vmss1Subnet"},
       "ApplicationGatewayBackendAddressPools": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/applicationGateways/apt1/backendAddressPools/vmss1LBBEPool"}]}}],
       "primary": "true"}}]}}, "orchestrationMode": "Uniform"}, "sku": {"name": "Standard_DS1_v2",
@@ -530,24 +524,23 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/vmss_deploy_ENewxaCukg2bCAXudW94LvkWM4kKGBT3","name":"vmss_deploy_ENewxaCukg2bCAXudW94LvkWM4kKGBT3","type":"Microsoft.Resources/deployments","properties":{"templateHash":"11785471116668309096","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2023-05-25T14:07:48.6881724Z","duration":"PT0.000402S","correlationId":"6a2a90d9-02db-40f1-9051-4d27d7d41e1b","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"applicationGateways","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/publicIPAddresses/apt1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"apt1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/applicationGateways/apt1","resourceType":"Microsoft.Network/applicationGateways","resourceName":"apt1"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/applicationGateways/apt1","resourceType":"Microsoft.Network/applicationGateways","resourceName":"apt1"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"vmss1"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/vmss_deploy_v7MwIDfh5x5BBAHw3YRVQ1qMt9LczrMP","name":"vmss_deploy_v7MwIDfh5x5BBAHw3YRVQ1qMt9LczrMP","type":"Microsoft.Resources/deployments","properties":{"templateHash":"12503914640322758143","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2023-07-11T08:30:24.2483919Z","duration":"PT0.0007119S","correlationId":"f7f9a145-d013-4d6f-ba52-4213c63fefc1","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"applicationGateways","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/publicIPAddresses/apt1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"apt1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/applicationGateways/apt1","resourceType":"Microsoft.Network/applicationGateways","resourceName":"apt1"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/applicationGateways/apt1","resourceType":"Microsoft.Network/applicationGateways","resourceName":"apt1"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"vmss1"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/vmss_deploy_ENewxaCukg2bCAXudW94LvkWM4kKGBT3/operationStatuses/08585165832182098147?api-version=2022-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/vmss_deploy_v7MwIDfh5x5BBAHw3YRVQ1qMt9LczrMP/operationStatuses/08585125426640057269?api-version=2022-09-01
       cache-control:
       - no-cache
       content-length:
-      - '2396'
+      - '2397'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:07:48 GMT
+      - Tue, 11 Jul 2023 08:30:26 GMT
       expires:
       - '-1'
       pragma:
@@ -557,7 +550,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -575,10 +568,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -590,7 +582,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:08:19 GMT
+      - Tue, 11 Jul 2023 08:30:27 GMT
       expires:
       - '-1'
       pragma:
@@ -618,10 +610,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -633,7 +624,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:08:49 GMT
+      - Tue, 11 Jul 2023 08:30:57 GMT
       expires:
       - '-1'
       pragma:
@@ -661,10 +652,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -676,7 +666,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:09:19 GMT
+      - Tue, 11 Jul 2023 08:31:29 GMT
       expires:
       - '-1'
       pragma:
@@ -704,10 +694,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -719,7 +708,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:09:49 GMT
+      - Tue, 11 Jul 2023 08:32:00 GMT
       expires:
       - '-1'
       pragma:
@@ -747,10 +736,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -762,7 +750,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:10:20 GMT
+      - Tue, 11 Jul 2023 08:32:30 GMT
       expires:
       - '-1'
       pragma:
@@ -790,10 +778,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -805,7 +792,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:10:50 GMT
+      - Tue, 11 Jul 2023 08:33:00 GMT
       expires:
       - '-1'
       pragma:
@@ -833,10 +820,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -848,7 +834,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:11:20 GMT
+      - Tue, 11 Jul 2023 08:33:31 GMT
       expires:
       - '-1'
       pragma:
@@ -876,10 +862,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -891,7 +876,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:11:51 GMT
+      - Tue, 11 Jul 2023 08:34:02 GMT
       expires:
       - '-1'
       pragma:
@@ -919,440 +904,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 25 May 2023 14:12:21 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vmss create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
-      User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 25 May 2023 14:12:51 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vmss create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
-      User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 25 May 2023 14:13:21 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vmss create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
-      User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 25 May 2023 14:13:52 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vmss create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
-      User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 25 May 2023 14:14:22 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vmss create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
-      User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 25 May 2023 14:14:52 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vmss create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
-      User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 25 May 2023 14:15:22 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vmss create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
-      User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 25 May 2023 14:15:53 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vmss create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
-      User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 25 May 2023 14:16:23 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vmss create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
-      User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 25 May 2023 14:16:53 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vmss create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
-      User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1366,7 +920,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:17:23 GMT
+      - Tue, 11 Jul 2023 08:34:31 GMT
       expires:
       - '-1'
       pragma:
@@ -1394,10 +948,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1409,7 +962,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:17:53 GMT
+      - Tue, 11 Jul 2023 08:35:03 GMT
       expires:
       - '-1'
       pragma:
@@ -1437,10 +990,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1452,7 +1004,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:18:23 GMT
+      - Tue, 11 Jul 2023 08:35:34 GMT
       expires:
       - '-1'
       pragma:
@@ -1480,10 +1032,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1495,7 +1046,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:18:54 GMT
+      - Tue, 11 Jul 2023 08:36:04 GMT
       expires:
       - '-1'
       pragma:
@@ -1523,10 +1074,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1538,7 +1088,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:19:25 GMT
+      - Tue, 11 Jul 2023 08:36:35 GMT
       expires:
       - '-1'
       pragma:
@@ -1566,10 +1116,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1581,7 +1130,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:19:55 GMT
+      - Tue, 11 Jul 2023 08:37:05 GMT
       expires:
       - '-1'
       pragma:
@@ -1609,10 +1158,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1624,7 +1172,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:20:25 GMT
+      - Tue, 11 Jul 2023 08:37:36 GMT
       expires:
       - '-1'
       pragma:
@@ -1652,10 +1200,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1667,7 +1214,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:20:55 GMT
+      - Tue, 11 Jul 2023 08:38:07 GMT
       expires:
       - '-1'
       pragma:
@@ -1695,10 +1242,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1710,7 +1256,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:21:25 GMT
+      - Tue, 11 Jul 2023 08:38:38 GMT
       expires:
       - '-1'
       pragma:
@@ -1738,10 +1284,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1753,7 +1298,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:21:55 GMT
+      - Tue, 11 Jul 2023 08:39:08 GMT
       expires:
       - '-1'
       pragma:
@@ -1781,10 +1326,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1796,7 +1340,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:22:25 GMT
+      - Tue, 11 Jul 2023 08:39:39 GMT
       expires:
       - '-1'
       pragma:
@@ -1824,10 +1368,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1839,7 +1382,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:22:55 GMT
+      - Tue, 11 Jul 2023 08:40:09 GMT
       expires:
       - '-1'
       pragma:
@@ -1867,10 +1410,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1882,7 +1424,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:23:26 GMT
+      - Tue, 11 Jul 2023 08:40:40 GMT
       expires:
       - '-1'
       pragma:
@@ -1910,10 +1452,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1925,7 +1466,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:23:56 GMT
+      - Tue, 11 Jul 2023 08:41:11 GMT
       expires:
       - '-1'
       pragma:
@@ -1953,10 +1494,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1968,7 +1508,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:24:27 GMT
+      - Tue, 11 Jul 2023 08:41:43 GMT
       expires:
       - '-1'
       pragma:
@@ -1996,10 +1536,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -2011,7 +1550,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:24:57 GMT
+      - Tue, 11 Jul 2023 08:42:13 GMT
       expires:
       - '-1'
       pragma:
@@ -2039,10 +1578,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -2054,7 +1592,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:25:27 GMT
+      - Tue, 11 Jul 2023 08:42:43 GMT
       expires:
       - '-1'
       pragma:
@@ -2082,10 +1620,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -2097,7 +1634,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:25:57 GMT
+      - Tue, 11 Jul 2023 08:43:14 GMT
       expires:
       - '-1'
       pragma:
@@ -2125,10 +1662,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -2140,7 +1676,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:26:27 GMT
+      - Tue, 11 Jul 2023 08:43:44 GMT
       expires:
       - '-1'
       pragma:
@@ -2168,10 +1704,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -2183,7 +1718,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:26:58 GMT
+      - Tue, 11 Jul 2023 08:44:15 GMT
       expires:
       - '-1'
       pragma:
@@ -2211,10 +1746,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -2226,7 +1760,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:27:28 GMT
+      - Tue, 11 Jul 2023 08:44:45 GMT
       expires:
       - '-1'
       pragma:
@@ -2254,10 +1788,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -2269,7 +1802,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:27:58 GMT
+      - Tue, 11 Jul 2023 08:45:15 GMT
       expires:
       - '-1'
       pragma:
@@ -2297,10 +1830,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -2312,7 +1844,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:28:28 GMT
+      - Tue, 11 Jul 2023 08:45:47 GMT
       expires:
       - '-1'
       pragma:
@@ -2340,10 +1872,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -2355,7 +1886,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:28:58 GMT
+      - Tue, 11 Jul 2023 08:46:17 GMT
       expires:
       - '-1'
       pragma:
@@ -2383,10 +1914,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -2398,7 +1928,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:29:28 GMT
+      - Tue, 11 Jul 2023 08:46:48 GMT
       expires:
       - '-1'
       pragma:
@@ -2426,10 +1956,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -2441,7 +1970,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:29:58 GMT
+      - Tue, 11 Jul 2023 08:47:19 GMT
       expires:
       - '-1'
       pragma:
@@ -2469,10 +1998,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -2484,7 +2012,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:30:29 GMT
+      - Tue, 11 Jul 2023 08:47:49 GMT
       expires:
       - '-1'
       pragma:
@@ -2512,10 +2040,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -2527,7 +2054,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:30:59 GMT
+      - Tue, 11 Jul 2023 08:48:20 GMT
       expires:
       - '-1'
       pragma:
@@ -2555,10 +2082,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -2570,7 +2096,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:31:29 GMT
+      - Tue, 11 Jul 2023 08:48:49 GMT
       expires:
       - '-1'
       pragma:
@@ -2598,10 +2124,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -2613,7 +2138,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:31:59 GMT
+      - Tue, 11 Jul 2023 08:49:20 GMT
       expires:
       - '-1'
       pragma:
@@ -2641,10 +2166,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -2656,7 +2180,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:32:30 GMT
+      - Tue, 11 Jul 2023 08:49:51 GMT
       expires:
       - '-1'
       pragma:
@@ -2684,10 +2208,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -2699,7 +2222,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:33:00 GMT
+      - Tue, 11 Jul 2023 08:50:22 GMT
       expires:
       - '-1'
       pragma:
@@ -2727,10 +2250,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -2742,7 +2264,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:33:31 GMT
+      - Tue, 11 Jul 2023 08:50:53 GMT
       expires:
       - '-1'
       pragma:
@@ -2770,10 +2292,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -2785,7 +2306,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:34:01 GMT
+      - Tue, 11 Jul 2023 08:51:23 GMT
       expires:
       - '-1'
       pragma:
@@ -2813,10 +2334,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -2828,7 +2348,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:34:31 GMT
+      - Tue, 11 Jul 2023 08:51:53 GMT
       expires:
       - '-1'
       pragma:
@@ -2856,10 +2376,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -2871,7 +2390,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:35:02 GMT
+      - Tue, 11 Jul 2023 08:52:24 GMT
       expires:
       - '-1'
       pragma:
@@ -2899,10 +2418,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -2914,7 +2432,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:35:32 GMT
+      - Tue, 11 Jul 2023 08:52:56 GMT
       expires:
       - '-1'
       pragma:
@@ -2942,10 +2460,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -2957,7 +2474,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:36:02 GMT
+      - Tue, 11 Jul 2023 08:53:26 GMT
       expires:
       - '-1'
       pragma:
@@ -2985,10 +2502,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -3000,7 +2516,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:36:32 GMT
+      - Tue, 11 Jul 2023 08:53:57 GMT
       expires:
       - '-1'
       pragma:
@@ -3028,10 +2544,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -3043,7 +2558,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:37:02 GMT
+      - Tue, 11 Jul 2023 08:54:27 GMT
       expires:
       - '-1'
       pragma:
@@ -3071,10 +2586,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -3086,7 +2600,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:37:32 GMT
+      - Tue, 11 Jul 2023 08:54:59 GMT
       expires:
       - '-1'
       pragma:
@@ -3114,10 +2628,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -3129,7 +2642,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:38:02 GMT
+      - Tue, 11 Jul 2023 08:55:30 GMT
       expires:
       - '-1'
       pragma:
@@ -3157,10 +2670,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -3172,7 +2684,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:38:32 GMT
+      - Tue, 11 Jul 2023 08:56:00 GMT
       expires:
       - '-1'
       pragma:
@@ -3200,10 +2712,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -3215,7 +2726,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:39:02 GMT
+      - Tue, 11 Jul 2023 08:56:31 GMT
       expires:
       - '-1'
       pragma:
@@ -3243,10 +2754,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -3258,7 +2768,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:39:34 GMT
+      - Tue, 11 Jul 2023 08:57:00 GMT
       expires:
       - '-1'
       pragma:
@@ -3286,10 +2796,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -3301,7 +2810,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:40:04 GMT
+      - Tue, 11 Jul 2023 08:57:31 GMT
       expires:
       - '-1'
       pragma:
@@ -3329,10 +2838,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -3344,7 +2852,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:40:34 GMT
+      - Tue, 11 Jul 2023 08:58:02 GMT
       expires:
       - '-1'
       pragma:
@@ -3372,10 +2880,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -3387,7 +2894,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:41:04 GMT
+      - Tue, 11 Jul 2023 08:58:32 GMT
       expires:
       - '-1'
       pragma:
@@ -3415,10 +2922,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -3430,7 +2936,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:41:34 GMT
+      - Tue, 11 Jul 2023 08:59:03 GMT
       expires:
       - '-1'
       pragma:
@@ -3458,10 +2964,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -3473,7 +2978,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:42:04 GMT
+      - Tue, 11 Jul 2023 08:59:33 GMT
       expires:
       - '-1'
       pragma:
@@ -3501,10 +3006,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -3516,7 +3020,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:42:34 GMT
+      - Tue, 11 Jul 2023 09:00:04 GMT
       expires:
       - '-1'
       pragma:
@@ -3544,10 +3048,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -3559,7 +3062,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:43:05 GMT
+      - Tue, 11 Jul 2023 09:00:35 GMT
       expires:
       - '-1'
       pragma:
@@ -3587,10 +3090,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -3602,7 +3104,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:43:35 GMT
+      - Tue, 11 Jul 2023 09:01:05 GMT
       expires:
       - '-1'
       pragma:
@@ -3630,10 +3132,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -3645,7 +3146,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:44:06 GMT
+      - Tue, 11 Jul 2023 09:01:36 GMT
       expires:
       - '-1'
       pragma:
@@ -3673,10 +3174,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -3688,7 +3188,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:44:35 GMT
+      - Tue, 11 Jul 2023 09:02:07 GMT
       expires:
       - '-1'
       pragma:
@@ -3716,10 +3216,53 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      connection:
+      - close
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 11 Jul 2023 09:02:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -3731,7 +3274,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:45:05 GMT
+      - Tue, 11 Jul 2023 09:03:09 GMT
       expires:
       - '-1'
       pragma:
@@ -3759,10 +3302,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -3774,7 +3316,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:45:37 GMT
+      - Tue, 11 Jul 2023 09:03:39 GMT
       expires:
       - '-1'
       pragma:
@@ -3802,10 +3344,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -3817,7 +3358,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:46:07 GMT
+      - Tue, 11 Jul 2023 09:04:09 GMT
       expires:
       - '-1'
       pragma:
@@ -3845,10 +3386,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -3860,7 +3400,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:46:37 GMT
+      - Tue, 11 Jul 2023 09:04:40 GMT
       expires:
       - '-1'
       pragma:
@@ -3888,10 +3428,387 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585165832182098147?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 11 Jul 2023 09:05:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 11 Jul 2023 09:05:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 11 Jul 2023 09:06:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 11 Jul 2023 09:06:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 11 Jul 2023 09:07:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 11 Jul 2023 09:07:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 11 Jul 2023 09:08:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 11 Jul 2023 09:08:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 11 Jul 2023 09:09:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585125426640057269?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -3903,7 +3820,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:47:07 GMT
+      - Tue, 11 Jul 2023 09:09:45 GMT
       expires:
       - '-1'
       pragma:
@@ -3931,15 +3848,14 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --ssh-key-value --app-gateway --instance-count
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/vmss_deploy_ENewxaCukg2bCAXudW94LvkWM4kKGBT3","name":"vmss_deploy_ENewxaCukg2bCAXudW94LvkWM4kKGBT3","type":"Microsoft.Resources/deployments","properties":{"templateHash":"11785471116668309096","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2023-05-25T14:47:01.6908887Z","duration":"PT39M13.0031183S","correlationId":"6a2a90d9-02db-40f1-9051-4d27d7d41e1b","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"applicationGateways","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/publicIPAddresses/apt1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"apt1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/applicationGateways/apt1","resourceType":"Microsoft.Network/applicationGateways","resourceName":"apt1"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/applicationGateways/apt1","resourceType":"Microsoft.Network/applicationGateways","resourceName":"apt1"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"vmss1"}],"outputs":{"vmss":{"type":"Object","value":{"singlePlacementGroup":true,"orchestrationMode":"Uniform","upgradePolicy":{"mode":"Manual","rollingUpgradePolicy":{"maxBatchInstancePercent":20,"maxUnhealthyInstancePercent":20,"maxUnhealthyUpgradedInstancePercent":20,"pauseTimeBetweenBatches":"PT0S","maxSurge":false,"rollbackFailedInstancesOnPolicyBreach":false}},"virtualMachineProfile":{"osProfile":{"computerNamePrefix":"vmss18499","adminUsername":"clittester","linuxConfiguration":{"disablePasswordAuthentication":true,"ssh":{"publicKeys":[{"path":"/home/clittester/.ssh/authorized_keys","keyData":"ssh-rsa
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Resources/deployments/vmss_deploy_v7MwIDfh5x5BBAHw3YRVQ1qMt9LczrMP","name":"vmss_deploy_v7MwIDfh5x5BBAHw3YRVQ1qMt9LczrMP","type":"Microsoft.Resources/deployments","properties":{"templateHash":"12503914640322758143","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2023-07-11T09:09:22.8945525Z","duration":"PT38M58.6468725S","correlationId":"f7f9a145-d013-4d6f-ba52-4213c63fefc1","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"applicationGateways","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/publicIPAddresses/apt1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"apt1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/applicationGateways/apt1","resourceType":"Microsoft.Network/applicationGateways","resourceName":"apt1"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/applicationGateways/apt1","resourceType":"Microsoft.Network/applicationGateways","resourceName":"apt1"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"vmss1"}],"outputs":{"vmss":{"type":"Object","value":{"singlePlacementGroup":true,"orchestrationMode":"Uniform","upgradePolicy":{"mode":"Manual","rollingUpgradePolicy":{"maxBatchInstancePercent":20,"maxUnhealthyInstancePercent":20,"maxUnhealthyUpgradedInstancePercent":20,"pauseTimeBetweenBatches":"PT0S","maxSurge":false,"rollbackFailedInstancesOnPolicyBreach":false}},"virtualMachineProfile":{"osProfile":{"computerNamePrefix":"vmss1c126","adminUsername":"clittester","linuxConfiguration":{"disablePasswordAuthentication":true,"ssh":{"publicKeys":[{"path":"/home/clittester/.ssh/authorized_keys","keyData":"ssh-rsa
         AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==
-        test@example.com\n"}]},"provisionVMAgent":true,"enableVMAgentPlatformUpdates":false},"secrets":[],"allowExtensionOperations":true,"requireGuestProvisionSignal":true},"storageProfile":{"osDisk":{"osType":"Linux","createOption":"FromImage","caching":"ReadWrite","managedDisk":{"storageAccountType":"Premium_LRS"},"diskSizeGB":30},"imageReference":{"publisher":"Debian","offer":"debian-10","sku":"10","version":"latest"}},"networkProfile":{"networkInterfaceConfigurations":[{"name":"vmss18499Nic","properties":{"primary":true,"disableTcpStateTracking":false,"dnsSettings":{"dnsServers":[]},"enableIPForwarding":false,"ipConfigurations":[{"name":"vmss18499IPConfig","properties":{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET/subnets/vmss1Subnet"},"privateIPAddressVersion":"IPv4","applicationGatewayBackendAddressPools":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/applicationGateways/apt1/backendAddressPools/vmss1LBBEPool"}]}}]}}]}},"provisioningState":"Succeeded","overprovision":true,"doNotRunExtensionsOnOverprovisionedVMs":false,"uniqueId":"6c338772-82b3-4ae7-80b9-ac173c36a321","timeCreated":"2023-05-25T14:17:53.2104955+00:00"}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/applicationGateways/apt1"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/publicIPAddresses/apt1PublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET"}]}}'
+        test@example.com\n"}]},"provisionVMAgent":true,"enableVMAgentPlatformUpdates":false},"secrets":[],"allowExtensionOperations":true,"requireGuestProvisionSignal":true},"storageProfile":{"osDisk":{"osType":"Linux","createOption":"FromImage","caching":"ReadWrite","managedDisk":{"storageAccountType":"Premium_LRS"},"diskSizeGB":30},"imageReference":{"publisher":"Debian","offer":"debian-10","sku":"10","version":"latest"}},"networkProfile":{"networkInterfaceConfigurations":[{"name":"vmss1c126Nic","properties":{"primary":true,"disableTcpStateTracking":false,"dnsSettings":{"dnsServers":[]},"enableIPForwarding":false,"ipConfigurations":[{"name":"vmss1c126IPConfig","properties":{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET/subnets/vmss1Subnet"},"privateIPAddressVersion":"IPv4","applicationGatewayBackendAddressPools":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/applicationGateways/apt1/backendAddressPools/vmss1LBBEPool"}]}}]}}]}},"provisioningState":"Succeeded","overprovision":true,"doNotRunExtensionsOnOverprovisionedVMs":false,"uniqueId":"6877bd46-b53c-44c0-9b0c-19ce27a386f0","timeCreated":"2023-07-11T08:40:30.2396739+00:00"}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/applicationGateways/apt1"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/publicIPAddresses/apt1PublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET"}]}}'
     headers:
       cache-control:
       - no-cache
@@ -3948,7 +3864,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:47:07 GMT
+      - Tue, 11 Jul 2023 09:09:45 GMT
       expires:
       - '-1'
       pragma:
@@ -3976,10 +3892,9 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-compute/29.1.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1?api-version=2022-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1?api-version=2023-03-01
   response:
     body:
       string: "{\r\n  \"name\": \"vmss1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1\",\r\n
@@ -3992,7 +3907,7 @@ interactions:
         20,\r\n        \"maxUnhealthyUpgradedInstancePercent\": 20,\r\n        \"pauseTimeBetweenBatches\":
         \"PT0S\",\r\n        \"maxSurge\": false,\r\n        \"rollbackFailedInstancesOnPolicyBreach\":
         false\r\n      }\r\n    },\r\n    \"virtualMachineProfile\": {\r\n      \"osProfile\":
-        {\r\n        \"computerNamePrefix\": \"vmss18499\",\r\n        \"adminUsername\":
+        {\r\n        \"computerNamePrefix\": \"vmss1c126\",\r\n        \"adminUsername\":
         \"clittester\",\r\n        \"linuxConfiguration\": {\r\n          \"disablePasswordAuthentication\":
         true,\r\n          \"ssh\": {\r\n            \"publicKeys\": [\r\n              {\r\n
         \               \"path\": \"/home/clittester/.ssh/authorized_keys\",\r\n                \"keyData\":
@@ -4007,10 +3922,10 @@ interactions:
         \         \"diskSizeGB\": 30\r\n        },\r\n        \"imageReference\":
         {\r\n          \"publisher\": \"Debian\",\r\n          \"offer\": \"debian-10\",\r\n
         \         \"sku\": \"10\",\r\n          \"version\": \"latest\"\r\n        }\r\n
-        \     },\r\n      \"networkProfile\": {\"networkInterfaceConfigurations\":[{\"name\":\"vmss18499Nic\",\"properties\":{\"primary\":true,\"disableTcpStateTracking\":false,\"dnsSettings\":{\"dnsServers\":[]},\"enableIPForwarding\":false,\"ipConfigurations\":[{\"name\":\"vmss18499IPConfig\",\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET/subnets/vmss1Subnet\"},\"privateIPAddressVersion\":\"IPv4\",\"applicationGatewayBackendAddressPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/applicationGateways/apt1/backendAddressPools/vmss1LBBEPool\"}]}}]}}]}\r\n
+        \     },\r\n      \"networkProfile\": {\"networkInterfaceConfigurations\":[{\"name\":\"vmss1c126Nic\",\"properties\":{\"primary\":true,\"disableTcpStateTracking\":false,\"dnsSettings\":{\"dnsServers\":[]},\"enableIPForwarding\":false,\"ipConfigurations\":[{\"name\":\"vmss1c126IPConfig\",\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET/subnets/vmss1Subnet\"},\"privateIPAddressVersion\":\"IPv4\",\"applicationGatewayBackendAddressPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_w_ag000001/providers/Microsoft.Network/applicationGateways/apt1/backendAddressPools/vmss1LBBEPool\"}]}}]}}]}\r\n
         \   },\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"overprovision\":
         true,\r\n    \"doNotRunExtensionsOnOverprovisionedVMs\": false,\r\n    \"uniqueId\":
-        \"6c338772-82b3-4ae7-80b9-ac173c36a321\",\r\n    \"timeCreated\": \"2023-05-25T14:17:53.2104955+00:00\"\r\n
+        \"6877bd46-b53c-44c0-9b0c-19ce27a386f0\",\r\n    \"timeCreated\": \"2023-07-11T08:40:30.2396739+00:00\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -4020,7 +3935,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 25 May 2023 14:47:08 GMT
+      - Tue, 11 Jul 2023 09:09:47 GMT
       expires:
       - '-1'
       pragma:
@@ -4037,7 +3952,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetVMScaleSet3Min;396,Microsoft.Compute/GetVMScaleSet30Min;2595
+      - Microsoft.Compute/GetVMScaleSet3Min;385,Microsoft.Compute/GetVMScaleSet30Min;2368
     status:
       code: 200
       message: OK

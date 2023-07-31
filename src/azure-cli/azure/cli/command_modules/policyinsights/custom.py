@@ -30,7 +30,7 @@ def list_policy_events(
         filter_clause=None,
         apply_clause=None):
 
-    from azure.mgmt.policyinsights.models import QueryOptions
+    from azure.mgmt.policyinsights.models import QueryOptions, PolicyEventsResourceType
 
     query_options = QueryOptions(
         top=top_value,
@@ -46,25 +46,29 @@ def list_policy_events(
     if policy_assignment_name:
         if resource_group_name:
             events = client.list_query_results_for_resource_group_level_policy_assignment(
-                subscription_id,
-                resource_group_name,
-                policy_assignment_name,
-                query_options)
+                subscription_id=subscription_id,
+                resource_group_name=resource_group_name,
+                policy_assignment_name=policy_assignment_name,
+                query_options=query_options,
+                policy_events_resource=PolicyEventsResourceType.DEFAULT)
         else:
             events = client.list_query_results_for_subscription_level_policy_assignment(
-                subscription_id,
-                policy_assignment_name,
-                query_options)
+                subscription_id=subscription_id,
+                policy_assignment_name=policy_assignment_name,
+                query_options=query_options,
+                policy_events_resource=PolicyEventsResourceType.DEFAULT)
     elif policy_definition_name:
         events = client.list_query_results_for_policy_definition(
-            subscription_id,
-            policy_definition_name,
-            query_options)
+            subscription_id=subscription_id,
+            policy_definition_name=policy_definition_name,
+            query_options=query_options,
+            policy_events_resource=PolicyEventsResourceType.DEFAULT)
     elif policy_set_definition_name:
         events = client.list_query_results_for_policy_set_definition(
-            subscription_id,
-            policy_set_definition_name,
-            query_options)
+            subscription_id=subscription_id,
+            policy_set_definition_name=policy_set_definition_name,
+            query_options=query_options,
+            policy_events_resource=PolicyEventsResourceType.DEFAULT)
     elif resource:
         if not is_valid_resource_id(resource):
             if resource_type_parent:
@@ -79,21 +83,25 @@ def list_policy_events(
                 type=resource_type,
                 name=resource)
         events = client.list_query_results_for_resource(
-            resource,
-            query_options)
+            resource_id=resource,
+            query_options=query_options,
+            policy_events_resource=PolicyEventsResourceType.DEFAULT)
     elif resource_group_name:
         events = client.list_query_results_for_resource_group(
-            subscription_id,
-            resource_group_name,
-            query_options)
+            subscription_id=subscription_id,
+            resource_group_name=resource_group_name,
+            query_options=query_options,
+            policy_events_resource=PolicyEventsResourceType.DEFAULT)
     elif management_group_name:
         events = client.list_query_results_for_management_group(
-            management_group_name,
-            query_options)
+            management_group_name=management_group_name,
+            query_options=query_options,
+            policy_events_resource=PolicyEventsResourceType.DEFAULT)
     else:
         events = client.list_query_results_for_subscription(
-            subscription_id,
-            query_options)
+            subscription_id=subscription_id,
+            query_options=query_options,
+            policy_events_resource=PolicyEventsResourceType.DEFAULT)
 
     return events
 
@@ -218,7 +226,7 @@ def summarize_policy_states(
         top_value=None,
         filter_clause=None):
 
-    from azure.mgmt.policyinsights.models import QueryOptions
+    from azure.mgmt.policyinsights.models import QueryOptions, PolicyStatesSummaryResourceType
 
     query_options = QueryOptions(
         top=top_value,
@@ -231,25 +239,29 @@ def summarize_policy_states(
     if policy_assignment_name:
         if resource_group_name:
             summary = client.summarize_for_resource_group_level_policy_assignment(
-                subscription_id,
-                resource_group_name,
-                policy_assignment_name,
-                query_options)
+                subscription_id=subscription_id,
+                resource_group_name=resource_group_name,
+                policy_assignment_name=policy_assignment_name,
+                query_options=query_options,
+                policy_states_summary_resource=PolicyStatesSummaryResourceType.LATEST)
         else:
             summary = client.summarize_for_subscription_level_policy_assignment(
-                subscription_id,
-                policy_assignment_name,
-                query_options)
+                subscription_id=subscription_id,
+                policy_assignment_name=policy_assignment_name,
+                query_options=query_options,
+                policy_states_summary_resource=PolicyStatesSummaryResourceType.LATEST)
     elif policy_definition_name:
         summary = client.summarize_for_policy_definition(
-            subscription_id,
-            policy_definition_name,
-            query_options)
+            subscription_id=subscription_id,
+            policy_definition_name=policy_definition_name,
+            query_options=query_options,
+            policy_states_summary_resource=PolicyStatesSummaryResourceType.LATEST)
     elif policy_set_definition_name:
         summary = client.summarize_for_policy_set_definition(
-            subscription_id,
-            policy_set_definition_name,
-            query_options)
+            subscription_id=subscription_id,
+            policy_set_definition_name=policy_set_definition_name,
+            query_options=query_options,
+            policy_states_summary_resource=PolicyStatesSummaryResourceType.LATEST)
     elif resource:
         resource = _build_resource_id(
             subscription_id,
@@ -259,21 +271,25 @@ def summarize_policy_states(
             resource_type_parent,
             resource_type)
         summary = client.summarize_for_resource(
-            resource,
-            query_options)
+            resource_id=resource,
+            query_options=query_options,
+            policy_states_summary_resource=PolicyStatesSummaryResourceType.LATEST)
     elif resource_group_name:
         summary = client.summarize_for_resource_group(
-            subscription_id,
-            resource_group_name,
-            query_options)
+            subscription_id=subscription_id,
+            resource_group_name=resource_group_name,
+            query_options=query_options,
+            policy_states_summary_resource=PolicyStatesSummaryResourceType.LATEST)
     elif management_group_name:
         summary = client.summarize_for_management_group(
-            management_group_name,
-            query_options)
+            management_group_name=management_group_name,
+            query_options=query_options,
+            policy_states_summary_resource=PolicyStatesSummaryResourceType.LATEST)
     else:
         summary = client.summarize_for_subscription(
-            subscription_id,
-            query_options)
+            subscription_id=subscription_id,
+            query_options=query_options,
+            policy_states_summary_resource=PolicyStatesSummaryResourceType.LATEST)
 
     return summary.value[0]
 

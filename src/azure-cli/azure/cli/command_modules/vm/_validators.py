@@ -2386,6 +2386,10 @@ def process_image_version_update_namespace(cmd, namespace):
 # endregion
 
 
+def process_image_version_undelete_namespace(cmd, namespace):  # pylint: disable=unused-argument
+    validate_tags(namespace)
+
+
 def process_image_resource_id_namespace(namespace):
     """
     Validate the resource id from different sources

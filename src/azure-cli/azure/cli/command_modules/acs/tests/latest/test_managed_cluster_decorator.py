@@ -1559,7 +1559,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                 }
             ),
             self.models,
-            DecoratorMode.CREATE,
+            DecoratorMode.UPDATE,
         )
         self.assertEqual(ctx_1._get_outbound_type(read_only=True), None)
         self.assertEqual(ctx_1.get_outbound_type(), "loadBalancer")
@@ -8110,6 +8110,8 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             location="test_location",
             network_profile=self.models.ContainerServiceNetworkProfile(
                 nat_gateway_profile=self.models.nat_gateway_models.ManagedClusterNATGatewayProfile(),
+                load_balancer_sku="standard",
+                outbound_type="managedNATGateway",
             ),
         )
         dec_1.context.attach_mc(mc_1)
@@ -8119,6 +8121,8 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             location="test_location",
             network_profile=self.models.ContainerServiceNetworkProfile(
                 nat_gateway_profile=self.models.nat_gateway_models.ManagedClusterNATGatewayProfile(),
+                load_balancer_sku="standard",
+                outbound_type="managedNATGateway",
             ),
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
@@ -8157,7 +8161,9 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
                         count=10
                     ),
                     idle_timeout_in_minutes=20,
-                )
+                ),
+                load_balancer_sku="standard",
+                outbound_type="managedNATGateway"
             ),
         )
         dec_3.context.attach_mc(mc_3)
@@ -8171,11 +8177,56 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
                         count=5
                     ),
                     idle_timeout_in_minutes=30,
-                )
+                ),
+                load_balancer_sku="standard",
+                outbound_type="managedNATGateway"
             ),
         )
-        self.assertEqual(dec_mc_3, ground_truth_mc_3)
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
+    def test_update_outbound_type(self):
+        # default value in `aks_update`
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "outbound_type": "managedNATGateway",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_outbound_type_in_network_profile(None)
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                load_balancer_sku="standard",
+                outbound_type="loadBalancer",
+            ),
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_outbound_type_in_network_profile(mc_1)
+
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                load_balancer_sku="standard",
+                outbound_type="managedNATGateway",
+            ),
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+        dec_2 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "vnet_subnet_id": "test_vnet_subnet_id",
+                "outbound_type": "managedNATGateway"
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_outbound_type_in_network_profile(dec_2)
+        
     def test_update_disable_local_accounts(self):
         # default value in `aks_update`
         dec_1 = AKSManagedClusterUpdateDecorator(

@@ -4932,7 +4932,11 @@ class InvokeActionTest(ScenarioTest):
 
         self.kwargs['vm_id'] = self.cmd('vm create -g {rg} -n {vm} --use-unmanaged-disk --image UbuntuLTS --admin-username {user} --admin-password {pass} --authentication-type password --nsg-rule None').get_output_in_json()['id']
 
-        self.cmd('resource invoke-action --action powerOff --ids {vm_id}')
+        self.cmd('resource invoke-action --action powerOff --ids {vm_id} --no-wait')
+        time.sleep(20)
+        self.cmd('vm get-instance-view -g {rg} -n {vm}', checks=[
+            self.check('instanceView.statuses[1].code', 'PowerState/stopped')
+        ])
         self.cmd('resource invoke-action --action generalize --ids {vm_id}')
         self.cmd('resource invoke-action --action deallocate --ids {vm_id}')
 

@@ -209,14 +209,13 @@ def validate_options(namespace):
         end = namespace.end_range
     except AttributeError:
         return
-    else:
-        namespace.ocp_range = None
-        del namespace.start_range
-        del namespace.end_range
-        if start or end:
-            start = start if start else 0
-            end = end if end else ""
-            namespace.ocp_range = f"bytes={start}-{end}"
+    namespace.ocp_range = None
+    del namespace.start_range
+    del namespace.end_range
+    if start or end:
+        start = start if start else 0
+        end = end if end else ""
+        namespace.ocp_range = f"bytes={start}-{end}"
 
 
 def validate_file_destination(namespace):
@@ -225,22 +224,21 @@ def validate_file_destination(namespace):
         path = namespace.destination
     except AttributeError:
         return
-    else:
-        # TODO: Need to confirm this logic...
-        file_path = path
-        file_dir = os.path.dirname(path)
-        if os.path.isdir(path):
-            file_name = os.path.basename(namespace.file_name)
-            file_path = os.path.join(path, file_name)
-        elif not os.path.isdir(file_dir):
-            try:
-                os.mkdir(file_dir)
-            except EnvironmentError as exp:
-                message = "Directory {} does not exist, and cannot be created: {}"
-                raise ValueError(message.format(file_dir, exp))
-        if os.path.isfile(file_path):
-            raise ValueError(f"File {file_path} already exists.")
-        namespace.destination = file_path
+    # TODO: Need to confirm this logic...
+    file_path = path
+    file_dir = os.path.dirname(path)
+    if os.path.isdir(path):
+        file_name = os.path.basename(namespace.file_name)
+        file_path = os.path.join(path, file_name)
+    elif not os.path.isdir(file_dir):
+        try:
+            os.mkdir(file_dir)
+        except EnvironmentError as exp:
+            message = "Directory {} does not exist, and cannot be created: {}"
+            raise ValueError(message.format(file_dir, exp))
+    if os.path.isfile(file_path):
+        raise ValueError(f"File {file_path} already exists.")
+    namespace.destination = file_path
 
 # CUSTOM REQUEST VALIDATORS
 

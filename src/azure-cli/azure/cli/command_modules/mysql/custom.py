@@ -1573,7 +1573,7 @@ def flexible_server_ad_admin_set(cmd, client, resource_group_name, server_name, 
             user_assigned_identities={identity: {}},
             type="UserAssigned")}
 
-    replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
+    replicas = list(replica_operations_client.list_by_server(resource_group_name, server_name))
     for replica in replicas:
         if not (replica.identity and replica.identity.user_assigned_identities and
            identity.lower() in [key.lower() for key in replica.identity.user_assigned_identities.keys()]):
@@ -1602,11 +1602,18 @@ def flexible_server_ad_admin_set(cmd, client, resource_group_name, server_name, 
         'identity_resource_id': identity
     }
 
-    return client.begin_create_or_update(
+    resolve_poller(client.begin_create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
         administrator_name='ActiveDirectory',
-        parameters=parameters)
+        parameters=parameters), cmd.cli_ctx, 'Enable AAD on Server {}'.format(server_name))
+
+    for replica in replicas:
+        resolve_poller(client.begin_create_or_update(
+            resource_group_name=resource_group_name,
+            server_name=replica.name,
+            administrator_name='ActiveDirectory',
+            parameters=parameters), cmd.cli_ctx, 'Enable AAD on Replica {}'.format(replica.name))
 
 
 def flexible_server_ad_admin_delete(cmd, client, resource_group_name, server_name):

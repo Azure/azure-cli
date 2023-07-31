@@ -10,9 +10,11 @@ import re
 from ipaddress import ip_network
 from math import isclose, isnan
 
+from azure.mgmt.containerservice.models import KubernetesSupportPlan
 from azure.cli.command_modules.acs._consts import (
     CONST_MANAGED_CLUSTER_SKU_TIER_FREE,
     CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD,
+    CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM,
     CONST_OS_SKU_AZURELINUX,
     CONST_OS_SKU_CBLMARINER,
     CONST_OS_SKU_MARINER,
@@ -201,8 +203,19 @@ def validate_sku_tier(namespace):
     if namespace.tier is not None:
         if namespace.tier == '':
             return
-        if namespace.tier.lower() not in (CONST_MANAGED_CLUSTER_SKU_TIER_FREE, CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD):
-            raise InvalidArgumentValueError("--tier can only be free or standard")
+        if namespace.tier.lower() not in (
+                CONST_MANAGED_CLUSTER_SKU_TIER_FREE, CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD,
+                CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM):
+            raise InvalidArgumentValueError("--tier can only be free, standard and premium")
+
+
+def validate_k8s_support_plan(namespace):
+    if namespace.k8s_support_plan is not None:
+        if namespace.k8s_support_plan == '':
+            return
+        if namespace.k8s_support_plan.lower() not in (
+                KubernetesSupportPlan.KUBERNETES_OFFICIAL.lower(), KubernetesSupportPlan.AKS_LONG_TERM_SUPPORT.lower()):
+            raise InvalidArgumentValueError("--k8s-support-plan can only be KubernetesOfficial or AKSLongTermSupport")
 
 
 def validate_load_balancer_outbound_ips(namespace):
@@ -267,18 +280,31 @@ def validate_nodes_count(namespace):
             raise CLIError('--max-count must be in the range [0,1000]')
 
 
-def validate_taints(namespace):
+def validate_nodepool_taints(namespace):
+    """Validates that provided node labels is a valid format"""
+
+    if hasattr(namespace, 'nodepool_taints'):
+        taintsStr = namespace.nodepool_taints
+    else:
+        taintsStr = namespace.node_taints
+
+    if taintsStr is None or taintsStr == '':
+        return
+
+    for taint in taintsStr.split(','):
+        validate_taint(taint)
+
+
+def validate_taint(taint):
     """Validates that provided taint is a valid format"""
 
     regex = re.compile(r"^[a-zA-Z\d][\w\-\.\/]{0,252}=[a-zA-Z\d][\w\-\.]{0,62}:(NoSchedule|PreferNoSchedule|NoExecute)$")  # pylint: disable=line-too-long
 
-    if namespace.node_taints is not None and namespace.node_taints != '':
-        for taint in namespace.node_taints.split(','):
-            if taint == "":
-                continue
-            found = regex.findall(taint)
-            if not found:
-                raise CLIError('Invalid node taint: %s' % taint)
+    if taint == "":
+        return
+    found = regex.findall(taint)
+    if not found:
+        raise ArgumentUsageError('Invalid node taint: %s' % taint)
 
 
 def validate_priority(namespace):
@@ -660,3 +686,47 @@ def validate_os_sku(namespace):
             CONST_OS_SKU_CBLMARINER,
             CONST_OS_SKU_MARINER,
         )
+
+
+def validate_utc_offset(namespace):
+    """Validates --utc-offset for aks maintenanceconfiguration add/update commands."""
+    if namespace.utc_offset is None:
+        return
+    # The regex here is used to match strings to the "+HH:MM" or "-HH:MM" time format.
+    # The complete regex breakdown is as follows:
+    # ^ matches the start of the string and $ matches to the end of the string, respectively.
+    # [+-] match to either + or -
+    # \d{2}:\d{2} will match to two digits followed by a colon and two digits. (example: +05:30 which is 5 hours and 30 minutes ahead or -12:00 which is 12 hours behind)
+    utc_offset_regex = re.compile(r'^[+-]\d{2}:\d{2}$')
+    found = utc_offset_regex.findall(namespace.utc_offset)
+    if not found:
+        raise InvalidArgumentValueError('--utc-offset must be in format: "+/-HH:mm". For example, "+05:30" and "-12:00".')
+
+
+def validate_start_date(namespace):
+    """Validates --start-date for aks maintenanceconfiguration add/update commands."""
+    if namespace.start_date is None:
+        return
+    # The regex here is used to match strings to the "yyyy-MM-dd" date format.
+    # The complete regex breakdown is as follows:
+    # ^ matches the start of the string and $ matches to the end of the string, respectively.
+    # ^\d{4}-\d{2}-\d{2} will match four digits, followed by a -, two digits, followed by a -. (example: 2023-01-01 which is January 1st 2023)
+    start_dt_regex = re.compile(r'^\d{4}-\d{2}-\d{2}$')
+    found = start_dt_regex.findall(namespace.start_date)
+    if not found:
+        raise InvalidArgumentValueError('--start-date must be in format: "yyyy-MM-dd". For example, "2023-01-01".')
+
+
+def validate_start_time(namespace):
+    """Validates --start-time for aks maintenanceconfiguration add/update commands."""
+    if namespace.start_time is None:
+        return
+    # The regex here is used to match strings to the "HH:MM" or "HH:MM" time format.
+    # The complete regex breakdown is as follows:
+    # ^ matches the start of the string and $ matches to the end of the string, respectively.
+    # \d{2}:\d{2} will match to two digits followed by a colon and two digits. (example: 09:30 which is 9 hours and 30 minutes or 17:00 which is 17 hours and 00 minutes)
+    start_time_regex = re.compile(r'^\d{2}:\d{2}$')
+    found = start_time_regex.findall(namespace.start_time)
+
+    if not found:
+        raise InvalidArgumentValueError('--start-time must be in format "HH:mm". For example, "09:30" and "17:00".')

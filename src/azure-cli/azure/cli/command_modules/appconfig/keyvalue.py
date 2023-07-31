@@ -9,7 +9,7 @@ import json
 import time
 import sys
 
-from itertools import chain, filterfalse
+from itertools import chain
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -24,20 +24,20 @@ from azure.core.exceptions import (HttpResponseError,
 import azure.cli.core.azclierror as CLIErrors
 
 from ._constants import (FeatureFlagConstants, KeyVaultConstants,
-                         SearchFilterOptions, StatusCodes, ImportExportProfiles)
-from ._models import (convert_configurationsetting_to_keyvalue,
-                      convert_keyvalue_to_configurationsetting)
-from ._utils import get_appconfig_data_client, prep_label_filter_for_url_encoding, resolve_store_metadata, get_store_endpoint_from_connection_string
+                         SearchFilterOptions, StatusCodes,
+                         ImportExportProfiles, CompareFieldsMap,
+                         JsonDiff)
+from ._models import (convert_configurationsetting_to_keyvalue, convert_keyvalue_to_configurationsetting)
+from ._utils import get_appconfig_data_client, prep_label_filter_for_url_encoding, resolve_store_metadata, get_store_endpoint_from_connection_string, is_json_content_type
 
-from ._kv_helpers import (__compare_kvs_for_restore, __read_kv_from_file, __read_features_from_file,
-                          __write_kv_and_features_to_file, __read_kv_from_config_store, __is_json_content_type,
-                          __write_kv_and_features_to_config_store, __discard_features_from_retrieved_kv,
-                          __read_kv_from_app_service, __write_kv_to_app_service, __print_restore_preview,
-                          __serialize_kv_list_to_comparable_json_object, __print_kv_preview,
-                          __serialize_features_from_kv_list_to_comparable_json_object, __export_kvset_to_file,
-                          __serialize_feature_list_to_comparable_json_object, __print_features_preview,
-                          __import_kvset_from_file, __delete_configuration_setting_from_config_store,
-                          __map_to_appservice_config_reference)
+from ._kv_helpers import (__read_kv_from_file, __read_features_from_file,
+                          __write_kv_and_features_to_file, __read_kv_from_config_store,
+                          __write_kv_and_features_to_config_store,
+                          __discard_features_from_retrieved_kv, __read_kv_from_app_service,
+                          __write_kv_to_app_service, __print_restore_preview,
+                          __convert_featureflag_list_to_keyvalue_list, __export_kvset_to_file,
+                          __import_kvset_from_file, __delete_configuration_setting_from_config_store, __map_to_appservice_config_reference)
+from ._diff_utils import print_preview, KVComparer
 from .feature import list_feature
 
 logger = get_logger(__name__)
@@ -88,7 +88,7 @@ def import_config(cmd,
         if format_ and content_type:
             # JSON content type is only supported with JSON format.
             # Error out if user has provided JSON content type with any other format.
-            if format_ != 'json' and __is_json_content_type(content_type):
+            if format_ != 'json' and is_json_content_type(content_type):
                 raise CLIErrors.FileOperationError("Failed to import '{}' file format with '{}' content type. Please provide JSON file format to match your content type.".format(format_, content_type))
 
         if separator:
@@ -150,13 +150,20 @@ def import_config(cmd,
     # if customer needs preview & confirmation
 
     # generate preview and wait for user confirmation
-    need_kv_change = __print_kv_preview(
-        old_json=__serialize_kv_list_to_comparable_json_object(keyvalues=dest_kvs, level=source),
-        new_json=__serialize_kv_list_to_comparable_json_object(keyvalues=src_kvs, level=source),
-        strict=strict,
-        yes=yes)
+    kv_comparer = KVComparer(
+        src_kvs=src_kvs,
+        compare_fields=CompareFieldsMap[source],
+        preserve_labels=source == "appconfig" and preserve_labels,
+        label=label,
+        content_type=content_type)
+
+    kv_diff = kv_comparer.compare(dest_kvs=dest_kvs, strict=strict)
+    # Show indented key-value preview similar to kvset for appconfig source
+    indent = 2 if source == "appconfig" else None
+    need_kv_change = print_preview(kv_diff, source, yes=yes, strict=strict, title="Key Values", indent=indent)
 
     need_feature_change = False
+    ff_diff = {}
     if strict or (src_features and not skip_features):
         all_features = __read_kv_from_config_store(azconfig_client,
                                                    key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + SearchFilterOptions.ANY_KEY,
@@ -167,11 +174,13 @@ def import_config(cmd,
             if feature.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
                 dest_features.append(feature)
 
-        need_feature_change = __print_features_preview(
-            old_json=__serialize_features_from_kv_list_to_comparable_json_object(keyvalues=dest_features, is_dest=True),
-            new_json=__serialize_features_from_kv_list_to_comparable_json_object(keyvalues=src_features),
-            strict=strict,
-            yes=yes)
+        ff_comparer = KVComparer(
+            src_kvs=src_features,
+            compare_fields=CompareFieldsMap[source],
+            preserve_labels=source == "appconfig" and preserve_labels,
+            label=label)
+        ff_diff = ff_comparer.compare(dest_kvs=dest_features, strict=strict)
+        need_feature_change = print_preview(ff_diff, source, yes=yes, strict=strict, title="Feature Flags")
 
     if not need_kv_change and not need_feature_change:
         return
@@ -184,10 +193,10 @@ def import_config(cmd,
 
     # In strict mode, delete kvs with specific label that are missing from the imported file
     if strict:
-        dest_kvs.extend(all_features)  # append the discarded features back
+        kvs_to_delete = chain(
+            kv_diff.get(JsonDiff.DELETE, []),
+            ff_diff.get(JsonDiff.DELETE, []))
 
-        kvs_to_delete = list(filterfalse(lambda kv: any(kv_import.key == kv.key and label == kv.label
-                                                        for kv_import in src_kvs), dest_kvs))
         for kv in kvs_to_delete:
             __delete_configuration_setting_from_config_store(azconfig_client, kv)
 
@@ -311,17 +320,29 @@ def export_config(cmd,
     elif destination == 'appservice':
         dest_kvs = __read_kv_from_app_service(cmd, appservice_account=appservice_account)
 
-    need_kv_change = __print_kv_preview(
-        old_json=__serialize_kv_list_to_comparable_json_object(keyvalues=dest_kvs, level=destination),
-        new_json=__serialize_kv_list_to_comparable_json_object(keyvalues=src_kvs, level=destination),
-        yes=yes)
+    kv_comparer = KVComparer(
+        src_kvs=src_kvs,
+        compare_fields=CompareFieldsMap[destination],
+        preserve_labels=destination == "appconfig" and preserve_labels,
+        label=dest_label)
+
+    kv_diff = kv_comparer.compare(dest_kvs=dest_kvs)
+
+    # Show indented key-value preview similar to kvset for appconfig destination
+    indent = 2 if destination == "appconfig" else None
+    need_kv_change = print_preview(kv_diff, destination, yes=yes, title="Key Values", indent=indent)
 
     need_feature_change = False
+    ff_diff = {}
     if src_features:
-        need_feature_change = __print_features_preview(
-            old_json=__serialize_feature_list_to_comparable_json_object(features=dest_features),
-            new_json=__serialize_feature_list_to_comparable_json_object(features=src_features),
-            yes=yes)
+        ff_comparer = KVComparer(
+            src_kvs=__convert_featureflag_list_to_keyvalue_list(src_features),
+            compare_fields=CompareFieldsMap[destination],
+            preserve_labels=destination == "appconfig" and preserve_labels,
+            label=dest_label)
+
+        ff_diff = ff_comparer.compare(dest_kvs=__convert_featureflag_list_to_keyvalue_list(dest_features))
+        need_feature_change = print_preview(ff_diff, destination, yes=yes, title="Feature Flags")
 
     if not need_feature_change and not need_kv_change:
         return
@@ -377,7 +398,7 @@ def set_key(cmd,
             raise CLIErrors.AzureResponseError("Failed to retrieve key-values from config store. " + str(exception))
 
         if retrieved_kv is None:
-            if __is_json_content_type(content_type):
+            if is_json_content_type(content_type):
                 try:
                     # Ensure that provided value is valid JSON. Error out if value is invalid JSON.
                     value = 'null' if value is None else value
@@ -393,7 +414,7 @@ def set_key(cmd,
         else:
             value = retrieved_kv.value if value is None else value
             content_type = retrieved_kv.content_type if content_type is None else content_type
-            if __is_json_content_type(content_type):
+            if is_json_content_type(content_type):
                 try:
                     # Ensure that provided/existing value is valid JSON. Error out if value is invalid JSON.
                     json.loads(value)
@@ -716,12 +737,21 @@ def restore_key(cmd,
                                                     label=label if label else SearchFilterOptions.ANY_LABEL)
 
     try:
-        kvs_to_restore, kvs_to_modify, kvs_to_delete = __compare_kvs_for_restore(restore_keyvalues, current_keyvalues)
+        comparer = KVComparer(restore_keyvalues, CompareFieldsMap["restore"])
+        restore_diff = comparer.compare(current_keyvalues, strict=True)
+
+        need_change = __print_restore_preview(restore_diff, yes=yes)
+
         if not yes:
-            need_change = __print_restore_preview(kvs_to_restore, kvs_to_modify, kvs_to_delete)
             if need_change is False:
                 logger.debug('Canceling the restore operation based on user selection.')
                 return
+
+            user_confirmation("Do you want to continue? \n")
+
+        kvs_to_restore = restore_diff.get(JsonDiff.ADD, [])
+        kvs_to_modify = [update["new"] for update in restore_diff.get(JsonDiff.UPDATE, [])]
+        kvs_to_delete = restore_diff.get(JsonDiff.DELETE, [])
 
         keys_to_restore = len(kvs_to_restore) + len(kvs_to_modify) + len(kvs_to_delete)
         restored_so_far = 0
