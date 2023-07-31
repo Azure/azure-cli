@@ -340,9 +340,11 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         raise RequiredArgumentMissingError(
             'usage error: --upload-size-bytes should be used together with --upload-type')
 
-    log_message = 'Ignite (November) 2023 onwards "az disk create" command will deploy Gen2-Trusted Launch VM ' \
-                  'by default. To know more about the default change and Trusted Launch, ' \
-                  'please visit https://aka.ms/TLaD'
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE, UPGRADE_SECURITY_HINT, TLAD_DEFAULT_CHANGE_MSG
+    if security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
+        log_message = TLAD_DEFAULT_CHANGE_MSG.format('az disk create')
+    else:
+        log_message = UPGRADE_SECURITY_HINT
     if image_reference is not None:
         if not is_valid_resource_id(image_reference):
             # URN or name
@@ -493,7 +495,9 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk.bursting_enabled = enable_bursting
     if edge_zone is not None:
         disk.extended_location = edge_zone
-    if security_type:
+    # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
+    # after changing the default values to Trusted Launch VMs in the future.
+    if security_type and security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
         disk.security_profile = {'securityType': security_type}
         if secure_vm_disk_encryption_set:
             disk.security_profile['secure_vm_disk_encryption_set_id'] = secure_vm_disk_encryption_set
@@ -652,14 +656,6 @@ def update_image(instance, tags=None):
     if tags is not None:
         instance.tags = tags
     return instance
-
-
-def list_images(cmd, resource_group_name=None):
-    client = _compute_client_factory(cmd.cli_ctx)
-    if resource_group_name:
-        return client.images.list_by_resource_group(resource_group_name)
-    return client.images.list()
-# endregion
 
 
 # region Snapshots
@@ -4619,10 +4615,17 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
 
     feature_list = None
     if features:
+        from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE, UPGRADE_SECURITY_HINT
         feature_list = []
         for item in features.split():
             try:
                 key, value = item.split('=', 1)
+                # create Non-Trusted Launch VM Image
+                # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
+                # after changing the default values to Trusted Launch VMs in the future.
+                if key == 'SecurityType' and value == COMPATIBLE_SECURITY_TYPE_VALUE:
+                    logger.warning(UPGRADE_SECURITY_HINT)
+                    continue
                 feature_list.append(GalleryImageFeature(name=key, value=value))
             except ValueError:
                 raise CLIError('usage error: --features KEY=VALUE [KEY=VALUE ...]')
@@ -4785,6 +4788,36 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         if managed_image is None:
             raise RequiredArgumentMissingError('usage error: Please provide --managed-image')
         image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}))
+
+    return client.gallery_image_versions.begin_create_or_update(
+        resource_group_name=resource_group_name,
+        gallery_name=gallery_name,
+        gallery_image_name=gallery_image_name,
+        gallery_image_version_name=gallery_image_version,
+        gallery_image_version=image_version
+    )
+
+
+def undelete_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version,
+                           location=None, tags=None, allow_replicated_location_deletion=None):
+    ImageVersion = cmd.get_models('GalleryImageVersion')
+    client = _compute_client_factory(cmd.cli_ctx)
+
+    location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+
+    gallery = client.galleries.get(resource_group_name, gallery_name)
+    soft_delete = gallery.soft_delete_policy.is_soft_delete_enabled
+    if not soft_delete:
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        raise InvalidArgumentValueError('soft-deletion is not enabled in Gallery \'{}\''.format(gallery_name))
+
+    image_version = ImageVersion(publishing_profile=None, location=location, tags=(tags or {}),
+                                 storage_profile=None)
+    if allow_replicated_location_deletion is not None:
+        GalleryImageVersionSafetyProfile = cmd.get_models('GalleryImageVersionSafetyProfile',
+                                                          operation_group='gallery_image_versions')
+        image_version.safety_profile = GalleryImageVersionSafetyProfile(
+            allow_deletion_of_replicated_locations=allow_replicated_location_deletion)
 
     return client.gallery_image_versions.begin_create_or_update(
         resource_group_name=resource_group_name,
@@ -5067,12 +5100,6 @@ def create_disk_encryption_set(
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, disk_encryption_set_name,
                        disk_encryption_set)
-
-
-def list_disk_encryption_sets(cmd, client, resource_group_name=None):
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list()
 
 
 def update_disk_encryption_set(cmd, instance, client, resource_group_name, key_url=None, source_vault=None,

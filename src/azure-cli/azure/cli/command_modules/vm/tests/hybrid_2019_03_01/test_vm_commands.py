@@ -236,6 +236,16 @@ class VMGeneralizeScenarioTest(ScenarioTest):
             self.check('storageProfile.zoneResilient', None)
         ])
 
+        self.cmd('image show -g {rg} -n {image}', checks=[
+            self.check('name', '{image}'),
+            self.check('sourceVirtualMachine.id', vm['id']),
+            self.check('storageProfile.zoneResilient', None)
+        ])
+        self.cmd('image list -g {rg}', checks=[
+            self.check('length(@)', '1')
+        ])
+        self.cmd('image delete -g {rg} -n {image}')
+
     @ResourceGroupPreparer(name_prefix='cli_test_generalize_vm')
     def test_vm_capture_zone_resilient_image(self, resource_group):
 
