@@ -415,7 +415,7 @@ class JsonCTemplatePolicy(SansIOHTTPPolicy):
             template = http_request.data["properties"]["template"]
             del http_request.data["properties"]["template"]
 
-            # templateLink nad template cannot exist at the same time in deployment_dry_run mode
+            # templateLink and template cannot exist at the same time in deployment_dry_run mode
             if "templateLink" in http_request.data["properties"].keys():
                 del http_request.data["properties"]["templateLink"]
 
@@ -961,7 +961,7 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
             template_link = TemplateLink(uri=template_uri)
         template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     elif template_spec:
-        template_link = TemplateLink(id=template_spec, mode="Incremental")
+        template_link = TemplateLink(id=template_spec)
         # The api-version for ResourceType.MGMT_RESOURCE_RESOURCES may get updated and point to another (newer) version of the api version for
         # ResourceType.MGMT_RESOURCE_TEMPLATESPECS than our designated version. This ensures the api-version of all the rest requests for
         # template_spec are consistent in the same profile:
@@ -1057,7 +1057,7 @@ def _get_deployment_management_client(cli_ctx, aux_subscriptions=None, aux_tenan
 
 def _prepare_stacks_deny_settings(rcf, deny_settings_mode):
     deny_settings_mode = None if deny_settings_mode.lower() == "none" else deny_settings_mode
-    deny_settings_enum = None
+    deny_settings_enum = rcf.deployment_stacks.models.DenySettingsMode.none
     if deny_settings_mode:
         if deny_settings_mode.lower().replace(' ', '') == "denydelete":
             deny_settings_enum = rcf.deployment_stacks.models.DenySettingsMode.deny_delete
@@ -1447,8 +1447,6 @@ def _validate_resource_inputs(resource_group_name, resource_provider_namespace,
     if resource_provider_namespace is None:
         raise CLIError('--namespace is required')
 
-
-# region Custom Commands
 
 def list_resource_groups(cmd, tag=None):  # pylint: disable=no-self-use
     """ List resource groups, optionally filtered by a tag.
@@ -2306,7 +2304,9 @@ def create_deployment_stack_at_subscription(cmd, name, location, deny_settings_m
             if get_subscription_response.location != location:
                 raise CLIError("Cannot change location of an already existing stack at subscription scope.")
             # bypass if yes flag is true
-            _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum)
+            built_string = _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum)
+            if not built_string:
+                return
     except:  # pylint: disable=bare-except
         pass
 
@@ -2427,7 +2427,9 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, deny_se
     # build confirmation string
     try:
         if rcf.deployment_stacks.get_at_resource_group(resource_group, name):
-            _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum)
+            built_string = _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum)
+            if not built_string:
+                return
     except:  # pylint: disable=bare-except
         pass
 
@@ -2541,7 +2543,6 @@ def create_deployment_stack_at_management_group(cmd, management_group_id, name, 
 
     excluded_principals_array = _prepare_stacks_excluded_principals(deny_settings_excluded_principals)
     excluded_actions_array = _prepare_stacks_excluded_actions(deny_settings_excluded_actions)
-    excluded_principals_array = []
 
     tags = tags or {}
 
@@ -2554,7 +2555,9 @@ def create_deployment_stack_at_management_group(cmd, management_group_id, name, 
     try:
         get_mg_response = rcf.deployment_stacks.get_at_management_group(management_group_id, name)
         if get_mg_response:
-            _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum)
+            built_string = _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum)
+            if not built_string:
+                return
     except:  # pylint: disable=bare-except
         pass
 

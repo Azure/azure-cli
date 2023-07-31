@@ -627,14 +627,14 @@ class PrivateDnsLinksTests(BaseScenarioTests):
     def test_GetLink_ZoneNotExists_ExpectError(self, resource_group):
         GeneratePrivateZoneName(self)
         GenerateVirtualNetworkLinkName(self)
-        with self.assertRaisesRegex(SystemExit, '3'):
+        with self.assertRaises(ResourceNotFoundError):
             self.cmd('az network private-dns link vnet show -g {rg} -n {link} -z {zone}')
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_GetLink_LinkNotExists_ExpectError(self, resource_group):
         self._Create_PrivateZone()
         GenerateVirtualNetworkLinkName(self)
-        with self.assertRaisesRegex(SystemExit, '3'):
+        with self.assertRaises(ResourceNotFoundError):
             self.cmd('az network private-dns link vnet show -g {rg} -n {link} -z {zone}')
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')

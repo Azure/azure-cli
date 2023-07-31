@@ -10,7 +10,7 @@ from ..storage_test_util import StorageScenarioMixin
 from azure.cli.testsdk.scenario_tests import record_only
 
 
-class StorageFileShareScenarios(StorageScenarioMixin, ScenarioTest):
+class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(location='EastUS2')
     def test_storage_file_copy_scenario(self, resource_group, storage_account):
@@ -322,6 +322,17 @@ class StorageFileShareScenarios(StorageScenarioMixin, ScenarioTest):
         file_url = 'https://{}.file.core.windows.net/{}/{}'.format(account_info[0], share, filename)
         self.storage_cmd('storage file url -s {} -p "{}"', account_info, share, filename) \
             .assert_with_checks(StringCheck(file_url))
+
+        # try uploading with file url
+        new_source_file = self.create_temp_file(64, full_random=False)
+        self.storage_cmd('storage file upload --source "{}" --file-url {}', account_info, new_source_file, file_url)
+        # download to validate the new upload with file-url uploaded file with new size
+        if os.path.isfile(dest_file):
+            os.remove(dest_file)
+        self.storage_cmd('storage file download --share-name {} -p "{}" --dest "{}"', account_info,
+                         share, filename, dest_file)
+        self.assertTrue(os.path.isfile(dest_file))
+        self.assertEqual(os.stat(dest_file).st_size, 64 * 1024)
 
         self.assertIn(filename,
                       self.storage_cmd('storage file list -s {} --query "[].name"',
