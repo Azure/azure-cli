@@ -387,7 +387,7 @@ class TestActions(unittest.TestCase):
         mock_resolve_role_id.assert_called_with(cmd.cli_ctx, 'reader', 'foo-scope')
 
     def test_normalize_disk_info(self):
-        CachingTypes = self._get_compute_model('CachingTypes')
+        from azure.mgmt.compute.models import CachingTypes
         cmd = mock.MagicMock()
         cmd.get_models.return_value = CachingTypes
 
@@ -683,16 +683,12 @@ class TestActions(unittest.TestCase):
                 self.fail("Test Expected value should be a dict or None, instead it is {}.".format(expected))
 
     def test_process_gallery_image_version_namespace(self):
-        from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType
         np = mock.MagicMock(spec='target_regions')
-        api_version = AZURE_API_PROFILES['latest'][ResourceType.MGMT_COMPUTE].profile['gallery_images']
-        TargetRegion = self._get_compute_model('TargetRegion', api_version)
-        EncryptionImages = self._get_compute_model('EncryptionImages', api_version)
-        OSDiskImageEncryption = self._get_compute_model('OSDiskImageEncryption', api_version)
-        DataDiskImageEncryption = self._get_compute_model('DataDiskImageEncryption', api_version)
-        ConfidentialVMEncryptionType = self._get_compute_model('ConfidentialVMEncryptionType', api_version)
-        GalleryTargetExtendedLocation = self._get_compute_model('GalleryTargetExtendedLocation', api_version)
-        GalleryExtendedLocation = self._get_compute_model('GalleryExtendedLocation', api_version)
+
+        from azure.mgmt.compute.models import (TargetRegion, EncryptionImages, OSDiskImageEncryption,
+                                               DataDiskImageEncryption, ConfidentialVMEncryptionType,
+                                               GalleryTargetExtendedLocation, GalleryExtendedLocation)
+
         cmd = mock.MagicMock()
         cmd.get_models.return_value = [TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption,
                                        ConfidentialVMEncryptionType, GalleryTargetExtendedLocation, GalleryExtendedLocation]

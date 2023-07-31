@@ -146,7 +146,7 @@ def load_command_table(self, _):
     compute_vmss_vm_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#VirtualMachineScaleSetVMsOperations.{}',
         client_factory=cf_vmss_vm,
-        operation_group='virtual_machine_scale_sets'
+        operation_group='virtual_machine_scale_set_vms'
     )
 
     compute_galleries_sdk = CliCommandType(
