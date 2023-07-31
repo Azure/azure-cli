@@ -48,7 +48,9 @@ By the way, both these two commands can add `--only-break` to just pull the brea
 
 This site just works as the same way as the command line tool:
 
-![azure-cli-diff-site](assets/azure-cli-diff-site.png)
+![azure-cli-diff-site](assets/azure-cli-diff-site.gif)
+
+
 
 ### Analysis
 
