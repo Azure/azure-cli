@@ -1621,7 +1621,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               security_type=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
-    SecurityProfile, UefiSettings = cmd.get_models('SecurityProfile', 'UefiSettings')
+    from azure.mgmt.compute.models import SecurityProfile, UefiSettings
     vm = kwargs['parameters']
 
     disk_resource_group, disk_name = None, None
@@ -3924,8 +3924,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         vmss.virtual_machine_profile.hardware_profile = hardware_profile
 
     if capacity_reservation_group is not None:
-        from azure.mgmt.compute.models import CapacityReservationProfile
-        SubResource = cmd.get_models('SubResource')
+        from azure.mgmt.compute.models import CapacityReservationProfile, SubResource
         if capacity_reservation_group == 'None':
             capacity_reservation_group = None
         sub_resource = SubResource(id=capacity_reservation_group)
@@ -4785,7 +4784,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
 
 def undelete_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version,
                            location=None, tags=None, allow_replicated_location_deletion=None):
-    ImageVersion = cmd.get_models('GalleryImageVersion')
+    from azure.mgmt.compute.models import GalleryImageVersion as ImageVersion
     client = _compute_client_factory(cmd.cli_ctx)
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
@@ -4799,8 +4798,7 @@ def undelete_image_version(cmd, resource_group_name, gallery_name, gallery_image
     image_version = ImageVersion(publishing_profile=None, location=location, tags=(tags or {}),
                                  storage_profile=None)
     if allow_replicated_location_deletion is not None:
-        GalleryImageVersionSafetyProfile = cmd.get_models('GalleryImageVersionSafetyProfile',
-                                                          operation_group='gallery_image_versions')
+        from azure.mgmt.compute.models import GalleryImageVersionSafetyProfile
         image_version.safety_profile = GalleryImageVersionSafetyProfile(
             allow_deletion_of_replicated_locations=allow_replicated_location_deletion)
 

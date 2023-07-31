@@ -2126,11 +2126,6 @@ def process_set_applications_namespace(cmd, namespace):  # pylint: disable=unuse
 
 def process_gallery_image_version_namespace(cmd, namespace):
     from azure.cli.core.azclierror import InvalidArgumentValueError
-    # TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption, \
-    #     ConfidentialVMEncryptionType, GalleryTargetExtendedLocation, GalleryExtendedLocation = cmd.get_models(
-    #         'TargetRegion', 'EncryptionImages', 'OSDiskImageEncryption', 'DataDiskImageEncryption',
-    #         'ConfidentialVMEncryptionType', 'GalleryTargetExtendedLocation', 'GalleryExtendedLocation')
-
     from azure.mgmt.compute.models import TargetRegion, EncryptionImages, OSDiskImageEncryption, \
         DataDiskImageEncryption, ConfidentialVMEncryptionType, GalleryTargetExtendedLocation, GalleryExtendedLocation
 
@@ -2143,7 +2138,6 @@ def process_gallery_image_version_namespace(cmd, namespace):
         if hasattr(namespace, 'target_region_cvm_encryption') and namespace.target_region_cvm_encryption:
             from azure.mgmt.compute.models import OSDiskImageSecurityProfile
 
-            # OSDiskImageSecurityProfile = cmd.get_models('OSDiskImageSecurityProfile')
             if len(namespace.target_regions) != len(namespace.target_region_cvm_encryption):
                 raise InvalidArgumentValueError(
                     'usage error: Length of --target_region_cvm_encryption should be as same as '
@@ -2607,7 +2601,6 @@ def validate_secure_vm_guest_state_sas(cmd, namespace):
 
     compute_client = _compute_client_factory(cmd.cli_ctx)
     disk_info = compute_client.disks.get(namespace.resource_group_name, namespace.disk_name)
-    # DiskCreateOption = cmd.get_models('DiskCreateOption')
 
     if disk_info.creation_data and disk_info.creation_data.create_option == DiskCreateOption.upload_prepared_secure:
         namespace.secure_vm_guest_state_sas = True
