@@ -150,7 +150,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         help='When creating a file or directory and the parent folder does not have a default ACL, the umask restricts '
              'the permissions of the file or directory to be created. The resulting permission is given by p & ^u, '
              'where p is the permission and u is the umask. For more information, please refer to '
-             'https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#umask.')
+             'https://learn.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#umask.')
     permissions_type = CLIArgumentType(
         help='POSIX access permissions for the file owner, the file owning group, and others. Each class may be '
              'granted read (4), write (2), or execute (1) permission. Both symbolic (rwxrw-rw-) and 4-digit octal '
@@ -161,7 +161,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
              'indicates sticky bit not set. In 4-digit octal notation, its represented by 1st digit (e.g. 1766 '
              'represents rwxrw-rw- with sticky bit and 0766 represents rwxrw-rw- without sticky bit). For more '
              'information, please refer to '
-             'https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#levels-of-permission.')
+             'https://learn.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#levels-of-permission.')
 
     timeout_type = CLIArgumentType(
         help='Request timeout in seconds. Applies to each call to the service.', type=int
@@ -300,7 +300,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage account blob-inventory-policy create') as c:
         c.argument('policy', type=file_type, completer=FilesCompleter(),
                    help='The Storage Account Blob Inventory Policy, string in JSON format or json file path. See more '
-                   'details in https://docs.microsoft.com/azure/storage/blobs/blob-inventory#inventory-policy.')
+                   'details in https://learn.microsoft.com/azure/storage/blobs/blob-inventory#inventory-policy.')
 
     with self.argument_context('storage account check-name') as c:
         c.argument('name', options_list=['--name', '-n'],
@@ -618,7 +618,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage account management-policy create') as c:
         c.argument('policy', type=file_type, completer=FilesCompleter(),
                    help='The Storage Account ManagementPolicies Rules, in JSON format. See more details in: '
-                        'https://docs.microsoft.com/azure/storage/common/storage-lifecycle-managment-concepts.')
+                        'https://learn.microsoft.com/azure/storage/common/storage-lifecycle-managment-concepts.')
 
     for item in ['create', 'update', 'show', 'delete']:
         with self.argument_context('storage account management-policy {}'.format(item)) as c:
@@ -1267,7 +1267,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The type of blob at the destination.')
         c.argument('preserve_s2s_access_tier', arg_group='Additional Flags', arg_type=get_three_state_flag(),
                    help='Preserve access tier during service to service copy. '
-                   'Please refer to https://docs.microsoft.com/azure/storage/blobs/storage-blob-storage-tiers '
+                   'Please refer to https://learn.microsoft.com/azure/storage/blobs/storage-blob-storage-tiers '
                    'to ensure destination storage account support setting access tier. In the cases that setting '
                    'access tier is not supported, please use `--preserve-s2s-access-tier false` to bypass copying '
                    'access tier. (Default true)')
@@ -1389,7 +1389,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 help='Required if the blob has an active lease.')
         c.argument('query_expression', help='The query expression in SQL. The maximum size of the query expression '
                    'is 256KiB. For more information about the expression syntax, please see '
-                   'https://docs.microsoft.com/azure/storage/blobs/query-acceleration-sql-reference')
+                   'https://learn.microsoft.com/azure/storage/blobs/query-acceleration-sql-reference')
         c.extra('input_format', arg_type=get_enum_type(['csv', 'json']), validator=validate_text_configuration,
                 help='Serialization type of the data currently stored in the blob. '
                 'The default is to treat the blob data as CSV data formatted in the default dialect.'
@@ -2662,7 +2662,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('acl', help='The value is a comma-separated list of access control entries. Each access control '
                        'entry (ACE) consists of a scope, a type, a user or group identifier, and permissions in the '
                        'format "[scope:][type]:[id]:[permissions]".  For more information, please refer to '
-                       'https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control.')
+                       'https://learn.microsoft.com/azure/storage/blobs/data-lake-storage-access-control.')
             c.extra('continuation',
                     help='Optional continuation token that can be used to resume previously stopped operation.')
             c.extra('batch_size', type=int, help='Optional. If data set size exceeds batch size then operation will '

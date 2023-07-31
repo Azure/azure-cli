@@ -6,7 +6,7 @@
 
 # property_map is a map from CLI argument name to API property name, such as display_name -> displayName.
 
-# https://docs.microsoft.com/en-us/graph/api/resources/application?view=graph-rest-1.0
+# https://learn.microsoft.com/en-us/graph/api/resources/application?view=graph-rest-1.0
 _application_property_map = {
     # base properties
     'display_name': 'displayName',
@@ -27,7 +27,7 @@ _application_property_map = {
     'required_resource_accesses': 'requiredResourceAccess',
 }
 
-# https://docs.microsoft.com/en-us/graph/api/resources/user?view=graph-rest-1.0#properties
+# https://learn.microsoft.com/en-us/graph/api/resources/user?view=graph-rest-1.0#properties
 _user_property_map = {
     # base properties
     'account_enabled': 'accountEnabled',
@@ -39,7 +39,7 @@ _user_property_map = {
     'force_change_password_next_sign_in': ['passwordProfile', 'forceChangePasswordNextSignIn']
 }
 
-# https://docs.microsoft.com/en-us/graph/api/resources/group?view=graph-rest-1.0#properties
+# https://learn.microsoft.com/en-us/graph/api/resources/group?view=graph-rest-1.0#properties
 _group_property_map = {
     'display_name': 'displayName',
     'mail_nickname': 'mailNickname',

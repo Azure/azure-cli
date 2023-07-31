@@ -18,7 +18,7 @@ class __CMDGroup(AAZCommandGroup):
     """Manage local gateways.
 
     For more information on local gateways, visit:
-    https://docs.microsoft.com/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-cli#localnet.
+    https://learn.microsoft.com/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-cli#localnet.
     """
     pass
 

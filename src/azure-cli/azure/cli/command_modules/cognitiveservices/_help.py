@@ -10,19 +10,19 @@ from knack.help_files import helps  # pylint: disable=unused-import
 helps['cognitiveservices'] = """
 type: group
 short-summary: Manage Azure Cognitive Services accounts.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 """
 
 helps['cognitiveservices account'] = """
 type: group
 short-summary: Manage Azure Cognitive Services accounts.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 """
 
 helps['cognitiveservices account create'] = """
 type: command
 short-summary: Manage Azure Cognitive Services accounts.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 parameters:
   - name: --kind
     populator-commands:
@@ -60,7 +60,7 @@ examples:
 helps['cognitiveservices account delete'] = """
 type: command
 short-summary: Manage Azure Cognitive Services accounts.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 examples:
   - name: Delete account.
     text: az cognitiveservices account delete --name myresource-luis -g cognitive-services-resource-group
@@ -69,13 +69,13 @@ examples:
 helps['cognitiveservices account keys'] = """
 type: group
 short-summary: Manage Azure Cognitive Services accounts.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 """
 
 helps['cognitiveservices account keys list'] = """
 type: command
 short-summary: Manage Azure Cognitive Services accounts.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 examples:
   - name: Get current resource keys.
     text: az cognitiveservices account keys list --name myresource -g cognitive-services-resource-group
@@ -87,7 +87,7 @@ examples:
 helps['cognitiveservices account keys regenerate'] = """
 type: command
 short-summary: Manage Azure Cognitive Services accounts.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 examples:
   - name: Get new keys for resource.
     text: az cognitiveservices account keys regenerate --name myresource -g cognitive-services-resource-group --key-name key1
@@ -96,7 +96,7 @@ examples:
 helps['cognitiveservices account list'] = """
 type: command
 short-summary: Manage Azure Cognitive Services accounts.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 examples:
   - name: List all the Cognitive Services accounts in a resource group.
     text: az cognitiveservices account list -g MyResourceGroup
@@ -105,7 +105,7 @@ examples:
 helps['cognitiveservices account list-skus'] = """
 type: command
 short-summary: Manage Azure Cognitive Services accounts.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 parameters:
   - name: --name -n
     long-summary: |
@@ -125,7 +125,7 @@ examples:
 helps['cognitiveservices account list-models'] = """
 type: command
 short-summary: Manage Azure Cognitive Services accounts.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 examples:
   - name: List models available for a Cognitive Services account.
     text: az cognitiveservices account list-models -n myresource -g cognitive-services-resource-group
@@ -172,7 +172,7 @@ examples:
 helps['cognitiveservices account show'] = """
 type: command
 short-summary: Manage Azure Cognitive Services accounts.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 examples:
   - name: Show account information.
     text: az cognitiveservices account show --name myresource --resource-group cognitive-services-resource-group
@@ -181,7 +181,7 @@ examples:
 helps['cognitiveservices account update'] = """
 type: command
 short-summary: Manage Azure Cognitive Services accounts.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 parameters:
   - name: --sku --sku-name
     populator-commands:
@@ -194,7 +194,7 @@ examples:
 helps['cognitiveservices list'] = """
 type: command
 short-summary: Manage Azure Cognitive Services accounts.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 examples:
   - name: List all the Cognitive Services accounts in a resource group.
     text: az cognitiveservices list -g MyResourceGroup
@@ -235,7 +235,7 @@ examples:
 helps['cognitiveservices account list-deleted'] = """
 type: command
 short-summary: List soft-deleted Azure Cognitive Services accounts.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 examples:
   - name: List all the Cognitive Services accounts in a subscription.
     text: az cognitiveservices account list-deleted
@@ -245,7 +245,7 @@ examples:
 helps['cognitiveservices account show-deleted'] = """
 type: command
 short-summary: Show a soft-deleted Azure Cognitive Services account.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 examples:
   - name: Show a soft-deleted Azure Cognitive Services account.
     text: az cognitiveservices account show-deleted --location eastus --resource-group cognitive-services-resource-group --name cognitive-services-account-name
@@ -254,7 +254,7 @@ examples:
 helps['cognitiveservices account recover'] = """
 type: command
 short-summary: Recover a soft-deleted Azure Cognitive Services account.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 examples:
   - name: Recover a soft-deleted Azure Cognitive Services account.
     text: az cognitiveservices account recover --location eastus --resource-group cognitive-services-resource-group --name cognitive-services-account-name
@@ -263,7 +263,7 @@ examples:
 helps['cognitiveservices account purge'] = """
 type: command
 short-summary: Purge a soft-deleted Azure Cognitive Services account.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 examples:
   - name: Purge a soft-deleted Azure Cognitive Services account.
     text: az cognitiveservices account purge --location eastus --resource-group cognitive-services-resource-group --name cognitive-services-account-name
@@ -277,7 +277,7 @@ short-summary: Manage deployments for Azure Cognitive Services accounts.
 helps['cognitiveservices account deployment create'] = """
 type: command
 short-summary: Create a deployment for Azure Cognitive Services account.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 examples:
   - name: Create a deployment for Azure Cognitive Services account.
     text: az cognitiveservices account deployment create -g yuanyang-test-sdk -n yytest-oai --deployment-name dpy --model-name ada --model-version "1" --model-format OpenAI --sku-capacity 1 --sku-name "Standard"
@@ -286,7 +286,7 @@ examples:
 helps['cognitiveservices account deployment delete'] = """
 type: command
 short-summary: Delete a deployment from Azure Cognitive Services account.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 examples:
   - name: Delete a deployment from Azure Cognitive Services account.
     text: az cognitiveservices account deployment delete -g yuanyang-test-sdk -n yytest-oai --deployment-name dpy
@@ -295,7 +295,7 @@ examples:
 helps['cognitiveservices account deployment show'] = """
 type: command
 short-summary: Show a deployment for Azure Cognitive Services account.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 examples:
   - name: Show a deployment for Azure Cognitive Services account.
     text: az cognitiveservices account deployment show -g yuanyang-test-sdk -n yytest-oai --deployment-name dpy
@@ -304,7 +304,7 @@ examples:
 helps['cognitiveservices account deployment list'] = """
 type: command
 short-summary: Show all deployments for Azure Cognitive Services account.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 examples:
   - name: Show all deployments for Azure Cognitive Services account.
     text: az cognitiveservices account deployment list -g yuanyang-test-sdk -n yytest-oai
@@ -318,7 +318,7 @@ short-summary: Manage commitment tiers for Azure Cognitive Services.
 helps['cognitiveservices commitment-tier list'] = """
 type: command
 short-summary: Show all commitment tiers for Azure Cognitive Services.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 examples:
   - name: Show all commitment tiers for Azure Cognitive Services.
     text: az cognitiveservices commitment-tier list -l centraluseuap
@@ -332,7 +332,7 @@ short-summary: Manage commitment plans for Azure Cognitive Services accounts.
 helps['cognitiveservices account commitment-plan create'] = """
 type: command
 short-summary: Create a commitment plan for Azure Cognitive Services account.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 examples:
   - name: Create a commitment plan for Azure Cognitive Services account.
     text: az cognitiveservices account commitment-plan create -g yuanyang-test-sdk -n yytest-ta --commitment-plan-name "plan" --hosting-model "Web" --plan-type "TA" --auto-renew false --current-tier "T1" --next-tier "T2"
@@ -341,7 +341,7 @@ examples:
 helps['cognitiveservices account commitment-plan delete'] = """
 type: command
 short-summary: Delete a commitment plan from Azure Cognitive Services account.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 examples:
   - name: Delete a commitment plan from Azure Cognitive Services account.
     text: az cognitiveservices account commitment-plan delete -g yuanyang-test-sdk -n yytest-ta --commitment-plan-name "plan"
@@ -350,7 +350,7 @@ examples:
 helps['cognitiveservices account commitment-plan show'] = """
 type: command
 short-summary: Show a commitment plan from Azure Cognitive Services account.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 examples:
   - name: Show a commitment plan from Azure Cognitive Services account.
     text: az cognitiveservices account commitment-plan show -g yuanyang-test-sdk -n yytest-ta --commitment-plan-name "plan"
@@ -359,7 +359,7 @@ examples:
 helps['cognitiveservices account commitment-plan list'] = """
 type: command
 short-summary: Show all commitment plans from Azure Cognitive Services account.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 examples:
   - name: Show all commitment plans from Azure Cognitive Services account.
     text: az cognitiveservices account commitment-plan list -g yuanyang-test-sdk -n yytest-ta
@@ -373,7 +373,7 @@ short-summary: Manage model for Azure Cognitive Services.
 helps['cognitiveservices model list'] = """
 type: command
 short-summary: Show all models for Azure Cognitive Services.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 examples:
   - name: Show all models for Azure Cognitive Services.
     text: az cognitiveservices model list -l centraluseuap
@@ -387,7 +387,7 @@ short-summary: Manage usage for Azure Cognitive Services.
 helps['cognitiveservices usage list'] = """
 type: command
 short-summary: Show all usages for Azure Cognitive Services.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://docs.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
 examples:
   - name: Show all usages for Azure Cognitive Services.
     text: az cognitiveservices usage list -l centraluseuap

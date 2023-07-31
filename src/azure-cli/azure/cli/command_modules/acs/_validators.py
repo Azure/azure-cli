@@ -598,7 +598,7 @@ def validate_azure_keyvault_kms_key_id(namespace):
     key_id = namespace.azure_keyvault_kms_key_id
     if key_id:
         # pylint:disable=line-too-long
-        err_msg = '--azure-keyvault-kms-key-id is not a valid Key Vault key ID. See https://docs.microsoft.com/en-us/azure/key-vault/general/about-keys-secrets-certificates#vault-name-and-object-name'
+        err_msg = '--azure-keyvault-kms-key-id is not a valid Key Vault key ID. See https://learn.microsoft.com/en-us/azure/key-vault/general/about-keys-secrets-certificates#vault-name-and-object-name'
 
         https_prefix = "https://"
         if not key_id.startswith(https_prefix):
