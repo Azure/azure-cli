@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class ShowSecurityGroupView(AAZCommand):
     """Get detailed security information on a VM for the currently configured network security group.
 
-    For more information on using security group view visit https://learn.microsoft.com/en-us/azure/network-watcher/network-watcher-security-group-view-cli.
+    For more information on using security group view visit https://learn.microsoft.com/azure/network-watcher/network-watcher-security-group-view-cli.
 
     :example: Get the network security group information for the specified VM.
         az network watcher show-security-group-view -g MyResourceGroup --vm MyVm

@@ -543,12 +543,12 @@ def configure_rule_parameters(c, is_afdx):
     if is_afdx:
         c.argument('match_variable', arg_group="Match Condition",
                    help='Name of the match condition: '
-                        'https://learn.microsoft.com/en-us/azure/frontdoor/rules-match-conditions',
+                        'https://learn.microsoft.com/azure/frontdoor/rules-match-conditions',
                    arg_type=get_enum_type(DeliveryRuleCondition._subtype_map["name"].keys()))
     else:
         c.argument('match_variable', arg_group="Match Condition",
                    help='Name of the match condition: '
-                        'https://learn.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-match-conditions',
+                        'https://learn.microsoft.com/azure/cdn/cdn-standard-rules-engine-match-conditions',
                    arg_type=get_enum_type(DeliveryRuleCondition._subtype_map["name"].keys()))
 
     c.argument('operator', arg_group="Match Condition", help='Operator of the match condition.')
@@ -572,7 +572,7 @@ def configure_rule_parameters(c, is_afdx):
         excldued_actions = ["UrlSigning", "CacheExpiration", "CacheKeyQueryString", "OriginGroupOverride"]
         c.argument('action_name', arg_group="Action",
                    help='The name of the action for the delivery rule: '
-                        'https://learn.microsoft.com/en-us/azure/frontdoor/front-door-rules-engine-actions',
+                        'https://learn.microsoft.com/azure/frontdoor/front-door-rules-engine-actions',
                    arg_type=get_enum_type([action for action in all_actions if action not in excldued_actions]))
 
         c.argument('cache_behavior', arg_group="Action",
@@ -608,7 +608,7 @@ def configure_rule_parameters(c, is_afdx):
         excldued_actions = ["RouteConfigurationOverride", "UrlSigning"]
         c.argument('action_name', arg_group="Action",
                    help='The name of the action for the delivery rule: '
-                        'https://learn.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-actions',
+                        'https://learn.microsoft.com/azure/cdn/cdn-standard-rules-engine-actions',
                    arg_type=get_enum_type([action for action in all_actions if action not in excldued_actions]))
 
         # CacheExpirationAction parameters

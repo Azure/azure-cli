@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class __CMDGroup(AAZCommandGroup):
     """Manage packet capture sessions on VMs.
 
-    These commands require that both Azure Network Watcher is enabled for the VMs region and that AzureNetworkWatcherExtension is enabled on the VM. For more information visit https://learn.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli.
+    These commands require that both Azure Network Watcher is enabled for the VMs region and that AzureNetworkWatcherExtension is enabled on the VM. For more information visit https://learn.microsoft.com/azure/network-watcher/network-watcher-packet-capture-manage-cli.
     """
     pass
 

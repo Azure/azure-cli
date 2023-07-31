@@ -9159,7 +9159,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         self.cmd(
             'vm create -g {rg} -n {vm3} --image {image_id} --admin-username clitest1 --generate-ssh-key --nsg-rule NONE')
 
-        message = 'Trusted Launch security configuration can be enabled only with Azure Gen2 VMs. Please visit https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch for more details.'
+        message = 'Trusted Launch security configuration can be enabled only with Azure Gen2 VMs. Please visit https://learn.microsoft.com/azure/virtual-machines/trusted-launch for more details.'
         with self.assertRaisesRegex(InvalidArgumentValueError, message):
             self.cmd('vm update -g {rg} -n {vm3} --security-type TrustedLaunch')
 

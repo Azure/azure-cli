@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class ShowTopology(AAZCommand):
     """Get the network topology of a resource group, virtual network or subnet.
 
-    For more information about using network topology visit https://learn.microsoft.com/en-us/azure/network-watcher/view-network-topology.
+    For more information about using network topology visit https://learn.microsoft.com/azure/network-watcher/view-network-topology.
 
     :example: Use show-topology to get the topology of resources within a resource group.
         az network watcher show-topology -g MyResourceGroup

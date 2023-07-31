@@ -339,7 +339,7 @@ examples:
 """
 
 # The example is from
-# https://learn.microsoft.com/en-us/azure/active-directory/develop/workload-identity-federation-create-trust-github?tabs=microsoft-graph
+# https://learn.microsoft.com/azure/active-directory/develop/workload-identity-federation-create-trust-github?tabs=microsoft-graph
 helps['ad app federated-credential create'] = """
 type: command
 short-summary: Create application federated identity credential.

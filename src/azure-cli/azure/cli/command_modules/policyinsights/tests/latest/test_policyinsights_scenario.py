@@ -383,7 +383,7 @@ class PolicyInsightsTests(ScenarioTest):
     #    2. Create 2 storage accounts in two different regions in above RG
     #    3. At above RG scope, create a new policy assignment for built-in definition with name '361c2074-3595-4e5d-8cab-4f21dffc835c' and display name 'Deploy Advanced Threat Protection on storage accounts'
     #    4. Update the 'pan' key value in test code below with the assignment name created above
-    #    5. Trigger an on-demand evaluation scan on above RG by calling triggerEvaluation API. Check https://learn.microsoft.com/en-us/azure/governance/policy/how-to/get-compliance-data#on-demand-evaluation-scan
+    #    5. Trigger an on-demand evaluation scan on above RG by calling triggerEvaluation API. Check https://learn.microsoft.com/azure/governance/policy/how-to/get-compliance-data#on-demand-evaluation-scan
     #    6. After step 5 completes, you should see the two storage accounts listed as non-compliant resources for the above assignment
     #    7. Now run the testcase in live mode using command 'azdev test test_policy_insights_remediation_complete --live'
     @record_only()

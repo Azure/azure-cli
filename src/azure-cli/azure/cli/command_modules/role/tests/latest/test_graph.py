@@ -14,7 +14,7 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
 # This test example is from
-# https://learn.microsoft.com/en-us/azure/active-directory/develop/howto-add-app-roles-in-azure-ad-apps#example-user-app-role
+# https://learn.microsoft.com/azure/active-directory/develop/howto-add-app-roles-in-azure-ad-apps#example-user-app-role
 TEST_APP_ROLES = '''[
     {
         "allowedMemberTypes": [
@@ -40,7 +40,7 @@ TEST_APP_ROLES = '''[
 '''
 
 # This test example is from
-# https://learn.microsoft.com/en-us/azure/active-directory/develop/active-directory-optional-claims#configuring-optional-claims
+# https://learn.microsoft.com/azure/active-directory/develop/active-directory-optional-claims#configuring-optional-claims
 TEST_OPTIONAL_CLAIMS = '''{
     "idToken": [
         {
@@ -95,7 +95,7 @@ TEST_REQUIRED_RESOURCE_ACCESS = '''[
 '''
 
 # This test example is from
-# https://learn.microsoft.com/en-us/azure/active-directory/develop/workload-identity-federation-create-trust-github?tabs=microsoft-graph
+# https://learn.microsoft.com/azure/active-directory/develop/workload-identity-federation-create-trust-github?tabs=microsoft-graph
 TEST_FEDERATED_IDENTITY_CREDENTIAL = '''{
     "name": "Testing",
     "issuer": "https://token.actions.githubusercontent.com/",
@@ -208,7 +208,7 @@ class ApplicationScenarioTest(GraphScenarioTestBase):
         display_name = self.create_random_name(prefix='azure-cli-test', length=30)
 
         # identifierUris must be on verified domain
-        # https://learn.microsoft.com/en-us/azure/active-directory/develop/security-best-practices-for-app-registration#appid-uri-configuration
+        # https://learn.microsoft.com/azure/active-directory/develop/security-best-practices-for-app-registration#appid-uri-configuration
         self.kwargs.update({
             'display_name': display_name,
             'identifier_uri': f'api://{display_name}',
@@ -996,5 +996,5 @@ class MiscellaneousScenarioTest(GraphScenarioTestBase):
 
 def _get_id_from_value(permissions, value):
     """Get id from value for appRoles or oauth2PermissionScopes."""
-    # https://learn.microsoft.com/en-us/graph/api/resources/serviceprincipal?view=graph-rest-1.0#properties
+    # https://learn.microsoft.com/graph/api/resources/serviceprincipal?view=graph-rest-1.0#properties
     return next(p['id'] for p in permissions if p['value'] == value)

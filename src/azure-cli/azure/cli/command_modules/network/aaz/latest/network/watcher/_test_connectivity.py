@@ -18,7 +18,7 @@ from azure.cli.core.aaz import *
 class TestConnectivity(AAZCommand):
     """Test if a connection can be established between a Virtual Machine and a given endpoint.
 
-    To check connectivity between two VMs in different regions, use the VM ids instead of the VM names for the source and destination resource arguments. To register for this feature or see additional examples visit https://learn.microsoft.com/en-us/azure/network-watcher/network-watcher-connectivity-cli.
+    To check connectivity between two VMs in different regions, use the VM ids instead of the VM names for the source and destination resource arguments. To register for this feature or see additional examples visit https://learn.microsoft.com/azure/network-watcher/network-watcher-connectivity-cli.
 
     :example: Check connectivity between two virtual machines in the same resource group over port 80.
         az network watcher test-connectivity -g MyResourceGroup --source-resource MyVmName1 --dest-resource MyVmName2 --dest-port 80

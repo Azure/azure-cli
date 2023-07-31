@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class __CMDGroup(AAZCommandGroup):
     """Configure the settings of a web application firewall.
 
-    These commands are only applicable to application gateways with an SKU type of WAF. To learn more, visit https://learn.microsoft.com/en-us/azure/web-application-firewall/ag/tutorial-restrict-web-traffic-cli.
+    These commands are only applicable to application gateways with an SKU type of WAF. To learn more, visit https://learn.microsoft.com/azure/web-application-firewall/ag/tutorial-restrict-web-traffic-cli.
     """
     pass
 

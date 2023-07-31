@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class __CMDGroup(AAZCommandGroup):
     """Manage managed rules of a WAF policy.
 
-    Visit https://learn.microsoft.com/en-us/azure/web-application-firewall/afds/afds-overview
+    Visit https://learn.microsoft.com/azure/web-application-firewall/afds/afds-overview
     """
     pass
 

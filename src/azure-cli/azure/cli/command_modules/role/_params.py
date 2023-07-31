@@ -112,12 +112,12 @@ def load_arguments(self, _):
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the application')
 
     with self.argument_context('ad app permission') as c:
-        # https://learn.microsoft.com/en-us/graph/api/resources/requiredresourceaccess
+        # https://learn.microsoft.com/graph/api/resources/requiredresourceaccess
         c.argument('api',
                    help='requiredResourceAccess.resourceAppId - '
                         'The unique identifier for the resource that the application requires access to. '
                         'This should be equal to the appId declared on the target resource application.')
-        # https://learn.microsoft.com/en-us/graph/api/resources/resourceaccess
+        # https://learn.microsoft.com/graph/api/resources/resourceaccess
         c.argument('api_permissions', nargs='+',
                    help='Space-separated list of {id}={type}. '
                         "{id} is resourceAccess.id - The unique identifier for one of the oauth2PermissionScopes or "

@@ -75,7 +75,7 @@ MOCKED_SP = {
     'appId': MOCKED_APP_APP_ID
 }
 
-# Example from https://learn.microsoft.com/en-us/graph/api/serviceprincipal-addpassword
+# Example from https://learn.microsoft.com/graph/api/serviceprincipal-addpassword
 MOCKED_ADD_PASSWORD_RESULT = {
     "customKeyIdentifier": None,
     "endDateTime": "2021-09-09T19:50:29.3086381Z",
