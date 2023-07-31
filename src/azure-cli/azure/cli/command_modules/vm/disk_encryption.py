@@ -76,7 +76,7 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
 
     # pylint: disable=no-member
     compute_client = _compute_client_factory(cmd.cli_ctx)
-    vm = compute_client.virtual_machines.get(resource_group_name=resource_group_name, vm_name=vm_name)
+    vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
     is_linux = _is_linux_os(vm)
     backup_encryption_settings = vm.storage_profile.os_disk.encryption_settings
     vm_encrypted = backup_encryption_settings.enabled if backup_encryption_settings else False
@@ -156,15 +156,13 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
         auto_upgrade_minor_version=True)
 
     poller = compute_client.virtual_machine_extensions.begin_create_or_update(
-        resource_group_name=resource_group_name, vm_name=vm_name,
-        vm_extension_name=extension['name'], extension_parameters=ext)
+        resource_group_name, vm_name, extension['name'], ext)
     LongRunningOperation(cmd.cli_ctx)(poller)
     poller.result()
 
     # verify the extension was ok
     extension_result = compute_client.virtual_machine_extensions.get(
-        resource_group_name=resource_group_name, vm_name=vm_name, vm_extension_name=extension['name'],
-        extension_parameters='instanceView')
+        resource_group_name, vm_name, extension['name'], expand='instanceView')
     if extension_result.provisioning_state != 'Succeeded':
         raise CLIError('Extension needed for disk encryption was not provisioned correctly')
 
@@ -176,7 +174,7 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
         # 3. update VM's storage profile with the secrets
         status_url = extension_result.instance_view.statuses[0].message
 
-        vm = compute_client.virtual_machines.get(resource_group_name=resource_group_name, vm_name=vm_name)
+        vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
         secret_ref = KeyVaultSecretReference(secret_url=status_url,
                                              source_vault=SubResource(id=disk_encryption_keyvault))
 
@@ -191,9 +189,8 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
         if vm_encrypted:
             # stop the vm before update if the vm is already encrypted
             logger.warning("Deallocating the VM before updating encryption settings...")
-            compute_client.virtual_machines.deallocate(
-                resource_group_name=resource_group_name, vm_name=vm_name).result()
-            vm = compute_client.virtual_machines.get(resource_group_name=resource_group_name, vm_name=vm_name)
+            compute_client.virtual_machines.deallocate(resource_group_name, vm_name).result()
+            vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
 
         vm.storage_profile.os_disk.encryption_settings = disk_encryption_settings
         set_vm(cmd, vm)
@@ -201,7 +198,7 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
         if vm_encrypted:
             # and start after the update
             logger.warning("Restarting the VM after the update...")
-            compute_client.virtual_machines.start(resource_group_name=resource_group_name, vm_name=vm_name).result()
+            compute_client.virtual_machines.start(resource_group_name, vm_name).result()
 
     if is_linux and volume_type != _DATA_VOLUME_TYPE:
         old_ade_msg = "If you see 'VMRestartPending', please restart the VM, and the encryption will finish shortly"
@@ -213,7 +210,7 @@ def decrypt_vm(cmd, resource_group_name, vm_name, volume_type=None, force=False)
     from knack.util import CLIError
 
     compute_client = _compute_client_factory(cmd.cli_ctx)
-    vm = compute_client.virtual_machines.get(resource_group_name=resource_group_name, vm_name=vm_name)
+    vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
     has_new_ade, has_old_ade = _detect_ade_status(vm)
     if not has_new_ade and not has_old_ade:
         logger.warning('Azure Disk Encryption is not enabled')
@@ -254,21 +251,20 @@ def decrypt_vm(cmd, resource_group_name, vm_name, volume_type=None, force=False)
         settings=public_config,
         auto_upgrade_minor_version=True)
 
-    poller = compute_client.virtual_machine_extensions.begin_create_or_update(resource_group_name=resource_group_name,
-                                                                              vm_name=vm_name,
-                                                                              vm_extension_name=extension['name'],
-                                                                              extension_parameters=ext)
+    poller = compute_client.virtual_machine_extensions.begin_create_or_update(resource_group_name,
+                                                                              vm_name,
+                                                                              extension['name'], ext)
     LongRunningOperation(cmd.cli_ctx)(poller)
     poller.result()
-    extension_result = compute_client.virtual_machine_extensions.get(resource_group_name, vm_name=vm_name,
-                                                                     vm_extension_name=extension['name'],
+    extension_result = compute_client.virtual_machine_extensions.get(resource_group_name, vm_name,
+                                                                     extension['name'],
                                                                      expand='instanceView')
     if extension_result.provisioning_state != 'Succeeded':
         raise CLIError("Extension updating didn't succeed")
 
     if not has_new_ade:
         # 3. Remove the secret from VM's storage profile
-        vm = compute_client.virtual_machines.get(resource_group_name=resource_group_name, vm_name=vm_name)
+        vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
         disk_encryption_settings = DiskEncryptionSettings(enabled=False)
         vm.storage_profile.os_disk.encryption_settings = disk_encryption_settings
         set_vm(cmd, vm)
@@ -300,8 +296,7 @@ def show_vm_encryption_status(cmd, resource_group_name, vm_name):
         'osType': None
     }
     compute_client = _compute_client_factory(cmd.cli_ctx)
-    vm = compute_client.virtual_machines.get(resource_group_name=resource_group_name,
-                                             vm_name=vm_name, expand='instanceView')
+    vm = compute_client.virtual_machines.get(resource_group_name, vm_name, expand='instanceView')
     has_new_ade, has_old_ade = _detect_ade_status(vm)
     if not has_new_ade and not has_old_ade:
         logger.warning('Azure Disk Encryption is not enabled')
@@ -315,9 +310,9 @@ def show_vm_encryption_status(cmd, resource_group_name, vm_name):
     os_type = 'Linux' if is_linux else 'Windows'
     encryption_status['osType'] = os_type
     extension = vm_extension_info[os_type]
-    extension_result = compute_client.virtual_machine_extensions.get(resource_group_name=resource_group_name,
-                                                                     vm_name=vm_name,
-                                                                     vm_extension_name=extension['name'],
+    extension_result = compute_client.virtual_machine_extensions.get(resource_group_name,
+                                                                     vm_name,
+                                                                     extension['name'],
                                                                      expand='instanceView')
     logger.debug(extension_result)
     if extension_result.instance_view and extension_result.instance_view.statuses:

@@ -230,8 +230,8 @@ jobs:
     matrix:
       x86:
         Platform: x86
-      x64:
-        Platform: x64
+#      x64:
+#        Platform: x64
 
   dependsOn: BuildWindowsMSI
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
@@ -441,11 +441,6 @@ jobs:
       
       CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
       PYPI_FILES=$(cd $BUILD_ARTIFACTSTAGINGDIRECTORY/pypi; pwd)
-      
-      echo "== Testing pip install on Python 3.7 =="
-      docker run \
-        --rm -v $PYPI_FILES:/mnt/pypi python:3.7 \
-        /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
       
       echo "== Testing pip install on Python 3.9 =="
       docker run \

@@ -18,6 +18,7 @@ from azure.cli.core.commands.parameters import (
 from azure.cli.command_modules.vm._actions import _resource_not_exists
 from azure.cli.command_modules.vm._completers import (
     get_urn_aliases_completion_list, get_vm_size_completion_list, get_vm_run_command_completion_list)
+from azure.cli.command_modules.vm._constants import COMPATIBLE_SECURITY_TYPE_VALUE
 from azure.cli.command_modules.vm._validators import (
     validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vmss_disk,
     validate_asg_names_or_ids, validate_keyvault, _validate_proximity_placement_group,
@@ -128,7 +129,9 @@ def load_arguments(self, _):
 
     enable_vtpm_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2020-12-01', help='Enable vTPM.')
     enable_secure_boot_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2020-12-01', help='Enable secure boot.')
-    security_type = CLIArgumentType(arg_type=get_enum_type(SecurityTypes), min_api='2020-12-01', help='Specify the security type of the virtual machine.')
+    # The `Standard` is used for backward compatibility to allow customers to keep their current behavior after changing the default values to Trusted Launch VMs in the future.
+    t_security = [x.value for x in SecurityTypes or []] + [COMPATIBLE_SECURITY_TYPE_VALUE]
+    security_type = CLIArgumentType(arg_type=get_enum_type(t_security), min_api='2020-12-01', help='Specify the security type of the virtual machine.')
     gallery_image_name_type = CLIArgumentType(options_list=['--gallery-image-definition', '-i'], help='The name of the community gallery image definition from which the image versions are to be listed.', id_part='child_name_2')
     gallery_image_name_version_type = CLIArgumentType(options_list=['--gallery-image-version', '-e'], help='The name of the gallery image version to be created. Needs to follow semantic version name pattern: The allowed characters are digit and period. Digits must be within the range of a 32-bit integer. Format: <MajorVersion>.<MinorVersion>.<Patch>', id_part='child_name_3')
     public_gallery_name_type = CLIArgumentType(help='The public name of community gallery.', id_part='child_name_1')
@@ -177,7 +180,9 @@ def load_arguments(self, _):
 
     # region Disks
     with self.argument_context('disk', resource_type=ResourceType.MGMT_COMPUTE, operation_group='disks') as c:
+        # The `Standard` is used for backward compatibility to allow customers to keep their current behavior after changing the default values to Trusted Launch VMs in the future.
         from azure.mgmt.compute.models import DiskSecurityTypes
+        t_disk_security = [x.value for x in DiskSecurityTypes or []] + [COMPATIBLE_SECURITY_TYPE_VALUE]
 
         c.argument('zone', zone_type, min_api='2017-03-30', options_list=['--zone'])  # TODO: --size-gb currently has claimed -z. We can do a breaking change later if we want to.
         c.argument('disk_name', existing_disk_name, completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
@@ -199,7 +204,7 @@ def load_arguments(self, _):
         c.argument('logical_sector_size', type=int, help='Logical sector size in bytes for Ultra disks. Supported values are 512 ad 4096. 4096 is the default.')
         c.argument('tier', help='Performance tier of the disk (e.g, P4, S10) as described here: https://azure.microsoft.com/pricing/details/managed-disks/. Does not apply to Ultra disks.')
         c.argument('edge_zone', edge_zone_type)
-        c.argument('security_type', arg_type=get_enum_type(DiskSecurityTypes), help='The security type of the VM. Applicable for OS disks only.', min_api='2020-12-01')
+        c.argument('security_type', arg_type=get_enum_type(t_disk_security), help='The security type of the VM. Applicable for OS disks only.', min_api='2020-12-01')
         c.argument('support_hibernation', arg_type=get_three_state_flag(), help='Indicate the OS on a disk supports hibernation.', min_api='2020-12-01')
         c.argument('architecture', arg_type=get_enum_type(Architecture), min_api='2021-12-01', help='CPU architecture.')
         c.argument('data_access_auth_mode', arg_type=get_enum_type(['AzureActiveDirectory', 'None']), min_api='2021-12-01', help='Specify the auth mode when exporting or uploading to a disk or snapshot.')
@@ -286,6 +291,8 @@ def load_arguments(self, _):
         c.argument('subnet', help='Name or ID of subnet to deploy the build virtual machine')
         c.argument('proxy_vm_size', help='Size of the virtual machine used to build, customize and capture images (Standard_D1_v2 for Gen1 images and Standard_D2ds_v4 for Gen2 images).')
         c.argument('build_vm_identities', nargs='+', help='Optional configuration of the virtual network to use to deploy the build virtual machine in. Omit if no specific virtual network needs to be used.')
+        c.argument('validator', nargs='+', min_api='2022-07-01',
+                   help='The type of validation you want to use on the Image. For example, "Shell" can be shell validation.')
 
         # Image Source Arguments
         c.argument('source', arg_type=ib_source_type)
@@ -325,8 +332,14 @@ def load_arguments(self, _):
         c.argument('gallery_replication_regions', arg_group="Shared Image Gallery", nargs='+', help=ib_sig_regions_help + ib_default_loc_help)
         c.argument('managed_image_location', arg_group="Managed Image", help=ib_img_location_help + ib_default_loc_help)
         c.argument('is_vhd', arg_group="VHD", help="The output is a VHD distributor.", action='store_true')
+        c.argument('vhd_uri', arg_group="VHD", help="Optional Azure Storage URI for the distributed VHD blob. Omit to use the default (empty string) in which case VHD would be published to the storage account in the staging resource group.")
+        c.argument('versioning', get_enum_type(['Latest', 'Source']), help="Describe how to generate new x.y.z version number for distribution.")
         c.argument('tags', arg_type=ib_artifact_tags_type)
         c.ignore('location')
+
+    with self.argument_context('image builder output versioning set') as c:
+        c.argument('scheme', get_enum_type(['Latest', 'Source']), help='Version numbering scheme to be used.')
+        c.argument('major', type=int, help='Major version for the generated version number. Determine what is "latest" based on versions with this value as the major version. -1 is equivalent to leaving it unset.')
 
     with self.argument_context('image builder customizer') as c:
         ib_win_restart_type = CLIArgumentType(arg_group="Windows Restart")
@@ -427,6 +440,7 @@ def load_arguments(self, _):
         c.argument('accelerated_networking', resource_type=ResourceType.MGMT_NETWORK, min_api='2016-09-01', arg_type=get_three_state_flag(), arg_group='Network',
                    help="enable accelerated networking. Unless specified, CLI will enable it based on machine image and size")
         if self.supported_api_version(min_api='2019-03-01', resource_type=ResourceType.MGMT_COMPUTE):
+            VirtualMachineEvictionPolicyTypes = self.get_models('VirtualMachineEvictionPolicyTypes', resource_type=ResourceType.MGMT_COMPUTE)
             c.argument('eviction_policy', resource_type=ResourceType.MGMT_COMPUTE, min_api='2019-03-01',
                        arg_type=get_enum_type(VirtualMachineEvictionPolicyTypes, default=None),
                        help="The eviction policy for the Spot priority virtual machine. Default eviction policy is Deallocate for a Spot priority virtual machine")
@@ -685,6 +699,8 @@ def load_arguments(self, _):
                    options_list=['--instance-ids', c.deprecate(target='--instance-id', redirect='--instance-ids', hide=True)])
 
     with self.argument_context('vmss create', operation_group='virtual_machine_scale_sets') as c:
+        VirtualMachineEvictionPolicyTypes = self.get_models('VirtualMachineEvictionPolicyTypes', resource_type=ResourceType.MGMT_COMPUTE)
+
         c.argument('name', name_arg_type)
         c.argument('nat_backend_port', default=None, help='Backend port to open with NAT rules. Defaults to 22 on Linux and 3389 on Windows.')
         c.argument('single_placement_group', arg_type=get_three_state_flag(), help="Limit the scale set to a single placement group."
@@ -1238,8 +1254,10 @@ def load_arguments(self, _):
 
     with self.argument_context('sig create') as c:
         c.argument('description', help='the description of the gallery')
+
     with self.argument_context('sig update') as c:
         c.ignore('gallery')
+
     for scope in ['sig create', 'sig update']:
         with self.argument_context(scope) as c:
             c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes),
@@ -1265,9 +1283,12 @@ def load_arguments(self, _):
         c.argument('gallery_image_version_name', options_list=['--gallery-image-version', '-e', deprecated_option],
                    help='Gallery image version in semantic version pattern. The allowed characters are digit and period. Digits must be within the range of a 32-bit integer, e.g. `<MajorVersion>.<MinorVersion>.<Patch>`')
 
+    for scope in ['sig image-version create', 'sig image-version undelete']:
+        with self.argument_context(scope, resource_type=ResourceType.MGMT_COMPUTE, operation_group='gallery_image_versions') as c:
+            c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'],
+                       help='Gallery image version in semantic version pattern. The allowed characters are digit and period. Digits must be within the range of a 32-bit integer, e.g. `<MajorVersion>.<MinorVersion>.<Patch>`')
+
     with self.argument_context('sig image-version create', resource_type=ResourceType.MGMT_COMPUTE, operation_group='gallery_image_versions') as c:
-        c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'],
-                   help='Gallery image version in semantic version pattern. The allowed characters are digit and period. Digits must be within the range of a 32-bit integer, e.g. `<MajorVersion>.<MinorVersion>.<Patch>`')
         c.argument('description', help='the description of the gallery image version')
         c.argument('managed_image', help='image name(if in the same resource group) or resource id')
         c.argument('os_snapshot', help='Name or ID of OS disk snapshot')
@@ -1330,6 +1351,9 @@ def load_arguments(self, _):
                        help='Space-separated list of regions, edge zones, replica counts and storage types. Use <region>=<edge zone>[=<replica count>][=<storage account type>] to optionally set the replica count and/or storage account type for each region. '
                             'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used. '
                             'If "--target-edge-zones None" is specified, the target extended locations will be cleared.')
+
+    for scope in ['sig image-version create', 'sig image-version update', 'sig image-version undelete']:
+        with self.argument_context(scope, operation_group='gallery_image_versions') as c:
             c.argument('allow_replicated_location_deletion', arg_type=get_three_state_flag(), min_api='2022-03-03', help='Indicate whether or not removing this gallery image version from replicated regions is allowed.')
 
     with self.argument_context('sig list-community') as c:
@@ -1601,5 +1625,4 @@ def load_arguments(self, _):
         c.argument('expand', help='The expand expression to apply on the operation.',
                    deprecate_info=c.deprecate(hide=True))
         c.argument('restore_points', action='store_true', help='Show all contained restore points in the restore point collection.')
-
     # endRegion
