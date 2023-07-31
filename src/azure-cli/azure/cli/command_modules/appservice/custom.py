@@ -4565,6 +4565,9 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, slot
         finally:
             num_trials = num_trials + 1
 
+        if res_dict.get('status') is None:
+            raise CLIError("Failed to retrieve deployment status. Please visit {}".format(deployment_status_url))
+
         status = res_dict.get('status', 0)
 
         if status == -1:
