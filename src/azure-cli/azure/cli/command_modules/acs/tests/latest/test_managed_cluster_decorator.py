@@ -1559,7 +1559,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                 }
             ),
             self.models,
-            DecoratorMode.CREATE,
+            DecoratorMode.UPDATE,
         )
         self.assertEqual(ctx_1._get_outbound_type(read_only=True), None)
         self.assertEqual(ctx_1.get_outbound_type(), "loadBalancer")
@@ -8120,12 +8120,12 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         ground_truth_mc_1 = self.models.ManagedCluster(
             location="test_location",
             network_profile=self.models.ContainerServiceNetworkProfile(
-                nat_gateway_profile=None,
+                nat_gateway_profile=self.models.nat_gateway_models.ManagedClusterNATGatewayProfile(),
                 load_balancer_sku="standard",
                 outbound_type="managedNATGateway",
             ),
         )
-        self.assertEqual(dec_mc_1.network_profile, ground_truth_mc_1.network_profile)
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
         # custom value
         dec_2 = AKSManagedClusterUpdateDecorator(
@@ -8194,6 +8194,9 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_outbound_type_in_network_profile(None)
         mc_1 = self.models.ManagedCluster(
             location="test_location",
             network_profile=self.models.ContainerServiceNetworkProfile(
@@ -8202,9 +8205,6 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             ),
         )
         dec_1.context.attach_mc(mc_1)
-        # fail on passing the wrong mc object
-        with self.assertRaises(CLIInternalError):
-            dec_1.update_outbound_type_in_network_profile(None)
         dec_mc_1 = dec_1.update_outbound_type_in_network_profile(mc_1)
 
         ground_truth_mc_1 = self.models.ManagedCluster(

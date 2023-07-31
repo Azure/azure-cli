@@ -659,28 +659,5 @@ class TestValidateRegistryName(unittest.TestCase):
             self.assertEqual(namespace.acr, "myacr" + acr_suffix)
 
 
-class UpdateOutBoundTypeNamespace:
-    def __init__(self, outbound_type):
-        self.outbound_type = outbound_type
-
-
-class TestUpdateOutBoundType(unittest.TestCase):
-    def test_pass_if_outbound_type_loadbalancer(self):
-        validators.validate_outbound_type_in_update(UpdateOutBoundTypeNamespace("loadBalancer"))
-
-    def test_pass_if_outbound_type_managedNATGateway(self):
-        validators.validate_outbound_type_in_update(UpdateOutBoundTypeNamespace("managedNATGateway"))
-    
-    def test_pass_if_outbound_type_UDR(self):
-        validators.validate_outbound_type_in_update(UpdateOutBoundTypeNamespace("userDefinedRouting"))
-
-    def test_pass_if_outbound_type_userAssignedNATGateway_with_vnet_subnet_id(self):
-        validators.validate_outbound_type_in_update(UpdateOutBoundTypeNamespace("userAssignedNATGateway"))
-
-    def test_fail_if_outbound_type_managedNATGateway_with_vnet_subnet_id(self):
-        with self.assertRaises(CLIError) as cm:
-            validators.validate_outbound_type_in_update(UpdateOutBoundTypeNamespace("unknowntype"))
-        self.assertTrue('Invalid outbound type unknowntype, supported values are loadBalancer, managedNATGateway, userAssignedNATGateway and userDefinedRouting' in str(cm.exception), msg=str(cm.exception))
-
 if __name__ == "__main__":
     unittest.main()

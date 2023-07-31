@@ -5175,7 +5175,11 @@ class VMSSRunCommandScenarioTest(ScenarioTest):
             'run_cmd': self.create_random_name('cmd_', 10),
             'user': self.create_random_name('user-', 10)
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username {user} --generate-ssh-keys')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --security-type Standard --admin-username {user} --generate-ssh-keys')
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('name', '{vmss}'),
+            self.check('securityProfile', None),
+        ])
         instace_ids = self.cmd('vmss list-instances --resource-group {rg} --name {vmss} --query "[].instanceId"').get_output_in_json()
         self.kwargs.update({
             'instance_id': instace_ids[0]
@@ -5907,7 +5911,7 @@ class VMGalleryImage(ScenarioTest):
             'des1_id': des1_id
         })
 
-        self.cmd('keyvault set-policy -n {vault} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('keyvault set-policy -n {vault} -g {rg} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
 
         time.sleep(15)
 
@@ -5939,7 +5943,10 @@ class VMGalleryImage(ScenarioTest):
             'captured': self.create_random_name('captured', 15),
         })
         self.cmd('sig create -g {rg} --gallery-name {gallery}')
-        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --features SecurityType=Standard --os-type linux -p publisher1 -f offer1 -s sku1', checks=[
+            self.check('name', '{image}'),
+            self.check('features', None),
+        ])
         self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username clitest1 --generate-ssh-key --nsg-rule NONE')
         self.cmd('vm deallocate -g {rg} -n {vm}')
         self.cmd('vm generalize -g {rg} -n {vm}')
@@ -6282,44 +6289,93 @@ class VMGalleryImage(ScenarioTest):
             self.check('sharingProfile.permissions', 'Private')
         ])
 
-
-    @ResourceGroupPreparer(location='westus')
-    def test_gallery_soft_delete(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_gallery_soft_delete_', location='westus')
+    def test_gallery_soft_delete(self, resource_group_location):
         self.kwargs.update({
-            'gallery_name': self.create_random_name('sig_', 10)
+            'vm': 'vm1',
+            'gallery': self.create_random_name('sig_', 10),
+            'image_name': self.create_random_name('img_', 10),
+            'version': '1.1.1',
         })
 
-        self.cmd('sig create -g {rg} -r {gallery_name} --soft-delete True', checks=[
+        self.cmd('sig create -g {rg} -r {gallery} --soft-delete True', checks=[
             self.check('location', 'westus'),
-            self.check('name', '{gallery_name}'),
+            self.check('name', '{gallery}'),
             self.check('resourceGroup', '{rg}'),
             self.check('softDeletePolicy.isSoftDeleteEnabled', True)
         ])
 
-        self.cmd('sig show -g {rg} -r {gallery_name} --sharing-groups', checks=[
+        self.cmd('sig show -g {rg} -r {gallery} --sharing-groups', checks=[
             self.check('location', 'westus'),
-            self.check('name', '{gallery_name}'),
+            self.check('name', '{gallery}'),
             self.check('resourceGroup', '{rg}'),
             self.check('softDeletePolicy.isSoftDeleteEnabled', True),
             self.check('sharingProfile.groups', None)
         ])
 
-        self.cmd('sig update -g {rg} -r {gallery_name} --soft-delete False', checks=[
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image_name} '
+                 '--os-type linux --os-state Specialized -p publisher1 -f offer1 -s sku1')
+
+        vm_id = self.cmd(
+            'vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --data-disk-sizes-gb 10 '
+            '--admin-username clitest1 --generate-ssh-key --nsg-rule NONE').get_output_in_json()['id']
+        self.kwargs.update({"vm_id": vm_id})
+
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image_name} '
+                 '--gallery-image-version {version} --virtual-machine {vm_id}',
+                 checks=[
+                     self.check('location', resource_group_location),
+                     self.check('name', '{version}'),
+                     self.check('provisioningState', 'Succeeded'),
+                     self.check('storageProfile.source.id', '{vm_id}'),
+                 ])
+        if self.is_live:
+            time.sleep(30)
+
+        self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image_name} '
+                 '--gallery-image-version {version}')
+        if self.is_live:
+            time.sleep(30)
+
+        self.cmd('sig image-version undelete -g {rg} --gallery-name {gallery} --gallery-image-definition {image_name} '
+                 '--gallery-image-version {version}',
+                 checks=[
+                     self.check('location', resource_group_location),
+                     self.check('name', '{version}'),
+                     self.check('provisioningState', 'Succeeded'),
+                     self.check('storageProfile.source.id', '{vm_id}'),
+                 ])
+        if self.is_live:
+            time.sleep(30)
+
+        self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image_name} '
+                 '--gallery-image-version {version}')
+
+        self.cmd('sig update -g {rg} -r {gallery} --soft-delete False', checks=[
             self.check('location', 'westus'),
-            self.check('name', '{gallery_name}'),
+            self.check('name', '{gallery}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('softDeletePolicy.isSoftDeleteEnabled', False)
+        ])
+        if self.is_live:
+            time.sleep(30)
+
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('sig image-version undelete -g {rg} --gallery-name {gallery} --gallery-image-definition {image_name} --gallery-image-version {version}')
+
+        self.cmd('sig show -g {rg} -r {gallery}', checks=[
+            self.check('location', 'westus'),
+            self.check('name', '{gallery}'),
             self.check('resourceGroup', '{rg}'),
             self.check('softDeletePolicy.isSoftDeleteEnabled', False)
         ])
 
-        self.cmd('sig show -g {rg} -r {gallery_name}', checks=[
-            self.check('location', 'westus'),
-            self.check('name', '{gallery_name}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('softDeletePolicy.isSoftDeleteEnabled', False)
-        ])
+        self.cmd('sig image-definition delete -g {rg} -r {gallery} --gallery-image-definition {image_name}')
+        if self.is_live:
+            time.sleep(30)
 
-        self.cmd('sig delete -g {rg} -r {gallery_name}')
-
+        self.cmd('sig delete -g {rg} -r {gallery}')
 
     @ResourceGroupPreparer(location='westus')
     def test_replication_mode(self, resource_group):
@@ -7262,9 +7318,10 @@ class VMCreateSpecialName(ScenarioTest):
             'vm': 'vm_1'
         })
 
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username azureuser --admin-password testPassword0 --authentication-type password --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username azureuser --admin-password testPassword0 --authentication-type password --security-type Standard --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('name', '{vm}'),
+            self.check('securityProfile', None),
             self.check('osProfile.computerName', 'vm1')
         ])
 
@@ -7894,7 +7951,7 @@ class DiskEncryptionSetTest(ScenarioTest):
             'des1_id': des1_id
         })
 
-        self.cmd('keyvault set-policy -n {vault} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('keyvault set-policy -n {vault} -g {rg} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
 
         time.sleep(15)
 
@@ -9870,7 +9927,10 @@ class DiskRPTestScenario(ScenarioTest):
             'snapshot1': self.create_random_name('snap', 10),
         })
 
-        self.cmd('disk create -n {disk} -g {rg} --size-gb 10')
+        self.cmd('disk create -n {disk} -g {rg} --security-type Standard --size-gb 10', checks=[
+            self.check('name', '{disk}'),
+            self.check('securityProfile', None),
+        ])
         self.cmd('snapshot create -n {snapshot} -g {rg} --incremental true --source {disk}', checks=[
             self.check('creationData.createOption', 'Copy')
         ])

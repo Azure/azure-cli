@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.50.0"
+VERSION = "2.51.0"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -50,9 +50,9 @@ DEPENDENCIES = [
     'distro; sys_platform == "linux"',
     'humanfriendly~=10.0',
     'jmespath',
-    'knack~=0.10.1',
+    'knack~=0.11.0',
     'msal-extensions~=1.0.0',
-    'msal[broker]==1.22.0',
+    'msal[broker]==1.24.0b1',
     'msrestazure~=0.6.4',
     'packaging>=20.9',
     'paramiko>=2.0.8,<4.0.0',
@@ -80,6 +80,6 @@ setup(
     classifiers=CLASSIFIERS,
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
-    python_requires='>=3.7.0',
+    python_requires='>=3.8.0',
     package_data={'azure.cli.core': ['auth/landing_pages/*.html']}
 )

@@ -18,8 +18,8 @@ class CognitiveServicesByoxTests(ScenarioTest):
 
         self.kwargs.update({
             'sname': sname,
-            'kind': 'Face',
-            'sku': 'E0',
+            'kind': 'FormRecognizer',
+            'sku': 'S0',
             'location': 'SOUTHCENTRALUS'
         })
 
@@ -46,8 +46,8 @@ class CognitiveServicesByoxTests(ScenarioTest):
 
         self.kwargs.update({
             'sname': sname,
-            'kind': 'Face',
-            'sku': 'E0',
+            'kind': 'FormRecognizer',
+            'sku': 'S0',
             'location': 'SOUTHCENTRALUS'
         })
 
