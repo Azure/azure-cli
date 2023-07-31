@@ -578,8 +578,9 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
         validate_zip_deploy_app_setting_exists(cmd, resource_group_name, name, slot)
 
     if is_flex_functionapp(cmd, resource_group_name, name):
-        return enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout, slot, build_remote)
-
+        enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout, slot, build_remote)
+        response = check_flex_app_after_deployment(cmd, resource_group_name, name)
+        return response
     if (not build_remote) and is_consumption and app.reserved:
         return upload_zip_to_storage(cmd, resource_group_name, name, src, slot)
     if build_remote and app.reserved:
@@ -592,6 +593,42 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
 
 def enable_zip_deploy_webapp(cmd, resource_group_name, name, src, timeout=None, slot=None):
     return enable_zip_deploy(cmd, resource_group_name, name, src, timeout=timeout, slot=slot)
+
+
+def check_flex_app_after_deployment(cmd, resource_group_name, name):
+    import requests
+    from azure.cli.core.util import should_disable_connection_verify
+
+    logger.warning("Waiting for sync triggers...")
+    time.sleep(60)
+    logger.warning("Checking the health of the function app")
+
+    try:
+        host_url = _get_host_url(cmd, resource_group_name, name)
+    except ValueError:
+        raise ResourceNotFoundError('Failed to fetch host url for function app')
+
+    try:
+        master_key = list_host_keys(cmd, resource_group_name, name).master_key
+    except:
+        raise ResourceNotFoundError('Failed to fetch host key to check for function app status')
+
+    host_status_url = host_url + '/admin/host/status'
+    headers = {"x-functions-key": master_key}
+    
+    total_trials = 15
+    num_trials = 0
+    while num_trials < total_trials:
+        time.sleep(2)
+        response = requests.get(host_status_url, headers=headers,
+                                verify=not should_disable_connection_verify())
+        if response.status_code == 200:
+            break
+
+    if response.status_code != 200:
+        raise CLIError("Deployment was successful but the app appears to be unhealthy. Please "
+                       "check the app logs.")
+    return "Deployment was successful."
 
 
 def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, slot=None, build_remote=False):
@@ -2551,6 +2588,17 @@ def _get_scm_url(cmd, resource_group_name, name, slot=None):
 
     # this should not happen, but throw anyway
     raise ResourceNotFoundError('Failed to retrieve Scm Uri')
+
+
+def _get_host_url(cmd, resource_group_name, name):
+    from azure.mgmt.web.models import HostType
+    app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
+    for host in app.host_name_ssl_states or []:
+        if host.host_type == HostType.standard:
+            return "https://{}".format(host.name)
+
+    # this should not happen, but throw anyway
+    raise ResourceNotFoundError('Failed to retrieve Host Uri')
 
 
 def get_publishing_user(cmd):
@@ -4517,13 +4565,22 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, slot
         finally:
             num_trials = num_trials + 1
 
-        if res_dict.get('status', 0) == 3:
+        status = res_dict.get('status', 0)
+
+        if status == -1:
+            raise CLIError("Deployment was cancelled.")
+        elif status == 3:
             if not is_flex_functionapp(cmd, rg_name, name):
                 _configure_default_logging(cmd, rg_name, name)
-            raise CLIError("Zip deployment failed. {}. Please run the command az webapp log deployment show "
-                           "-n {} -g {}".format(res_dict, name, rg_name))
-        if res_dict.get('status', 0) == 4:
+            raise CLIError("Zip deployment failed. {}. These are the deployment logs: \n{}".format(
+                           res_dict, json.dumps(show_deployment_log(cmd, rg_name, name))))
+        elif status == 4:
             break
+        elif status == 5:
+            raise CLIError("Deployment was cancelled and another deployment is in progress.")
+        elif status == 6:
+            raise CLIError("Deployment was partially successful. These are the deployment logs:\n{}".format(
+                           json.dumps(show_deployment_log(cmd, rg_name, name))))
         if 'progress' in res_dict:
             logger.info(res_dict['progress'])  # show only in debug mode, customers seem to find this confusing
     # if the deployment is taking longer than expected
