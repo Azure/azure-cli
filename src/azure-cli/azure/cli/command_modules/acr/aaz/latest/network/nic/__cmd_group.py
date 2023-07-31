@@ -14,7 +14,7 @@ from azure.cli.core.aaz import *
 class __CMDGroup(AAZCommandGroup):
     """Manage network interfaces.
 
-    To learn more about network interfaces in Azure, visit https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-network-interface?tabs=network-interface-portal.
+    To learn more about network interfaces in Azure, visit https://learn.microsoft.com/azure/virtual-network/virtual-network-network-interface?tabs=network-interface-portal.
     """
     pass
 

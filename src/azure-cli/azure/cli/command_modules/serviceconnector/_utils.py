@@ -255,7 +255,7 @@ def get_auth_if_no_valid_key_vault_connection(source_name, source_id, key_vault_
             is_valid_resource_id
         )
 
-        # https://docs.microsoft.com/azure/app-service/app-service-key-vault-references
+        # https://learn.microsoft.com/azure/app-service/app-service-key-vault-references
         if source_name == RESOURCE.WebApp:
             try:
                 webapp = run_cli_cmd(

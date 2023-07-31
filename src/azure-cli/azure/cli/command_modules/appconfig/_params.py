@@ -131,7 +131,7 @@ def load_arguments(self, _):
                    'If the auth mode is "key", provide connection string or store name and your account access keys will be retrieved for authorization. ' +
                    'If the auth mode is "login", provide the store endpoint or store name and your "az login" credentials will be used for authorization. ' +
                    'You can configure the default auth mode using `az configure --defaults appconfig_auth_mode=<auth_mode>`. ' +
-                   'For more information, see https://docs.microsoft.com/azure/azure-app-configuration/concept-enable-rbac')
+                   'For more information, see https://learn.microsoft.com/azure/azure-app-configuration/concept-enable-rbac')
 
     with self.argument_context('appconfig create') as c:
         c.argument('location', options_list=['--location', '-l'], arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
@@ -240,7 +240,7 @@ def load_arguments(self, _):
     with self.argument_context('appconfig kv export', arg_group='AppService') as c:
         c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration. Required for AppService arguments')
         c.argument('export_as_reference', options_list=['--export-as-reference', '-r'], is_preview=True, arg_type=get_three_state_flag(), validator=validate_export_as_reference,
-                   help="Export key-values as App Configuration references. For more information, see https://docs.microsoft.com/en-us/azure/app-service/app-service-configuration-references")
+                   help="Export key-values as App Configuration references. For more information, see https://learn.microsoft.com/azure/app-service/app-service-configuration-references")
 
     with self.argument_context('appconfig kv set') as c:
         c.argument('key', validator=validate_key, help="Key to be set. Key cannot be a '.' or '..', or contain the '%' character.")

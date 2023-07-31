@@ -82,22 +82,22 @@ class GraphClient:
     # filter is python built-in name: https://docs.python.org/3/library/functions.html#filter
 
     def application_list(self, filter=None):
-        # https://docs.microsoft.com/en-us/graph/api/application-list
+        # https://learn.microsoft.com/graph/api/application-list
         result = self._send("GET", "/applications" + _filter_to_query(filter))
         return result
 
     def application_create(self, body):
-        # https://docs.microsoft.com/en-us/graph/api/application-post-applications
+        # https://learn.microsoft.com/graph/api/application-post-applications
         result = self._send("POST", "/applications", body=body)
         return result
 
     def application_get(self, id):
-        # https://docs.microsoft.com/en-us/graph/api/application-get
+        # https://learn.microsoft.com/graph/api/application-get
         result = self._send("GET", "/applications/{id}".format(id=id))
         return result
 
     def application_update(self, id, body):
-        # https://docs.microsoft.com/en-us/graph/api/application-update
+        # https://learn.microsoft.com/graph/api/application-update
         # AD Graph SDK uses verb 'patch', instead of 'update':
         #   azure.graphrbac.operations.applications_operations.ApplicationsOperations.patch
         # We use 'update' to align with other update operations:
@@ -106,45 +106,45 @@ class GraphClient:
         return result
 
     def application_delete(self, id):
-        # https://docs.microsoft.com/en-us/graph/api/application-delete
+        # https://learn.microsoft.com/graph/api/application-delete
         result = self._send("DELETE", "/applications/{id}".format(id=id))
         return result
 
     def application_owner_list(self, id):
-        # https://docs.microsoft.com/en-us/graph/api/application-list-owners
+        # https://learn.microsoft.com/graph/api/application-list-owners
         result = self._send("GET", "/applications/{id}/owners".format(id=id))
         return result
 
     def application_owner_add(self, id, body):
-        # https://docs.microsoft.com/en-us/graph/api/application-post-owners
+        # https://learn.microsoft.com/graph/api/application-post-owners
         result = self._send("POST", "/applications/{id}/owners/$ref".format(id=id), body=body)
         return result
 
     def application_owner_remove(self, id, owner_id):
-        # https://docs.microsoft.com/en-us/graph/api/application-delete-owners
+        # https://learn.microsoft.com/graph/api/application-delete-owners
         result = self._send("DELETE", "/applications/{id}/owners/{owner_id}/$ref".format(id=id, owner_id=owner_id))
         return result
 
     def application_add_password(self, id, body):
-        # https://docs.microsoft.com/en-us/graph/api/application-addpassword
+        # https://learn.microsoft.com/graph/api/application-addpassword
         # 'addPassword' appears in the API, so we keep its name, instead of using application_password_add
         result = self._send("POST", "/applications/{id}/addPassword".format(id=id), body=body)
         return result
 
     def application_remove_password(self, id, body):
-        # https://docs.microsoft.com/en-us/graph/api/application-removepassword
+        # https://learn.microsoft.com/graph/api/application-removepassword
         result = self._send("POST", "/applications/{id}/removePassword".format(id=id), body=body)
         return result
 
     def application_federated_identity_credential_list(self, application_id, filter=None):
-        # https://docs.microsoft.com/en-us/graph/api/application-list-federatedidentitycredentials
+        # https://learn.microsoft.com/graph/api/application-list-federatedidentitycredentials
         result = self._send(
             "GET",
             f"/applications/{application_id}/federatedIdentityCredentials" + _filter_to_query(filter))
         return result
 
     def application_federated_identity_credential_create(self, application_id, body):
-        # https://docs.microsoft.com/en-us/graph/api/application-post-federatedidentitycredentials
+        # https://learn.microsoft.com/graph/api/application-post-federatedidentitycredentials
         result = self._send(
             "POST",
             f"/applications/{application_id}/federatedIdentityCredentials",
@@ -152,7 +152,7 @@ class GraphClient:
         return result
 
     def application_federated_identity_credential_get(self, application_id, federated_identity_credential_id_or_name):
-        # https://docs.microsoft.com/en-us/graph/api/federatedidentitycredential-get
+        # https://learn.microsoft.com/graph/api/federatedidentitycredential-get
         result = self._send(
             "GET",
             f"/applications/{application_id}/federatedIdentityCredentials/{federated_identity_credential_id_or_name}")
@@ -160,7 +160,7 @@ class GraphClient:
 
     def application_federated_identity_credential_update(
             self, application_id, federated_identity_credential_id_or_name, body):
-        # https://docs.microsoft.com/en-us/graph/api/federatedidentitycredential-update
+        # https://learn.microsoft.com/graph/api/federatedidentitycredential-update
         result = self._send(
             "PATCH",
             f"/applications/{application_id}/federatedIdentityCredentials/{federated_identity_credential_id_or_name}",
@@ -168,169 +168,169 @@ class GraphClient:
         return result
 
     def application_federated_identity_credential_delete(self, application_id, federated_identity_credential_id_or_name):
-        # https://docs.microsoft.com/en-us/graph/api/federatedidentitycredential-delete
+        # https://learn.microsoft.com/graph/api/federatedidentitycredential-delete
         result = self._send(
             "DELETE",
             f"/applications/{application_id}/federatedIdentityCredentials/{federated_identity_credential_id_or_name}")
         return result
 
     def service_principal_list(self, filter=None):
-        # https://docs.microsoft.com/en-us/graph/api/serviceprincipal-list
+        # https://learn.microsoft.com/graph/api/serviceprincipal-list
         result = self._send("GET", "/servicePrincipals" + _filter_to_query(filter))
         return result
 
     def service_principal_create(self, body):
-        # https://docs.microsoft.com/en-us/graph/api/serviceprincipal-post-serviceprincipals
+        # https://learn.microsoft.com/graph/api/serviceprincipal-post-serviceprincipals
         result = self._send("POST", "/servicePrincipals", body=body)
         return result
 
     def service_principal_get(self, id):
-        # https://docs.microsoft.com/en-us/graph/api/serviceprincipal-get
+        # https://learn.microsoft.com/graph/api/serviceprincipal-get
         result = self._send("GET", "/servicePrincipals/{id}".format(id=id))
         return result
 
     def service_principal_update(self, id, body):
-        # https://docs.microsoft.com/en-us/graph/api/serviceprincipal-update
+        # https://learn.microsoft.com/graph/api/serviceprincipal-update
         result = self._send("PATCH", "/servicePrincipals/{id}".format(id=id), body=body)
         return result
 
     def service_principal_delete(self, id):
-        # https://docs.microsoft.com/en-us/graph/api/serviceprincipal-delete
+        # https://learn.microsoft.com/graph/api/serviceprincipal-delete
         result = self._send("DELETE", "/servicePrincipals/{id}".format(id=id))
         return result
 
     def service_principal_add_password(self, id, body):
-        # https://docs.microsoft.com/en-us/graph/api/serviceprincipal-addpassword
+        # https://learn.microsoft.com/graph/api/serviceprincipal-addpassword
         result = self._send("POST", "/servicePrincipals/{id}/addPassword".format(id=id), body=body)
         return result
 
     def service_principal_remove_password(self, id, body):
-        # https://docs.microsoft.com/en-us/graph/api/serviceprincipal-removepassword
+        # https://learn.microsoft.com/graph/api/serviceprincipal-removepassword
         result = self._send("POST", "/servicePrincipals/{id}/removePassword".format(id=id), body=body)
         return result
 
     def service_principal_owner_list(self, id):
-        # https://docs.microsoft.com/en-us/graph/api/serviceprincipal-list-owners
+        # https://learn.microsoft.com/graph/api/serviceprincipal-list-owners
         result = self._send("GET", "/servicePrincipals/{id}/owners".format(id=id))
         return result
 
     def owned_objects_list(self):
-        # https://docs.microsoft.com/en-us/graph/api/user-list-ownedobjects
+        # https://learn.microsoft.com/graph/api/user-list-ownedobjects
         result = self._send("GET", "/me/ownedObjects")
         return result
 
     def signed_in_user_get(self):
-        # https://docs.microsoft.com/en-us/graph/api/user-get
+        # https://learn.microsoft.com/graph/api/user-get
         result = self._send("GET", "/me")
         return result
 
     def directory_object_get_by_ids(self, body):
-        # https://docs.microsoft.com/en-us/graph/api/directoryobject-getbyids
+        # https://learn.microsoft.com/graph/api/directoryobject-getbyids
         result = self._send("POST", "/directoryObjects/getByIds", body=body)
         return result
 
     def directory_object_check_member_groups(self, id, body):
-        # https://docs.microsoft.com/en-us/graph/api/directoryobject-checkmembergroups
+        # https://learn.microsoft.com/graph/api/directoryobject-checkmembergroups
         result = self._send("POST", "/directoryObjects/{id}/checkMemberGroups".format(id=id), body=body)
         return result
 
     def group_get_member_groups(self, id, body):
-        # https://docs.microsoft.com/en-us/graph/api/directoryobject-getmembergroups
+        # https://learn.microsoft.com/graph/api/directoryobject-getmembergroups
         result = self._send("POST", "/groups/{id}/getMemberGroups".format(id=id), body=body)
         return result
 
     def group_list(self, filter=None):
-        # https://docs.microsoft.com/en-us/graph/api/group-list
+        # https://learn.microsoft.com/graph/api/group-list
         result = self._send("GET", "/groups" + _filter_to_query(filter))
         return result
 
     def group_create(self, body):
-        # https://docs.microsoft.com/en-us/graph/api/group-post-groups
+        # https://learn.microsoft.com/graph/api/group-post-groups
         result = self._send("POST", "/groups", body=body)
         return result
 
     def group_get(self, id):
-        # https://docs.microsoft.com/en-us/graph/api/group-get
+        # https://learn.microsoft.com/graph/api/group-get
         result = self._send("GET", "/groups/{id}".format(id=id))
         return result
 
     def group_delete(self, id):
-        # https://docs.microsoft.com/en-us/graph/api/group-delete
+        # https://learn.microsoft.com/graph/api/group-delete
         result = self._send("DELETE", "/groups/{id}".format(id=id))
         return result
 
     def group_owner_list(self, id):
-        # https://docs.microsoft.com/en-us/graph/api/group-list-owners
+        # https://learn.microsoft.com/graph/api/group-list-owners
         result = self._send("GET", "/groups/{id}/owners".format(id=id))
         return result
 
     def group_owner_add(self, id, body):
-        # https://docs.microsoft.com/en-us/graph/api/group-post-owners
+        # https://learn.microsoft.com/graph/api/group-post-owners
         result = self._send("POST", "/groups/{id}/owners/$ref".format(id=id), body=body)
         return result
 
     def group_owner_remove(self, id, owner_id):
-        # https://docs.microsoft.com/en-us/graph/api/group-delete-owners
+        # https://learn.microsoft.com/graph/api/group-delete-owners
         result = self._send("DELETE", "/groups/{id}/owners/{owner_id}/$ref".format(id=id, owner_id=owner_id))
         return result
 
     def group_member_list(self, id):
-        # https://docs.microsoft.com/en-us/graph/api/group-list-members
+        # https://learn.microsoft.com/graph/api/group-list-members
         result = self._send("GET", '/groups/{id}/members'.format(id=id))
         return result
 
     def group_member_add(self, id, body):
-        # https://docs.microsoft.com/en-us/graph/api/group-post-members
+        # https://learn.microsoft.com/graph/api/group-post-members
         result = self._send("POST", "/groups/{id}/members/$ref".format(id=id), body=body)
         return result
 
     def group_member_remove(self, id, member_id):
-        # https://docs.microsoft.com/en-us/graph/api/group-delete-members
+        # https://learn.microsoft.com/graph/api/group-delete-members
         result = self._send("DELETE", "/groups/{id}/members/{member_id}/$ref".format(id=id, member_id=member_id))
         return result
 
     def user_list(self, filter):
-        # https://docs.microsoft.com/graph/api/user-list
+        # https://learn.microsoft.com/graph/api/user-list
         result = self._send("GET", "/users" + _filter_to_query(filter))
         return result
 
     def user_create(self, body):
-        # https://docs.microsoft.com/graph/api/user-post-users
+        # https://learn.microsoft.com/graph/api/user-post-users
         result = self._send("POST", "/users", body=body)
         return result
 
     def user_get(self, id_or_upn):
-        # https://docs.microsoft.com/graph/api/user-get
+        # https://learn.microsoft.com/graph/api/user-get
         result = self._send("GET", "{}".format(_get_user_url(id_or_upn)))
         return result
 
     def user_update(self, id_or_upn, body):
-        # https://docs.microsoft.com/graph/api/user-update
+        # https://learn.microsoft.com/graph/api/user-update
         result = self._send("PATCH", "{}".format(_get_user_url(id_or_upn)), body=body)
         return result
 
     def user_delete(self, id_or_upn):
-        # https://docs.microsoft.com/graph/api/user-delete
+        # https://learn.microsoft.com/graph/api/user-delete
         result = self._send("DELETE", "{}".format(_get_user_url(id_or_upn)))
         return result
 
     def user_get_member_groups(self, id_or_upn, body):
-        # https://docs.microsoft.com/en-us/graph/api/directoryobject-getmembergroups
+        # https://learn.microsoft.com/graph/api/directoryobject-getmembergroups
         result = self._send("POST", "{}/getMemberGroups".format(_get_user_url(id_or_upn)), body=body)
         return result
 
     def oauth2_permission_grant_list(self, filter=None):
-        # https://docs.microsoft.com/en-us/graph/api/oauth2permissiongrant-list
+        # https://learn.microsoft.com/graph/api/oauth2permissiongrant-list
         result = self._send("GET", "/oauth2PermissionGrants" + _filter_to_query(filter))
         return result
 
     def oauth2_permission_grant_create(self, body):
-        # https://docs.microsoft.com/en-us/graph/api/oauth2permissiongrant-post
+        # https://learn.microsoft.com/graph/api/oauth2permissiongrant-post
         result = self._send("POST", "/oauth2PermissionGrants", body=body)
         return result
 
     def oauth2_permission_grant_delete(self, id):
-        # https://docs.microsoft.com/en-us/graph/api/oauth2permissiongrant-delete
+        # https://learn.microsoft.com/graph/api/oauth2permissiongrant-delete
         result = self._send("DELETE", "/oAuth2PermissionGrants/{id}".format(id=id))
         return result
 
@@ -350,7 +350,7 @@ class GraphClient:
 
 def _filter_to_query(filter):
     if filter is not None:
-        # https://docs.microsoft.com/en-us/graph/query-parameters#encoding-query-parameters
+        # https://learn.microsoft.com/graph/query-parameters#encoding-query-parameters
         # The values of query parameters should be percent-encoded.
         from urllib.parse import quote
         return "?$filter={}".format(quote(filter, safe=''))
@@ -359,8 +359,8 @@ def _filter_to_query(filter):
 
 def _get_user_url(id_or_upn):
     # Correctly handle $ and # in upn according to
-    # https://docs.microsoft.com/en-us/graph/api/user-get
-    # https://docs.microsoft.com/en-us/graph/known-issues#users
+    # https://learn.microsoft.com/graph/api/user-get
+    # https://learn.microsoft.com/graph/known-issues#users
 
     # UPN
     if '@' in id_or_upn:

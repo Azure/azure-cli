@@ -30,7 +30,7 @@ long-summary: >4
     The operating system disk is created from an image, and both the operating system disk and the image are actually virtual hard disks (VHDs)
     stored in an Azure storage account. Virtual machines also can have one or more data disks, that are also stored as VHDs.
 
-    Azure Unmanaged Data Disks have a maximum size of 4095 GB. To use disks larger than 4095 GB use [Azure Managed Disks](https://docs.microsoft.com/azure/virtual-machines/managed-disks-overview)
+    Azure Unmanaged Data Disks have a maximum size of 4095 GB. To use disks larger than 4095 GB use [Azure Managed Disks](https://learn.microsoft.com/azure/virtual-machines/managed-disks-overview)
 
 """
 
@@ -1448,7 +1448,7 @@ examples:
 helps['vm availability-set create'] = """
 type: command
 short-summary: Create an Azure Availability Set.
-long-summary: 'For more information, see https://docs.microsoft.com/azure/virtual-machines/availability.'
+long-summary: 'For more information, see https://learn.microsoft.com/azure/virtual-machines/availability.'
 examples:
   - name: Create an availability set.
     text: az vm availability-set create -n MyAvSet -g MyResourceGroup --platform-fault-domain-count 2 --platform-update-domain-count 2
@@ -1563,7 +1563,7 @@ examples:
 helps['vm capture'] = """
 type: command
 short-summary: Capture information for a stopped VM.
-long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/linux/capture-image'
+long-summary: 'For an end-to-end tutorial, see https://learn.microsoft.com/azure/virtual-machines/linux/capture-image'
 parameters:
   - name: --vhd-name-prefix
     type: string
@@ -1601,14 +1601,14 @@ examples:
 helps['vm create'] = """
 type: command
 short-summary: Create an Azure Virtual Machine.
-long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/linux/quick-create-cli.'
+long-summary: 'For an end-to-end tutorial, see https://learn.microsoft.com/azure/virtual-machines/linux/quick-create-cli.'
 parameters:
   - name: --image
     type: string
     short-summary: >
         The name of the operating system image as a URN alias, URN, custom image name or ID, custom image version ID, or VHD blob URI. In addition, it also supports shared gallery image.
         Please use the image alias including the version of the distribution you want to use. For example: please use Debian11 instead of Debian.'
-        This parameter is required unless using `--attach-os-disk.` Valid URN format: "Publisher:Offer:Sku:Version". For more information, see https://docs.microsoft.com/azure/virtual-machines/linux/cli-ps-findimage
+        This parameter is required unless using `--attach-os-disk.` Valid URN format: "Publisher:Offer:Sku:Version". For more information, see https://learn.microsoft.com/azure/virtual-machines/linux/cli-ps-findimage
     populator-commands:
       - az vm image list
       - az vm image show
@@ -1648,7 +1648,7 @@ examples:
   - name: Create a VM by attaching to an unmanaged operating system disk from a VHD blob uri.
     text: >
         az vm create -g MyResourceGroup -n MyVm --attach-os-disk https://vhd1234.blob.core.windows.net/vhds/osdisk1234.vhd --os-type linux --use-unmanaged-disk
-  - name: 'Create an Debian11 VM using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/linux/using-cloud-init.'
+  - name: 'Create an Debian11 VM using a cloud-init script for configuration. See: https://learn.microsoft.com/azure/virtual-machines/linux/using-cloud-init.'
     text: >
         az vm create -g MyResourceGroup -n MyVm --image Debian11 --custom-data MyCloudInitScript.yml
   - name: Create a Debian11 VM with SSH key authentication and a public DNS entry, located on an existing virtual network and availability set.
@@ -1701,7 +1701,7 @@ examples:
 helps['vm deallocate'] = """
 type: command
 short-summary: Deallocate a VM so that computing resources are no longer allocated (charges no longer apply). The status will change from 'Stopped' to 'Stopped (Deallocated)'.
-long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/linux/capture-image'
+long-summary: 'For an end-to-end tutorial, see https://learn.microsoft.com/azure/virtual-machines/linux/capture-image'
 parameters:
   - name: --hibernate
     short-summary: Optional parameter to hibernate a virtual machine. (Feature in Preview). Default value is None.
@@ -1837,11 +1837,11 @@ long-summary: >4
 
     For more information, see:
 
-    - Azure Disks - https://docs.microsoft.com/azure/virtual-machines/managed-disks-overview.
+    - Azure Disks - https://learn.microsoft.com/azure/virtual-machines/managed-disks-overview.
 
     - Larger Managed Disks in Public Preview - https://azure.microsoft.com/blog/introducing-the-public-preview-of-larger-managed-disks-sizes/
 
-    - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/azure/virtual-machines/disks-types
+    - Ultra SSD Managed Disks in Public Preview - https://learn.microsoft.com/azure/virtual-machines/disks-types
 
 
 """
@@ -1880,7 +1880,7 @@ type: group
 short-summary: "Manage encryption of VM disks."
 long-summary: |
     For more information, see:
-    https://docs.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss
+    https://learn.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss
 """
 
 helps['vm encryption disable'] = """
@@ -1902,7 +1902,7 @@ short-summary: "Enable disk encryption on the OS disk and/or data disks. Encrypt
 long-summary: |
     Note that Azure Active Directory / service principal arguments are unnecessary for vm encryption. The older version of Azure Disk Encryption required AAD arguments.
     For more information, see:
-    https://docs.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss
+    https://learn.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss
 parameters:
   - name: --aad-client-id
     short-summary: Client ID of an AAD app with permissions to write secrets to the key vault.
@@ -2005,7 +2005,7 @@ examples:
 helps['vm generalize'] = """
 type: command
 short-summary: Mark a VM as generalized, allowing it to be imaged for multiple deployments.
-long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/linux/capture-image'
+long-summary: 'For an end-to-end tutorial, see https://learn.microsoft.com/azure/virtual-machines/linux/capture-image'
 examples:
   - name: Deallocate, generalize, and capture a stopped virtual machine.
     text: |
@@ -2296,7 +2296,7 @@ examples:
 helps['vm list'] = """
 type: command
 short-summary: List details of Virtual Machines.
-long-summary: '`--resource-group` can pass in an empty string as a parameter, which will output all VM information under the subscription. For more information on querying information about Virtual Machines, see https://docs.microsoft.com/cli/azure/query-az-cli2'
+long-summary: '`--resource-group` can pass in an empty string as a parameter, which will output all VM information under the subscription. For more information on querying information about Virtual Machines, see https://learn.microsoft.com/cli/azure/query-az-cli2'
 examples:
   - name: List all VMs.
     text: az vm list
@@ -2366,7 +2366,7 @@ type: group
 short-summary: Manage network interfaces. See also `az network nic`.
 long-summary: >
     A network interface (NIC) is the interconnection between a VM and the underlying software
-    network. For more information, see https://docs.microsoft.com/azure/virtual-network/virtual-network-network-interface-overview.
+    network. For more information, see https://learn.microsoft.com/azure/virtual-network/virtual-network-network-interface-overview.
 """
 
 helps['vm nic add'] = """
@@ -2492,7 +2492,7 @@ examples:
 helps['vm run-command'] = """
 type: group
 short-summary: Manage run commands on a Virtual Machine.
-long-summary: 'For more information, see https://docs.microsoft.com/azure/virtual-machines/windows/run-command or https://docs.microsoft.com/azure/virtual-machines/linux/run-command.'
+long-summary: 'For more information, see https://learn.microsoft.com/azure/virtual-machines/windows/run-command or https://learn.microsoft.com/azure/virtual-machines/linux/run-command.'
 """
 
 helps['vm run-command invoke'] = """
@@ -2650,7 +2650,7 @@ short-summary: Manage VM secrets.
 helps['vm secret add'] = """
 type: command
 short-summary: Add a secret to a VM.
-long-summary: 'To install certificates on a virtual machine it is recommended to use the [Azure Key Vault virtual machine extension for Linux](https://docs.microsoft.com/azure/virtual-machines/extensions/key-vault-linux) or the [Azure Key Vault virtual machine extension for Windows](https://docs.microsoft.com/azure/virtual-machines/extensions/key-vault-windows) instead of `az vm secret add`.'
+long-summary: 'To install certificates on a virtual machine it is recommended to use the [Azure Key Vault virtual machine extension for Linux](https://learn.microsoft.com/azure/virtual-machines/extensions/key-vault-linux) or the [Azure Key Vault virtual machine extension for Windows](https://learn.microsoft.com/azure/virtual-machines/extensions/key-vault-windows) instead of `az vm secret add`.'
 examples:
   - name: Add a secret to a VM. (autogenerated)
     text: |
@@ -2763,11 +2763,11 @@ long-summary: >4
 
     For more information, see:
 
-    - Azure Disks - https://docs.microsoft.com/azure/virtual-machines/managed-disks-overview.
+    - Azure Disks - https://learn.microsoft.com/azure/virtual-machines/managed-disks-overview.
 
     - Larger Managed Disks in Public Preview - https://azure.microsoft.com/blog/introducing-the-public-preview-of-larger-managed-disks-sizes/
 
-    - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/azure/virtual-machines/disks-types
+    - Ultra SSD Managed Disks in Public Preview - https://learn.microsoft.com/azure/virtual-machines/disks-types
 
 
 """
@@ -2909,14 +2909,14 @@ short-summary: Manage groupings of virtual machines in an Azure Virtual Machine 
 helps['vmss create'] = """
 type: command
 short-summary: Create an Azure Virtual Machine Scale Set.
-long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-linux-create-cli.'
+long-summary: 'For an end-to-end tutorial, see https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-linux-create-cli.'
 parameters:
   - name: --image
     type: string
     short-summary: >
         The name of the operating system image as a URN alias, URN, custom image name or ID, or VHD blob URI. In addition, it also supports shared gallery image.
         Please use the image alias including the version of the distribution you want to use. For example: please use Debian11 instead of Debian.'
-        This parameter is required unless using `--attach-os-disk.` Valid URN format: "Publisher:Offer:Sku:Version". For more information, see https://docs.microsoft.com/azure/virtual-machines/linux/cli-ps-findimage
+        This parameter is required unless using `--attach-os-disk.` Valid URN format: "Publisher:Offer:Sku:Version". For more information, see https://learn.microsoft.com/azure/virtual-machines/linux/cli-ps-findimage
     populator-commands:
       - az vm image list
       - az vm image show
@@ -2939,7 +2939,7 @@ examples:
     text: >
         az vmss create -n MyVmss -g MyResourceGroup --image CentOS85Gen2 \\
             --public-ip-per-vm --vm-domain-name myvmss --dns-servers 10.0.0.6 10.0.0.5
-  - name: 'Create a Linux VM scale set using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/linux/using-cloud-init'
+  - name: 'Create a Linux VM scale set using a cloud-init script for configuration. See: https://learn.microsoft.com/azure/virtual-machines/linux/using-cloud-init'
     text: >
         az vmss create -g MyResourceGroup -n MyVmss --image Debian11 --custom-data MyCloudInitScript.yml
   - name: Create a VMSS from a generalized gallery image version.
@@ -3070,7 +3070,7 @@ examples:
 helps['vmss encryption'] = """
 type: group
 short-summary: "Manage encryption of VMSS."
-long-summary: "For more information, see: ttps://docs.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss"
+long-summary: "For more information, see: ttps://learn.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss"
 """
 
 helps['vmss encryption disable'] = """
@@ -3085,7 +3085,7 @@ examples:
 helps['vmss encryption enable'] = """
 type: command
 short-summary: "Encrypt a VMSS with managed disks."
-long-summary: "For more information, see: For more information, see: ttps://docs.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss"
+long-summary: "For more information, see: For more information, see: ttps://learn.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss"
 examples:
   - name: encrypt a VM scale set using a key vault in the same resource group
     text: >
@@ -3331,7 +3331,7 @@ examples:
 helps['vmss run-command'] = """
 type: group
 short-summary: Manage run commands on a Virtual Machine Scale Set.
-long-summary: 'For more information, see https://docs.microsoft.com/azure/virtual-machines/windows/run-command or https://docs.microsoft.com/azure/virtual-machines/linux/run-command.'
+long-summary: 'For more information, see https://learn.microsoft.com/azure/virtual-machines/windows/run-command or https://learn.microsoft.com/azure/virtual-machines/linux/run-command.'
 """
 
 helps['vmss run-command invoke'] = """
@@ -3608,7 +3608,7 @@ parameters:
         The interval over which to aggregate metrics, in ##h##m format.
   - name: --filter
     short-summary: A string used to reduce the set of metric data returned. eg. "LUN eq '*'"
-    long-summary: 'For a full list of filters, see the filter string reference at https://docs.microsoft.com/rest/api/monitor/metrics/list'
+    long-summary: 'For a full list of filters, see the filter string reference at https://learn.microsoft.com/rest/api/monitor/metrics/list'
   - name: --metadata
     short-summary: Return the metadata values instead of metric data
   - name: --dimension

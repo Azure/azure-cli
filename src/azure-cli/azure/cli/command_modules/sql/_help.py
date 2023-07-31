@@ -1726,7 +1726,7 @@ short-summary: Manage a server's encryption protector.
 
 helps['sql server tde-key set'] = """
 type: command
-short-summary: Sets the server's encryption protector. Ensure to create the key first https://docs.microsoft.com/en-us/cli/azure/sql/server/key?view=azure-cli-latest#az-sql-server-key-create
+short-summary: Sets the server's encryption protector. Ensure to create the key first https://learn.microsoft.com/cli/azure/sql/server/key?view=azure-cli-latest#az-sql-server-key-create
 """
 
 helps['sql server update'] = """

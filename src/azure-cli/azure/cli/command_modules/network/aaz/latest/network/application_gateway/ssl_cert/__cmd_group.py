@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class __CMDGroup(AAZCommandGroup):
     """Manage SSL certificates of an application gateway.
 
-    For more information visit https://learn.microsoft.com/en-us/azure/application-gateway/tutorial-ssl-cli.
+    For more information visit https://learn.microsoft.com/azure/application-gateway/tutorial-ssl-cli.
     """
     pass
 

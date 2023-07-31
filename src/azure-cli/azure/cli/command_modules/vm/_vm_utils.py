@@ -582,7 +582,7 @@ def validate_update_vm_trusted_launch_supported(cmd, vm, os_disk_resource_group,
     if generation_version != "V2":
         raise InvalidArgumentValueError(
             "Trusted Launch security configuration can be enabled only with Azure Gen2 VMs. Please visit "
-            "https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch for more details.")
+            "https://learn.microsoft.com/azure/virtual-machines/trusted-launch for more details.")
 
     if vm.security_profile is not None and vm.security_profile.security_type == "ConfidentialVM":
         raise InvalidArgumentValueError("{} is already configured with ConfidentialVM. "

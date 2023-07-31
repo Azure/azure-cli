@@ -146,7 +146,7 @@ def raise_missing_token_suggestion():
 
 
 def raise_missing_ado_token_suggestion():
-    pat_documentation = ("https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-"
+    pat_documentation = ("https://learn.microsoft.com/azure/devops/organizations/accounts/use-personal-access-"
                          "tokens-to-authenticate?view=azure-devops&tabs=Windows#create-a-pat")
     raise RequiredArgumentMissingError("If this repo is an Azure Dev Ops repo, please provide a Personal Access Token."
                                        "Please run with the '--login-with-ado' flag or follow "

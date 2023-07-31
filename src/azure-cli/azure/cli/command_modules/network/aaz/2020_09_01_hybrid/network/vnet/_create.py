@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class Create(AAZCommand):
     """Create a virtual network.
 
-    You may also create a subnet at the same time by specifying a subnet name and (optionally) an address prefix. To learn about how to create a virtual network visit https://docs.microsoft.com/azure/virtual-network/manage-virtual-network#create-a-virtual-network.
+    You may also create a subnet at the same time by specifying a subnet name and (optionally) an address prefix. To learn about how to create a virtual network visit https://learn.microsoft.com/azure/virtual-network/manage-virtual-network#create-a-virtual-network.
 
     :example: Create a virtual network with a specific address prefix and one subnet.
         az network vnet create -g MyResourceGroup -n MyVnet --address-prefix 10.0.0.0/16 --subnet-name MySubnet --subnet-prefixes 10.0.0.0/24
