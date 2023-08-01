@@ -686,3 +686,47 @@ def validate_os_sku(namespace):
             CONST_OS_SKU_CBLMARINER,
             CONST_OS_SKU_MARINER,
         )
+
+
+def validate_utc_offset(namespace):
+    """Validates --utc-offset for aks maintenanceconfiguration add/update commands."""
+    if namespace.utc_offset is None:
+        return
+    # The regex here is used to match strings to the "+HH:MM" or "-HH:MM" time format.
+    # The complete regex breakdown is as follows:
+    # ^ matches the start of the string and $ matches to the end of the string, respectively.
+    # [+-] match to either + or -
+    # \d{2}:\d{2} will match to two digits followed by a colon and two digits. (example: +05:30 which is 5 hours and 30 minutes ahead or -12:00 which is 12 hours behind)
+    utc_offset_regex = re.compile(r'^[+-]\d{2}:\d{2}$')
+    found = utc_offset_regex.findall(namespace.utc_offset)
+    if not found:
+        raise InvalidArgumentValueError('--utc-offset must be in format: "+/-HH:mm". For example, "+05:30" and "-12:00".')
+
+
+def validate_start_date(namespace):
+    """Validates --start-date for aks maintenanceconfiguration add/update commands."""
+    if namespace.start_date is None:
+        return
+    # The regex here is used to match strings to the "yyyy-MM-dd" date format.
+    # The complete regex breakdown is as follows:
+    # ^ matches the start of the string and $ matches to the end of the string, respectively.
+    # ^\d{4}-\d{2}-\d{2} will match four digits, followed by a -, two digits, followed by a -. (example: 2023-01-01 which is January 1st 2023)
+    start_dt_regex = re.compile(r'^\d{4}-\d{2}-\d{2}$')
+    found = start_dt_regex.findall(namespace.start_date)
+    if not found:
+        raise InvalidArgumentValueError('--start-date must be in format: "yyyy-MM-dd". For example, "2023-01-01".')
+
+
+def validate_start_time(namespace):
+    """Validates --start-time for aks maintenanceconfiguration add/update commands."""
+    if namespace.start_time is None:
+        return
+    # The regex here is used to match strings to the "HH:MM" or "HH:MM" time format.
+    # The complete regex breakdown is as follows:
+    # ^ matches the start of the string and $ matches to the end of the string, respectively.
+    # \d{2}:\d{2} will match to two digits followed by a colon and two digits. (example: 09:30 which is 9 hours and 30 minutes or 17:00 which is 17 hours and 00 minutes)
+    start_time_regex = re.compile(r'^\d{2}:\d{2}$')
+    found = start_time_regex.findall(namespace.start_time)
+
+    if not found:
+        raise InvalidArgumentValueError('--start-time must be in format "HH:mm". For example, "09:30" and "17:00".')

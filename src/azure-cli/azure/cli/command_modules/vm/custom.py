@@ -340,9 +340,11 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         raise RequiredArgumentMissingError(
             'usage error: --upload-size-bytes should be used together with --upload-type')
 
-    log_message = 'Ignite (November) 2023 onwards "az disk create" command will deploy Gen2-Trusted Launch VM ' \
-                  'by default. To know more about the default change and Trusted Launch, ' \
-                  'please visit https://aka.ms/TLaD'
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE, UPGRADE_SECURITY_HINT, TLAD_DEFAULT_CHANGE_MSG
+    if security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
+        log_message = TLAD_DEFAULT_CHANGE_MSG.format('az disk create')
+    else:
+        log_message = UPGRADE_SECURITY_HINT
     if image_reference is not None:
         if not is_valid_resource_id(image_reference):
             # URN or name
@@ -361,8 +363,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                 terms['child_name_1'], terms['child_name_3'], terms['child_name_4'], terms['child_name_5']
 
         client = _compute_client_factory(cmd.cli_ctx)
-        response = client.virtual_machine_images.get(location, disk_publisher, disk_offer, disk_sku,
-                                                     disk_version)
+        response = client.virtual_machine_images.get(location=location, publisher_name=disk_publisher,
+                                                     offer=disk_offer, skus=disk_sku, version=disk_version)
 
         if hasattr(response, 'hyper_v_generation'):
             if response.hyper_v_generation == 'V1':
@@ -468,9 +470,6 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
     disk = Disk(location=location, creation_data=creation_data, tags=(tags or {}),
                 sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, os_type=os_type, encryption=encryption)
 
-    if option == DiskCreateOption.empty and os_type:
-        # will set default value of hyper_v_generation and security_type
-        logger.warning(log_message)
     if hyper_v_generation:
         disk.hyper_v_generation = hyper_v_generation
 
@@ -496,7 +495,9 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk.bursting_enabled = enable_bursting
     if edge_zone is not None:
         disk.extended_location = edge_zone
-    if security_type:
+    # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
+    # after changing the default values to Trusted Launch VMs in the future.
+    if security_type and security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
         disk.security_profile = {'securityType': security_type}
         if secure_vm_disk_encryption_set:
             disk.security_profile['secure_vm_disk_encryption_set_id'] = secure_vm_disk_encryption_set
@@ -655,14 +656,6 @@ def update_image(instance, tags=None):
     if tags is not None:
         instance.tags = tags
     return instance
-
-
-def list_images(cmd, resource_group_name=None):
-    client = _compute_client_factory(cmd.cli_ctx)
-    if resource_group_name:
-        return client.images.list_by_resource_group(resource_group_name)
-    return client.images.list()
-# endregion
 
 
 # region Snapshots
@@ -1992,7 +1985,7 @@ def set_diagnostics_extension(
         cmd, resource_group_name, vm_name, settings, protected_settings=None, version=None,
         no_auto_upgrade=False):
     client = _compute_client_factory(cmd.cli_ctx)
-    vm = client.virtual_machines.get(resource_group_name, vm_name, 'instanceView')
+    vm = client.virtual_machines.get(resource_group_name, vm_name, expand='instanceView')
     # pylint: disable=no-member
     is_linux_os = _is_linux_os(vm)
     vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
@@ -2351,7 +2344,8 @@ def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=N
                                     skus=sku, version=version)
     else:
         client = _compute_client_factory(cmd.cli_ctx)
-        return client.virtual_machine_images.get(location, publisher, offer, sku, version)
+        return client.virtual_machine_images.get(location=location, publisher_name=publisher,
+                                                 offer=offer, skus=sku, version=version)
 
 
 def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
@@ -3655,18 +3649,22 @@ def get_vmss(cmd, resource_group_name, name, instance_id=None, include_user_data
 
     if instance_id is not None:
         if cmd.supported_api_version(min_api='2020-12-01', operation_group='virtual_machine_scale_sets'):
-            return client.virtual_machine_scale_set_vms.get(resource_group_name, name, instance_id, expand)
-        return client.virtual_machine_scale_set_vms.get(resource_group_name, name, instance_id)
+            return client.virtual_machine_scale_set_vms.get(resource_group_name=resource_group_name,
+                                                            vm_scale_set_name=name, instance_id=instance_id,
+                                                            expand=expand)
+        return client.virtual_machine_scale_set_vms.get(resource_group_name=resource_group_name,
+                                                        vm_scale_set_name=name, instance_id=instance_id)
 
     if cmd.supported_api_version(min_api='2021-03-01', operation_group='virtual_machine_scale_sets'):
-        return client.virtual_machine_scale_sets.get(resource_group_name, name, expand)
+        return client.virtual_machine_scale_sets.get(resource_group_name, name, expand=expand)
     return client.virtual_machine_scale_sets.get(resource_group_name, name)
 
 
 def get_vmss_modified(cmd, resource_group_name, name, instance_id=None):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_id is not None:
-        vms = client.virtual_machine_scale_set_vms.get(resource_group_name, name, instance_id)
+        vms = client.virtual_machine_scale_set_vms.get(resource_group_name=resource_group_name,
+                                                       vm_scale_set_name=name, instance_id=instance_id)
         # To avoid unnecessary permission check of image
         if hasattr(vms, "storage_profile") and vms.storage_profile:
             vms.storage_profile.image_reference = None
@@ -3685,10 +3683,12 @@ def get_vmss_instance_view(cmd, resource_group_name, vm_scale_set_name, instance
         if instance_id == '*':
 
             return [x.instance_view for x in (client.virtual_machine_scale_set_vms.list(
-                resource_group_name, vm_scale_set_name, select='instanceView', expand='instanceView'))]
+                resource_group_name=resource_group_name, virtual_machine_scale_set_name=vm_scale_set_name,
+                select='instanceView', expand='instanceView'))]
 
-        return client.virtual_machine_scale_set_vms.get_instance_view(resource_group_name, vm_scale_set_name,
-                                                                      instance_id)
+        return client.virtual_machine_scale_set_vms.get_instance_view(resource_group_name=resource_group_name,
+                                                                      vm_scale_set_name=vm_scale_set_name,
+                                                                      instance_id=instance_id)
 
     return client.virtual_machine_scale_sets.get_instance_view(resource_group_name, vm_scale_set_name)
 
@@ -4186,7 +4186,7 @@ def detach_disk_from_vmss(cmd, resource_group_name, vmss_name, lun, instance_id=
 # region VirtualMachineScaleSets Extensions
 def delete_vmss_extension(cmd, resource_group_name, vmss_name, extension_name):
     client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name, vm_scale_set_name=vmss_name)
     # Avoid unnecessary permission error
     vmss.virtual_machine_profile.storage_profile.image_reference = None
     # pylint: disable=no-member
@@ -4200,13 +4200,14 @@ def delete_vmss_extension(cmd, resource_group_name, vmss_name, extension_name):
 
     vmss.virtual_machine_profile.extension_profile.extensions = keep_list
 
-    return client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name, vmss_name, vmss)
+    return client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name=resource_group_name,
+                                                                    vm_scale_set_name=vmss_name, parameters=vmss)
 
 
 # pylint: disable=inconsistent-return-statements
 def get_vmss_extension(cmd, resource_group_name, vmss_name, extension_name):
     client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name, vm_scale_set_name=vmss_name)
     # pylint: disable=no-member
     if not vmss.virtual_machine_profile.extension_profile:
         return
@@ -4216,7 +4217,7 @@ def get_vmss_extension(cmd, resource_group_name, vmss_name, extension_name):
 
 def list_vmss_extensions(cmd, resource_group_name, vmss_name):
     client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name, vm_scale_set_name=vmss_name)
     # pylint: disable=no-member
     if vmss.virtual_machine_profile and vmss.virtual_machine_profile.extension_profile:
         return vmss.virtual_machine_profile.extension_profile.extensions
@@ -4231,7 +4232,7 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
         extension_instance_name = extension_name
 
     client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name, vm_scale_set_name=vmss_name)
     # Avoid unnecessary permission error
     vmss.virtual_machine_profile.storage_profile.image_reference = None
     VirtualMachineScaleSetExtension, VirtualMachineScaleSetExtensionProfile = cmd.get_models(
@@ -4614,10 +4615,17 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
 
     feature_list = None
     if features:
+        from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE, UPGRADE_SECURITY_HINT
         feature_list = []
         for item in features.split():
             try:
                 key, value = item.split('=', 1)
+                # create Non-Trusted Launch VM Image
+                # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
+                # after changing the default values to Trusted Launch VMs in the future.
+                if key == 'SecurityType' and value == COMPATIBLE_SECURITY_TYPE_VALUE:
+                    logger.warning(UPGRADE_SECURITY_HINT)
+                    continue
                 feature_list.append(GalleryImageFeature(name=key, value=value))
             except ValueError:
                 raise CLIError('usage error: --features KEY=VALUE [KEY=VALUE ...]')
@@ -4780,6 +4788,36 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         if managed_image is None:
             raise RequiredArgumentMissingError('usage error: Please provide --managed-image')
         image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}))
+
+    return client.gallery_image_versions.begin_create_or_update(
+        resource_group_name=resource_group_name,
+        gallery_name=gallery_name,
+        gallery_image_name=gallery_image_name,
+        gallery_image_version_name=gallery_image_version,
+        gallery_image_version=image_version
+    )
+
+
+def undelete_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version,
+                           location=None, tags=None, allow_replicated_location_deletion=None):
+    ImageVersion = cmd.get_models('GalleryImageVersion')
+    client = _compute_client_factory(cmd.cli_ctx)
+
+    location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+
+    gallery = client.galleries.get(resource_group_name, gallery_name)
+    soft_delete = gallery.soft_delete_policy.is_soft_delete_enabled
+    if not soft_delete:
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        raise InvalidArgumentValueError('soft-deletion is not enabled in Gallery \'{}\''.format(gallery_name))
+
+    image_version = ImageVersion(publishing_profile=None, location=location, tags=(tags or {}),
+                                 storage_profile=None)
+    if allow_replicated_location_deletion is not None:
+        GalleryImageVersionSafetyProfile = cmd.get_models('GalleryImageVersionSafetyProfile',
+                                                          operation_group='gallery_image_versions')
+        image_version.safety_profile = GalleryImageVersionSafetyProfile(
+            allow_deletion_of_replicated_locations=allow_replicated_location_deletion)
 
     return client.gallery_image_versions.begin_create_or_update(
         resource_group_name=resource_group_name,
@@ -5062,12 +5100,6 @@ def create_disk_encryption_set(
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, disk_encryption_set_name,
                        disk_encryption_set)
-
-
-def list_disk_encryption_sets(cmd, client, resource_group_name=None):
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list()
 
 
 def update_disk_encryption_set(cmd, instance, client, resource_group_name, key_url=None, source_vault=None,
