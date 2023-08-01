@@ -614,6 +614,12 @@ parameters:
   - name: --pod-cidr
     type: string
     short-summary: Update the pod CIDR for a cluster. Used when updating a cluster from Azure CNI to Azure CNI Overlay.
+  - name: --network-dataplane
+    type: string
+    short-summary: The network dataplane to use.
+    long-summary: |
+        Network dataplane used in the Kubernetes cluster.
+        Specify "azure" to use the Azure dataplane (default) or "cilium" to enable Cilium dataplane.
   - name: --load-balancer-managed-outbound-ip-count
     type: int
     short-summary: Load balancer managed outbound IP count.
