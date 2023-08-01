@@ -29,7 +29,7 @@ parameters:
 jobs:
 - job: CheckPullRequest
   displayName: "Check the Format of Pull Request Title and Content"
-  condition: and(succeeded(), in(variables['System.PullRequest.TargetBranch'], 'dev', 'release'))
+  condition: and(succeeded(), in(variables['System.PullRequest.TargetBranch'], 'dev', 'release', 'main'))
 
   pool:
     name: ${{ variables.ubuntu_pool }}
@@ -42,6 +42,10 @@ jobs:
       echo $body
       if [ "$(System.PullRequest.TargetBranch)" != "release" ] && echo $title | grep -iqF hotfix:; then
         echo "Hotfix PR should target release branch."
+        exit 1
+      fi
+      if [ "$(System.PullRequest.TargetBranch)" == "main" ]; then
+        echo "Feature PR should target dev branch."
         exit 1
       fi
       python scripts/ci/check_pull_request.py "$title" "$body"
