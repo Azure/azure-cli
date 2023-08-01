@@ -1969,6 +1969,7 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         agentpool_1 = self.create_initialized_agentpool_instance(restore_defaults=False)
         dec_1.context.attach_agentpool(agentpool_1)
         dec_agentpool_1 = dec_1.set_up_vm_properties(agentpool_1)
+        dec_agentpool_1 = dec_1.set_up_agentpool_type(dec_agentpool_1)
         dec_agentpool_1 = self._restore_defaults_in_agentpool(dec_agentpool_1)
 
         ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
