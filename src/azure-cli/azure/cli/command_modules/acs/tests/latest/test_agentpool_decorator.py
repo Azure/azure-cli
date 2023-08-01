@@ -2122,6 +2122,7 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
             return_value=Mock(list=Mock(return_value=[])),
         ):
             dec_agentpool_1 = dec_1.construct_agentpool_profile_default()
+            dec_agentpool_1 = dec_1.set_up_agentpool_type(dec_agentpool_1)
 
         ground_truth_upgrade_settings_1 = self.models.AgentPoolUpgradeSettings()
         ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
@@ -2266,6 +2267,7 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
             return_value=Mock(list=Mock(return_value=[])),
         ):
             dec_agentpool_1 = dec_1.construct_agentpool_profile_default()
+            dec_agentpool_1 = dec_1.set_up_agentpool_type(dec_agentpool_1)
 
         upgrade_settings_1 = self.models.AgentPoolUpgradeSettings()
         ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(

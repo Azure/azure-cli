@@ -5046,6 +5046,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         self._ensure_mc(mc)
 
         agentpool_profile = self.agentpool_decorator.construct_agentpool_profile_default()
+        # set up vm set type and also can be customized from AKS-Preview cli extension
+        agentpool_profile = self.agentpool_decorator.set_up_agentpool_type(agentpool_profile)
         mc.agent_pool_profiles = [agentpool_profile]
         return mc
 

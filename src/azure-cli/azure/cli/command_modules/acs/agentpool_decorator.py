@@ -1478,10 +1478,6 @@ class AKSAgentPoolAddDecorator:
         """
         self._ensure_agentpool(agentpool)
 
-        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
-            agentpool.type = self.context.get_vm_set_type()
-        else:
-            agentpool.type_properties_type = self.context.get_vm_set_type()
 
         agentpool.proximity_placement_group_id = self.context.get_ppg()
         agentpool.enable_encryption_at_host = self.context.get_enable_encryption_at_host()
@@ -1492,6 +1488,18 @@ class AKSAgentPoolAddDecorator:
         agentpool.max_pods = self.context.get_max_pods()
         agentpool.mode = self.context.get_mode()
         agentpool.scale_down_mode = self.context.get_scale_down_mode()
+        return agentpool
+    
+    def set_up_agentpool_type(self, agentpool: AgentPool) -> AgentPool:
+        """Set up agentpool type for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            agentpool.type = self.context.get_vm_set_type()
+        else:
+            agentpool.type_properties_type = self.context.get_vm_set_type()
         return agentpool
 
     def set_up_custom_node_config(self, agentpool: AgentPool) -> AgentPool:

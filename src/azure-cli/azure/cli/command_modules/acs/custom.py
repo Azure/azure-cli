@@ -2095,6 +2095,7 @@ def aks_agentpool_add(
     try:
         # construct agentpool profile
         agentpool = aks_agentpool_add_decorator.construct_agentpool_profile_default()
+        agentpool = aks_agentpool_add_decorator.set_up_agentpool_type(agentpool)
     except DecoratorEarlyExitException:
         # exit gracefully
         return None
