@@ -1069,7 +1069,7 @@ jobs:
       fi
 
 - job: CodegenCoverage
-  condition: and(succeededOrFailed(), in(variables['Build.Reason'], 'BatchedCI'))
+#  condition: and(succeededOrFailed(), in(variables['Build.Reason'], 'BatchedCI'))
   displayName: "Codegen Coverage"
   pool:
     name: ${{ variables.ubuntu_pool }}
@@ -1096,7 +1096,7 @@ jobs:
       # azure-kusto is not compatible with azure-cli
       # so we need run azdev statistics before installing azure-kusto to avoid the error `No module named azure.cli`
       pip install azure-kusto-data azure-kusto-ingest
-      python scripts/ci/codegen_report.py
+      python s/scripts/ci/codegen_report.py
     env:
       BUILD_ID: $(Build.BuildId)
       BUILD_BRANCH: $(Build.SourceBranchName)
