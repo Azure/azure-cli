@@ -966,6 +966,7 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
+            CLIENT_TYPE.SpringBoot,
             CLIENT_TYPE.Blank
         ],
         RESOURCE.StorageBlob: [

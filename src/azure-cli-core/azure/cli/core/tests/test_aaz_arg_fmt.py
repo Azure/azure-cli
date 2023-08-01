@@ -796,3 +796,43 @@ class TestAAZArgBaseFmt(unittest.TestCase):
             self.format_arg(schema, {
                 "data": data_file,
             })
+
+    def test_aaz_pagination_token_fmt(self):
+        from azure.cli.core.aaz import AAZArgumentsSchema, AAZPaginationTokenArg, AAZPaginationTokenArgFormat
+        schema = AAZArgumentsSchema()
+        schema.token = AAZPaginationTokenArg(fmt=AAZPaginationTokenArgFormat())
+
+        # {next_link: None, offset: 0}
+        data = "eyJuZXh0X2xpbmsiOiBudWxsLCAib2Zmc2V0IjogMH0="
+        args = self.format_arg(schema, {"token": data})
+        self.assertEqual(args.to_serialized_data(), {"token": base64.b64decode(data).decode("utf-8")})
+
+        # incomplete base64 string
+        data = "eyJuZXh0X2xpbmsiOiBudWxsLCAib2Zmc2V0IjogMH0"
+        with self.assertRaises(azclierror.InvalidArgumentValueError) as e:
+            self.format_arg(schema, {"token": data})
+        self.assertEqual(str(e.exception), "InvalidArgumentValue: --next-token: Invalid Base64 string.")
+
+        # utf-16 encoded
+        data = "//57ACIAbgBlAHgAdABfAGwAaQBuAGsAIgA6ACAAbgB1AGwAbAAsACAAIgBvAGYAZgBzAGUAdAAiADoAIAAwAH0A"
+        with self.assertRaises(azclierror.InvalidArgumentValueError) as e:
+            self.format_arg(schema, {"token": data})
+        self.assertEqual(str(e.exception), "InvalidArgumentValue: --next-token: Error decoding UTF-8.")
+
+        # {next_link: None, offset: 0,}
+        data = "eyJuZXh0X2xpbmsiOiBudWxsLCAib2Zmc2V0IjogMCx9"
+        with self.assertRaises(azclierror.InvalidArgumentValueError) as e:
+            self.format_arg(schema, {"token": data})
+        self.assertEqual(str(e.exception), "InvalidArgumentValue: --next-token: Invalid JSON object.")
+
+        # ["next_link", null, "offset", 0]
+        data = "WyJuZXh0X2xpbmsiLCBudWxsLCAib2Zmc2V0IiwgMF0="
+        with self.assertRaises(azclierror.InvalidArgumentValueError) as e:
+            self.format_arg(schema, {"token": data})
+        self.assertEqual(str(e.exception), "InvalidArgumentValue: --next-token: Decoded object is not a dictionary.")
+
+        # {"curr_link": None, "offset": 0}
+        data = "eyJjdXJyX2xpbmsiOiBudWxsLCAib2Zmc2V0IjogMH0="
+        with self.assertRaises(azclierror.InvalidArgumentValueError) as e:
+            self.format_arg(schema, {"token": data})
+        self.assertEqual(str(e.exception), "InvalidArgumentValue: --next-token: `next_link` or `offset` doesn't exist.")

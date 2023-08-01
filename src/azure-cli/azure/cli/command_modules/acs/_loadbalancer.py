@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from distutils.version import StrictVersion
+from distutils.version import StrictVersion  # pylint: disable=deprecated-module
 from types import SimpleNamespace
 
 from knack.log import get_logger

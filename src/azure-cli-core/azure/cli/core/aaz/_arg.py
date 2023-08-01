@@ -19,11 +19,12 @@ from ._field_type import AAZObjectType, AAZStrType, AAZIntType, AAZBoolType, AAZ
 from ._field_value import AAZObject
 from ._arg_fmt import AAZObjectArgFormat, AAZListArgFormat, AAZDictArgFormat, AAZFreeFormDictArgFormat, \
     AAZSubscriptionIdArgFormat, AAZResourceLocationArgFormat, AAZResourceIdArgFormat, AAZUuidFormat, AAZDateFormat, \
-    AAZTimeFormat, AAZDateTimeFormat, AAZDurationFormat, AAZFileArgTextFormat
+    AAZTimeFormat, AAZDateTimeFormat, AAZDurationFormat, AAZFileArgTextFormat, AAZPaginationTokenArgFormat, \
+    AAZIntArgFormat
 from .exceptions import AAZUnregisteredArg
 from ._prompt import AAZPromptInput
 
-# pylint: disable=redefined-builtin, protected-access, too-few-public-methods
+# pylint: disable=redefined-builtin, protected-access, too-few-public-methods, too-many-instance-attributes
 
 
 class AAZArgumentsSchema(AAZObjectType):
@@ -73,7 +74,7 @@ class AAZArgEnum:
             f"unrecognized value '{data}' from choices '{self.to_choices()}' ")
 
 
-class AAZBaseArg(AAZBaseType):  # pylint: disable=too-many-instance-attributes
+class AAZBaseArg(AAZBaseType):
     """Base argument"""
 
     def __init__(self, options=None, required=False, help=None, arg_group=None, is_preview=False, is_experimental=False,
@@ -656,3 +657,42 @@ class AAZGenericUpdateRemoveArg(AAZGenericUpdateArg):
         class Action(AAZGenericUpdateAction):
             ACTION_NAME = "remove"
         return Action
+
+
+class AAZPaginationTokenArg(AAZStrArg):
+    def __init__(
+            self, options=("--next-token",), arg_group="Pagination",
+            help="Token to specify where to start paginating. This is the token value from a previously truncated "
+                 "response.",
+            fmt=None,
+            **kwargs
+    ):
+        fmt = fmt or AAZPaginationTokenArgFormat()
+
+        super().__init__(
+            options=options,
+            arg_group=arg_group,
+            help=help,
+            fmt=fmt,
+            **kwargs,
+        )
+
+
+class AAZPaginationLimitArg(AAZIntArg):
+    def __init__(
+            self, options=("--max-items",), arg_group="Pagination",
+            help="Total number of items to return in the command's output. If the total number of items available is "
+                 "more than the value specified, a token is provided in the command's output. To resume pagination, "
+                 "provide the token value in `--next-token` argument of a subsequent command.",
+            fmt=None,
+            **kwargs
+    ):
+        fmt = fmt or AAZIntArgFormat(minimum=1)
+
+        super().__init__(
+            options=options,
+            arg_group=arg_group,
+            help=help,
+            fmt=fmt,
+            **kwargs,
+        )
