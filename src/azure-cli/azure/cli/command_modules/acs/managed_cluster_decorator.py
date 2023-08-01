@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=line-too-long
 
 import os
 import re
@@ -135,6 +136,8 @@ class AKSManagedClusterModels(AKSAgentPoolModels):
         self.__loadbalancer_models = None
         # holder for nat gateway related models
         self.__nat_gateway_models = None
+        # holder for maintenance configuration related models
+        self.__maintenance_configuration_models = None
 
     @property
     def load_balancer_models(self) -> SimpleNamespace:
@@ -182,6 +185,31 @@ class AKSManagedClusterModels(AKSAgentPoolModels):
             )   # backward compatibility
             self.__nat_gateway_models = SimpleNamespace(**nat_gateway_models)
         return self.__nat_gateway_models
+
+    @property
+    def maintenance_configuration_models(self) -> SimpleNamespace:
+        """Get maintenance configuration related models.
+
+        The models are stored in a SimpleNamespace object, could be accessed by the dot operator like
+        `maintenance_configuration_models.ManagedClusterMaintenanceConfigurationProfile`.
+
+        :return: SimpleNamespace
+        """
+        if self.__maintenance_configuration_models is None:
+            maintenance_configuration_models = {}
+            # getting maintenance configuration related models
+            maintenance_configuration_models["MaintenanceConfiguration"] = self.MaintenanceConfiguration
+            maintenance_configuration_models["MaintenanceConfigurationListResult"] = self.MaintenanceConfigurationListResult
+            maintenance_configuration_models["MaintenanceWindow"] = self.MaintenanceWindow
+            maintenance_configuration_models["Schedule"] = self.Schedule
+            maintenance_configuration_models["DailySchedule"] = self.DailySchedule
+            maintenance_configuration_models["WeeklySchedule"] = self.WeeklySchedule
+            maintenance_configuration_models["AbsoluteMonthlySchedule"] = self.AbsoluteMonthlySchedule
+            maintenance_configuration_models["RelativeMonthlySchedule"] = self.RelativeMonthlySchedule
+            maintenance_configuration_models["TimeSpan"] = self.TimeSpan
+            maintenance_configuration_models["TimeInWeek"] = self.TimeInWeek
+            self.__maintenance_configuration_models = SimpleNamespace(**maintenance_configuration_models)
+        return self.__maintenance_configuration_models
 
 
 # pylint: disable=too-few-public-methods
@@ -2037,7 +2065,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         outbound_type = self.raw_param.get("outbound_type")
         # try to read the property value corresponding to the parameter from the `mc` object
         read_from_mc = False
-        if self.decorator_mode == DecoratorMode.CREATE:
+        if outbound_type is None and self.decorator_mode != DecoratorMode.CREATE:
             if (
                 self.mc and
                 self.mc.network_profile and

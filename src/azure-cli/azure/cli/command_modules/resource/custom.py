@@ -415,7 +415,7 @@ class JsonCTemplatePolicy(SansIOHTTPPolicy):
             template = http_request.data["properties"]["template"]
             del http_request.data["properties"]["template"]
 
-            # templateLink nad template cannot exist at the same time in deployment_dry_run mode
+            # templateLink and template cannot exist at the same time in deployment_dry_run mode
             if "templateLink" in http_request.data["properties"].keys():
                 del http_request.data["properties"]["templateLink"]
 
@@ -961,7 +961,7 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
             template_link = TemplateLink(uri=template_uri)
         template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     elif template_spec:
-        template_link = TemplateLink(id=template_spec, mode="Incremental")
+        template_link = TemplateLink(id=template_spec)
         # The api-version for ResourceType.MGMT_RESOURCE_RESOURCES may get updated and point to another (newer) version of the api version for
         # ResourceType.MGMT_RESOURCE_TEMPLATESPECS than our designated version. This ensures the api-version of all the rest requests for
         # template_spec are consistent in the same profile:
@@ -1447,8 +1447,6 @@ def _validate_resource_inputs(resource_group_name, resource_provider_namespace,
     if resource_provider_namespace is None:
         raise CLIError('--namespace is required')
 
-
-# region Custom Commands
 
 def list_resource_groups(cmd, tag=None):  # pylint: disable=no-self-use
     """ List resource groups, optionally filtered by a tag.
