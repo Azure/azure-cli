@@ -44,6 +44,10 @@ jobs:
         echo "Hotfix PR should target release branch."
         exit 1
       fi
+      if [ "$(System.PullRequest.TargetBranch)" == "main" ]; then
+        echo "Feature PR should target dev branch."
+        exit 1
+      fi
       python scripts/ci/check_pull_request.py "$title" "$body"
 
 - job: RejectPullRequestToMasterBranch
