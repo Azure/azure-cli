@@ -1478,7 +1478,6 @@ class AKSAgentPoolAddDecorator:
         """
         self._ensure_agentpool(agentpool)
 
-
         agentpool.proximity_placement_group_id = self.context.get_ppg()
         agentpool.enable_encryption_at_host = self.context.get_enable_encryption_at_host()
         agentpool.enable_ultra_ssd = self.context.get_enable_ultra_ssd()
@@ -1489,7 +1488,7 @@ class AKSAgentPoolAddDecorator:
         agentpool.mode = self.context.get_mode()
         agentpool.scale_down_mode = self.context.get_scale_down_mode()
         return agentpool
-    
+
     def set_up_agentpool_type(self, agentpool: AgentPool) -> AgentPool:
         """Set up agentpool type for the AgentPool object.
 
