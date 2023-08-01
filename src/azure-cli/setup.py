@@ -146,7 +146,8 @@ DEPENDENCIES = [
     'sshtunnel~=0.1.4',
     'urllib3',
     'websocket-client~=1.3.1',
-    'xmltodict~=0.12'
+    'xmltodict~=0.12',
+    'pycomposefile>=0.0.29'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
