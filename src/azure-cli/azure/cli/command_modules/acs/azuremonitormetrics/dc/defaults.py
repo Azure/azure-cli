@@ -16,7 +16,6 @@ def sanitize_name(name, objtype, length):
     name = name[0:length]
     length = length - 1
     if objtype == DC_TYPE.DCE:
-        name = name.replace("_", "")
         name = ''.join(char for char in name if char.isalnum() or char == '-')
     lastIndexAlphaNumeric = len(name) - 1
     while ((name[lastIndexAlphaNumeric].isalnum() is False) and lastIndexAlphaNumeric > -1):
