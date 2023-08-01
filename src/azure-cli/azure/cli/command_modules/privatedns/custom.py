@@ -14,17 +14,9 @@ from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zo
 from azure.core.exceptions import HttpResponseError
 
 from .aaz.latest.network.private_dns.link.vnet import Create as _PrivateDNSLinkVNetCreate
+from .aaz.latest.network.private_dns.zone import Create as _PrivateDNSZoneCreate
 
 logger = get_logger(__name__)
-
-
-# pylint: disable=line-too-long
-def list_privatedns_zones(cmd, resource_group_name=None):
-    from azure.mgmt.privatedns import PrivateDnsManagementClient
-    client = get_mgmt_service_client(cmd.cli_ctx, PrivateDnsManagementClient).private_zones
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list()
 
 
 # pylint: disable=too-many-statements, too-many-locals, too-many-branches
@@ -96,17 +88,16 @@ def import_zone(cmd, resource_group_name, private_zone_name, file_name):
     cum_records = 0
 
     from azure.mgmt.privatedns import PrivateDnsManagementClient
-    from azure.mgmt.privatedns.models import PrivateZone
     client = get_mgmt_service_client(cmd.cli_ctx, PrivateDnsManagementClient)
 
     print('== BEGINNING ZONE IMPORT: {} ==\n'.format(private_zone_name), file=sys.stderr)
 
-    if private_zone_name.endswith(".local"):
-        logger.warning(("Please be aware that DNS names ending with .local are reserved for use with multicast DNS "
-                        "and may not work as expected with some operating systems. For details refer to your operating systems documentation."))
-    zone = PrivateZone(location='global')
-    result = LongRunningOperation(cmd.cli_ctx)(client.private_zones.begin_create_or_update(resource_group_name, private_zone_name, zone))
-    if result.provisioning_state != 'Succeeded':
+    poller = PrivateDNSZoneCreate(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": private_zone_name,
+        "resource_group": resource_group_name
+    })
+    result = LongRunningOperation(cmd.cli_ctx)(poller)
+    if result["provisioningState"] != 'Succeeded':
         raise CLIError('Error occured while creating or updating private dns zone.')
 
     for key, rs in record_sets.items():
@@ -263,21 +254,25 @@ def _build_record(cmd, data):
                        .format(record_type, data['name'], ke))
 
 
-def create_privatedns_zone(cmd, resource_group_name, private_zone_name, tags=None):
-    from azure.mgmt.privatedns import PrivateDnsManagementClient
-    from azure.mgmt.privatedns.models import PrivateZone
-    client = get_mgmt_service_client(cmd.cli_ctx, PrivateDnsManagementClient).private_zones
-    if private_zone_name.endswith(".local"):
-        logger.warning(("Please be aware that DNS names ending with .local are reserved for use with multicast DNS "
-                        "and may not work as expected with some operating systems. For details refer to your operating systems documentation."))
-    zone = PrivateZone(location='global', tags=tags)
-    return client.begin_create_or_update(resource_group_name, private_zone_name, zone, if_none_match='*')
+class PrivateDNSZoneCreate(_PrivateDNSZoneCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.if_none_match._registered = False
+        args_schema.location._registered = False
 
+        return args_schema
 
-def update_privatedns_zone(instance, tags=None):
-    if tags is not None:
-        instance.tags = tags
-    return instance
+    def pre_operations(self):
+        args = self.ctx.args
+        if args.name.to_serialized_data().endswith(".local"):
+            logger.warning(
+                "Please be aware that DNS names ending with `.local` are reserved for use with multicast DNS and "
+                "may not work as expected with some operating systems. "
+                "For details refer to your operating systems documentation."
+            )
+        args.location = "global"
+        args.if_none_match = "*"
 
 
 class PrivateDNSLinkVNetCreate(_PrivateDNSLinkVNetCreate):

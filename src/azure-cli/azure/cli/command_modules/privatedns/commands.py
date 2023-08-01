@@ -21,15 +21,14 @@ def load_command_table(self, _):
         client_factory=cf_privatedns_mgmt_record_sets
     )
 
-    with self.command_group('network private-dns zone', network_privatedns_zone_sdk) as g:
-        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
-        g.show_command('show', 'get', table_transformer=transform_privatedns_zone_table_output)
-        g.custom_command('list', 'list_privatedns_zones', client_factory=cf_privatedns_mgmt_zones, table_transformer=transform_privatedns_zone_table_output)
-        g.custom_command('import', 'import_zone')
-        g.custom_command('export', 'export_zone')
-        g.custom_command('create', 'create_privatedns_zone', client_factory=cf_privatedns_mgmt_zones, supports_no_wait=True)
-        g.generic_update_command('update', setter_name='begin_update', custom_func_name='update_privatedns_zone', supports_no_wait=True)
-        g.wait_command('wait')
+    with self.command_group("network private-dns zone", network_privatedns_zone_sdk) as g:
+        from .aaz.latest.network.private_dns.zone import List as PrivateDNSZoneList, Show as PrivateDNSZoneShow
+        from .custom import PrivateDNSZoneCreate
+        self.command_table["network private-dns zone create"] = PrivateDNSZoneCreate(loader=self)
+        self.command_table["network private-dns zone list"] = PrivateDNSZoneList(loader=self, table_transformer=transform_privatedns_zone_table_output)
+        self.command_table["network private-dns zone show"] = PrivateDNSZoneShow(loader=self, table_transformer=transform_privatedns_zone_table_output)
+        g.custom_command("import", "import_zone")
+        g.custom_command("export", "export_zone")
 
     with self.command_group("network private-dns link vnet"):
         from .aaz.latest.network.private_dns.link.vnet import List as PrivateDNSLinkVNetList, Show as PrivateDNSLinkVNetShow
