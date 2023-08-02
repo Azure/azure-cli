@@ -8,7 +8,7 @@ import os
 import traceback
 import json
 import re
-from distutils.sysconfig import get_python_lib
+from distutils.sysconfig import get_python_lib  # pylint: disable=deprecated-module
 
 import pkginfo
 from knack.config import CLIConfig
@@ -55,7 +55,7 @@ class ExtensionNotInstalledException(Exception):
         self.extension_name = extension_name
 
     def __str__(self):
-        return "The extension {} is not installed.".format(self.extension_name)
+        return f"The extension {self.extension_name} is not installed. Please install the extension via `az extension add -n {self.extension_name}`."
 
 
 class Extension:
@@ -205,6 +205,9 @@ class WheelExtension(Extension):
                     ext = WheelExtension(ext_name, ext_path)
                     if ext not in exts:
                         exts.append(ext)
+        # https://docs.python.org/3/library/os.html#os.listdir, listdir is in arbitrary order.
+        # Sort the extensions by name to support overwrite extension feature: https://github.com/Azure/azure-cli/issues/25782.
+        exts.sort(key=lambda ext: ext.name)
         return exts
 
 
@@ -272,6 +275,9 @@ class DevExtension(Extension):
                     _collect(os.path.join(path, item), depth + 1, max_depth)
         for source in DEV_EXTENSION_SOURCES:
             _collect(source)
+        # https://docs.python.org/3/library/os.html#os.listdir, listdir is in arbitrary order.
+        # Sort the extensions by name to support overwrite extension feature: https://github.com/Azure/azure-cli/issues/25782.
+        exts.sort(key=lambda ext: ext.name)
         return exts
 
 
@@ -305,8 +311,8 @@ def get_extension_modname(ext_name=None, ext_dir=None):
     pos_mods = [n for n in os.listdir(ext_dir)
                 if n.startswith(EXTENSIONS_MOD_PREFIX) and os.path.isdir(os.path.join(ext_dir, n))]
     if len(pos_mods) != 1:
-        raise AssertionError("Expected 1 module to load starting with "
-                             "'{}': got {}".format(EXTENSIONS_MOD_PREFIX, pos_mods))
+        raise AssertionError("Expected 1 module to load starting with '{}': got {}. Please delete {} and "
+                             "install the extension again.".format(EXTENSIONS_MOD_PREFIX, pos_mods, ext_dir))
     return pos_mods[0]
 
 

@@ -13,10 +13,10 @@ import os
 from knack.util import CLIError
 from knack.log import get_logger
 
-from azure.cli.core.commands.validators import \
-    (validate_tags, get_default_location_from_resource_group)
+from azure.cli.core.azclierror import ValidationError
+from azure.cli.core.commands.validators import validate_tags, get_default_location_from_resource_group
 from azure.cli.core.commands.template_create import get_folded_parameter_validator
-from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
+from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands.validators import validate_parameter_set
 from azure.cli.core.profiles import ResourceType
 
@@ -42,34 +42,6 @@ def _resolve_api_version(rcf, resource_provider_namespace, parent_resource_path,
         return npv[0] if npv else rt[0].api_versions[0]
     raise IncorrectUsageError(
         'API version is required and could not be resolved for resource {}'.format(resource_type))
-
-
-def get_asg_validator(loader, dest):
-    from msrestazure.tools import is_valid_resource_id, resource_id
-
-    ApplicationSecurityGroup = loader.get_models('ApplicationSecurityGroup')
-
-    def _validate_asg_name_or_id(cmd, namespace):
-        subscription_id = get_subscription_id(cmd.cli_ctx)
-        resource_group = namespace.resource_group_name
-        names_or_ids = getattr(namespace, dest)
-        ids = []
-
-        if names_or_ids == [""] or not names_or_ids:
-            return
-
-        for val in names_or_ids:
-            if not is_valid_resource_id(val):
-                val = resource_id(
-                    subscription=subscription_id,
-                    resource_group=resource_group,
-                    namespace='Microsoft.Network', type='applicationSecurityGroups',
-                    name=val
-                )
-            ids.append(ApplicationSecurityGroup(id=val))
-        setattr(namespace, dest, ids)
-
-    return _validate_asg_name_or_id
 
 
 def get_vnet_validator(dest):
@@ -248,7 +220,7 @@ def validate_ssl_cert(namespace):
 
 def validate_dns_record_type(namespace):
     tokens = namespace.command.split(' ')
-    types = ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'soa', 'srv', 'txt']
+    types = ['a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'ns', 'ptr', 'soa', 'srv', 'tlsa', 'txt']
     for token in tokens:
         if token in types:
             if hasattr(namespace, 'record_type'):
@@ -507,15 +479,6 @@ def get_servers_validator(camel_case=False):
     return validate_servers
 
 
-def validate_subresource_list(cmd, namespace):
-    if namespace.target_resources:
-        SubResource = cmd.get_models('SubResource', resource_type=ResourceType.MGMT_NETWORK_DNS)
-        subresources = []
-        for item in namespace.target_resources:
-            subresources.append(SubResource(id=item))
-        namespace.target_resources = subresources
-
-
 def validate_private_dns_zone(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
     if namespace.private_dns_zone and not is_valid_resource_id(namespace.private_dns_zone):
@@ -691,44 +654,18 @@ def load_cert_file(param_name):
     return load_cert_validator
 
 
-def get_network_watcher_from_vm(cmd, namespace):
-    from msrestazure.tools import parse_resource_id
-
-    compute_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machines
-    vm_name = parse_resource_id(namespace.vm)['name']
-    vm = compute_client.get(namespace.resource_group_name, vm_name)
-    namespace.location = vm.location  # pylint: disable=no-member
-    get_network_watcher_from_location()(cmd, namespace)
-
-
-def get_network_watcher_from_vmss(cmd, namespace):
-    from msrestazure.tools import parse_resource_id
-
-    compute_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machine_scale_sets
-    vmss_name = parse_resource_id(namespace.target)['name']
-    vmss = compute_client.get(namespace.resource_group_name, vmss_name)
-    namespace.location = vmss.location  # pylint: disable=no-member
-    get_network_watcher_from_location()(cmd, namespace)
-
-
-def get_network_watcher_from_resource(cmd, namespace):
-    from azure.cli.core.commands.arm import get_arm_resource_by_id
-    resource = get_arm_resource_by_id(cmd.cli_ctx, namespace.resource)
-    namespace.location = resource.location  # pylint: disable=no-member
-    get_network_watcher_from_location(remove=True)(cmd, namespace)
-
-
 def get_network_watcher_from_location(remove=False, watcher_name='watcher_name',
                                       rg_name='watcher_rg'):
     def _validator(cmd, namespace):
         from msrestazure.tools import parse_resource_id
+        from .aaz.latest.network.watcher import List
 
         location = namespace.location
-        network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK).network_watchers
-        watcher = next((x for x in network_client.list_all() if x.location.lower() == location.lower()), None)
+        watcher_list = List(cli_ctx=cmd.cli_ctx)(command_args={})
+        watcher = next((w for w in watcher_list if w["location"].lower() == location.lower()), None)
         if not watcher:
-            raise CLIError("network watcher is not enabled for region '{}'.".format(location))
-        id_parts = parse_resource_id(watcher.id)
+            raise ValidationError(f"network watcher is not enabled for region {location}.")
+        id_parts = parse_resource_id(watcher['id'])
         setattr(namespace, rg_name, id_parts['resource_group'])
         setattr(namespace, watcher_name, id_parts['name'])
 
@@ -736,37 +673,6 @@ def get_network_watcher_from_location(remove=False, watcher_name='watcher_name',
             del namespace.location
 
     return _validator
-
-
-def process_nw_cm_v1_create_namespace(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
-
-    validate_tags(namespace)
-
-    compute_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machines
-    vm_name = parse_resource_id(namespace.source_resource)['name']
-    rg = namespace.resource_group_name or parse_resource_id(namespace.source_resource).get('resource_group', None)
-    if not rg:
-        raise CLIError('usage error: --source-resource ID | --source-resource NAME --resource-group NAME')
-    vm = compute_client.get(rg, vm_name)
-    namespace.location = vm.location  # pylint: disable=no-member
-    get_network_watcher_from_location()(cmd, namespace)
-
-    if namespace.source_resource and not is_valid_resource_id(namespace.source_resource):
-        namespace.source_resource = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=rg,
-            namespace='Microsoft.Compute',
-            type='virtualMachines',
-            name=namespace.source_resource)
-
-    if namespace.dest_resource and not is_valid_resource_id(namespace.dest_resource):
-        namespace.dest_resource = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Compute',
-            type='virtualMachines',
-            name=namespace.dest_resource)
 
 
 def _process_vnet_name_and_id(vnet, cmd, resource_group_name):

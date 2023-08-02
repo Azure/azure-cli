@@ -28,9 +28,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-04-01-preview",
+        "version": "2022-04-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}", "2022-04-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}", "2022-04-01"],
         ]
     }
 
@@ -279,7 +279,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-04-01-preview",
+                    "api-version", "2022-04-01",
                     required=True,
                 ),
             }
@@ -310,7 +310,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _build_schema_profile_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_profile_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -362,7 +362,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-04-01-preview",
+                    "api-version", "2022-04-01",
                     required=True,
                 ),
             }
@@ -405,7 +405,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _build_schema_profile_read(cls._schema_on_200_201)
+            _UpdateHelper._build_schema_profile_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
@@ -480,179 +480,181 @@ class Update(AAZCommand):
             )
 
 
-_schema_profile_read = None
+class _UpdateHelper:
+    """Helper class for Update"""
 
+    _schema_profile_read = None
 
-def _build_schema_profile_read(_schema):
-    global _schema_profile_read
-    if _schema_profile_read is not None:
-        _schema.id = _schema_profile_read.id
-        _schema.location = _schema_profile_read.location
-        _schema.name = _schema_profile_read.name
-        _schema.properties = _schema_profile_read.properties
-        _schema.tags = _schema_profile_read.tags
-        _schema.type = _schema_profile_read.type
-        return
+    @classmethod
+    def _build_schema_profile_read(cls, _schema):
+        if cls._schema_profile_read is not None:
+            _schema.id = cls._schema_profile_read.id
+            _schema.location = cls._schema_profile_read.location
+            _schema.name = cls._schema_profile_read.name
+            _schema.properties = cls._schema_profile_read.properties
+            _schema.tags = cls._schema_profile_read.tags
+            _schema.type = cls._schema_profile_read.type
+            return
 
-    _schema_profile_read = AAZObjectType()
+        cls._schema_profile_read = _schema_profile_read = AAZObjectType()
 
-    profile_read = _schema_profile_read
-    profile_read.id = AAZStrType()
-    profile_read.location = AAZStrType()
-    profile_read.name = AAZStrType()
-    profile_read.properties = AAZObjectType(
-        flags={"client_flatten": True},
-    )
-    profile_read.tags = AAZDictType()
-    profile_read.type = AAZStrType()
+        profile_read = _schema_profile_read
+        profile_read.id = AAZStrType()
+        profile_read.location = AAZStrType()
+        profile_read.name = AAZStrType()
+        profile_read.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+        profile_read.tags = AAZDictType()
+        profile_read.type = AAZStrType()
 
-    properties = _schema_profile_read.properties
-    properties.allowed_endpoint_record_types = AAZListType(
-        serialized_name="allowedEndpointRecordTypes",
-    )
-    properties.dns_config = AAZObjectType(
-        serialized_name="dnsConfig",
-    )
-    properties.endpoints = AAZListType()
-    properties.max_return = AAZIntType(
-        serialized_name="maxReturn",
-    )
-    properties.monitor_config = AAZObjectType(
-        serialized_name="monitorConfig",
-    )
-    properties.profile_status = AAZStrType(
-        serialized_name="profileStatus",
-    )
-    properties.traffic_routing_method = AAZStrType(
-        serialized_name="trafficRoutingMethod",
-    )
-    properties.traffic_view_enrollment_status = AAZStrType(
-        serialized_name="trafficViewEnrollmentStatus",
-    )
+        properties = _schema_profile_read.properties
+        properties.allowed_endpoint_record_types = AAZListType(
+            serialized_name="allowedEndpointRecordTypes",
+        )
+        properties.dns_config = AAZObjectType(
+            serialized_name="dnsConfig",
+        )
+        properties.endpoints = AAZListType()
+        properties.max_return = AAZIntType(
+            serialized_name="maxReturn",
+        )
+        properties.monitor_config = AAZObjectType(
+            serialized_name="monitorConfig",
+        )
+        properties.profile_status = AAZStrType(
+            serialized_name="profileStatus",
+        )
+        properties.traffic_routing_method = AAZStrType(
+            serialized_name="trafficRoutingMethod",
+        )
+        properties.traffic_view_enrollment_status = AAZStrType(
+            serialized_name="trafficViewEnrollmentStatus",
+        )
 
-    allowed_endpoint_record_types = _schema_profile_read.properties.allowed_endpoint_record_types
-    allowed_endpoint_record_types.Element = AAZStrType()
+        allowed_endpoint_record_types = _schema_profile_read.properties.allowed_endpoint_record_types
+        allowed_endpoint_record_types.Element = AAZStrType()
 
-    dns_config = _schema_profile_read.properties.dns_config
-    dns_config.fqdn = AAZStrType(
-        flags={"read_only": True},
-    )
-    dns_config.relative_name = AAZStrType(
-        serialized_name="relativeName",
-    )
-    dns_config.ttl = AAZIntType()
+        dns_config = _schema_profile_read.properties.dns_config
+        dns_config.fqdn = AAZStrType(
+            flags={"read_only": True},
+        )
+        dns_config.relative_name = AAZStrType(
+            serialized_name="relativeName",
+        )
+        dns_config.ttl = AAZIntType()
 
-    endpoints = _schema_profile_read.properties.endpoints
-    endpoints.Element = AAZObjectType()
+        endpoints = _schema_profile_read.properties.endpoints
+        endpoints.Element = AAZObjectType()
 
-    _element = _schema_profile_read.properties.endpoints.Element
-    _element.id = AAZStrType()
-    _element.name = AAZStrType()
-    _element.properties = AAZObjectType(
-        flags={"client_flatten": True},
-    )
-    _element.type = AAZStrType()
+        _element = _schema_profile_read.properties.endpoints.Element
+        _element.id = AAZStrType()
+        _element.name = AAZStrType()
+        _element.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+        _element.type = AAZStrType()
 
-    properties = _schema_profile_read.properties.endpoints.Element.properties
-    properties.always_serve = AAZStrType(
-        serialized_name="alwaysServe",
-    )
-    properties.custom_headers = AAZListType(
-        serialized_name="customHeaders",
-    )
-    properties.endpoint_location = AAZStrType(
-        serialized_name="endpointLocation",
-    )
-    properties.endpoint_monitor_status = AAZStrType(
-        serialized_name="endpointMonitorStatus",
-    )
-    properties.endpoint_status = AAZStrType(
-        serialized_name="endpointStatus",
-    )
-    properties.geo_mapping = AAZListType(
-        serialized_name="geoMapping",
-    )
-    properties.min_child_endpoints = AAZIntType(
-        serialized_name="minChildEndpoints",
-    )
-    properties.min_child_endpoints_i_pv4 = AAZIntType(
-        serialized_name="minChildEndpointsIPv4",
-    )
-    properties.min_child_endpoints_i_pv6 = AAZIntType(
-        serialized_name="minChildEndpointsIPv6",
-    )
-    properties.priority = AAZIntType()
-    properties.subnets = AAZListType()
-    properties.target = AAZStrType()
-    properties.target_resource_id = AAZStrType(
-        serialized_name="targetResourceId",
-    )
-    properties.weight = AAZIntType()
+        properties = _schema_profile_read.properties.endpoints.Element.properties
+        properties.always_serve = AAZStrType(
+            serialized_name="alwaysServe",
+        )
+        properties.custom_headers = AAZListType(
+            serialized_name="customHeaders",
+        )
+        properties.endpoint_location = AAZStrType(
+            serialized_name="endpointLocation",
+        )
+        properties.endpoint_monitor_status = AAZStrType(
+            serialized_name="endpointMonitorStatus",
+        )
+        properties.endpoint_status = AAZStrType(
+            serialized_name="endpointStatus",
+        )
+        properties.geo_mapping = AAZListType(
+            serialized_name="geoMapping",
+        )
+        properties.min_child_endpoints = AAZIntType(
+            serialized_name="minChildEndpoints",
+        )
+        properties.min_child_endpoints_i_pv4 = AAZIntType(
+            serialized_name="minChildEndpointsIPv4",
+        )
+        properties.min_child_endpoints_i_pv6 = AAZIntType(
+            serialized_name="minChildEndpointsIPv6",
+        )
+        properties.priority = AAZIntType()
+        properties.subnets = AAZListType()
+        properties.target = AAZStrType()
+        properties.target_resource_id = AAZStrType(
+            serialized_name="targetResourceId",
+        )
+        properties.weight = AAZIntType()
 
-    custom_headers = _schema_profile_read.properties.endpoints.Element.properties.custom_headers
-    custom_headers.Element = AAZObjectType()
+        custom_headers = _schema_profile_read.properties.endpoints.Element.properties.custom_headers
+        custom_headers.Element = AAZObjectType()
 
-    _element = _schema_profile_read.properties.endpoints.Element.properties.custom_headers.Element
-    _element.name = AAZStrType()
-    _element.value = AAZStrType()
+        _element = _schema_profile_read.properties.endpoints.Element.properties.custom_headers.Element
+        _element.name = AAZStrType()
+        _element.value = AAZStrType()
 
-    geo_mapping = _schema_profile_read.properties.endpoints.Element.properties.geo_mapping
-    geo_mapping.Element = AAZStrType()
+        geo_mapping = _schema_profile_read.properties.endpoints.Element.properties.geo_mapping
+        geo_mapping.Element = AAZStrType()
 
-    subnets = _schema_profile_read.properties.endpoints.Element.properties.subnets
-    subnets.Element = AAZObjectType()
+        subnets = _schema_profile_read.properties.endpoints.Element.properties.subnets
+        subnets.Element = AAZObjectType()
 
-    _element = _schema_profile_read.properties.endpoints.Element.properties.subnets.Element
-    _element.first = AAZStrType()
-    _element.last = AAZStrType()
-    _element.scope = AAZIntType()
+        _element = _schema_profile_read.properties.endpoints.Element.properties.subnets.Element
+        _element.first = AAZStrType()
+        _element.last = AAZStrType()
+        _element.scope = AAZIntType()
 
-    monitor_config = _schema_profile_read.properties.monitor_config
-    monitor_config.custom_headers = AAZListType(
-        serialized_name="customHeaders",
-    )
-    monitor_config.expected_status_code_ranges = AAZListType(
-        serialized_name="expectedStatusCodeRanges",
-    )
-    monitor_config.interval_in_seconds = AAZIntType(
-        serialized_name="intervalInSeconds",
-    )
-    monitor_config.path = AAZStrType()
-    monitor_config.port = AAZIntType()
-    monitor_config.profile_monitor_status = AAZStrType(
-        serialized_name="profileMonitorStatus",
-    )
-    monitor_config.protocol = AAZStrType()
-    monitor_config.timeout_in_seconds = AAZIntType(
-        serialized_name="timeoutInSeconds",
-    )
-    monitor_config.tolerated_number_of_failures = AAZIntType(
-        serialized_name="toleratedNumberOfFailures",
-    )
+        monitor_config = _schema_profile_read.properties.monitor_config
+        monitor_config.custom_headers = AAZListType(
+            serialized_name="customHeaders",
+        )
+        monitor_config.expected_status_code_ranges = AAZListType(
+            serialized_name="expectedStatusCodeRanges",
+        )
+        monitor_config.interval_in_seconds = AAZIntType(
+            serialized_name="intervalInSeconds",
+        )
+        monitor_config.path = AAZStrType()
+        monitor_config.port = AAZIntType()
+        monitor_config.profile_monitor_status = AAZStrType(
+            serialized_name="profileMonitorStatus",
+        )
+        monitor_config.protocol = AAZStrType()
+        monitor_config.timeout_in_seconds = AAZIntType(
+            serialized_name="timeoutInSeconds",
+        )
+        monitor_config.tolerated_number_of_failures = AAZIntType(
+            serialized_name="toleratedNumberOfFailures",
+        )
 
-    custom_headers = _schema_profile_read.properties.monitor_config.custom_headers
-    custom_headers.Element = AAZObjectType()
+        custom_headers = _schema_profile_read.properties.monitor_config.custom_headers
+        custom_headers.Element = AAZObjectType()
 
-    _element = _schema_profile_read.properties.monitor_config.custom_headers.Element
-    _element.name = AAZStrType()
-    _element.value = AAZStrType()
+        _element = _schema_profile_read.properties.monitor_config.custom_headers.Element
+        _element.name = AAZStrType()
+        _element.value = AAZStrType()
 
-    expected_status_code_ranges = _schema_profile_read.properties.monitor_config.expected_status_code_ranges
-    expected_status_code_ranges.Element = AAZObjectType()
+        expected_status_code_ranges = _schema_profile_read.properties.monitor_config.expected_status_code_ranges
+        expected_status_code_ranges.Element = AAZObjectType()
 
-    _element = _schema_profile_read.properties.monitor_config.expected_status_code_ranges.Element
-    _element.max = AAZIntType()
-    _element.min = AAZIntType()
+        _element = _schema_profile_read.properties.monitor_config.expected_status_code_ranges.Element
+        _element.max = AAZIntType()
+        _element.min = AAZIntType()
 
-    tags = _schema_profile_read.tags
-    tags.Element = AAZStrType()
+        tags = _schema_profile_read.tags
+        tags.Element = AAZStrType()
 
-    _schema.id = _schema_profile_read.id
-    _schema.location = _schema_profile_read.location
-    _schema.name = _schema_profile_read.name
-    _schema.properties = _schema_profile_read.properties
-    _schema.tags = _schema_profile_read.tags
-    _schema.type = _schema_profile_read.type
+        _schema.id = cls._schema_profile_read.id
+        _schema.location = cls._schema_profile_read.location
+        _schema.name = cls._schema_profile_read.name
+        _schema.properties = cls._schema_profile_read.properties
+        _schema.tags = cls._schema_profile_read.tags
+        _schema.type = cls._schema_profile_read.type
 
 
 __all__ = ["Update"]

@@ -47,9 +47,8 @@ class Create(AAZCommand):
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
-            help="The name of the Route Server.",
+            help="Name of the route server.",
             required=True,
-            id_part="name",
         )
         _args_schema.location = AAZResourceLocationArg(
             help="Location. Values from: `az account list-locations`. You can configure the default location using `az configure --defaults location=<location>`.",
@@ -58,9 +57,14 @@ class Create(AAZCommand):
                 resource_group_arg="resource_group",
             ),
         )
+        _args_schema.hub_routing_preference = AAZStrArg(
+            options=["--hub-routing-preference"],
+            help="Routing preference of the route server.",
+            enum={"ASPath": "ASPath", "ExpressRoute": "ExpressRoute", "VpnGateway": "VpnGateway"},
+        )
         _args_schema.sku = AAZStrArg(
             options=["--sku"],
-            help="The sku of this VirtualHub.",
+            help="SKU of the route server.",
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
@@ -205,6 +209,7 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
+                properties.set_prop("hubRoutingPreference", AAZStrType, ".hub_routing_preference")
                 properties.set_prop("sku", AAZStrType, ".sku")
 
             tags = _builder.get(".tags")
@@ -262,7 +267,7 @@ class Create(AAZCommand):
             properties.azure_firewall = AAZObjectType(
                 serialized_name="azureFirewall",
             )
-            _build_schema_sub_resource_read(properties.azure_firewall)
+            _CreateHelper._build_schema_sub_resource_read(properties.azure_firewall)
             properties.bgp_connections = AAZListType(
                 serialized_name="bgpConnections",
                 flags={"read_only": True},
@@ -270,7 +275,7 @@ class Create(AAZCommand):
             properties.express_route_gateway = AAZObjectType(
                 serialized_name="expressRouteGateway",
             )
-            _build_schema_sub_resource_read(properties.express_route_gateway)
+            _CreateHelper._build_schema_sub_resource_read(properties.express_route_gateway)
             properties.hub_routing_preference = AAZStrType(
                 serialized_name="hubRoutingPreference",
             )
@@ -281,7 +286,7 @@ class Create(AAZCommand):
             properties.p2_s_vpn_gateway = AAZObjectType(
                 serialized_name="p2SVpnGateway",
             )
-            _build_schema_sub_resource_read(properties.p2_s_vpn_gateway)
+            _CreateHelper._build_schema_sub_resource_read(properties.p2_s_vpn_gateway)
             properties.preferred_routing_gateway = AAZStrType(
                 serialized_name="preferredRoutingGateway",
             )
@@ -299,7 +304,7 @@ class Create(AAZCommand):
             properties.security_partner_provider = AAZObjectType(
                 serialized_name="securityPartnerProvider",
             )
-            _build_schema_sub_resource_read(properties.security_partner_provider)
+            _CreateHelper._build_schema_sub_resource_read(properties.security_partner_provider)
             properties.security_provider_name = AAZStrType(
                 serialized_name="securityProviderName",
             )
@@ -319,19 +324,19 @@ class Create(AAZCommand):
             properties.virtual_wan = AAZObjectType(
                 serialized_name="virtualWan",
             )
-            _build_schema_sub_resource_read(properties.virtual_wan)
+            _CreateHelper._build_schema_sub_resource_read(properties.virtual_wan)
             properties.vpn_gateway = AAZObjectType(
                 serialized_name="vpnGateway",
             )
-            _build_schema_sub_resource_read(properties.vpn_gateway)
+            _CreateHelper._build_schema_sub_resource_read(properties.vpn_gateway)
 
             bgp_connections = cls._schema_on_200_201.properties.bgp_connections
             bgp_connections.Element = AAZObjectType()
-            _build_schema_sub_resource_read(bgp_connections.Element)
+            _CreateHelper._build_schema_sub_resource_read(bgp_connections.Element)
 
             ip_configurations = cls._schema_on_200_201.properties.ip_configurations
             ip_configurations.Element = AAZObjectType()
-            _build_schema_sub_resource_read(ip_configurations.Element)
+            _CreateHelper._build_schema_sub_resource_read(ip_configurations.Element)
 
             route_table = cls._schema_on_200_201.properties.route_table
             route_table.routes = AAZListType()
@@ -411,27 +416,29 @@ class Create(AAZCommand):
             return cls._schema_on_200_201
 
 
-def _build_schema_sub_resource_create(_builder):
-    if _builder is None:
-        return
-    _builder.set_prop("id", AAZStrType, ".id")
+class _CreateHelper:
+    """Helper class for Create"""
 
+    @classmethod
+    def _build_schema_sub_resource_create(cls, _builder):
+        if _builder is None:
+            return
+        _builder.set_prop("id", AAZStrType, ".id")
 
-_schema_sub_resource_read = None
+    _schema_sub_resource_read = None
 
+    @classmethod
+    def _build_schema_sub_resource_read(cls, _schema):
+        if cls._schema_sub_resource_read is not None:
+            _schema.id = cls._schema_sub_resource_read.id
+            return
 
-def _build_schema_sub_resource_read(_schema):
-    global _schema_sub_resource_read
-    if _schema_sub_resource_read is not None:
-        _schema.id = _schema_sub_resource_read.id
-        return
+        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
 
-    _schema_sub_resource_read = AAZObjectType()
+        sub_resource_read = _schema_sub_resource_read
+        sub_resource_read.id = AAZStrType()
 
-    sub_resource_read = _schema_sub_resource_read
-    sub_resource_read.id = AAZStrType()
-
-    _schema.id = _schema_sub_resource_read.id
+        _schema.id = cls._schema_sub_resource_read.id
 
 
 __all__ = ["Create"]

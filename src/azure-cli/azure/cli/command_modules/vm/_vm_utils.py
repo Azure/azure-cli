@@ -6,6 +6,7 @@
 import json
 import os
 import re
+import importlib
 
 from azure.cli.core.commands.arm import ArmTemplateBuilder
 
@@ -553,16 +554,40 @@ def trusted_launch_warning_log(namespace, generation_version, features):
     if not generation_version:
         return
 
-    log_message = 'Starting Build 2023 event, "az vm/vmss create" command will deploy Trusted Launch VM by default.' \
-                  ' To know more about Trusted Launch, please visit' \
-                  ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch'
+    from ._constants import TLAD_DEFAULT_CHANGE_MSG
+    log_message = TLAD_DEFAULT_CHANGE_MSG.format('az vm/vmss create')
 
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE, UPGRADE_SECURITY_HINT
     if generation_version == 'V1':
-        logger.warning(log_message)
-
-    if generation_version == 'V2':
-        if is_trusted_launch_supported(features) and not namespace.security_type:
+        if namespace.security_type and namespace.security_type == COMPATIBLE_SECURITY_TYPE_VALUE:
+            logger.warning(UPGRADE_SECURITY_HINT)
+        else:
             logger.warning(log_message)
+
+    if generation_version == 'V2' and is_trusted_launch_supported(features):
+        if not namespace.security_type:
+            logger.warning(log_message)
+        elif namespace.security_type == COMPATIBLE_SECURITY_TYPE_VALUE:
+            logger.warning(UPGRADE_SECURITY_HINT)
+
+
+def validate_update_vm_trusted_launch_supported(cmd, vm, os_disk_resource_group, os_disk_name):
+    from azure.cli.command_modules.vm._client_factory import _compute_client_factory
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+
+    client = _compute_client_factory(cmd.cli_ctx).disks
+    os_disk_info = client.get(os_disk_resource_group, os_disk_name)
+    generation_version = os_disk_info.hyper_v_generation if hasattr(os_disk_info, 'hyper_v_generation') else None
+
+    if generation_version != "V2":
+        raise InvalidArgumentValueError(
+            "Trusted Launch security configuration can be enabled only with Azure Gen2 VMs. Please visit "
+            "https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch for more details.")
+
+    if vm.security_profile is not None and vm.security_profile.security_type == "ConfidentialVM":
+        raise InvalidArgumentValueError("{} is already configured with ConfidentialVM. "
+                                        "Security Configuration cannot be updated from ConfidentialVM to TrustedLaunch."
+                                        .format(vm.name))
 
 
 def display_region_recommendation(cmd, namespace):
@@ -574,6 +599,8 @@ def display_region_recommendation(cmd, namespace):
     }
 
     identified_region = identified_region_maps.get(namespace.location)
+    from azure.cli.core import telemetry
+    telemetry.set_region_identified(namespace.location, identified_region)
 
     if identified_region and cmd.cli_ctx.config.getboolean('core', 'display_region_identified', True):
         logger.warning('Selecting "%s" may reduce your costs. '
@@ -582,5 +609,8 @@ def display_region_recommendation(cmd, namespace):
                        ' "az config set core.display_region_identified=false". '
                        'Learn more at https://go.microsoft.com/fwlink/?linkid=222571 ',
                        identified_region)
-        from azure.cli.core import telemetry
-        telemetry.set_region_identified(namespace.location, identified_region)
+
+
+def import_aaz_by_profile(profile, module_name):
+    profile_module_name = profile.lower().replace('-', '_')
+    return importlib.import_module(f"azure.cli.command_modules.vm.aaz.{profile_module_name}.{module_name}")

@@ -77,11 +77,10 @@ def load_command_table(self, _):
     self.command_table['network vnet-gateway root-cert create'] = VnetGatewayRootCertCreate(loader=self)
 
     # region VirtualNetwork
-    from .operations.vnet import VNetCreate, VNetUpdate, VNetSubnetUpdate
+    from .operations.vnet import VNetCreate, VNetSubnetUpdate
     from .._format import transform_vnet_table_output
     vnet = import_aaz_by_profile("network.vnet")
     self.command_table['network vnet create'] = VNetCreate(loader=self)
-    self.command_table['network vnet update'] = VNetUpdate(loader=self)
     self.command_table['network vnet list'] = vnet.List(loader=self, table_transformer=transform_vnet_table_output)
 
     self.command_table['network vnet subnet update'] = VNetSubnetUpdate(loader=self)
@@ -113,4 +112,17 @@ def load_command_table(self, _):
     self.command_table['network public-ip show'] = public_ip.Show(loader=self,
                                                                   table_transformer=public_ip_show_table_transform)
 
+    # endregion
+
+    # region NetworkSecurityGroups
+    from .operations.nsg import NSGCreate, NSGRuleCreate
+    from .._format import transform_nsg_rule_table_output
+    operations_tmpl = self.get_module_name_by_profile("operations.nsg#{}")
+    nsgRule = import_aaz_by_profile("network.nsg.rule")
+    self.command_table["network nsg create"] = NSGCreate(loader=self)
+
+    self.command_table["network nsg rule create"] = NSGRuleCreate(loader=self)
+    self.command_table["network nsg rule show"] = nsgRule.Show(loader=self, table_transformer=transform_nsg_rule_table_output)
+    with self.command_group("network nsg rule", operations_tmpl=operations_tmpl) as g:
+        g.custom_command("list", "list_nsg_rules", table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
     # endregion

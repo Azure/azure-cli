@@ -1,6 +1,7 @@
 [MASTER]
 ignore=tests,generated,vendored_sdks,privates
 ignore-patterns=test.*,azure_devops_build.*
+ignore-paths=.*/command_modules/.*/aaz
 reports=no
 
 [MESSAGES CONTROL]
@@ -46,7 +47,12 @@ disable=
     redundant-u-string-prefix,
     raising-bad-type,
     unused-private-member,
-    used-before-assignment
+    used-before-assignment,
+    # These rules were added in Pylint >= 2.12, disable them to avoid making retroactive change
+    missing-timeout,
+    superfluous-parens,
+    implicit-str-concat,
+    unnecessary-dunder-call,
 
 [FORMAT]
 max-line-length=120
@@ -60,24 +66,8 @@ init-import=yes
 max-locals=25
 # Maximum number of branch for function / method body
 max-branches=20
+# Temporally disable this check as inline disable is not working, see https://github.com/pylint-dev/pylint/issues/8806
+max-statements=500
 
 [SIMILARITIES]
 min-similarity-lines=10
-
-[BASIC]
-# Naming hints based on PEP 8 (https://www.python.org/dev/peps/pep-0008/#naming-conventions).
-# Consider these guidelines and not hard rules. Read PEP 8 for more details.
-
-# The invalid-name checker must be **enabled** for these hints to be used.
-include-naming-hint=yes
-
-module-name-hint=lowercase (keep short; underscores are discouraged)
-const-name-hint=UPPER_CASE_WITH_UNDERSCORES
-class-name-hint=CapitalizedWords
-class-attribute-name-hint=lower_case_with_underscores
-attr-name-hint=lower_case_with_underscores
-method-name-hint=lower_case_with_underscores
-function-name-hint=lower_case_with_underscores
-argument-name-hint=lower_case_with_underscores
-variable-name-hint=lower_case_with_underscores
-inlinevar-name-hint=lower_case_with_underscores (short is OK)

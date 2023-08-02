@@ -211,6 +211,21 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertTrue(result['publicNetworkAccess'] == 'Disabled')
 
     @AllowLargeResponse()
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-09-01')
+    @ResourceGroupPreparer(name_prefix='cli_test_storage_account_dns')
+    def test_create_storage_account_with_dns_endpoint_type(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'sa1': self.create_random_name(prefix='cli', length=24),
+            'sa2': self.create_random_name(prefix='cli', length=24),
+            'loc': 'eastus'
+        })
+        self.cmd('storage account create -n {sa1} -g {rg} -l {loc} --hns true --dns-endpoint-type Standard',
+                 checks=[JMESPathCheck('dnsEndpointType', 'Standard')])
+        self.cmd('storage account create -n {sa2} -g {rg} -l {loc} --hns true --dns-endpoint-type AzureDnsZone',
+                 checks=[JMESPathCheck('dnsEndpointType', 'AzureDnsZone')])
+
+    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_create_storage_account(self, resource_group, location):
         name = self.create_random_name(prefix='cli', length=24)
@@ -2012,6 +2027,33 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
 
         result = self.cmd('storage account blob-service-properties show -n {sa} -g {rg}').get_output_in_json()
         self.assertEqual(result['lastAccessTimeTrackingPolicy']['enable'], True)
+
+    @ResourceGroupPreparer(name_prefix="cli_test_sa_blob_cors")
+    @StorageAccountPreparer(location="eastus2", kind="StorageV2")
+    def test_storage_account_blob_cors_rule(self, resource_group, storage_account):
+        self.kwargs.update({
+            'sa': storage_account,
+            'rg': resource_group
+        })
+
+        self.cmd('storage account blob-service-properties cors-rule add -n {sa} -g {rg} '
+                 '--allowed-origins "http://*.contoso.com" "http://www.fabrikam.com" --allowed-methods PUT GET '
+                 '--allowed-headers x-ms-meta-data* --max-age 200')\
+            .assert_with_checks(
+                        JMESPathCheck('length(@)', 1),
+                        JMESPathCheck('[0].allowedOrigins', ['http://*.contoso.com', 'http://www.fabrikam.com']),
+                        JMESPathCheck('[0].allowedMethods', ['PUT', 'GET']),
+                        JMESPathCheck('[0].allowedHeaders', ['x-ms-meta-data*']),
+                        JMESPathCheck('[0].exposedHeaders', []),
+                        JMESPathCheck('[0].maxAgeInSeconds', 200))
+
+        self.cmd('storage account blob-service-properties cors-rule list -n {sa} -g {rg}') \
+            .assert_with_checks(JMESPathCheck('length(@)', 1))
+
+        self.cmd('storage account blob-service-properties cors-rule clear -n {sa} -g {rg}')\
+            .assert_with_checks(JMESPathCheck('length(@)', 0))
+        self.cmd('storage account blob-service-properties cors-rule list -n {sa} -g {rg}')\
+            .assert_with_checks(JMESPathCheck('length(@)', 0))
 
 
 class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):

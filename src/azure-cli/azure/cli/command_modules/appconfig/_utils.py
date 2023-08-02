@@ -10,12 +10,13 @@ from azure.appconfiguration import AzureAppConfigurationClient
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.azclierror import (ValidationError,
                                        AzureResponseError,
+                                       InvalidArgumentValueError,
                                        ResourceNotFoundError,
                                        RequiredArgumentMissingError,
                                        MutuallyExclusiveArgumentError)
 
 from ._client_factory import cf_configstore
-from ._constants import HttpHeaders
+from ._constants import HttpHeaders, FeatureFlagConstants
 
 logger = get_logger(__name__)
 
@@ -88,7 +89,6 @@ def resolve_deleted_store_metadata(cmd, config_store_name, resource_group_name=N
 
 
 def resolve_connection_string(cmd, config_store_name=None, connection_string=None):
-    string = ''
     error_message = '''You may have specified both store name and connection string, which is a conflict.
 Please specify exactly ONE (suggest connection string) in one of the following options:\n
 1 pass in App Configuration store name as a parameter\n
@@ -97,30 +97,28 @@ Please specify exactly ONE (suggest connection string) in one of the following o
 4 preset connection string using 'az configure --defaults appconfig_connection_string=xxxx'\n
 5 preset connection in environment variable like set AZURE_APPCONFIG_CONNECTION_STRING=xxxx'''
 
+    connection_string_from_args = ''
+
     if config_store_name:
-        string = construct_connection_string(cmd, config_store_name)
+        connection_string_from_args = construct_connection_string(cmd, config_store_name)
 
     if connection_string:
-        if string and ';'.join(sorted(connection_string.split(';'))) != string:
-            raise MutuallyExclusiveArgumentError(error_message)
-        string = connection_string
-
-    connection_string_env = cmd.cli_ctx.config.get(
-        'appconfig', 'connection_string', None)
-
-    if connection_string_env:
-        if not is_valid_connection_string(connection_string_env):
+        if not is_valid_connection_string(connection_string):
             raise ValidationError(
-                "The environment variable connection string is invalid. Correct format should be Endpoint=https://example.appconfig.io;Id=xxxxx;Secret=xxxx")
+                "The connection string argument is invalid. Correct format should be Endpoint=https://example.appconfig.io;Id=xxxxx;Secret=xxxx")
 
-        if string and ';'.join(sorted(connection_string_env.split(';'))) != string:
-            raise MutuallyExclusiveArgumentError(error_message)
-        string = connection_string_env
+        # If both connection string specified and name specified, ensure that both arguments reference the same store
+        if connection_string_from_args:
+            if ';'.join(sorted(connection_string.split(';'))) != connection_string_from_args:
+                raise MutuallyExclusiveArgumentError(error_message)
+        else:
+            connection_string_from_args = connection_string
 
-    if not string:
-        raise RequiredArgumentMissingError(
-            'Please specify config store name or connection string(suggested).')
-    return string
+    if connection_string_from_args:
+        return connection_string_from_args
+
+    raise RequiredArgumentMissingError(
+        'Please specify config store name or connection string(suggested).')
 
 
 def is_valid_connection_string(connection_string):
@@ -189,3 +187,46 @@ def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
             raise CLIError("Failed to initialize AzureAppConfigurationClient due to an exception: {}".format(str(ex)))
 
     return azconfig_client
+
+
+def is_json_content_type(content_type):
+    if not content_type:
+        return False
+
+    content_type = content_type.strip().lower()
+    mime_type = content_type.split(';')[0].strip()
+
+    type_parts = mime_type.split('/')
+    if len(type_parts) != 2:
+        return False
+
+    (main_type, sub_type) = type_parts
+    if main_type != "application":
+        return False
+
+    sub_types = sub_type.split('+')
+    if "json" in sub_types:
+        return True
+
+    return False
+
+
+def validate_feature_flag_name(feature):
+    if feature:
+        INVALID_FEATURE_CHARACTERS = ("%", ":")
+        if any(invalid_char in feature for invalid_char in INVALID_FEATURE_CHARACTERS):
+            raise InvalidArgumentValueError(
+                "Feature name cannot contain the following characters: '{}'.".format("', '".join(INVALID_FEATURE_CHARACTERS)))
+
+    else:
+        raise InvalidArgumentValueError("Feature name cannot be empty.")
+
+
+def validate_feature_flag_key(key):
+    input_key = str(key).lower()
+    if '%' in input_key:
+        raise InvalidArgumentValueError("Feature flag key cannot contain the '%' character.")
+    if not input_key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX):
+        raise InvalidArgumentValueError("Feature flag key must start with the reserved prefix '{0}'.".format(FeatureFlagConstants.FEATURE_FLAG_PREFIX))
+    if len(input_key) == len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):
+        raise InvalidArgumentValueError("Feature flag key must contain more characters after the reserved prefix '{0}'.".format(FeatureFlagConstants.FEATURE_FLAG_PREFIX))

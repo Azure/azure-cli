@@ -181,7 +181,7 @@ def auto_register(func, *args, **kwargs):
         if ex.error and ex.error.code == 'SubscriptionNotRegistered':
             if register_provider():
                 return func(*args, **kwargs_backup)
-            raise CLIInternalError('Registeration failed, please manually run command '
+            raise CLIInternalError('Registration failed, please manually run command '
                                    '`az provider register -n Microsoft.ServiceLinker` to register the provider.')
         # target subscription is not registered, raw check
         if ex.error and ex.error.code == 'UnauthorizedResourceAccess' and 'not registered' in ex.error.message:
@@ -193,7 +193,7 @@ def auto_register(func, *args, **kwargs):
                 if not provider_is_registered(target_subs):
                     if register_provider(target_subs):
                         return func(*args, **kwargs_backup)
-                    raise CLIInternalError('Registeration failed, please manually run command '
+                    raise CLIInternalError('Registration failed, please manually run command '
                                            '`az provider register -n Microsoft.ServiceLinker --subscription {}` '
                                            'to register the provider.'.format(target_subs))
         raise ex
@@ -202,7 +202,7 @@ def auto_register(func, *args, **kwargs):
 def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id):
     from ._validators import get_source_resource_name
 
-    logger.warning('get valid key vualt reference connection')
+    logger.warning('get valid key vault reference connection')
     key_vault_connections = []
     for connection in client.list(resource_uri=source_id):
         connection = todict(connection)
@@ -288,13 +288,13 @@ def get_auth_if_no_valid_key_vault_connection(source_name, source_id, key_vault_
                     auth_info = connection.get('authInfo')
                     if auth_info.get('clientId') == client_id and auth_info.get('subscriptionId') == subscription_id:
                         logger.warning(
-                            'key vualt reference connection: %s', connection.get('id'))
+                            'key vault reference connection: %s', connection.get('id'))
                         return
             else:  # System Identity
                 for connection in key_vault_connections:
                     if connection.get('authInfo').get('authType') == auth_type:
                         logger.warning(
-                            'key vualt reference connection: %s', connection.get('id'))
+                            'key vault reference connection: %s', connection.get('id'))
                         return
 
         # any connection with csi enabled is a valid connection
@@ -306,7 +306,7 @@ def get_auth_if_no_valid_key_vault_connection(source_name, source_id, key_vault_
             return {'authType': 'userAssignedIdentity'}
 
         else:
-            logger.warning('key vualt reference connection: %s',
+            logger.warning('key vault reference connection: %s',
                            key_vault_connections[0].get('id'))
             return
 
@@ -435,3 +435,45 @@ def _install_extension(cmd, extension_name):
     except Exception:  # nopa pylint: disable=broad-except
         return False
     return True
+
+
+def springboot_migration_warning(require_update=False, check_version=False, both_version=False):
+    warning_message = "It is recommended to use Spring Cloud Azure version 4.0 and above. \
+The configurations in the format of \"azure.cosmos.*\" from Spring Cloud Azure 3.x will no longer be supported after 1st July, 2024. \
+Please refer to https://microsoft.github.io/spring-cloud-azure/current/reference/html/appendix.html\
+#configuration-spring-cloud-azure-starter-data-cosmos for more details."
+
+    update_message = "\nPlease update your connection to include the configurations for the newer version."
+
+    check_version_message = "\nManaged identity and service principal are only supported \
+in Spring Cloud Azure version 4.0 and above. Please check your Spring Cloud Azure version. \
+Learn more at https://spring.io/projects/spring-cloud-azure#overview"
+    both_version_message = "\nTwo sets of configuration properties will be configured \
+according to Spring Cloud Azure version 3.x and 4.x. \
+Learn more at https://spring.io/projects/spring-cloud-azure#overview"
+
+    if require_update:
+        warning_message += update_message
+    if check_version:
+        warning_message += check_version_message
+    if both_version:
+        warning_message += both_version_message
+
+    return warning_message
+
+
+def decorate_springboot_cosmossql_config(configs):
+    is_springboot_cosmossql = False
+    require_update = True
+
+    for config in configs.configurations:
+        if config.name.startswith("azure.cosmos."):
+            is_springboot_cosmossql = True
+            config.note = "This configuration property is used in Spring Cloud Azure version 3.x and below."
+        elif config.name.startswith("spring.cloud.azure.cosmos."):
+            is_springboot_cosmossql = True
+            require_update = False
+            config.note = "This configuration property is used in Spring Cloud Azure version 4.0 and above."
+
+    if is_springboot_cosmossql:
+        logger.warning(springboot_migration_warning(require_update=require_update))

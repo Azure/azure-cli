@@ -39,13 +39,12 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import sdk_no_wait
 
-from ._vm_utils import read_content_if_is_file
+from ._vm_utils import read_content_if_is_file, import_aaz_by_profile
 from ._vm_diagnostics_templates import get_default_diag_config
 
 from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_services,
                        load_images_thru_services, _get_latest_image_version)
-from ._client_factory import (_compute_client_factory, cf_public_ip_addresses, cf_vm_image_term,
-                              _dev_test_labs_client_factory)
+from ._client_factory import (_compute_client_factory, cf_vm_image_term, _dev_test_labs_client_factory)
 from .aaz.latest.ppg import Show as _PPGShow
 
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
@@ -341,9 +340,11 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         raise RequiredArgumentMissingError(
             'usage error: --upload-size-bytes should be used together with --upload-type')
 
-    log_message = 'Starting Build 2023 event, "az disk create" command will deploy Trusted Launch VM by default.' \
-                  ' To know more about Trusted Launch, please visit' \
-                  ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch'
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE, UPGRADE_SECURITY_HINT, TLAD_DEFAULT_CHANGE_MSG
+    if security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
+        log_message = TLAD_DEFAULT_CHANGE_MSG.format('az disk create')
+    else:
+        log_message = UPGRADE_SECURITY_HINT
     if image_reference is not None:
         if not is_valid_resource_id(image_reference):
             # URN or name
@@ -362,8 +363,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                 terms['child_name_1'], terms['child_name_3'], terms['child_name_4'], terms['child_name_5']
 
         client = _compute_client_factory(cmd.cli_ctx)
-        response = client.virtual_machine_images.get(location, disk_publisher, disk_offer, disk_sku,
-                                                     disk_version)
+        response = client.virtual_machine_images.get(location=location, publisher_name=disk_publisher,
+                                                     offer=disk_offer, skus=disk_sku, version=disk_version)
 
         if hasattr(response, 'hyper_v_generation'):
             if response.hyper_v_generation == 'V1':
@@ -469,9 +470,6 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
     disk = Disk(location=location, creation_data=creation_data, tags=(tags or {}),
                 sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, os_type=os_type, encryption=encryption)
 
-    if option == DiskCreateOption.empty and os_type:
-        # will set default value of hyper_v_generation and security_type
-        logger.warning(log_message)
     if hyper_v_generation:
         disk.hyper_v_generation = hyper_v_generation
 
@@ -497,7 +495,9 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk.bursting_enabled = enable_bursting
     if edge_zone is not None:
         disk.extended_location = edge_zone
-    if security_type:
+    # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
+    # after changing the default values to Trusted Launch VMs in the future.
+    if security_type and security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
         disk.security_profile = {'securityType': security_type}
         if secure_vm_disk_encryption_set:
             disk.security_profile['secure_vm_disk_encryption_set_id'] = secure_vm_disk_encryption_set
@@ -656,14 +656,6 @@ def update_image(instance, tags=None):
     if tags is not None:
         instance.tags = tags
     return instance
-
-
-def list_images(cmd, resource_group_name=None):
-    client = _compute_client_factory(cmd.cli_ctx)
-    if resource_group_name:
-        return client.images.list_by_resource_group(resource_group_name)
-    return client.images.list()
-# endregion
 
 
 # region Snapshots
@@ -896,7 +888,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               data_disk_delete_option=None, user_data=None, capacity_reservation_group=None, enable_hibernation=None,
               v_cpus_available=None, v_cpus_per_core=None, accept_term=None, disable_integrity_monitoring=False,
               os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None,
-              disk_controller_type=None):
+              disk_controller_type=None, disable_integrity_monitoring_autoupgrade=False):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -914,14 +906,25 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     # In the latest profile, the default public IP will be expected to be changed from Basic to Standard.
     # In order to avoid breaking change which has a big impact to users,
     # we use the hint to guide users to use Standard public IP to create VM in the first stage.
-    if public_ip_sku is None and cmd.cli_ctx.cloud.profile == 'latest':
+    if public_ip_sku is None and public_ip_address_type == 'new' and cmd.cli_ctx.cloud.profile == 'latest':
         logger.warning(
             'It is recommended to use parameter "--public-ip-sku Standard" to create new VM with Standard public IP. '
             'Please note that the default public IP used for VM creation will be changed from Basic to Standard '
             'in the future.')
 
-    subscription_id = get_subscription_id(cmd.cli_ctx)
+    # Breaking Change Warning, change image alias
+    if image:
+        if image == "UbuntuLTS":
+            logger.warning('Consider using the "Ubuntu2204" alias. On April 30, 2023,'
+                           'the image deployed by the "UbuntuLTS" alias reaches its end of life. '
+                           'The "UbuntuLTS" will be removed with the breaking change release of Fall 2023.')
+        if image in ["RHEL", "Debian", "CentOS", "Flatcar", "SLES", "openSUSE-Leap"]:
+            logger.warning('Consider using the image alias including the version of the distribution you want to use. '
+                           'For example: please use Debian11 instead of Debian.\nIn Ignite (November) 2023, '
+                           'the aliases without version suffix (such as: `UbuntuLTS`, `CentOS`, `Debian`, `Flatcar`, '
+                           '`SLES`, `openSUSE-Leap` and `RHEL`) will be removed.')
 
+    subscription_id = get_subscription_id(cmd.cli_ctx)
     if os_disk_encryption_set is not None and not is_valid_resource_id(os_disk_encryption_set):
         os_disk_encryption_set = resource_id(
             subscription=subscription_id, resource_group=resource_group_name,
@@ -987,20 +990,16 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                 vnet_exists = \
                     check_existence(cmd.cli_ctx, vnet_name, resource_group_name, 'Microsoft.Network', 'virtualNetworks')
                 if vnet_exists:
-                    from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection
-                    from azure.cli.command_modules.vm._validators import get_network_client
-                    client = get_network_client(cmd.cli_ctx).virtual_networks
-                    vnet = cached_get(cmd, client.get, resource_group_name, vnet_name)
-
-                    Subnet = cmd.get_models('Subnet', resource_type=ResourceType.MGMT_NETWORK)
-                    subnet_obj = Subnet(
-                        name=subnet,
-                        address_prefixes=[subnet_address_prefix],
-                        address_prefix=subnet_address_prefix
-                    )
-                    upsert_to_collection(vnet, 'subnets', subnet_obj, 'name')
+                    SubnetCreate = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.vnet.subnet").Create
                     try:
-                        cached_put(cmd, client.begin_create_or_update, vnet, resource_group_name, vnet_name).result()
+                        poller = SubnetCreate(cli_ctx=cmd.cli_ctx)(command_args={
+                            'name': subnet,
+                            'vnet_name': vnet_name,
+                            'resource_group': resource_group_name,
+                            'address_prefixes': [subnet_address_prefix],
+                            'address_prefix': subnet_address_prefix
+                        })
+                        LongRunningOperation(cmd.cli_ctx)(poller)
                     except Exception:
                         raise CLIError('Subnet({}) does not exist, but failed to create a new subnet with address '
                                        'prefix {}. It may be caused by name or address prefix conflict. Please specify '
@@ -1208,7 +1207,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                       type_handler_version=version,
                                       settings=None,
                                       auto_upgrade_minor_version=True,
-                                      enable_automatic_upgrade=None)
+                                      enable_automatic_upgrade=not disable_integrity_monitoring_autoupgrade)
         try:
             LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_extensions.begin_create_or_update(
                 resource_group_name, vm_name, 'GuestAttestation', ext))
@@ -1302,8 +1301,11 @@ def get_vm_to_update(cmd, resource_group_name, vm_name):
 
 def get_vm_details(cmd, resource_group_name, vm_name, include_user_data=False):
     from msrestazure.tools import parse_resource_id
+
+    NicShow = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.nic").Show
+    PublicIPShow = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.public_ip").Show
+
     result = get_instance_view(cmd, resource_group_name, vm_name, include_user_data)
-    network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK)
     public_ips = []
     fqdns = []
     private_ips = []
@@ -1311,20 +1313,25 @@ def get_vm_details(cmd, resource_group_name, vm_name, include_user_data=False):
     # pylint: disable=line-too-long,no-member
     for nic_ref in result.network_profile.network_interfaces:
         nic_parts = parse_resource_id(nic_ref.id)
-        nic = network_client.network_interfaces.get(nic_parts['resource_group'], nic_parts['name'])
-        if nic.mac_address:
-            mac_addresses.append(nic.mac_address)
-        for ip_configuration in nic.ip_configurations:
-            if ip_configuration.private_ip_address:
-                private_ips.append(ip_configuration.private_ip_address)
-            if ip_configuration.public_ip_address:
-                res = parse_resource_id(ip_configuration.public_ip_address.id)
-                public_ip_info = network_client.public_ip_addresses.get(res['resource_group'],
-                                                                        res['name'])
-                if public_ip_info.ip_address:
-                    public_ips.append(public_ip_info.ip_address)
-                if public_ip_info.dns_settings:
-                    fqdns.append(public_ip_info.dns_settings.fqdn)
+        nic = NicShow(cli_ctx=cmd.cli_ctx)(command_args={
+            "name": nic_parts['name'],
+            'resource_group': nic_parts['resource_group']
+        })
+        if 'macAddress' in nic:
+            mac_addresses.append(nic['macAddress'])
+        for ip_configuration in nic['ipConfigurations']:
+            if 'privateIPAddress' in ip_configuration:
+                private_ips.append(ip_configuration['privateIPAddress'])
+            if 'publicIPAddress' in ip_configuration:
+                res = parse_resource_id(ip_configuration['publicIPAddress']['id'])
+                public_ip_info = PublicIPShow(cli_ctx=cmd.cli_ctx)(command_args={
+                    'name': res['name'],
+                    'resource_group': res['resource_group']
+                })
+                if 'ipAddress' in public_ip_info:
+                    public_ips.append(public_ip_info['ipAddress'])
+                if 'dnsSettings' in public_ip_info:
+                    fqdns.append(public_ip_info['dnsSettings']['fqdn'])
 
     setattr(result, 'power_state',
             ','.join([s.display_status for s in result.instance_view.statuses if s.code.startswith('PowerState/')]))
@@ -1389,15 +1396,17 @@ def list_vm_ip_addresses(cmd, resource_group_name=None, vm_name=None):
     #
     # Since there is no guarantee that a NIC is in the same resource group as a given
     # Virtual Machine, we can't constrain the lookup to only a single group...
-    network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK)
-    nics = network_client.network_interfaces.list_all()
-    public_ip_addresses = network_client.public_ip_addresses.list_all()
+    NicList = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.nic").List
+    PublicIPList = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.public_ip").List
 
-    ip_address_lookup = {pip.id: pip for pip in list(public_ip_addresses)}
+    nics = NicList(cli_ctx=cmd.cli_ctx)(command_args={})
+    public_ip_addresses = PublicIPList(cli_ctx=cmd.cli_ctx)(command_args={})
+
+    ip_address_lookup = {pip['id']: pip for pip in list(public_ip_addresses)}
 
     result = []
-    for nic in [n for n in list(nics) if n.virtual_machine]:
-        nic_resource_group, nic_vm_name = _parse_rg_name(nic.virtual_machine.id)
+    for nic in [n for n in list(nics) if 'virtualMachine' in n and n['virtualMachine']]:
+        nic_resource_group, nic_vm_name = _parse_rg_name(nic['virtualMachine']['id'])
 
         # If provided, make sure that resource group name and vm name match the NIC we are
         # looking at before adding it to the result...
@@ -1410,21 +1419,23 @@ def list_vm_ip_addresses(cmd, resource_group_name=None, vm_name=None):
                 'privateIpAddresses': [],
                 'publicIpAddresses': []
             }
-            for ip_configuration in nic.ip_configurations:
-                network_info['privateIpAddresses'].append(ip_configuration.private_ip_address)
-                if ip_configuration.public_ip_address and ip_configuration.public_ip_address.id in ip_address_lookup:
-                    public_ip_address = ip_address_lookup[ip_configuration.public_ip_address.id]
+            for ip_configuration in nic['ipConfigurations']:
+                network_info['privateIpAddresses'].append(ip_configuration['privateIPAddress'])
+                if 'publicIPAddress' in ip_configuration and ip_configuration['publicIPAddress'] and \
+                        ip_configuration['publicIPAddress']['id'] in ip_address_lookup:
+                    public_ip_address = ip_address_lookup[ip_configuration['publicIPAddress']['id']]
 
                     public_ip_addr_info = {
-                        'id': public_ip_address.id,
-                        'name': public_ip_address.name,
-                        'ipAddress': public_ip_address.ip_address,
-                        'ipAllocationMethod': public_ip_address.public_ip_allocation_method
+                        'id': public_ip_address['id'],
+                        'name': public_ip_address['name'],
+                        'ipAddress': public_ip_address.get('ipAddress', None),
+                        'ipAllocationMethod': public_ip_address.get('publicIPAllocationMethod', None)
                     }
 
                     try:
-                        public_ip_addr_info['zone'] = public_ip_address.zones[0]
-                    except (AttributeError, IndexError, TypeError):
+                        public_ip_addr_info['zone'] = public_ip_address['zones'][0] \
+                            if 'zones' in public_ip_address else None
+                    except (KeyError, IndexError, TypeError):
                         pass
 
                     network_info['publicIpAddresses'].append(public_ip_addr_info)
@@ -1443,8 +1454,13 @@ def list_vm_ip_addresses(cmd, resource_group_name=None, vm_name=None):
 def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_security_group_name=None,
                  apply_to_subnet=False):
     from msrestazure.tools import parse_resource_id
-
-    network = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK)
+    _nic = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.nic")
+    NicShow, NicUpdate = _nic.Show, _nic.Update
+    _subnet = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.vnet.subnet")
+    SubnetShow, SubnetUpdate = _subnet.Show, _subnet.Update
+    _nsg = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.nsg")
+    NSGShow, NSGCreate = _nsg.Show, _nsg.Create
+    NSGRuleCreate = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.nsg.rule").Create
 
     vm = get_vm(cmd, resource_group_name, vm_name)
     location = vm.location
@@ -1460,28 +1476,31 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
 
     # get existing NSG or create a new one
     created_nsg = False
-    nic = network.network_interfaces.get(resource_group_name, os.path.split(nic_ids[0].id)[1])
+    nic = NicShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'name': os.path.split(nic_ids[0].id)[1],
+        'resource_group': resource_group_name
+    })
     if not apply_to_subnet:
-        nsg = nic.network_security_group
+        nsg = nic['networkSecurityGroup']
     else:
-        subnet_id = parse_resource_id(nic.ip_configurations[0].subnet.id)
-        subnet = network.subnets.get(resource_group_name, subnet_id['name'], subnet_id['child_name_1'])
-        nsg = subnet.network_security_group
+        subnet_id = parse_resource_id(nic['ipConfigurations'][0]['subnet']['id'])
+        subnet = SubnetShow(cli_ctx=cmd.cli_ctx)(command_args={
+            'name': subnet_id['child_name_1'],
+            'vnet_name': subnet_id['name'],
+            'resource_group': resource_group_name
+        })
+        nsg = subnet['networkSecurityGroup'] if 'networkSecurityGroup' in subnet else None
 
     if not nsg:
-        NetworkSecurityGroup = \
-            cmd.get_models('NetworkSecurityGroup', resource_type=ResourceType.MGMT_NETWORK)
         nsg = LongRunningOperation(cmd.cli_ctx, 'Creating network security group')(
-            network.network_security_groups.begin_create_or_update(
-                resource_group_name=resource_group_name,
-                network_security_group_name=network_security_group_name,
-                parameters=NetworkSecurityGroup(location=location)
-            )
-        )
+            NSGCreate(cli_ctx=cmd.cli_ctx)(command_args={
+                'name': network_security_group_name,
+                'resource_group': resource_group_name,
+                'location': location
+            }))
         created_nsg = True
 
     # update the NSG with the new rule to allow inbound traffic
-    SecurityRule = cmd.get_models('SecurityRule', resource_type=ResourceType.MGMT_NETWORK)
 
     rule_name = 'open-port-all' if port == '*' else 'open-port-{}'.format((port.replace(',', '_')))
 
@@ -1495,30 +1514,47 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
             'destination_port_ranges': port.split(',')
         }
 
-    rule = SecurityRule(protocol='*', access='allow', direction='inbound', name=rule_name,
-                        source_port_range='*', **port_arg, priority=priority,
-                        source_address_prefix='*', destination_address_prefix='*')
-    nsg_name = nsg.name or os.path.split(nsg.id)[1]
+    nsg_name = nsg['name'] if 'name' in nsg else os.path.split(nsg['id'])[1]
     LongRunningOperation(cmd.cli_ctx, 'Adding security rule')(
-        network.security_rules.begin_create_or_update(
-            resource_group_name, nsg_name, rule_name, rule)
+        NSGRuleCreate(cli_ctx=cmd.cli_ctx)(command_args={
+            'name': rule_name,
+            'nsg_name': nsg_name,
+            'resource_group': resource_group_name,
+            'protocol': '*',
+            'access': 'allow',
+            'direction': 'inbound',
+            'source_port_range': '*',
+            **port_arg,
+            'priority': priority,
+            'source_address_prefix': '*',
+            'destination_address_prefix': '*'
+        })
     )
 
     # update the NIC or subnet if a new NSG was created
     if created_nsg and not apply_to_subnet:
-        nic.network_security_group = nsg
-        LongRunningOperation(cmd.cli_ctx, 'Updating NIC')(network.network_interfaces.begin_create_or_update(
-            resource_group_name, nic.name, nic))
+        nic['networkSecurityGroup'] = nsg
+        LongRunningOperation(cmd.cli_ctx, 'Updating NIC')(
+            NicUpdate(cli_ctx=cmd.cli_ctx)(command_args={
+                'name': nic['name'],
+                'resource_group': resource_group_name,
+                'security_rules': nic
+            }))
     elif created_nsg and apply_to_subnet:
-        subnet.network_security_group = nsg
-        LongRunningOperation(cmd.cli_ctx, 'Updating subnet')(network.subnets.begin_create_or_update(
-            resource_group_name=resource_group_name,
-            virtual_network_name=subnet_id['name'],
-            subnet_name=subnet_id['child_name_1'],
-            subnet_parameters=subnet
-        ))
+        subnet['networkSecurityGroup'] = nsg
+        LongRunningOperation(cmd.cli_ctx, 'Updating subnet')(
+            SubnetUpdate(cli_ctx=cmd.cli_ctx)(command_args={
+                'name': subnet_id['child_name_1'],
+                'resource_group': resource_group_name,
+                'vnet_name': subnet_id['name'],
+                'subnet': subnet
+            })
+        )
 
-    return network.network_security_groups.get(resource_group_name, nsg_name)
+    return NSGShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'name': nsg_name,
+        'resource_group': resource_group_name
+    })
 
 
 def resize_vm(cmd, resource_group_name, vm_name, size, no_wait=False):
@@ -1581,20 +1617,44 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               enable_vtpm=None, user_data=None, capacity_reservation_group=None,
               dedicated_host=None, dedicated_host_group=None, size=None, ephemeral_os_disk_placement=None,
               enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None, disk_controller_type=None,
-              **kwargs):
+              security_type=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
+    SecurityProfile, UefiSettings = cmd.get_models('SecurityProfile', 'UefiSettings')
     vm = kwargs['parameters']
+
+    disk_resource_group, disk_name = None, None
     if os_disk is not None:
         if is_valid_resource_id(os_disk):
-            disk_id, disk_name = os_disk, parse_resource_id(os_disk)['name']
+            disk_id = os_disk
+            os_disk_id_parsed = parse_resource_id(os_disk)
+            disk_resource_group, disk_name = os_disk_id_parsed['resource_group'], os_disk_id_parsed['name']
         else:
-            res = parse_resource_id(vm.id)
-            disk_id = resource_id(subscription=res['subscription'], resource_group=res['resource_group'],
+            vm_id_parsed = parse_resource_id(vm.id)
+            disk_id = resource_id(subscription=vm_id_parsed['subscription'],
+                                  resource_group=vm_id_parsed['resource_group'],
                                   namespace='Microsoft.Compute', type='disks', name=os_disk)
-            disk_name = os_disk
+            disk_resource_group, disk_name = vm_id_parsed['resource_group'], os_disk
         vm.storage_profile.os_disk.managed_disk.id = disk_id
         vm.storage_profile.os_disk.name = disk_name
+
+    if security_type == "TrustedLaunch":
+        if disk_name is None and vm.storage_profile.os_disk.managed_disk is not None:
+            os_disk_id_parsed = parse_resource_id(vm.storage_profile.os_disk.managed_disk.id)
+            disk_resource_group, disk_name = os_disk_id_parsed['resource_group'], os_disk_id_parsed['name']
+
+        if disk_name is not None:
+            from ._vm_utils import validate_update_vm_trusted_launch_supported
+
+            validate_update_vm_trusted_launch_supported(cmd=cmd, vm=vm, os_disk_resource_group=disk_resource_group,
+                                                        os_disk_name=disk_name)
+            # Set --enable-secure-boot False and --enable-vtpm True if not specified by end user.
+            enable_secure_boot = enable_secure_boot if enable_secure_boot is not None else False
+            enable_vtpm = enable_vtpm if enable_vtpm is not None else True
+
+            if vm.security_profile is None:
+                vm.security_profile = SecurityProfile()
+            vm.security_profile.security_type = security_type
 
     if write_accelerator is not None:
         update_write_accelerator_settings(vm.storage_profile, write_accelerator)
@@ -1664,10 +1724,11 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         vm.proximity_placement_group = {'id': proximity_placement_group}
 
     if enable_secure_boot is not None or enable_vtpm is not None:
-        vm.security_profile = {'uefiSettings': {
-            'secureBootEnabled': enable_secure_boot,
-            'vTpmEnabled': enable_vtpm
-        }}
+        if vm.security_profile is None:
+            vm.security_profile = SecurityProfile()
+
+        vm.security_profile.uefi_settings = UefiSettings(secure_boot_enabled=enable_secure_boot,
+                                                         v_tpm_enabled=enable_vtpm)
 
     if workspace is not None:
         workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
@@ -1924,7 +1985,7 @@ def set_diagnostics_extension(
         cmd, resource_group_name, vm_name, settings, protected_settings=None, version=None,
         no_auto_upgrade=False):
     client = _compute_client_factory(cmd.cli_ctx)
-    vm = client.virtual_machines.get(resource_group_name, vm_name, 'instanceView')
+    vm = client.virtual_machines.get(resource_group_name, vm_name, expand='instanceView')
     # pylint: disable=no-member
     is_linux_os = _is_linux_os(vm)
     vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
@@ -2070,6 +2131,8 @@ def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publishe
                        'on a Red Hat based operating system.')
     if vm_extension_name == 'AHBForSLES':
         logger.warning('Please ensure that you are provisioning AHBForSLES extension on a SLES based operating system.')
+    if vm_extension_name == 'GuestAttestation' and enable_auto_upgrade is None:
+        enable_auto_upgrade = True
 
     version = _normalize_extension_version(cmd.cli_ctx, publisher, vm_extension_name, version, vm.location)
     ext = VirtualMachineExtension(location=vm.location,
@@ -2281,7 +2344,8 @@ def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=N
                                     skus=sku, version=version)
     else:
         client = _compute_client_factory(cmd.cli_ctx)
-        return client.virtual_machine_images.get(location, publisher, offer, sku, version)
+        return client.virtual_machine_images.get(location=location, publisher_name=publisher,
+                                                 offer=offer, skus=sku, version=version)
 
 
 def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
@@ -2407,15 +2471,20 @@ def get_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
 # region VirtualMachines NetworkInterfaces (NICs)
 def show_vm_nic(cmd, resource_group_name, vm_name, nic):
     from msrestazure.tools import parse_resource_id
+
+    NicShow = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.nic").Show
+
     vm = get_vm(cmd, resource_group_name, vm_name)
     found = next(
         (n for n in vm.network_profile.network_interfaces if nic.lower() == n.id.lower()), None
         # pylint: disable=no-member
     )
     if found:
-        network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK)
         nic_name = parse_resource_id(found.id)['name']
-        return network_client.network_interfaces.get(resource_group_name, nic_name)
+        return NicShow(cli_ctx=cmd.cli_ctx)(command_args={
+            'name': nic_name,
+            'resource_group': resource_group_name
+        })
     raise CLIError("NIC '{}' not found on VM '{}'".format(nic, vm_name))
 
 
@@ -2450,15 +2519,19 @@ def set_vm_nic(cmd, resource_group_name, vm_name, nics, primary_nic=None):
 
 
 def _build_nic_list(cmd, nic_ids):
+    NicShow = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.nic").Show
+
     NetworkInterfaceReference = cmd.get_models('NetworkInterfaceReference')
     nic_list = []
     if nic_ids:
         # pylint: disable=no-member
-        network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK)
         for nic_id in nic_ids:
             rg, name = _parse_rg_name(nic_id)
-            nic = network_client.network_interfaces.get(rg, name)
-            nic_list.append(NetworkInterfaceReference(id=nic.id, primary=False))
+            nic = NicShow(cli_ctx=cmd.cli_ctx)(command_args={
+                'name': name,
+                'resource_group': rg
+            })
+            nic_list.append((NetworkInterfaceReference(id=nic['id'], primary=False)))
     return nic_list
 
 
@@ -2838,7 +2911,7 @@ def remove_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate=No
             cert_url_pattern = '/' + cert_url_pattern + '/'
         for x in temp:
             x.vault_certificates = ([v for v in x.vault_certificates
-                                     if not(v.certificate_url and cert_url_pattern in v.certificate_url.lower())])
+                                     if not (v.certificate_url and cert_url_pattern in v.certificate_url.lower())])
         to_keep = [x for x in to_keep if x.vault_certificates]  # purge all groups w/o any cert entries
 
     vm.os_profile.secrets = to_keep
@@ -3073,7 +3146,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 application_security_groups=None, ultra_ssd_enabled=None,
                 ephemeral_os_disk=None, ephemeral_os_disk_placement=None,
                 proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
-                max_price=None, computer_name_prefix=None, orchestration_mode='Uniform', scale_in_policy=None,
+                max_price=None, computer_name_prefix=None, orchestration_mode=None, scale_in_policy=None,
                 os_disk_encryption_set=None, data_disk_encryption_sets=None, data_disk_iops=None, data_disk_mbps=None,
                 automatic_repairs_grace_period=None, specialized=None, os_disk_size_gb=None, encryption_at_host=None,
                 host_group=None, max_batch_instance_percent=None, max_unhealthy_instance_percent=None,
@@ -3086,8 +3159,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None,
                 os_disk_delete_option=None, data_disk_delete_option=None, regular_priority_count=None,
                 regular_priority_percentage=None, disk_controller_type=None, nat_rule_name=None,
-                enable_osimage_notification=None, max_surge=None):
-
+                enable_osimage_notification=None, max_surge=None, disable_integrity_monitoring_autoupgrade=False):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -3098,6 +3170,18 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                                                                 build_application_gateway_resource,
                                                                 build_msi_role_assignment, build_nsg_resource,
                                                                 build_nat_rule_v2)
+
+    # Breaking Change Warning, change image alias
+    if image:
+        if image == "UbuntuLTS":
+            logger.warning('Consider using the "Ubuntu2204" alias. On April 30, 2023,'
+                           'the image deployed by the "UbuntuLTS" alias reaches its end of life. '
+                           'The "UbuntuLTS" will be removed with the breaking change release of Fall 2023.')
+        if image in ["RHEL", "Debian", "CentOS", "Flatcar", "SLES", "openSUSE-Leap"]:
+            logger.warning('Consider using the image alias including the version of the distribution you want to use. '
+                           'For example: please use Debian11 instead of Debian.\nIn Ignite (November) 2023, '
+                           'the aliases without version suffix (such as: `UbuntuLTS`, `CentOS`, `Debian`, `Flatcar`, '
+                           '`SLES`, `openSUSE-Leap` and `RHEL`) will be removed.')
 
     # The default load balancer will be expected to be changed from Basic to Standard.
     # In order to avoid breaking change which has a big impact to users,
@@ -3198,10 +3282,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                                                                           public_ip_address))
 
         def _get_public_ip_address_allocation(value, sku):
-            IPAllocationMethod = cmd.get_models('IPAllocationMethod', resource_type=ResourceType.MGMT_NETWORK)
             if not value:
-                value = IPAllocationMethod.static.value if (sku and sku.lower() == 'standard') \
-                    else IPAllocationMethod.dynamic.value
+                value = 'Static' if (sku and sku.lower() == 'standard') else 'Dynamic'
             return value
 
         # Handle load balancer creation
@@ -3484,7 +3566,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                                               settings=None,
                                               auto_upgrade_minor_version=True,
                                               provision_after_extensions=None,
-                                              enable_automatic_upgrade=None)
+                                              enable_automatic_upgrade=not disable_integrity_monitoring_autoupgrade)
         if not vmss.virtual_machine_profile.extension_profile:
             vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile(extensions=[])
         vmss.virtual_machine_profile.extension_profile.extensions.append(ext)
@@ -3567,24 +3649,31 @@ def get_vmss(cmd, resource_group_name, name, instance_id=None, include_user_data
 
     if instance_id is not None:
         if cmd.supported_api_version(min_api='2020-12-01', operation_group='virtual_machine_scale_sets'):
-            return client.virtual_machine_scale_set_vms.get(resource_group_name, name, instance_id, expand)
-        return client.virtual_machine_scale_set_vms.get(resource_group_name, name, instance_id)
+            return client.virtual_machine_scale_set_vms.get(resource_group_name=resource_group_name,
+                                                            vm_scale_set_name=name, instance_id=instance_id,
+                                                            expand=expand)
+        return client.virtual_machine_scale_set_vms.get(resource_group_name=resource_group_name,
+                                                        vm_scale_set_name=name, instance_id=instance_id)
 
     if cmd.supported_api_version(min_api='2021-03-01', operation_group='virtual_machine_scale_sets'):
-        return client.virtual_machine_scale_sets.get(resource_group_name, name, expand)
+        return client.virtual_machine_scale_sets.get(resource_group_name, name, expand=expand)
     return client.virtual_machine_scale_sets.get(resource_group_name, name)
 
 
 def get_vmss_modified(cmd, resource_group_name, name, instance_id=None):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_id is not None:
-        vms = client.virtual_machine_scale_set_vms.get(resource_group_name, name, instance_id)
+        vms = client.virtual_machine_scale_set_vms.get(resource_group_name=resource_group_name,
+                                                       vm_scale_set_name=name, instance_id=instance_id)
         # To avoid unnecessary permission check of image
-        vms.storage_profile.image_reference = None
+        if hasattr(vms, "storage_profile") and vms.storage_profile:
+            vms.storage_profile.image_reference = None
         return vms
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, name)
     # To avoid unnecessary permission check of image
-    vmss.virtual_machine_profile.storage_profile.image_reference = None
+    if hasattr(vmss, "virtual_machine_profile") and vmss.virtual_machine_profile \
+            and vmss.virtual_machine_profile.storage_profile:
+        vmss.virtual_machine_profile.storage_profile.image_reference = None
     return vmss
 
 
@@ -3594,10 +3683,12 @@ def get_vmss_instance_view(cmd, resource_group_name, vm_scale_set_name, instance
         if instance_id == '*':
 
             return [x.instance_view for x in (client.virtual_machine_scale_set_vms.list(
-                resource_group_name, vm_scale_set_name, select='instanceView', expand='instanceView'))]
+                resource_group_name=resource_group_name, virtual_machine_scale_set_name=vm_scale_set_name,
+                select='instanceView', expand='instanceView'))]
 
-        return client.virtual_machine_scale_set_vms.get_instance_view(resource_group_name, vm_scale_set_name,
-                                                                      instance_id)
+        return client.virtual_machine_scale_set_vms.get_instance_view(resource_group_name=resource_group_name,
+                                                                      vm_scale_set_name=vm_scale_set_name,
+                                                                      instance_id=instance_id)
 
     return client.virtual_machine_scale_sets.get_instance_view(resource_group_name, vm_scale_set_name)
 
@@ -3611,6 +3702,10 @@ def list_vmss(cmd, resource_group_name=None):
 
 def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_name):
     from msrestazure.tools import parse_resource_id
+
+    LBShow = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.lb").Show
+    PublicIPAddress = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.public_ip").Show
+
     client = _compute_client_factory(cmd.cli_ctx)
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, vm_scale_set_name)
 
@@ -3642,46 +3737,51 @@ def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_na
     lb_rg = lb_info['resource_group']
 
     # get public ip
-    network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK)
-    lb = network_client.load_balancers.get(lb_rg, lb_name)
-    if getattr(lb.frontend_ip_configurations[0], 'public_ip_address', None):
-        res_id = lb.frontend_ip_configurations[0].public_ip_address.id
+    lb = LBShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'name': lb_name,
+        'resource_group': lb_rg
+    })
+    if 'publicIPAddress' in lb['frontendIPConfigurations'][0]:
+        res_id = lb['frontendIPConfigurations'][0]['publicIPAddress']['id']
         public_ip_info = parse_resource_id(res_id)
         public_ip_name = public_ip_info['name']
         public_ip_rg = public_ip_info['resource_group']
-        public_ip = network_client.public_ip_addresses.get(public_ip_rg, public_ip_name)
-        public_ip_address = public_ip.ip_address
-
+        public_ip = PublicIPAddress(cli_ctx=cmd.cli_ctx)(command_args={
+            'name': public_ip_name,
+            'resource_group': public_ip_rg
+        })
+        public_ip_address = public_ip['ipAddress'] if 'ipAddress' in public_ip else None
         # For NAT pool, get the frontend port and VMSS instance from inboundNatRules
         is_nat_pool = True
         instance_addresses = {}
-        for rule in lb.inbound_nat_rules:
+        for rule in lb['inboundNatRules']:
             # If backend_ip_configuration does not exist, it means that NAT rule V2 is used
-            if not rule.backend_ip_configuration:
+            if 'backendIPConfiguration' not in rule or not rule['backendIPConfiguration']:
                 is_nat_pool = False
                 break
-            instance_id = parse_resource_id(rule.backend_ip_configuration.id)['child_name_1']
+            instance_id = parse_resource_id(rule['backendIPConfiguration']['id'])['child_name_1']
             instance_addresses['instance ' + instance_id] = '{}:{}'.format(public_ip_address,
-                                                                           rule.frontend_port)
+                                                                           rule['frontendPort'])
         if is_nat_pool:
             return instance_addresses
 
         # For NAT rule V2, get the frontend port and VMSS instance from loadBalancerBackendAddresses
-        for backend_address_pool in lb.backend_address_pools:
-            if not backend_address_pool.load_balancer_backend_addresses:
+        for backend_address_pool in lb['backendAddressPools']:
+            if 'loadBalancerBackendAddresses' not in backend_address_pool or \
+                    not backend_address_pool['loadBalancerBackendAddresses']:
                 raise CLIError('There is no connection information. '
                                'If you are using NAT rule V2, please confirm whether the load balancer SKU is Standard')
 
-            for load_balancer_backend_addresse in backend_address_pool.load_balancer_backend_addresses:
+            for load_balancer_backend_addresse in backend_address_pool['loadBalancerBackendAddresses']:
 
-                network_interface_ip_configuration = load_balancer_backend_addresse.network_interface_ip_configuration
-                if not network_interface_ip_configuration or not network_interface_ip_configuration.id:
+                network_interface_ip_configuration = load_balancer_backend_addresse['networkInterfaceIPConfiguration']
+                if not network_interface_ip_configuration or 'id' not in network_interface_ip_configuration:
                     continue
-                instance_id = parse_resource_id(network_interface_ip_configuration.id)['child_name_1']
+                instance_id = parse_resource_id(network_interface_ip_configuration['id'])['child_name_1']
 
-                if not load_balancer_backend_addresse.inbound_nat_rules_port_mapping:
+                if not load_balancer_backend_addresse['inboundNatRulesPortMapping']:
                     continue
-                frontend_port = load_balancer_backend_addresse.inbound_nat_rules_port_mapping[0].frontend_port
+                frontend_port = load_balancer_backend_addresse['inboundNatRulesPortMapping'][0]['frontendPort']
                 instance_addresses['instance ' + instance_id] = '{}:{}'.format(public_ip_address, frontend_port)
 
         return instance_addresses
@@ -3689,6 +3789,7 @@ def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_na
 
 
 def list_vmss_instance_public_ips(cmd, resource_group_name, vm_scale_set_name):
+    ListInstancePublicIps = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "vmss").ListInstancePublicIps
 
     compute_client = _compute_client_factory(cmd.cli_ctx)
     vmss = compute_client.virtual_machine_scale_sets.get(resource_group_name, vm_scale_set_name)
@@ -3697,10 +3798,12 @@ def list_vmss_instance_public_ips(cmd, resource_group_name, vm_scale_set_name):
         vmss, 'This command is not available for VMSS in Flex mode. '
               'Please use the "az network public-ip list/show" to retrieve networking information.')
 
-    public_ip_client = cf_public_ip_addresses(cmd.cli_ctx)
-    result = public_ip_client.list_virtual_machine_scale_set_public_ip_addresses(resource_group_name, vm_scale_set_name)
+    result = ListInstancePublicIps(cli_ctx=cmd.cli_ctx)(command_args={
+        'vmss_name': vm_scale_set_name,
+        'resource_group': resource_group_name
+    })
     # filter away over-provisioned instances which are deleted after 'create/update' returns
-    return [r for r in result if r.ip_address]
+    return [r for r in result if 'ipAddress' in r and r['ipAddress']]
 
 
 def reimage_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
@@ -3782,7 +3885,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 vm_sku=None, ephemeral_os_disk_placement=None, force_deletion=None, enable_secure_boot=None,
                 enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None, v_cpus_per_core=None,
                 regular_priority_count=None, regular_priority_percentage=None, disk_controller_type=None,
-                enable_osimage_notification=None, **kwargs):
+                enable_osimage_notification=None, custom_data=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -3962,6 +4065,10 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     if disk_controller_type is not None:
         vmss.virtual_machine_profile.storage_profile.disk_controller_type = disk_controller_type
 
+    if custom_data is not None:
+        custom_data = read_content_if_is_file(custom_data)
+        vmss.virtual_machine_profile.os_profile.custom_data = b64encode(custom_data)
+
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, name, **kwargs)
 
@@ -4079,7 +4186,7 @@ def detach_disk_from_vmss(cmd, resource_group_name, vmss_name, lun, instance_id=
 # region VirtualMachineScaleSets Extensions
 def delete_vmss_extension(cmd, resource_group_name, vmss_name, extension_name):
     client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name, vm_scale_set_name=vmss_name)
     # Avoid unnecessary permission error
     vmss.virtual_machine_profile.storage_profile.image_reference = None
     # pylint: disable=no-member
@@ -4093,13 +4200,14 @@ def delete_vmss_extension(cmd, resource_group_name, vmss_name, extension_name):
 
     vmss.virtual_machine_profile.extension_profile.extensions = keep_list
 
-    return client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name, vmss_name, vmss)
+    return client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name=resource_group_name,
+                                                                    vm_scale_set_name=vmss_name, parameters=vmss)
 
 
 # pylint: disable=inconsistent-return-statements
 def get_vmss_extension(cmd, resource_group_name, vmss_name, extension_name):
     client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name, vm_scale_set_name=vmss_name)
     # pylint: disable=no-member
     if not vmss.virtual_machine_profile.extension_profile:
         return
@@ -4109,7 +4217,7 @@ def get_vmss_extension(cmd, resource_group_name, vmss_name, extension_name):
 
 def list_vmss_extensions(cmd, resource_group_name, vmss_name):
     client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name, vm_scale_set_name=vmss_name)
     # pylint: disable=no-member
     if vmss.virtual_machine_profile and vmss.virtual_machine_profile.extension_profile:
         return vmss.virtual_machine_profile.extension_profile.extensions
@@ -4124,7 +4232,7 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
         extension_instance_name = extension_name
 
     client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name, vm_scale_set_name=vmss_name)
     # Avoid unnecessary permission error
     vmss.virtual_machine_profile.storage_profile.image_reference = None
     VirtualMachineScaleSetExtension, VirtualMachineScaleSetExtensionProfile = cmd.get_models(
@@ -4411,14 +4519,6 @@ def remove_vmss_identity(cmd, resource_group_name, vmss_name, identities=None):
 # endregion
 
 
-# region image galleries
-def list_image_galleries(cmd, resource_group_name=None):
-    client = _compute_client_factory(cmd.cli_ctx)
-    if resource_group_name:
-        return client.galleries.list_by_resource_group(resource_group_name)
-    return client.galleries.list()
-
-
 # from azure.mgmt.compute.models import Gallery, SharingProfile
 def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, permissions=None,
                            soft_delete=None, publisher_uri=None, publisher_contact=None, eula=None,
@@ -4444,7 +4544,10 @@ def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, perm
         gallery.sharing_profile.community_gallery_info = community_gallery_info
 
     if soft_delete is not None:
-        gallery.soft_delete_policy.is_soft_delete_enabled = soft_delete
+        if gallery.soft_delete_policy:
+            gallery.soft_delete_policy.is_soft_delete_enabled = soft_delete
+        else:
+            gallery.soft_delete_policy = {'is_soft_delete_enabled': soft_delete}
 
     client = _compute_client_factory(cmd.cli_ctx)
 
@@ -4512,10 +4615,17 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
 
     feature_list = None
     if features:
+        from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE, UPGRADE_SECURITY_HINT
         feature_list = []
         for item in features.split():
             try:
                 key, value = item.split('=', 1)
+                # create Non-Trusted Launch VM Image
+                # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
+                # after changing the default values to Trusted Launch VMs in the future.
+                if key == 'SecurityType' and value == COMPATIBLE_SECURITY_TYPE_VALUE:
+                    logger.warning(UPGRADE_SECURITY_HINT)
+                    continue
                 feature_list.append(GalleryImageFeature(name=key, value=value))
             except ValueError:
                 raise CLIError('usage error: --features KEY=VALUE [KEY=VALUE ...]')
@@ -4678,6 +4788,36 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         if managed_image is None:
             raise RequiredArgumentMissingError('usage error: Please provide --managed-image')
         image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}))
+
+    return client.gallery_image_versions.begin_create_or_update(
+        resource_group_name=resource_group_name,
+        gallery_name=gallery_name,
+        gallery_image_name=gallery_image_name,
+        gallery_image_version_name=gallery_image_version,
+        gallery_image_version=image_version
+    )
+
+
+def undelete_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version,
+                           location=None, tags=None, allow_replicated_location_deletion=None):
+    ImageVersion = cmd.get_models('GalleryImageVersion')
+    client = _compute_client_factory(cmd.cli_ctx)
+
+    location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+
+    gallery = client.galleries.get(resource_group_name, gallery_name)
+    soft_delete = gallery.soft_delete_policy.is_soft_delete_enabled
+    if not soft_delete:
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        raise InvalidArgumentValueError('soft-deletion is not enabled in Gallery \'{}\''.format(gallery_name))
+
+    image_version = ImageVersion(publishing_profile=None, location=location, tags=(tags or {}),
+                                 storage_profile=None)
+    if allow_replicated_location_deletion is not None:
+        GalleryImageVersionSafetyProfile = cmd.get_models('GalleryImageVersionSafetyProfile',
+                                                          operation_group='gallery_image_versions')
+        image_version.safety_profile = GalleryImageVersionSafetyProfile(
+            allow_deletion_of_replicated_locations=allow_replicated_location_deletion)
 
     return client.gallery_image_versions.begin_create_or_update(
         resource_group_name=resource_group_name,
@@ -4962,12 +5102,6 @@ def create_disk_encryption_set(
                        disk_encryption_set)
 
 
-def list_disk_encryption_sets(cmd, client, resource_group_name=None):
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list()
-
-
 def update_disk_encryption_set(cmd, instance, client, resource_group_name, key_url=None, source_vault=None,
                                enable_auto_key_rotation=None, federated_client_id=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
@@ -5061,12 +5195,6 @@ def create_disk_access(cmd, client, resource_group_name, disk_access_name, locat
     disk_access = DiskAccess(location=location, tags=tags)
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name, disk_access_name, disk_access)
-
-
-def list_disk_accesses(cmd, client, resource_group_name=None):
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list()
 
 
 def set_disk_access(cmd, client, parameters, resource_group_name, disk_access_name, tags=None, no_wait=False):

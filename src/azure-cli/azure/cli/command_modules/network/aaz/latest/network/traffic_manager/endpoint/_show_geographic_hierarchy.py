@@ -22,9 +22,9 @@ class ShowGeographicHierarchy(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-04-01-preview",
+        "version": "2022-04-01",
         "resources": [
-            ["mgmt-plane", "/providers/microsoft.network/trafficmanagergeographichierarchies/default", "2022-04-01-preview"],
+            ["mgmt-plane", "/providers/microsoft.network/trafficmanagergeographichierarchies/default", "2022-04-01"],
         ]
     }
 
@@ -80,7 +80,7 @@ class ShowGeographicHierarchy(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-04-01-preview",
+                    "api-version", "2022-04-01",
                     required=True,
                 ),
             }
@@ -124,36 +124,38 @@ class ShowGeographicHierarchy(AAZCommand):
             properties.geographic_hierarchy = AAZObjectType(
                 serialized_name="geographicHierarchy",
             )
-            _build_schema_region_read(properties.geographic_hierarchy)
+            _ShowGeographicHierarchyHelper._build_schema_region_read(properties.geographic_hierarchy)
 
             return cls._schema_on_200
 
 
-_schema_region_read = None
+class _ShowGeographicHierarchyHelper:
+    """Helper class for ShowGeographicHierarchy"""
 
+    _schema_region_read = None
 
-def _build_schema_region_read(_schema):
-    global _schema_region_read
-    if _schema_region_read is not None:
-        _schema.code = _schema_region_read.code
-        _schema.name = _schema_region_read.name
-        _schema.regions = _schema_region_read.regions
-        return
+    @classmethod
+    def _build_schema_region_read(cls, _schema):
+        if cls._schema_region_read is not None:
+            _schema.code = cls._schema_region_read.code
+            _schema.name = cls._schema_region_read.name
+            _schema.regions = cls._schema_region_read.regions
+            return
 
-    _schema_region_read = AAZObjectType()
+        cls._schema_region_read = _schema_region_read = AAZObjectType()
 
-    region_read = _schema_region_read
-    region_read.code = AAZStrType()
-    region_read.name = AAZStrType()
-    region_read.regions = AAZListType()
+        region_read = _schema_region_read
+        region_read.code = AAZStrType()
+        region_read.name = AAZStrType()
+        region_read.regions = AAZListType()
 
-    regions = _schema_region_read.regions
-    regions.Element = AAZObjectType()
-    _build_schema_region_read(regions.Element)
+        regions = _schema_region_read.regions
+        regions.Element = AAZObjectType()
+        cls._build_schema_region_read(regions.Element)
 
-    _schema.code = _schema_region_read.code
-    _schema.name = _schema_region_read.name
-    _schema.regions = _schema_region_read.regions
+        _schema.code = cls._schema_region_read.code
+        _schema.name = cls._schema_region_read.name
+        _schema.regions = cls._schema_region_read.regions
 
 
 __all__ = ["ShowGeographicHierarchy"]

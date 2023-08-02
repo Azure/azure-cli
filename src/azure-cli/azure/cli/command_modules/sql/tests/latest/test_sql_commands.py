@@ -171,6 +171,17 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
             except ResourceNotFoundError:
                 pass
 
+class SqlServerExternalGovernanceTests(ScenarioTest):
+    
+    @ResourceGroupPreparer(location='eastus2euap')
+    @SqlServerPreparer(location='eastus2euap')
+    def test_sql_refresh_external_governance_status(self, resource_group, resource_group_location, server):
+        
+        self.cmd('sql server refresh-external-governance-status -g {} --server {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('serverName', server),
+                     JMESPathCheck('status', 'Succeeded')])
 
 class SqlServerMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
@@ -927,6 +938,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
     def test_sql_db_preferred_enclave_type(self, resource_group, resource_group_location, server):
         database_name_one = "cliautomationdb01"
         database_name_two = "cliautomationdb02"
+        database_name_three = "cliautomationdb03"
         preferred_enclave_type_default = AlwaysEncryptedEnclaveType.default
         preferred_enclave_type_vbs = AlwaysEncryptedEnclaveType.vbs
 
@@ -962,6 +974,39 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('name', database_name_two),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_vbs)])
+
+        # test sql db update from Default to VBS enclave type
+        self.cmd('sql db create -g {} --server {} --name {} --preferred-enclave-type {} '
+                .format(resource_group, server, database_name_three, preferred_enclave_type_default),
+                checks=[
+                    JMESPathCheck('resourceGroup', resource_group),
+                    JMESPathCheck('name', database_name_three),
+                    JMESPathCheck('location', resource_group_location),
+                    JMESPathCheck('preferredEnclaveType', preferred_enclave_type_default)])
+
+        self.cmd('sql db show -g {} -s {} --name {}'
+                 .format(resource_group, server, database_name_three),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_three),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_default)])
+
+        self.cmd('sql db update -g {} --server {} --name {} --preferred-enclave-type {}'
+                .format(resource_group, server, database_name_three, preferred_enclave_type_vbs),
+                checks=[
+                    JMESPathCheck('resourceGroup', resource_group),
+                    JMESPathCheck('name', database_name_three),
+                    JMESPathCheck('location', resource_group_location),
+                    JMESPathCheck('preferredEnclaveType', preferred_enclave_type_vbs)])
+
+        self.cmd('sql db show -g {} -s {} --name {}'
+                 .format(resource_group, server, database_name_three),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_three),
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('preferredEnclaveType', preferred_enclave_type_vbs)])
 
@@ -1240,7 +1285,8 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
         self.cmd(
             'sql db ltr-backup restore --backup-id \'{backup_id}\' --dest-database {dest_database_name}'
             ' --dest-server {server_name} --dest-resource-group {rg} -i --encryption-protector {encryption_protector}'
-            ' --keys {keys} --umi {umi}',
+            ' --keys {keys} --umi {umi} --edition Hyperscale'
+            ' --service-level-objective SQLDB_HS_Gen5_2 --bsr Zone --ha-replicas 1 -z true',
             checks=[
                 self.check('name', '{dest_database_name}')])
 
@@ -1252,15 +1298,16 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
 
 class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
     @record_only()
+    @AllowLargeResponse()
     # using fixed resources because of long time preperation for geo-redundant backup
     # need to change resources for others who want to rerecord this test
     def test_sql_db_geo_restore(
             self):
         self.kwargs.update({
-            'rg': 'sejagada-AlwaysEncrypted',
-            'loc': 'eastus2euap',
-            'server_name': 'sejagada-ae-sqlserver-canary-donotdelete',
-            'database_name': 'sejagada-ae-sqldb-canary-donotdelete'
+            'rg': 'rebeccaxu-test',
+            'loc': 'eastus',
+            'server_name': 'rebeccaxu-eastus-svr',
+            'database_name': 'cli-test-hs',
         })
 
         # test list geo backups for database
@@ -1282,7 +1329,8 @@ class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
 
         self.cmd(
             'sql db geo-backup restore --geo-backup-id {backup_id} --dest-database {dest_database_name}'
-            ' --dest-server {server_name} --resource-group {rg}',
+            ' --dest-server {server_name} --resource-group {rg} --edition Hyperscale'
+            ' --service-level-objective SQLDB_HS_Gen5_2 --bsr Zone --ha-replicas 1 -z true',
             checks=[
                 self.check('name', '{dest_database_name}')])
                 
@@ -3481,6 +3529,109 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('status', 'Online'),
                      JMESPathCheck('highAvailabilityReplicaCount', replica_count)]) #Verify its the same as pool
 
+    @ResourceGroupPreparer(name_prefix='clitest-EPVBS', location='eastus2euap')
+    @SqlServerPreparer(name_prefix='clitest-EPVBS', location='eastus2euap')
+    @AllowLargeResponse()
+    def test_sql_elastic_pools_preferred_enclave_type_mgmt(self, resource_group, resource_group_location, server):
+        pool_name_one = "cliautomationpool1"
+        pool_name_two = "cliautomationpool2"
+        database_name_one = "cliautomationdb01"
+        database_name_two = "cliautomationdb02"
+        edition = 'GeneralPurpose'
+        preferred_enclave_type_default = AlwaysEncryptedEnclaveType.default
+        preferred_enclave_type_vbs = AlwaysEncryptedEnclaveType.vbs
+
+        # Create general purpose pool with default enclave type
+        self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {} --preferred-enclave-type {}'
+                 .format(resource_group, server, pool_name_one, edition, preferred_enclave_type_default),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', pool_name_one),
+                     JMESPathCheck('edition', edition),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_default)])
+
+        self.cmd('sql elastic-pool show -g {} --server {} --name {}'
+                 .format(resource_group, server, pool_name_one),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', pool_name_one),
+                     JMESPathCheck('edition', edition),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_default)])
+
+        # Create a database inside the general purpose elastic pool with default enclave type.
+        self.cmd('sql db create -g {} --server {} --name {} '
+                 '--elastic-pool {}'
+                 .format(resource_group, server, database_name_one, pool_name_one),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_one),
+                     JMESPathCheck('requestedServiceObjectiveName', 'ElasticPool'),
+                     JMESPathCheck('status', 'Online'),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_default)]) #Verify its the same as pool
+
+        self.cmd('sql db show -g {} --server {} --name {}'
+                 .format(resource_group, server, database_name_one),
+                 checks=[
+                     JMESPathCheck('elasticPoolName', pool_name_one),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_default)])
+
+        # Create general purpose pool with vbs enclave type
+        self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {} --preferred-enclave-type {}'
+                 .format(resource_group, server, pool_name_two, edition, preferred_enclave_type_vbs),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', pool_name_two),
+                     JMESPathCheck('edition', edition),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_vbs)])
+
+        self.cmd('sql elastic-pool show -g {} --server {} --name {}'
+                 .format(resource_group, server, pool_name_two),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', pool_name_two),
+                     JMESPathCheck('edition', edition),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_vbs)])
+
+        # Create a database inside the general purpose elastic pool with vbs enclave type.
+        self.cmd('sql db create -g {} --server {} --name {} '
+                 '--elastic-pool {}'
+                 .format(resource_group, server, database_name_two, pool_name_two),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_two),
+                     JMESPathCheck('requestedServiceObjectiveName', 'ElasticPool'),
+                     JMESPathCheck('status', 'Online'),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_vbs)]) #Verify its the same as pool
+
+        self.cmd('sql db show -g {} --server {} --name {}'
+                 .format(resource_group, server, database_name_two),
+                 checks=[
+                     JMESPathCheck('elasticPoolName', pool_name_two),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_vbs)])
+
+        # Update only preferred enclave type from vbs -> default on the elastic pool
+        self.cmd('sql elastic-pool update -g {} --server {} --name {} --preferred-enclave-type {}'
+                 .format(resource_group, server, pool_name_two, preferred_enclave_type_default),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', pool_name_two),
+                     JMESPathCheck('edition', edition),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_default)])
+
+        """
+        self.cmd('sql db show -g {} --server {} --name {}'
+                 .format(resource_group, server, database_name_two),
+                 checks=[
+                     JMESPathCheck('elasticPoolName', pool_name_two),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_default)])
+        """
+
+
 class SqlElasticPoolOperationMgmtScenarioTest(ScenarioTest):
     def __init__(self, method_name):
         super(SqlElasticPoolOperationMgmtScenarioTest, self).__init__(method_name)
@@ -5109,6 +5260,102 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         # test list sql managed_instance in the subscription should be at least 1
         self.cmd('sql mi list', checks=[JMESPathCheckGreaterThan('length(@)', 0)])
 
+class SqlManagedInstanceStartStopMgmtScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
+    def test_sql_mi_startstop_mgmt(self):
+        rg = 'CustomerExperienceTeam_RG'
+        mi = 'clitestmilb5hsyvgolc22pa3zzf2urno3uwskko4us2mbcti2gebgawczstsm'
+        self.kwargs.update({
+            'rg': rg,
+            'mi': mi,
+        })
+        # check managed instance
+        self.cmd('sql mi show -g {rg} -n {mi}',
+        checks=[
+            JMESPathCheck('name', mi),
+            JMESPathCheck('resourceGroup', rg)])
+
+        # test the manual stop command
+        self.cmd('sql mi stop -g {rg} --mi {mi}',
+        checks=[
+            JMESPathCheck('name', mi),
+            JMESPathCheck('state', 'Stopped')])
+
+        # test the manual start command
+        self.cmd('sql mi start -g {rg} --mi {mi}',
+        checks=[
+            JMESPathCheck('name', mi),
+            JMESPathCheck('state', 'Ready')])
+        
+    @AllowLargeResponse()
+    def test_sql_mi_scheduledstartstop_mgmt(self):
+        rg = 'CustomerExperienceTeam_RG'
+        mi = 'clitestmilb5hsyvgolc22pa3zzf2urno3uwskko4us2mbcti2gebgawczstsm'
+        schedule = "[{'startDay':'Friday','startTime':'10:00 AM','stopDay':'Friday','stopTime':'11:10 AM'}]"
+        schedule_item = "{'startDay':'Monday','startTime':'10:00 AM','stopDay':'Monday','stopTime':'11:10 AM'}"
+        description = "test description"
+        self.kwargs.update({
+            'rg': rg,
+            'mi': mi,
+            'schedule': schedule,
+            'desc': description,
+            'schedule_item': schedule_item,
+        })
+        # check if test MI got created
+        self.cmd('sql mi show -g {rg} -n {mi}',
+        checks=[
+            JMESPathCheck('name', mi),
+            JMESPathCheck('resourceGroup', rg)])
+
+        # test the create schedule
+        self.cmd('az sql mi start-stop-schedule create -g {rg} --mi {mi} --schedule-list \"{schedule}\" --description \"{desc}\"',
+        checks=[
+            JMESPathCheck('name', 'default'),
+            JMESPathCheck('description', description),
+            JMESPathCheck('scheduleList[0].startDay', 'Friday'),
+            JMESPathCheck('scheduleList[0].startTime', '10:00'),
+            JMESPathCheck('scheduleList[0].stopDay', 'Friday'),
+            JMESPathCheck('scheduleList[0].stopTime', '11:10'),
+            JMESPathCheck('timeZoneId', 'UTC')])
+        
+        # test the update schedule - add item
+        self.cmd('az sql mi start-stop-schedule update -g {rg} --mi {mi} --add schedule_list \"{schedule_item}\"',
+        checks=[
+            JMESPathCheck('description', description),
+            JMESPathCheck('scheduleList[1].startDay', 'Monday'),
+            JMESPathCheck('scheduleList[1].startTime', '10:00'),
+            JMESPathCheck('scheduleList[1].stopDay', 'Monday'),
+            JMESPathCheck('scheduleList[1].stopTime', '11:10')])
+
+        # test the update schedule - overwrite schedule
+        self.cmd('az sql mi start-stop-schedule update -g {rg} --mi {mi} --schedule-list \"{schedule}\"',
+        checks=[
+            JMESPathCheck('scheduleList[0].startDay', 'Friday'),
+            JMESPathCheck('scheduleList[0].startTime', '10:00'),
+            JMESPathCheck('scheduleList[0].stopDay', 'Friday'),
+            JMESPathCheck('scheduleList[0].stopTime', '11:10')])
+
+        # test the show schedule
+        self.cmd('az sql mi start-stop-schedule show -g {rg} --mi {mi}',
+        checks=[
+            JMESPathCheck('description', description),
+            JMESPathCheck('scheduleList[0].startDay', 'Friday'),
+            JMESPathCheck('scheduleList[0].startTime', '10:00'),
+            JMESPathCheck('scheduleList[0].stopDay', 'Friday'),
+            JMESPathCheck('scheduleList[0].stopTime', '11:10')])
+        
+        # test the list schedule
+        self.cmd('az sql mi start-stop-schedule list -g {rg} --mi {mi}',
+        checks=[
+            JMESPathCheck('[0].description', description),
+            JMESPathCheck('[0].scheduleList[0].startDay', 'Friday'),
+            JMESPathCheck('[0].scheduleList[0].startTime', '10:00'),
+            JMESPathCheck('[0].scheduleList[0].stopDay', 'Friday'),
+            JMESPathCheck('[0].scheduleList[0].stopTime', '11:10')])
+
+        # test the delete schedule
+        self.cmd('az sql mi start-stop-schedule delete -g {rg} --mi {mi} --yes')
+
 class SqlManagedInstanceBackupStorageRedundancyTest(ScenarioTest):
     bsr_geo = "Geo"
 
@@ -5731,6 +5978,112 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
         self.cmd('sql midb show -g {} --managed-instance {} -n {}'
                  .format(resource_group_1, managed_instance_name_1, database_name),
                  expect_failure=True)
+
+    @ManagedInstancePreparer(parameter_name="mi")
+    def test_sql_midb_ledger(self, mi, rg):
+        managed_instance_name = mi
+        resource_group = rg
+        
+        database_name_one = "cliautomationmidb01"
+        database_name_two = "cliautomationmidb02"
+
+        # test sql mi db is created with ledger off by default
+        self.cmd('sql midb create -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, database_name_one),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_one),
+                     JMESPathCheck('isLedgerOn', False)])
+
+        self.cmd('sql midb show -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, database_name_one),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_one),
+                     JMESPathCheck('isLedgerOn', False)])
+
+        # test sql mi db with ledger on
+        self.cmd('sql midb create -g {} --mi {} -n {} --ledger-on'
+                 .format(resource_group, managed_instance_name, database_name_two),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_two),
+                     JMESPathCheck('isLedgerOn', True)])
+
+        self.cmd('sql midb show -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, database_name_two),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_two),
+                     JMESPathCheck('isLedgerOn', True)])
+    
+    @ManagedInstancePreparer(parameter_name="mi1")
+    @ManagedInstancePreparer(parameter_name="mi2")
+    def test_sql_midb_move_copy(self, mi1, rg, mi2):
+        self.kwargs.update({
+            'loc': ManagedInstancePreparer.location,
+            'rg': rg,
+            'mi1': mi1,
+            'mi2': mi2,
+            'database_name': 'test-db'
+        })
+
+        # Create source and target instance
+        source_mi = self.cmd('sql mi show -g {rg} -n {mi1}').get_output_in_json()
+        target_mi = self.cmd('sql mi show -g {rg} -n {mi2}').get_output_in_json()
+
+        self.kwargs.update({
+            'source_mi_name': source_mi['name'],
+            'target_mi_name': target_mi['name']
+        })
+
+        # Create managed database to be moved and copied
+        mdb = self.cmd('sql midb create -g {rg} --mi {source_mi_name} -n {database_name}',
+                 checks=[
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('name', '{database_name}'),
+                     self.check('location', '{loc}'),
+                     self.check('status', 'Online')]).get_output_in_json()
+        
+        self.kwargs.update({
+            'database_id': mdb['id']
+        })
+        
+        # Start the copy operation from source to target instance
+        self.cmd('sql midb copy start -g {rg} --mi {source_mi_name} -n {database_name} --dest-mi {target_mi_name}')
+        
+        # Cancel the move operation from source to target instance
+        self.cmd('sql midb copy cancel -g {rg} --mi {source_mi_name} -n {database_name} --dest-mi {target_mi_name}')
+
+        # Start the move operation from source to target instance
+        self.cmd('sql midb move start -g {rg} --mi {source_mi_name} -n {database_name} --dest-mi {target_mi_name}')
+
+        # Complete the move operation from source to target instance
+        self.cmd('sql midb move complete --ids {database_id} --dest-mi {target_mi_name}')
+
+        # List the move operation
+        self.cmd('sql midb move list -g {rg} --mi {source_mi_name} -n {database_name} --dest-mi {target_mi_name}',
+                                checks=[
+                                    self.check('[0].state', 'Succeeded'),
+                                    self.check('[0].sourceManagedInstanceName', '{source_mi_name}'),
+                                    self.check('[0].targetManagedInstanceName', '{target_mi_name}'),
+                                    self.check('[0].resourceGroup', '{rg}'),
+                                    self.check('[0].operationMode', 'Move')])
+
+        # Copy the database back from target to source
+        self.cmd('sql midb copy start -g {rg} --mi {target_mi_name} -n {database_name} --dest-mi {source_mi_name}')
+
+        # Complete the copy operation
+        self.cmd('sql midb copy complete -g {rg} --mi {target_mi_name} -n {database_name} --dest-mi {source_mi_name}')
+
+        # List the copy operation
+        self.cmd('sql midb copy list -g {rg} --mi {target_mi_name} -n {database_name} --dest-mi {source_mi_name} --latest',
+                                checks=[
+                                    self.check('[0].state', 'Succeeded'),
+                                    self.check('[0].sourceManagedInstanceName', '{target_mi_name}'),
+                                    self.check('[0].targetManagedInstanceName', '{source_mi_name}'),
+                                    self.check('[0].resourceGroup', '{rg}'),
+                                    self.check('[0].operationMode', 'Copy')])
 
 
 class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
@@ -6522,6 +6875,50 @@ class SqlLedgerDigestUploadsScenarioTest(ScenarioTest):
                  .format(resource_group, server, db_name),
                  checks=[JMESPathCheck('state', 'Disabled')])
 
+class SqlManagedLedgerDigestUploadsScenarioTest(ScenarioTest):
+    def _get_storage_endpoint(self, storage_account, resource_group):
+        return self.cmd('storage account show -g {} -n {}'
+                        ' --query primaryEndpoints.blob'
+                        .format(resource_group, storage_account)).get_output_in_json()
+
+    @ManagedInstancePreparer(parameter_name="mi")
+    def test_sql_mi_ledger(self, mi, rg):
+        db_name = self.create_random_name("sqlledgermidb", 20)
+        endpoint = "https://mi-test.confidential-ledger.azure.com"
+        managed_instance_name = mi
+        resource_group = rg
+
+        # create database
+        self.cmd('sql midb create -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, db_name))
+
+        # validate ledger digest uploads is disabled by default
+        self.cmd('sql midb ledger-digest-uploads show -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, db_name),
+                 checks=[JMESPathCheck('state', 'Disabled')])
+
+        # enable uploads to ACL dummy instance
+        self.cmd('sql midb ledger-digest-uploads enable -g {} --mi {} -n {} --endpoint {}'
+                 .format(resource_group, managed_instance_name, db_name, endpoint))
+
+        time.sleep(2)
+
+        # validate setting through show command
+        self.cmd('sql midb ledger-digest-uploads show -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, db_name),
+                 checks=[JMESPathCheck('state', 'Enabled'),
+                         JMESPathCheck('digestStorageEndpoint', endpoint)])
+
+        # disable ledger digest uploads
+        self.cmd('sql midb ledger-digest-uploads disable -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, db_name))
+
+        time.sleep(2)
+
+        # validate setting through show command
+        self.cmd('sql midb ledger-digest-uploads show -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, db_name),
+                 checks=[JMESPathCheck('state', 'Disabled')])
 
 class SqlManagedInstanceEndpointCertificateScenarioTest(ScenarioTest):
     @AllowLargeResponse()
@@ -6697,7 +7094,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
                     checks=[JMESPathCheck('length(@)', 0)])
 
         # upsert link (copying state)
-        self.cmd('sql mi link create -g {rg} --instance-name {mi} --name {link_name} --primary-availability-group-name {primary_ag} --replication-mode {replication_mode} --secondary-availability-group-name {secondary_ag} --source-endpoint {source_endpoint} --target-database {target_database} --no-wait')
+        self.cmd('sql mi link create -g {rg} --instance-name {mi} --name {link_name} --primary-availability-group-name {primary_ag} --secondary-availability-group-name {secondary_ag} --source-endpoint {source_endpoint} --target-database {target_database} --no-wait')
 
         # wait a bit for the resource creation (this doesn't mean the link is fully established)
         time.sleep(60)
@@ -6710,6 +7107,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
                         JMESPathCheck('targetDatabase', target_database),
                         JMESPathCheck('sourceEndpoint', source_endpoint),
                         JMESPathCheck('linkState', 'WaitForHybridConnectionToEstablish'),
+                        JMESPathCheck('replicationMode', replication_mode), # link is in async repl mode by default
                         ]).get_output_in_json()
 
         link_id = link['id']
@@ -6726,6 +7124,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
                         JMESPathCheck('targetDatabase', target_database),
                         JMESPathCheck('sourceEndpoint', source_endpoint),
                         JMESPathCheck('linkState', 'WaitForHybridConnectionToEstablish'),
+                        JMESPathCheck('replicationMode', replication_mode), # link is in async repl mode by default
                         ]).get_output_in_json()
 
         # delete instance link
@@ -6823,9 +7222,9 @@ class SqlManagedInstanceDatabaseRecoverTest(ScenarioTest):
         self.kwargs.update({
             'recoverable_db': recoverable_db['id']
         })
-        self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db3 -r {recoverable_db}',
+        self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db4 -r {recoverable_db}',
                 checks=[
-                    JMESPathCheck('name', "recovered_db3")])
+                    JMESPathCheck('name', "recovered_db4")])
 
 
 class SqlManagedInstanceZoneRedundancyScenarioTest(ScenarioTest):
@@ -6897,3 +7296,61 @@ class SqlManagedInstanceZoneRedundancyScenarioTest(ScenarioTest):
         # Delete the managed instance
         self.cmd('sql mi delete --ids {} --yes'
                  .format(managed_instance['id']), checks=NoneCheck())
+
+class SqlManagedInstanceServerConfigurationOptionTest(ScenarioTest):
+    @AllowLargeResponse()
+    @ManagedInstancePreparer(parameter_name="mi")
+    def test_sql_mi_server_configuration_options(self, mi, rg):
+        option_name = 'allowPolybaseExport'
+        option_value = 1
+        self.kwargs.update({
+            'rg': rg,
+            'mi': mi,
+            'option_name' : option_name,
+            'option_value': option_value,
+        })
+
+        # Create sql managed_instance
+        self.cmd('sql mi show -g {rg} -n {mi}',
+                    checks=[
+                        JMESPathCheck('name', mi),
+                        JMESPathCheck('resourceGroup', rg)]).get_output_in_json()
+
+        # no config options on the instance
+        self.cmd('sql mi server-configuration-option list -g {rg} --instance-name {mi}',
+                    checks=[JMESPathCheck('length(@)', 0)])
+
+        # upsert config option
+        self.cmd('sql mi server-configuration-option set -g {rg} --instance-name {mi} --name {option_name} --value {option_value}')
+
+        # show config option
+        opt = self.cmd('sql mi server-configuration-option show -g {rg} --instance-name {mi} --name {option_name}',
+                    checks=[
+                        JMESPathCheck('name', option_name),
+                        JMESPathCheck('resourceGroup', rg),
+                        JMESPathCheck('type', 'Microsoft.Sql/managedInstances/serverConfigurationOptions'),
+                        JMESPathCheck('serverConfigurationOptionValue', option_value),
+                        JMESPathCheck('provisioningState', 'Succeeded'),
+                        ]).get_output_in_json()
+
+        opt_id = opt['id']
+        self.kwargs.update({
+            'opt_id': opt_id
+        })
+
+        # show command with --ids parameter
+        self.cmd('sql mi server-configuration-option show --ids {opt_id}',
+                    checks=[
+                        JMESPathCheck('name', option_name),
+                        JMESPathCheck('resourceGroup', rg),
+                        JMESPathCheck('type', 'Microsoft.Sql/managedInstances/serverConfigurationOptions'),
+                        JMESPathCheck('serverConfigurationOptionValue', option_value),
+                        JMESPathCheck('provisioningState', 'Succeeded'),
+                        ]).get_output_in_json()
+
+        # delete config option
+        self.cmd('sql mi server-configuration-option set -g {rg} --instance-name {mi} -n {option_name} --value 0')
+
+        # list 0 config options
+        self.cmd('sql mi server-configuration-option list -g {rg} --instance-name {mi}',
+                    checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json

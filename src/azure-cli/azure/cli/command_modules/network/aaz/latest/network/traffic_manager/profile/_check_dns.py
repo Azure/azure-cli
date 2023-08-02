@@ -22,9 +22,9 @@ class CheckDns(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-04-01-preview",
+        "version": "2022-04-01",
         "resources": [
-            ["mgmt-plane", "/providers/microsoft.network/checktrafficmanagernameavailability", "2022-04-01-preview"],
+            ["mgmt-plane", "/providers/microsoft.network/checktrafficmanagernameavailability", "2022-04-01"],
         ]
     }
 
@@ -104,7 +104,7 @@ class CheckDns(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-04-01-preview",
+                    "api-version", "2022-04-01",
                     required=True,
                 ),
             }
@@ -161,6 +161,10 @@ class CheckDns(AAZCommand):
             _schema_on_200.type = AAZStrType()
 
             return cls._schema_on_200
+
+
+class _CheckDnsHelper:
+    """Helper class for CheckDns"""
 
 
 __all__ = ["CheckDns"]

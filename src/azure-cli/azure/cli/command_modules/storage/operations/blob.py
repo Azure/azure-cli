@@ -91,6 +91,16 @@ def update_container_rm(cmd, instance, metadata=None, public_access=None,
                         default_encryption_scope=None, deny_encryption_scope_override=None,
                         enable_nfs_v3_root_squash=None, enable_nfs_v3_all_squash=None):
     BlobContainer = cmd.get_models('BlobContainer', resource_type=ResourceType.MGMT_STORAGE)
+
+    # # TODO will remove warning as well as the parameters in November 2023
+    if default_encryption_scope is not None:
+        logger.warning('--default-encryption-scope cannot be updated after container is created. '
+                       'When it is provided, it will be ignored by the server. '
+                       'This parameter will be removed for the update command in November 2023.')
+    if deny_encryption_scope_override is not None:
+        logger.warning('--deny-encryption-scope-override cannot be updated after container is created. '
+                       'When it is provided, it will be ignored by the server. '
+                       'This parameter will be removed for the update command in November 2023.')
     blob_container = BlobContainer(
         metadata=metadata if metadata is not None else instance.metadata,
         public_access=public_access if public_access is not None else instance.public_access,
@@ -1044,12 +1054,10 @@ def copy_blob(cmd, client, source_url, metadata=None, **kwargs):
                                                source_offset=0, **params)
             return transform_response_with_bytearray(res)
     if kwargs.get('tier') is not None:
-        src_properties = src_client.get_blob_properties()
-        BlobType = cmd.get_models('_models#BlobType')
         tier = kwargs.pop('tier')
-        if src_properties.blob_type == BlobType.BlockBlob:
+        try:
             kwargs["standard_blob_tier"] = getattr(StandardBlobTier, tier)
-        elif src_properties.blob_type == BlobType.PageBlob:
+        except AttributeError:
             PremiumPageBlobTier = cmd.get_models('_models#PremiumPageBlobTier')
             kwargs["premium_page_blob_tier"] = getattr(PremiumPageBlobTier, tier)
     return client.start_copy_from_url(source_url=source_url, metadata=metadata, incremental_copy=False, **kwargs)

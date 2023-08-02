@@ -18,7 +18,7 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint,
-    StorageAccountPreparer)
+    StorageAccountPreparer, KeyVaultPreparer)
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 # pylint: disable=line-too-long
@@ -233,6 +233,15 @@ class VMGeneralizeScenarioTest(ScenarioTest):
             self.check('sourceVirtualMachine.id', vm['id']),
             self.check('storageProfile.zoneResilient', None)
         ])
+        self.cmd('image show -g {rg} -n {image}', checks=[
+            self.check('name', '{image}'),
+            self.check('sourceVirtualMachine.id', vm['id']),
+            self.check('storageProfile.zoneResilient', None)
+        ])
+        self.cmd('image list -g {rg}', checks=[
+            self.check('length(@)', '1')
+        ])
+        self.cmd('image delete -g {rg} -n {image}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_generalize_vm')
     def test_vm_capture_zone_resilient_image(self, resource_group):
@@ -2183,6 +2192,98 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
                 self.assertTrue(parsed_2[k2].startswith(rg_prefix))
             else:
                 self.assertEqual(parsed_1[k1], parsed_2[k2])
+# endregion
+
+
+class VMGalleryImage(ScenarioTest):
+
+    @ResourceGroupPreparer(location='westus')
+    def test_gallery_image(self, resource_group):
+        self.kwargs.update({
+            'gallery': self.create_random_name('sig_', 10),
+            'image': 'image1',
+            'disk': 'disk',
+            'snapshot': 'snapshot',
+            'version': '1.0.0',
+        })
+
+        self.cmd('sig create -g {rg} -r {gallery}', checks=[
+            self.check('location', 'westus'),
+            self.check('name', '{gallery}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+        self.cmd('sig list -g {rg}', checks=self.check('length(@)', 1))
+
+        self.cmd(
+            'sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1',
+            checks=self.check('name', self.kwargs['image']))
+        self.cmd('sig image-definition list -g {rg} --gallery-name {gallery}', checks=self.check('length(@)', 1))
+        res = self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image}',
+                       checks=self.check('name', self.kwargs['image'])).get_output_in_json()
+
+        self.cmd('snapshot create -g {rg} -n {snapshot} --size-gb 1 --sku Premium_LRS --tags tag1=s1')
+        self.cmd('sig image-version create --resource-group {rg} --gallery-name {gallery} '
+                 '--gallery-image-definition {image} --gallery-image-version {version} --os-snapshot {snapshot}',
+                 checks=[
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('sig image-version show -g {rg} -r {gallery} -i {image} -e {version}', checks=[
+            self.check('name', '{version}')
+        ])
+
+        self.cmd('sig image-version list -g {rg} -r {gallery} -i {image}', checks=[
+            self.check('length(@)', 1),
+            self.check('[0].name', '{version}')
+        ])
+        self.cmd('sig image-version delete -g {rg} -r {gallery} -i {image} -e {version}')
+        time.sleep(60)
+
+        self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
+        time.sleep(60)  # service end latency
+        self.cmd('sig delete -g {rg} --gallery-name {gallery}')
+# endregion
+
+
+class DiskAccessTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_access_', location='centraluseuap')
+    def test_disk_access(self, resource_group):
+        self.kwargs.update({
+            'loc': 'centraluseuap',
+            'diskaccess': 'mydiskaccess',
+            'disk': 'mydisk',
+            'snapshot': 'mysnapshot'
+        })
+
+        self.cmd('disk-access create -g {rg} -l {loc} -n {diskaccess} --no-wait')
+        self.cmd('disk-access wait --created -g {rg} -n {diskaccess}')
+        self.cmd('disk-access list -g {rg}', checks=[
+            self.check('length(@)', 1),
+            self.check('[0].name', '{diskaccess}'),
+            self.check('[0].location', '{loc}')
+        ])
+
+        self.cmd('disk-access update -g {rg} -n {diskaccess} --tags tag1=val1')
+        self.kwargs['disk_access_id'] = self.cmd('disk-access show -g {rg} -n {diskaccess}', checks=[
+            self.check('name', '{diskaccess}'),
+            self.check('location', '{loc}'),
+            self.check('tags.tag1', 'val1')
+        ]).get_output_in_json()['id']
+
+        self.cmd('disk create -g {rg} -n {disk} --size-gb 10 --network-access-policy AllowPrivate --disk-access {diskaccess}')
+
+        self.cmd('disk update -g {rg} -n {disk} --network-access-policy AllowPrivate --disk-access {disk_access_id}')
+
+        self.cmd('disk show -g {rg} -n {disk}', checks=[
+            self.check('name', '{disk}')
+        ])
+
+        self.cmd('disk delete -g {rg} -n {disk} --yes')
+        self.cmd('disk-access delete -g {rg} -n {diskaccess}')
+        self.cmd('disk-access list -g {rg}', checks=[
+            self.check('length(@)', 0)
+        ])
 # endregion
 
 # endregion

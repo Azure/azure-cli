@@ -25,9 +25,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-04-01-preview",
+        "version": "2022-04-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}/{}/{}", "2022-04-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}/{}/{}", "2022-04-01"],
         ]
     }
 
@@ -51,20 +51,17 @@ class Create(AAZCommand):
             options=["-n", "--name"],
             help="Endpoint name.",
             required=True,
-            id_part="child_name_1",
         )
         _args_schema.type = AAZStrArg(
             options=["-t", "--type"],
             help="Endpoint type.",
             required=True,
-            id_part="child_type_1",
             enum={"AzureEndpoints": "AzureEndpoints", "ExternalEndpoints": "ExternalEndpoints", "NestedEndpoints": "NestedEndpoints"},
         )
         _args_schema.profile_name = AAZStrArg(
             options=["--profile-name"],
             help="Name of parent profile.",
             required=True,
-            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -94,7 +91,7 @@ class Create(AAZCommand):
             options=["--endpoint-monitor-status"],
             arg_group="Properties",
             help="The monitoring status of the endpoint.",
-            enum={"CheckingEndpoint": "CheckingEndpoint", "Degraded": "Degraded", "Disabled": "Disabled", "Inactive": "Inactive", "Online": "Online", "Stopped": "Stopped"},
+            enum={"CheckingEndpoint": "CheckingEndpoint", "Degraded": "Degraded", "Disabled": "Disabled", "Inactive": "Inactive", "Online": "Online", "Stopped": "Stopped", "Unmonitored": "Unmonitored"},
         )
         _args_schema.endpoint_status = AAZStrArg(
             options=["--endpoint-status"],
@@ -255,7 +252,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-04-01-preview",
+                    "api-version", "2022-04-01",
                     required=True,
                 ),
             }
@@ -405,6 +402,10 @@ class Create(AAZCommand):
             _element.scope = AAZIntType()
 
             return cls._schema_on_200_201
+
+
+class _CreateHelper:
+    """Helper class for Create"""
 
 
 __all__ = ["Create"]

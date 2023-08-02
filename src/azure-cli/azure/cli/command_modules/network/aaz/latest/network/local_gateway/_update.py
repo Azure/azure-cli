@@ -122,10 +122,30 @@ class Update(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         self.LocalNetworkGatewaysGet(ctx=self.ctx)()
+        self.pre_instance_update(self.ctx.vars.instance)
         self.InstanceUpdateByJson(ctx=self.ctx)()
         self.InstanceUpdateByGeneric(ctx=self.ctx)()
+        self.post_instance_update(self.ctx.vars.instance)
         yield self.LocalNetworkGatewaysCreateOrUpdate(ctx=self.ctx)()
+        self.post_operations()
+
+    @register_callback
+    def pre_operations(self):
+        pass
+
+    @register_callback
+    def post_operations(self):
+        pass
+
+    @register_callback
+    def pre_instance_update(self, instance):
+        pass
+
+    @register_callback
+    def post_instance_update(self, instance):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -210,7 +230,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _build_schema_local_network_gateway_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_local_network_gateway_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -321,7 +341,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _build_schema_local_network_gateway_read(cls._schema_on_200_201)
+            _UpdateHelper._build_schema_local_network_gateway_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
@@ -374,122 +394,120 @@ class Update(AAZCommand):
             )
 
 
-_schema_local_network_gateway_read = None
+class _UpdateHelper:
+    """Helper class for Update"""
 
+    _schema_local_network_gateway_read = None
 
-def _build_schema_local_network_gateway_read(_schema):
-    global _schema_local_network_gateway_read
-    if _schema_local_network_gateway_read is not None:
-        _schema.etag = _schema_local_network_gateway_read.etag
-        _schema.id = _schema_local_network_gateway_read.id
-        _schema.location = _schema_local_network_gateway_read.location
-        _schema.name = _schema_local_network_gateway_read.name
-        _schema.properties = _schema_local_network_gateway_read.properties
-        _schema.tags = _schema_local_network_gateway_read.tags
-        _schema.type = _schema_local_network_gateway_read.type
-        return
+    @classmethod
+    def _build_schema_local_network_gateway_read(cls, _schema):
+        if cls._schema_local_network_gateway_read is not None:
+            _schema.etag = cls._schema_local_network_gateway_read.etag
+            _schema.id = cls._schema_local_network_gateway_read.id
+            _schema.location = cls._schema_local_network_gateway_read.location
+            _schema.name = cls._schema_local_network_gateway_read.name
+            _schema.properties = cls._schema_local_network_gateway_read.properties
+            _schema.tags = cls._schema_local_network_gateway_read.tags
+            _schema.type = cls._schema_local_network_gateway_read.type
+            return
 
-    _schema_local_network_gateway_read = AAZObjectType()
+        cls._schema_local_network_gateway_read = _schema_local_network_gateway_read = AAZObjectType()
 
-    local_network_gateway_read = _schema_local_network_gateway_read
-    local_network_gateway_read.etag = AAZStrType(
-        flags={"read_only": True},
-    )
-    local_network_gateway_read.id = AAZStrType()
-    local_network_gateway_read.location = AAZStrType()
-    local_network_gateway_read.name = AAZStrType(
-        flags={"read_only": True},
-    )
-    local_network_gateway_read.properties = AAZObjectType(
-        flags={"required": True, "client_flatten": True},
-    )
-    local_network_gateway_read.tags = AAZDictType()
-    local_network_gateway_read.type = AAZStrType(
-        flags={"read_only": True},
-    )
+        local_network_gateway_read = _schema_local_network_gateway_read
+        local_network_gateway_read.etag = AAZStrType(
+            flags={"read_only": True},
+        )
+        local_network_gateway_read.id = AAZStrType()
+        local_network_gateway_read.location = AAZStrType()
+        local_network_gateway_read.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        local_network_gateway_read.properties = AAZObjectType(
+            flags={"required": True, "client_flatten": True},
+        )
+        local_network_gateway_read.tags = AAZDictType()
+        local_network_gateway_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
 
-    properties = _schema_local_network_gateway_read.properties
-    properties.bgp_settings = AAZObjectType(
-        serialized_name="bgpSettings",
-    )
-    properties.fqdn = AAZStrType()
-    properties.gateway_ip_address = AAZStrType(
-        serialized_name="gatewayIpAddress",
-    )
-    properties.local_network_address_space = AAZObjectType(
-        serialized_name="localNetworkAddressSpace",
-    )
-    properties.provisioning_state = AAZStrType(
-        serialized_name="provisioningState",
-        flags={"read_only": True},
-    )
-    properties.resource_guid = AAZStrType(
-        serialized_name="resourceGuid",
-        flags={"read_only": True},
-    )
+        properties = _schema_local_network_gateway_read.properties
+        properties.bgp_settings = AAZObjectType(
+            serialized_name="bgpSettings",
+        )
+        properties.fqdn = AAZStrType()
+        properties.gateway_ip_address = AAZStrType(
+            serialized_name="gatewayIpAddress",
+        )
+        properties.local_network_address_space = AAZObjectType(
+            serialized_name="localNetworkAddressSpace",
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
+        properties.resource_guid = AAZStrType(
+            serialized_name="resourceGuid",
+            flags={"read_only": True},
+        )
 
-    bgp_settings = _schema_local_network_gateway_read.properties.bgp_settings
-    bgp_settings.asn = AAZIntType()
-    bgp_settings.bgp_peering_address = AAZStrType(
-        serialized_name="bgpPeeringAddress",
-    )
-    bgp_settings.bgp_peering_addresses = AAZListType(
-        serialized_name="bgpPeeringAddresses",
-    )
-    bgp_settings.peer_weight = AAZIntType(
-        serialized_name="peerWeight",
-    )
+        bgp_settings = _schema_local_network_gateway_read.properties.bgp_settings
+        bgp_settings.asn = AAZIntType()
+        bgp_settings.bgp_peering_address = AAZStrType(
+            serialized_name="bgpPeeringAddress",
+        )
+        bgp_settings.bgp_peering_addresses = AAZListType(
+            serialized_name="bgpPeeringAddresses",
+        )
+        bgp_settings.peer_weight = AAZIntType(
+            serialized_name="peerWeight",
+        )
 
-    bgp_peering_addresses = _schema_local_network_gateway_read.properties.bgp_settings.bgp_peering_addresses
-    bgp_peering_addresses.Element = AAZObjectType()
+        bgp_peering_addresses = _schema_local_network_gateway_read.properties.bgp_settings.bgp_peering_addresses
+        bgp_peering_addresses.Element = AAZObjectType()
 
-    _element = _schema_local_network_gateway_read.properties.bgp_settings.bgp_peering_addresses.Element
-    _element.custom_bgp_ip_addresses = AAZListType(
-        serialized_name="customBgpIpAddresses",
-    )
-    _element.default_bgp_ip_addresses = AAZListType(
-        serialized_name="defaultBgpIpAddresses",
-        flags={"read_only": True},
-    )
-    _element.ipconfiguration_id = AAZStrType(
-        serialized_name="ipconfigurationId",
-    )
-    _element.tunnel_ip_addresses = AAZListType(
-        serialized_name="tunnelIpAddresses",
-        flags={"read_only": True},
-    )
+        _element = _schema_local_network_gateway_read.properties.bgp_settings.bgp_peering_addresses.Element
+        _element.custom_bgp_ip_addresses = AAZListType(
+            serialized_name="customBgpIpAddresses",
+        )
+        _element.default_bgp_ip_addresses = AAZListType(
+            serialized_name="defaultBgpIpAddresses",
+            flags={"read_only": True},
+        )
+        _element.ipconfiguration_id = AAZStrType(
+            serialized_name="ipconfigurationId",
+        )
+        _element.tunnel_ip_addresses = AAZListType(
+            serialized_name="tunnelIpAddresses",
+            flags={"read_only": True},
+        )
 
-    custom_bgp_ip_addresses = _schema_local_network_gateway_read.properties.bgp_settings.bgp_peering_addresses.Element.custom_bgp_ip_addresses
-    custom_bgp_ip_addresses.Element = AAZStrType()
+        custom_bgp_ip_addresses = _schema_local_network_gateway_read.properties.bgp_settings.bgp_peering_addresses.Element.custom_bgp_ip_addresses
+        custom_bgp_ip_addresses.Element = AAZStrType()
 
-    default_bgp_ip_addresses = _schema_local_network_gateway_read.properties.bgp_settings.bgp_peering_addresses.Element.default_bgp_ip_addresses
-    default_bgp_ip_addresses.Element = AAZStrType(
-        flags={"read_only": True},
-    )
+        default_bgp_ip_addresses = _schema_local_network_gateway_read.properties.bgp_settings.bgp_peering_addresses.Element.default_bgp_ip_addresses
+        default_bgp_ip_addresses.Element = AAZStrType()
 
-    tunnel_ip_addresses = _schema_local_network_gateway_read.properties.bgp_settings.bgp_peering_addresses.Element.tunnel_ip_addresses
-    tunnel_ip_addresses.Element = AAZStrType(
-        flags={"read_only": True},
-    )
+        tunnel_ip_addresses = _schema_local_network_gateway_read.properties.bgp_settings.bgp_peering_addresses.Element.tunnel_ip_addresses
+        tunnel_ip_addresses.Element = AAZStrType()
 
-    local_network_address_space = _schema_local_network_gateway_read.properties.local_network_address_space
-    local_network_address_space.address_prefixes = AAZListType(
-        serialized_name="addressPrefixes",
-    )
+        local_network_address_space = _schema_local_network_gateway_read.properties.local_network_address_space
+        local_network_address_space.address_prefixes = AAZListType(
+            serialized_name="addressPrefixes",
+        )
 
-    address_prefixes = _schema_local_network_gateway_read.properties.local_network_address_space.address_prefixes
-    address_prefixes.Element = AAZStrType()
+        address_prefixes = _schema_local_network_gateway_read.properties.local_network_address_space.address_prefixes
+        address_prefixes.Element = AAZStrType()
 
-    tags = _schema_local_network_gateway_read.tags
-    tags.Element = AAZStrType()
+        tags = _schema_local_network_gateway_read.tags
+        tags.Element = AAZStrType()
 
-    _schema.etag = _schema_local_network_gateway_read.etag
-    _schema.id = _schema_local_network_gateway_read.id
-    _schema.location = _schema_local_network_gateway_read.location
-    _schema.name = _schema_local_network_gateway_read.name
-    _schema.properties = _schema_local_network_gateway_read.properties
-    _schema.tags = _schema_local_network_gateway_read.tags
-    _schema.type = _schema_local_network_gateway_read.type
+        _schema.etag = cls._schema_local_network_gateway_read.etag
+        _schema.id = cls._schema_local_network_gateway_read.id
+        _schema.location = cls._schema_local_network_gateway_read.location
+        _schema.name = cls._schema_local_network_gateway_read.name
+        _schema.properties = cls._schema_local_network_gateway_read.properties
+        _schema.tags = cls._schema_local_network_gateway_read.tags
+        _schema.type = cls._schema_local_network_gateway_read.type
 
 
 __all__ = ["Update"]

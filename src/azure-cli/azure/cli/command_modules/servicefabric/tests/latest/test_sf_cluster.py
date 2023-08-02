@@ -9,7 +9,7 @@ import os
 import time
 from azure.cli.command_modules.servicefabric.tests.latest.test_util import _create_cluster, _create_cluster_with_separate_kv, _wait_for_cluster_state_ready, _add_selfsigned_cert_to_keyvault
 from azure.cli.core.util import CLIError
-from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
+from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer, live_only
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -60,7 +60,7 @@ class ServiceFabricClusterTests(ScenarioTest):
         self.cmd('sf cluster reliability update --resource-group {rg} -c {cluster_name} --reliability-level Silver',
                  checks=[self.check('reliabilityLevel', 'Silver')])
 
-
+    @live_only()
     @ResourceGroupPreparer(location='southcentralus')
     def test_add_secondary_node_type_add_remove_node(self):
         self.kwargs.update({

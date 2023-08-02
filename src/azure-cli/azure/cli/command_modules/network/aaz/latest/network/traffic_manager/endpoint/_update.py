@@ -32,9 +32,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-04-01-preview",
+        "version": "2022-04-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}/{}/{}", "2022-04-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}/{}/{}", "2022-04-01"],
         ]
     }
 
@@ -107,7 +107,7 @@ class Update(AAZCommand):
             arg_group="Properties",
             help="The monitoring status of the endpoint.",
             nullable=True,
-            enum={"CheckingEndpoint": "CheckingEndpoint", "Degraded": "Degraded", "Disabled": "Disabled", "Inactive": "Inactive", "Online": "Online", "Stopped": "Stopped"},
+            enum={"CheckingEndpoint": "CheckingEndpoint", "Degraded": "Degraded", "Disabled": "Disabled", "Inactive": "Inactive", "Online": "Online", "Stopped": "Stopped", "Unmonitored": "Unmonitored"},
         )
         _args_schema.endpoint_status = AAZStrArg(
             options=["--endpoint-status"],
@@ -302,7 +302,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-04-01-preview",
+                    "api-version", "2022-04-01",
                     required=True,
                 ),
             }
@@ -333,7 +333,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _build_schema_endpoint_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_endpoint_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -393,7 +393,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-04-01-preview",
+                    "api-version", "2022-04-01",
                     required=True,
                 ),
             }
@@ -436,7 +436,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _build_schema_endpoint_read(cls._schema_on_200_201)
+            _UpdateHelper._build_schema_endpoint_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
@@ -505,86 +505,88 @@ class Update(AAZCommand):
             )
 
 
-_schema_endpoint_read = None
+class _UpdateHelper:
+    """Helper class for Update"""
 
+    _schema_endpoint_read = None
 
-def _build_schema_endpoint_read(_schema):
-    global _schema_endpoint_read
-    if _schema_endpoint_read is not None:
-        _schema.id = _schema_endpoint_read.id
-        _schema.name = _schema_endpoint_read.name
-        _schema.properties = _schema_endpoint_read.properties
-        _schema.type = _schema_endpoint_read.type
-        return
+    @classmethod
+    def _build_schema_endpoint_read(cls, _schema):
+        if cls._schema_endpoint_read is not None:
+            _schema.id = cls._schema_endpoint_read.id
+            _schema.name = cls._schema_endpoint_read.name
+            _schema.properties = cls._schema_endpoint_read.properties
+            _schema.type = cls._schema_endpoint_read.type
+            return
 
-    _schema_endpoint_read = AAZObjectType()
+        cls._schema_endpoint_read = _schema_endpoint_read = AAZObjectType()
 
-    endpoint_read = _schema_endpoint_read
-    endpoint_read.id = AAZStrType()
-    endpoint_read.name = AAZStrType()
-    endpoint_read.properties = AAZObjectType(
-        flags={"client_flatten": True},
-    )
-    endpoint_read.type = AAZStrType()
+        endpoint_read = _schema_endpoint_read
+        endpoint_read.id = AAZStrType()
+        endpoint_read.name = AAZStrType()
+        endpoint_read.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+        endpoint_read.type = AAZStrType()
 
-    properties = _schema_endpoint_read.properties
-    properties.always_serve = AAZStrType(
-        serialized_name="alwaysServe",
-    )
-    properties.custom_headers = AAZListType(
-        serialized_name="customHeaders",
-    )
-    properties.endpoint_location = AAZStrType(
-        serialized_name="endpointLocation",
-    )
-    properties.endpoint_monitor_status = AAZStrType(
-        serialized_name="endpointMonitorStatus",
-    )
-    properties.endpoint_status = AAZStrType(
-        serialized_name="endpointStatus",
-    )
-    properties.geo_mapping = AAZListType(
-        serialized_name="geoMapping",
-    )
-    properties.min_child_endpoints = AAZIntType(
-        serialized_name="minChildEndpoints",
-    )
-    properties.min_child_endpoints_i_pv4 = AAZIntType(
-        serialized_name="minChildEndpointsIPv4",
-    )
-    properties.min_child_endpoints_i_pv6 = AAZIntType(
-        serialized_name="minChildEndpointsIPv6",
-    )
-    properties.priority = AAZIntType()
-    properties.subnets = AAZListType()
-    properties.target = AAZStrType()
-    properties.target_resource_id = AAZStrType(
-        serialized_name="targetResourceId",
-    )
-    properties.weight = AAZIntType()
+        properties = _schema_endpoint_read.properties
+        properties.always_serve = AAZStrType(
+            serialized_name="alwaysServe",
+        )
+        properties.custom_headers = AAZListType(
+            serialized_name="customHeaders",
+        )
+        properties.endpoint_location = AAZStrType(
+            serialized_name="endpointLocation",
+        )
+        properties.endpoint_monitor_status = AAZStrType(
+            serialized_name="endpointMonitorStatus",
+        )
+        properties.endpoint_status = AAZStrType(
+            serialized_name="endpointStatus",
+        )
+        properties.geo_mapping = AAZListType(
+            serialized_name="geoMapping",
+        )
+        properties.min_child_endpoints = AAZIntType(
+            serialized_name="minChildEndpoints",
+        )
+        properties.min_child_endpoints_i_pv4 = AAZIntType(
+            serialized_name="minChildEndpointsIPv4",
+        )
+        properties.min_child_endpoints_i_pv6 = AAZIntType(
+            serialized_name="minChildEndpointsIPv6",
+        )
+        properties.priority = AAZIntType()
+        properties.subnets = AAZListType()
+        properties.target = AAZStrType()
+        properties.target_resource_id = AAZStrType(
+            serialized_name="targetResourceId",
+        )
+        properties.weight = AAZIntType()
 
-    custom_headers = _schema_endpoint_read.properties.custom_headers
-    custom_headers.Element = AAZObjectType()
+        custom_headers = _schema_endpoint_read.properties.custom_headers
+        custom_headers.Element = AAZObjectType()
 
-    _element = _schema_endpoint_read.properties.custom_headers.Element
-    _element.name = AAZStrType()
-    _element.value = AAZStrType()
+        _element = _schema_endpoint_read.properties.custom_headers.Element
+        _element.name = AAZStrType()
+        _element.value = AAZStrType()
 
-    geo_mapping = _schema_endpoint_read.properties.geo_mapping
-    geo_mapping.Element = AAZStrType()
+        geo_mapping = _schema_endpoint_read.properties.geo_mapping
+        geo_mapping.Element = AAZStrType()
 
-    subnets = _schema_endpoint_read.properties.subnets
-    subnets.Element = AAZObjectType()
+        subnets = _schema_endpoint_read.properties.subnets
+        subnets.Element = AAZObjectType()
 
-    _element = _schema_endpoint_read.properties.subnets.Element
-    _element.first = AAZStrType()
-    _element.last = AAZStrType()
-    _element.scope = AAZIntType()
+        _element = _schema_endpoint_read.properties.subnets.Element
+        _element.first = AAZStrType()
+        _element.last = AAZStrType()
+        _element.scope = AAZIntType()
 
-    _schema.id = _schema_endpoint_read.id
-    _schema.name = _schema_endpoint_read.name
-    _schema.properties = _schema_endpoint_read.properties
-    _schema.type = _schema_endpoint_read.type
+        _schema.id = cls._schema_endpoint_read.id
+        _schema.name = cls._schema_endpoint_read.name
+        _schema.properties = cls._schema_endpoint_read.properties
+        _schema.type = cls._schema_endpoint_read.type
 
 
 __all__ = ["Update"]

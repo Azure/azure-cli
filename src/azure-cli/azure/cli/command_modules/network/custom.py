@@ -19,9 +19,8 @@ from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.core.azclierror import InvalidArgumentValueError, ValidationError, \
     UnrecognizedArgumentError, ResourceNotFoundError, ArgumentUsageError
-from azure.cli.core.profiles import ResourceType, supported_api_version
+from azure.cli.core.profiles import ResourceType
 
-from azure.cli.command_modules.network._client_factory import network_client_factory
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 
@@ -30,8 +29,7 @@ from .aaz.latest.network.application_gateway import Update as _ApplicationGatewa
 from .aaz.latest.network.application_gateway.address_pool import Create as _AddressPoolCreate, \
     Update as _AddressPoolUpdate
 from .aaz.latest.network.application_gateway.auth_cert import Create as _AuthCertCreate, Update as _AuthCertUpdate
-from .aaz.latest.network.application_gateway.client_cert import Add as _ClientCertAdd, Remove as _ClientCertRemove, \
-    Update as _ClientCertUpdate
+from .aaz.latest.network.application_gateway.client_cert import Add as _ClientCertAdd, Update as _ClientCertUpdate
 from .aaz.latest.network.application_gateway.frontend_ip import Create as _FrontendIPCreate, Update as _FrontendIPUpdate
 from .aaz.latest.network.application_gateway.http_listener import Create as _HTTPListenerCreate, \
     Update as _HTTPListenerUpdate
@@ -53,8 +51,7 @@ from .aaz.latest.network.application_gateway.rule import Create as _RuleCreate, 
 from .aaz.latest.network.application_gateway.settings import Create as _SettingsCreate, Update as _SettingsUpdate
 from .aaz.latest.network.application_gateway.ssl_cert import Create as _SSLCertCreate, Update as _SSLCertUpdate
 from .aaz.latest.network.application_gateway.ssl_policy import Set as _SSLPolicySet
-from .aaz.latest.network.application_gateway.ssl_profile import Add as _SSLProfileAdd, Update as _SSLProfileUpdate, \
-    Remove as _SSLProfileRemove
+from .aaz.latest.network.application_gateway.ssl_profile import Add as _SSLProfileAdd, Update as _SSLProfileUpdate
 from .aaz.latest.network.application_gateway.url_path_map import Create as _URLPathMapCreate, \
     Update as _URLPathMapUpdate
 from .aaz.latest.network.application_gateway.url_path_map.rule import Create as _URLPathMapRuleCreate
@@ -62,11 +59,17 @@ from .aaz.latest.network.application_gateway.waf_policy import Create as _WAFCre
 from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condition import \
     Add as _WAFCustomRuleMatchConditionAdd
 from .aaz.latest.network.application_gateway.waf_policy.policy_setting import Update as _WAFPolicySettingUpdate
+from .aaz.latest.network.custom_ip.prefix import Update as _CustomIpPrefixUpdate
+from .aaz.latest.network.dns.record_set import List as _DNSRecordSetListByZone
+from .aaz.latest.network.dns.zone import Create as _DNSZoneCreate
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
+from .aaz.latest.network.express_route.gateway import Create as _ExpressRouteGatewayCreate, \
+    Update as _ExpressRouteGatewayUpdate
 from .aaz.latest.network.express_route.gateway.connection import Create as _ExpressRouteConnectionCreate, \
     Update as _ExpressRouteConnectionUpdate
 from .aaz.latest.network.express_route.peering import Create as _ExpressRoutePeeringCreate, \
     Update as _ExpressRoutePeeringUpdate
+from .aaz.latest.network.express_route.peering.connection import Create as _ExpressRoutePeeringConnectionCreate
 from .aaz.latest.network.express_route.port import Create as _ExpressRoutePortCreate
 from .aaz.latest.network.express_route.port.identity import Assign as _ExpressRoutePortIdentityAssign
 from .aaz.latest.network.express_route.port.link import Update as _ExpressRoutePortLinkUpdate
@@ -78,15 +81,17 @@ from .aaz.latest.network.nsg import Create as _NSGCreate
 from .aaz.latest.network.nsg.rule import Create as _NSGRuleCreate, Update as _NSGRuleUpdate
 from .aaz.latest.network.public_ip import Create as _PublicIPCreate, Update as _PublicIPUpdate
 from .aaz.latest.network.private_endpoint import Create as _PrivateEndpointCreate, Update as _PrivateEndpointUpdate
-from .aaz.latest.network.private_endpoint.asg import Add as _PrivateEndpointAsgAdd, Remove as _PrivateEndpointAsgRemove
+from .aaz.latest.network.private_endpoint.asg import Add as _PrivateEndpointAsgAdd
 from .aaz.latest.network.private_endpoint.dns_zone_group import Create as _PrivateEndpointPrivateDnsZoneGroupCreate, \
-    Add as _PrivateEndpointPrivateDnsZoneAdd, Remove as _PrivateEndpointPrivateDnsZoneRemove
-from .aaz.latest.network.private_endpoint.ip_config import Remove as _PrivateEndpointIpConfigRemove, \
-    Add as _PrivateEndpointIpConfigAdd
+    Add as _PrivateEndpointPrivateDnsZoneAdd
+from .aaz.latest.network.private_endpoint.ip_config import Add as _PrivateEndpointIpConfigAdd
 from .aaz.latest.network.private_link_service import Create as _PrivateLinkServiceCreate, \
     Update as _PrivateLinkServiceUpdate
 from .aaz.latest.network.private_link_service.connection import Update as _PrivateEndpointConnectionUpdate
 from .aaz.latest.network.public_ip.prefix import Create as _PublicIpPrefixCreate
+from .aaz.latest.network.security_partner_provider import Create as _SecurityPartnerProviderCreate, \
+    Update as _SecurityPartnerProviderUpdate
+from .aaz.latest.network.virtual_appliance import Create as _VirtualApplianceCreate, Update as _VirtualApplianceUpdate
 from .aaz.latest.network.vnet import Create as _VNetCreate, Update as _VNetUpdate
 from .aaz.latest.network.vnet.peering import Create as _VNetPeeringCreate
 from .aaz.latest.network.vnet.subnet import Create as _VNetSubnetCreate, Update as _VNetSubnetUpdate
@@ -105,6 +110,30 @@ from .aaz.latest.network.vpn_connection import Update as _VpnConnectionUpdate, \
 from .aaz.latest.network.vpn_connection.ipsec_policy import Add as _VpnConnIpsecPolicyAdd
 from .aaz.latest.network.vpn_connection.packet_capture import Stop as _VpnConnPackageCaptureStop
 from .aaz.latest.network.vpn_connection.shared_key import Update as _VpnConnSharedKeyUpdate
+from .operations.dns import (RecordSetAShow as DNSRecordSetAShow, RecordSetAAAAShow as DNSRecordSetAAAAShow,  # pylint: disable=unused-import
+                             RecordSetDSShow as DNSRecordSetDSShow, RecordSetMXShow as DNSRecordSetMXShow,
+                             RecordSetNSShow as DNSRecordSetNSShow, RecordSetPTRShow as DNSRecordSetPTRShow,
+                             RecordSetSRVShow as DNSRecordSetSRVShow, RecordSetTLSAShow as DNSRecordSetTLSAShow,
+                             RecordSetTXTShow as DNSRecordSetTXTShow, RecordSetCAAShow as DNSRecordSetCAAShow,
+                             RecordSetCNAMEShow as DNSRecordSetCNAMEShow, RecordSetSOAShow as DNSRecordSetSOAShow)
+from .operations.dns import (RecordSetACreate as DNSRecordSetACreate, RecordSetAAAACreate as DNSRecordSetAAAACreate,  # pylint: disable=unused-import
+                             RecordSetDSCreate as DNSRecordSetDSCreate, RecordSetMXCreate as DNSRecordSetMXCreate,
+                             RecordSetNSCreate as DNSRecordSetNSCreate, RecordSetPTRCreate as DNSRecordSetPTRCreate,
+                             RecordSetSRVCreate as DNSRecordSetSRVCreate, RecordSetTLSACreate as DNSRecordSetTLSACreate,
+                             RecordSetTXTCreate as DNSRecordSetTXTCreate, RecordSetCAACreate as DNSRecordSetCAACreate,
+                             RecordSetCNAMECreate as DNSRecordSetCNAMECreate, RecordSetSOACreate as DNSRecordSetSOACreate)
+from .operations.dns import (RecordSetAUpdate as DNSRecordSetAUpdate, RecordSetAAAAUpdate as DNSRecordSetAAAAUpdate,  # pylint: disable=unused-import
+                             RecordSetDSUpdate as DNSRecordSetDSUpdate, RecordSetMXUpdate as DNSRecordSetMXUpdate,
+                             RecordSetNSUpdate as DNSRecordSetNSUpdate, RecordSetPTRUpdate as DNSRecordSetPTRUpdate,
+                             RecordSetSRVUpdate as DNSRecordSetSRVUpdate, RecordSetTLSAUpdate as DNSRecordSetTLSAUpdate,
+                             RecordSetTXTUpdate as DNSRecordSetTXTUpdate, RecordSetCAAUpdate as DNSRecordSetCAAUpdate,
+                             RecordSetCNAMEUpdate as DNSRecordSetCNAMEUpdate)
+from .operations.dns import (RecordSetADelete as DNSRecordSetADelete, RecordSetAAAADelete as DNSRecordSetAAAADelete,  # pylint: disable=unused-import
+                             RecordSetDSDelete as DNSRecordSetDSDelete, RecordSetMXDelete as DNSRecordSetMXDelete,
+                             RecordSetNSDelete as DNSRecordSetNSDelete, RecordSetPTRDelete as DNSRecordSetPTRDelete,
+                             RecordSetSRVDelete as DNSRecordSetSRVDelete, RecordSetTLSADelete as DNSRecordSetTLSADelete,
+                             RecordSetTXTDelete as DNSRecordSetTXTDelete, RecordSetCAADelete as DNSRecordSetCAADelete,
+                             RecordSetCNAMEDelete as DNSRecordSetCNAMEDelete)
 
 logger = get_logger(__name__)
 
@@ -844,17 +873,6 @@ class ClientCertAdd(_ClientCertAdd):
         return result
 
 
-class ClientCertRemove(_ClientCertRemove):
-    def _handler(self, command_args):
-        lro_poller = super()._handler(command_args)
-        lro_poller._result_callback = self._output
-        return lro_poller
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
 class ClientCertUpdate(_ClientCertUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -904,7 +922,7 @@ def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, e
                 child_name_1=http_settings
             )
 
-        from .aaz.latest.network.application_gateway._health_on_demand import HealthOnDemand
+        from .aaz.latest.network.application_gateway import HealthOnDemand
         return LongRunningOperation(cmd.cli_ctx)(
             HealthOnDemand(cli_ctx=cmd.cli_ctx)(command_args={
                 "name": application_gateway_name,
@@ -922,7 +940,7 @@ def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, e
             })
         )
 
-    from .aaz.latest.network.application_gateway._health import Health
+    from .aaz.latest.network.application_gateway import Health
     return LongRunningOperation(cmd.cli_ctx)(
         Health(cli_ctx=cmd.cli_ctx)(command_args={
             "name": application_gateway_name,
@@ -1011,17 +1029,6 @@ class SSLProfileUpdate(_SSLProfileUpdate):
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
-
-
-class SSLProfileRemove(_SSLProfileRemove):
-    def _handler(self, command_args):
-        lro_poller = super()._handler(command_args)
-        lro_poller._result_callback = self._output
-        return lro_poller
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
 # endregion
 
 
@@ -1092,20 +1099,12 @@ class HTTPSettingsCreate(_HTTPSettingsCreate):
 class HTTPSettingsUpdate(_HTTPSettingsUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZListArgFormat, AAZIntArg, AAZIntArgFormat, AAZResourceIdArg, AAZResourceIdArgFormat
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
+        from azure.cli.core.aaz import AAZListArg, AAZIntArg, AAZIntArgFormat, AAZResourceIdArg, AAZResourceIdArgFormat
 
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.auth_certs = AAZListArg(
             options=["--auth-certs"],
             help="Space-separated list of authentication certificates (Names and IDs) to associate with the HTTP settings.",
-            fmt=EmptyListArgFormat(),
             nullable=True,
         )
         args_schema.auth_certs.Element = AAZResourceIdArg(
@@ -1119,7 +1118,6 @@ class HTTPSettingsUpdate(_HTTPSettingsUpdate):
             options=["--root-certs"],
             help="Space-separated list of trusted root certificates (Names and IDs) to associate with the HTTP settings. "
                  "`--host-name` or `--host-name-from-backend-pool` is required when this field is set.",
-            fmt=EmptyListArgFormat(),
             nullable=True,
         )
         args_schema.root_certs.Element = AAZResourceIdArg(
@@ -1211,21 +1209,12 @@ class SettingsCreate(_SettingsCreate):
 class SettingsUpdate(_SettingsUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZListArgFormat, AAZResourceIdArg, AAZResourceIdArgFormat
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
+        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.root_certs = AAZListArg(
             options=["--root-certs"],
             help="Space-separated list of trusted root certificates (Names and IDs) to associate with the HTTP settings. "
                  "`--host-name` or `--backend-pool-host-name` is required when this field is set.",
-            fmt=EmptyListArgFormat(),
             nullable=True,
         )
         args_schema.root_certs.Element = AAZResourceIdArg(
@@ -1747,29 +1736,21 @@ class URLPathMapUpdate(_URLPathMapUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZResourceIdArgFormat
-
-        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
-            def __call__(self, ctx, value):
-                if value._data == "":
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         # apply templates for resource id
-        args_schema.default_address_pool._fmt = EmptyResourceIdArgFormat(
+        args_schema.default_address_pool._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/applicationGateways/{gateway_name}/backendAddressPools/{}",
         )
-        args_schema.default_http_settings._fmt = EmptyResourceIdArgFormat(
+        args_schema.default_http_settings._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/applicationGateways/{gateway_name}/backendHttpSettingsCollection/{}",
         )
-        args_schema.default_redirect_config._fmt = EmptyResourceIdArgFormat(
+        args_schema.default_redirect_config._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/applicationGateways/{gateway_name}/redirectConfigurations/{}",
         )
-        args_schema.default_rewrite_rule_set._fmt = EmptyResourceIdArgFormat(
+        args_schema.default_rewrite_rule_set._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/applicationGateways/{gateway_name}/rewriteRuleSets/{}",
         )
@@ -2405,6 +2386,27 @@ def update_ddos_plan(cmd, resource_group_name, ddos_plan_name, tags=None, vnets=
 
 # region DNS Commands
 # add delegation name server record for the created child zone in it's parent zone.
+def _to_snake(s):
+    import re
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', s)
+
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+
+def _convert_to_snake_case(element):
+    if isinstance(element, dict):
+        ret = dict()
+        for k, v in element.items():
+            ret[_to_snake(k)] = _convert_to_snake_case(v)
+
+        return ret
+
+    if isinstance(element, list):
+        return [_convert_to_snake_case(i) for i in element]
+
+    return element
+
+
 def add_dns_delegation(cmd, child_zone, parent_zone, child_rg, child_zone_name):
     """
      :param child_zone: the zone object corresponding to the child that is created.
@@ -2428,28 +2430,39 @@ def add_dns_delegation(cmd, child_zone, parent_zone, child_rg, child_zone_name):
     if all([parent_zone_name, parent_rg, child_zone_name, child_zone]) and child_zone_name.endswith(parent_zone_name):
         record_set_name = child_zone_name.replace('.' + parent_zone_name, '')
         try:
-            for dname in child_zone.name_servers:
+            for dname in child_zone["nameServers"]:
                 add_dns_ns_record(cmd, parent_rg, parent_zone_name, record_set_name, dname, parent_subscription_id)
-            print('Delegation added succesfully in \'{}\'\n'.format(parent_zone_name), file=sys.stderr)
+            print('Delegation added successfully in \'{}\'\n'.format(parent_zone_name), file=sys.stderr)
         except HttpResponseError as ex:
             logger.error(ex)
             print('Could not add delegation in \'{}\'\n'.format(parent_zone_name), file=sys.stderr)
 
 
-def create_dns_zone(cmd, client, resource_group_name, zone_name, parent_zone_name=None, tags=None,
+def create_dns_zone(cmd, resource_group_name, zone_name, parent_zone_name=None, tags=None,
                     if_none_match=False, zone_type='Public', resolution_vnets=None, registration_vnets=None):
-    Zone = cmd.get_models('Zone', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    zone = Zone(location='global', tags=tags)
 
-    if hasattr(zone, 'zone_type'):
-        zone.zone_type = zone_type
-        zone.registration_virtual_networks = registration_vnets
-        zone.resolution_virtual_networks = resolution_vnets
+    resolution_vnets_dict = []
+    if resolution_vnets:
+        for resolution_vnet in resolution_vnets:
+            resolution_vnets_dict.append({"id": resolution_vnet.id})
 
-    created_zone = client.create_or_update(resource_group_name, zone_name, zone,
-                                           if_none_match='*' if if_none_match else None)
+    registration_vnets_dict = []
+    if registration_vnets:
+        for registration_vnet in registration_vnets:
+            registration_vnets_dict.append({"id": registration_vnet.id})
 
-    if cmd.supported_api_version(min_api='2016-04-01') and parent_zone_name is not None:
+    created_zone = _DNSZoneCreate(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "zone_name": zone_name,
+        "if_none_match": '*' if if_none_match else None,
+        "location": 'global',
+        "tags": tags,
+        "zone_type": zone_type,
+        "resolution_virtual_networks": resolution_vnets_dict if resolution_vnets else None,
+        "registration_virtual_networks": registration_vnets_dict if registration_vnets else None
+    })
+
+    if cmd.supported_api_version(min_api='2016-04-01', resource_type=ResourceType.MGMT_NETWORK_DNS) and parent_zone_name is not None:
         logger.info('Attempting to add delegation in the parent zone')
         add_dns_delegation(cmd, created_zone, parent_zone_name, resource_group_name, zone_name)
     return created_zone
@@ -2475,61 +2488,55 @@ def update_dns_zone(instance, tags=None, zone_type=None, resolution_vnets=None, 
     return instance
 
 
-def list_dns_zones(cmd, resource_group_name=None):
-    ncf = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS).zones
-    if resource_group_name:
-        return ncf.list_by_resource_group(resource_group_name)
-    return ncf.list()
+def show_dns_soa_record_set(cmd, resource_group_name, zone_name, record_type):
+    return DNSRecordSetSOAShow(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "zone_name": zone_name
+    })
 
 
-def create_dns_record_set(cmd, resource_group_name, zone_name, record_set_name, record_set_type,
-                          metadata=None, if_match=None, if_none_match=None, ttl=3600, target_resource=None):
+def update_dns_soa_record(cmd, resource_group_name, zone_name, host=None, email=None,
+                          serial_number=None, refresh_time=None, retry_time=None, expire_time=None,
+                          minimum_ttl=3600, if_none_match=None):
+    record_set_name = '@'
+    record_type = 'soa'
 
-    RecordSet = cmd.get_models('RecordSet', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    SubResource = cmd.get_models('SubResource', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS).record_sets
-    record_set = RecordSet(
-        ttl=ttl,
-        metadata=metadata,
-        target_resource=SubResource(id=target_resource) if target_resource else None
-    )
-    return client.create_or_update(resource_group_name, zone_name, record_set_name,
-                                   record_set_type, record_set, if_match=if_match,
-                                   if_none_match='*' if if_none_match else None)
+    record_set = DNSRecordSetSOAShow(cli_ctx=cmd.cli_ctx)(command_args={
+        "zone_name": zone_name,
+        "resource_group": resource_group_name
+    })
 
+    record_camal = record_set["SOARecord"]
+    record = dict()
+    record["host"] = host or record_camal.get("host", None)
+    record["email"] = email or record_camal.get("email", None)
+    record["serial_number"] = serial_number or record_camal.get("serialNumber", None)
+    record["refresh_time"] = refresh_time or record_camal.get("refreshTime", None)
+    record["retry_time"] = retry_time or record_camal.get("retryTime", None)
+    record["expire_time"] = expire_time or record_camal.get("expireTime", None)
+    record["minimum_ttl"] = minimum_ttl or record_camal.get("minimumTTL", None)
 
-def list_dns_record_set(client, resource_group_name, zone_name, record_type=None):
-    if record_type:
-        return client.list_by_type(resource_group_name, zone_name, record_type)
-
-    return client.list_by_dns_zone(resource_group_name, zone_name)
-
-
-def update_dns_record_set(instance, cmd, metadata=None, target_resource=None):
-    if metadata is not None:
-        instance.metadata = metadata
-    if target_resource == '':
-        instance.target_resource = None
-    elif target_resource is not None:
-        SubResource = cmd.get_models('SubResource', resource_type=ResourceType.MGMT_NETWORK_DNS)
-        instance.target_resource = SubResource(id=target_resource)
-    return instance
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            is_list=False, if_none_match=if_none_match)
 
 
 def _type_to_property_name(key):
     type_dict = {
-        'a': 'a_records',
-        'aaaa': 'aaaa_records',
-        'caa': 'caa_records',
-        'cname': 'cname_record',
-        'mx': 'mx_records',
-        'ns': 'ns_records',
-        'ptr': 'ptr_records',
-        'soa': 'soa_record',
-        'spf': 'txt_records',
-        'srv': 'srv_records',
-        'txt': 'txt_records',
-        'alias': 'target_resource',
+        # `record_type`: (`snake_case`, `camel_case`)
+        'a': ('a_records', "ARecords"),
+        'aaaa': ('aaaa_records', "AAAARecords"),
+        'caa': ('caa_records', "caaRecords"),
+        'cname': ('cname_record', "CNAMERecord"),
+        'ds': ('ds_records', "DSRecords"),
+        'mx': ('mx_records', "MXRecords"),
+        'ns': ('ns_records', "NSRecords"),
+        'ptr': ('ptr_records', "PTRRecords"),
+        'soa': ('soa_record', "SOARecord"),
+        'spf': ('txt_records', "TXTRecords"),
+        'srv': ('srv_records', "SRVRecords"),
+        'tlsa': ('tlsa_records', "TLSARecords"),
+        'txt': ('txt_records', "TXTRecords"),
+        'alias': ('target_resource', "targetResource"),
     }
     return type_dict[key.lower()]
 
@@ -2537,8 +2544,10 @@ def _type_to_property_name(key):
 def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint: disable=too-many-branches
     from time import localtime, strftime
 
-    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS)
-    record_sets = client.record_sets.list_by_dns_zone(resource_group_name, zone_name)
+    record_sets = _DNSRecordSetListByZone(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "zone_name": zone_name
+    })
 
     zone_obj = OrderedDict({
         '$origin': zone_name.rstrip('.') + '.',
@@ -2548,9 +2557,10 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint:
     })
 
     for record_set in record_sets:
-        record_type = record_set.type.rsplit('/', 1)[1].lower()
-        record_set_name = record_set.name
-        record_data = getattr(record_set, _type_to_property_name(record_type), None)
+        record_set = _convert_to_snake_case(record_set)
+        record_type = record_set["type"].rsplit('/', 1)[1].lower()
+        record_set_name = record_set["name"]
+        record_data = record_set.get(_type_to_property_name(record_type)[0])
 
         if not record_data:
             record_data = []
@@ -2561,48 +2571,54 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint:
             zone_obj[record_set_name] = OrderedDict()
 
         for record in record_data:
-            record_obj = {'ttl': record_set.ttl}
+            record_obj = {'ttl': record_set["ttl"]}
 
             if record_type not in zone_obj[record_set_name]:
                 zone_obj[record_set_name][record_type] = []
             if record_type == 'aaaa':
-                record_obj.update({'ip': record.ipv6_address})
+                record_obj.update({'ip': record["ipv6_address"]})
             elif record_type == 'a':
-                record_obj.update({'ip': record.ipv4_address})
+                record_obj.update({'ip': record["ipv4_address"]})
             elif record_type == 'caa':
-                record_obj.update({'val': record.value, 'tag': record.tag, 'flags': record.flags})
+                record_obj.update({'val': record["value"], 'tag': record["tag"], 'flags': record["flags"]})
             elif record_type == 'cname':
-                record_obj.update({'alias': record.cname.rstrip('.') + '.'})
+                record_obj.update({'alias': record["cname"].rstrip('.') + '.'})
+            elif record_type == 'ds':
+                record_obj.update({'key_tag': record["key_tag"], 'algorithm': record["algorithm"], 'digest_type': record["digest"]["algorithm_type"], 'digest': record["digest"]["value"]})
             elif record_type == 'mx':
-                record_obj.update({'preference': record.preference, 'host': record.exchange.rstrip('.') + '.'})
+                record_obj.update({'preference': record["preference"], 'host': record["exchange"].rstrip('.') + '.'})
             elif record_type == 'ns':
-                record_obj.update({'host': record.nsdname.rstrip('.') + '.'})
+                record_obj.update({'host': record["nsdname"].rstrip('.') + '.'})
             elif record_type == 'ptr':
-                record_obj.update({'host': record.ptrdname.rstrip('.') + '.'})
+                record_obj.update({'host': record["ptrdname"].rstrip('.') + '.'})
             elif record_type == 'soa':
                 record_obj.update({
-                    'mname': record.host.rstrip('.') + '.',
-                    'rname': record.email.rstrip('.') + '.',
-                    'serial': int(record.serial_number), 'refresh': record.refresh_time,
-                    'retry': record.retry_time, 'expire': record.expire_time,
-                    'minimum': record.minimum_ttl
+                    'mname': record["host"].rstrip('.') + '.',
+                    'rname': record["email"].rstrip('.') + '.',
+                    'serial': int(record["serial_number"]),
+                    'refresh': record["refresh_time"],
+                    'retry': record["retry_time"],
+                    'expire': record["expire_time"],
+                    'minimum': record["minimum_ttl"]
                 })
-                zone_obj['$ttl'] = record.minimum_ttl
+                zone_obj['$ttl'] = record["minimum_ttl"]
             elif record_type == 'srv':
-                record_obj.update({'priority': record.priority, 'weight': record.weight,
-                                   'port': record.port, 'target': record.target.rstrip('.') + '.'})
+                record_obj.update({'priority': record["priority"], 'weight': record["weight"],
+                                   'port': record["port"], 'target': record["target"].rstrip('.') + '.'})
+            elif record_type == 'tlsa':
+                record_obj.update({'usage': record["usage"], 'selector': record["selector"], 'matching_type': record["matching_type"], 'certificate': record["cert_association_data"]})
             elif record_type == 'txt':
-                record_obj.update({'txt': ''.join(record.value)})
+                record_obj.update({'txt': ''.join(record["value"])})
             zone_obj[record_set_name][record_type].append(record_obj)
 
         if len(record_data) == 0:
-            record_obj = {'ttl': record_set.ttl}
+            record_obj = {'ttl': record_set["ttl"]}
 
             if record_type not in zone_obj[record_set_name]:
                 zone_obj[record_set_name][record_type] = []
             # Checking for alias record
-            if (record_type == 'a' or record_type == 'aaaa' or record_type == 'cname') and record_set.target_resource.id:
-                target_resource_id = record_set.target_resource.id
+            if (record_type == 'a' or record_type == 'aaaa' or record_type == 'cname') and record_set["target_resource"]["id"]:
+                target_resource_id = record_set["target_resource"]["id"]
                 record_obj.update({'target-resource-id': record_type.upper() + " " + target_resource_id})
                 record_type = 'alias'
                 if record_type not in zone_obj[record_set_name]:
@@ -2624,62 +2640,40 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint:
 
 # pylint: disable=too-many-return-statements, inconsistent-return-statements, too-many-branches
 def _build_record(cmd, data):
-    (
-        AaaaRecord,
-        ARecord,
-        CaaRecord,
-        CnameRecord,
-        MxRecord,
-        NsRecord,
-        PtrRecord,
-        SoaRecord,
-        SrvRecord,
-        TxtRecord,
-        SubResource,
-    ) = cmd.get_models(
-        "AaaaRecord",
-        "ARecord",
-        "CaaRecord",
-        "CnameRecord",
-        "MxRecord",
-        "NsRecord",
-        "PtrRecord",
-        "SoaRecord",
-        "SrvRecord",
-        "TxtRecord",
-        "SubResource",
-        resource_type=ResourceType.MGMT_NETWORK_DNS,
-    )
     record_type = data['delim'].lower()
     try:
         if record_type == 'aaaa':
-            return AaaaRecord(ipv6_address=data['ip'])
+            return {"ipv6_address": data["ip"]}
         if record_type == 'a':
-            return ARecord(ipv4_address=data['ip'])
-        if (record_type == 'caa' and
-                supported_api_version(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS, min_api='2018-03-01-preview')):
-            return CaaRecord(value=data['val'], flags=int(data['flags']), tag=data['tag'])
+            return {"ipv4_address": data["ip"]}
+        if record_type == 'caa':
+            return {"value": data["val"], "flags": int(data["flags"]), "tag": data["tag"]}
         if record_type == 'cname':
-            return CnameRecord(cname=data['alias'])
+            return {"cname": data["alias"]}
+        if record_type == 'ds':
+            return {"key_tag": int(data["key_tag"]), "algorithm": int(data["algorithm"]),
+                    "digest": {"algorithm_type": int(data["digest_type"]), "value": data["digest"]}}
         if record_type == 'mx':
-            return MxRecord(preference=data['preference'], exchange=data['host'])
+            return {"preference": int(data["preference"]), "exchange": data["host"]}
         if record_type == 'ns':
-            return NsRecord(nsdname=data['host'])
+            return {"nsdname": data["host"]}
         if record_type == 'ptr':
-            return PtrRecord(ptrdname=data['host'])
+            return {"ptrdname": data["host"]}
         if record_type == 'soa':
-            return SoaRecord(host=data['host'], email=data['email'], serial_number=data['serial'],
-                             refresh_time=data['refresh'], retry_time=data['retry'], expire_time=data['expire'],
-                             minimum_ttl=data['minimum'])
+            return {"host": data["host"], "email": data["email"], "serial_number": int(data["serial"]),
+                    "refresh_time": data["refresh"], "retry_time": data["retry"], "expire_time": data["expire"],
+                    "minimum_ttl": data["minimum"]}
         if record_type == 'srv':
-            return SrvRecord(
-                priority=int(data['priority']), weight=int(data['weight']), port=int(data['port']),
-                target=data['target'])
+            return {"priority": int(data["priority"]), "weight": int(data["weight"]), "port": int(data["port"]),
+                    "target": data["target"]}
+        if record_type == 'tlsa':
+            return {"usage": int(data["usage"]), "selector": int(data["selector"]),
+                    "matching_type": int(data["matching_type"]), "cert_association_data": data["certificate"]}
         if record_type in ['txt', 'spf']:
             text_data = data['txt']
-            return TxtRecord(value=text_data) if isinstance(text_data, list) else TxtRecord(value=[text_data])
+            return {"value": text_data} if isinstance(text_data, list) else {"value": [text_data]}
         if record_type == 'alias':
-            return SubResource(id=data["resourceId"])
+            return {"id": data["resourceId"]}
     except KeyError as ke:
         raise CLIError("The {} record '{}' is missing a property.  {}"
                        .format(record_type, data['name'], ke))
@@ -2691,7 +2685,6 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
     from azure.core.exceptions import HttpResponseError
     import sys
     logger.warning("In the future, zone name will be case insensitive.")
-    RecordSet = cmd.get_models('RecordSet', resource_type=ResourceType.MGMT_NETWORK_DNS)
 
     from azure.cli.core.azclierror import FileOperationError, UnclassifiedUserFault
     try:
@@ -2712,7 +2705,6 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
     for record_set_name in zone_obj:
         for record_set_type in zone_obj[record_set_name]:
             record_set_obj = zone_obj[record_set_name][record_set_type]
-
             if record_set_type == 'soa':
                 origin = record_set_name.rstrip('.')
 
@@ -2730,11 +2722,13 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
                     record_set_key = '{}{}'.format(record_set_name.lower(), alias_record_type)
 
                 record = _build_record(cmd, entry)
+
                 if not record:
                     logger.warning('Cannot import %s. RecordType is not found. Skipping...', entry['delim'].lower())
                     continue
 
                 record_set = record_sets.get(record_set_key, None)
+
                 if not record_set:
 
                     # Workaround for issue #2824
@@ -2745,8 +2739,9 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
                             'imported at this time. Skipping...', relative_record_set_name)
                         continue
 
-                    record_set = RecordSet(ttl=record_set_ttl)
+                    record_set = {"ttl": record_set_ttl}
                     record_sets[record_set_key] = record_set
+
                 _add_record(record_set, record, record_set_type,
                             is_list=record_set_type.lower() not in ['soa', 'cname', 'alias'])
 
@@ -2755,40 +2750,63 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
         rs_name, rs_type = key.lower().rsplit('.', 1)
         rs_name = rs_name[:-(len(origin) + 1)] if rs_name != origin else '@'
         try:
-            record_count = len(getattr(rs, _type_to_property_name(rs_type)))
-        except TypeError:
+            records_temp = rs[_type_to_property_name(rs_type)[0]]
+            record_count = len(records_temp) if isinstance(records_temp, list) else 1
+        except (TypeError, KeyError):
+            # There is some bug with `alias records` being mapped from `AZURE ALIAS A` to `ARecords`,
+            # but `rs` does not contain `a_records`.  We could fix it, but this is just logging, so
+            # lets not fail the whole import and hope someone refactors this method
             record_count = 1
         total_records += record_count
     cum_records = 0
 
-    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS)
     print('== BEGINNING ZONE IMPORT: {} ==\n'.format(zone_name), file=sys.stderr)
 
-    Zone = cmd.get_models('Zone', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    client.zones.create_or_update(resource_group_name, zone_name, Zone(location='global'))
-    for key, rs in record_sets.items():
+    _DNSZoneCreate(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'zone_name': zone_name,
+        'location': 'global'
+    })
 
+    for key, rs in record_sets.items():
         rs_name, rs_type = key.lower().rsplit('.', 1)
         rs_name = '@' if rs_name == origin else rs_name
+
         if rs_name.endswith(origin):
             rs_name = rs_name[:-(len(origin) + 1)]
 
         try:
-            record_count = len(getattr(rs, _type_to_property_name(rs_type)))
-        except TypeError:
+            records_temp = rs[_type_to_property_name(rs_type)[0]]
+            record_count = len(records_temp) if isinstance(records_temp, list) else 1
+        except (TypeError, KeyError):
             record_count = 1
+
         if rs_name == '@' and rs_type == 'soa':
-            root_soa = client.record_sets.get(resource_group_name, zone_name, '@', 'SOA')
-            rs.soa_record.host = root_soa.soa_record.host
+            root_soa = DNSRecordSetSOAShow(cli_ctx=cmd.cli_ctx)(command_args={
+                'resource_group': resource_group_name,
+                'zone_name': zone_name,
+            })
+            rs["soa_record"]["host"] = root_soa["SOARecord"]["host"]
             rs_name = '@'
         elif rs_name == '@' and rs_type == 'ns':
-            root_ns = client.record_sets.get(resource_group_name, zone_name, '@', 'NS')
-            root_ns.ttl = rs.ttl
-            rs = root_ns
-            rs_type = rs.type.rsplit('/', 1)[1]
+            root_ns = DNSRecordSetNSShow(cli_ctx=cmd.cli_ctx)(command_args={
+                'resource_group': resource_group_name,
+                'zone_name': zone_name,
+                'name': '@'
+            })
+            root_ns["ttl"] = rs["ttl"]
+            rs = _convert_to_snake_case(root_ns)
         try:
-            client.record_sets.create_or_update(
-                resource_group_name, zone_name, rs_name, rs_type, rs)
+            rs["target_resource"] = rs.get("target_resource").get("id") if rs.get("target_resource") else None
+
+            _record_create = _record_create_func(rs_type)
+            _record_create(cli_ctx=cmd.cli_ctx)(command_args={
+                'resource_group': resource_group_name,
+                'zone_name': zone_name,
+                'name': rs_name,
+                **rs
+            })
+
             cum_records += record_count
             print("({}/{}) Imported {} records of type '{}' and name '{}'"
                   .format(cum_records, total_records, record_count, rs_type, rs_name), file=sys.stderr)
@@ -2800,8 +2818,7 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
 
 def add_dns_aaaa_record(cmd, resource_group_name, zone_name, record_set_name, ipv6_address,
                         ttl=3600, if_none_match=None):
-    AaaaRecord = cmd.get_models('AaaaRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = AaaaRecord(ipv6_address=ipv6_address)
+    record = {"ipv6_address": ipv6_address}
     record_type = 'aaaa'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                             ttl=ttl, if_none_match=if_none_match)
@@ -2809,8 +2826,7 @@ def add_dns_aaaa_record(cmd, resource_group_name, zone_name, record_set_name, ip
 
 def add_dns_a_record(cmd, resource_group_name, zone_name, record_set_name, ipv4_address,
                      ttl=3600, if_none_match=None):
-    ARecord = cmd.get_models('ARecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = ARecord(ipv4_address=ipv4_address)
+    record = {"ipv4_address": ipv4_address}
     record_type = 'a'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name, 'arecords',
                             ttl=ttl, if_none_match=if_none_match)
@@ -2818,25 +2834,30 @@ def add_dns_a_record(cmd, resource_group_name, zone_name, record_set_name, ipv4_
 
 def add_dns_caa_record(cmd, resource_group_name, zone_name, record_set_name, value, flags, tag,
                        ttl=3600, if_none_match=None):
-    CaaRecord = cmd.get_models('CaaRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = CaaRecord(flags=flags, tag=tag, value=value)
+    record = {"flags": flags, "tag": tag, "value": value}
     record_type = 'caa'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                             ttl=ttl, if_none_match=if_none_match)
 
 
 def add_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name, cname, ttl=3600, if_none_match=None):
-    CnameRecord = cmd.get_models('CnameRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = CnameRecord(cname=cname)
+    record = {"cname": cname}
     record_type = 'cname'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                             is_list=False, ttl=ttl, if_none_match=if_none_match)
 
 
+def add_dns_ds_record(cmd, resource_group_name, zone_name, record_set_name, key_tag, algorithm, digest_type, digest,
+                      ttl=3600, if_none_match=None):
+    record = {"algorithm": algorithm, "key_tag": key_tag, "digest": {"algorithm_type": digest_type, "value": digest}}
+    record_type = 'ds'
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            ttl=ttl, if_none_match=if_none_match)
+
+
 def add_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, preference, exchange,
                       ttl=3600, if_none_match=None):
-    MxRecord = cmd.get_models('MxRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = MxRecord(preference=int(preference), exchange=exchange)
+    record = {"preference": int(preference), "exchange": exchange}
     record_type = 'mx'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                             ttl=ttl, if_none_match=if_none_match)
@@ -2844,64 +2865,46 @@ def add_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, pref
 
 def add_dns_ns_record(cmd, resource_group_name, zone_name, record_set_name, dname,
                       subscription_id=None, ttl=3600, if_none_match=None):
-    NsRecord = cmd.get_models('NsRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = NsRecord(nsdname=dname)
+    record = {"nsdname": dname}
     record_type = 'ns'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                             subscription_id=subscription_id, ttl=ttl, if_none_match=if_none_match)
 
 
 def add_dns_ptr_record(cmd, resource_group_name, zone_name, record_set_name, dname, ttl=3600, if_none_match=None):
-    PtrRecord = cmd.get_models('PtrRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = PtrRecord(ptrdname=dname)
+    record = {"ptrdname": dname}
     record_type = 'ptr'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                             ttl=ttl, if_none_match=if_none_match)
 
 
-def update_dns_soa_record(cmd, resource_group_name, zone_name, host=None, email=None,
-                          serial_number=None, refresh_time=None, retry_time=None, expire_time=None,
-                          minimum_ttl=3600, if_none_match=None):
-    record_set_name = '@'
-    record_type = 'soa'
-
-    ncf = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS).record_sets
-    record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
-    record = record_set.soa_record
-
-    record.host = host or record.host
-    record.email = email or record.email
-    record.serial_number = serial_number or record.serial_number
-    record.refresh_time = refresh_time or record.refresh_time
-    record.retry_time = retry_time or record.retry_time
-    record.expire_time = expire_time or record.expire_time
-    record.minimum_ttl = minimum_ttl or record.minimum_ttl
-
-    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                            is_list=False, if_none_match=if_none_match)
-
-
 def add_dns_srv_record(cmd, resource_group_name, zone_name, record_set_name, priority, weight,
                        port, target, if_none_match=None):
-    SrvRecord = cmd.get_models('SrvRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = SrvRecord(priority=priority, weight=weight, port=port, target=target)
+    record = {"priority": priority, "weight": weight, "port": port, "target": target}
     record_type = 'srv'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                             if_none_match=if_none_match)
 
 
+def add_dns_tlsa_record(cmd, resource_group_name, zone_name, record_set_name, certificate_usage, selector, matching_type, certificate_data,
+                        ttl=3600, if_none_match=None):
+    record = {"cert_association_data": certificate_data, "matching_type": matching_type, "selector": selector, "usage": certificate_usage}
+    record_type = 'tlsa'
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            ttl=ttl, if_none_match=if_none_match)
+
+
 def add_dns_txt_record(cmd, resource_group_name, zone_name, record_set_name, value, if_none_match=None):
-    TxtRecord = cmd.get_models('TxtRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = TxtRecord(value=value)
+    record = {"value": value}
     record_type = 'txt'
-    long_text = ''.join(x for x in record.value)
+    long_text = ''.join(x for x in record["value"])
     original_len = len(long_text)
-    record.value = []
+    record["value"] = []
     while len(long_text) > 255:
-        record.value.append(long_text[:255])
+        record["value"].append(long_text[:255])
         long_text = long_text[255:]
-    record.value.append(long_text)
-    final_str = ''.join(record.value)
+    record["value"].append(long_text)
+    final_str = ''.join(record["value"])
     final_len = len(final_str)
     assert original_len == final_len
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
@@ -2910,8 +2913,7 @@ def add_dns_txt_record(cmd, resource_group_name, zone_name, record_set_name, val
 
 def remove_dns_aaaa_record(cmd, resource_group_name, zone_name, record_set_name, ipv6_address,
                            keep_empty_record_set=False):
-    AaaaRecord = cmd.get_models('AaaaRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = AaaaRecord(ipv6_address=ipv6_address)
+    record = {"ipv6_address": ipv6_address}
     record_type = 'aaaa'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
@@ -2919,8 +2921,7 @@ def remove_dns_aaaa_record(cmd, resource_group_name, zone_name, record_set_name,
 
 def remove_dns_a_record(cmd, resource_group_name, zone_name, record_set_name, ipv4_address,
                         keep_empty_record_set=False):
-    ARecord = cmd.get_models('ARecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = ARecord(ipv4_address=ipv4_address)
+    record = {"ipv4_address": ipv4_address}
     record_type = 'a'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
@@ -2928,8 +2929,7 @@ def remove_dns_a_record(cmd, resource_group_name, zone_name, record_set_name, ip
 
 def remove_dns_caa_record(cmd, resource_group_name, zone_name, record_set_name, value,
                           flags, tag, keep_empty_record_set=False):
-    CaaRecord = cmd.get_models('CaaRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = CaaRecord(flags=flags, tag=tag, value=value)
+    record = {"flags": flags, "tag": tag, "value": value}
     record_type = 'caa'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
@@ -2937,17 +2937,22 @@ def remove_dns_caa_record(cmd, resource_group_name, zone_name, record_set_name, 
 
 def remove_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name, cname,
                             keep_empty_record_set=False):
-    CnameRecord = cmd.get_models('CnameRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = CnameRecord(cname=cname)
+    record = {"cname": cname}
     record_type = 'cname'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
                           is_list=False, keep_empty_record_set=keep_empty_record_set)
 
 
+def remove_dns_ds_record(cmd, resource_group_name, zone_name, record_set_name, key_tag, algorithm, digest_type, digest, keep_empty_record_set=False):
+    record = {"algorithm": algorithm, "key_tag": key_tag, "digest": {"algorithm_type": digest_type, "value": digest}}
+    record_type = 'ds'
+    return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
+                          keep_empty_record_set=keep_empty_record_set)
+
+
 def remove_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, preference, exchange,
                          keep_empty_record_set=False):
-    MxRecord = cmd.get_models('MxRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = MxRecord(preference=int(preference), exchange=exchange)
+    record = {"preference": int(preference), "exchange": exchange}
     record_type = 'mx'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
@@ -2955,8 +2960,7 @@ def remove_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, p
 
 def remove_dns_ns_record(cmd, resource_group_name, zone_name, record_set_name, dname,
                          keep_empty_record_set=False):
-    NsRecord = cmd.get_models('NsRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = NsRecord(nsdname=dname)
+    record = {"nsdname": dname}
     record_type = 'ns'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
@@ -2964,8 +2968,7 @@ def remove_dns_ns_record(cmd, resource_group_name, zone_name, record_set_name, d
 
 def remove_dns_ptr_record(cmd, resource_group_name, zone_name, record_set_name, dname,
                           keep_empty_record_set=False):
-    PtrRecord = cmd.get_models('PtrRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = PtrRecord(ptrdname=dname)
+    record = {"ptrdname": dname}
     record_type = 'ptr'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
@@ -2973,17 +2976,22 @@ def remove_dns_ptr_record(cmd, resource_group_name, zone_name, record_set_name, 
 
 def remove_dns_srv_record(cmd, resource_group_name, zone_name, record_set_name, priority, weight,
                           port, target, keep_empty_record_set=False):
-    SrvRecord = cmd.get_models('SrvRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = SrvRecord(priority=priority, weight=weight, port=port, target=target)
+    record = {"priority": priority, "weight": weight, "port": port, "target": target}
     record_type = 'srv'
+    return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
+                          keep_empty_record_set=keep_empty_record_set)
+
+
+def remove_dns_tlsa_record(cmd, resource_group_name, zone_name, record_set_name, certificate_usage, selector, matching_type, certificate_data, keep_empty_record_set=False):
+    record = {"cert_association_data": certificate_data, "matching_type": matching_type, "selector": selector, "usage": certificate_usage}
+    record_type = 'tlsa'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
 
 
 def remove_dns_txt_record(cmd, resource_group_name, zone_name, record_set_name, value,
                           keep_empty_record_set=False):
-    TxtRecord = cmd.get_models('TxtRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = TxtRecord(value=value)
+    record = {"value": value}
     record_type = 'txt'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
@@ -2991,69 +2999,77 @@ def remove_dns_txt_record(cmd, resource_group_name, zone_name, record_set_name, 
 
 def _check_a_record_exist(record, exist_list):
     for r in exist_list:
-        if r.ipv4_address == record.ipv4_address:
+        if r["ipv4_address"] == record["ipv4_address"]:
             return True
     return False
 
 
 def _check_aaaa_record_exist(record, exist_list):
     for r in exist_list:
-        if r.ipv6_address == record.ipv6_address:
+        if r["ipv6_address"] == record["ipv6_address"]:
             return True
     return False
 
 
 def _check_caa_record_exist(record, exist_list):
     for r in exist_list:
-        if (r.flags == record.flags and
-                r.tag == record.tag and
-                r.value == record.value):
+        if (r["flags"], r["tag"], r["value"]) == (record["flags"], record["tag"], record["value"]):
             return True
     return False
 
 
 def _check_cname_record_exist(record, exist_list):
     for r in exist_list:
-        if r.cname == record.cname:
+        if r["cname"] == record["cname"]:
+            return True
+    return False
+
+
+def _check_ds_record_exist(record, exist_list):
+    for r in exist_list:
+        if (r["algorithm"], r["key_tag"], r["digest"]["algorithm_type"], r["digest"]["value"]) == (record["algorithm"], record["key_tag"], record["digest"]["algorithm_type"], record["digest"]["value"]):
             return True
     return False
 
 
 def _check_mx_record_exist(record, exist_list):
     for r in exist_list:
-        if (r.preference == record.preference and
-                r.exchange == record.exchange):
+        if (r["preference"], r["exchange"]) == (record["preference"], record["exchange"]):
             return True
     return False
 
 
 def _check_ns_record_exist(record, exist_list):
     for r in exist_list:
-        if r.nsdname == record.nsdname:
+        if r["nsdname"] == record["nsdname"]:
             return True
     return False
 
 
 def _check_ptr_record_exist(record, exist_list):
     for r in exist_list:
-        if r.ptrdname == record.ptrdname:
+        if r["ptrdname"] == record["ptrdname"]:
             return True
     return False
 
 
 def _check_srv_record_exist(record, exist_list):
     for r in exist_list:
-        if (r.priority == record.priority and
-                r.weight == record.weight and
-                r.port == record.port and
-                r.target == record.target):
+        if (r["priority"], r["weight"], r["port"], r["target"]) == (record["priority"], record["weight"], record["port"], record["target"]):
+            return True
+    return False
+
+
+def _check_tlsa_record_exist(record, exist_list):
+    for r in exist_list:
+        if (r["cert_association_data"], r["matching_type"], r["selector"], r["usage"]) == (record["cert_association_data"], record["matching_type"], record["selector"], record["usage"]):
             return True
     return False
 
 
 def _check_txt_record_exist(record, exist_list):
     for r in exist_list:
-        if r.value == record.value:
+        if r["value"] == record["value"]:
             return True
     return False
 
@@ -3063,70 +3079,125 @@ def _record_exist_func(record_type):
 
 
 def _add_record(record_set, record, record_type, is_list=False):
-    record_property = _type_to_property_name(record_type)
+    record_property, _ = _type_to_property_name(record_type)
 
     if is_list:
-        record_list = getattr(record_set, record_property)
+        record_list = record_set.get(record_property, None)
         if record_list is None:
-            setattr(record_set, record_property, [])
-            record_list = getattr(record_set, record_property)
+            record_set[record_property] = []
+            record_list = []
 
         _record_exist = _record_exist_func(record_type)
         if not _record_exist(record, record_list):
-            record_list.append(record)
+            record_set[record_property].append(record)
     else:
-        setattr(record_set, record_property, record)
+        record_set[record_property] = record
+
+
+def _record_show_func(record_type):
+    return globals()["DNSRecordSet{}Show".format(record_type.upper())]
+
+
+def _record_create_func(record_type):
+    return globals()["DNSRecordSet{}Create".format(record_type.upper())]
+
+
+def _record_delete_func(record_type):
+    return globals()["DNSRecordSet{}Delete".format(record_type.upper())]
+
+
+def _record_update_func(record_type):
+    return globals()["DNSRecordSet{}Update".format(record_type.upper())]
 
 
 def _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                      is_list=True, subscription_id=None, ttl=None, if_none_match=None):
     from azure.core.exceptions import HttpResponseError
-    ncf = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS,
-                                  subscription_id=subscription_id).record_sets
 
+    record_snake, record_camel = _type_to_property_name(record_type)
     try:
-        record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
+        _record_show = _record_show_func(record_type)
+        ret = _record_show(cli_ctx=cmd.cli_ctx)(command_args={
+            "name": record_set_name,
+            "zone_name": zone_name,
+            "subscription": subscription_id,
+            "resource_group": resource_group_name
+        })
+        record_set = dict()
+        record_set["ttl"] = ret.get("TTL", None)
+        record_set[record_snake] = ret.get(record_camel, None)
+        record_set = _convert_to_snake_case(record_set)
     except HttpResponseError:
-        RecordSet = cmd.get_models('RecordSet', resource_type=ResourceType.MGMT_NETWORK_DNS)
-        record_set = RecordSet(ttl=3600)
+        record_set = {"ttl": 3600}
 
     if ttl is not None:
-        record_set.ttl = ttl
+        record_set["ttl"] = ttl
 
     _add_record(record_set, record, record_type, is_list)
 
-    return ncf.create_or_update(resource_group_name, zone_name, record_set_name,
-                                record_type, record_set,
-                                if_none_match='*' if if_none_match else None)
+    record_set["target_resource"] = record_set.get("target_resource").get("id") if record_set.get("target_resource") else None
+    _record_create = _record_create_func(record_type)
+    return _record_create(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": record_set_name,
+        "zone_name": zone_name,
+        "subscription": subscription_id,
+        "resource_group": resource_group_name,
+        "if_none_match": "*" if if_none_match else None,
+        **record_set
+    })
 
 
 def _remove_record(cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
                    keep_empty_record_set, is_list=True):
-    ncf = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK_DNS).record_sets
-    record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
-    record_property = _type_to_property_name(record_type)
+    record_snake, record_camel = _type_to_property_name(record_type)
+
+    _record_show = _record_show_func(record_type)
+    ret = _record_show(cli_ctx=cli_ctx)(command_args={
+        "name": record_set_name,
+        "zone_name": zone_name,
+        "resource_group": resource_group_name,
+        "record_type": record_type
+    })
+    record_set = dict()
+    record_set["ttl"] = ret.get("TTL", None)
+    record_set[record_snake] = ret.get(record_camel, None)
+    record_set = _convert_to_snake_case(record_set)
+
+    logger.debug('Retrieved record: %s', str(record_set))
 
     if is_list:
-        record_list = getattr(record_set, record_property)
+        record_list = record_set[record_snake]
         if record_list is not None:
-            keep_list = [r for r in record_list
-                         if not dict_matches_filter(r.__dict__, record.__dict__)]
+            keep_list = [r for r in record_list if not dict_matches_filter(r, record)]
             if len(keep_list) == len(record_list):
                 raise CLIError('Record {} not found.'.format(str(record)))
-            setattr(record_set, record_property, keep_list)
+
+            record_set[record_snake] = keep_list
     else:
-        setattr(record_set, record_property, None)
+        record_set[record_snake] = None
 
     if is_list:
-        records_remaining = len(getattr(record_set, record_property))
+        records_remaining = len(record_set[record_snake]) if record_set[record_snake] is not None else 0
     else:
-        records_remaining = 1 if getattr(record_set, record_property) is not None else 0
+        records_remaining = 1 if record_set[record_snake] is not None else 0
 
     if not records_remaining and not keep_empty_record_set:
         logger.info('Removing empty %s record set: %s', record_type, record_set_name)
-        return ncf.delete(resource_group_name, zone_name, record_set_name, record_type)
 
-    return ncf.create_or_update(resource_group_name, zone_name, record_set_name, record_type, record_set)
+        _record_delete = _record_delete_func(record_type)
+        return _record_delete(cli_ctx=cli_ctx)(command_args={
+            "name": record_set_name,
+            "zone_name": zone_name,
+            "resource_group": resource_group_name
+        })
+
+    _record_update = _record_update_func(record_type)
+    return _record_update(cli_ctx=cli_ctx)(command_args={
+        "name": record_set_name,
+        "zone_name": zone_name,
+        "resource_group": resource_group_name,
+        **record_set
+    })
 
 
 def dict_matches_filter(d, filter_dict):
@@ -3150,7 +3221,7 @@ class ExpressRouteCreate(_ExpressRouteCreate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.bandwidth = AAZListArg(
             options=["--bandwidth"],
@@ -3160,6 +3231,9 @@ class ExpressRouteCreate(_ExpressRouteCreate):
         args_schema.bandwidth_in_mbps._registered = False
         args_schema.bandwidth_in_gbps._registered = False
         args_schema.sku_name._registered = False
+        args_schema.express_route_port._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRoutePorts/{}",
+        )
         return args_schema
 
     def pre_operations(self):
@@ -3180,7 +3254,7 @@ class ExpressRouteUpdate(_ExpressRouteUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.bandwidth = AAZListArg(
             options=["--bandwidth"],
@@ -3191,6 +3265,9 @@ class ExpressRouteUpdate(_ExpressRouteUpdate):
         args_schema.bandwidth_in_mbps._registered = False
         args_schema.bandwidth_in_gbps._registered = False
         args_schema.sku_name._registered = False
+        args_schema.express_route_port._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRoutePorts/{}",
+        )
         return args_schema
 
     def pre_operations(self):
@@ -3231,7 +3308,7 @@ def _validate_ipv6_address_prefixes(prefixes):
 class ExpressRoutePeeringCreate(_ExpressRoutePeeringCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg
+        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat, AAZArgEnum
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.ip_version = AAZStrArg(
             options=['--ip-version'],
@@ -3239,7 +3316,13 @@ class ExpressRoutePeeringCreate(_ExpressRoutePeeringCreate):
             help="The IP version to update Microsoft Peering settings for. Allowed values: IPv4, IPv6. Default: IPv4.",
             default='IPv4'
         )
+        args_schema.route_filter._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/routeFilters/{}",
+        )
+        # taken from Xplat. No enums in SDK
+        args_schema.routing_registry_name.enum = AAZArgEnum({"ARIN": "ARIN", "APNIC": "APNIC", "AFRINIC": "AFRINIC", "LACNIC": "LACNIC", "RIPENCC": "RIPENCC", "RADB": "RADB", "ALTDB": "ALTDB", "LEVEL3": "LEVEL3"})
         args_schema.ipv6_peering_config._registered = False
+        args_schema.peering_name._required = False
         args_schema.peering_name._registered = False
 
         return args_schema
@@ -3279,7 +3362,7 @@ class ExpressRoutePeeringUpdate(_ExpressRoutePeeringUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg
+        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat, AAZArgEnum
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.ip_version = AAZStrArg(
             options=['--ip-version'],
@@ -3287,6 +3370,11 @@ class ExpressRoutePeeringUpdate(_ExpressRoutePeeringUpdate):
             help="The IP version to update Microsoft Peering settings for. Allowed values: IPv4, IPv6. Default: IPv4.",
             default='IPv4'
         )
+        args_schema.route_filter._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/routeFilters/{}",
+        )
+        # taken from Xplat. No enums in SDK
+        args_schema.routing_registry_name.enum = AAZArgEnum({"ARIN": "ARIN", "APNIC": "APNIC", "AFRINIC": "AFRINIC", "LACNIC": "LACNIC", "RIPENCC": "RIPENCC", "RADB": "RADB", "ALTDB": "ALTDB", "LEVEL3": "LEVEL3"})
         args_schema.ipv6_peering_config._registered = False
         args_schema.peering_type._registered = False
         return args_schema
@@ -3316,11 +3404,50 @@ class ExpressRoutePeeringUpdate(_ExpressRoutePeeringUpdate):
                 args.route_filter = None
             if microsoft_config is not None:
                 args.ipv6_peering_config['microsoft_peering_config'] = microsoft_config
+
+
+class ExpressRoutePeeringConnectionCreate(_ExpressRoutePeeringConnectionCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.peer_circuit._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRouteCircuits/{}/peerings/{peering_name}",
+        )
+        args_schema.source_circuit._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRouteCircuits/{circuit_name}/peerings/{peering_name}",
+        )
+
+        return args_schema
 # endregion
 
 
 # region ExpressRoute Connection
 # pylint: disable=unused-argument
+class ExpressRouteGatewayCreate(_ExpressRouteGatewayCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.virtual_hub._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
+        )
+
+        return args_schema
+
+
+class ExpressRouteGatewayUpdate(_ExpressRouteGatewayUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.virtual_hub._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
+        )
+
+        return args_schema
+
+
 class ExpressRouteConnectionCreate(_ExpressRouteConnectionCreate):
 
     @classmethod
@@ -3669,24 +3796,13 @@ class PrivateEndpointPrivateDnsZoneAdd(_PrivateEndpointPrivateDnsZoneAdd):
             )
         )
         args_schema.private_dns_zone_id._registered = False
+        args_schema.name._required = False
 
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
         args.private_dns_zone_id = args.private_dns_zone
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
-class PrivateEndpointPrivateDnsZoneRemove(_PrivateEndpointPrivateDnsZoneRemove):
-
-    def _handler(self, command_args):
-        lro_poller = super()._handler(command_args)
-        lro_poller._result_callback = self._output
-        return lro_poller
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -3700,31 +3816,14 @@ class PrivateEndpointIpConfigAdd(_PrivateEndpointIpConfigAdd):
         return result
 
 
-class PrivateEndpointIpConfigRemove(_PrivateEndpointIpConfigRemove):
-
-    def _handler(self, command_args):
-        lro_poller = super()._handler(command_args)
-        lro_poller._result_callback = self._output
-        return lro_poller
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
 class PrivateEndpointAsgAdd(_PrivateEndpointAsgAdd):
 
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.asg_id._required = False
 
-
-class PrivateEndpointAsgRemove(_PrivateEndpointAsgRemove):
-
-    def _handler(self, command_args):
-        lro_poller = super()._handler(command_args)
-        lro_poller._result_callback = self._output
-        return lro_poller
+        return args_schema
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -3794,11 +3893,12 @@ class PrivateLinkServiceUpdate(_PrivateLinkServiceUpdate):
         from azure.cli.core.aaz import AAZStrArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.lb_name = AAZStrArg(options=['--lb-name'], help="Name of the load balancer to retrieve frontend IP configs from. Ignored if a frontend IP configuration ID is supplied.")
-        args_schema.lb_frontend_ip_configs = AAZListArg(options=['--lb-frontend-ip-configs'], help="Space-separated list of names or IDs of load balancer frontend IP configurations to link to. If names are used, also supply `--lb-name`.")
+        args_schema.lb_frontend_ip_configs = AAZListArg(options=['--lb-frontend-ip-configs'], help="Space-separated list of names or IDs of load balancer frontend IP configurations to link to. If names are used, also supply `--lb-name`.", nullable=True)
         args_schema.lb_frontend_ip_configs.Element = AAZResourceIdArg(
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIpConfigurations/{}"
-            )
+            ),
+            nullable=True
         )
         args_schema.load_balancer_frontend_ip_configurations._registered = False
         return args_schema
@@ -3867,7 +3967,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
         subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
         namespace='Microsoft.Network')
 
-    if edge_zone and cmd.supported_api_version(min_api='2020-08-01'):
+    if edge_zone:
         edge_zone_type = 'EdgeZone'
     else:
         edge_zone_type = None
@@ -3968,6 +4068,7 @@ def _process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name):
 
         subnet = vnet + f'/subnets/{subnet}'
     return subnet
+# endregion
 
 
 # region cross-region lb
@@ -4188,33 +4289,17 @@ class NICCreate(_NICCreate):
 class NICUpdate(_NICUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArg, AAZListArgFormat, AAZResourceIdArgFormat
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
-        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
-            def __call__(self, ctx, value):
-                if value._data == "":
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
+        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_security_group = AAZResourceIdArg(
             options=["--network-security-group"],
             help="Name or ID of an existing network security group",
-            fmt=EmptyResourceIdArgFormat(
+            fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                          "/networkSecurityGroups/{}",
             ),
             nullable=True,
         )
-        args_schema.dns_servers._fmt = EmptyListArgFormat()
         args_schema.nsg._registered = False
         return args_schema
 
@@ -4362,22 +4447,7 @@ class NICIPConfigCreate(_NICIPConfigCreate):
 class NICIPConfigUpdate(_NICIPConfigUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZListArgFormat, AAZResourceIdArgFormat
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
-        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
-            def __call__(self, ctx, value):
-                if value._data == "":
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.vnet_name = AAZStrArg(
             options=["--vnet-name"],
@@ -4385,15 +4455,15 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
             help="Name of the virtual network.",
             nullable=True,
         )
-        args_schema.subnet._fmt = EmptyResourceIdArgFormat(
+        args_schema.subnet._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/virtualNetworks/{vnet_name}/subnets/{}",
         )
-        args_schema.public_ip_address._fmt = EmptyResourceIdArgFormat(
+        args_schema.public_ip_address._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/"
                      "publicIPAddresses/{}"
         )
-        args_schema.gateway_lb._fmt = EmptyResourceIdArgFormat(
+        args_schema.gateway_lb._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/"
                      "loadBalancers/{}/frontendIPConfigurations/{}",
         )
@@ -4401,7 +4471,6 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
             options=["--application-security-groups", "--asgs"],
             arg_group="IP Configuration",
             help="Space-separated list of application security groups.",
-            fmt=EmptyListArgFormat(),
             nullable=True,
         )
         args_schema.application_security_groups.Element = AAZResourceIdArg(
@@ -4422,7 +4491,6 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
             arg_group="Application Gateway",
             help="Space-separated list of names or IDs of application gateway backend address pools to "
                  "associate with the NIC. If names are used, `--gateway-name` must be specified.",
-            fmt=EmptyListArgFormat(),
             nullable=True,
         )
         args_schema.app_gateway_address_pools.Element = AAZResourceIdArg(
@@ -4443,7 +4511,6 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
             arg_group="Load Balancer",
             help="Space-separated list of names or IDs of load balancer address pools to associate with the NIC. "
                  "If names are used, `--lb-name` must be specified.",
-            fmt=EmptyListArgFormat(),
             nullable=True,
         )
         args_schema.lb_address_pools.Element = AAZResourceIdArg(
@@ -4458,7 +4525,6 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
             arg_group="Load Balancer",
             help="Space-separated list of names or IDs of load balancer inbound NAT rules to associate with the NIC. "
                  "If names are used, `--lb-name` must be specified.",
-            fmt=EmptyListArgFormat(),
             nullable=True,
         )
         args_schema.lb_inbound_nat_rules.Element = AAZResourceIdArg(
@@ -4555,28 +4621,8 @@ def add_nic_ip_config_address_pool(cmd, resource_group_name, network_interface_n
 
 def remove_nic_ip_config_address_pool(cmd, resource_group_name, network_interface_name, ip_config_name,
                                       backend_address_pool, load_balancer_name=None, application_gateway_name=None):
-    from .aaz.latest.network.nic.ip_config.lb_pool import Remove as _LBPoolRemove
-    from .aaz.latest.network.nic.ip_config.ag_pool import Remove as _AGPoolRemove
-
-    class LBPoolRemove(_LBPoolRemove):
-        def _handler(self, command_args):
-            lro_poller = super()._handler(command_args)
-            lro_poller._result_callback = self._output
-            return lro_poller
-
-        def _output(self, *args, **kwargs):
-            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-            return result["ipConfigurations"][0]
-
-    class AGPoolRemove(_AGPoolRemove):
-        def _handler(self, command_args):
-            lro_poller = super()._handler(command_args)
-            lro_poller._result_callback = self._output
-            return lro_poller
-
-        def _output(self, *args, **kwargs):
-            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-            return result["ipConfigurations"][0]
+    from .aaz.latest.network.nic.ip_config.lb_pool import Remove as LBPoolRemove
+    from .aaz.latest.network.nic.ip_config.ag_pool import Remove as AGPoolRemove
 
     arguments = {
         "ip_config_name": ip_config_name,
@@ -4611,10 +4657,6 @@ class NICIPConfigNATAdd(_NICIPConfigNATAdd):
 
 
 class NICIPConfigNATRemove(_NICIPConfigNATRemove):
-    def _handler(self, command_args):
-        lro_poller = super()._handler(command_args)
-        lro_poller._result_callback = self._output
-        return lro_poller
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -4629,10 +4671,6 @@ class NICIPConfigNATRemove(_NICIPConfigNATRemove):
                      "/loadBalancers/{lb_name}/inboundNatRules/{}",
         )
         return args_schema
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result["ipConfigurations"][0]
 # endregion
 
 
@@ -4711,15 +4749,7 @@ class NSGRuleCreate(_NSGRuleCreate):
 class NSGRuleUpdate(_NSGRuleUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZListArgFormat, AAZResourceIdArgFormat
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
+        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.destination_asgs = AAZListArg(
             options=["--destination-asgs"],
@@ -4727,7 +4757,6 @@ class NSGRuleUpdate(_NSGRuleUpdate):
             help="Space-separated list of application security group names or IDs. Limited by backend server, "
                  "temporarily this argument only supports one application security group name or ID.",
             nullable=True,
-            fmt=EmptyListArgFormat(),
         )
         args_schema.destination_asgs.Element = AAZResourceIdArg(
             nullable=True,
@@ -4742,7 +4771,6 @@ class NSGRuleUpdate(_NSGRuleUpdate):
             help="Space-separated list of application security group names or IDs. Limited by backend server, "
                  "temporarily this argument only supports one application security group name or ID.",
             nullable=True,
-            fmt=EmptyListArgFormat(),
         )
         args_schema.source_asgs.Element = AAZResourceIdArg(
             nullable=True,
@@ -4891,350 +4919,6 @@ def configure_network_watcher(cmd, locations, resource_group_name=None, enabled=
     return List(cli_ctx=cmd.cli_ctx)(command_args={})
 
 
-def create_nw_connection_monitor(cmd,
-                                 client,
-                                 connection_monitor_name,
-                                 watcher_rg,
-                                 watcher_name,
-                                 resource_group_name=None,
-                                 location=None,
-                                 tags=None,
-                                 endpoint_source_name=None,
-                                 endpoint_source_resource_id=None,
-                                 endpoint_source_address=None,
-                                 endpoint_source_type=None,
-                                 endpoint_source_coverage_level=None,
-                                 endpoint_dest_name=None,
-                                 endpoint_dest_resource_id=None,
-                                 endpoint_dest_address=None,
-                                 endpoint_dest_type=None,
-                                 endpoint_dest_coverage_level=None,
-                                 test_config_name=None,
-                                 test_config_frequency=None,
-                                 test_config_protocol=None,
-                                 test_config_preferred_ip_version=None,
-                                 test_config_threshold_failed_percent=None,
-                                 test_config_threshold_round_trip_time=None,
-                                 test_config_tcp_disable_trace_route=None,
-                                 test_config_tcp_port=None,
-                                 test_config_tcp_port_behavior=None,
-                                 test_config_icmp_disable_trace_route=None,
-                                 test_config_http_port=None,
-                                 test_config_http_method=None,
-                                 test_config_http_path=None,
-                                 test_config_http_valid_status_codes=None,
-                                 test_config_http_prefer_https=None,
-                                 test_group_name=None,
-                                 test_group_disable=None,
-                                 output_type=None,
-                                 workspace_ids=None,
-                                 notes=None):
-    connection_monitor = _create_nw_connection_monitor_v2(cmd,
-                                                          location,
-                                                          tags,
-                                                          endpoint_source_name,
-                                                          endpoint_source_resource_id,
-                                                          endpoint_source_address,
-                                                          endpoint_source_type,
-                                                          endpoint_source_coverage_level,
-                                                          endpoint_dest_name,
-                                                          endpoint_dest_resource_id,
-                                                          endpoint_dest_address,
-                                                          endpoint_dest_type,
-                                                          endpoint_dest_coverage_level,
-                                                          test_config_name,
-                                                          test_config_frequency,
-                                                          test_config_protocol,
-                                                          test_config_preferred_ip_version,
-                                                          test_config_threshold_failed_percent,
-                                                          test_config_threshold_round_trip_time,
-                                                          test_config_tcp_port,
-                                                          test_config_tcp_port_behavior,
-                                                          test_config_tcp_disable_trace_route,
-                                                          test_config_icmp_disable_trace_route,
-                                                          test_config_http_port,
-                                                          test_config_http_method,
-                                                          test_config_http_path,
-                                                          test_config_http_valid_status_codes,
-                                                          test_config_http_prefer_https,
-                                                          test_group_name,
-                                                          test_group_disable,
-                                                          output_type,
-                                                          workspace_ids,
-                                                          notes)
-
-    return client.begin_create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
-
-
-def _create_nw_connection_monitor_v2(cmd,
-                                     location=None,
-                                     tags=None,
-                                     endpoint_source_name=None,
-                                     endpoint_source_resource_id=None,
-                                     endpoint_source_address=None,
-                                     endpoint_source_type=None,
-                                     endpoint_source_coverage_level=None,
-                                     endpoint_dest_name=None,
-                                     endpoint_dest_resource_id=None,
-                                     endpoint_dest_address=None,
-                                     endpoint_dest_type=None,
-                                     endpoint_dest_coverage_level=None,
-                                     test_config_name=None,
-                                     test_config_frequency=None,
-                                     test_config_protocol=None,
-                                     test_config_preferred_ip_version=None,
-                                     test_config_threshold_failed_percent=None,
-                                     test_config_threshold_round_trip_time=None,
-                                     test_config_tcp_port=None,
-                                     test_config_tcp_port_behavior=None,
-                                     test_config_tcp_disable_trace_route=False,
-                                     test_config_icmp_disable_trace_route=False,
-                                     test_config_http_port=None,
-                                     test_config_http_method=None,
-                                     test_config_http_path=None,
-                                     test_config_http_valid_status_codes=None,
-                                     test_config_http_prefer_https=None,
-                                     test_group_name=None,
-                                     test_group_disable=False,
-                                     output_type=None,
-                                     workspace_ids=None,
-                                     notes=None):
-    src_endpoint = _create_nw_connection_monitor_v2_endpoint(cmd,
-                                                             endpoint_source_name,
-                                                             endpoint_resource_id=endpoint_source_resource_id,
-                                                             address=endpoint_source_address,
-                                                             endpoint_type=endpoint_source_type,
-                                                             coverage_level=endpoint_source_coverage_level)
-    dst_endpoint = _create_nw_connection_monitor_v2_endpoint(cmd,
-                                                             endpoint_dest_name,
-                                                             endpoint_resource_id=endpoint_dest_resource_id,
-                                                             address=endpoint_dest_address,
-                                                             endpoint_type=endpoint_dest_type,
-                                                             coverage_level=endpoint_dest_coverage_level)
-    test_config = _create_nw_connection_monitor_v2_test_configuration(cmd,
-                                                                      test_config_name,
-                                                                      test_config_frequency,
-                                                                      test_config_protocol,
-                                                                      test_config_threshold_failed_percent,
-                                                                      test_config_threshold_round_trip_time,
-                                                                      test_config_preferred_ip_version,
-                                                                      test_config_tcp_port,
-                                                                      test_config_tcp_port_behavior,
-                                                                      test_config_tcp_disable_trace_route,
-                                                                      test_config_icmp_disable_trace_route,
-                                                                      test_config_http_port,
-                                                                      test_config_http_method,
-                                                                      test_config_http_path,
-                                                                      test_config_http_valid_status_codes,
-                                                                      test_config_http_prefer_https)
-    test_group = _create_nw_connection_monitor_v2_test_group(cmd,
-                                                             test_group_name,
-                                                             test_group_disable,
-                                                             [test_config],
-                                                             [src_endpoint],
-                                                             [dst_endpoint])
-
-    # If 'workspace_ids' option is specified but 'output_type' is not then still it should be implicit that 'output-type' is 'Workspace'
-    # since only supported value for output_type is 'Workspace' currently.
-    if workspace_ids and not output_type:
-        output_type = 'Workspace'
-
-    if output_type:
-        outputs = []
-        if workspace_ids:
-            for workspace_id in workspace_ids:
-                output = _create_nw_connection_monitor_v2_output(cmd, output_type, workspace_id)
-                outputs.append(output)
-    else:
-        outputs = []
-
-    ConnectionMonitor = cmd.get_models('ConnectionMonitor')
-    cmv2 = ConnectionMonitor(location=location,
-                             tags=tags,
-                             auto_start=None,
-                             monitoring_interval_in_seconds=None,
-                             endpoints=[src_endpoint, dst_endpoint],
-                             test_configurations=[test_config],
-                             test_groups=[test_group],
-                             outputs=outputs,
-                             notes=notes)
-    return cmv2
-
-
-def _create_nw_connection_monitor_v2_endpoint(cmd,
-                                              name,
-                                              endpoint_resource_id=None,
-                                              address=None,
-                                              filter_type=None,
-                                              filter_items=None,
-                                              endpoint_type=None,
-                                              coverage_level=None):
-    if (filter_type and not filter_items) or (not filter_type and filter_items):
-        raise CLIError('usage error: '
-                       '--filter-type and --filter-item for endpoint filter must be present at the same time.')
-
-    ConnectionMonitorEndpoint, ConnectionMonitorEndpointFilter = cmd.get_models(
-        'ConnectionMonitorEndpoint', 'ConnectionMonitorEndpointFilter')
-
-    endpoint = ConnectionMonitorEndpoint(name=name,
-                                         resource_id=endpoint_resource_id,
-                                         address=address,
-                                         type=endpoint_type,
-                                         coverage_level=coverage_level)
-
-    if filter_type and filter_items:
-        endpoint_filter = ConnectionMonitorEndpointFilter(type=filter_type, items=filter_items)
-        endpoint.filter = endpoint_filter
-
-    return endpoint
-
-
-def _create_nw_connection_monitor_v2_test_configuration(cmd,
-                                                        name,
-                                                        test_frequency,
-                                                        protocol,
-                                                        threshold_failed_percent,
-                                                        threshold_round_trip_time,
-                                                        preferred_ip_version,
-                                                        tcp_port=None,
-                                                        tcp_port_behavior=None,
-                                                        tcp_disable_trace_route=None,
-                                                        icmp_disable_trace_route=None,
-                                                        http_port=None,
-                                                        http_method=None,
-                                                        http_path=None,
-                                                        http_valid_status_codes=None,
-                                                        http_prefer_https=None,
-                                                        http_request_headers=None):
-    (ConnectionMonitorTestConfigurationProtocol,
-     ConnectionMonitorTestConfiguration, ConnectionMonitorSuccessThreshold) = cmd.get_models(
-         'ConnectionMonitorTestConfigurationProtocol',
-         'ConnectionMonitorTestConfiguration', 'ConnectionMonitorSuccessThreshold')
-
-    test_config = ConnectionMonitorTestConfiguration(name=name,
-                                                     test_frequency_sec=test_frequency,
-                                                     protocol=protocol,
-                                                     preferred_ip_version=preferred_ip_version)
-
-    if threshold_failed_percent or threshold_round_trip_time:
-        threshold = ConnectionMonitorSuccessThreshold(checks_failed_percent=threshold_failed_percent,
-                                                      round_trip_time_ms=threshold_round_trip_time)
-        test_config.success_threshold = threshold
-
-    if protocol == ConnectionMonitorTestConfigurationProtocol.tcp:
-        ConnectionMonitorTcpConfiguration = cmd.get_models('ConnectionMonitorTcpConfiguration')
-        tcp_config = ConnectionMonitorTcpConfiguration(
-            port=tcp_port,
-            destination_port_behavior=tcp_port_behavior,
-            disable_trace_route=tcp_disable_trace_route
-        )
-        test_config.tcp_configuration = tcp_config
-    elif protocol == ConnectionMonitorTestConfigurationProtocol.icmp:
-        ConnectionMonitorIcmpConfiguration = cmd.get_models('ConnectionMonitorIcmpConfiguration')
-        icmp_config = ConnectionMonitorIcmpConfiguration(disable_trace_route=icmp_disable_trace_route)
-        test_config.icmp_configuration = icmp_config
-    elif protocol == ConnectionMonitorTestConfigurationProtocol.http:
-        ConnectionMonitorHttpConfiguration = cmd.get_models('ConnectionMonitorHttpConfiguration')
-        http_config = ConnectionMonitorHttpConfiguration(
-            port=http_port,
-            method=http_method,
-            path=http_path,
-            request_headers=http_request_headers,
-            valid_status_code_ranges=http_valid_status_codes,
-            prefer_https=http_prefer_https)
-        test_config.http_configuration = http_config
-    else:
-        raise CLIError('Unsupported protocol: "{}" for test configuration'.format(protocol))
-
-    return test_config
-
-
-def _create_nw_connection_monitor_v2_test_group(cmd,
-                                                name,
-                                                disable,
-                                                test_configurations,
-                                                source_endpoints,
-                                                destination_endpoints):
-    ConnectionMonitorTestGroup = cmd.get_models('ConnectionMonitorTestGroup')
-
-    test_group = ConnectionMonitorTestGroup(name=name,
-                                            disable=disable,
-                                            test_configurations=[tc.name for tc in test_configurations],
-                                            sources=[e.name for e in source_endpoints],
-                                            destinations=[e.name for e in destination_endpoints])
-    return test_group
-
-
-def _create_nw_connection_monitor_v2_output(cmd,
-                                            output_type,
-                                            workspace_id=None):
-    ConnectionMonitorOutput, OutputType = cmd.get_models('ConnectionMonitorOutput', 'OutputType')
-    output = ConnectionMonitorOutput(type=output_type)
-
-    if output_type == OutputType.workspace:
-        ConnectionMonitorWorkspaceSettings = cmd.get_models('ConnectionMonitorWorkspaceSettings')
-        workspace = ConnectionMonitorWorkspaceSettings(workspace_resource_id=workspace_id)
-        output.workspace_settings = workspace
-    else:
-        raise CLIError('Unsupported output type: "{}"'.format(output_type))
-
-    return output
-
-
-def add_nw_connection_monitor_v2_endpoint(cmd,
-                                          client,
-                                          watcher_rg,
-                                          watcher_name,
-                                          connection_monitor_name,
-                                          location,
-                                          name,
-                                          coverage_level=None,
-                                          endpoint_type=None,
-                                          source_test_groups=None,
-                                          dest_test_groups=None,
-                                          endpoint_resource_id=None,
-                                          address=None,
-                                          filter_type=None,
-                                          filter_items=None,
-                                          address_include=None,
-                                          address_exclude=None):
-    (ConnectionMonitorEndpoint, ConnectionMonitorEndpointFilter,
-     ConnectionMonitorEndpointScope, ConnectionMonitorEndpointScopeItem) = cmd.get_models(
-         'ConnectionMonitorEndpoint', 'ConnectionMonitorEndpointFilter',
-         'ConnectionMonitorEndpointScope', 'ConnectionMonitorEndpointScopeItem')
-
-    endpoint_scope = ConnectionMonitorEndpointScope(include=[], exclude=[])
-    for ip in address_include or []:
-        include_item = ConnectionMonitorEndpointScopeItem(address=ip)
-        endpoint_scope.include.append(include_item)
-    for ip in address_exclude or []:
-        exclude_item = ConnectionMonitorEndpointScopeItem(address=ip)
-        endpoint_scope.exclude.append(exclude_item)
-
-    endpoint = ConnectionMonitorEndpoint(name=name,
-                                         resource_id=endpoint_resource_id,
-                                         address=address,
-                                         type=endpoint_type,
-                                         coverage_level=coverage_level,
-                                         scope=endpoint_scope if address_include or address_exclude else None)
-
-    if filter_type and filter_items:
-        endpoint_filter = ConnectionMonitorEndpointFilter(type=filter_type, items=filter_items)
-        endpoint.filter = endpoint_filter
-
-    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
-    connection_monitor.endpoints.append(endpoint)
-
-    src_test_groups, dst_test_groups = set(source_test_groups or []), set(dest_test_groups or [])
-    for test_group in connection_monitor.test_groups:
-        if test_group.name in src_test_groups:
-            test_group.sources.append(endpoint.name)
-        if test_group.name in dst_test_groups:
-            test_group.destinations.append(endpoint.name)
-
-    return client.begin_create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
-
-
 def remove_nw_connection_monitor_v2_endpoint(client,
                                              watcher_rg,
                                              watcher_name,
@@ -5287,57 +4971,6 @@ def list_nw_connection_monitor_v2_endpoint(client,
     return connection_monitor.endpoints
 
 
-def add_nw_connection_monitor_v2_test_configuration(cmd,
-                                                    client,
-                                                    watcher_rg,
-                                                    watcher_name,
-                                                    connection_monitor_name,
-                                                    location,
-                                                    name,
-                                                    protocol,
-                                                    test_groups,
-                                                    frequency=None,
-                                                    threshold_failed_percent=None,
-                                                    threshold_round_trip_time=None,
-                                                    preferred_ip_version=None,
-                                                    tcp_port=None,
-                                                    tcp_port_behavior=None,
-                                                    tcp_disable_trace_route=None,
-                                                    icmp_disable_trace_route=None,
-                                                    http_port=None,
-                                                    http_method=None,
-                                                    http_path=None,
-                                                    http_valid_status_codes=None,
-                                                    http_prefer_https=None,
-                                                    http_request_headers=None):
-    new_test_config = _create_nw_connection_monitor_v2_test_configuration(cmd,
-                                                                          name,
-                                                                          frequency,
-                                                                          protocol,
-                                                                          threshold_failed_percent,
-                                                                          threshold_round_trip_time,
-                                                                          preferred_ip_version,
-                                                                          tcp_port,
-                                                                          tcp_port_behavior,
-                                                                          tcp_disable_trace_route,
-                                                                          icmp_disable_trace_route,
-                                                                          http_port,
-                                                                          http_method,
-                                                                          http_path,
-                                                                          http_valid_status_codes,
-                                                                          http_prefer_https,
-                                                                          http_request_headers)
-
-    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
-    connection_monitor.test_configurations.append(new_test_config)
-
-    for test_group in connection_monitor.test_groups:
-        if test_group.name in test_groups:
-            test_group.test_configurations.append(new_test_config.name)
-
-    return client.begin_create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
-
-
 def remove_nw_connection_monitor_v2_test_configuration(client,
                                                        watcher_rg,
                                                        watcher_name,
@@ -5385,92 +5018,6 @@ def list_nw_connection_monitor_v2_test_configuration(client,
                                                      location):
     connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
     return connection_monitor.test_configurations
-
-
-def add_nw_connection_monitor_v2_test_group(cmd,
-                                            client,
-                                            connection_monitor_name,
-                                            watcher_rg,
-                                            watcher_name,
-                                            location,
-                                            name,
-                                            endpoint_source_name,
-                                            endpoint_dest_name,
-                                            test_config_name,
-                                            disable=False,
-                                            endpoint_source_resource_id=None,
-                                            endpoint_source_address=None,
-                                            endpoint_dest_resource_id=None,
-                                            endpoint_dest_address=None,
-                                            test_config_frequency=None,
-                                            test_config_protocol=None,
-                                            test_config_preferred_ip_version=None,
-                                            test_config_threshold_failed_percent=None,
-                                            test_config_threshold_round_trip_time=None,
-                                            test_config_tcp_disable_trace_route=None,
-                                            test_config_tcp_port=None,
-                                            test_config_icmp_disable_trace_route=None,
-                                            test_config_http_port=None,
-                                            test_config_http_method=None,
-                                            test_config_http_path=None,
-                                            test_config_http_valid_status_codes=None,
-                                            test_config_http_prefer_https=None):
-    new_test_configuration_creation_requirements = [
-        test_config_protocol, test_config_preferred_ip_version,
-        test_config_threshold_failed_percent, test_config_threshold_round_trip_time,
-        test_config_tcp_disable_trace_route, test_config_tcp_port,
-        test_config_icmp_disable_trace_route,
-        test_config_http_port, test_config_http_method,
-        test_config_http_path, test_config_http_valid_status_codes, test_config_http_prefer_https
-    ]
-
-    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
-
-    new_test_group = _create_nw_connection_monitor_v2_test_group(cmd,
-                                                                 name,
-                                                                 disable,
-                                                                 [], [], [])
-
-    # deal with endpoint
-    if any([endpoint_source_address, endpoint_source_resource_id]):
-        src_endpoint = _create_nw_connection_monitor_v2_endpoint(cmd,
-                                                                 endpoint_source_name,
-                                                                 endpoint_source_resource_id,
-                                                                 endpoint_source_address)
-        connection_monitor.endpoints.append(src_endpoint)
-    if any([endpoint_dest_address, endpoint_dest_resource_id]):
-        dst_endpoint = _create_nw_connection_monitor_v2_endpoint(cmd,
-                                                                 endpoint_dest_name,
-                                                                 endpoint_dest_resource_id,
-                                                                 endpoint_dest_address)
-        connection_monitor.endpoints.append(dst_endpoint)
-
-    new_test_group.sources.append(endpoint_source_name)
-    new_test_group.destinations.append(endpoint_dest_name)
-
-    # deal with test configuration
-    if any(new_test_configuration_creation_requirements):
-        test_config = _create_nw_connection_monitor_v2_test_configuration(cmd,
-                                                                          test_config_name,
-                                                                          test_config_frequency,
-                                                                          test_config_protocol,
-                                                                          test_config_threshold_failed_percent,
-                                                                          test_config_threshold_round_trip_time,
-                                                                          test_config_preferred_ip_version,
-                                                                          test_config_tcp_port,
-                                                                          test_config_tcp_disable_trace_route,
-                                                                          test_config_icmp_disable_trace_route,
-                                                                          test_config_http_port,
-                                                                          test_config_http_method,
-                                                                          test_config_http_path,
-                                                                          test_config_http_valid_status_codes,
-                                                                          test_config_http_prefer_https)
-        connection_monitor.test_configurations.append(test_config)
-    new_test_group.test_configurations.append(test_config_name)
-
-    connection_monitor.test_groups.append(new_test_group)
-
-    return client.begin_create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
 
 
 def remove_nw_connection_monitor_v2_test_group(client,
@@ -5565,7 +5112,7 @@ def update_nw_flow_log_setter(client, watcher_rg, watcher_name, flow_log_name, p
 
 # region PublicIPAddresses
 def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
-                     allocation_method=None, dns_name=None,
+                     allocation_method=None, dns_name=None, dns_name_scope=None,
                      idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
                      public_ip_prefix=None, edge_zone=None, ip_address=None,
                      protection_mode=None, ddos_protection_plan=None):
@@ -5616,8 +5163,9 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
             public_ip_args['sku'] = 'Basic'
         public_ip_args['tier'] = tier
 
-    if dns_name or reverse_fqdn:
+    if dns_name or dns_name_scope or reverse_fqdn:
         public_ip_args['dns_name'] = dns_name
+        public_ip_args['dns_name_scope'] = dns_name_scope
         public_ip_args['reverse_fqdn'] = reverse_fqdn
 
     if edge_zone:
@@ -5671,18 +5219,19 @@ class PublicIpPrefixCreate(_PublicIpPrefixCreate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
+        from azure.cli.core.aaz import AAZDictArg, AAZStrArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.custom_ip_prefix_name = AAZResourceIdArg(
-            options=['--custom-ip-prefix-name'],
-            help="A custom prefix from which the public prefix derived. If you'd like to cross subscription, please use Resource ID instead.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/customIPPrefixes/{}"
-            )
+        args_schema.custom_ip_prefix_name._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/customIPPrefixes/{}"
         )
-        args_schema.custom_ip_prefix._registered = False
+        args_schema.ip_tags = AAZDictArg(
+            options=["--ip-tags"],
+            help="The list of tags associated with the public IP prefix in 'TYPE=VAL' format.",
+        )
+        args_schema.ip_tags.Element = AAZStrArg()
         args_schema.type._registered = False
         args_schema.sku._registered = False
+        args_schema.ip_tags_list._registered = False
 
         return args_schema
 
@@ -5691,8 +5240,11 @@ class PublicIpPrefixCreate(_PublicIpPrefixCreate):
         args.sku = {'name': 'Standard'}
         if has_value(args.edge_zone):
             args.type = 'EdgeZone'
-        if has_value(args.custom_ip_prefix_name):
-            args.custom_ip_prefix = {'id': args.custom_ip_prefix_name}
+        if has_value(args.ip_tags):
+            ip_tags = []
+            for k, v in args.ip_tags.to_serialized_data().items():
+                ip_tags.append({"ip_tag_type": k, "tag": v})
+            args.ip_tags_list = ip_tags
 # endregion
 
 
@@ -5704,8 +5256,6 @@ def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
                                    ttl=30, tags=None, interval=None, timeout=None, max_failures=None,
                                    monitor_custom_headers=None, status_code_ranges=None, max_return=None):
     from .aaz.latest.network.traffic_manager.profile import Create
-    Create_Profile = Create(cmd.loader)
-
     if monitor_path is None and monitor_protocol == 'HTTP':
         monitor_path = '/'
     args = {
@@ -5728,7 +5278,7 @@ def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
         "max_failures": max_failures
     }
 
-    return Create_Profile(args)
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
 def update_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_group_name,
@@ -5737,8 +5287,6 @@ def update_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
                                    ttl=None, timeout=None, interval=None, max_failures=None,
                                    monitor_custom_headers=None, status_code_ranges=None, max_return=None):
     from .aaz.latest.network.traffic_manager.profile import Update
-    Update_Profile = Update(cmd.loader)
-
     args = {
         "name": traffic_manager_profile_name,
         "resource_group": resource_group_name
@@ -5770,7 +5318,7 @@ def update_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
     if max_failures is not None:
         args["max_failures"] = max_failures
 
-    return Update_Profile(args)
+    return Update(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
 def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endpoint_type, endpoint_name,
@@ -5780,8 +5328,6 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                                     min_child_endpoints=None, min_child_ipv4=None, min_child_ipv6=None,
                                     geo_mapping=None, monitor_custom_headers=None, subnets=None, always_serve=None):
     from .aaz.latest.network.traffic_manager.endpoint import Create
-    Create_Endpoint = Create(cmd.loader)
-
     args = {
         "name": endpoint_name,
         "type": endpoint_type,
@@ -5803,7 +5349,7 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
         "always_serve": always_serve,
     }
 
-    return Create_Endpoint(args)
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
 def update_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endpoint_name,
@@ -5814,8 +5360,6 @@ def update_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                                     min_child_ipv6=None, geo_mapping=None,
                                     subnets=None, monitor_custom_headers=None, always_serve=None):
     from .aaz.latest.network.traffic_manager.endpoint import Update
-    Update_Endpoint = Update(cmd.loader)
-
     args = {
         "name": endpoint_name,
         "type": endpoint_type,
@@ -5851,20 +5395,17 @@ def update_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
     if always_serve is not None:
         args["always_serve"] = always_serve
 
-    return Update_Endpoint(args)
+    return Update(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
 def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpoint_type=None):
     from .aaz.latest.network.traffic_manager.profile import Show
-    Show_Profile = Show(cmd.loader)
-
-    args = {
+    profile = Show(cli_ctx=cmd.cli_ctx)(command_args={
+        "profile_name": profile_name,
         "resource_group": resource_group_name,
-        "profile_name": profile_name
-    }
-    profile = Show_Profile(args)
+    })
 
-    return [e for e in profile['endpoints'] if not endpoint_type or e['type'].endswith(endpoint_type)]
+    return [endpoint for endpoint in profile["endpoints"] if not endpoint_type or endpoint["type"].endswith(endpoint_type)]
 # endregion
 
 
@@ -5900,6 +5441,9 @@ class VNetCreate(_VNetCreate):
                          "/networkSecurityGroups/{}",
             ),
         )
+        args_schema.ddos_protection_plan._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/ddosProtectionPlans/{}",
+        )
         # filter arguments
         args_schema.extended_location._registered = False
         return args_schema
@@ -5933,26 +5477,10 @@ class VNetCreate(_VNetCreate):
 class VNetUpdate(_VNetUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArgFormat, AAZResourceIdArgFormat
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
-        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
-            def __call__(self, ctx, value):
-                if value._data == "":
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         # handle detach logic
-        args_schema.dns_servers._fmt = EmptyListArgFormat()
-        args_schema.ddos_protection_plan._fmt = EmptyResourceIdArgFormat(
+        args_schema.ddos_protection_plan._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/ddosProtectionPlans/{}",
         )
@@ -6011,6 +5539,18 @@ class VNetSubnetCreate(_VNetSubnetCreate):
             },
             blank="Disabled",
         )
+        args_schema.nat_gateway._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/natGateways/{}",
+        )
+        args_schema.network_security_group._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/networkSecurityGroups/{}",
+        )
+        args_schema.route_table._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/routeTables/{}",
+        )
         # filter arguments
         args_schema.policies._registered = False
         args_schema.endpoints._registered = False
@@ -6060,22 +5600,7 @@ class VNetSubnetCreate(_VNetSubnetCreate):
 class VNetSubnetUpdate(_VNetSubnetUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZListArgFormat, AAZResourceIdArgFormat
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
-        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
-            def __call__(self, ctx, value):
-                if value._data == "":
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.delegations = AAZListArg(
             options=["--delegations"],
@@ -6091,7 +5616,6 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
             help="Space-separated list of services allowed private access to this subnet. "
                  "Values from: az network vnet list-endpoint-services.",
             nullable=True,
-            fmt=EmptyListArgFormat(),
         )
         args_schema.service_endpoints.Element = AAZStrArg(
             nullable=True,
@@ -6100,7 +5624,6 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
             options=["--service-endpoint-policy"],
             help="Space-separated list of names or IDs of service endpoint policies to apply.",
             nullable=True,
-            fmt=EmptyListArgFormat(),
         )
         args_schema.service_endpoint_policy.Element = AAZResourceIdArg(
             nullable=True,
@@ -6138,15 +5661,15 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
         args_schema.private_endpoint_network_policies._registered = False
         args_schema.private_link_service_network_policies._registered = False
         # handle detach logic
-        args_schema.nat_gateway._fmt = EmptyResourceIdArgFormat(
+        args_schema.nat_gateway._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/natGateways/{}",
         )
-        args_schema.network_security_group._fmt = EmptyResourceIdArgFormat(
+        args_schema.network_security_group._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/networkSecurityGroups/{}",
         )
-        args_schema.route_table._fmt = EmptyResourceIdArgFormat(
+        args_schema.route_table._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/routeTables/{}",
         )
@@ -6193,13 +5716,19 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
             instance.properties.network_security_group = None
         if not has_value(instance.properties.route_table.id):
             instance.properties.route_table = None
+        if not has_value(instance.properties.nat_gateway.id):
+            instance.properties.nat_gateway = None
 
 
 class VNetPeeringCreate(_VNetPeeringCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.sync_remote._registered = False
+        args_schema.remote_vnet._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}",
+        )
         return args_schema
 
 
@@ -6254,8 +5783,7 @@ def sync_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_ne
         err_msg = f"Virtual network peering {virtual_network_name} doesn't exist."
         raise ResourceNotFoundError(err_msg)
 
-    from .aaz.latest.network.vnet.peering import Create
-    return Create(cli_ctx=cmd.cli_ctx)(command_args={
+    return VNetPeeringCreate(cli_ctx=cmd.cli_ctx)(command_args={
         "name": virtual_network_peering_name,
         "resource_group": resource_group_name,
         "vnet_name": virtual_network_name,
@@ -6810,6 +6338,7 @@ def create_virtual_hub(cmd,
                        virtual_hub_name,
                        hosted_subnet,
                        public_ip_address,
+                       hub_routing_preference=None,
                        location=None,
                        tags=None):
     from azure.core.exceptions import HttpResponseError
@@ -6823,33 +6352,37 @@ def create_virtual_hub(cmd,
             raise CLIError('The VirtualHub "{}" under resource group "{}" exists'.format(
                 virtual_hub_name, resource_group_name))
 
-    SubResource, HubIpConfiguration, PublicIPAddress = cmd.get_models('SubResource',
-                                                                      'HubIpConfiguration', 'PublicIPAddress')
-
     args = {
         'resource_group': resource_group_name,
         'name': virtual_hub_name,
         'location': location,
         'tags': tags,
         'sku': 'Standard',
+        "hub_routing_preference": hub_routing_preference
     }
-    from azure.cli.command_modules.network.aaz.latest.network.routeserver import Create
+    from .aaz.latest.network.routeserver import Create
     vhub_poller = Create(cli_ctx=cmd.cli_ctx)(command_args=args)
     LongRunningOperation(cmd.cli_ctx)(vhub_poller)
 
-    ip_config = HubIpConfiguration(
-        subnet=SubResource(id=hosted_subnet),
-        public_ip_address=PublicIPAddress(id=public_ip_address)
-    )
-    vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
+    from .aaz.latest.network.routeserver.ip_config import Create as IPConfigCreate, Delete as IPConfigDelete
     try:
-        vhub_ip_poller = vhub_ip_config_client.begin_create_or_update(
-            resource_group_name, virtual_hub_name, 'Default', ip_config)
-        LongRunningOperation(cmd.cli_ctx)(vhub_ip_poller)
+        create_poller = IPConfigCreate(cli_ctx=cmd.cli_ctx)(command_args={
+            'name': 'Default',
+            'vhub_name': virtual_hub_name,
+            'resource_group': resource_group_name,
+            'subnet': hosted_subnet,
+            'public_ip_address': public_ip_address
+        })
+        LongRunningOperation(cmd.cli_ctx)(create_poller)
     except Exception as ex:
         logger.error(ex)
         try:
-            vhub_ip_config_client.begin_delete(resource_group_name, virtual_hub_name, 'Default')
+            delete_poller = IPConfigDelete(cli_ctx=cmd.cli_ctx)(command_args={
+                'name': 'Default',
+                'vhub_name': virtual_hub_name,
+                'resource_group': resource_group_name
+            })
+            LongRunningOperation(cmd.cli_ctx)(delete_poller)
         except HttpResponseError:
             pass
         from .aaz.latest.network.routeserver import Delete
@@ -6861,12 +6394,21 @@ def create_virtual_hub(cmd,
 
 def delete_virtual_hub(cmd, resource_group_name, virtual_hub_name):
     from azure.cli.core.commands import LongRunningOperation
-    vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
-    ip_configs = list(vhub_ip_config_client.list(resource_group_name, virtual_hub_name))
-    if ip_configs:
-        ip_config = ip_configs[0]   # There will always be only 1
-        poller = vhub_ip_config_client.begin_delete(resource_group_name, virtual_hub_name, ip_config.name)
+    from .aaz.latest.network.routeserver.ip_config import List as IPConfigList, Delete as IPConfigDelete
+    ip_configs = IPConfigList(cli_ctx=cmd.cli_ctx)(command_args={
+        'vhub_name': virtual_hub_name,
+        'resource_group': resource_group_name
+    })
+    try:
+        ip_config = next(ip_configs)  # there will always be only 1
+        poller = IPConfigDelete(cli_ctx=cmd.cli_ctx)(command_args={
+            'name': ip_config['name'],
+            'vhub_name': virtual_hub_name,
+            'resource_group': resource_group_name
+        })
         LongRunningOperation(cmd.cli_ctx)(poller)
+    except StopIteration:
+        pass
     from .aaz.latest.network.routeserver import Delete
     return Delete(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'name': virtual_hub_name})
 # endregion
@@ -6915,3 +6457,66 @@ def remove_nw_connection_monitor_test_group(cmd, connection_monitor_name, locati
     }
     from .operations.watcher import WatcherConnectionMonitorTestGroupRemove
     return WatcherConnectionMonitorTestGroupRemove(cli_ctx=cmd.cli_ctx)(command_args=update_args)
+
+
+class SecurityPartnerProviderCreate(_SecurityPartnerProviderCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vhub._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
+        )
+
+        return args_schema
+
+
+class SecurityPartnerProviderUpdate(_SecurityPartnerProviderUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vhub._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
+        )
+
+        return args_schema
+
+
+class VirtualApplianceCreate(_VirtualApplianceCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vhub._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
+        )
+
+        return args_schema
+
+
+class VirtualApplianceUpdate(_VirtualApplianceUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vhub._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
+        )
+
+        return args_schema
+
+
+class CustomIpPrefixUpdate(_CustomIpPrefixUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZArgEnum
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.state.enum = AAZArgEnum({"commission": "Commissioning", "decommission": "Decommissioning", "deprovision": "Deprovisioning", "provision": "Provisioning"})
+
+        return args_schema

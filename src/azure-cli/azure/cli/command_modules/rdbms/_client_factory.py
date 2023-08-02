@@ -349,12 +349,20 @@ def cf_postgres_flexible_location_capabilities(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).location_based_capabilities
 
 
+def cf_postgres_flexible_server_capabilities(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).server_capabilities
+
+
 def cf_postgres_flexible_backups(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).backups
 
 
 def cf_postgres_flexible_adadmin(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).administrators
+
+
+def cf_postgres_flexible_migrations(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).migrations
 
 
 def cf_postgres_check_resource_availability(cli_ctx, _):
@@ -375,10 +383,6 @@ def cf_postgres_flexible_private_dns_zone_suffix_operations(cli_ctx, _):
 
 def resource_client_factory(cli_ctx, subscription_id=None):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, subscription_id=subscription_id)
-
-
-def network_client_factory(cli_ctx, subscription_id=None):
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK, subscription_id=subscription_id)
 
 
 def private_dns_client_factory(cli_ctx, subscription_id=None):

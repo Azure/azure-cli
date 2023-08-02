@@ -6,6 +6,7 @@
 
 from enum import Enum
 
+from knack.log import get_logger
 from knack.util import CLIError
 
 from azure.cli.core.azclierror import ValidationError, InvalidArgumentValueError
@@ -14,6 +15,8 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.arm import ArmTemplateBuilder
 
 from azure.cli.command_modules.vm._vm_utils import get_target_network_api
+
+logger = get_logger(__name__)
 
 
 # pylint: disable=too-few-public-methods
@@ -160,7 +163,7 @@ def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_a
 
     api_version = '2015-06-15'
     if application_security_groups:
-        asg_ids = [{'id': x.id} for x in application_security_groups]
+        asg_ids = [{'id': x['id']} for x in application_security_groups]
         nic_properties['ipConfigurations'][0]['properties']['applicationSecurityGroups'] = asg_ids
         api_version = '2017-09-01'
 
@@ -626,7 +629,10 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
     if encryption_at_host is not None:
         vm_properties['securityProfile']['encryptionAtHost'] = encryption_at_host
 
-    if security_type is not None:
+    # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
+    # after changing the default values to Trusted Launch VMs in the future.
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
+    if security_type is not None and security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
         vm_properties['securityProfile']['securityType'] = security_type
 
     if enable_secure_boot is not None or enable_vtpm is not None:
@@ -983,7 +989,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
 
     if application_security_groups and cmd.supported_api_version(min_api='2018-06-01',
                                                                  operation_group='virtual_machine_scale_sets'):
-        ip_config_properties['applicationSecurityGroups'] = [{'id': x.id} for x in application_security_groups]
+        ip_config_properties['applicationSecurityGroups'] = [{'id': x['id']} for x in application_security_groups]
 
     if ip_config_properties:
         ip_configuration = {
@@ -1377,7 +1383,10 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if encryption_at_host:
         security_profile['encryptionAtHost'] = encryption_at_host
 
-    if security_type is not None:
+    # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
+    # after changing the default values to Trusted Launch VMs in the future.
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
+    if security_type is not None and security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
         security_profile['securityType'] = security_type
 
     if enable_secure_boot is not None or enable_vtpm is not None:

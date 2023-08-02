@@ -32,16 +32,6 @@ from azure.mgmt.servicefabric.models import (ClusterUpdateParameters,
                                              SettingsParameterDescription,
                                              NodeTypeDescription,
                                              EndpointRangeDescription)
-from azure.mgmt.network.models import (PublicIPAddress,
-                                       Subnet,
-                                       SubResource as NetworkSubResource,
-                                       InboundNatPool,
-                                       Probe,
-                                       PublicIPAddressDnsSettings,
-                                       LoadBalancer,
-                                       FrontendIPConfiguration,
-                                       BackendAddressPool,
-                                       LoadBalancingRule)
 from azure.mgmt.compute.models import (VaultCertificate,
                                        Sku as ComputeSku,
                                        UpgradePolicy,
@@ -66,8 +56,7 @@ from knack.log import get_logger
 from ._client_factory import (resource_client_factory,
                               keyvault_client_factory,
                               compute_client_factory,
-                              storage_client_factory,
-                              network_client_factory)
+                              storage_client_factory)
 logger = get_logger(__name__)
 
 DEFAULT_ADMIN_USER_NAME = "adminuser"
@@ -737,14 +726,21 @@ def _add_node_type_to_sfrp(cmd, client, resource_group_name, cluster_name, clust
 
 
 def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name, durability_level, vm_password, vm_user_name, vm_sku, vm_tier, capacity):
+    from .aaz.latest.network.lb import Create as LBCreate, Show as LBShow
+    from .aaz.latest.network.public_ip import Create as PublicIPCreate
+    from .aaz.latest.network.vnet import List as VNetList
+    from .aaz.latest.network.vnet.subnet import Create as SubnetCreate, List as SubnetList
+
     cli_ctx = cmd.cli_ctx
     subnet_name = "subnet_{}".format(1)
-    network_client = network_client_factory(cli_ctx)
     location = _get_resource_group_by_name(cli_ctx, resource_group_name).location
-    virtual_network = list(
-        network_client.virtual_networks.list(resource_group_name))[0]
-    subnets = list(network_client.subnets.list(
-        resource_group_name, virtual_network.name))
+    virtual_network = list(VNetList(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name
+    }))[0]
+    subnets = SubnetList(cli_ctx=cli_ctx)(command_args={
+        "vnet_name": virtual_network["name"],
+        "resource_group": resource_group_name
+    })
     address_prefix = None
     index = None
     for x in range(1, 255):
@@ -752,123 +748,117 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
         index = x
         found = False
         for s in subnets:
-            if address_prefix == s.address_prefix:
+            if address_prefix == s["addressPrefix"]:
                 found = True
-            if subnet_name.lower() == s.name.lower():
+            if subnet_name.lower() == s["name"].lower():
                 subnet_name = "subnet_{}".format(x)
         if found is False:
             break
 
     if address_prefix is None:
         raise CLIError("Failed to generate the address prefix")
-    poller = network_client.subnets.begin_create_or_update(resource_group_name,
-                                                           virtual_network.name,
-                                                           subnet_name,
-                                                           Subnet(address_prefix=address_prefix))
 
+    poller = SubnetCreate(cli_ctx=cli_ctx)(command_args={
+        "name": subnet_name,
+        "vnet_name": virtual_network["name"],
+        "resource_group": resource_group_name,
+        "address_prefix": address_prefix
+    })
     subnet = LongRunningOperation(cli_ctx)(poller)
 
-    public_address_name = 'LBIP-{}-{}{}'.format(
-        cluster_name.lower(), node_type_name.lower(), index)
-    dns_label = '{}-{}{}'.format(cluster_name.lower(),
-                                 node_type_name.lower(), index)
-    lb_name = 'LB-{}-{}{}'.format(cluster_name.lower(),
-                                  node_type_name.lower(), index)
+    public_address_name = 'LBIP-{}-{}{}'.format(cluster_name.lower(), node_type_name.lower(), index)
+    dns_label = '{}-{}{}'.format(cluster_name.lower(), node_type_name.lower(), index)
+    lb_name = 'LB-{}-{}{}'.format(cluster_name.lower(), node_type_name.lower(), index)
     if len(lb_name) >= 24:
         lb_name = '{}{}'.format(lb_name[0:21], index)
-    poller = network_client.public_ip_addresses.begin_create_or_update(resource_group_name,
-                                                                       public_address_name,
-                                                                       PublicIPAddress(public_ip_allocation_method='Dynamic',
-                                                                                       location=location,
-                                                                                       dns_settings=PublicIPAddressDnsSettings(domain_name_label=dns_label)))
 
-    publicIp = LongRunningOperation(cli_ctx)(poller)
+    poller = PublicIPCreate(cli_ctx=cli_ctx)(command_args={
+        "name": public_address_name,
+        "resource_group": resource_group_name,
+        "location": location,
+        "allocation_method": "Dynamic",
+        "dns_name": dns_label
+    })
+    public_ip = LongRunningOperation(cli_ctx)(poller)
+
     from azure.cli.core.commands.client_factory import get_subscription_id
     subscription_id = get_subscription_id(cli_ctx)
-    new_load_balancer_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/loadBalancers/{}'.format(
-        subscription_id, resource_group_name, lb_name)
-    backend_address_poll_name = "LoadBalancerBEAddressPool"
+    backend_address_pool_name = "LoadBalancerBEAddressPool"
     frontendip_configuration_name = "LoadBalancerIPConfig"
     probe_name = "FabricGatewayProbe"
     probe_http_name = "FabricHttpGatewayProbe"
     inbound_nat_pools_name = "LoadBalancerBEAddressNatPool"
 
-    new_load_balancer = LoadBalancer(id=new_load_balancer_id,
-                                     location=location,
-                                     frontend_ip_configurations=[FrontendIPConfiguration(name=frontendip_configuration_name,
-                                                                                         public_ip_address=PublicIPAddress(id=publicIp.id))],
-                                     backend_address_pools=[BackendAddressPool(
-                                         name=backend_address_poll_name)],
-                                     load_balancing_rules=[LoadBalancingRule(name='LBRule',
-                                                                             backend_address_pool=NetworkSubResource(id='/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/loadBalancers/{}/backendAddressPools/{}'.
-                                                                                                                     format(subscription_id,
-                                                                                                                            resource_group_name,
-                                                                                                                            lb_name,
-                                                                                                                            backend_address_poll_name)),
-                                                                             backend_port=DEFAULT_TCP_PORT,
-                                                                             enable_floating_ip=False,
-                                                                             frontend_ip_configuration=NetworkSubResource(id='/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/loadBalancers/{}/frontendIPConfigurations/{}'.format(subscription_id,
-                                                                                                                                                                                                                                                   resource_group_name,
-                                                                                                                                                                                                                                                   lb_name,
-                                                                                                                                                                                                                                                   frontendip_configuration_name)),
-                                                                             frontend_port=DEFAULT_TCP_PORT,
-                                                                             idle_timeout_in_minutes=5,
-                                                                             protocol='tcp',
-                                                                             probe=NetworkSubResource(id='/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/loadBalancers/{}/probes/{}'.format(subscription_id,
-                                                                                                                                                                                                             resource_group_name,
-                                                                                                                                                                                                             lb_name,
-                                                                                                                                                                                                             probe_name))),
-                                                           LoadBalancingRule(name='LBHttpRule',
-                                                                             backend_address_pool=NetworkSubResource(id='/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/loadBalancers/{}/backendAddressPools/{}'.format(subscription_id,
-                                                                                                                                                                                                                                         resource_group_name,
-                                                                                                                                                                                                                                         lb_name,
-                                                                                                                                                                                                                                         backend_address_poll_name)),
-                                                                             backend_port=DEFAULT_HTTP_PORT,
-                                                                             enable_floating_ip=False,
-                                                                             frontend_ip_configuration=NetworkSubResource(id='/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/loadBalancers/{}/frontendIPConfigurations/{}'.format(subscription_id,
-                                                                                                                                                                                                                                                   resource_group_name,
-                                                                                                                                                                                                                                                   lb_name,
-                                                                                                                                                                                                                                                   frontendip_configuration_name)),
-                                                                             frontend_port=DEFAULT_HTTP_PORT,
-                                                                             idle_timeout_in_minutes=5,
-                                                                             protocol='tcp',
-                                                                             probe=NetworkSubResource(id='/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/loadBalancers/{}/probes/{}'.format(subscription_id,
-                                                                                                                                                                                                             resource_group_name,
-                                                                                                                                                                                                             lb_name,
-                                                                                                                                                                                                             probe_http_name)))],
-                                     probes=[Probe(protocol='tcp',
-                                                   name=probe_name,
-                                                   interval_in_seconds=5,
-                                                   number_of_probes=2,
-                                                   port=DEFAULT_TCP_PORT),
-                                             Probe(protocol='tcp',
-                                                   name=probe_http_name,
-                                                   interval_in_seconds=5,
-                                                   number_of_probes=2,
-                                                   port=DEFAULT_HTTP_PORT)],
-
-                                     inbound_nat_pools=[InboundNatPool(protocol='tcp',
-                                                                       name=inbound_nat_pools_name,
-                                                                       backend_port=DEFAULT_BACKEND_PORT,
-                                                                       frontend_ip_configuration=NetworkSubResource(id='/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/loadBalancers/{}/frontendIPConfigurations/{}'.format(subscription_id,
-                                                                                                                                                                                                                                             resource_group_name,
-                                                                                                                                                                                                                                             lb_name,
-                                                                                                                                                                                                                                             frontendip_configuration_name)),
-                                                                       frontend_port_range_start=DEFAULT_FRONTEND_PORT_RANGE_START,
-                                                                       frontend_port_range_end=DEFAULT_FRONTEND_PORT_RANGE_END)])
-
-    poller = network_client.load_balancers.begin_create_or_update(
-        resource_group_name, lb_name, new_load_balancer)
+    poller = LBCreate(cli_ctx=cli_ctx)(command_args={
+        "name": lb_name,
+        "resource_group": resource_group_name,
+        "location": location,
+        "frontend_ip_configurations": [{
+            "name": frontendip_configuration_name,
+            "public_ip_address": {"id": public_ip["id"]}
+        }],
+        "backend_address_pools": [{"name": backend_address_pool_name}],
+        "load_balancing_rules": [
+            {
+                "name": "LBRule",
+                "backend_address_pool": {"id": f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Network/loadBalancers/{lb_name}/backendAddressPools/{backend_address_pool_name}"},
+                "backend_port": DEFAULT_TCP_PORT,
+                "enable_floating_ip": False,
+                "frontend_ip_configuration": {"id": f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{frontendip_configuration_name}"},
+                "frontend_port": DEFAULT_TCP_PORT,
+                "idle_timeout_in_minutes": 5,
+                "protocol": "Tcp",
+                "probe": {"id": f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Network/loadBalancers/{lb_name}/probes/{probe_name}"}
+            },
+            {
+                "name": "LBHttpRule",
+                "backend_address_pool": {"id": f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Network/loadBalancers/{lb_name}/backendAddressPools/{backend_address_pool_name}"},
+                "backend_port": DEFAULT_HTTP_PORT,
+                "enable_floating_ip": False,
+                "frontend_ip_configuration": {"id": f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{frontendip_configuration_name}"},
+                "frontend_port": DEFAULT_HTTP_PORT,
+                "idle_timeout_in_minutes": 5,
+                "protocol": "Tcp",
+                "probe": {"id": f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Network/loadBalancers/{lb_name}/probes/{probe_http_name}"}
+            }
+        ],
+        "probes": [
+            {
+                "name": probe_name,
+                "protocol": "Tcp",
+                "interval_in_seconds": 5,
+                "number_of_probes": 2,
+                "port": DEFAULT_TCP_PORT
+            },
+            {
+                "name": probe_http_name,
+                "protocol": "Tcp",
+                "interval_in_seconds": 5,
+                "number_of_probes": 2,
+                "port": DEFAULT_HTTP_PORT
+            }
+        ],
+        "inbound_nat_pools": [{
+            "name": inbound_nat_pools_name,
+            "protocol": "Tcp",
+            "backend_port": DEFAULT_BACKEND_PORT,
+            "frontend_ip_configuration": {"id": f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{frontendip_configuration_name}"},
+            "frontend_port_range_start": DEFAULT_FRONTEND_PORT_RANGE_START,
+            "frontend_port_range_end": DEFAULT_FRONTEND_PORT_RANGE_END
+        }]
+    })
     LongRunningOperation(cli_ctx)(poller)
 
-    new_load_balancer = network_client.load_balancers.get(
-        resource_group_name, lb_name)
+    new_load_balancer = LBShow(cli_ctx=cli_ctx)(command_args={
+        "name": lb_name,
+        "resource_group": resource_group_name
+    })
     backend_address_pools = []
     inbound_nat_pools = []
-    for p in new_load_balancer.backend_address_pools:
-        backend_address_pools.append(SubResource(id=p.id))
-    for p in new_load_balancer.inbound_nat_pools:
-        inbound_nat_pools.append(SubResource(id=p.id))
+    for p in new_load_balancer["backendAddressPools"]:
+        backend_address_pools.append(SubResource(id=p["id"]))
+    for p in new_load_balancer["inboundNatPools"]:
+        inbound_nat_pools.append(SubResource(id=p["id"]))
 
     network_config_name = 'NIC-{}-{}'.format(node_type_name.lower(), node_type_name.lower())
     if len(network_config_name) >= 24:
@@ -882,7 +872,7 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
                                                                                                                                            ip_configurations=[VirtualMachineScaleSetIPConfiguration(name=ip_config_name,
                                                                                                                                                                                                     load_balancer_backend_address_pools=backend_address_pools,
                                                                                                                                                                                                     load_balancer_inbound_nat_pools=inbound_nat_pools,
-                                                                                                                                                                                                    subnet=ApiEntityReference(id=subnet.id))])])
+                                                                                                                                                                                                    subnet=ApiEntityReference(id=subnet["id"]))])])
     compute_client = compute_client_factory(cli_ctx)
 
     node_type_name_ref = cluster.node_types[0].name
@@ -1402,7 +1392,7 @@ def _get_thumbprint_from_secret_identifier(cli_ctx, vault, secret_identifier):
         x509 = crypto.load_certificate(crypto.FILETYPE_PEM, cert_bytes)
 
     if not x509:
-        raise Exception('invalid certificate')
+        raise Exception('invalid certificate')  # pylint: disable=broad-exception-raised
 
     thumbprint = x509.digest("sha1").decode("utf-8").replace(':', '')
     return thumbprint
