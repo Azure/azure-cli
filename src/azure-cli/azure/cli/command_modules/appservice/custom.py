@@ -4365,9 +4365,6 @@ def list_flexconsumption_locations(cmd):
         },
         {
             "name": "northeurope"
-        },
-        {
-            "name": "northcentralus(stage)"
         }
     ]
 
