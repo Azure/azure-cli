@@ -12,21 +12,22 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "vm reimage",
+    "vm redeploy",
 )
-class Reimage(AAZCommand):
-    """Reimage (upgrade the operating system) a virtual machine.
+class Redeploy(AAZCommand):
+    """Redeploy an existing VM.
 
-    Reimage (upgrade the operating system) a virtual machine which don't have a ephemeral OS disk, for virtual machines who have a ephemeral OS disk the virtual machine is reset to initial state. NOTE: The retaining of old OS disk depends on the value of deleteOption of OS disk. If deleteOption is detach, the old OS disk will be preserved after reimage. If deleteOption is delete, the old OS disk will be deleted after reimage. The deleteOption of the OS disk should be updated accordingly before performing the reimage.
+    :example: Redeploy a VM.
+        az vm redeploy -g MyResourceGroup -n MyVm
 
-    :example: Reimage a virtual machine.
-        az vm reimage --name MyVm --resource-group MyResourceGroup --admin-password MyPassword --custom-data "dGVzdA==" --temp-disk false --exact-version 0.1
+    :example: Redeploy all VMs in a resource group.
+        az vm redeploy --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv)
     """
 
     _aaz_info = {
         "version": "2022-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachines/{}/reimage", "2022-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachines/{}/redeploy", "2022-11-01"],
         ]
     }
 
@@ -48,7 +49,6 @@ class Reimage(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.resource_group = AAZResourceGroupNameArg(
-            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
         _args_schema.vm_name = AAZStrArg(
@@ -57,39 +57,11 @@ class Reimage(AAZCommand):
             required=True,
             id_part="name",
         )
-
-        # define Arg Group "OsProfile"
-
-        _args_schema = cls._args_schema
-        _args_schema.admin_password = AAZStrArg(
-            options=["--admin-password"],
-            arg_group="OsProfile",
-            help="Specifies the password of the administrator account.",
-        )
-        _args_schema.custom_data = AAZStrArg(
-            options=["--custom-data"],
-            arg_group="OsProfile",
-            help="Specifies a base-64 encoded string of custom data.",
-        )
-
-        # define Arg Group "Parameters"
-
-        _args_schema = cls._args_schema
-        _args_schema.exact_version = AAZStrArg(
-            options=["--exact-version"],
-            arg_group="Parameters",
-            help="Specifies in decimal number, the version the OS disk should be reimaged to. If exact version is not provided, the OS disk is reimaged to the existing version of OS Disk.",
-        )
-        _args_schema.temp_disk = AAZBoolArg(
-            options=["--temp-disk"],
-            arg_group="Parameters",
-            help="Specifies whether to reimage temp disk. Default value: false. Note: This temp disk reimage parameter is only supported for VM/VMSS with Ephemeral OS disk.",
-        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.VirtualMachinesReimage(ctx=self.ctx)()
+        yield self.VirtualMachinesRedeploy(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -100,7 +72,7 @@ class Reimage(AAZCommand):
     def post_operations(self):
         pass
 
-    class VirtualMachinesReimage(AAZHttpOperation):
+    class VirtualMachinesRedeploy(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -130,7 +102,7 @@ class Reimage(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}/reimage",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}/redeploy",
                 **self.url_parameters
             )
 
@@ -170,39 +142,12 @@ class Reimage(AAZCommand):
             }
             return parameters
 
-        @property
-        def header_parameters(self):
-            parameters = {
-                **self.serialize_header_param(
-                    "Content-Type", "application/json",
-                ),
-            }
-            return parameters
-
-        @property
-        def content(self):
-            _content_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                typ=AAZObjectType,
-                typ_kwargs={"flags": {"client_flatten": True}}
-            )
-            _builder.set_prop("exactVersion", AAZStrType, ".exact_version")
-            _builder.set_prop("osProfile", AAZObjectType)
-            _builder.set_prop("tempDisk", AAZBoolType, ".temp_disk")
-
-            os_profile = _builder.get(".osProfile")
-            if os_profile is not None:
-                os_profile.set_prop("adminPassword", AAZStrType, ".admin_password")
-                os_profile.set_prop("customData", AAZStrType, ".custom_data")
-
-            return self.serialize_content(_content_value)
-
         def on_200(self, session):
             pass
 
 
-class _ReimageHelper:
-    """Helper class for Reimage"""
+class _RedeployHelper:
+    """Helper class for Redeploy"""
 
 
-__all__ = ["Reimage"]
+__all__ = ["Redeploy"]
