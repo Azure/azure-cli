@@ -259,7 +259,7 @@ def load_arguments(self, _):
         c.argument('image_cleaner_interval_hours', type=int)
         c.argument('http_proxy_config')
         c.argument('enable_keda', action='store_true')
-        c.argument('enable_vpa', action='store_true',help='enable vertical pod autoscaler for cluster')
+        c.argument('enable_vpa', action='store_true', help='enable vertical pod autoscaler for cluster')
         # addons
         c.argument('enable_addons', options_list=['--enable-addons', '-a'])
         c.argument('workspace_resource_id')

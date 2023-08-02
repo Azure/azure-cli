@@ -4869,7 +4869,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: bool
         """
         return self._get_disable_azure_monitor_metrics(enable_validation=True)
-    
+
     def _get_enable_vpa(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of enable_vpa.
         This function supports the option of enable_vpa. When enabled, if both enable_vpa and enable_vpa are
@@ -4921,6 +4921,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: bool
         """
         return self._get_disable_vpa(enable_validation=True)
+
 
 class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
     def __init__(

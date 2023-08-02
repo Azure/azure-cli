@@ -8708,6 +8708,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # create: enable-vpa
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} --ssh-key-value={ssh_key_value} --output=json ' \
+                     '--aks-custom-headers=AKSHTTPCustomFeatures=Microsoft.ContainerService/AKS-VPAPreview ' \
                      '--enable-vpa'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -8740,6 +8741,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # update: enable-vpa
         update_cmd = 'aks update --resource-group={resource_group} --name={name} --yes --output=json ' \
+                     '--aks-custom-headers=AKSHTTPCustomFeatures=Microsoft.ContainerService/AKS-VPAPreview ' \
                      '--enable-vpa'
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
