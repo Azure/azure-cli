@@ -8,11 +8,11 @@ import json
 from knack.util import CLIError
 from knack.log import get_logger
 
-from azure.mgmt.cognitiveservices.models import Account as CognitiveServicesAccount, Sku,\
-    VirtualNetworkRule, IpRule, NetworkRuleSet, NetworkRuleAction,\
-    AccountProperties as CognitiveServicesAccountProperties, ApiProperties as CognitiveServicesAccountApiProperties,\
-    Identity, ResourceIdentityType as IdentityType,\
-    Deployment, DeploymentModel, DeploymentScaleSettings, DeploymentProperties,\
+from azure.mgmt.cognitiveservices.models import Account as CognitiveServicesAccount, Sku, \
+    VirtualNetworkRule, IpRule, NetworkRuleSet, NetworkRuleAction, \
+    AccountProperties as CognitiveServicesAccountProperties, ApiProperties as CognitiveServicesAccountApiProperties, \
+    Identity, ResourceIdentityType as IdentityType, \
+    Deployment, DeploymentModel, DeploymentScaleSettings, DeploymentProperties, \
     CommitmentPlan, CommitmentPlanProperties, CommitmentPeriod
 from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus
 
