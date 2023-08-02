@@ -2344,6 +2344,81 @@ class VMConvertTest(ScenarioTest):
         converted = self.cmd('vm unmanaged-disk list --vm-name {vm} -g {rg}').get_output_in_json()
         self.assertTrue(converted[0]['managedDisk'])
         self.assertFalse(converted[0]['vhd'])
+
+
+class VMSimulateEvictionScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_simulate_eviction')
+    def test_vm_simulate_eviction(self, resource_group):
+
+        self.kwargs.update({
+            'loc': 'eastus',
+            'vm1': 'vm-simualte-eviction1',
+            'vm2': 'vm-simulate-eviction2',
+            'vm3': 'vm-simulate-eviction3'
+        })
+
+        # simulate-eviction on a Regular VM, expect failure
+        self.cmd('vm create --resource-group {rg} --name {vm1} --admin-username azureuser --admin-password testPassword0 --authentication-type password --location {loc} --image OpenLogic:CentOS:7.5:latest --priority Regular --nsg-rule NONE')
+        self.cmd('vm simulate-eviction --resource-group {rg} --name {vm1}', expect_failure=True)
+
+        # simulate-eviction on a Spot VM with Deallocate policy, expect VM to be deallocated
+        self.cmd('vm create --resource-group {rg} --name {vm2} --admin-username azureuser --admin-password testPassword0 --authentication-type password --location {loc} --image OpenLogic:CentOS:7.5:latest --priority Spot --eviction-policy Deallocate --nsg-rule NONE')
+        self.cmd('vm simulate-eviction --resource-group {rg} --name {vm2}')
+        time.sleep(180)
+        self.cmd('vm get-instance-view --resource-group {rg} --name {vm2}', checks=[
+            self.check('name', '{vm2}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('length(instanceView.statuses)', 2),
+            self.check('instanceView.statuses[0].code', 'ProvisioningState/succeeded'),
+            self.check('instanceView.statuses[1].code', 'PowerState/deallocated'),
+        ])
+
+        # simulate-eviction on a Spot VM with Delete policy, expect VM to be deleted
+        self.cmd('vm create --resource-group {rg} --name {vm3} --admin-username azureuser --admin-password testPassword0 --authentication-type password --location {loc} --image OpenLogic:CentOS:7.5:latest --priority Spot --eviction-policy Delete --nsg-rule NONE')
+        self.cmd('vm simulate-eviction --resource-group {rg} --name {vm3}')
+        time.sleep(180)
+        self.cmd('vm list --resource-group {rg}', checks=[self.check('length(@)', 2)])
+        self.cmd('vm show --resource-group {rg} --name {vm3}', expect_failure=True)
+
+
+class VMRestartTest(ScenarioTest):
+    def _check_vm_power_state(self, expected_power_state):
+
+        self.cmd('vm get-instance-view --resource-group {rg} --name {vm}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{vm}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('length(instanceView.statuses)', 2),
+            self.check('instanceView.statuses[0].code', 'ProvisioningState/succeeded'),
+            self.check('instanceView.statuses[1].code', expected_power_state),
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_stop_start')
+    def test_vm_stop_start(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm'
+        })
+        self.cmd(
+            'vm create --resource-group {rg} --name {vm} --admin-username azureuser --admin-password testPassword0 --authentication-type password --location {loc} --image OpenLogic:CentOS:7.5:latest --priority Regular --nsg-rule NONE')
+
+        self.cmd('vm stop --resource-group {rg} --name {vm}')
+        self._check_vm_power_state('PowerState/stopped')
+        self.cmd('vm start --resource-group {rg} --name {vm}')
+        self._check_vm_power_state('PowerState/running')
+
+
+class VMAutoUpdateScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_linux_vm_patch_mode_')
+    def test_linux_vm_patch_mode(self, resource_group):
+        self.cmd('vm create -g {rg} -n vm1 --image Canonical:UbuntuServer:18.04-LTS:latest --enable-agent --patch-mode AutomaticByPlatform --generate-ssh-keys --nsg-rule NONE --admin-username vmtest')
+        self.cmd('vm show -g {rg} -n vm1', checks=[
+            self.check('osProfile.linuxConfiguration.patchSettings.patchMode', 'AutomaticByPlatform')
+        ])
+        self.cmd('vm assess-patches -g {rg} -n vm1', checks=[
+            self.check('status', 'Succeeded')
+        ])
 # endregion
 
 # endregion

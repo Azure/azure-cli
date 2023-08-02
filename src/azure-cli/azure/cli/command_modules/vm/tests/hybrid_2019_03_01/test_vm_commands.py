@@ -2568,6 +2568,32 @@ class VMConvertTest(ScenarioTest):
         self.assertTrue(converted[0]['managedDisk'])
         self.assertFalse(converted[0]['vhd'])
 
+
+class VMRestartTest(ScenarioTest):
+    def _check_vm_power_state(self, expected_power_state):
+
+        self.cmd('vm get-instance-view --resource-group {rg} --name {vm}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{vm}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('length(instanceView.statuses)', 2),
+            self.check('instanceView.statuses[0].code', 'ProvisioningState/succeeded'),
+            self.check('instanceView.statuses[1].code', expected_power_state),
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_stop_start')
+    def test_vm_stop_start(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm'
+        })
+        self.cmd(
+            'vm create --resource-group {rg} --name {vm} --admin-username azureuser --admin-password testPassword0 --authentication-type password --location {loc} --image OpenLogic:CentOS:7.5:latest --priority Regular --nsg-rule NONE')
+
+        self.cmd('vm stop --resource-group {rg} --name {vm}')
+        self._check_vm_power_state('PowerState/stopped')
+        self.cmd('vm start --resource-group {rg} --name {vm}')
+        self._check_vm_power_state('PowerState/running')
+
 # endregion
 
 
