@@ -209,7 +209,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         arg_type=get_three_state_flag(), options_list=['--allow-cross-tenant-replication', '-r'], min_api='2021-04-01',
         help='Allow or disallow cross AAD tenant object replication. Set this property to true for new or existing '
              'accounts only if object replication policies will involve storage accounts in different AAD tenants. '
-             'The default interpretation is false for new accounts to follow best security practices by default.')
+             'If not specified, the default value is false for new accounts to follow best security practices.')
 
     t_share_permission = self.get_models('DefaultSharePermission', resource_type=ResourceType.MGMT_STORAGE)
 
@@ -377,7 +377,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'platform managed keys for data at rest.')
         c.argument('allow_blob_public_access', arg_type=get_three_state_flag(), min_api='2019-04-01',
                    help='Allow or disallow public access to all blobs or containers in the storage account. '
-                   'The default value is false for new accounts to follow best security practices by default. '
+                   'If not specified, the default value is false for new accounts to follow best security practices. '
                    'When true, containers in the account may '
                    'be configured for public access. Note that setting this property to true does '
                    'not enable anonymous access to any data in the account. The additional step of configuring the '
@@ -481,7 +481,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('publish_internet_endpoints', publish_internet_endpoints_type)
         c.argument('allow_blob_public_access', arg_type=get_three_state_flag(), min_api='2019-04-01',
                    help='Allow or disallow public access to all blobs or containers in the storage account. '
-                   'The default value is false for new account to follow best security practices by default. '
+                   'If not specified, the default value is false for new account to follow best security practices. '
                    'When true, containers '
                    'in the account may be configured for public access. Note that setting this property to true does '
                    'not enable anonymous access to any data in the account. The additional step of configuring the '
