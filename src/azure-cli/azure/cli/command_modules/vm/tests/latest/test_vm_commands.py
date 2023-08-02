@@ -3923,13 +3923,6 @@ class VMSSUpdateTests(ScenarioTest):
             'vm': 'vm1',
             'img': 'img1',
             'vmss': 'vmss1',
-            'vmss2': self.create_random_name('vmss', 10),
-            # 'img2': 'OpenLogic:CentOS:8_5:latest',
-            # 'img2_sku_gen2': '8_5-gen2',
-            'img2': 'microsoftwindowsserver:windowsserver:2019-datacenter-zhcn:latest',
-            'img2_sku_gen2': '2022-datacenter-azure-edition',
-            'vmss3': self.create_random_name('vmss', 10),
-            'img3': 'OpenLogic:CentOS:8_5:latest'
         })
         self.cmd('vm create -g {rg} -n {vm} --image OpenLogic:CentOS:7.5:latest --admin-username clitest1 --generate-ssh-key --nsg-rule None --admin-username vmtest')
         self.cmd('vm run-command invoke -g {rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes" --no-wait')
@@ -3948,17 +3941,26 @@ class VMSSUpdateTests(ScenarioTest):
         with self.assertRaisesRegex(HttpResponseError, 'UEFI settings are not supported for VMs and VM Scale Sets using Generation 1 Image\.'):
             self.cmd('vmss update -g {rg} -n {vmss} --security-type TrustedLaunch')
 
-        self.cmd('vmss create -n {vmss2} -g {rg} --image {img2} --admin-username vmtest --admin-password Test123456789#')
-        self.cmd('vmss update -g {rg} -n {vmss2} --set virtualMachineProfile.storageProfile.imageReference.sku={img2_sku_gen2} --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm true', checks=[
-            self.check('virtualMachineProfile.storageProfile.imageReference.offer', 'CentOS'),
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_security_type_', location='westus', subscription='1c638cf4-608f-4ee6-b680-c329e824c3a8')
+    def test_vmss_update_security_type(self):
+        self.kwargs.update({
+            'vmss2': self.create_random_name('vmss', 10),
+            'img2': 'microsoftwindowsserver:windowsserver:2019-datacenter-zhcn:latest',
+            'img2_sku_gen2': '2022-datacenter-azure-edition',
+            'vmss3': self.create_random_name('vmss', 10),
+            'img3': 'OpenLogic:CentOS:8_5-gen2:latest'
+        })
+        self.cmd('vmss create -n {vmss2} -g {rg} --image {img2} --admin-username vmtest --admin-password Test123456789# --subscription 1c638cf4-608f-4ee6-b680-c329e824c3a8')
+        self.cmd('vmss update -g {rg} -n {vmss2} --set virtualMachineProfile.storageProfile.imageReference.sku={img2_sku_gen2} --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm true --subscription 1c638cf4-608f-4ee6-b680-c329e824c3a8', checks=[
+            self.check('virtualMachineProfile.storageProfile.imageReference.offer', 'windowsserver'),
             self.check('virtualMachineProfile.storageProfile.imageReference.sku', '{img2_sku_gen2}'),
             self.check('virtualMachineProfile.securityProfile.securityType', 'TrustedLaunch'),
             self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True),
             self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True),
         ])
 
-        self.cmd('vmss create -n {vmss3} -g {rg} --image {img3} --admin-username vmtest')
-        self.cmd('vmss update -g {rg} -n {vmss3} --security-type TrustedLaunch', checks=[
+        self.cmd('vmss create -n {vmss3} -g {rg} --image {img3} --admin-username vmtest --subscription 1c638cf4-608f-4ee6-b680-c329e824c3a8')
+        self.cmd('vmss update -g {rg} -n {vmss3} --security-type TrustedLaunch --subscription 1c638cf4-608f-4ee6-b680-c329e824c3a8', checks=[
             self.check('virtualMachineProfile.storageProfile.imageReference.offer', 'CentOS'),
             self.check('virtualMachineProfile.securityProfile.securityType', 'TrustedLaunch'),
             self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', False),
