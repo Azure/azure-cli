@@ -123,7 +123,7 @@ class CommandOperation(BaseCommandOperation):
                 command_args[client_arg_name] = client
 
         if self.enable_sdk_api_version_validation is False:
-            command_args['enable_api_version_validation'] = False
+            command_args.update({'enable_api_version_validation': False})
 
         return op(**command_args)
 
@@ -366,7 +366,7 @@ class ShowCommandOperation(BaseCommandOperation):
         op = self.get_op_handler(self.op_path)  # Fetch op handler again after cmd property is set
 
         if self.enable_sdk_api_version_validation is False:
-            command_args.update('enable_api_version_validation', self.enable_sdk_api_version_validation)
+            command_args.update({'enable_api_version_validation': False})
 
         try:
             return op(**command_args)
@@ -409,6 +409,9 @@ class WaitCommandOperation(BaseCommandOperation):
             command_args[client_arg_name] = client
 
         getter = self.get_op_handler(self.op_path)      # Fetch op handler again after cmd property is set
+
+        if self.enable_sdk_api_version_validation is False:
+            command_args.update({'enable_api_version_validation': False})
 
         return self.wait(command_args, cli_ctx=self.cli_ctx, getter=getter)
 
