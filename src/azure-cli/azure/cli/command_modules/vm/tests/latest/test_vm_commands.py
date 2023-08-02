@@ -3452,6 +3452,14 @@ class VMSSCreateAndModify(ScenarioTest):
             self.check('scaleInPolicy.forceDeletion', True)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_hibernate_')
+    def test_vmss_hibernate(self):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10),
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --orchestration-mode Flexible --admin-username vmtest --enable-hibernation true')
+        self.cmd('vmss deallocate -g {rg} -n {vmss} --instance-ids 1 --hibernate true')
+
 
 class VMSSCreateOptions(ScenarioTest):
 
