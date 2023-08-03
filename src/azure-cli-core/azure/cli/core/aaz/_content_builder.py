@@ -178,7 +178,8 @@ class AAZContentBuilder:
     @staticmethod
     def _split_key(key):
         parts = []
-        # when discriminator value contains `.` value, like `Microsoft.Network/publicIPAddresses` the key. It will separate the value in several parts.
+        # when discriminator value contains `.` value, like `Microsoft.Network/publicIPAddresses` the key.
+        # It will separate the value in several parts.
         pending_disc_part = None
         for part in key.replace('[', '.[').replace('{', '.{').split('.'):
             if pending_disc_part is not None:
