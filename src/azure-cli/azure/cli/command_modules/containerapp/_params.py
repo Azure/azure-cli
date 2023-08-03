@@ -455,12 +455,6 @@ def load_arguments(self, _):
         c.argument('min_nodes', help="The minimum node count for the workload profile")
         c.argument('max_nodes', help="The maximum node count for the workload profile")
 
-    # Patch
-    with self.argument_context('containerapp patch') as c:
-        c.argument('resource_group_name', arg_type=resource_group_name_type)
-        c.argument('managed_env', options_list=['--environment', '-e'], help='Name or resource id of the Container App environment.')
-        c.argument('show_all', action='store_true', help='Show all patchable and unpatchable container apps')
-
     # Container App job
     with self.argument_context('containerapp job') as c:
         c.argument('name', name_type, metavar='NAME', id_part='name', help=f"The name of the Container Apps Job. A name must consist of lower case alphanumeric characters or '-', start with a letter, end with an alphanumeric character, cannot have '--', and must be less than {MAXIMUM_CONTAINER_APP_NAME_LENGTH} characters.")

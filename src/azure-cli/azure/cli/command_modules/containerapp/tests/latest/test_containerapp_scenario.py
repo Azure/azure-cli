@@ -8,14 +8,14 @@ import platform
 from unittest import mock
 import time
 import unittest
-from azext_containerapp.custom import containerapp_ssh
+from azure.cli.command_modules.containerapp.custom import containerapp_ssh
 
 from azure.cli.testsdk.reverse_dependency import get_dummy_cli
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, live_only)
 from knack.util import CLIError
 
-from azext_containerapp.tests.latest.common import TEST_LOCATION
+from azure.cli.command_modules.containerapp.tests.latest.common import TEST_LOCATION
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -348,7 +348,7 @@ class ContainerappScenarioTest(ScenarioTest):
     @unittest.skip("API only on stage currently")
     @live_only()  # VCR.py can't seem to handle websockets (only --live works)
     # @ResourceGroupPreparer(location="centraluseuap")
-    @mock.patch("azext_containerapp._ssh_utils._resize_terminal")
+    @mock.patch("azure.cli.command_modules.containerapp._ssh_utils._resize_terminal")
     @mock.patch("sys.stdin")
     def test_containerapp_ssh(self, resource_group=None, *args):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
@@ -386,8 +386,8 @@ class ContainerappScenarioTest(ScenarioTest):
 
         cmd = mock.MagicMock()
         cmd.cli_ctx = get_dummy_cli()
-        from azext_containerapp._validators import validate_ssh
-        from azext_containerapp.custom import containerapp_ssh
+        from azure.cli.command_modules.containerapp._validators import validate_ssh
+        from azure.cli.command_modules.containerapp.custom import containerapp_ssh
 
         class Namespace: pass
         namespace = Namespace()
@@ -401,10 +401,10 @@ class ContainerappScenarioTest(ScenarioTest):
 
         mock_lib = "tty.setcbreak"
         if platform.system() == "Windows":
-            mock_lib = "azext_containerapp._ssh_utils.enable_vt_mode"
+            mock_lib = "azure.cli.command_modules.containerapp._ssh_utils.enable_vt_mode"
 
         with mock.patch("builtins.print", side_effect=mock_print), mock.patch(mock_lib):
-            with mock.patch("azext_containerapp._ssh_utils._getch_unix", side_effect=mock_getch), mock.patch("azext_containerapp._ssh_utils._getch_windows", side_effect=mock_getch):
+            with mock.patch("azure.cli.command_modules.containerapp._ssh_utils._getch_unix", side_effect=mock_getch), mock.patch("azure.cli.command_modules.containerapp._ssh_utils._getch_windows", side_effect=mock_getch):
                 containerapp_ssh(cmd=cmd, resource_group_name=namespace.resource_group_name, name=namespace.name,
                                     container=namespace.container, revision=namespace.revision, replica=namespace.replica, startup_command="sh")
         for line in expected_output:

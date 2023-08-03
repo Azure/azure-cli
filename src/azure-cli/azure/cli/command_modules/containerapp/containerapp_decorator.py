@@ -95,45 +95,6 @@ class BaseContainerAppDecorator(BaseResource):
         except CLIError as e:
             handle_raw_exception(e)
 
-    # deprecate, will be removed in the future
-    def list_containerapp(self):
-        try:
-            resource_group_name = self.get_argument_resource_group_name()
-            managed_env = self.get_argument_managed_env()
-            if self.get_argument_resource_group_name() is None:
-                containerapps = self.client.list_by_subscription(cmd=self.cmd)
-            else:
-                containerapps = self.client.list_by_resource_group(cmd=self.cmd, resource_group_name=resource_group_name)
-
-            if managed_env:
-                env_name = parse_resource_id(managed_env)["name"].lower()
-                if "resource_group" in parse_resource_id(managed_env):
-                    self.get_environment_client().show(self.cmd, parse_resource_id(managed_env)["resource_group"], parse_resource_id(managed_env)["name"])
-                    containerapps = [c for c in containerapps if c["properties"]["environmentId"].lower() == managed_env.lower()]
-                else:
-                    containerapps = [c for c in containerapps if parse_resource_id(c["properties"]["environmentId"])["name"].lower() == env_name]
-
-            return containerapps
-        except CLIError as e:
-            handle_raw_exception(e)
-
-    # deprecate, will be removed in the future
-    def show_containerapp(self):
-        try:
-            r = self.client.show(cmd=self.cmd, resource_group_name=self.get_argument_resource_group_name(), name=self.get_argument_name())
-            if self.get_param("show_secrets"):
-                self.set_up_get_existing_secrets(r)
-            return r
-        except CLIError as e:
-            handle_raw_exception(e)
-
-    # deprecate, will be removed in the future
-    def delete_containerapp(self):
-        try:
-            return self.client.delete(cmd=self.cmd, name=self.get_argument_name(), resource_group_name=self.get_argument_resource_group_name(), no_wait=self.get_argument_no_wait())
-        except CLIError as e:
-            handle_raw_exception(e)
-
     def get_environment_client(self):
         return ManagedEnvironmentClient
 

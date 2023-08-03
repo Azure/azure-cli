@@ -5,7 +5,8 @@
 
 import time
 import requests
-from azext_containerapp.tests.latest.common import TEST_LOCATION
+from azure.cli.command_modules.containerapp.tests.latest.common import TEST_LOCATION
+
 
 def create_containerapp_env(test_cls, env_name, resource_group, location=None):
     logs_workspace_name = test_cls.create_random_name(prefix='containerapp-env', length=24)
@@ -23,16 +24,17 @@ def create_containerapp_env(test_cls, env_name, resource_group, location=None):
         time.sleep(5)
         containerapp_env = test_cls.cmd('containerapp env show -g {} -n {}'.format(resource_group, env_name)).get_output_in_json()
 
+
 def create_and_verify_containerapp_up(
             test_cls,
             resource_group,
-            env_name = None,
-            source_path = None,
-            image = None,
-            location = None,
-            ingress = None,
-            target_port = None,
-            app_name = None):
+            env_name=None,
+            source_path=None,
+            image=None,
+            location=None,
+            ingress=None,
+            target_port=None,
+            app_name=None):
         # Configure the default location
         test_cls.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 

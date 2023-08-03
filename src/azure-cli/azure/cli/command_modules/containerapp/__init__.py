@@ -6,7 +6,7 @@
 
 from azure.cli.core import AzCommandsLoader
 
-from azext_containerapp._help import helps  # pylint: disable=unused-import
+from azure.cli.command_modules.containerapp._help import helps  # pylint: disable=unused-import
 
 
 class ContainerappCommandsLoader(AzCommandsLoader):
@@ -14,13 +14,13 @@ class ContainerappCommandsLoader(AzCommandsLoader):
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
         containerapp_custom = CliCommandType(
-            operations_tmpl='azext_containerapp.custom#{}',
+            operations_tmpl='azure.cli.command_modules.containerapp.custom#{}',
             client_factory=None)
         super(ContainerappCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                          custom_command_type=containerapp_custom)
 
     def load_command_table(self, args):
-        from azext_containerapp.commands import load_command_table
+        from azure.cli.command_modules.containerapp.commands import load_command_table
         from azure.cli.core.aaz import load_aaz_command_table
         try:
             from . import aaz
@@ -36,7 +36,7 @@ class ContainerappCommandsLoader(AzCommandsLoader):
         return self.command_table
 
     def load_arguments(self, command):
-        from azext_containerapp._params import load_arguments
+        from azure.cli.command_modules.containerapp._params import load_arguments
         load_arguments(self, command)
 
 

@@ -6,7 +6,7 @@
 # pylint: disable=line-too-long, too-many-statements, bare-except
 # from azure.cli.core.commands import CliCommandType
 # from msrestazure.tools import is_valid_resource_id, parse_resource_id
-from azext_containerapp._client_factory import ex_handler_factory
+from azure.cli.command_modules.containerapp._client_factory import ex_handler_factory
 from ._validators import validate_ssh
 from ._transformers import (transform_containerapp_output,
                             transform_containerapp_list_output,
@@ -223,8 +223,3 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_workload_profile')
         g.custom_command('update', 'update_workload_profile')
         g.custom_command('delete', 'delete_workload_profile')
-
-    with self.command_group('containerapp patch', is_preview=True) as g:
-        g.custom_command('list', 'patch_list')
-        g.custom_command('apply', 'patch_apply')
-        g.custom_command('interactive', 'patch_interactive')

@@ -11,7 +11,7 @@ from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathChec
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
-from azext_containerapp.tests.latest.common import TEST_LOCATION
+from azure.cli.command_modules.containerapp.tests.latest.common import TEST_LOCATION
 from .utils import create_containerapp_env
 
 class ContainerAppJobsCRUDOperationsTest(ScenarioTest):

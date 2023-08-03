@@ -9,8 +9,8 @@ import unittest
 
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, live_only)
 
-from azext_containerapp.tests.latest.common import TEST_LOCATION
-from azext_containerapp.tests.latest.utils import create_and_verify_containerapp_up
+from azure.cli.command_modules.containerapp.tests.latest.common import TEST_LOCATION
+from azure.cli.command_modules.containerapp.tests.latest.utils import create_and_verify_containerapp_up
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 

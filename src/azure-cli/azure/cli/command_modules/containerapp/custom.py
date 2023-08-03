@@ -9,7 +9,6 @@ import sys
 import time
 from urllib.parse import urlparse
 import json
-import re
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
 import requests
@@ -27,7 +26,6 @@ from azure.cli.core.azclierror import (
     MutuallyExclusiveArgumentError)
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import open_page_in_browser
-from azure.cli.command_modules.appservice.utils import _normalize_location
 from knack.log import get_logger
 from knack.prompting import prompt_y_n, prompt as prompt_str
 
@@ -35,68 +33,61 @@ from msrestazure.tools import parse_resource_id, is_valid_resource_id
 from msrest.exceptions import DeserializationError
 
 from .containerapp_job_decorator import ContainerAppJobDecorator, ContainerAppJobCreateDecorator
+from .containerapp_env_decorator import ContainerAppEnvDecorator, ContainerAppEnvCreateDecorator, ContainerAppEnvUpdateDecorator
 from .containerapp_auth_decorator import ContainerAppAuthDecorator
 from .containerapp_decorator import ContainerAppCreateDecorator, BaseContainerAppDecorator
 from ._client_factory import handle_raw_exception, handle_non_404_exception
-from ._clients import ManagedEnvironmentClient, ContainerAppClient, GitHubActionClient, DaprComponentClient, StorageClient, AuthClient, WorkloadProfileClient, ContainerAppsJobClient
+from ._clients import (
+    ManagedEnvironmentClient,
+    ContainerAppClient,
+    GitHubActionClient,
+    DaprComponentClient,
+    StorageClient,
+    AuthClient,
+    WorkloadProfileClient,
+    ContainerAppsJobClient
+)
 from ._dev_service_utils import DevServiceUtils
 from ._github_oauth import get_github_access_token
 from ._models import (
-    ManagedEnvironment as ManagedEnvironmentModel,
-    VnetConfiguration as VnetConfigurationModel,
-    AppLogsConfiguration as AppLogsConfigurationModel,
-    LogAnalyticsConfiguration as LogAnalyticsConfigurationModel,
     Ingress as IngressModel,
-    Configuration as ConfigurationModel,
-    JobConfiguration as JobConfigurationModel,
-    ManualTriggerConfig as ManualTriggerModel,
-    ScheduleTriggerConfig as ScheduleTriggerModel,
-    EventTriggerConfig as EventTriggerModel,
-    Template as TemplateModel,
-    JobTemplate as JobTemplateModel,
     JobExecutionTemplate as JobExecutionTemplateModel,
     RegistryCredentials as RegistryCredentialsModel,
-    ContainerApp as ContainerAppModel,
-    ContainerAppsJob as ContainerAppsJobModel,
-    Dapr as DaprModel,
     ContainerResources as ContainerResourcesModel,
     Scale as ScaleModel,
-    Service as ServiceModel,
     JobScale as JobScaleModel,
     Container as ContainerModel,
     GitHubActionConfiguration,
     RegistryInfo as RegistryInfoModel,
     AzureCredentials as AzureCredentialsModel,
     SourceControl as SourceControlModel,
-    ManagedServiceIdentity as ManagedServiceIdentityModel,
     ContainerAppCertificateEnvelope as ContainerAppCertificateEnvelopeModel,
     ContainerAppCustomDomain as ContainerAppCustomDomainModel,
     AzureFileProperties as AzureFilePropertiesModel,
-    CustomDomainConfiguration as CustomDomainConfigurationModel,
     ScaleRule as ScaleRuleModel,
     Volume as VolumeModel,
     VolumeMount as VolumeMountModel)
 
-from ._utils import (_validate_subscription_registered, _ensure_location_allowed,
+from ._utils import (_validate_subscription_registered,
                      parse_secret_flags, store_as_secret_and_return_secret_ref, parse_env_var_flags,
-                     _generate_log_analytics_if_not_provided, _get_existing_secrets, _convert_object_from_snake_to_camel_case,
+                     _get_existing_secrets, _convert_object_from_snake_to_camel_case,
                      _object_to_dict, _add_or_update_secrets, _remove_additional_attributes, _remove_readonly_attributes,
                      _add_or_update_env_vars, _add_or_update_tags, _update_revision_weights, _append_label_weights,
-                     _get_app_from_revision, raise_missing_token_suggestion, _infer_acr_credentials, _remove_registry_secret, _remove_secret,
+                     _get_app_from_revision, raise_missing_token_suggestion, _remove_registry_secret, _remove_secret,
                      _ensure_identity_resource_id, _remove_dapr_readonly_attributes, _remove_env_vars, _validate_traffic_sum,
                      _update_revision_env_secretrefs, _get_acr_cred, safe_get, await_github_action, repo_url_to_name,
-                     validate_container_app_name, _update_weights, get_vnet_location, register_provider_if_needed,
+                     validate_container_app_name, _update_weights, register_provider_if_needed,
                      generate_randomized_cert_name, _get_name, load_cert_file, check_cert_name_availability,
                      validate_hostname, patch_new_custom_domain, get_custom_domains, _validate_revision_name, set_managed_identity,
-                     create_acrpull_role_assignment, is_registry_msi_system, clean_null_values, _populate_secret_values,
-                     validate_environment_location, safe_set, parse_metadata_flags, parse_auth_flags, _azure_monitor_quickstart,
+                     is_registry_msi_system, clean_null_values, _populate_secret_values,
+                     safe_set, parse_metadata_flags, parse_auth_flags,
                      set_ip_restrictions, certificate_location_matches, certificate_matches, generate_randomized_managed_cert_name,
                      check_managed_cert_name_availability, prepare_managed_certificate_envelop,
-                     get_default_workload_profile_name_from_env, get_default_workload_profiles, ensure_workload_profile_supported, _generate_secret_volume_name,
-                     parse_service_bindings, get_linker_client, check_unique_bindings,
+                     ensure_workload_profile_supported, _generate_secret_volume_name,
+                     parse_service_bindings, get_linker_client,
                      get_current_mariner_tags, patchable_check, get_pack_exec_path, is_docker_running, trigger_workflow, AppType,
                      format_location)
-from ._validators import validate_create, validate_revision_suffix
+from ._validators import validate_revision_suffix
 from ._ssh_utils import (SSH_DEFAULT_ENCODING, WebSocketConnection, read_ssh, get_stdin_writer, SSH_CTRL_C_MSG,
                          SSH_BACKUP_ENCODING)
 from ._constants import (MAXIMUM_SECRET_LENGTH, MICROSOFT_SECRET_SETTING_NAME, FACEBOOK_SECRET_SETTING_NAME, GITHUB_SECRET_SETTING_NAME,
@@ -104,7 +95,7 @@ from ._constants import (MAXIMUM_SECRET_LENGTH, MICROSOFT_SECRET_SETTING_NAME, F
                          NAME_INVALID, NAME_ALREADY_EXISTS, ACR_IMAGE_SUFFIX, HELLO_WORLD_IMAGE, LOG_TYPE_SYSTEM, LOG_TYPE_CONSOLE,
                          MANAGED_CERTIFICATE_RT, PRIVATE_CERTIFICATE_RT, PENDING_STATUS, SUCCEEDED_STATUS, DEV_POSTGRES_IMAGE, DEV_POSTGRES_SERVICE_TYPE,
                          DEV_POSTGRES_CONTAINER_NAME, DEV_REDIS_IMAGE, DEV_REDIS_SERVICE_TYPE, DEV_REDIS_CONTAINER_NAME, DEV_KAFKA_CONTAINER_NAME,
-                         DEV_KAFKA_IMAGE, DEV_KAFKA_SERVICE_TYPE, DEV_MARIADB_CONTAINER_NAME, DEV_MARIADB_IMAGE, DEV_MARIADB_SERVICE_TYPE, DEV_SERVICE_LIST)
+                         DEV_KAFKA_IMAGE, DEV_KAFKA_SERVICE_TYPE, DEV_MARIADB_CONTAINER_NAME, DEV_MARIADB_IMAGE, DEV_MARIADB_SERVICE_TYPE, DEV_SERVICE_LIST, CONTAINER_APPS_SDK_MODELS)
 
 logger = get_logger(__name__)
 
@@ -167,7 +158,7 @@ def create_deserializer():
     from msrest import Deserializer
     import inspect
 
-    sdkClasses = inspect.getmembers(sys.modules["azext_containerapp._sdk_models"])
+    sdkClasses = inspect.getmembers(sys.modules[CONTAINER_APPS_SDK_MODELS])
     deserializer = {}
 
     for sdkClass in sdkClasses:
@@ -321,100 +312,6 @@ def update_containerapp_yaml(cmd, name, resource_group_name, file_name, from_rev
     except Exception as e:
         handle_raw_exception(e)
 
-
-def create_containerapp_yaml(cmd, name, resource_group_name, file_name, no_wait=False):
-    yaml_containerapp = process_loaded_yaml(load_yaml_file(file_name))
-    if type(yaml_containerapp) != dict:  # pylint: disable=unidiomatic-typecheck
-        raise ValidationError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-yaml for a valid containerapps YAML spec.')
-
-    if not yaml_containerapp.get('name'):
-        yaml_containerapp['name'] = name
-    elif yaml_containerapp.get('name').lower() != name.lower():
-        logger.warning('The app name provided in the --yaml file "{}" does not match the one provided in the --name flag "{}". The one provided in the --yaml file will be used.'.format(
-            yaml_containerapp.get('name'), name))
-    name = yaml_containerapp.get('name')
-
-    if not yaml_containerapp.get('type'):
-        yaml_containerapp['type'] = 'Microsoft.App/containerApps'
-    elif yaml_containerapp.get('type').lower() != "microsoft.app/containerapps":
-        raise ValidationError('Containerapp type must be \"Microsoft.App/ContainerApps\"')
-
-    # Deserialize the yaml into a ContainerApp object. Need this since we're not using SDK
-    containerapp_def = None
-    try:
-        deserializer = create_deserializer()
-
-        containerapp_def = deserializer('ContainerApp', yaml_containerapp)
-    except DeserializationError as ex:
-        raise ValidationError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-yaml for a valid containerapps YAML spec.') from ex
-
-    # Remove tags before converting from snake case to camel case, then re-add tags. We don't want to change the case of the tags. Need this since we're not using SDK
-    tags = None
-    if yaml_containerapp.get('tags'):
-        tags = yaml_containerapp.get('tags')
-        del yaml_containerapp['tags']
-
-    containerapp_def = _convert_object_from_snake_to_camel_case(_object_to_dict(containerapp_def))
-    containerapp_def['tags'] = tags
-
-    # After deserializing, some properties may need to be moved under the "properties" attribute. Need this since we're not using SDK
-    containerapp_def = process_loaded_yaml(containerapp_def)
-
-    # Remove "additionalProperties" and read-only attributes that are introduced in the deserialization. Need this since we're not using SDK
-    _remove_additional_attributes(containerapp_def)
-    _remove_readonly_attributes(containerapp_def)
-
-    # Remove extra workloadProfileName introduced in deserialization
-    if "workloadProfileName" in containerapp_def:
-        del containerapp_def["workloadProfileName"]
-
-    # Validate managed environment
-    if not containerapp_def["properties"].get('environmentId'):
-        raise RequiredArgumentMissingError('environmentId is required. This can be retrieved using the `az containerapp env show -g MyResourceGroup -n MyContainerappEnvironment --query id` command. Please see https://aka.ms/azure-container-apps-yaml for a valid containerapps YAML spec.')
-
-    env_id = containerapp_def["properties"]['environmentId']
-    env_name = None
-    env_rg = None
-    env_info = None
-
-    if is_valid_resource_id(env_id):
-        parsed_managed_env = parse_resource_id(env_id)
-        env_name = parsed_managed_env['name']
-        env_rg = parsed_managed_env['resource_group']
-    else:
-        raise ValidationError('Invalid environmentId specified. Environment not found')
-
-    try:
-        env_info = ManagedEnvironmentClient.show(cmd=cmd, resource_group_name=env_rg, name=env_name)
-    except:
-        pass
-
-    if not env_info:
-        raise ValidationError("The environment '{}' in resource group '{}' was not found".format(env_name, env_rg))
-
-    # Validate location
-    if not containerapp_def.get('location'):
-        containerapp_def['location'] = env_info['location']
-
-    try:
-        r = ContainerAppClient.create_or_update(
-            cmd=cmd, resource_group_name=resource_group_name, name=name, container_app_envelope=containerapp_def, no_wait=no_wait)
-
-        if r["properties"] and r["properties"]["provisioningState"] and r["properties"]["provisioningState"].lower() == "waiting" and not no_wait:
-            logger.warning('Containerapp creation in progress. Please monitor the creation using `az containerapp show -n {} -g {}`'.format(
-                name, resource_group_name
-            ))
-
-        if r["properties"] and r["properties"]["configuration"] and r["properties"]["configuration"]["ingress"] and r["properties"]["configuration"]["ingress"]["fqdn"]:
-            logger.warning("\nContainer app created. Access your app at https://{}/\n".format(r["properties"]["configuration"]["ingress"]["fqdn"]))
-        else:
-            logger.warning("\nContainer app created. To access it over HTTPS, enable ingress: az containerapp ingress enable --help\n")
-
-        return r
-    except Exception as e:
-        handle_raw_exception(e)
-
-
 def create_containerapp(cmd,
                         name,
                         resource_group_name,
@@ -462,14 +359,15 @@ def create_containerapp(cmd,
                         registry_identity=None,
                         workload_profile_name=None,
                         termination_grace_period=None,
-                        secret_volume_mount=None):
+                        secret_volume_mount=None,
+                        environment_type="managed"):
     raw_parameters = locals()
 
     containerapp_create_decorator = ContainerAppCreateDecorator(
         cmd=cmd,
         client=ContainerAppClient,
         raw_parameters=raw_parameters,
-        models="azext_containerapp._sdk_models"
+        models=CONTAINER_APPS_SDK_MODELS
     )
     containerapp_create_decorator.register_provider(CONTAINER_APPS_RP)
     containerapp_create_decorator.validate_arguments()
@@ -1014,7 +912,7 @@ def show_containerapp(cmd, name, resource_group_name, show_secrets=False):
         cmd=cmd,
         client=ContainerAppClient,
         raw_parameters=raw_parameters,
-        models="azext_containerapp._sdk_models"
+        models=CONTAINER_APPS_SDK_MODELS
     )
     containerapp_base_decorator.validate_subscription_registered(CONTAINER_APPS_RP)
 
@@ -1023,15 +921,15 @@ def show_containerapp(cmd, name, resource_group_name, show_secrets=False):
 
 def list_containerapp(cmd, resource_group_name=None, managed_env=None):
     raw_parameters = locals()
-    containerapp_base_decorator = BaseContainerAppDecorator(
+    containerapp_list_decorator = BaseContainerAppDecorator(
         cmd=cmd,
         client=ContainerAppClient,
         raw_parameters=raw_parameters,
-        models="azext_containerapp._sdk_models"
+        models=CONTAINER_APPS_SDK_MODELS
     )
-    containerapp_base_decorator.validate_subscription_registered(CONTAINER_APPS_RP)
+    containerapp_list_decorator.validate_subscription_registered(CONTAINER_APPS_RP)
 
-    return containerapp_base_decorator.list()
+    return containerapp_list_decorator.list()
 
 
 def delete_containerapp(cmd, name, resource_group_name, no_wait=False):
@@ -1040,7 +938,7 @@ def delete_containerapp(cmd, name, resource_group_name, no_wait=False):
         cmd=cmd,
         client=ContainerAppClient,
         raw_parameters=raw_parameters,
-        models="azext_containerapp._sdk_models"
+        models=CONTAINER_APPS_SDK_MODELS
     )
     containerapp_base_decorator.validate_subscription_registered(CONTAINER_APPS_RP)
 
@@ -1070,98 +968,19 @@ def create_managed_environment(cmd,
                                enable_workload_profiles=False,
                                mtls_enabled=None,
                                no_wait=False):
-    if zone_redundant:
-        if not infrastructure_subnet_resource_id:
-            raise RequiredArgumentMissingError("Cannot use --zone-redundant/-z without "
-                                               "--infrastructure-subnet-resource-id/-s")
-        if not is_valid_resource_id(infrastructure_subnet_resource_id):
-            raise ValidationError("--infrastructure-subnet-resource-id must be a valid resource id")
-        vnet_location = get_vnet_location(cmd, infrastructure_subnet_resource_id)
-        if location:
-            if _normalize_location(cmd, location) != vnet_location:
-                raise ValidationError(f"Location '{location}' does not match the subnet's location: '{vnet_location}'. "
-                                      "Please change either --location/-l or --infrastructure-subnet-resource-id/-s")
-        else:
-            location = vnet_location
+    raw_parameters = locals()
+    containerapp_env_create_decorator = ContainerAppEnvCreateDecorator(
+        cmd=cmd,
+        client=ManagedEnvironmentClient,
+        raw_parameters=raw_parameters,
+        models=CONTAINER_APPS_SDK_MODELS
+    )
+    containerapp_env_create_decorator.validate_arguments()
+    containerapp_env_create_decorator.register_provider(CONTAINER_APPS_RP)
 
-    location = validate_environment_location(cmd, location)
-
-    register_provider_if_needed(cmd, CONTAINER_APPS_RP)
-    _ensure_location_allowed(cmd, location, CONTAINER_APPS_RP, "managedEnvironments")
-
-    if (logs_customer_id is None or logs_key is None) and logs_destination == "log-analytics":
-        logs_customer_id, logs_key = _generate_log_analytics_if_not_provided(cmd, logs_customer_id, logs_key, location, resource_group_name)
-
-    if logs_destination == "log-analytics":
-        log_analytics_config_def = LogAnalyticsConfigurationModel
-        log_analytics_config_def["customerId"] = logs_customer_id
-        log_analytics_config_def["sharedKey"] = logs_key
-    else:
-        log_analytics_config_def = None
-
-    app_logs_config_def = AppLogsConfigurationModel
-    app_logs_config_def["destination"] = logs_destination if logs_destination != "none" else None
-    app_logs_config_def["logAnalyticsConfiguration"] = log_analytics_config_def
-
-    managed_env_def = ManagedEnvironmentModel
-    managed_env_def["location"] = location
-    managed_env_def["properties"]["appLogsConfiguration"] = app_logs_config_def
-    managed_env_def["tags"] = tags
-    managed_env_def["properties"]["zoneRedundant"] = zone_redundant
-
-    if enable_workload_profiles is True:
-        managed_env_def["properties"]["workloadProfiles"] = get_default_workload_profiles(cmd, location)
-
-    if hostname:
-        customDomain = CustomDomainConfigurationModel
-        blob, _ = load_cert_file(certificate_file, certificate_password)
-        customDomain["dnsSuffix"] = hostname
-        customDomain["certificatePassword"] = certificate_password
-        customDomain["certificateValue"] = blob
-        managed_env_def["properties"]["customDomainConfiguration"] = customDomain
-
-    if instrumentation_key is not None:
-        managed_env_def["properties"]["daprAIInstrumentationKey"] = instrumentation_key
-
-    if infrastructure_subnet_resource_id or docker_bridge_cidr or platform_reserved_cidr or platform_reserved_dns_ip:
-        vnet_config_def = VnetConfigurationModel
-
-        if infrastructure_subnet_resource_id is not None:
-            vnet_config_def["infrastructureSubnetId"] = infrastructure_subnet_resource_id
-
-        if docker_bridge_cidr is not None:
-            vnet_config_def["dockerBridgeCidr"] = docker_bridge_cidr
-
-        if platform_reserved_cidr is not None:
-            vnet_config_def["platformReservedCidr"] = platform_reserved_cidr
-
-        if platform_reserved_dns_ip is not None:
-            vnet_config_def["platformReservedDnsIP"] = platform_reserved_dns_ip
-
-        managed_env_def["properties"]["vnetConfiguration"] = vnet_config_def
-
-    if internal_only:
-        if not infrastructure_subnet_resource_id:
-            raise ValidationError('Infrastructure subnet resource ID needs to be supplied for internal only environments.')
-        managed_env_def["properties"]["vnetConfiguration"]["internal"] = True
-
-    if mtls_enabled is not None:
-        safe_set(managed_env_def, "properties", "peerAuthentication", "mtls", "enabled", value=mtls_enabled)
-    try:
-        r = ManagedEnvironmentClient.create(
-            cmd=cmd, resource_group_name=resource_group_name, name=name, managed_environment_envelope=managed_env_def, no_wait=no_wait)
-
-    except Exception as e:
-        handle_raw_exception(e)
-
-    _azure_monitor_quickstart(cmd, name, resource_group_name, storage_account, logs_destination)
-
-    # return ENV
-    if "properties" in r and "provisioningState" in r["properties"] and r["properties"]["provisioningState"].lower() != "succeeded" and not no_wait:
-        not disable_warnings and logger.warning('Containerapp environment creation in progress. Please monitor the creation using `az containerapp env show -n {} -g {}`'.format(name, resource_group_name))
-
-    if "properties" in r and "provisioningState" in r["properties"] and r["properties"]["provisioningState"].lower() == "succeeded":
-        not disable_warnings and logger.warning("\nContainer Apps environment created. To deploy a container app, use: az containerapp create --help\n")
+    containerapp_env_create_decorator.construct_payload()
+    r = containerapp_env_create_decorator.create()
+    r = containerapp_env_create_decorator.post_process(r)
 
     return r
 
@@ -1183,121 +1002,58 @@ def update_managed_environment(cmd,
                                max_nodes=None,
                                mtls_enabled=None,
                                no_wait=False):
-    if logs_destination == "log-analytics" or logs_customer_id or logs_key:
-        if logs_destination != "log-analytics":
-            raise ValidationError("When configuring Log Analytics workspace, --logs-destination should be \"log-analytics\"")
-        if not logs_customer_id or not logs_key:
-            raise ValidationError("Must provide --logs-workspace-id and --logs-workspace-key if updating logs destination to type 'log-analytics'.")
-
-    try:
-        r = ManagedEnvironmentClient.show(cmd=cmd, resource_group_name=resource_group_name, name=name)
-    except CLIError as e:
-        handle_raw_exception(e)
-
-    # General setup
-    env_def = {}
-    safe_set(env_def, "location", value=r["location"])  # required for API
-    if tags:
-        safe_set(env_def, "tags", value=tags)
-
-    # Logs
-    if logs_destination:
-        logs_destination = None if logs_destination == "none" else logs_destination
-        safe_set(env_def, "properties", "appLogsConfiguration", "destination", value=logs_destination)
-
-    if logs_destination == "log-analytics":
-        safe_set(env_def, "properties", "appLogsConfiguration", "logAnalyticsConfiguration", "customerId", value=logs_customer_id)
-        safe_set(env_def, "properties", "appLogsConfiguration", "logAnalyticsConfiguration", "sharedKey", value=logs_key)
-    elif logs_destination:
-        safe_set(env_def, "properties", "appLogsConfiguration", "logAnalyticsConfiguration", value=None)
-
-    # Custom domains
-    if hostname:
-        safe_set(env_def, "properties", "customDomainConfiguration", value={})
-        cert_def = env_def["properties"]["customDomainConfiguration"]
-        if certificate_file:
-            blob, _ = load_cert_file(certificate_file, certificate_password)
-            safe_set(cert_def, "certificateValue", value=blob)
-        safe_set(cert_def, "dnsSuffix", value=hostname)
-        if certificate_password:
-            safe_set(cert_def, "certificatePassword", value=certificate_password)
-
-    if workload_profile_name:
-        if "workloadProfiles" not in r["properties"] or not r["properties"]["workloadProfiles"]:
-            raise ValidationError("This environment does not allow for workload profiles. Can create a compatible environment with 'az containerapp env create --enable-workload-profiles'")
-
-        if workload_profile_type:
-            workload_profile_type = workload_profile_type.upper()
-        workload_profiles = r["properties"]["workloadProfiles"]
-        profile = [p for p in workload_profiles if p["name"].lower() == workload_profile_name.lower()]
-        update = False  # flag for updating an existing profile
-        if profile:
-            profile = profile[0]
-            update = True
-        else:
-            profile = {"name": workload_profile_name}
-
-        if workload_profile_type:
-            profile["workloadProfileType"] = workload_profile_type
-        if max_nodes:
-            profile["maximumCount"] = max_nodes
-        if min_nodes:
-            profile["minimumCount"] = min_nodes
-
-        if not update:
-            workload_profiles.append(profile)
-        else:
-            idx = [i for i, p in enumerate(workload_profiles) if p["name"].lower() == workload_profile_name.lower()][0]
-            workload_profiles[idx] = profile
-
-        safe_set(env_def, "properties", "workloadProfiles", value=workload_profiles)
-
-    if mtls_enabled is not None:
-        safe_set(env_def, "properties", "peerAuthentication", "mtls", "enabled", value=mtls_enabled)
-
-    try:
-        r = ManagedEnvironmentClient.update(
-            cmd=cmd, resource_group_name=resource_group_name, name=name, managed_environment_envelope=env_def, no_wait=no_wait)
-
-    except Exception as e:
-        handle_raw_exception(e)
-
-    _azure_monitor_quickstart(cmd, name, resource_group_name, storage_account, logs_destination)
+    raw_parameters = locals()
+    containerapp_env_update_decorator = ContainerAppEnvUpdateDecorator(
+        cmd=cmd,
+        client=ManagedEnvironmentClient,
+        raw_parameters=raw_parameters,
+        models=CONTAINER_APPS_SDK_MODELS
+    )
+    containerapp_env_update_decorator.validate_arguments()
+    containerapp_env_update_decorator.construct_payload()
+    r = containerapp_env_update_decorator.update()
+    r = containerapp_env_update_decorator.post_process(r)
 
     return r
 
 
 def show_managed_environment(cmd, name, resource_group_name):
-    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
+    raw_parameters = locals()
+    containerapp_env_decorator = ContainerAppEnvDecorator(
+        cmd=cmd,
+        client=ManagedEnvironmentClient,
+        raw_parameters=raw_parameters,
+        models=CONTAINER_APPS_SDK_MODELS
+    )
+    containerapp_env_decorator.validate_subscription_registered(CONTAINER_APPS_RP)
 
-    try:
-        return ManagedEnvironmentClient.show(cmd=cmd, resource_group_name=resource_group_name, name=name)
-    except CLIError as e:
-        handle_raw_exception(e)
+    return containerapp_env_decorator.show()
 
 
 def list_managed_environments(cmd, resource_group_name=None):
-    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
+    raw_parameters = locals()
+    containerapp_env_decorator = ContainerAppEnvDecorator(
+        cmd=cmd,
+        client=ManagedEnvironmentClient,
+        raw_parameters=raw_parameters,
+        models=CONTAINER_APPS_SDK_MODELS
+    )
+    containerapp_env_decorator.validate_subscription_registered(CONTAINER_APPS_RP)
 
-    try:
-        managed_envs = []
-        if resource_group_name is None:
-            managed_envs = ManagedEnvironmentClient.list_by_subscription(cmd=cmd)
-        else:
-            managed_envs = ManagedEnvironmentClient.list_by_resource_group(cmd=cmd, resource_group_name=resource_group_name)
-
-        return managed_envs
-    except CLIError as e:
-        handle_raw_exception(e)
+    return containerapp_env_decorator.list()
 
 
 def delete_managed_environment(cmd, name, resource_group_name, no_wait=False):
-    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
+    raw_parameters = locals()
+    containerapp_env_decorator = ContainerAppEnvDecorator(
+        cmd=cmd,
+        client=ManagedEnvironmentClient,
+        raw_parameters=raw_parameters,
+        models=CONTAINER_APPS_SDK_MODELS
+    )
+    containerapp_env_decorator.validate_subscription_registered(CONTAINER_APPS_RP)
 
-    try:
-        return ManagedEnvironmentClient.delete(cmd=cmd, name=name, resource_group_name=resource_group_name, no_wait=no_wait)
-    except CLIError as e:
-        handle_raw_exception(e)
+    return containerapp_env_decorator.delete()
 
 
 def create_containerappsjob(cmd,
@@ -1341,7 +1097,7 @@ def create_containerappsjob(cmd,
         cmd=cmd,
         client=ContainerAppsJobClient,
         raw_parameters=raw_parameters,
-        models="azext_containerapp._sdk_models"
+        models=CONTAINER_APPS_SDK_MODELS
     )
     containerapp_job_create_decorator.register_provider(CONTAINER_APPS_RP)
     containerapp_job_create_decorator.validate_arguments()
@@ -1360,7 +1116,7 @@ def show_containerappsjob(cmd, name, resource_group_name):
         cmd=cmd,
         client=ContainerAppsJobClient,
         raw_parameters=raw_parameters,
-        models="azext_containerapp._sdk_models"
+        models=CONTAINER_APPS_SDK_MODELS
     )
     containerapp_job_decorator.validate_subscription_registered(CONTAINER_APPS_RP)
 
@@ -1373,7 +1129,7 @@ def list_containerappsjob(cmd, resource_group_name=None):
         cmd=cmd,
         client=ContainerAppsJobClient,
         raw_parameters=raw_parameters,
-        models="azext_containerapp._sdk_models"
+        models=CONTAINER_APPS_SDK_MODELS
     )
     containerapp_job_decorator.validate_subscription_registered(CONTAINER_APPS_RP)
 
@@ -1386,7 +1142,7 @@ def delete_containerappsjob(cmd, name, resource_group_name, no_wait=False):
         cmd=cmd,
         client=ContainerAppsJobClient,
         raw_parameters=raw_parameters,
-        models="azext_containerapp._sdk_models"
+        models=CONTAINER_APPS_SDK_MODELS
     )
     containerapp_job_decorator.validate_subscription_registered(CONTAINER_APPS_RP)
 
@@ -1788,94 +1544,6 @@ def update_containerappsjob_logic(cmd,
 
         if "properties" in r and "provisioningState" in r["properties"] and r["properties"]["provisioningState"].lower() == "waiting" and not no_wait:
             logger.warning('Containerapps job update in progress. Please monitor the update using `az containerapp job show -n {} -g {}`'.format(name, resource_group_name))
-
-        return r
-    except Exception as e:
-        handle_raw_exception(e)
-
-
-def create_containerappsjob_yaml(cmd, name, resource_group_name, file_name, no_wait=False):
-    yaml_containerappsjob = process_loaded_yaml(load_yaml_file(file_name))
-    if type(yaml_containerappsjob) != dict:  # pylint: disable=unidiomatic-typecheck
-        raise ValidationError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-yaml for a valid YAML spec.')
-
-    if not yaml_containerappsjob.get('name'):
-        yaml_containerappsjob['name'] = name
-    elif yaml_containerappsjob.get('name').lower() != name.lower():
-        logger.warning('The job name provided in the --yaml file "{}" does not match the one provided in the --name flag "{}". The one provided in the --yaml file will be used.'.format(
-            yaml_containerappsjob.get('name'), name))
-    name = yaml_containerappsjob.get('name')
-
-    if not yaml_containerappsjob.get('type'):
-        yaml_containerappsjob['type'] = 'Microsoft.App/jobs'
-    elif yaml_containerappsjob.get('type').lower() != "microsoft.app/jobs":
-        raise ValidationError('Containerapp job type must be \"Microsoft.App/jobs\"')
-
-    # Deserialize the yaml into a ContainerAppsJob object. Need this since we're not using SDK
-    containerappsjob_def = None
-    try:
-        deserializer = create_deserializer()
-
-        containerappsjob_def = deserializer('ContainerAppsJob', yaml_containerappsjob)
-    except DeserializationError as ex:
-        raise ValidationError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-yaml for a valid containerapps YAML spec.') from ex
-
-    # Remove tags before converting from snake case to camel case, then re-add tags. We don't want to change the case of the tags. Need this since we're not using SDK
-    tags = None
-    if yaml_containerappsjob.get('tags'):
-        tags = yaml_containerappsjob.get('tags')
-        del yaml_containerappsjob['tags']
-
-    containerappsjob_def = _convert_object_from_snake_to_camel_case(_object_to_dict(containerappsjob_def))
-    containerappsjob_def['tags'] = tags
-
-    # After deserializing, some properties may need to be moved under the "properties" attribute. Need this since we're not using SDK
-    containerappsjob_def = process_loaded_yaml(containerappsjob_def)
-
-    # Remove "additionalProperties" and read-only attributes that are introduced in the deserialization. Need this since we're not using SDK
-    _remove_additional_attributes(containerappsjob_def)
-    _remove_readonly_attributes(containerappsjob_def)
-
-    # Remove extra workloadProfileName introduced in deserialization
-    if "workloadProfileName" in containerappsjob_def:
-        del containerappsjob_def["workloadProfileName"]
-
-    # Validate managed environment
-    if not containerappsjob_def["properties"].get('environmentId'):
-        raise RequiredArgumentMissingError('environmentId is required. This can be retrieved using the `az containerapp env show -g MyResourceGroup -n MyContainerappEnvironment --query id` command. Please see https://aka.ms/azure-container-apps-yaml for a valid containerapps YAML spec.')
-
-    env_id = containerappsjob_def["properties"]['environmentId']
-    env_name = None
-    env_rg = None
-    env_info = None
-
-    if is_valid_resource_id(env_id):
-        parsed_managed_env = parse_resource_id(env_id)
-        env_name = parsed_managed_env['name']
-        env_rg = parsed_managed_env['resource_group']
-    else:
-        raise ValidationError('Invalid environmentId specified. Environment not found')
-
-    try:
-        env_info = ManagedEnvironmentClient.show(cmd=cmd, resource_group_name=env_rg, name=env_name)
-    except:
-        pass
-
-    if not env_info:
-        raise ValidationError("The environment '{}' in resource group '{}' was not found".format(env_name, env_rg))
-
-    # Validate location
-    if not containerappsjob_def.get('location'):
-        containerappsjob_def['location'] = env_info['location']
-
-    try:
-        r = ContainerAppsJobClient.create_or_update(
-            cmd=cmd, resource_group_name=resource_group_name, name=name, containerapp_job_envelope=containerappsjob_def, no_wait=no_wait)
-
-        if "properties" in r and "provisioningState" in r["properties"] and r["properties"]["provisioningState"].lower() == "waiting" and not no_wait:
-            logger.warning('Containerapps job creation in progress. Please monitor the creation using `az containerapp job show -n {} -g {}`'.format(
-                name, resource_group_name
-            ))
 
         return r
     except Exception as e:
@@ -5171,7 +4839,7 @@ def update_auth_config(cmd, resource_group_name, name, set_string=None, enabled=
         cmd=cmd,
         client=AuthClient,
         raw_parameters=raw_parameters,
-        models="azext_containerapp._sdk_models"
+        models=CONTAINER_APPS_SDK_MODELS
     )
 
     containerapp_auth_decorator.construct_payload()
@@ -5184,7 +4852,7 @@ def show_auth_config(cmd, resource_group_name, name):
         cmd=cmd,
         client=AuthClient,
         raw_parameters=raw_parameters,
-        models="azext_containerapp._sdk_models"
+        models=CONTAINER_APPS_SDK_MODELS
     )
 
     return containerapp_auth_decorator.show()
@@ -5388,258 +5056,3 @@ def delete_workload_profile(cmd, resource_group_name, env_name, workload_profile
         return r
     except Exception as e:
         handle_raw_exception(e)
-
-
-def patch_list(cmd, resource_group_name=None, managed_env=None, show_all=False):
-    if is_docker_running() is False:
-        logger.error("Please install or start Docker and try again.")
-        return
-    pack_exec_path = get_pack_exec_path()
-    if pack_exec_path is None:
-        return
-    logger.warning("Listing container apps...")
-    ca_list = list_containerapp(cmd, resource_group_name, managed_env)
-    imgs = []
-    if ca_list:
-        for ca in ca_list:
-            id_parts = parse_resource_id(ca["id"])
-            resource_group_name = id_parts.get('resource_group')
-            container_app_name = id_parts.get('name')
-            managed_env_id_parts = parse_resource_id(ca["properties"]["managedEnvironmentId"])
-            managed_env_name = managed_env_id_parts.get('name')
-            containers = safe_get(ca, "properties", "template", "containers")
-            for container in containers:
-                result = dict(
-                    imageName=container["image"],
-                    targetContainerName=container["name"],
-                    targetContainerAppName=container_app_name,
-                    targetContainerAppEnvironmentName=managed_env_name,
-                    targetResourceGroup=resource_group_name)
-                imgs.append(result)
-    # Inspect the images
-    results = []
-    inspect_results = []
-    # Multi-worker
-    logger.warning("Inspecting container apps images...")
-    with ThreadPoolExecutor(max_workers=10) as executor:
-        [executor.submit(patch_get_image_inspection, pack_exec_path, img, inspect_results) for img in imgs]
-
-    # Get the current tags of Dotnet Mariners
-    oryx_run_img_tags = get_current_mariner_tags()
-    failed_reason = "Failed to inspect the image. Please make sure that you are authenticated to the container registry and that the image exists."
-    not_based_mariner_reason = "Image not based on Mariner"
-    mcr_check_reason = "Image not from mcr.microsoft.com/oryx/builder"
-    results = []
-    # Start checking if the images are based on Mariner
-    logger.warning("Checking for patches...")
-    for inspect_result in inspect_results:
-        if inspect_result["remote_info"] == 401:
-            results.append(dict(
-                targetContainerName=inspect_result["targetContainerName"],
-                targetContainerAppName=inspect_result["targetContainerAppName"],
-                targetContainerAppEnvironmentName=inspect_result["targetContainerAppEnvironmentName"],
-                targetResourceGroup=inspect_result["targetResourceGroup"],
-                targetImageName=inspect_result["image_name"],
-                oldRunImage=None,
-                newRunImage=None,
-                id=None,
-                reason=failed_reason))
-        else:
-            # Divide run-images into different parts by "/"
-            run_images_props = inspect_result["remote_info"]["run_images"]
-            if run_images_props is None:
-                results.append(dict(
-                    targetContainerName=inspect_result["targetContainerName"],
-                    targetContainerAppName=inspect_result["targetContainerAppName"],
-                    targetContainerAppEnvironmentName=inspect_result["targetContainerAppEnvironmentName"],
-                    targetResourceGroup=inspect_result["targetResourceGroup"],
-                    targetImageName=inspect_result["image_name"],
-                    oldRunImage=None,
-                    newRunImage=None,
-                    id=None,
-                    reason=not_based_mariner_reason))
-            else:
-                for run_images_prop in run_images_props:
-                    if run_images_prop["name"].find("mcr.microsoft.com/oryx/builder") != -1:
-                        run_images_prop = run_images_prop["name"].split(":")
-                        run_images_tag = run_images_prop[1]
-                        # Based on Mariners
-                        if run_images_tag.find('mariner') != -1:
-                            check_result = patchable_check(run_images_tag, oryx_run_img_tags, inspect_result=inspect_result)
-                            results.append(check_result)
-                        else:
-                            results.append(dict(
-                                targetContainerName=inspect_result["targetContainerName"],
-                                targetContainerAppName=inspect_result["targetContainerAppName"],
-                                targetContainerAppEnvironmentName=inspect_result["targetContainerAppEnvironmentName"],
-                                targetResourceGroup=inspect_result["targetResourceGroup"],
-                                targetImageName=inspect_result["image_name"],
-                                oldRunImage=run_images_tag,
-                                newRunImage=None,
-                                id=None,
-                                reason=failed_reason))
-                    else:
-                        # Not based on image from mcr.microsoft.com/oryx/builder
-                        results.append(dict(
-                            targetContainerAppName=inspect_result["targetContainerAppName"],
-                            targetContainerAppEnvironmentName=inspect_result["targetContainerAppEnvironmentName"],
-                            targetResourceGroup=inspect_result["targetResourceGroup"],
-                            oldRunImage=inspect_result["remote_info"]["run_images"],
-                            newRunImage=None,
-                            id=None,
-                            reason=mcr_check_reason))
-    if show_all is False:
-        results = [result for result in results if result["id"] is not None]
-    if not results:
-        logger.warning("No container apps available to patch at this time. Use --show-all to show the container apps that cannot be patched.")
-        return
-    return results
-
-
-def patch_get_image_inspection(pack_exec_path, img, info_list):
-    if (img["imageName"].find("run-dotnet") != -1) and (img["imageName"].find("cbl-mariner") != -1):
-        inspect_result = {
-            "remote_info":
-            {
-                "run_images":
-                [{
-                    "name": "mcr.microsoft.com/oryx/builder:" + img["imageName"].split(":")[-1]
-                }]
-            },
-            "image_name": img["imageName"],
-            "targetContainerName": img["targetContainerName"],
-            "targetContainerAppName": img["targetContainerAppName"],
-            "targetContainerAppEnvironmentName": img["targetContainerAppEnvironmentName"],
-            "targetResourceGroup": img["targetResourceGroup"]
-        }
-    else:
-        with subprocess.Popen(pack_exec_path + " inspect-image " + img["imageName"] + " --output json", shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE) as img_info:
-            img_info_out, img_info_err = img_info.communicate()
-            if img_info_err.find(b"status code 401 Unauthorized") != -1 or img_info_err.find(b"unable to find image") != -1:
-                inspect_result = dict(remote_info=401, image_name=img["imageName"])
-            else:
-                inspect_result = json.loads(img_info_out)
-            inspect_result.update({
-                "targetContainerName": img["targetContainerName"],
-                "targetContainerAppName": img["targetContainerAppName"],
-                "targetContainerAppEnvironmentName": img["targetContainerAppEnvironmentName"],
-                "targetResourceGroup": img["targetResourceGroup"]
-            })
-    info_list.append(inspect_result)
-
-
-def patch_interactive(cmd, resource_group_name=None, managed_env=None, show_all=False):
-    if is_docker_running() is False:
-        logger.error("Please install or start Docker and try again.")
-        return
-    patchable_check_results = patch_list(cmd, resource_group_name, managed_env, show_all=show_all)
-    pack_exec_path = get_pack_exec_path()
-    if pack_exec_path is None:
-        return
-    if patchable_check_results is None:
-        return
-    patchable_check_results_json = json.dumps(patchable_check_results, indent=2)
-    without_unpatchable_results = []
-    without_unpatchable_results = [result for result in patchable_check_results if result["id"] is not None]
-    if without_unpatchable_results == [] and (patchable_check_results is None or show_all is False):
-        return
-    logger.warning(patchable_check_results_json)
-    if without_unpatchable_results == []:
-        return
-    user_input = input("Do you want to apply all the patches or specify by id? (y/n/id)\n")
-    patch_apply_handle_input(cmd, patchable_check_results, user_input, pack_exec_path)
-
-
-def patch_apply(cmd, resource_group_name=None, managed_env=None, show_all=False):
-    if is_docker_running() is False:
-        logger.error("Please install or start Docker and try again.")
-        return
-    patchable_check_results = patch_list(cmd, resource_group_name, managed_env, show_all=show_all)
-    pack_exec_path = get_pack_exec_path()
-    if pack_exec_path is None:
-        return
-    if patchable_check_results is None:
-        return
-    patchable_check_results_json = json.dumps(patchable_check_results, indent=2)
-    without_unpatchable_results = []
-    without_unpatchable_results = [result for result in patchable_check_results if result["id"] is not None]
-    if without_unpatchable_results == [] and (patchable_check_results is None or show_all is False):
-        return
-    logger.warning(patchable_check_results_json)
-    if without_unpatchable_results == []:
-        return
-    patch_apply_handle_input(cmd, patchable_check_results, "y", pack_exec_path)
-
-
-def patch_apply_handle_input(cmd, patch_check_list, method, pack_exec_path):
-    input_method = method.strip().lower()
-    # Track number of times patches were applied successfully.
-    patch_apply_count = 0
-    if input_method == "y":
-        telemetry_record_method = "y"
-        for patch_check in patch_check_list:
-            if patch_check["id"] and patch_check["newRunImage"]:
-                patch_cli_call(cmd,
-                               patch_check["targetResourceGroup"],
-                               patch_check["targetContainerAppName"],
-                               patch_check["targetContainerName"],
-                               patch_check["targetImageName"],
-                               patch_check["newRunImage"],
-                               pack_exec_path)
-                # Increment patch_apply_count with every successful patch.
-                patch_apply_count += 1
-    elif input_method == "n":
-        telemetry_record_method = "n"
-        logger.warning("No patch applied.")
-        return
-    else:
-        # Check if method is an existing id in the list
-        for patch_check in patch_check_list:
-            if patch_check["id"] == input_method:
-                patch_cli_call(cmd,
-                               patch_check["targetResourceGroup"],
-                               patch_check["targetContainerAppName"],
-                               patch_check["targetContainerName"],
-                               patch_check["targetImageName"],
-                               patch_check["newRunImage"],
-                               pack_exec_path)
-                patch_apply_count += 1
-                telemetry_record_method = input_method
-                break
-        else:
-            telemetry_record_method = "invalid"
-            logger.error("Invalid patch method or id.")
-    patch_apply_properties = {
-        'Context.Default.AzureCLI.PatchUserResponse': telemetry_record_method,
-        'Context.Default.AzureCLI.PatchApplyCount': patch_apply_count
-    }
-    telemetry_core.add_extension_event('containerapp', patch_apply_properties)
-    return
-
-
-def patch_cli_call(cmd, resource_group, container_app_name, container_name, target_image_name, new_run_image, pack_exec_path):
-    try:
-        logger.warning("Applying patch for container app: " + container_app_name + " container: " + container_name)
-        subprocess.run(f"{pack_exec_path} rebase -q {target_image_name} --run-image {new_run_image}", shell=True, check=True)
-        new_target_image_name = target_image_name.split(":")[0] + ":" + new_run_image.split(":")[1]
-        subprocess.run(f"docker tag {target_image_name} {new_target_image_name}", shell=True, check=True)
-        logger.debug(f"Publishing {new_target_image_name} to registry...")
-        subprocess.run(f"docker push -q {new_target_image_name}", shell=True, check=True)
-        logger.warning("Patch applied and published successfully.\nNew image: " + new_target_image_name)
-    except Exception:
-        logger.error("Error: Failed to apply patch and publish. Check if registry is logged in and has write access.")
-        raise
-    try:
-        logger.warning("Patching container app: " + container_app_name + " container: " + container_name)
-        logger.info("Creating new revision with image: " + new_target_image_name)
-        update_info_json = update_containerapp(cmd,
-                                               name=container_app_name,
-                                               resource_group_name=resource_group,
-                                               container_name=container_name,
-                                               image=new_target_image_name)
-        logger.warning(json.dumps(update_info_json, indent=2))
-        logger.warning("Container app revision created successfully from the patched image.")
-        return
-    except Exception:
-        logger.error("Error: Failed to create new revision with the container app.")
-        raise

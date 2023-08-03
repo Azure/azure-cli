@@ -7,7 +7,7 @@ import unittest  # pylint: disable=unused-import
 
 from azure.cli.testsdk import (ResourceGroupPreparer)
 from azure.cli.testsdk.decorators import serial_test
-from azext_containerapp.tests.latest.common import (
+from azure.cli.command_modules.containerapp.tests.latest.common import (
     ContainerappComposePreviewScenarioTest,  # pylint: disable=unused-import
     write_test_file,
     clean_up_test_file,

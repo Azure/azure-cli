@@ -60,7 +60,6 @@ from ._constants import (MAXIMUM_SECRET_LENGTH,
                          LOG_ANALYTICS_RP,
                          CONTAINER_APPS_RP,
                          ACR_IMAGE_SUFFIX,
-                         MAXIMUM_CONTAINER_APP_NAME_LENGTH,
                          ACR_TASK_TEMPLATE,
                          DEFAULT_PORT)
 
