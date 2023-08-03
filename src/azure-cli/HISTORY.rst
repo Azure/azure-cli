@@ -3,6 +3,111 @@
 Release History
 ===============
 
+2.51.0
+++++++
+
+**AKS**
+
+* `az aks nodepool snapshot update`: Add aks nodepool snapshot update command (#26790)
+* `az aks create`: Add new parameter `--k8s-support-plan` to support LTS onboarding, also add new tier enum `premium` (#26795)
+* `az aks update`: Support enabling/disabling LTS via new parameter `--k8s-support-plan` (#26795)
+* `az aks create`: Add node taint support when create cluster use `az aks` command (#26837)
+* `az aks update`: Add update node taint support on cluster level use `az aks` command (#26837)
+* `az aks enable-addons`: Fix the default value of option `--enable-msi-auth-for-monitoring` being overwritten to `False` when specified (#26844)
+* `az aks update`: Add new parameter `--outbound-type` to support cluster outbound type. (#26975)
+* `az aks maintenanceconfiguration list`: Add new command to list all maintenance windows in a cluster (#26758)
+* `az aks maintenanceconfiguration show`: Add new command to display a specific maintenance window of a cluster (#26758)
+* `az aks maintenanceconfiguration add`: Add new command to add a new maintenance window configuration for a cluster (#26758)
+* `az aks maintenanceconfiguration update`: Add new command to update an existing maintenance window configuration of a cluster (#26758)
+* `az aks maintenanceconfiguration delete`: Add new command to delete an existing maintenance window configuration of a cluster (#26758)
+* `az aks update`: Fix aks network profile update error (#27006)
+
+**App Config**
+
+* `az appconfig kv delete/set/set-keyvault`: Add key validations for null or empty space keys (#26928)
+* `az appconfig kv export/import/restore`: Update key-value diffing and preview (#26325)
+* `az appconfig snapshot`: Remove status code property from snapshot object (#26891)
+* `az appconfig snapshot list`: Use enums for status parameter (#26879)
+
+**App Service**
+
+* Fix #26214: `az webapp show`: Fix the bug caused by missing leading slash causes web app and plan commands to fail for s-clouds (#26921)
+* Fix #26214: `az appservice plan show`: Fix the bug caused by missing leading slash causes web app and plan commands to fail for s-clouds (#26921)
+* Fix #26601: `az functionapp create`: Throw error for consumption function app created with vnet (#26792)
+* Fix #21133: `az webapp/functionapp config ssl bind/unbind`: Search for matching certificates in the subscription by App Service Plan Id (#26617)
+
+**ARM**
+
+* `az stack`: Fix the bug that the required `--deny-settings-mode` parameter should not return None (should be a string) (#26900)
+* `az stack`: Fix the bug that the `--deny-settings-excluded-principals` parameter was accidentally reset (#26900)
+
+**Batch**
+
+* `az batch job/pool all-statistics`: Remove no longer worked commands (#26766)
+* `az batch pool create`: Add new parameter `--enable-accelerated-networking` to determine whether this pool should enable accelerated networking (#26766)
+
+**Cognitive Services**
+
+* `az cognitiveservices account deployment create`: Add `--sku-name` and `--sku-capacity` parameters (#26995)
+* `az cognitiveservices usage`: Add new command `list` (#26995)
+* `az cognitiveservices model`: Add new command `list` (#26995)
+
+**Compute**
+
+* `az vm/vmss create`: Enable auto upgrading of guest attestation extension by default for Trusted Launch enabled VMs and VMSS (#26878)
+* `az vm/vmss create`: Add new parameter `--disable-integrity-monitoring-autoupgrade` to support disabling auto upgrading of guest attestation extension for Trusted Launch enabled VMs and VMSS (#26878)
+* `az sig image-version undelete`: Add new command to support softdeleted image recovery (#26943)
+* `az vm/vmss/disk create`: Add new option `Standard` for `--security-type` for backward compatibility (#26892)
+* `az sig image-definition create`: Add new option `Standard` for `--security-type` for backward compatibility (#26892)
+
+**Cosmos DB**
+
+* `az cosmosdb restore`: Add `--assign-identity` and `--default-identity` to allow PITR restoring with identity (#26867)
+* `az cosmosdb postgres`: Add new command groups to support Cosmos DB for PostgreSQL (#26729)
+
+**Key Vault**
+
+* `az keyvault restore start`: Add `--key-name` to support selective key restoring (#26907)
+* `az keyvault key sign/verify`: Add new commands to support signing with keyvault key and verify the signature (#26922)
+
+**MySQL**
+
+* `az mysql flexible-server ad-admin set`: Enable AAD for replica (#27007)
+
+**Network**
+
+* `az network nic create/update`: Add parameters `--auxiliary-mode` and `--auxiliary-sku` to support setting auxiliary mode and sku (#26932)
+* `az network public-ip`: Add parameter `--dns-name-scope` to specify different options (#26961)
+* `az network private-endpoint-connection`: Add provider `Microsoft.ElasticSan/elasticSans` (#26988)
+
+**Packaging**
+
+* Drop Python 3.7 support (#26855)
+* Support x86 and x64 MSI builds (#26640)
+
+**Resource**
+
+* `az resource invoke-action`: Add new parameter `--no-wait` to support not waiting the long-running operation to finish (#26877)
+
+**Role**
+
+* `az ad sp create-for-rbac`: Add alias `--json-auth` for `--sdk-auth` (#26572)
+
+**Service Connector**
+
+* `az functionapp connection`: Add new command group to support service connector on Function App (#26825)
+* `az spring connection`: Enable new auth types for Spring Boot and Cosmos SQL connection (#26719)
+
+**SQL**
+
+* `az sql mi start/stop/start-stop-schedule`: Add SQL MI manual and scheduled start stop (#26979)
+
+**Storage**
+
+* `az storage container-rm update`: `--default-encryption-scope` and `--deny-encryption-scope-override` should not be specified during updating (#26948)
+* Fix #22704: `az storage account create`: `--encryption-key-type-for-queue` and `--encryption-key-type-for-table` no longer remove other settings (#26853)
+* Fix #26587: `az storage file upload`: Add `--file-url` to support supplying the url instead of share/file name (#26997)
+
 2.50.0
 ++++++
 
