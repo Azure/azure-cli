@@ -1941,7 +1941,7 @@ class VMRunCommandScenarioTest(ScenarioTest):
 class VMDiskEncryptionTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_encryption', location='westus')
-    @KeyVaultPreparer(name_prefix='vault', name_len=10, location='westus', key='vault', additional_params='--enabled-for-disk-encryption')
+    @KeyVaultPreparer(name_prefix='vault', name_len=10, location='westus', key='vault', skip_purge=True, additional_params='--enabled-for-disk-encryption')
     def test_vm_disk_encryption_e2e(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vm': 'vm1'
