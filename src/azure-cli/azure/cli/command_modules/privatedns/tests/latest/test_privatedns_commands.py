@@ -430,9 +430,8 @@ class PrivateDnsZonesTests(BaseScenarioTests):
             self.check('tags.{}'.format(tagKey), tagVal),
             self.check('provisioningState', 'Succeeded')
         ])
-        self.cmd('az network private-dns zone update -g {rg} -n {zone} --tags ""', checks=[
+        self.cmd('az network private-dns zone update -g {rg} -n {zone} --tags null', checks=[
             self.check('name', '{zone}'),
-            self.check('tags', '{{}}'),
             self.check('provisioningState', 'Succeeded')
         ])
 
@@ -462,7 +461,7 @@ class PrivateDnsZonesTests(BaseScenarioTests):
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_GetZone_ZoneNotExists_ExpectError(self, resource_group):
         GeneratePrivateZoneName(self)
-        with self.assertRaisesRegex(SystemExit, '3'):
+        with self.assertRaisesRegex(ResourceNotFoundError, 'ResourceNotFound'):
             self.cmd('az network private-dns zone show -g {rg} -n {zone}')
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')

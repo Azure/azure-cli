@@ -13,21 +13,21 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_encryption000001?api-version=2018-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001","name":"cli_test_vm_encryption000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-06-23T15:04:31Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001","name":"cli_test_vm_encryption000001","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_vm_disk_encryption_e2e","date":"2023-07-25T08:44:31Z","module":"vm"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '290'
+      - '341'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:05:50 GMT
+      - Tue, 25 Jul 2023 08:45:47 GMT
       expires:
       - '-1'
       pragma:
@@ -51,7 +51,7 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.26.0
+      - python-requests/2.31.0
     method: GET
     uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/arm-compute/quickstart-templates/aliases.json
   response:
@@ -62,23 +62,44 @@ interactions:
         \"object\",\n      \"value\": {\n        \"Linux\": {\n          \"CentOS\":
         {\n            \"publisher\": \"OpenLogic\",\n            \"offer\": \"CentOS\",\n
         \           \"sku\": \"7.5\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"CentOS85Gen2\": {\n            \"publisher\":
+        \ \"OpenLogic\",\n            \"offer\":  \"CentOS\",\n            \"sku\":
+        \ \"8_5-gen2\",\n            \"version\":  \"latest\",\n            \"architecture\":
         \"x64\"\n          },\n          \"Debian\": {\n            \"publisher\":
         \"Debian\",\n            \"offer\": \"debian-10\",\n            \"sku\": \"10\",\n
         \           \"version\": \"latest\",\n            \"architecture\": \"x64\"\n
+        \         },\n          \"Debian11\":  {\n            \"publisher\":  \"Debian\",\n
+        \           \"offer\":  \"debian-11\",\n            \"sku\":  \"11-backports-gen2\",\n
+        \           \"version\":  \"latest\",\n            \"architecture\": \"x64\"\n
         \         },\n          \"Flatcar\": {\n            \"publisher\": \"kinvolk\",\n
         \           \"offer\": \"flatcar-container-linux-free\",\n            \"sku\":
         \"stable\",\n            \"version\": \"latest\",\n            \"architecture\":
-        \"x64\"\n          },\n          \"openSUSE-Leap\": {\n            \"publisher\":
-        \"SUSE\",\n            \"offer\": \"opensuse-leap-15-3\",\n            \"sku\":
-        \"gen2\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"FlatcarLinuxFreeGen2\":  {\n            \"publisher\":
+        \ \"kinvolk\",\n            \"offer\":  \"flatcar-container-linux-free\",\n
+        \           \"sku\":  \"stable-gen2\",\n            \"version\":  \"latest\",\n
+        \           \"architecture\": \"x64\"\n          },\n          \"openSUSE-Leap\":
+        {\n            \"publisher\": \"SUSE\",\n            \"offer\": \"opensuse-leap-15-3\",\n
+        \           \"sku\": \"gen2\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"OpenSuseLeap154Gen2\":  {\n            \"publisher\":
+        \ \"SUSE\",\n            \"offer\":  \"openSUSE-leap-15-4\",\n            \"sku\":
+        \ \"gen2\",\n            \"version\":  \"latest\",\n            \"architecture\":
         \"x64\"\n          },\n          \"RHEL\": {\n            \"publisher\": \"RedHat\",\n
         \           \"offer\": \"RHEL\",\n            \"sku\": \"7-LVM\",\n            \"version\":
-        \"latest\",\n            \"architecture\": \"x64\"\n          },\n          \"SLES\":
-        {\n            \"publisher\": \"SUSE\",\n            \"offer\": \"sles-15-sp3\",\n
+        \"latest\",\n            \"architecture\": \"x64\"\n          },\n          \"RHELRaw8LVMGen2\":
+        \ {\n            \"publisher\":  \"RedHat\",\n            \"offer\":  \"RHEL\",\n
+        \           \"sku\":  \"8-lvm-gen2\",\n            \"version\":  \"latest\",\n
+        \           \"architecture\": \"x64\"\n          },\n          \"SLES\": {\n
+        \           \"publisher\": \"SUSE\",\n            \"offer\": \"sles-15-sp3\",\n
         \           \"sku\": \"gen2\",\n            \"version\": \"latest\",\n            \"architecture\":
-        \"x64\"\n          },\n          \"UbuntuLTS\": {\n            \"publisher\":
-        \"Canonical\",\n            \"offer\": \"UbuntuServer\",\n            \"sku\":
-        \"18.04-LTS\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"SuseSles15SP3\": {\n            \"publisher\":
+        \"SUSE\",\n            \"offer\": \"sles-15-sp3\",\n            \"sku\": \"gen2\",\n
+        \           \"version\": \"latest\",\n            \"architecture\": \"x64\"\n
+        \         },\n          \"UbuntuLTS\": {\n            \"publisher\": \"Canonical\",\n
+        \           \"offer\": \"UbuntuServer\",\n            \"sku\": \"18.04-LTS\",\n
+        \           \"version\": \"latest\",\n            \"architecture\": \"x64\"\n
+        \         },\n          \"Ubuntu2204\":  {\n            \"publisher\":  \"Canonical\",\n
+        \           \"offer\":  \"0001-com-ubuntu-server-jammy\",\n            \"sku\":
+        \ \"22_04-lts-gen2\",\n            \"version\":  \"latest\",\n            \"architecture\":
         \"x64\"\n          }\n        },\n        \"Windows\": {\n          \"Win2022Datacenter\":
         {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
         \"WindowsServer\",\n            \"sku\": \"2022-Datacenter\",\n            \"version\":
@@ -101,7 +122,7 @@ interactions:
         \"x64\"\n          },\n          \"Win2008R2SP1\": {\n            \"publisher\":
         \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
         \"2008-R2-SP1\",\n            \"version\": \"latest\",\n            \"architecture\":
-        \"x64\"\n          }\n        }\n      }\n    }\n  }\n}"
+        \"x64\"\n          }\n        }\n      }\n    }\n  }\n}\n"
     headers:
       accept-ranges:
       - bytes
@@ -112,17 +133,19 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '3463'
+      - '5018'
       content-security-policy:
       - default-src 'none'; style-src 'unsafe-inline'; sandbox
       content-type:
       - text/plain; charset=utf-8
+      cross-origin-resource-policy:
+      - cross-origin
       date:
-      - Thu, 23 Jun 2022 15:05:52 GMT
+      - Tue, 25 Jul 2023 08:45:47 GMT
       etag:
-      - W/"41b202f4dc5098d126019dc00721a4c5e30df0c5196794514fadc3710ee2a5cb"
+      - W/"0a553f088c358b909a2940b5a97fcb731c1d443cb7a332ca4933eb2b7df38468"
       expires:
-      - Thu, 23 Jun 2022 15:10:52 GMT
+      - Tue, 25 Jul 2023 08:50:47 GMT
       source-age:
       - '0'
       strict-transport-security:
@@ -138,15 +161,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - 57618f8e4905518a6d1c8d7f554fccceb46cfb5f
+      - 995783629b535a6839faf4bd69395ef6a75ad3b9
       x-frame-options:
       - deny
       x-github-request-id:
-      - 21B0:36D2:2D43B3:3CFF7D:62B40BF8
+      - D4D6:240A:32A7C:40BDE:64BEF321
       x-served-by:
-      - cache-qpg1260-QPG
+      - cache-qpg1255-QPG
       x-timer:
-      - S1655996752.877463,VS0,VE230
+      - S1690274748.527267,VS0,VE249
       x-xss-protection:
       - 1; mode=block
     status:
@@ -166,13 +189,13 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2012-Datacenter/versions?$top=1&$orderby=name%20desc&api-version=2017-03-30
   response:
     body:
-      string: "[\r\n  {\r\n    \"location\": \"westus\",\r\n    \"name\": \"9200.23736.220609\",\r\n
-        \   \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/MicrosoftWindowsServer/ArtifactTypes/VMImage/Offers/WindowsServer/Skus/2012-Datacenter/Versions/9200.23736.220609\"\r\n
+      string: "[\r\n  {\r\n    \"location\": \"westus\",\r\n    \"name\": \"9200.24374.230707\",\r\n
+        \   \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/MicrosoftWindowsServer/ArtifactTypes/VMImage/Offers/WindowsServer/Skus/2012-Datacenter/Versions/9200.24374.230707\"\r\n
         \ }\r\n]"
     headers:
       cache-control:
@@ -182,7 +205,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:05:53 GMT
+      - Tue, 25 Jul 2023 08:45:48 GMT
       expires:
       - '-1'
       pragma:
@@ -199,7 +222,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15999,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43988
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15999,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43996
     status:
       code: 200
       message: OK
@@ -217,9 +240,9 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2012-Datacenter/versions/9200.23736.220609?api-version=2017-03-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2012-Datacenter/versions/9200.24374.230707?api-version=2017-03-30
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
@@ -233,8 +256,8 @@ interactions:
         \       \"value\": \"False\"\r\n      }\r\n    ],\r\n    \"osDiskImage\":
         {\r\n      \"operatingSystem\": \"Windows\",\r\n      \"sizeInGb\": 128,\r\n
         \     \"sizeInBytes\": 136367309312\r\n    },\r\n    \"dataDiskImages\": []\r\n
-        \ },\r\n  \"location\": \"westus\",\r\n  \"name\": \"9200.23736.220609\",\r\n
-        \ \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/MicrosoftWindowsServer/ArtifactTypes/VMImage/Offers/WindowsServer/Skus/2012-Datacenter/Versions/9200.23736.220609\"\r\n}"
+        \ },\r\n  \"location\": \"westus\",\r\n  \"name\": \"9200.24374.230707\",\r\n
+        \ \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/MicrosoftWindowsServer/ArtifactTypes/VMImage/Offers/WindowsServer/Skus/2012-Datacenter/Versions/9200.24374.230707\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -243,7 +266,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:05:54 GMT
+      - Tue, 25 Jul 2023 08:45:50 GMT
       expires:
       - '-1'
       pragma:
@@ -260,7 +283,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetVMImageFromLocation3Min;12999,Microsoft.Compute/GetVMImageFromLocation30Min;73990
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12999,Microsoft.Compute/GetVMImageFromLocation30Min;73997
     status:
       code: 200
       message: OK
@@ -268,7 +291,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json, text/json
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -278,7 +301,7 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/virtualNetworks?api-version=2017-10-01
   response:
@@ -292,7 +315,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:05:56 GMT
+      - Tue, 25 Jul 2023 08:45:51 GMT
       expires:
       - '-1'
       pragma:
@@ -355,15 +378,15 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_encryption000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2018-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Resources/deployments/vm_deploy_47dMEjA3f8iTq8OyJl39Dwke7ichrAvz","name":"vm_deploy_47dMEjA3f8iTq8OyJl39Dwke7ichrAvz","properties":{"templateHash":"5853338185096415080","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2022-06-23T15:06:01.7446255Z","duration":"PT0.0002692S","correlationId":"73aeec31-7c5b-4cb9-970f-aad3fa20be53","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/virtualNetworks/vm1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/networkSecurityGroups/vm1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/publicIPAddresses/vm1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/virtualMachines/vm1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm1"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Resources/deployments/vm_deploy_V7N4SKdPmm0p53WOQscybru45DJhPlfx","name":"vm_deploy_V7N4SKdPmm0p53WOQscybru45DJhPlfx","properties":{"templateHash":"13087520491750630346","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2023-07-25T08:45:57.151309Z","duration":"PT0.0002182S","correlationId":"823d6164-2c1f-42ee-a207-3093b7c48b78","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/virtualNetworks/vm1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/networkSecurityGroups/vm1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/publicIPAddresses/vm1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/virtualMachines/vm1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm1"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_encryption000001/providers/Microsoft.Resources/deployments/vm_deploy_47dMEjA3f8iTq8OyJl39Dwke7ichrAvz/operationStatuses/08585456101264942919?api-version=2018-02-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_encryption000001/providers/Microsoft.Resources/deployments/vm_deploy_V7N4SKdPmm0p53WOQscybru45DJhPlfx/operationStatuses/08585113321314883179?api-version=2018-02-01
       cache-control:
       - no-cache
       content-length:
@@ -371,7 +394,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:06:02 GMT
+      - Tue, 25 Jul 2023 08:45:58 GMT
       expires:
       - '-1'
       pragma:
@@ -381,7 +404,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1193'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -399,9 +422,9 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_encryption000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585456101264942919?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_encryption000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585113321314883179?api-version=2018-02-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -413,7 +436,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:06:33 GMT
+      - Tue, 25 Jul 2023 08:45:58 GMT
       expires:
       - '-1'
       pragma:
@@ -441,9 +464,9 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_encryption000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585456101264942919?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_encryption000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585113321314883179?api-version=2018-02-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -455,7 +478,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:07:04 GMT
+      - Tue, 25 Jul 2023 08:46:28 GMT
       expires:
       - '-1'
       pragma:
@@ -483,9 +506,9 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_encryption000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585456101264942919?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_encryption000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585113321314883179?api-version=2018-02-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -497,7 +520,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:07:34 GMT
+      - Tue, 25 Jul 2023 08:46:59 GMT
       expires:
       - '-1'
       pragma:
@@ -525,9 +548,51 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_encryption000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585456101264942919?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_encryption000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585113321314883179?api-version=2018-02-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 25 Jul 2023 08:47:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --admin-username --admin-password
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_encryption000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585113321314883179?api-version=2018-02-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -539,7 +604,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:08:05 GMT
+      - Tue, 25 Jul 2023 08:48:00 GMT
       expires:
       - '-1'
       pragma:
@@ -567,21 +632,21 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_encryption000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2018-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Resources/deployments/vm_deploy_47dMEjA3f8iTq8OyJl39Dwke7ichrAvz","name":"vm_deploy_47dMEjA3f8iTq8OyJl39Dwke7ichrAvz","properties":{"templateHash":"5853338185096415080","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2022-06-23T15:07:50.4430263Z","duration":"PT1M48.69867S","correlationId":"73aeec31-7c5b-4cb9-970f-aad3fa20be53","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/virtualNetworks/vm1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/networkSecurityGroups/vm1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/publicIPAddresses/vm1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/virtualMachines/vm1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm1"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/virtualMachines/vm1"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/networkSecurityGroups/vm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/publicIPAddresses/vm1PublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/virtualNetworks/vm1VNET"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Resources/deployments/vm_deploy_V7N4SKdPmm0p53WOQscybru45DJhPlfx","name":"vm_deploy_V7N4SKdPmm0p53WOQscybru45DJhPlfx","properties":{"templateHash":"13087520491750630346","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2023-07-25T08:47:49.9589452Z","duration":"PT1M52.8078544S","correlationId":"823d6164-2c1f-42ee-a207-3093b7c48b78","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/virtualNetworks/vm1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/networkSecurityGroups/vm1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/publicIPAddresses/vm1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/virtualMachines/vm1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm1"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/virtualMachines/vm1"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/networkSecurityGroups/vm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/publicIPAddresses/vm1PublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/virtualNetworks/vm1VNET"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3241'
+      - '3244'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:08:06 GMT
+      - Tue, 25 Jul 2023 08:48:00 GMT
       expires:
       - '-1'
       pragma:
@@ -609,22 +674,22 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/virtualMachines/vm1?$expand=instanceView&api-version=2017-03-30
   response:
     body:
       string: "{\r\n  \"name\": \"vm1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/virtualMachines/vm1\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"58a6934b-558f-420a-b8a1-44f14227eeb6\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"9ad1d78c-0edd-4cfb-9a5c-08ce85318021\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"MicrosoftWindowsServer\",\r\n        \"offer\": \"WindowsServer\",\r\n        \"sku\":
         \"2012-Datacenter\",\r\n        \"version\": \"latest\"\r\n      },\r\n      \"osDisk\":
-        {\r\n        \"osType\": \"Windows\",\r\n        \"name\": \"vm1_OsDisk_1_5f7f353a134446a5a8f92205df3612c1\",\r\n
+        {\r\n        \"osType\": \"Windows\",\r\n        \"name\": \"vm1_OsDisk_1_6f5d7bb0b5d74abd843dc84929b5600f\",\r\n
         \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n
         \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n
-        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/disks/vm1_OsDisk_1_5f7f353a134446a5a8f92205df3612c1\"\r\n
+        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/disks/vm1_OsDisk_1_6f5d7bb0b5d74abd843dc84929b5600f\"\r\n
         \       },\r\n        \"diskSizeGB\": 127\r\n      },\r\n      \"dataDisks\":
         []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm1\",\r\n
         \     \"adminUsername\": \"clitester1\",\r\n      \"windowsConfiguration\":
@@ -636,16 +701,16 @@ interactions:
         \         {\r\n            \"code\": \"ProvisioningState/Unavailable\",\r\n
         \           \"level\": \"Warning\",\r\n            \"displayStatus\": \"Not
         Ready\",\r\n            \"message\": \"VM status blob is found but not yet
-        populated.\",\r\n            \"time\": \"2022-06-23T15:08:07+00:00\"\r\n          }\r\n
+        populated.\",\r\n            \"time\": \"2023-07-25T08:48:02+00:00\"\r\n          }\r\n
         \       ]\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\":
-        \"vm1_OsDisk_1_5f7f353a134446a5a8f92205df3612c1\",\r\n          \"statuses\":
+        \"vm1_OsDisk_1_6f5d7bb0b5d74abd843dc84929b5600f\",\r\n          \"statuses\":
         [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2022-06-23T15:06:20.5400194+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2023-07-25T08:46:21.9000775+00:00\"\r\n
         \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"statuses\":
         [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
-        succeeded\",\r\n          \"time\": \"2022-06-23T15:07:47.8353564+00:00\"\r\n
+        succeeded\",\r\n          \"time\": \"2023-07-25T08:47:47.2139298+00:00\"\r\n
         \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
         \       }\r\n      ]\r\n    }\r\n  }\r\n}"
@@ -657,7 +722,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:08:07 GMT
+      - Tue, 25 Jul 2023 08:48:02 GMT
       expires:
       - '-1'
       pragma:
@@ -674,7 +739,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3887,Microsoft.Compute/LowCostGet30Min;30782
+      - Microsoft.Compute/LowCostGet3Min;3991,Microsoft.Compute/LowCostGet30Min;31896
     status:
       code: 200
       message: OK
@@ -682,7 +747,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json, text/json
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -692,18 +757,17 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic?api-version=2017-10-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm1VMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic\",\r\n
-        \ \"etag\": \"W/\\\"f7d7e95e-dffa-4a1f-9801-888181e5c9e6\\\"\",\r\n  \"location\":
-        \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"9f573060-eb8c-4e33-b0bd-ccc917ddc2e5\",\r\n
-        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfigvm1\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic/ipConfigurations/ipconfigvm1\",\r\n
-        \       \"etag\": \"W/\\\"f7d7e95e-dffa-4a1f-9801-888181e5c9e6\\\"\",\r\n
+        \ \"etag\": \"W/\\\"533f1af0-d11e-4a36-91af-bbf65758d8ae\\\"\",\r\n  \"tags\":
+        {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"13e3ba1d-167f-4086-8df1-b042c83d90c9\",\r\n    \"ipConfigurations\":
+        [\r\n      {\r\n        \"name\": \"ipconfigvm1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic/ipConfigurations/ipconfigvm1\",\r\n
+        \       \"etag\": \"W/\\\"533f1af0-d11e-4a36-91af-bbf65758d8ae\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
@@ -712,12 +776,13 @@ interactions:
         \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
         \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
         [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"21cioc05cv0u1ieosgthimvf1a.dx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
-        \"60-45-BD-00-75-C7\",\r\n    \"enableIPForwarding\": false,\r\n    \"networkSecurityGroup\":
+        \"3ievkjrnq3re3f2izuzcdvtcah.dx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
+        \"00-0D-3A-36-DD-54\",\r\n    \"enableIPForwarding\": false,\r\n    \"networkSecurityGroup\":
         {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/networkSecurityGroups/vm1NSG\"\r\n
         \   },\r\n    \"primary\": true,\r\n    \"virtualMachine\": {\r\n      \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/virtualMachines/vm1\"\r\n
-        \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\r\n}"
+        \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\",\r\n
+        \ \"location\": \"westus\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -726,9 +791,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:08:07 GMT
+      - Tue, 25 Jul 2023 08:48:03 GMT
       etag:
-      - W/"f7d7e95e-dffa-4a1f-9801-888181e5c9e6"
+      - W/"533f1af0-d11e-4a36-91af-bbf65758d8ae"
       expires:
       - '-1'
       pragma:
@@ -745,7 +810,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f730574f-4c88-49e9-9b20-edb16e58e7d1
+      - 2646ae67-3038-4ee5-8023-96c7b7ef896a
     status:
       code: 200
       message: OK
@@ -753,7 +818,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json, text/json
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -763,16 +828,16 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/publicIPAddresses/vm1PublicIP?api-version=2017-10-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm1PublicIP\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/publicIPAddresses/vm1PublicIP\",\r\n
-        \ \"etag\": \"W/\\\"bb16723c-cfb9-4f58-977b-812fc6979da1\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"3878b345-04ea-4b4f-b8d1-1b6f838494d2\\\"\",\r\n  \"location\":
         \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"85fc5908-4b62-49c3-a8f7-ccc2c2c3b20c\",\r\n
-        \   \"ipAddress\": \"20.253.240.96\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"86b9df7c-93f1-4052-884a-f54b42f10556\",\r\n
+        \   \"ipAddress\": \"104.42.52.241\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
         \   \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
         4,\r\n    \"ipTags\": [],\r\n    \"ipConfiguration\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic/ipConfigurations/ipconfigvm1\"\r\n
         \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
@@ -785,9 +850,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:08:08 GMT
+      - Tue, 25 Jul 2023 08:48:05 GMT
       etag:
-      - W/"bb16723c-cfb9-4f58-977b-812fc6979da1"
+      - W/"3878b345-04ea-4b4f-b8d1-1b6f838494d2"
       expires:
       - '-1'
       pragma:
@@ -804,7 +869,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 53979051-23ce-47e5-a594-e0fde725d969
+      - cf60568d-d044-4fba-9007-bb100aa542fc
     status:
       code: 200
       message: OK
@@ -822,22 +887,22 @@ interactions:
       ParameterSetName:
       - -g -n --disk-encryption-keyvault
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/virtualMachines/vm1?$expand=instanceView&api-version=2017-03-30
   response:
     body:
       string: "{\r\n  \"name\": \"vm1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/virtualMachines/vm1\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"58a6934b-558f-420a-b8a1-44f14227eeb6\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"9ad1d78c-0edd-4cfb-9a5c-08ce85318021\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"MicrosoftWindowsServer\",\r\n        \"offer\": \"WindowsServer\",\r\n        \"sku\":
         \"2012-Datacenter\",\r\n        \"version\": \"latest\"\r\n      },\r\n      \"osDisk\":
-        {\r\n        \"osType\": \"Windows\",\r\n        \"name\": \"vm1_OsDisk_1_5f7f353a134446a5a8f92205df3612c1\",\r\n
+        {\r\n        \"osType\": \"Windows\",\r\n        \"name\": \"vm1_OsDisk_1_6f5d7bb0b5d74abd843dc84929b5600f\",\r\n
         \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n
         \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n
-        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/disks/vm1_OsDisk_1_5f7f353a134446a5a8f92205df3612c1\"\r\n
+        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/disks/vm1_OsDisk_1_6f5d7bb0b5d74abd843dc84929b5600f\"\r\n
         \       },\r\n        \"diskSizeGB\": 127\r\n      },\r\n      \"dataDisks\":
         []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm1\",\r\n
         \     \"adminUsername\": \"clitester1\",\r\n      \"windowsConfiguration\":
@@ -849,16 +914,16 @@ interactions:
         \         {\r\n            \"code\": \"ProvisioningState/Unavailable\",\r\n
         \           \"level\": \"Warning\",\r\n            \"displayStatus\": \"Not
         Ready\",\r\n            \"message\": \"VM status blob is found but not yet
-        populated.\",\r\n            \"time\": \"2022-06-23T15:08:10+00:00\"\r\n          }\r\n
+        populated.\",\r\n            \"time\": \"2023-07-25T08:48:07+00:00\"\r\n          }\r\n
         \       ]\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\":
-        \"vm1_OsDisk_1_5f7f353a134446a5a8f92205df3612c1\",\r\n          \"statuses\":
+        \"vm1_OsDisk_1_6f5d7bb0b5d74abd843dc84929b5600f\",\r\n          \"statuses\":
         [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2022-06-23T15:06:20.5400194+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2023-07-25T08:46:21.9000775+00:00\"\r\n
         \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"statuses\":
         [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
-        succeeded\",\r\n          \"time\": \"2022-06-23T15:07:47.8353564+00:00\"\r\n
+        succeeded\",\r\n          \"time\": \"2023-07-25T08:47:47.2139298+00:00\"\r\n
         \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
         \       }\r\n      ]\r\n    }\r\n  }\r\n}"
@@ -870,7 +935,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:08:09 GMT
+      - Tue, 25 Jul 2023 08:48:06 GMT
       expires:
       - '-1'
       pragma:
@@ -887,7 +952,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3884,Microsoft.Compute/LowCostGet30Min;30779
+      - Microsoft.Compute/LowCostGet3Min;3990,Microsoft.Compute/LowCostGet30Min;31895
     status:
       code: 200
       message: OK
@@ -905,21 +970,21 @@ interactions:
       ParameterSetName:
       - -g -n --disk-encryption-keyvault
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-keyvault/9.3.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-keyvault/10.2.2 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.KeyVault/vaults/vault000002?api-version=2016-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.KeyVault/vaults/vault000002","name":"vault000002","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"50d74fcf-8472-4968-a62f-69cc953d3396","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enabledForDiskEncryption":true,"enableSoftDelete":true,"vaultUri":"https://vault000002.vault.azure.net/","provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.KeyVault/vaults/vault000002","name":"vault000002","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"1afc88d9-8464-402f-af6f-7b57a5ace100","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enabledForDiskEncryption":true,"vaultUri":"https://vault000002.vault.azure.net/","provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1072'
+      - '1048'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:08:11 GMT
+      - Tue, 25 Jul 2023 08:48:08 GMT
       expires:
       - '-1'
       pragma:
@@ -937,7 +1002,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.413.0
+      - 1.5.851.0
     status:
       code: 200
       message: OK
@@ -946,7 +1011,7 @@ interactions:
       "type": "AzureDiskEncryption", "typeHandlerVersion": "2.2", "autoUpgradeMinorVersion":
       true, "settings": {"KeyVaultURL": "https://vault000002.vault.azure.net", "VolumeType":
       "ALL", "EncryptionOperation": "EnableEncryption", "KeyEncryptionKeyURL": null,
-      "KeyEncryptionAlgorithm": "RSA-OAEP", "SequenceVersion": "b75e3db9-0630-44a2-a734-6509beaa5349",
+      "KeyEncryptionAlgorithm": "RSA-OAEP", "SequenceVersion": "38d4a937-8bf0-4f97-aea6-1d90673effd8",
       "KeyVaultResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.KeyVault/vaults/vault000002",
       "KekVaultResourceId": ""}}}'
     headers:
@@ -965,7 +1030,7 @@ interactions:
       ParameterSetName:
       - -g -n --disk-encryption-keyvault
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/virtualMachines/vm1/extensions/AzureDiskEncryption?api-version=2017-03-30
   response:
@@ -975,13 +1040,13 @@ interactions:
         \"westus\",\r\n  \"properties\": {\r\n    \"autoUpgradeMinorVersion\": true,\r\n
         \   \"provisioningState\": \"Creating\",\r\n    \"publisher\": \"Microsoft.Azure.Security\",\r\n
         \   \"type\": \"AzureDiskEncryption\",\r\n    \"typeHandlerVersion\": \"2.2\",\r\n
-        \   \"settings\": {\"KeyVaultURL\":\"https://vault000002.vault.azure.net\",\"VolumeType\":\"ALL\",\"EncryptionOperation\":\"EnableEncryption\",\"KeyEncryptionKeyURL\":null,\"KeyEncryptionAlgorithm\":\"RSA-OAEP\",\"SequenceVersion\":\"b75e3db9-0630-44a2-a734-6509beaa5349\",\"KeyVaultResourceId\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.KeyVault/vaults/vault000002\",\"KekVaultResourceId\":\"\"}\r\n
+        \   \"settings\": {\"KeyVaultURL\":\"https://vault000002.vault.azure.net\",\"VolumeType\":\"ALL\",\"EncryptionOperation\":\"EnableEncryption\",\"KeyEncryptionKeyURL\":null,\"KeyEncryptionAlgorithm\":\"RSA-OAEP\",\"SequenceVersion\":\"38d4a937-8bf0-4f97-aea6-1d90673effd8\",\"KeyVaultResourceId\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.KeyVault/vaults/vault000002\",\"KekVaultResourceId\":\"\"}\r\n
         \ }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/6f622ac9-e32a-4cb8-a908-cc772c8e9957?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2017-03-30
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/82087503-5b40-41eb-aa30-3de2279901fb?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2017-03-30
       cache-control:
       - no-cache
       content-length:
@@ -989,7 +1054,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:08:15 GMT
+      - Tue, 25 Jul 2023 08:48:11 GMT
       expires:
       - '-1'
       pragma:
@@ -1002,9 +1067,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/UpdateVM3Min;238,Microsoft.Compute/UpdateVM30Min;1195
+      - Microsoft.Compute/UpdateVM3Min;239,Microsoft.Compute/UpdateVM30Min;1195
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -1022,13 +1087,13 @@ interactions:
       ParameterSetName:
       - -g -n --disk-encryption-keyvault
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/6f622ac9-e32a-4cb8-a908-cc772c8e9957?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2017-03-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/82087503-5b40-41eb-aa30-3de2279901fb?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2017-03-30
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2022-06-23T15:08:14.8838847+00:00\",\r\n  \"status\":
-        \"InProgress\",\r\n  \"name\": \"6f622ac9-e32a-4cb8-a908-cc772c8e9957\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2023-07-25T08:48:11.5893493+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"82087503-5b40-41eb-aa30-3de2279901fb\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1037,7 +1102,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:08:46 GMT
+      - Tue, 25 Jul 2023 08:48:12 GMT
       expires:
       - '-1'
       pragma:
@@ -1054,7 +1119,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14979,Microsoft.Compute/GetOperation30Min;29740
+      - Microsoft.Compute/GetOperation3Min;14995,Microsoft.Compute/GetOperation30Min;29940
     status:
       code: 200
       message: OK
@@ -1072,13 +1137,13 @@ interactions:
       ParameterSetName:
       - -g -n --disk-encryption-keyvault
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/6f622ac9-e32a-4cb8-a908-cc772c8e9957?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2017-03-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/82087503-5b40-41eb-aa30-3de2279901fb?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2017-03-30
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2022-06-23T15:08:14.8838847+00:00\",\r\n  \"status\":
-        \"InProgress\",\r\n  \"name\": \"6f622ac9-e32a-4cb8-a908-cc772c8e9957\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2023-07-25T08:48:11.5893493+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"82087503-5b40-41eb-aa30-3de2279901fb\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1087,7 +1152,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:09:16 GMT
+      - Tue, 25 Jul 2023 08:48:44 GMT
       expires:
       - '-1'
       pragma:
@@ -1104,7 +1169,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14978,Microsoft.Compute/GetOperation30Min;29735
+      - Microsoft.Compute/GetOperation3Min;14995,Microsoft.Compute/GetOperation30Min;29938
     status:
       code: 200
       message: OK
@@ -1122,13 +1187,13 @@ interactions:
       ParameterSetName:
       - -g -n --disk-encryption-keyvault
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/6f622ac9-e32a-4cb8-a908-cc772c8e9957?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2017-03-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/82087503-5b40-41eb-aa30-3de2279901fb?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2017-03-30
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2022-06-23T15:08:14.8838847+00:00\",\r\n  \"status\":
-        \"InProgress\",\r\n  \"name\": \"6f622ac9-e32a-4cb8-a908-cc772c8e9957\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2023-07-25T08:48:11.5893493+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"82087503-5b40-41eb-aa30-3de2279901fb\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1137,7 +1202,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:09:46 GMT
+      - Tue, 25 Jul 2023 08:49:14 GMT
       expires:
       - '-1'
       pragma:
@@ -1154,7 +1219,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14973,Microsoft.Compute/GetOperation30Min;29728
+      - Microsoft.Compute/GetOperation3Min;14994,Microsoft.Compute/GetOperation30Min;29937
     status:
       code: 200
       message: OK
@@ -1172,13 +1237,13 @@ interactions:
       ParameterSetName:
       - -g -n --disk-encryption-keyvault
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/6f622ac9-e32a-4cb8-a908-cc772c8e9957?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2017-03-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/82087503-5b40-41eb-aa30-3de2279901fb?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2017-03-30
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2022-06-23T15:08:14.8838847+00:00\",\r\n  \"status\":
-        \"InProgress\",\r\n  \"name\": \"6f622ac9-e32a-4cb8-a908-cc772c8e9957\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2023-07-25T08:48:11.5893493+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"82087503-5b40-41eb-aa30-3de2279901fb\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1187,7 +1252,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:10:17 GMT
+      - Tue, 25 Jul 2023 08:49:44 GMT
       expires:
       - '-1'
       pragma:
@@ -1204,7 +1269,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14973,Microsoft.Compute/GetOperation30Min;29774
+      - Microsoft.Compute/GetOperation3Min;14994,Microsoft.Compute/GetOperation30Min;29936
     status:
       code: 200
       message: OK
@@ -1222,23 +1287,22 @@ interactions:
       ParameterSetName:
       - -g -n --disk-encryption-keyvault
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/6f622ac9-e32a-4cb8-a908-cc772c8e9957?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2017-03-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/82087503-5b40-41eb-aa30-3de2279901fb?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2017-03-30
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2022-06-23T15:08:14.8838847+00:00\",\r\n  \"endTime\":
-        \"2022-06-23T15:10:39.962359+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"name\": \"6f622ac9-e32a-4cb8-a908-cc772c8e9957\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2023-07-25T08:48:11.5893493+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"82087503-5b40-41eb-aa30-3de2279901fb\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '183'
+      - '134'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:10:48 GMT
+      - Tue, 25 Jul 2023 08:50:16 GMT
       expires:
       - '-1'
       pragma:
@@ -1255,7 +1319,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14974,Microsoft.Compute/GetOperation30Min;29772
+      - Microsoft.Compute/GetOperation3Min;14992,Microsoft.Compute/GetOperation30Min;29938
     status:
       code: 200
       message: OK
@@ -1273,7 +1337,158 @@ interactions:
       ParameterSetName:
       - -g -n --disk-encryption-keyvault
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/82087503-5b40-41eb-aa30-3de2279901fb?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2017-03-30
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2023-07-25T08:48:11.5893493+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"82087503-5b40-41eb-aa30-3de2279901fb\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '134'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 25 Jul 2023 08:50:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperation3Min;14992,Microsoft.Compute/GetOperation30Min;29937
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm encryption enable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --disk-encryption-keyvault
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/82087503-5b40-41eb-aa30-3de2279901fb?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2017-03-30
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2023-07-25T08:48:11.5893493+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"82087503-5b40-41eb-aa30-3de2279901fb\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '134'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 25 Jul 2023 08:51:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperation3Min;14993,Microsoft.Compute/GetOperation30Min;29936
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm encryption enable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --disk-encryption-keyvault
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/82087503-5b40-41eb-aa30-3de2279901fb?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2017-03-30
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2023-07-25T08:48:11.5893493+00:00\",\r\n  \"endTime\":
+        \"2023-07-25T08:51:29.1394339+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"82087503-5b40-41eb-aa30-3de2279901fb\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '184'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 25 Jul 2023 08:51:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperation3Min;14993,Microsoft.Compute/GetOperation30Min;29935
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm encryption enable
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --disk-encryption-keyvault
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/virtualMachines/vm1/extensions/AzureDiskEncryption?api-version=2017-03-30
   response:
@@ -1283,7 +1498,7 @@ interactions:
         \"westus\",\r\n  \"properties\": {\r\n    \"autoUpgradeMinorVersion\": true,\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"publisher\": \"Microsoft.Azure.Security\",\r\n
         \   \"type\": \"AzureDiskEncryption\",\r\n    \"typeHandlerVersion\": \"2.2\",\r\n
-        \   \"settings\": {\"KeyVaultURL\":\"https://vault000002.vault.azure.net\",\"VolumeType\":\"ALL\",\"EncryptionOperation\":\"EnableEncryption\",\"KeyEncryptionKeyURL\":null,\"KeyEncryptionAlgorithm\":\"RSA-OAEP\",\"SequenceVersion\":\"b75e3db9-0630-44a2-a734-6509beaa5349\",\"KeyVaultResourceId\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.KeyVault/vaults/vault000002\",\"KekVaultResourceId\":\"\"}\r\n
+        \   \"settings\": {\"KeyVaultURL\":\"https://vault000002.vault.azure.net\",\"VolumeType\":\"ALL\",\"EncryptionOperation\":\"EnableEncryption\",\"KeyEncryptionKeyURL\":null,\"KeyEncryptionAlgorithm\":\"RSA-OAEP\",\"SequenceVersion\":\"38d4a937-8bf0-4f97-aea6-1d90673effd8\",\"KeyVaultResourceId\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.KeyVault/vaults/vault000002\",\"KekVaultResourceId\":\"\"}\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -1293,7 +1508,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:10:48 GMT
+      - Tue, 25 Jul 2023 08:51:49 GMT
       expires:
       - '-1'
       pragma:
@@ -1310,7 +1525,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3885,Microsoft.Compute/LowCostGet30Min;30909
+      - Microsoft.Compute/LowCostGet3Min;3995,Microsoft.Compute/LowCostGet30Min;31906
     status:
       code: 200
       message: OK
@@ -1328,7 +1543,7 @@ interactions:
       ParameterSetName:
       - -g -n --disk-encryption-keyvault
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/virtualMachines/vm1/extensions/AzureDiskEncryption?$expand=instanceView&api-version=2017-03-30
   response:
@@ -1338,22 +1553,23 @@ interactions:
         \"westus\",\r\n  \"properties\": {\r\n    \"autoUpgradeMinorVersion\": true,\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\": {\r\n      \"name\":
         \"AzureDiskEncryption\",\r\n      \"type\": \"Microsoft.Azure.Security.AzureDiskEncryption\",\r\n
-        \     \"typeHandlerVersion\": \"2.2.0.43\",\r\n      \"statuses\": [\r\n        {\r\n
-        \         \"code\": \"ProvisioningState/succeeded\",\r\n          \"level\":
-        \"Info\",\r\n          \"displayStatus\": \"Provisioning succeeded\",\r\n
-        \         \"message\": \"[2.2.0.43] \"\r\n        }\r\n      ]\r\n    },\r\n
-        \   \"publisher\": \"Microsoft.Azure.Security\",\r\n    \"type\": \"AzureDiskEncryption\",\r\n
-        \   \"typeHandlerVersion\": \"2.2\",\r\n    \"settings\": {\"KeyVaultURL\":\"https://vault000002.vault.azure.net\",\"VolumeType\":\"ALL\",\"EncryptionOperation\":\"EnableEncryption\",\"KeyEncryptionKeyURL\":null,\"KeyEncryptionAlgorithm\":\"RSA-OAEP\",\"SequenceVersion\":\"b75e3db9-0630-44a2-a734-6509beaa5349\",\"KeyVaultResourceId\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.KeyVault/vaults/vault000002\",\"KekVaultResourceId\":\"\"}\r\n
+        \     \"typeHandlerVersion\": \"2.4.0.2\",\r\n      \"statuses\": [\r\n        {\r\n
+        \         \"code\": \"ProvisioningState/transitioning\",\r\n          \"level\":
+        \"Info\",\r\n          \"displayStatus\": \"Transitioning\",\r\n          \"message\":
+        \"[2.4.0.2] Preparing machine for bitlocker\"\r\n        }\r\n      ]\r\n
+        \   },\r\n    \"publisher\": \"Microsoft.Azure.Security\",\r\n    \"type\":
+        \"AzureDiskEncryption\",\r\n    \"typeHandlerVersion\": \"2.2\",\r\n    \"settings\":
+        {\"KeyVaultURL\":\"https://vault000002.vault.azure.net\",\"VolumeType\":\"ALL\",\"EncryptionOperation\":\"EnableEncryption\",\"KeyEncryptionKeyURL\":null,\"KeyEncryptionAlgorithm\":\"RSA-OAEP\",\"SequenceVersion\":\"38d4a937-8bf0-4f97-aea6-1d90673effd8\",\"KeyVaultResourceId\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.KeyVault/vaults/vault000002\",\"KekVaultResourceId\":\"\"}\r\n
         \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1361'
+      - '1385'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:10:49 GMT
+      - Tue, 25 Jul 2023 08:51:50 GMT
       expires:
       - '-1'
       pragma:
@@ -1370,7 +1586,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3884,Microsoft.Compute/LowCostGet30Min;30908
+      - Microsoft.Compute/LowCostGet3Min;3994,Microsoft.Compute/LowCostGet30Min;31905
     status:
       code: 200
       message: OK
@@ -1388,22 +1604,22 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/virtualMachines/vm1?$expand=instanceView&api-version=2017-03-30
   response:
     body:
       string: "{\r\n  \"name\": \"vm1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/virtualMachines/vm1\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"58a6934b-558f-420a-b8a1-44f14227eeb6\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"9ad1d78c-0edd-4cfb-9a5c-08ce85318021\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"MicrosoftWindowsServer\",\r\n        \"offer\": \"WindowsServer\",\r\n        \"sku\":
         \"2012-Datacenter\",\r\n        \"version\": \"latest\"\r\n      },\r\n      \"osDisk\":
-        {\r\n        \"osType\": \"Windows\",\r\n        \"name\": \"vm1_OsDisk_1_5f7f353a134446a5a8f92205df3612c1\",\r\n
+        {\r\n        \"osType\": \"Windows\",\r\n        \"name\": \"vm1_OsDisk_1_6f5d7bb0b5d74abd843dc84929b5600f\",\r\n
         \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n
         \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n
-        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/disks/vm1_OsDisk_1_5f7f353a134446a5a8f92205df3612c1\"\r\n
+        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/disks/vm1_OsDisk_1_6f5d7bb0b5d74abd843dc84929b5600f\"\r\n
         \       },\r\n        \"diskSizeGB\": 127\r\n      },\r\n      \"dataDisks\":
         []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm1\",\r\n
         \     \"adminUsername\": \"clitester1\",\r\n      \"windowsConfiguration\":
@@ -1411,57 +1627,57 @@ interactions:
         true\r\n      },\r\n      \"secrets\": []\r\n    },\r\n    \"networkProfile\":
         {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic\"}]},\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\": {\r\n      \"vmAgent\":
-        {\r\n        \"vmAgentVersion\": \"2.7.41491.1044\",\r\n        \"statuses\":
+        {\r\n        \"vmAgentVersion\": \"2.7.41491.1088\",\r\n        \"statuses\":
         [\r\n          {\r\n            \"code\": \"ProvisioningState/succeeded\",\r\n
         \           \"level\": \"Info\",\r\n            \"displayStatus\": \"Ready\",\r\n
         \           \"message\": \"GuestAgent is running and processing the extensions.\",\r\n
-        \           \"time\": \"2022-06-23T15:10:39.189+00:00\"\r\n          }\r\n
+        \           \"time\": \"2023-07-25T08:51:48.639+00:00\"\r\n          }\r\n
         \       ],\r\n        \"extensionHandlers\": [\r\n          {\r\n            \"type\":
         \"Microsoft.Azure.Security.AzureDiskEncryption\",\r\n            \"typeHandlerVersion\":
-        \"2.2.0.43\",\r\n            \"status\": {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
+        \"2.4.0.2\",\r\n            \"status\": {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Ready\"\r\n
         \           }\r\n          }\r\n        ]\r\n      },\r\n      \"disks\":
-        [\r\n        {\r\n          \"name\": \"vm1_OsDisk_1_5f7f353a134446a5a8f92205df3612c1\",\r\n
+        [\r\n        {\r\n          \"name\": \"vm1_OsDisk_1_6f5d7bb0b5d74abd843dc84929b5600f\",\r\n
         \         \"encryptionSettings\": [\r\n            {\r\n              \"enabled\":
         true,\r\n              \"diskEncryptionKey\": {\r\n                \"sourceVault\":
         {\r\n                  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.KeyVault/vaults/vault000002\"\r\n
-        \               },\r\n                \"secretUrl\": \"https://vault000002.vault.azure.net/secrets/F586D975-AA35-411A-B142-91936BB450F5/beb49f02eefe4b8c92a94d2234500616\"\r\n
+        \               },\r\n                \"secretUrl\": \"https://vault000002.vault.azure.net/secrets/8459A978-545C-47A3-B852-4A9F7A4BB9BC/5d729a667c0f477a923e43926c932651\"\r\n
         \             }\r\n            }\r\n          ],\r\n          \"statuses\":
         [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2022-06-23T15:10:39.9154827+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2023-07-25T08:51:29.1081827+00:00\"\r\n
         \           },\r\n            {\r\n              \"code\": \"EncryptionState/encrypted\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Encryption
         is enabled on disk\"\r\n            }\r\n          ]\r\n        }\r\n      ],\r\n
         \     \"extensions\": [\r\n        {\r\n          \"name\": \"AzureDiskEncryption\",\r\n
         \         \"type\": \"Microsoft.Azure.Security.AzureDiskEncryption\",\r\n
-        \         \"typeHandlerVersion\": \"2.2.0.43\",\r\n          \"statuses\":
-        [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
-        \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"message\": \"[2.2.0.43] \"\r\n            }\r\n
-        \         ]\r\n        }\r\n      ],\r\n      \"statuses\": [\r\n        {\r\n
-        \         \"code\": \"ProvisioningState/succeeded\",\r\n          \"level\":
-        \"Info\",\r\n          \"displayStatus\": \"Provisioning succeeded\",\r\n
-        \         \"time\": \"2022-06-23T15:10:39.9467319+00:00\"\r\n        },\r\n
-        \       {\r\n          \"code\": \"PowerState/running\",\r\n          \"level\":
-        \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n        }\r\n
-        \     ]\r\n    }\r\n  },\r\n  \"resources\": [\r\n    {\r\n      \"name\":
+        \         \"typeHandlerVersion\": \"2.4.0.2\",\r\n          \"statuses\":
+        [\r\n            {\r\n              \"code\": \"ProvisioningState/transitioning\",\r\n
+        \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Transitioning\",\r\n
+        \             \"message\": \"[2.4.0.2] Preparing machine for bitlocker\"\r\n
+        \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"statuses\":
+        [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
+        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
+        succeeded\",\r\n          \"time\": \"2023-07-25T08:51:29.1238064+00:00\"\r\n
+        \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
+        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
+        \       }\r\n      ]\r\n    }\r\n  },\r\n  \"resources\": [\r\n    {\r\n      \"name\":
         \"AzureDiskEncryption\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/virtualMachines/vm1/extensions/AzureDiskEncryption\",\r\n
         \     \"type\": \"Microsoft.Compute/virtualMachines/extensions\",\r\n      \"location\":
         \"westus\",\r\n      \"properties\": {\r\n        \"autoUpgradeMinorVersion\":
         true,\r\n        \"provisioningState\": \"Succeeded\",\r\n        \"publisher\":
         \"Microsoft.Azure.Security\",\r\n        \"type\": \"AzureDiskEncryption\",\r\n
-        \       \"typeHandlerVersion\": \"2.2\",\r\n        \"settings\": {\"KeyVaultURL\":\"https://vault000002.vault.azure.net\",\"VolumeType\":\"ALL\",\"EncryptionOperation\":\"EnableEncryption\",\"KeyEncryptionKeyURL\":null,\"KeyEncryptionAlgorithm\":\"RSA-OAEP\",\"SequenceVersion\":\"b75e3db9-0630-44a2-a734-6509beaa5349\",\"KeyVaultResourceId\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.KeyVault/vaults/vault000002\",\"KekVaultResourceId\":\"\"}\r\n
+        \       \"typeHandlerVersion\": \"2.2\",\r\n        \"settings\": {\"KeyVaultURL\":\"https://vault000002.vault.azure.net\",\"VolumeType\":\"ALL\",\"EncryptionOperation\":\"EnableEncryption\",\"KeyEncryptionKeyURL\":null,\"KeyEncryptionAlgorithm\":\"RSA-OAEP\",\"SequenceVersion\":\"38d4a937-8bf0-4f97-aea6-1d90673effd8\",\"KeyVaultResourceId\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.KeyVault/vaults/vault000002\",\"KekVaultResourceId\":\"\"}\r\n
         \     }\r\n    }\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '5397'
+      - '5420'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:10:50 GMT
+      - Tue, 25 Jul 2023 08:51:50 GMT
       expires:
       - '-1'
       pragma:
@@ -1478,7 +1694,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3883,Microsoft.Compute/LowCostGet30Min;30907
+      - Microsoft.Compute/LowCostGet3Min;3993,Microsoft.Compute/LowCostGet30Min;31904
     status:
       code: 200
       message: OK
@@ -1496,22 +1712,22 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/virtualMachines/vm1?$expand=instanceView&api-version=2017-03-30
   response:
     body:
       string: "{\r\n  \"name\": \"vm1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/virtualMachines/vm1\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"58a6934b-558f-420a-b8a1-44f14227eeb6\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"9ad1d78c-0edd-4cfb-9a5c-08ce85318021\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"MicrosoftWindowsServer\",\r\n        \"offer\": \"WindowsServer\",\r\n        \"sku\":
         \"2012-Datacenter\",\r\n        \"version\": \"latest\"\r\n      },\r\n      \"osDisk\":
-        {\r\n        \"osType\": \"Windows\",\r\n        \"name\": \"vm1_OsDisk_1_5f7f353a134446a5a8f92205df3612c1\",\r\n
+        {\r\n        \"osType\": \"Windows\",\r\n        \"name\": \"vm1_OsDisk_1_6f5d7bb0b5d74abd843dc84929b5600f\",\r\n
         \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n
         \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n
-        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/disks/vm1_OsDisk_1_5f7f353a134446a5a8f92205df3612c1\"\r\n
+        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/disks/vm1_OsDisk_1_6f5d7bb0b5d74abd843dc84929b5600f\"\r\n
         \       },\r\n        \"diskSizeGB\": 127\r\n      },\r\n      \"dataDisks\":
         []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm1\",\r\n
         \     \"adminUsername\": \"clitester1\",\r\n      \"windowsConfiguration\":
@@ -1519,57 +1735,57 @@ interactions:
         true\r\n      },\r\n      \"secrets\": []\r\n    },\r\n    \"networkProfile\":
         {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic\"}]},\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\": {\r\n      \"vmAgent\":
-        {\r\n        \"vmAgentVersion\": \"2.7.41491.1044\",\r\n        \"statuses\":
+        {\r\n        \"vmAgentVersion\": \"2.7.41491.1088\",\r\n        \"statuses\":
         [\r\n          {\r\n            \"code\": \"ProvisioningState/succeeded\",\r\n
         \           \"level\": \"Info\",\r\n            \"displayStatus\": \"Ready\",\r\n
         \           \"message\": \"GuestAgent is running and processing the extensions.\",\r\n
-        \           \"time\": \"2022-06-23T15:10:39.189+00:00\"\r\n          }\r\n
+        \           \"time\": \"2023-07-25T08:51:48.639+00:00\"\r\n          }\r\n
         \       ],\r\n        \"extensionHandlers\": [\r\n          {\r\n            \"type\":
         \"Microsoft.Azure.Security.AzureDiskEncryption\",\r\n            \"typeHandlerVersion\":
-        \"2.2.0.43\",\r\n            \"status\": {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
+        \"2.4.0.2\",\r\n            \"status\": {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Ready\"\r\n
         \           }\r\n          }\r\n        ]\r\n      },\r\n      \"disks\":
-        [\r\n        {\r\n          \"name\": \"vm1_OsDisk_1_5f7f353a134446a5a8f92205df3612c1\",\r\n
+        [\r\n        {\r\n          \"name\": \"vm1_OsDisk_1_6f5d7bb0b5d74abd843dc84929b5600f\",\r\n
         \         \"encryptionSettings\": [\r\n            {\r\n              \"enabled\":
         true,\r\n              \"diskEncryptionKey\": {\r\n                \"sourceVault\":
         {\r\n                  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.KeyVault/vaults/vault000002\"\r\n
-        \               },\r\n                \"secretUrl\": \"https://vault000002.vault.azure.net/secrets/F586D975-AA35-411A-B142-91936BB450F5/beb49f02eefe4b8c92a94d2234500616\"\r\n
+        \               },\r\n                \"secretUrl\": \"https://vault000002.vault.azure.net/secrets/8459A978-545C-47A3-B852-4A9F7A4BB9BC/5d729a667c0f477a923e43926c932651\"\r\n
         \             }\r\n            }\r\n          ],\r\n          \"statuses\":
         [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2022-06-23T15:10:39.9154827+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2023-07-25T08:51:29.1081827+00:00\"\r\n
         \           },\r\n            {\r\n              \"code\": \"EncryptionState/encrypted\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Encryption
         is enabled on disk\"\r\n            }\r\n          ]\r\n        }\r\n      ],\r\n
         \     \"extensions\": [\r\n        {\r\n          \"name\": \"AzureDiskEncryption\",\r\n
         \         \"type\": \"Microsoft.Azure.Security.AzureDiskEncryption\",\r\n
-        \         \"typeHandlerVersion\": \"2.2.0.43\",\r\n          \"statuses\":
-        [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
-        \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"message\": \"[2.2.0.43] \"\r\n            }\r\n
-        \         ]\r\n        }\r\n      ],\r\n      \"statuses\": [\r\n        {\r\n
-        \         \"code\": \"ProvisioningState/succeeded\",\r\n          \"level\":
-        \"Info\",\r\n          \"displayStatus\": \"Provisioning succeeded\",\r\n
-        \         \"time\": \"2022-06-23T15:10:39.9467319+00:00\"\r\n        },\r\n
-        \       {\r\n          \"code\": \"PowerState/running\",\r\n          \"level\":
-        \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n        }\r\n
-        \     ]\r\n    }\r\n  },\r\n  \"resources\": [\r\n    {\r\n      \"name\":
+        \         \"typeHandlerVersion\": \"2.4.0.2\",\r\n          \"statuses\":
+        [\r\n            {\r\n              \"code\": \"ProvisioningState/transitioning\",\r\n
+        \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Transitioning\",\r\n
+        \             \"message\": \"[2.4.0.2] Preparing machine for bitlocker\"\r\n
+        \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"statuses\":
+        [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
+        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
+        succeeded\",\r\n          \"time\": \"2023-07-25T08:51:29.1238064+00:00\"\r\n
+        \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
+        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
+        \       }\r\n      ]\r\n    }\r\n  },\r\n  \"resources\": [\r\n    {\r\n      \"name\":
         \"AzureDiskEncryption\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/virtualMachines/vm1/extensions/AzureDiskEncryption\",\r\n
         \     \"type\": \"Microsoft.Compute/virtualMachines/extensions\",\r\n      \"location\":
         \"westus\",\r\n      \"properties\": {\r\n        \"autoUpgradeMinorVersion\":
         true,\r\n        \"provisioningState\": \"Succeeded\",\r\n        \"publisher\":
         \"Microsoft.Azure.Security\",\r\n        \"type\": \"AzureDiskEncryption\",\r\n
-        \       \"typeHandlerVersion\": \"2.2\",\r\n        \"settings\": {\"KeyVaultURL\":\"https://vault000002.vault.azure.net\",\"VolumeType\":\"ALL\",\"EncryptionOperation\":\"EnableEncryption\",\"KeyEncryptionKeyURL\":null,\"KeyEncryptionAlgorithm\":\"RSA-OAEP\",\"SequenceVersion\":\"b75e3db9-0630-44a2-a734-6509beaa5349\",\"KeyVaultResourceId\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.KeyVault/vaults/vault000002\",\"KekVaultResourceId\":\"\"}\r\n
+        \       \"typeHandlerVersion\": \"2.2\",\r\n        \"settings\": {\"KeyVaultURL\":\"https://vault000002.vault.azure.net\",\"VolumeType\":\"ALL\",\"EncryptionOperation\":\"EnableEncryption\",\"KeyEncryptionKeyURL\":null,\"KeyEncryptionAlgorithm\":\"RSA-OAEP\",\"SequenceVersion\":\"38d4a937-8bf0-4f97-aea6-1d90673effd8\",\"KeyVaultResourceId\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.KeyVault/vaults/vault000002\",\"KekVaultResourceId\":\"\"}\r\n
         \     }\r\n    }\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '5397'
+      - '5420'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:10:51 GMT
+      - Tue, 25 Jul 2023 08:51:51 GMT
       expires:
       - '-1'
       pragma:
@@ -1586,14 +1802,14 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3881,Microsoft.Compute/LowCostGet30Min;30905
+      - Microsoft.Compute/LowCostGet3Min;3992,Microsoft.Compute/LowCostGet30Min;31903
     status:
       code: 200
       message: OK
 - request:
     body: '{"location": "westus", "properties": {"publisher": "Microsoft.Azure.Security",
       "typeHandlerVersion": "2.2", "autoUpgradeMinorVersion": true, "settings": {"VolumeType":
-      "ALL", "EncryptionOperation": "DisableEncryption", "SequenceVersion": "57005f98-1eaf-4e71-be07-d531978a2e05"}}}'
+      "ALL", "EncryptionOperation": "DisableEncryption", "SequenceVersion": "bbf10eb6-3827-49b9-b49c-5bcbcc143dcf"}}}'
     headers:
       Accept:
       - application/json
@@ -1610,7 +1826,7 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/virtualMachines/vm1/extensions/AzureDiskEncryption?api-version=2017-03-30
   response:
@@ -1620,13 +1836,13 @@ interactions:
         \"westus\",\r\n  \"properties\": {\r\n    \"autoUpgradeMinorVersion\": true,\r\n
         \   \"provisioningState\": \"Updating\",\r\n    \"publisher\": \"Microsoft.Azure.Security\",\r\n
         \   \"type\": \"AzureDiskEncryption\",\r\n    \"typeHandlerVersion\": \"2.2\",\r\n
-        \   \"settings\": {\"VolumeType\":\"ALL\",\"EncryptionOperation\":\"DisableEncryption\",\"SequenceVersion\":\"57005f98-1eaf-4e71-be07-d531978a2e05\"}\r\n
+        \   \"settings\": {\"VolumeType\":\"ALL\",\"EncryptionOperation\":\"DisableEncryption\",\"SequenceVersion\":\"bbf10eb6-3827-49b9-b49c-5bcbcc143dcf\"}\r\n
         \ }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/04b5b64d-e906-4a76-ab0d-11ed6ff88cad?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2017-03-30
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/41d79b2f-570d-4cfe-92fe-a9153f1a8d90?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2017-03-30
       cache-control:
       - no-cache
       content-length:
@@ -1634,7 +1850,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:10:52 GMT
+      - Tue, 25 Jul 2023 08:51:52 GMT
       expires:
       - '-1'
       pragma:
@@ -1651,9 +1867,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/UpdateVM3Min;238,Microsoft.Compute/UpdateVM30Min;1197
+      - Microsoft.Compute/UpdateVM3Min;239,Microsoft.Compute/UpdateVM30Min;1194
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -1671,13 +1887,13 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/04b5b64d-e906-4a76-ab0d-11ed6ff88cad?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2017-03-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/41d79b2f-570d-4cfe-92fe-a9153f1a8d90?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2017-03-30
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2022-06-23T15:10:52.6186298+00:00\",\r\n  \"status\":
-        \"InProgress\",\r\n  \"name\": \"04b5b64d-e906-4a76-ab0d-11ed6ff88cad\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2023-07-25T08:51:52.4366845+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"41d79b2f-570d-4cfe-92fe-a9153f1a8d90\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1686,7 +1902,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:11:22 GMT
+      - Tue, 25 Jul 2023 08:51:52 GMT
       expires:
       - '-1'
       pragma:
@@ -1703,7 +1919,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14974,Microsoft.Compute/GetOperation30Min;29766
+      - Microsoft.Compute/GetOperation3Min;14992,Microsoft.Compute/GetOperation30Min;29934
     status:
       code: 200
       message: OK
@@ -1721,13 +1937,13 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/04b5b64d-e906-4a76-ab0d-11ed6ff88cad?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2017-03-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/41d79b2f-570d-4cfe-92fe-a9153f1a8d90?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2017-03-30
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2022-06-23T15:10:52.6186298+00:00\",\r\n  \"status\":
-        \"InProgress\",\r\n  \"name\": \"04b5b64d-e906-4a76-ab0d-11ed6ff88cad\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2023-07-25T08:51:52.4366845+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"41d79b2f-570d-4cfe-92fe-a9153f1a8d90\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1736,7 +1952,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:11:52 GMT
+      - Tue, 25 Jul 2023 08:52:22 GMT
       expires:
       - '-1'
       pragma:
@@ -1753,7 +1969,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14976,Microsoft.Compute/GetOperation30Min;29763
+      - Microsoft.Compute/GetOperation3Min;14991,Microsoft.Compute/GetOperation30Min;29932
     status:
       code: 200
       message: OK
@@ -1771,14 +1987,14 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/04b5b64d-e906-4a76-ab0d-11ed6ff88cad?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2017-03-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/41d79b2f-570d-4cfe-92fe-a9153f1a8d90?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2017-03-30
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2022-06-23T15:10:52.6186298+00:00\",\r\n  \"endTime\":
-        \"2022-06-23T15:12:08.9937794+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"name\": \"04b5b64d-e906-4a76-ab0d-11ed6ff88cad\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2023-07-25T08:51:52.4366845+00:00\",\r\n  \"endTime\":
+        \"2023-07-25T08:52:29.3591259+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"41d79b2f-570d-4cfe-92fe-a9153f1a8d90\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1787,7 +2003,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:12:23 GMT
+      - Tue, 25 Jul 2023 08:52:53 GMT
       expires:
       - '-1'
       pragma:
@@ -1804,7 +2020,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14980,Microsoft.Compute/GetOperation30Min;29761
+      - Microsoft.Compute/GetOperation3Min;14991,Microsoft.Compute/GetOperation30Min;29931
     status:
       code: 200
       message: OK
@@ -1822,7 +2038,7 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/virtualMachines/vm1/extensions/AzureDiskEncryption?api-version=2017-03-30
   response:
@@ -1832,7 +2048,7 @@ interactions:
         \"westus\",\r\n  \"properties\": {\r\n    \"autoUpgradeMinorVersion\": true,\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"publisher\": \"Microsoft.Azure.Security\",\r\n
         \   \"type\": \"AzureDiskEncryption\",\r\n    \"typeHandlerVersion\": \"2.2\",\r\n
-        \   \"settings\": {\"VolumeType\":\"ALL\",\"EncryptionOperation\":\"DisableEncryption\",\"SequenceVersion\":\"57005f98-1eaf-4e71-be07-d531978a2e05\"}\r\n
+        \   \"settings\": {\"VolumeType\":\"ALL\",\"EncryptionOperation\":\"DisableEncryption\",\"SequenceVersion\":\"bbf10eb6-3827-49b9-b49c-5bcbcc143dcf\"}\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -1842,7 +2058,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:12:24 GMT
+      - Tue, 25 Jul 2023 08:52:53 GMT
       expires:
       - '-1'
       pragma:
@@ -1859,7 +2075,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3868,Microsoft.Compute/LowCostGet30Min;30841
+      - Microsoft.Compute/LowCostGet3Min;3993,Microsoft.Compute/LowCostGet30Min;31901
     status:
       code: 200
       message: OK
@@ -1877,7 +2093,7 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.10.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_encryption000001/providers/Microsoft.Compute/virtualMachines/vm1/extensions/AzureDiskEncryption?$expand=instanceView&api-version=2017-03-30
   response:
@@ -1887,23 +2103,23 @@ interactions:
         \"westus\",\r\n  \"properties\": {\r\n    \"autoUpgradeMinorVersion\": true,\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\": {\r\n      \"name\":
         \"AzureDiskEncryption\",\r\n      \"type\": \"Microsoft.Azure.Security.AzureDiskEncryption\",\r\n
-        \     \"typeHandlerVersion\": \"2.2.0.43\",\r\n      \"statuses\": [\r\n        {\r\n
+        \     \"typeHandlerVersion\": \"2.4.0.2\",\r\n      \"statuses\": [\r\n        {\r\n
         \         \"code\": \"ProvisioningState/succeeded\",\r\n          \"level\":
         \"Info\",\r\n          \"displayStatus\": \"Provisioning succeeded\",\r\n
-        \         \"message\": \"[2.2.0.43] Disable Encryption completed successfully\"\r\n
+        \         \"message\": \"[2.4.0.2] Disable Encryption completed successfully\"\r\n
         \       }\r\n      ]\r\n    },\r\n    \"publisher\": \"Microsoft.Azure.Security\",\r\n
         \   \"type\": \"AzureDiskEncryption\",\r\n    \"typeHandlerVersion\": \"2.2\",\r\n
-        \   \"settings\": {\"VolumeType\":\"ALL\",\"EncryptionOperation\":\"DisableEncryption\",\"SequenceVersion\":\"57005f98-1eaf-4e71-be07-d531978a2e05\"}\r\n
+        \   \"settings\": {\"VolumeType\":\"ALL\",\"EncryptionOperation\":\"DisableEncryption\",\"SequenceVersion\":\"bbf10eb6-3827-49b9-b49c-5bcbcc143dcf\"}\r\n
         \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1097'
+      - '1095'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 23 Jun 2022 15:12:25 GMT
+      - Tue, 25 Jul 2023 08:52:54 GMT
       expires:
       - '-1'
       pragma:
@@ -1920,7 +2136,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3867,Microsoft.Compute/LowCostGet30Min;30840
+      - Microsoft.Compute/LowCostGet3Min;3992,Microsoft.Compute/LowCostGet30Min;31900
     status:
       code: 200
       message: OK
