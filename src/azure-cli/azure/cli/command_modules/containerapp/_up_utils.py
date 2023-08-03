@@ -123,7 +123,7 @@ class ResourceGroup:
 
 class Resource:
     def __init__(
-        self, cmd, name: str, resource_group: "ResourceGroup", exists: bool = None
+            self, cmd, name: str, resource_group: "ResourceGroup", exists: bool = None
     ):
         self.cmd = cmd
         self.name = name
@@ -156,14 +156,14 @@ class Resource:
 
 class ContainerAppEnvironment(Resource):
     def __init__(
-        self,
-        cmd,
-        name: str,
-        resource_group: "ResourceGroup",
-        exists: bool = None,
-        location=None,
-        logs_key=None,
-        logs_customer_id=None,
+            self,
+            cmd,
+            name: str,
+            resource_group: "ResourceGroup",
+            exists: bool = None,
+            location=None,
+            logs_key=None,
+            logs_customer_id=None,
     ):
 
         super().__init__(cmd, name, resource_group, exists)
@@ -266,24 +266,24 @@ class ContainerAppEnvironment(Resource):
 
 class ContainerAppsJob(Resource):  # pylint: disable=too-many-instance-attributes
     def __init__(
-        self,
-        cmd,
-        name: str,
-        resource_group: "ResourceGroup",
-        exists: bool = None,
-        image=None,
-        env: "ContainerAppEnvironment" = None,
-        target_port=None,
-        registry_server=None,
-        registry_user=None,
-        registry_pass=None,
-        env_vars=None,
-        trigger_type=None,
-        replica_timeout=None,
-        replica_retry_limit=None,
-        replica_completion_count=None,
-        parallelism=None,
-        cron_expression=None,
+            self,
+            cmd,
+            name: str,
+            resource_group: "ResourceGroup",
+            exists: bool = None,
+            image=None,
+            env: "ContainerAppEnvironment" = None,
+            target_port=None,
+            registry_server=None,
+            registry_user=None,
+            registry_pass=None,
+            env_vars=None,
+            trigger_type=None,
+            replica_timeout=None,
+            replica_retry_limit=None,
+            replica_completion_count=None,
+            parallelism=None,
+            cron_expression=None,
     ):
 
         super().__init__(cmd, name, resource_group, exists)
@@ -346,20 +346,20 @@ class AzureContainerRegistry(Resource):
 
 class ContainerApp(Resource):  # pylint: disable=too-many-instance-attributes
     def __init__(
-        self,
-        cmd,
-        name: str,
-        resource_group: "ResourceGroup",
-        exists: bool = None,
-        image=None,
-        env: "ContainerAppEnvironment" = None,
-        target_port=None,
-        registry_server=None,
-        registry_user=None,
-        registry_pass=None,
-        env_vars=None,
-        workload_profile_name=None,
-        ingress=None,
+            self,
+            cmd,
+            name: str,
+            resource_group: "ResourceGroup",
+            exists: bool = None,
+            image=None,
+            env: "ContainerAppEnvironment" = None,
+            target_port=None,
+            registry_server=None,
+            registry_user=None,
+            registry_pass=None,
+            env_vars=None,
+            workload_profile_name=None,
+            ingress=None,
     ):
 
         super().__init__(cmd, name, resource_group, exists)
@@ -446,9 +446,11 @@ class ContainerApp(Resource):  # pylint: disable=too-many-instance-attributes
                     docker_push_error = stderr.decode('utf-8')
                     if not forced_acr_login and ".azurecr.io/" in image_name and "unauthorized: authentication required" in docker_push_error:
                         # Couldn't push to ACR because the user isn't authenticated. Let's try to login to ACR and retrigger the docker push
-                        logger.warning(f"The current user isn't authenticated to the {self.acr.name} ACR instance. Triggering an ACR login and retrying to push the image...")
+                        logger.warning(
+                            f"The current user isn't authenticated to the {self.acr.name} ACR instance. Triggering an ACR login and retrying to push the image...")
                         # Logic to login to ACR
-                        task_command_kwargs = {"resource_type": ResourceType.MGMT_CONTAINERREGISTRY, 'operation_group': 'webhooks'}
+                        task_command_kwargs = {"resource_type": ResourceType.MGMT_CONTAINERREGISTRY,
+                                               'operation_group': 'webhooks'}
                         old_command_kwargs = {}
                         for key in task_command_kwargs:  # pylint: disable=consider-using-dict-items
                             old_command_kwargs[key] = self.cmd.command_kwargs.get(key)
@@ -475,7 +477,8 @@ class ContainerApp(Resource):  # pylint: disable=too-many-instance-attributes
         if pack_exec_path is None:
             raise ValidationError("The pack CLI could not be installed.")
 
-        logger.info("Docker is running and pack CLI is installed; attempting to use buildpacks to build container image...")
+        logger.info(
+            "Docker is running and pack CLI is installed; attempting to use buildpacks to build container image...")
 
         registry_name = self.registry_server.lower()
         image_name = f"{registry_name}/{image_name}"
@@ -524,10 +527,12 @@ class ContainerApp(Resource):  # pylint: disable=too-many-instance-attributes
                 # Update the result of process.returncode
                 process.communicate()
                 if is_non_supported_platform:
-                    raise ValidationError("Current buildpacks do not support the platform targeted in the provided source code.")
+                    raise ValidationError(
+                        "Current buildpacks do not support the platform targeted in the provided source code.")
 
                 if process.returncode != 0:
-                    raise CLIError("Non-zero exit code returned from 'pack build'; please check the above output for more details.")
+                    raise CLIError(
+                        "Non-zero exit code returned from 'pack build'; please check the above output for more details.")
 
                 logger.debug(f"Successfully built image {image_name} using buildpacks.")
         except ValidationError as ex:
@@ -548,7 +553,8 @@ class ContainerApp(Resource):  # pylint: disable=too-many-instance-attributes
         registry_name = (self.registry_server[: self.registry_server.rindex(ACR_IMAGE_SUFFIX)]).lower()
         if not self.target_port:
             self.target_port = DEFAULT_PORT
-        task_content = ACR_TASK_TEMPLATE.replace("{{image_name}}", image_name).replace("{{target_port}}", str(self.target_port))
+        task_content = ACR_TASK_TEMPLATE.replace("{{image_name}}", image_name).replace("{{target_port}}",
+                                                                                       str(self.target_port))
         task_client = cf_acr_tasks(self.cmd.cli_ctx)
         run_client = cf_acr_runs(self.cmd.cli_ctx)
         task_command_kwargs = {"resource_type": ResourceType.MGMT_CONTAINERREGISTRY, 'operation_group': 'webhooks'}
@@ -561,7 +567,8 @@ class ContainerApp(Resource):  # pylint: disable=too-many-instance-attributes
             try:
                 task_file.write(task_content)
                 task_file.flush()
-                acr_task_create(self.cmd, task_client, task_name, registry_name, context_path="/dev/null", file=task_file.name)
+                acr_task_create(self.cmd, task_client, task_name, registry_name, context_path="/dev/null",
+                                file=task_file.name)
                 logger.warning("Created ACR task %s in registry %s", task_name, registry_name)
             finally:
                 task_file.close()
@@ -594,7 +601,8 @@ class ContainerApp(Resource):  # pylint: disable=too-many-instance-attributes
         self.image = self.registry_server + "/" + image_name_with_tag
 
         if build_from_source:
-            logger.warning("No dockerfile detected. Attempting to build a container directly from the provided source...")
+            logger.warning(
+                "No dockerfile detected. Attempting to build a container directly from the provided source...")
 
             try:
                 # First try to build source using buildpacks
@@ -642,10 +650,7 @@ def _create_service_principal(cmd, resource_group_name, env_resource_group_name)
     scopes = [
         f"/subscriptions/{get_subscription_id(cmd.cli_ctx)}/resourceGroups/{resource_group_name}"
     ]
-    if (
-        env_resource_group_name is not None
-        and env_resource_group_name != resource_group_name
-    ):
+    if env_resource_group_name is not None and env_resource_group_name != resource_group_name:
         scopes.append(
             f"/subscriptions/{get_subscription_id(cmd.cli_ctx)}/resourceGroups/{env_resource_group_name}"
         )
@@ -657,13 +662,13 @@ def _create_service_principal(cmd, resource_group_name, env_resource_group_name)
 
 
 def _get_or_create_sp(  # pylint: disable=inconsistent-return-statements
-    cmd,
-    resource_group_name,
-    env_resource_group_name,
-    name,
-    service_principal_client_id,
-    service_principal_client_secret,
-    service_principal_tenant_id,
+        cmd,
+        resource_group_name,
+        env_resource_group_name,
+        name,
+        service_principal_client_id,
+        service_principal_client_secret,
+        service_principal_tenant_id,
 ):
     if service_principal_client_id and service_principal_client_secret and service_principal_tenant_id:
         return (
@@ -694,7 +699,7 @@ def _get_or_create_sp(  # pylint: disable=inconsistent-return-statements
 
 
 def _get_dockerfile_content_from_repo(
-    repo_url, branch, token, context_path, dockerfile
+        repo_url, branch, token, context_path, dockerfile
 ):
     from github import Github
 
@@ -811,12 +816,13 @@ def _get_dockerfile_content(repo, branch, token, source, context_path, dockerfil
 
 
 def _get_app_env_and_group(
-    cmd, name, resource_group: "ResourceGroup", env: "ContainerAppEnvironment", location
+        cmd, name, resource_group: "ResourceGroup", env: "ContainerAppEnvironment", location
 ):
     if not resource_group.name and not resource_group.exists:
         matched_apps = [c for c in list_containerapp(cmd) if c["name"].lower() == name.lower()]
         if env.name:
-            matched_apps = [c for c in matched_apps if parse_resource_id(c["properties"]["environmentId"])["name"].lower() == env.name.lower()]
+            matched_apps = [c for c in matched_apps if
+                            parse_resource_id(c["properties"]["environmentId"])["name"].lower() == env.name.lower()]
         if location:
             matched_apps = [c for c in matched_apps if format_location(c["location"]) == format_location(location)]
         if len(matched_apps) == 1:
@@ -832,17 +838,17 @@ def _get_app_env_and_group(
 
 
 def _get_env_and_group_from_log_analytics(
-    cmd,
-    resource_group_name,
-    env: "ContainerAppEnvironment",
-    resource_group: "ResourceGroup",
-    logs_customer_id,
-    location,
+        cmd,
+        resource_group_name,
+        env: "ContainerAppEnvironment",
+        resource_group: "ResourceGroup",
+        logs_customer_id,
+        location,
 ):
     # resource_group_name is the value the user passed in (if present)
     if not env.name:
         if (resource_group_name == resource_group.name and resource_group.exists) or (
-            not resource_group_name
+                not resource_group_name
         ):
             env_list = list_managed_environments(
                 cmd=cmd, resource_group_name=resource_group_name
@@ -851,14 +857,7 @@ def _get_env_and_group_from_log_analytics(
                 env_list = [
                     e
                     for e in env_list
-                    if safe_get(
-                        e,
-                        "properties",
-                        "appLogsConfiguration",
-                        "logAnalyticsConfiguration",
-                        "customerId",
-                    )
-                    == logs_customer_id
+                    if safe_get(e, "properties", "appLogsConfiguration", "logAnalyticsConfiguration", "customerId") == logs_customer_id
                 ]
             if location:
                 env_list = [e for e in env_list if format_location(e["location"]) == format_location(location)]
@@ -979,14 +978,14 @@ def _get_registry_details(cmd, app: "ContainerApp", source):
 
 # attempt to populate defaults for managed env, RG, ACR, etc
 def _set_up_defaults(
-    cmd,
-    name,
-    resource_group_name,
-    logs_customer_id,
-    location,
-    resource_group: "ResourceGroup",
-    env: "ContainerAppEnvironment",
-    app: "ContainerApp",
+        cmd,
+        name,
+        resource_group_name,
+        logs_customer_id,
+        location,
+        resource_group: "ResourceGroup",
+        env: "ContainerAppEnvironment",
+        app: "ContainerApp",
 ):
     # If no RG passed in and a singular app exists with the same name, get its env and rg
     _get_app_env_and_group(cmd, name, resource_group, env, location)
@@ -1001,29 +1000,29 @@ def _set_up_defaults(
         if not location:
             env_list = [e for e in list_managed_environments(cmd=cmd) if e["name"] == env.name]
         else:
-            env_list = [e for e in list_managed_environments(cmd=cmd) if e["name"] == env.name and format_location(e["location"]) == format_location(location)]
+            env_list = [e for e in list_managed_environments(cmd=cmd) if
+                        e["name"] == env.name and format_location(e["location"]) == format_location(location)]
         if len(env_list) == 1:
             resource_group.name = parse_resource_id(env_list[0]["id"])["resource_group"]
         if len(env_list) > 1:
             raise ValidationError(
                 f"There are multiple environments with name {env.name} on the subscription. "
                 "Please specify which resource group your Containerapp environment is in."
-            )    # get ACR details from --image, if possible
+            )  # get ACR details from --image, if possible
     _get_acr_from_image(cmd, app)
 
 
 def _create_github_action(
-    app: "ContainerApp",
-    env: "ContainerAppEnvironment",
-    service_principal_client_id,
-    service_principal_client_secret,
-    service_principal_tenant_id,
-    branch,
-    token,
-    repo,
-    context_path,
+        app: "ContainerApp",
+        env: "ContainerAppEnvironment",
+        service_principal_client_id,
+        service_principal_client_secret,
+        service_principal_tenant_id,
+        branch,
+        token,
+        repo,
+        context_path,
 ):
-
     sp = _get_or_create_sp(
         app.cmd,
         app.resource_group.name,
@@ -1112,7 +1111,9 @@ def check_env_name_on_rg(cmd, managed_env, resource_group_name, location):
             pass
         if env_def:
             if format_location(location) != format_location(env_def["location"]):
-                raise ValidationError("Environment {} already exists in resource group {} on location {}, cannot change location of existing environment to {}.".format(parse_resource_id(managed_env)["name"], resource_group_name, env_def["location"], location))
+                raise ValidationError(
+                    "Environment {} already exists in resource group {} on location {}, cannot change location of existing environment to {}.".format(
+                        parse_resource_id(managed_env)["name"], resource_group_name, env_def["location"], location))
 
 
 def get_token(cmd, repo, token):

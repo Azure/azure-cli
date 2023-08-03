@@ -9,11 +9,8 @@ import sys
 import time
 from urllib.parse import urlparse
 import json
-import subprocess
-from concurrent.futures import ThreadPoolExecutor
 import requests
 
-from azure.cli.core import telemetry as telemetry_core
 
 from azure.cli.core.azclierror import (
     RequiredArgumentMissingError,
@@ -85,7 +82,7 @@ from ._utils import (_validate_subscription_registered,
                      check_managed_cert_name_availability, prepare_managed_certificate_envelop,
                      ensure_workload_profile_supported, _generate_secret_volume_name,
                      parse_service_bindings, get_linker_client,
-                     get_current_mariner_tags, patchable_check, get_pack_exec_path, is_docker_running, trigger_workflow, AppType,
+                     trigger_workflow, AppType,
                      format_location)
 from ._validators import validate_revision_suffix
 from ._ssh_utils import (SSH_DEFAULT_ENCODING, WebSocketConnection, read_ssh, get_stdin_writer, SSH_CTRL_C_MSG,
@@ -225,7 +222,8 @@ def delete_mariadb_service(cmd, service_name, resource_group_name, no_wait=False
 
 def update_containerapp_yaml(cmd, name, resource_group_name, file_name, from_revision=None, no_wait=False):
     yaml_containerapp = process_loaded_yaml(load_yaml_file(file_name))
-    if type(yaml_containerapp) != dict:  # pylint: disable=unidiomatic-typecheck
+    # check if the type is dict
+    if not isinstance(yaml_containerapp, dict):
         raise ValidationError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-yaml for a valid containerapps YAML spec.')
 
     if not yaml_containerapp.get('name'):
@@ -311,6 +309,7 @@ def update_containerapp_yaml(cmd, name, resource_group_name, file_name, from_rev
         return r
     except Exception as e:
         handle_raw_exception(e)
+
 
 def create_containerapp(cmd,
                         name,
@@ -1552,7 +1551,8 @@ def update_containerappsjob_logic(cmd,
 
 def update_containerappjob_yaml(cmd, name, resource_group_name, file_name, from_revision=None, no_wait=False):
     yaml_containerappsjob = process_loaded_yaml(load_yaml_file(file_name))
-    if type(yaml_containerappsjob) != dict:  # pylint: disable=unidiomatic-typecheck
+    # check if the type is dict
+    if not isinstance(yaml_containerappsjob, dict):
         raise ValidationError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-yaml for a valid YAML spec.')
 
     if not yaml_containerappsjob.get('name'):
@@ -1684,7 +1684,8 @@ def start_containerappsjob(cmd,
 
 def start_containerappjob_execution_yaml(cmd, name, resource_group_name, file_name, no_wait=False):
     yaml_containerappjob_execution = load_yaml_file(file_name)
-    if type(yaml_containerappjob_execution) != dict:  # pylint: disable=unidiomatic-typecheck
+    # check if the type is dict
+    if not isinstance(yaml_containerappjob_execution, dict):
         raise InvalidArgumentValueError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-yaml for a valid containerapp job execution YAML.')
 
     containerappjob_def = None
@@ -3470,7 +3471,8 @@ def create_or_update_dapr_component(cmd, resource_group_name, environment_name, 
     _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
 
     yaml_containerapp = load_yaml_file(yaml)
-    if type(yaml_containerapp) != dict:  # pylint: disable=unidiomatic-typecheck
+    # check if the type is dict
+    if not isinstance(yaml_containerapp, dict):
         raise ValidationError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-yaml for a valid containerapps YAML spec.')
 
     # Deserialize the yaml into a DaprComponent object. Need this since we're not using SDK
