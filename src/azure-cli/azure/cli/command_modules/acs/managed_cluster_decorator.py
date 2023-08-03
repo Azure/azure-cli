@@ -7171,11 +7171,6 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             mc.workload_auto_scaler_profile.vertical_pod_autoscaler.enabled = False
 
         return mc
-        """Obtain the value of disable_vpa.
-        This function will verify the parameter by default. If both enable_vpa and disable_vpa are specified, raise a MutuallyExclusiveArgumentError.
-        :return: bool
-        """
-        return self._get_disable_vpa(enable_validation=True)
 
     def update_azure_monitor_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Update azure monitor profile for the ManagedCluster object.
