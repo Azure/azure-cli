@@ -409,6 +409,8 @@ def _get_profile_pkg(aaz_module_name, cloud):
     """ load the profile package of aaz module according to the cloud profile.
     """
     profile_module_name = cloud.profile.lower().replace('-', '_')
+    if profile_module_name != "latest":
+        profile_module_name = "profile_" + profile_module_name
     try:
         return importlib.import_module(f'{aaz_module_name}.{profile_module_name}')
     except ModuleNotFoundError:
