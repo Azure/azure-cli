@@ -568,6 +568,8 @@ def raise_unsupported_error_for_flex_vmss(vmss, error_message):
 
 
 def get_hyper_v_generation_from_vmss(cli_ctx, image_ref, location):
+    if image_ref is None:
+        return None
     if image_ref.id:
         from ._client_factory import _compute_client_factory
         if is_valid_image_version_id(image_ref.id):
