@@ -567,7 +567,7 @@ def raise_unsupported_error_for_flex_vmss(vmss, error_message):
         raise ArgumentUsageError(error_message)
 
 
-def get_hyper_v_generation_from_vmss(cli_ctx, image_ref, location):
+def get_hyper_v_generation_from_vmss(cli_ctx, image_ref, location):  # pylint: disable=too-many-return-statements
     if image_ref is None:
         return None
     if image_ref.id:
@@ -578,7 +578,7 @@ def get_hyper_v_generation_from_vmss(cli_ctx, image_ref, location):
             gallery_image_info = client.get(
                 resource_group_name=image_info[1], gallery_name=image_info[2], gallery_image_name=image_info[3])
             return gallery_image_info.hyper_v_generation if hasattr(gallery_image_info, 'hyper_v_generation') else None
-        elif is_valid_vm_image_id(image_ref.id):
+        if is_valid_vm_image_id(image_ref.id):
             sub, rg, image_name = parse_vm_image_id(image_ref.id)
             client = _compute_client_factory(cli_ctx, subscription_id=sub).images
             image_info = client.get(rg, image_name)
