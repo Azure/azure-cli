@@ -3159,7 +3159,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None,
                 os_disk_delete_option=None, data_disk_delete_option=None, regular_priority_count=None,
                 regular_priority_percentage=None, disk_controller_type=None, nat_rule_name=None,
-                enable_osimage_notification=None, max_surge=None, disable_integrity_monitoring_autoupgrade=False):
+                enable_osimage_notification=None, max_surge=None, disable_integrity_monitoring_autoupgrade=False,
+                enable_hibernation=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -3478,7 +3479,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             os_disk_secure_vm_disk_encryption_set=os_disk_secure_vm_disk_encryption_set,
             os_disk_delete_option=os_disk_delete_option, regular_priority_count=regular_priority_count,
             regular_priority_percentage=regular_priority_percentage, disk_controller_type=disk_controller_type,
-            enable_osimage_notification=enable_osimage_notification, max_surge=max_surge)
+            enable_osimage_notification=enable_osimage_notification, max_surge=max_surge,
+            enable_hibernation=enable_hibernation)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 

@@ -3380,7 +3380,8 @@ class VMSSCreateAndModify(ScenarioTest):
         self.kwargs.update({
             'vmss': 'vmss1',
             'count': 5,
-            'new_count': 4
+            'new_count': 4,
+            'vmss2': self.create_random_name('vmss', 10)
         })
 
         self.cmd('vmss create --admin-password testPassword0 --name {vmss} -g {rg} --admin-username myadmin --image Win2012R2Datacenter --instance-count {count}')
@@ -3436,6 +3437,10 @@ class VMSSCreateAndModify(ScenarioTest):
         self.cmd('vmss deallocate --resource-group {rg} --name {vmss}')
         self.cmd('vmss delete --resource-group {rg} --name {vmss}')
         self.cmd('vmss list --resource-group {rg}', checks=self.is_empty())
+
+        self.cmd('vmss create -g {rg} -n {vmss2} --image Canonical:UbuntuServer:18.04-LTS:latest --orchestration-mode Flexible --admin-username vmtest --enable-hibernation true', checks=[
+            self.check('vmss.additionalCapabilities.hibernationEnabled', True),
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_scale_in_policy_')
     def test_vmss_scale_in_policy(self, resource_group):
