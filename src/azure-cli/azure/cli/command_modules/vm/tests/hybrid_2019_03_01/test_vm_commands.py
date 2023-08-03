@@ -148,6 +148,7 @@ class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
 
 class VMSizeListScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     def test_vm_size_list(self):
         self.cmd('vm list-sizes --location westus',
                  checks=self.check('type(@)', 'array'))
@@ -2587,7 +2588,7 @@ class VMRestartTest(ScenarioTest):
             'vm': 'vm'
         })
         self.cmd(
-            'vm create --resource-group {rg} --name {vm} --admin-username azureuser --admin-password testPassword0 --authentication-type password --location {loc} --image OpenLogic:CentOS:7.5:latest --priority Regular --nsg-rule NONE')
+            'vm create --resource-group {rg} --name {vm} --admin-username azureuser --admin-password testPassword0 --authentication-type password --image OpenLogic:CentOS:7.5:latest --nsg-rule NONE')
 
         self.cmd('vm stop --resource-group {rg} --name {vm}')
         self._check_vm_power_state('PowerState/stopped')

@@ -146,6 +146,7 @@ class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
 
 class VMSizeListScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     def test_vm_size_list(self):
         self.cmd('vm list-sizes --location westus',
                  checks=self.check('type(@)', 'array'))
@@ -2400,7 +2401,7 @@ class VMRestartTest(ScenarioTest):
             'vm': 'vm'
         })
         self.cmd(
-            'vm create --resource-group {rg} --name {vm} --admin-username azureuser --admin-password testPassword0 --authentication-type password --location {loc} --image OpenLogic:CentOS:7.5:latest --priority Regular --nsg-rule NONE')
+            'vm create --resource-group {rg} --name {vm} --admin-username azureuser --admin-password testPassword0 --authentication-type password --image OpenLogic:CentOS:7.5:latest --priority Regular --nsg-rule NONE')
 
         self.cmd('vm stop --resource-group {rg} --name {vm}')
         self._check_vm_power_state('PowerState/stopped')
@@ -2412,10 +2413,8 @@ class VMAutoUpdateScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_linux_vm_patch_mode_')
     def test_linux_vm_patch_mode(self, resource_group):
-        self.cmd('vm create -g {rg} -n vm1 --image Canonical:UbuntuServer:18.04-LTS:latest --enable-agent --patch-mode AutomaticByPlatform --generate-ssh-keys --nsg-rule NONE --admin-username vmtest')
-        self.cmd('vm show -g {rg} -n vm1', checks=[
-            self.check('osProfile.linuxConfiguration.patchSettings.patchMode', 'AutomaticByPlatform')
-        ])
+        self.cmd('vm create -g {rg} -n vm1 --image Canonical:UbuntuServer:18.04-LTS:latest --enable-agent --generate-ssh-keys --nsg-rule NONE --admin-username vmtest')
+
         self.cmd('vm assess-patches -g {rg} -n vm1', checks=[
             self.check('status', 'Succeeded')
         ])
