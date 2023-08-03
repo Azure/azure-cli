@@ -172,25 +172,21 @@ class TestVMCreateDefaultVnet(unittest.TestCase):
         ns.location = None
         self.ns = ns
 
+    @mock.patch('azure.cli.command_modules.vm.aaz.2020_09_01_hybrid.network.vnet.List', _mock_network_client_with_existing_vnet)
     def test_no_matching_vnet(self):
-        from importlib import import_module
-        vnet = import_module('azure.cli.command_modules.vm.aaz.2020_09_01_hybrid.network.vnet')
-        with mock.patch.object(vnet, 'List', _mock_network_client_with_existing_vnet):
-            self._set_ns('emptyrg', 'eastus')
-            _validate_vm_vmss_create_vnet(_get_test_cmd(), self.ns)
-            self.assertIsNone(self.ns.vnet_name)
-            self.assertIsNone(self.ns.subnet)
-            self.assertEqual(self.ns.vnet_type, 'new')
+        self._set_ns('emptyrg', 'eastus')
+        _validate_vm_vmss_create_vnet(_get_test_cmd(), self.ns)
+        self.assertIsNone(self.ns.vnet_name)
+        self.assertIsNone(self.ns.subnet)
+        self.assertEqual(self.ns.vnet_type, 'new')
 
+    @mock.patch('azure.cli.command_modules.vm.aaz.2020_09_01_hybrid.network.vnet.List', _mock_network_client_with_existing_vnet_location)
     def test_matching_vnet_specified_location(self):
-        from importlib import import_module
-        vnet = import_module('azure.cli.command_modules.vm.aaz.2020_09_01_hybrid.network.vnet')
-        with mock.patch.object(vnet, 'List', _mock_network_client_with_existing_vnet_location):
-            self._set_ns('rg1', 'eastus')
-            _validate_vm_vmss_create_vnet(_get_test_cmd(), self.ns)
-            self.assertEqual(self.ns.vnet_name, 'vnet1')
-            self.assertEqual(self.ns.subnet, 'vnet1subnet')
-            self.assertEqual(self.ns.vnet_type, 'existing')
+        self._set_ns('rg1', 'eastus')
+        _validate_vm_vmss_create_vnet(_get_test_cmd(), self.ns)
+        self.assertEqual(self.ns.vnet_name, 'vnet1')
+        self.assertEqual(self.ns.subnet, 'vnet1subnet')
+        self.assertEqual(self.ns.vnet_type, 'existing')
 
 
 class TestVMSSCreateDefaultVnet(unittest.TestCase):
@@ -206,32 +202,28 @@ class TestVMSSCreateDefaultVnet(unittest.TestCase):
         ns.disable_overprovision = None
         return ns
 
+    @mock.patch('azure.cli.command_modules.vm.aaz.2020_09_01_hybrid.network.vnet.List', _mock_network_client_with_existing_vnet_location)
     def test_matching_vnet_subnet_size_matching(self):
-        from importlib import import_module
-        vnet = import_module('azure.cli.command_modules.vm.aaz.2020_09_01_hybrid.network.vnet')
-        with mock.patch.object(vnet, 'List', _mock_network_client_with_existing_vnet_location):
-            ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
-            ns.instance_count = 5
-            _validate_vm_vmss_create_vnet(_get_test_cmd(), ns, for_scale_set=True)
-            self.assertEqual(ns.vnet_name, 'vnet1')
-            self.assertEqual(ns.subnet, 'vnet1subnet')
-            self.assertEqual(ns.vnet_type, 'existing')
+        ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
+        ns.instance_count = 5
+        _validate_vm_vmss_create_vnet(_get_test_cmd(), ns, for_scale_set=True)
+        self.assertEqual(ns.vnet_name, 'vnet1')
+        self.assertEqual(ns.subnet, 'vnet1subnet')
+        self.assertEqual(ns.vnet_type, 'existing')
 
+    @mock.patch('azure.cli.command_modules.vm.aaz.2020_09_01_hybrid.network.vnet.List', _mock_network_client_with_existing_subnet)
     def test_matching_vnet_no_subnet_size_matching(self):
-        from importlib import import_module
-        vnet = import_module('azure.cli.command_modules.vm.aaz.2020_09_01_hybrid.network.vnet')
-        with mock.patch.object(vnet, 'List', _mock_network_client_with_existing_subnet):
-            ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
-            ns.instance_count = 1000
-            _validate_vm_vmss_create_vnet(_get_test_cmd(), ns, for_scale_set=True)
-            self.assertIsNone(ns.vnet_name)
-            self.assertIsNone(ns.subnet)
-            self.assertEqual(ns.vnet_type, 'new')
+        ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
+        ns.instance_count = 1000
+        _validate_vm_vmss_create_vnet(_get_test_cmd(), ns, for_scale_set=True)
+        self.assertIsNone(ns.vnet_name)
+        self.assertIsNone(ns.subnet)
+        self.assertEqual(ns.vnet_type, 'new')
 
-            ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
-            ns.instance_count = 255
-            _validate_vm_vmss_create_vnet(_get_test_cmd(), ns, for_scale_set=True)
-            self.assertEqual(ns.vnet_type, 'new')
+        ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
+        ns.instance_count = 255
+        _validate_vm_vmss_create_vnet(_get_test_cmd(), ns, for_scale_set=True)
+        self.assertEqual(ns.vnet_type, 'new')
 
     def test_new_subnet_size_for_big_vmss_with_over_provision(self):
         ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
