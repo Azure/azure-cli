@@ -14,16 +14,14 @@ from azure.cli.command_modules.acs.azuremonitormetrics.deaults import get_defaul
 # DCE remove underscore from cluster name
 def sanitize_name(name, objtype, length):
     name = name[0:length]
-    length = length - 1
     if objtype == DC_TYPE.DCE:
-        name = name.replace("_", "")
         name = ''.join(char for char in name if char.isalnum() or char == '-')
     lastIndexAlphaNumeric = len(name) - 1
     while ((name[lastIndexAlphaNumeric].isalnum() is False) and lastIndexAlphaNumeric > -1):
         lastIndexAlphaNumeric = lastIndexAlphaNumeric - 1
     if lastIndexAlphaNumeric < 0:
         return ""
-    return name[0:lastIndexAlphaNumeric + 1]
+    return name[0:lastIndexAlphaNumeric+1]
 
 
 def get_default_dce_name(cmd, mac_region, cluster_name):
