@@ -410,6 +410,7 @@ def _get_profile_pkg(aaz_module_name, cloud):
     """
     profile_module_name = cloud.profile.lower().replace('-', '_')
     if profile_module_name != "latest":
+        # the rest profiles for azure-stack use start with digit number, it's not a valid python package name.
         profile_module_name = "profile_" + profile_module_name
     try:
         return importlib.import_module(f'{aaz_module_name}.{profile_module_name}')
