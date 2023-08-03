@@ -21,7 +21,7 @@ def sanitize_name(name, objtype, length):
         lastIndexAlphaNumeric = lastIndexAlphaNumeric - 1
     if lastIndexAlphaNumeric < 0:
         return ""
-    return name[0:lastIndexAlphaNumeric+1]
+    return name[0:lastIndexAlphaNumeric + 1]
 
 
 def get_default_dce_name(cmd, mac_region, cluster_name):
