@@ -6,4 +6,4 @@ import importlib
 
 
 def import_aaz_by_profile(module_name):
-    return importlib.import_module(f"azure.cli.command_modules.network.aaz.2018_03_01_hybrid.{module_name}")
+    return importlib.import_module(f"azure.cli.command_modules.network.aaz.profile_2018_03_01_hybrid.{module_name}")
