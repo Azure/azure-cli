@@ -4001,16 +4001,17 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         else:
             vmss.virtual_machine_profile.billing_profile.max_price = max_price
 
-    security_profile = vmss.virtual_machine_profile.security_profile
-    vmss_security_type = security_profile.security_type if security_profile else None
-    if security_type is not None and vmss_security_type != security_type:
-        vmss.virtual_machine_profile.security_profile = {
-            'securityType': security_type,
-            'uefiSettings': {
-                'secureBootEnabled': enable_secure_boot if enable_secure_boot is not None else False,
-                'vTpmEnabled': enable_vtpm if enable_vtpm is not None else True
+    if security_type is not None:
+        security_profile = vmss.virtual_machine_profile.security_profile
+        vmss_security_type = security_profile.security_type if security_profile else None
+        if vmss_security_type != security_type:
+            vmss.virtual_machine_profile.security_profile = {
+                'securityType': security_type,
+                'uefiSettings': {
+                    'secureBootEnabled': enable_secure_boot if enable_secure_boot is not None else False,
+                    'vTpmEnabled': enable_vtpm if enable_vtpm is not None else True
+                }
             }
-        }
     elif enable_secure_boot is not None or enable_vtpm is not None:
         vmss.virtual_machine_profile.security_profile = {'uefiSettings': {
             'secureBootEnabled': enable_secure_boot,
