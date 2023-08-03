@@ -108,8 +108,8 @@ transform_extension_show_table_output = '{Name:name, ProvisioningState:provision
 
 
 transform_disk_create_table_output = '{Name:name, ResourceGroup:resourceGroup, Location:location, Zones: ' \
-                                   '(!zones && \' \') || join(` `, zones), Sku:sku.name, OsType:osType, ' \
-                                   'SizeGb:diskSizeGb, ProvisioningState:provisioningState}'
+                                     '(!zones && \' \') || join(` `, zones), Sku:sku.name, OsType:osType, ' \
+                                     'SizeGb:diskSizeGb, ProvisioningState:provisioningState}'
 
 
 transform_disk_show_table_output = '{Name:name, ResourceGroup:resourceGroup, Location:location, Zones: ' \
