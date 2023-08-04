@@ -2,6 +2,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=line-too-long
+# pylint: disable=ungrouped-imports
+# pylint: disable=unused-argument, unused-variable
+# pylint: disable=broad-exception-caught
+# pylint: disable=logging-format-interpolation
+# pylint: disable=too-many-statements, too-many-locals, too-many-branches, too-many-public-methods
 from typing import Dict, Any
 
 from azure.cli.core.commands import AzCliCommand
@@ -59,8 +65,6 @@ logger = get_logger(__name__)
 
 
 class ContainerAppJobDecorator(BaseResource):
-    def __init__(self, cmd: AzCliCommand, client: Any, raw_parameters: Dict, models: str):
-        super().__init__(cmd, client, raw_parameters, models)
 
     def get_environment_client(self):
         return ManagedEnvironmentClient
@@ -216,7 +220,9 @@ class ContainerAppJobCreateDecorator(ContainerAppJobDecorator):
             r = self.create()
 
         if "properties" in r and "provisioningState" in r["properties"] and r["properties"]["provisioningState"].lower() == "waiting" and not self.get_argument_no_wait():
-            not self.get_argument_disable_warnings() and logger.warning('Containerapp job creation in progress. Please monitor the creation using `az containerapp job show -n {} -g {}`'.format(self.get_argument_name, self.get_argument_resource_group_name()))
+            if not self.get_argument_disable_warnings():
+                logger.warning('Containerapp job creation in progress. Please monitor the creation using `az containerapp job show -n {} -g {}`'.format(self.get_argument_name, self.get_argument_resource_group_name()))
+        return r
 
     def construct_payload(self):
         if self.get_argument_registry_identity() and not is_registry_msi_system(self.get_argument_registry_identity()):
@@ -237,7 +243,7 @@ class ContainerAppJobCreateDecorator(ContainerAppJobDecorator):
 
         try:
             managed_env_info = self.get_environment_client().show(cmd=self.cmd, resource_group_name=managed_env_rg, name=managed_env_name)
-        except:
+        except:  # pylint: disable=bare-except
             pass
 
         if not managed_env_info:
@@ -469,7 +475,7 @@ class ContainerAppJobCreateDecorator(ContainerAppJobDecorator):
 
         try:
             env_info = self.get_environment_client().show(cmd=self.cmd, resource_group_name=env_rg, name=env_name)
-        except:
+        except:  # pylint: disable=bare-except
             pass
 
         if not env_info:

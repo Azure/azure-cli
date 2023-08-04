@@ -13,6 +13,9 @@ from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathChec
 from .common import TEST_LOCATION
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
+# flake8: noqa
+# noqa
+# pylint: skip-file
 
 
 class ContainerappEnvScenarioTest(ScenarioTest):

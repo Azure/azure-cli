@@ -14,6 +14,9 @@ from azure.cli.command_modules.containerapp.tests.latest.common import (write_te
 from .common import TEST_LOCATION
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
+# flake8: noqa
+# noqa
+# pylint: skip-file
 
 
 class ContainerAppWorkloadProfilesTest(ScenarioTest):

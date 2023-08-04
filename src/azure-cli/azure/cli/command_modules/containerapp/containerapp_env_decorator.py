@@ -2,6 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=line-too-long, consider-using-f-string, logging-format-interpolation, inconsistent-return-statements, broad-except, bare-except, too-many-statements, too-many-locals, too-many-boolean-expressions, too-many-branches, too-many-nested-blocks, pointless-statement, expression-not-assigned, unbalanced-tuple-unpacking, unsupported-assignment-operation, too-many-public-methods, broad-exception-caught, expression-not-assigned
+
 from typing import Any, Dict
 from knack.log import get_logger
 
@@ -33,8 +35,6 @@ logger = get_logger(__name__)
 
 
 class ContainerAppEnvDecorator(BaseResource):
-    def __init__(self, cmd: AzCliCommand, client: Any, raw_parameters: Dict, models: str):
-        super().__init__(cmd, client, raw_parameters, models)
 
     def get_argument_logs_destination(self):
         return self.get_param("logs_destination")

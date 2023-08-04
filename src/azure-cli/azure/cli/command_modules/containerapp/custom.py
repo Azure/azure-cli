@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long, consider-using-f-string, logging-format-interpolation, inconsistent-return-statements, broad-except, bare-except, too-many-statements, too-many-locals, too-many-boolean-expressions, too-many-branches, too-many-nested-blocks, pointless-statement, expression-not-assigned, unbalanced-tuple-unpacking, unsupported-assignment-operation
-
+# pylint: disable=unused-argument, no-else-raise
 import threading
 import sys
 import time
@@ -3602,7 +3602,7 @@ def stream_containerapp_logs(cmd, resource_group_name, name, container=None, rev
                         headers=headers)
 
     if not resp.ok:
-        ValidationError(f"Got bad status from the logstream API: {resp.status_code}")
+        raise ValidationError(f"Got bad status from the logstream API: {resp.status_code}")
 
     for line in resp.iter_lines():
         if line:

@@ -18,6 +18,11 @@ from azure.cli.command_modules.containerapp.tests.latest.common import (
     clean_up_test_file,
     TEST_DIR, TEST_LOCATION)
 
+# flake8: noqa
+# noqa
+# pylint: skip-file
+
+
 class ContainerAppMountAzureFileTest(ScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=TEST_LOCATION)

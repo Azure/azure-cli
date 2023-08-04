@@ -2,8 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
-from azure.cli.core.azclierror import ValidationError, CLIError, ResourceNotFoundError
+# pylint: disable=broad-exception-caught
+from azure.cli.core.azclierror import CLIError, ResourceNotFoundError
 from ._client_factory import handle_raw_exception
 from ._clients import ManagedEnvironmentClient, ContainerAppClient
 from ._constants import (

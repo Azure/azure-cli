@@ -3,12 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-
-from azure.cli.testsdk import (ScenarioTest)
+import unittest
 from ..._validators import validate_revision_suffix, ValidationError
 
 
-class ContainerappRevisionSuffixTests(ScenarioTest):
+class ContainerappRevisionSuffixTests(unittest.TestCase):
     def test_containerapp_revision_suffix_validation(self):
         #valid suffixes
         validate_revision_suffix("0123-abcd")

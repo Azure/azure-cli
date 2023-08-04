@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=broad-exception-caught, line-too-long, no-else-return
 from typing import Any, Dict
 
 from azure.cli.core.commands import AzCliCommand

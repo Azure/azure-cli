@@ -14,6 +14,9 @@ from azure.cli.command_modules.containerapp.tests.latest.common import (
     TEST_DIR, TEST_LOCATION)
 
 from .utils import create_containerapp_env
+# flake8: noqa
+# noqa
+# pylint: skip-file
 
 
 class ContainerappComposePreviewResourceSettingsScenarioTest(ContainerappComposePreviewScenarioTest):

@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=line-too-long
+# pylint: disable=line-too-long, unused-argument
 
 import re
 from azure.cli.core.azclierror import (ValidationError, ResourceNotFoundError, InvalidArgumentValueError,

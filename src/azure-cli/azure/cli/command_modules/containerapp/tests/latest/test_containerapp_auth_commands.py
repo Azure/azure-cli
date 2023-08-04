@@ -10,6 +10,10 @@ from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathChec
 from .common import TEST_LOCATION
 from .utils import create_containerapp_env
 
+# flake8: noqa
+# noqa
+# pylint: skip-file
+
 
 class ContainerAppAuthTest(ScenarioTest):
     @AllowLargeResponse(8192)
