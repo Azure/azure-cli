@@ -205,6 +205,7 @@ def load_arguments(self, _):
         c.argument('src_endpoint', help='If --src-auth-mode is "login", provide endpoint URL of the source App Configuration.')
         c.argument('src_auth_mode', arg_type=get_enum_type(['login', 'key']),
                    help='Auth mode for connecting to source App Configuration. For details, refer to "--auth-mode" argument.')
+        c.argument('src_snapshot', help='Import all keys in a given snapshot of the source App Configuration store. If no snapshot is specified, the keys currently in the store are imported based on the specified key and label filters.', is_preview=True)
 
     with self.argument_context('appconfig kv import', arg_group='AppService') as c:
         c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration. Required for AppService arguments')

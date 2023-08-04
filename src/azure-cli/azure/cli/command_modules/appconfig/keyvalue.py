@@ -66,11 +66,16 @@ def import_config(cmd,
                   src_connection_string=None,
                   src_key=None,
                   src_label=None,
+                  src_snapshot=None,
                   preserve_labels=False,
                   src_auth_mode="key",
                   src_endpoint=None,
                   # from-appservice parameters
                   appservice_account=None):
+
+    if src_snapshot and (src_key or src_label):
+        raise CLIErrors.MutuallyExclusiveArgumentError("'snapshot' cannot be specified with 'key' or 'label' filters.")
+
     src_features = []
     dest_features = []
     dest_kvs = []
@@ -122,6 +127,7 @@ def import_config(cmd,
 
         src_kvs = __read_kv_from_config_store(src_azconfig_client,
                                               key=src_key,
+                                              snapshot=src_snapshot,
                                               label=src_label if src_label else SearchFilterOptions.EMPTY_LABEL,
                                               prefix_to_add=prefix)
         # We need to separate KV from feature flags
@@ -240,7 +246,7 @@ def export_config(cmd,
                   export_as_reference=False):
 
     if snapshot and (key or label):
-        raise CLIErrors.MutuallyExclusiveArgumentError("'snapshot' cannot be specified with 'key', 'label' filters.")
+        raise CLIErrors.MutuallyExclusiveArgumentError("'snapshot' cannot be specified with 'key' or 'label' filters.")
 
     src_features = []
     dest_features = []
