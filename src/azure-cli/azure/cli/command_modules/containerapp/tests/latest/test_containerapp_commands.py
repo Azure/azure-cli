@@ -1129,7 +1129,13 @@ class ContainerappScaleTests(ScenarioTest):
         self.cmd(f'containerapp replica show -g {resource_group} -n {app} --revision {revisions_list[0]["name"]} --replica {replica_list[0]["name"]}', expect_failure=False).get_output_in_json()
 
         self.cmd(f'containerapp browse -g {resource_group} -n {app}', expect_failure=False)
-        self.cmd(f'containerapp delete -g {resource_group} -n {app} --yes', expect_failure=False)
+
+        self.cmd(f'containerapp delete --resource-group {resource_group} -n {app} --yes', expect_failure=False)
+        self.cmd(f'containerapp env show --resource-group {resource_group} --name {env}', expect_failure=False, checks=[
+            JMESPathCheck("name", env),
+        ])
+        self.cmd(f'containerapp env delete --resource-group {resource_group} --name {env} --yes', expect_failure=False)
+
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="westeurope")

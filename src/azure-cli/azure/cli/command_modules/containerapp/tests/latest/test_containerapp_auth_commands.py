@@ -32,8 +32,15 @@ class ContainerAppAuthTest(ScenarioTest):
         issuer = 'https://sts.windows.net/54826b22-38d6-4fb2-bad9-b7983a3e9c5a/'
 
         self.cmd(
-            'containerapp auth microsoft update  -g {} --name {} --client-id {} --client-secret {} --issuer {} --yes'
+            'containerapp auth microsoft update -g {} --name {} --client-id {} --client-secret {} --issuer {} --yes'
             .format(resource_group, app, client_id, test_secret, issuer), checks=[
+                JMESPathCheck('registration.clientId', client_id),
+                JMESPathCheck('registration.clientSecretSettingName',
+                              "microsoft-provider-authentication-secret"),
+                JMESPathCheck('registration.openIdIssuer', issuer),
+            ])
+
+        self.cmd('containerapp auth microsoft show -g {} --name {}'.format(resource_group, app), checks=[
                 JMESPathCheck('registration.clientId', client_id),
                 JMESPathCheck('registration.clientSecretSettingName',
                               "microsoft-provider-authentication-secret"),
@@ -45,14 +52,14 @@ class ContainerAppAuthTest(ScenarioTest):
             JMESPathCheck('[0].name', "microsoft-provider-authentication-secret")
         ])
 
-        self.cmd('containerapp auth show  -g {} -n {}'.format(resource_group, app), checks=[
+        self.cmd('containerapp auth show -g {} -n {}'.format(resource_group, app), checks=[
             JMESPathCheck('identityProviders.azureActiveDirectory.registration.clientId', client_id),
             JMESPathCheck('identityProviders.azureActiveDirectory.registration.clientSecretSettingName',
                           "microsoft-provider-authentication-secret"),
             JMESPathCheck('identityProviders.azureActiveDirectory.registration.openIdIssuer', issuer),
         ])
 
-        self.cmd('containerapp auth update  -g {} -n {} --unauthenticated-client-action AllowAnonymous'.format(resource_group, app), checks=[
+        self.cmd('containerapp auth update -g {} -n {} --unauthenticated-client-action AllowAnonymous'.format(resource_group, app), checks=[
             JMESPathCheck('name', "current"),
             JMESPathCheck('properties.globalValidation.unauthenticatedClientAction', "AllowAnonymous"),
             JMESPathCheck('properties.identityProviders.azureActiveDirectory.registration.clientId', client_id),
@@ -61,7 +68,7 @@ class ContainerAppAuthTest(ScenarioTest):
             JMESPathCheck('properties.identityProviders.azureActiveDirectory.registration.openIdIssuer', issuer),
         ])
 
-        self.cmd('containerapp auth show  -g {} -n {}'.format(resource_group, app), checks=[
+        self.cmd('containerapp auth show -g {} -n {}'.format(resource_group, app), checks=[
             JMESPathCheck('globalValidation.unauthenticatedClientAction', "AllowAnonymous"),
             JMESPathCheck('identityProviders.azureActiveDirectory.registration.clientId', client_id),
             JMESPathCheck('identityProviders.azureActiveDirectory.registration.clientSecretSettingName',
@@ -83,3 +90,159 @@ class ContainerAppAuthTest(ScenarioTest):
         self.cmd('containerapp show  -g {} -n {}'.format(resource_group, app), checks=[
             JMESPathCheck('properties.provisioningState', "Succeeded")
         ])
+
+        self.cmd('containerapp auth microsoft update -g {} --name {} --client-id {} --client-secret {} --client-secret-name {} --san a --thumbprint a --issuer {} --allowed-audiences a --tenant-id a --yes'
+                 .format(resource_group, app, client_id, test_secret, test_secret, issuer), expect_failure=True)
+
+        self.cmd('containerapp auth update -g {} --name {} --config-file-path a --custom-host-header b --set a --custom-proto-header c --enabled true --excluded-paths b --proxy-convention NoProxy --redirect-provider c --require-https false --runtime-version 0.0.0 '.format(resource_group, app), expect_failure=True)
+
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location=TEST_LOCATION)
+    def test_containerapp_auth_facebook_e2e(self, resource_group):
+        self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
+        env = self.create_random_name(prefix='containerapp-env', length=24)
+        app = self.create_random_name(prefix='containerapp-auth', length=24)
+
+        create_containerapp_env(self, env, resource_group)
+
+        self.cmd(
+            'containerapp create -g {} -n {} --environment {} --image mcr.microsoft.com/k8se/quickstart:latest --ingress external --target-port 80'.format(
+                resource_group, app, env))
+
+        app_id = 'c0d23eb5-ea9f-4a4d-9519-bfa0a422c491'
+        test_secret = 'c0d23eb5-ea9f-4a4d-9519-bfa0a422c491'
+        issuer = 'https://sts.windows.net/54826b22-38d6-4fb2-bad9-b7983a3e9c5a/'
+
+        self.cmd(
+            'containerapp auth facebook update  -g {} --name {} --app-id {} --app-secret {} --graph-api-version 0.0.2 --scopes cc --yes'
+            .format(resource_group, app, app_id, test_secret, issuer).format(resource_group, app), checks=[
+                JMESPathCheck('graphApiVersion', "0.0.2"),
+                JMESPathCheck('login.scopes[0]', "cc"),
+                JMESPathCheck('registration.appId', app_id),
+                JMESPathCheck('registration.appSecretSettingName', "facebook-provider-authentication-secret"),
+            ])
+        self.cmd(
+            'containerapp auth facebook show  -g {} --name {}'
+            .format(resource_group, app), checks=[
+                JMESPathCheck('graphApiVersion', "0.0.2"),
+                JMESPathCheck('login.scopes[0]', "cc"),
+                JMESPathCheck('registration.appId', app_id),
+                JMESPathCheck('registration.appSecretSettingName', "facebook-provider-authentication-secret"),
+            ])
+
+        self.cmd(
+            'containerapp auth facebook update  -g {} --name {} --app-id {} --app-secret-name {} --graph-api-version 0.0.2 --scopes cc --yes'
+            .format(resource_group, app, app_id, test_secret, issuer).format(resource_group, app), expect_failure=True)
+
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location=TEST_LOCATION)
+    def test_containerapp_auth_github_e2e(self, resource_group):
+        self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
+        env = self.create_random_name(prefix='containerapp-env', length=24)
+        app = self.create_random_name(prefix='containerapp-auth', length=24)
+
+        create_containerapp_env(self, env, resource_group)
+
+        self.cmd(
+            'containerapp create -g {} -n {} --environment {} --image mcr.microsoft.com/k8se/quickstart:latest --ingress external --target-port 80'.format(
+                resource_group, app, env))
+
+        client_id = 'c0d23eb5-ea9f-4a4d-9519-bfa0a422c491'
+        test_secret = 'c0d23eb5-ea9f-4a4d-9519-bfa0a422c491'
+        # github
+        self.cmd(
+            'containerapp auth github update -g {} --name {} --client-id {} --client-secret {} --yes'
+            .format(resource_group, app, client_id, test_secret), checks=[
+                JMESPathCheck('registration.clientId', client_id),
+                JMESPathCheck('registration.clientSecretSettingName',
+                              "github-provider-authentication-secret"),
+            ])
+
+        self.cmd('containerapp auth github show -g {} --name {}'.format(resource_group, app), checks=[
+            JMESPathCheck('registration.clientId', client_id),
+            JMESPathCheck('registration.clientSecretSettingName',
+                          "github-provider-authentication-secret"),
+        ])
+
+        # google
+        app = self.create_random_name(prefix='containerapp-auth', length=24)
+
+        self.cmd(
+            'containerapp create -g {} -n {} --environment {} --image mcr.microsoft.com/k8se/quickstart:latest --ingress external --target-port 80'.format(
+                resource_group, app, env))
+
+        self.cmd(
+            'containerapp auth google update -g {} --name {} --client-id {} --client-secret {} --yes'
+            .format(resource_group, app, client_id, test_secret), checks=[
+                JMESPathCheck('registration.clientId', client_id),
+                JMESPathCheck('registration.clientSecretSettingName',
+                              "google-provider-authentication-secret"),
+            ])
+
+        self.cmd('containerapp auth google show -g {} --name {}'.format(resource_group, app), checks=[
+            JMESPathCheck('registration.clientId', client_id),
+            JMESPathCheck('registration.clientSecretSettingName',
+                          "google-provider-authentication-secret"),
+        ])
+
+        # twitter
+        app = self.create_random_name(prefix='containerapp-auth', length=24)
+
+        self.cmd(
+            'containerapp create -g {} -n {} --environment {} --image mcr.microsoft.com/k8se/quickstart:latest --ingress external --target-port 80'.format(
+                resource_group, app, env))
+
+        self.cmd(
+            'containerapp auth twitter update -g {} --name {} --consumer-key {} --consumer-secret {} --yes'
+            .format(resource_group, app, client_id, test_secret), checks=[
+                JMESPathCheck('registration.consumerKey', client_id),
+                JMESPathCheck('registration.consumerSecretSettingName',
+                              "twitter-provider-authentication-secret"),
+            ])
+
+        self.cmd('containerapp auth twitter show -g {} --name {}'.format(resource_group, app), checks=[
+            JMESPathCheck('registration.consumerKey', client_id),
+            JMESPathCheck('registration.consumerSecretSettingName',
+                          "twitter-provider-authentication-secret"),
+        ])
+
+        self.cmd(
+            'containerapp auth twitter update -g {} --name {} --consumer-key {} --consumer-secret-name {} --yes'
+            .format(resource_group, app, client_id, test_secret), expect_failure=True)
+
+
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location=TEST_LOCATION)
+    def test_containerapp_auth_openid_connect_e2e(self, resource_group):
+        self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
+        env = self.create_random_name(prefix='containerapp-env', length=24)
+        app = self.create_random_name(prefix='containerapp-auth', length=24)
+
+        create_containerapp_env(self, env, resource_group)
+
+        self.cmd(
+            'containerapp create -g {} -n {} --environment {} --image mcr.microsoft.com/k8se/quickstart:latest --ingress external --target-port 80'.format(
+                resource_group, app, env))
+
+        client_id = 'c0d23eb5-ea9f-4a4d-9519-bfa0a422c491'
+        test_secret = 'c0d23eb5-ea9f-4a4d-9519-bfa0a422c491'
+
+        # openid-connect
+        app = self.create_random_name(prefix='containerapp-auth', length=24)
+        self.cmd(
+            'containerapp create -g {} -n {} --environment {} --image mcr.microsoft.com/k8se/quickstart:latest --ingress external --target-port 80'.format(
+                resource_group, app, env))
+
+        provider_name = "customopenid"
+        configuration = "test-openid-configuration"
+        self.cmd(
+            'containerapp auth openid-connect add -g {} --name {} --client-id {} --provider-name {} --openid-configuration {} --scope sc --yes'
+            .format(resource_group, app, client_id, provider_name, configuration), checks=[
+            JMESPathCheck('registration.clientId', client_id),
+            JMESPathCheck('registration.openIdConnectConfiguration.wellKnownOpenIdConfiguration', configuration),
+        ])
+
+        self.cmd('containerapp auth openid-connect show -g {} --name {} --provider-name {}'.format(resource_group, app, provider_name))
+        self.cmd('containerapp auth openid-connect remove -g {} --name {} --provider-name {} --yes'.format(resource_group, app, provider_name), expect_failure=True)
+        self.cmd('containerapp auth openid-connect update -g {} --name {} --client-id {} --client-secret {} --client-secret-name {} --provider-name {} --openid-configuration {} --scope sc --yes'
+            .format(resource_group, app, client_id, test_secret, test_secret, provider_name, configuration), expect_failure=True)

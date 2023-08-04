@@ -269,6 +269,10 @@ class ContainerappScenarioTest(ScenarioTest):
             JMESPathCheck('length(@)', 2),
         ])
 
+        self.cmd('containerapp secret show -g {} -n {} --secret-name {}'.format(resource_group, containerapp_name, secret_name), checks=[
+            JMESPathCheck('name', secret_name),
+        ])
+
         with self.assertRaises(CLIError):
             # Removing ACR password should fail since it is needed for ACR
             self.cmd('containerapp secret remove -g {} -n {} --secret-names {}'.format(resource_group, containerapp_name, secret_name))
@@ -480,6 +484,14 @@ class ContainerappScenarioTest(ScenarioTest):
         self.cmd(f'acr create -g {resource_group} -n {acr} --sku basic --admin-enabled')
         # self.cmd(f'acr credential renew -n {acr} ')
         self.cmd(f'containerapp registry set --server {acr}.azurecr.io -g {resource_group} -n {app}')
+        registry_list = self.cmd(f'containerapp registry list -g {resource_group} -n {app}', checks=[
+            JMESPathCheck('length(@)', 1),
+        ]).get_output_in_json()
+
+        self.cmd(f'containerapp registry show -g {resource_group} -n {app} --server {registry_list[0]["server"]}', checks=[
+            JMESPathCheck('server', acr+'.azurecr.io'),
+        ])
+
         app_data = self.cmd(f'containerapp show -g {resource_group} -n {app}').get_output_in_json()
         self.assertEqual(app_data["properties"]["configuration"]["registries"][0].get("server"), f'{acr}.azurecr.io')
         self.assertIsNotNone(app_data["properties"]["configuration"]["registries"][0].get("passwordSecretRef"))
@@ -492,3 +504,5 @@ class ContainerappScenarioTest(ScenarioTest):
         self.assertEqual(app_data["properties"]["configuration"]["registries"][0].get("passwordSecretRef"), "")
         self.assertEqual(app_data["properties"]["configuration"]["registries"][0].get("username"), "")
         self.assertEqual(app_data["properties"]["configuration"]["registries"][0].get("identity"), "system")
+
+        self.cmd(f'containerapp registry remove -g {resource_group} -n {app} --server {registry_list[0]["server"]}',expect_failure=False)
