@@ -134,7 +134,7 @@ jobs:
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
-      pythonVersion: '3.10'
+      pythonVersion: '3.11'
       profile: 'latest'
       instance_cnt: '8'
       instance_idx: '$(Instance_idx)'
@@ -154,9 +154,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
+    displayName: 'Use Python 3.11'
     inputs:
-      versionSpec: 3.10
+      versionSpec: 3.11
   - task: AzureCLI@2
     inputs:
       azureSubscription: 'Azure CLI'
