@@ -329,6 +329,7 @@ def load_arguments(self, _):
         c.argument('load_balancer_idle_timeout', type=int, validator=validate_load_balancer_idle_timeout)
         c.argument('nat_gateway_managed_outbound_ip_count', type=int, validator=validate_nat_gateway_managed_outbound_ip_count)
         c.argument('nat_gateway_idle_timeout', type=int, validator=validate_nat_gateway_idle_timeout)
+        c.argument('network_dataplane', arg_type=get_enum_type(network_dataplanes))
         c.argument('outbound_type', arg_type=get_enum_type(outbound_types))
         c.argument('auto_upgrade_channel', arg_type=get_enum_type(auto_upgrade_channels))
         c.argument('cluster_autoscaler_profile', nargs='+', options_list=["--cluster-autoscaler-profile", "--ca-profile"],

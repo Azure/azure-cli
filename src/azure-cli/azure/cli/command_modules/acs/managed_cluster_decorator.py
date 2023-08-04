@@ -6746,6 +6746,11 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             _,
             _
         ) = self.context.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
+
+        network_dataplane = self.context.get_network_dataplane()
+        if network_dataplane:
+            mc.network_profile.network_dataplane = network_dataplane
+
         if pod_cidr:
             mc.network_profile.pod_cidr = pod_cidr
         return mc
