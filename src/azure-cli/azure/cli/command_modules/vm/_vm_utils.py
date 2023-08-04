@@ -105,9 +105,9 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
         return False
 
 
-def create_keyvault_data_plane_client(cli_ctx):
-    from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
-    return keyvault_data_plane_factory(cli_ctx)
+def create_keyvault_data_plane_client(cli_ctx, vault_base_url):
+    from azure.cli.command_modules.keyvault._client_factory import data_plane_azure_keyvault_certificate_client
+    return data_plane_azure_keyvault_certificate_client(cli_ctx, {"vault_base_url": vault_base_url})
 
 
 def get_key_vault_base_url(cli_ctx, vault_name):
@@ -612,5 +612,6 @@ def display_region_recommendation(cmd, namespace):
 
 
 def import_aaz_by_profile(profile, module_name):
-    profile_module_name = profile.lower().replace('-', '_')
+    from azure.cli.core.aaz.utils import get_aaz_profile_module_name
+    profile_module_name = get_aaz_profile_module_name(profile_name=profile)
     return importlib.import_module(f"azure.cli.command_modules.vm.aaz.{profile_module_name}.{module_name}")
