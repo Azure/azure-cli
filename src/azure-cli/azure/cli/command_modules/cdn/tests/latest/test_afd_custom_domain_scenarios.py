@@ -38,8 +38,8 @@ class CdnAfdCustomDomainScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
 
         custom_domain_name = self.create_random_name(prefix='customdomain', length=24)
         host_name = f"{custom_domain_name}.localdev.cdn.azure.cn"
-        certificate_type = AfdCertificateType.customer_certificate
-        minimum_tls_version = AfdMinimumTlsVersion.tls12
+        certificate_type = AfdCertificateType.customer_certificate.value
+        minimum_tls_version = AfdMinimumTlsVersion.tls12.value
         azure_dns_zone = None
 
         checks = [JMESPathCheck('domainValidationState', 'Pending')]
