@@ -692,7 +692,7 @@ def load_arguments(self, _):
             for dest in scaleset_name_aliases:
                 c.argument(dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
 
-    with self.argument_context('vmss deallocate') as c:
+    with self.argument_context('vmss deallocate', operation_group='virtual_machine_scale_sets') as c:
         c.argument('hibernate', arg_type=get_three_state_flag(), help='Hibernate a virtual machine from the VM scale set. Available for VMSS with Flexible OrchestrationMode only.', min_api='2023-03-01')
 
     with self.argument_context('vmss reimage') as c:
