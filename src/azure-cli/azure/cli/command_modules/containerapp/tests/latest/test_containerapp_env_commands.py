@@ -14,7 +14,6 @@ from .common import TEST_LOCATION
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
-from .utils import create_containerapp_env
 
 class ContainerappEnvScenarioTest(ScenarioTest):
     @AllowLargeResponse(8192)
@@ -228,8 +227,8 @@ class ContainerappEnvScenarioTest(ScenarioTest):
 
         # test pfx file with password
         pfx_file = os.path.join(TEST_DIR, 'cert.pfx')
-        pfx_password = 'test12'
-        cert = self.cmd('containerapp env certificate upload -g {} -n {} --certificate-file "{}" --password {}'.format(resource_group, env_name, pfx_file, pfx_password), checks=[
+        testpassword = 'test12'
+        cert = self.cmd('containerapp env certificate upload -g {} -n {} --certificate-file "{}" --password {}'.format(resource_group, env_name, pfx_file, testpassword), checks=[
             JMESPathCheck('type', "Microsoft.App/managedEnvironments/certificates"),
         ]).get_output_in_json()
 
@@ -330,7 +329,6 @@ class ContainerappEnvScenarioTest(ScenarioTest):
             JMESPathCheck('length(@)', 0),
         ])
 
-
     @AllowLargeResponse(8192)
     @live_only()  # encounters 'CannotOverwriteExistingCassetteException' only when run from recording (passes when run live)
     @ResourceGroupPreparer(location="westeurope")
@@ -367,9 +365,9 @@ class ContainerappEnvScenarioTest(ScenarioTest):
 
         # upload cert, add hostname & binding
         pfx_file = os.path.join(TEST_DIR, 'cert.pfx')
-        pfx_password = 'test12'
+        testpassword = 'test12'
 
-        self.cmd('containerapp env create -g {} -n {} --logs-workspace-id {} --logs-workspace-key {} --dns-suffix {} --certificate-file "{}" --certificate-password {}'.format(resource_group, env_name, logs_workspace_id, logs_workspace_key, hostname_1, pfx_file, pfx_password))
+        self.cmd('containerapp env create -g {} -n {} --logs-workspace-id {} --logs-workspace-key {} --dns-suffix {} --certificate-file "{}" --certificate-password {}'.format(resource_group, env_name, logs_workspace_id, logs_workspace_key, hostname_1, pfx_file, testpassword))
 
         self.cmd(f'containerapp env show -n {env_name} -g {resource_group}', checks=[
             JMESPathCheck('name', env_name),
@@ -413,9 +411,9 @@ class ContainerappEnvScenarioTest(ScenarioTest):
 
         # upload cert, add hostname & binding
         pfx_file = os.path.join(TEST_DIR, 'cert.pfx')
-        pfx_password = 'test12'
+        testpassword = 'test12'
 
-        self.cmd('containerapp env update -g {} -n {} --dns-suffix {} --certificate-file "{}" --certificate-password {}'.format(resource_group, env_name, hostname_1, pfx_file, pfx_password))
+        self.cmd('containerapp env update -g {} -n {} --dns-suffix {} --certificate-file "{}" --certificate-password {}'.format(resource_group, env_name, hostname_1, pfx_file, testpassword))
 
         self.cmd(f'containerapp env show -n {env_name} -g {resource_group}', checks=[
             JMESPathCheck('name', env_name),

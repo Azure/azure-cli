@@ -874,9 +874,9 @@ def _get_existing_secrets(cmd, resource_group_name, name, containerapp_def, appT
     else:
         secrets = []
         try:
-            if(appType == AppType.ContainerApp):
+            if appType == AppType.ContainerApp:
                 secrets = ContainerAppClient.list_secrets(cmd=cmd, resource_group_name=resource_group_name, name=name)
-            if(appType == AppType.ContainerAppJob):
+            if appType == AppType.ContainerAppJob:
                 secrets = ContainerAppsJobClient.list_secrets(cmd=cmd, resource_group_name=resource_group_name, name=name)
         except Exception as e:  # pylint: disable=broad-except
             handle_raw_exception(e)

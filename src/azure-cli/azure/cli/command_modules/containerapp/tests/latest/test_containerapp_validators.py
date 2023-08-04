@@ -7,6 +7,7 @@
 from azure.cli.testsdk import (ScenarioTest)
 from ..._validators import validate_revision_suffix, ValidationError
 
+
 class ContainerappRevisionSuffixTests(ScenarioTest):
     def test_containerapp_revision_suffix_validation(self):
         #valid suffixes

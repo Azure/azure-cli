@@ -7,12 +7,13 @@ import os
 import time
 
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, live_only, StorageAccountPreparer)
-
-TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck)
 
 from azure.cli.command_modules.containerapp.tests.latest.common import TEST_LOCATION
 from .utils import create_containerapp_env
+
+TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
+
 
 class ContainerAppJobsCRUDOperationsTest(ScenarioTest):
     @AllowLargeResponse(8192)

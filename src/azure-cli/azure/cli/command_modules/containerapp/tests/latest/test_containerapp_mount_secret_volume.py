@@ -9,9 +9,10 @@ import time
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, live_only, StorageAccountPreparer)
 
+from .utils import create_containerapp_env
+
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
-from .utils import create_containerapp_env
 
 class ContainerAppMountSecretTest(ScenarioTest):
     @AllowLargeResponse(8192)

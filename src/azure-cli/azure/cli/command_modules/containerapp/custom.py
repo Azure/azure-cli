@@ -358,8 +358,7 @@ def create_containerapp(cmd,
                         registry_identity=None,
                         workload_profile_name=None,
                         termination_grace_period=None,
-                        secret_volume_mount=None,
-                        environment_type="managed"):
+                        secret_volume_mount=None):
     raw_parameters = locals()
 
     containerapp_create_decorator = ContainerAppCreateDecorator(

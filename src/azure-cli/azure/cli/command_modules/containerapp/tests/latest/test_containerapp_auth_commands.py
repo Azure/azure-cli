@@ -24,12 +24,12 @@ class ContainerAppAuthTest(ScenarioTest):
         self.cmd('containerapp create -g {} -n {} --environment {} --image mcr.microsoft.com/k8se/quickstart:latest --ingress external --target-port 80'.format(resource_group, app, env))
 
         client_id = 'c0d23eb5-ea9f-4a4d-9519-bfa0a422c491'
-        client_secret = 'c0d23eb5-ea9f-4a4d-9519-bfa0a422c491'
+        test_secret = 'c0d23eb5-ea9f-4a4d-9519-bfa0a422c491'
         issuer = 'https://sts.windows.net/54826b22-38d6-4fb2-bad9-b7983a3e9c5a/'
 
         self.cmd(
             'containerapp auth microsoft update  -g {} --name {} --client-id {} --client-secret {} --issuer {} --yes'
-            .format(resource_group, app, client_id, client_secret, issuer), checks=[
+            .format(resource_group, app, client_id, test_secret, issuer), checks=[
                 JMESPathCheck('registration.clientId', client_id),
                 JMESPathCheck('registration.clientSecretSettingName',
                               "microsoft-provider-authentication-secret"),
