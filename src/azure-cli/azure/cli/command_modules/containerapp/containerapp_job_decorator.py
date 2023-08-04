@@ -7,7 +7,7 @@
 # pylint: disable=unused-argument, unused-variable
 # pylint: disable=broad-exception-caught
 # pylint: disable=logging-format-interpolation
-# pylint: disable=too-many-statements, too-many-locals, too-many-branches, too-many-public-methods
+# pylint: disable=too-many-statements, too-many-locals, too-many-branches, too-many-public-methods, too-many-boolean-expressions, expression-not-assigned
 from typing import Dict, Any
 
 from azure.cli.core.commands import AzCliCommand
