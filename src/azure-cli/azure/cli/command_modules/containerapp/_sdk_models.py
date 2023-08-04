@@ -16,7 +16,30 @@ from typing import Any, Dict, List, Optional, Union
 
 import msrest.serialization as _serialization
 
-from ._sdk_enums import *
+from ._sdk_enums import (
+    Applicability,
+    AccessMode,
+    CheckNameAvailabilityReason,
+    ActiveRevisionsMode,
+    Type,
+    Scheme,
+    CookieExpirationConvention,
+    BindingType,
+    AppProtocol,
+    LogLevel,
+    ExtendedLocationTypes,
+    ForwardProxyConvention,
+    UnauthenticatedClientActionV2,
+    IngressTransportMethod,
+    IngressClientCertificateMode,
+    Affinity,
+    Action,
+    TriggerType,
+    ManagedCertificateDomainControlValidation,
+    ManagedServiceIdentityType,
+    CreatedByType,
+    StorageType
+)
 
 if sys.version_info >= (3, 9):
     from collections.abc import MutableMapping

@@ -2581,6 +2581,7 @@ def disable_ingress(cmd, name, resource_group_name, no_wait=False):
         handle_raw_exception(e)
 
 
+# pylint: disable=redefined-builtin
 def update_ingress(cmd, name, resource_group_name, type=None, target_port=None, transport=None, exposed_port=None, allow_insecure=False, disable_warnings=False, no_wait=False):
     _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
 
@@ -3640,7 +3641,7 @@ def stream_environment_logs(cmd, resource_group_name, name, follow=False, tail=N
                         headers=headers)
 
     if not resp.ok:
-        ValidationError(f"Got bad status from the logstream API: {resp.status_code}")
+        raise ValidationError(f"Got bad status from the logstream API: {resp.status_code}")
 
     for line in resp.iter_lines():
         if line:
