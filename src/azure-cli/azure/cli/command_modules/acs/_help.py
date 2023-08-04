@@ -506,6 +506,9 @@ parameters:
   - name: --nodepool-labels
     type: string
     short-summary: The node labels for all node pool. See https://aka.ms/node-labels for syntax of labels.
+  - name: --enable-vpa
+    type: bool
+    short-summary: Enable vertical pod autoscaler for cluster.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -578,6 +581,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-keda
   - name: Create a kubernetes cluster with the Azure Monitor managed service for Prometheus integration enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-monitor-metrics
+  - name: Create a kubernetes cluster with vertical pod autoscaler enaled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-vpa
 """
 
 helps['aks update'] = """
@@ -854,6 +859,12 @@ parameters:
   - name: --nodepool-labels
     type: string
     short-summary: The node labels for all node pool. See https://aka.ms/node-labels for syntax of labels.
+  - name: --enable-vpa
+    type: bool
+    short-summary: Enable vertical pod autoscaler for cluster.
+  - name: --disable-vpa
+    type: bool
+    short-summary: Disable vertical pod autoscaler for cluster.
 
 examples:
   - name: Reconcile the cluster back to its current state.
@@ -908,6 +919,10 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-keda
   - name: Disable KEDA workload autoscaler for an existing kubernetes cluster.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-keda
+  - name: Enable VPA(Vertical Pod Autoscaler) for an existing kubernetes cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCLuster --enable-vpa
+  - name: Disable VPA(Vertical Pod Autoscaler) for an existing kubernetes cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCLuster --disable-vpa
 """
 
 helps['aks delete'] = """

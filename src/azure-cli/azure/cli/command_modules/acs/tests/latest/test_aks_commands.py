@@ -8697,6 +8697,73 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_vpa(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        # create: enable-vpa
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} --ssh-key-value={ssh_key_value} --output=json ' \
+                     '--aks-custom-headers=AKSHTTPCustomFeatures=Microsoft.ContainerService/AKS-VPAPreview ' \
+                     '--enable-vpa'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('workloadAutoScalerProfile.verticalPodAutoscaler.enabled', True),
+        ])
+
+        # delete
+        delete_cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(delete_cmd, checks=[
+            self.is_empty(),
+        ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_update_with_vpa(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        # create: without enable-vpa
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} --ssh-key-value={ssh_key_value} --output=json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.not_exists('workloadAutoScalerProfile.verticalPodAutoscaler'),
+        ])
+
+        # update: enable-vpa
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} --yes --output=json ' \
+                     '--aks-custom-headers=AKSHTTPCustomFeatures=Microsoft.ContainerService/AKS-VPAPreview ' \
+                     '--enable-vpa'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('workloadAutoScalerProfile.verticalPodAutoscaler.enabled', True),
+        ])
+
+        # update: disable-vpa
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} --yes --output=json ' \
+                     '--disable-vpa'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('workloadAutoScalerProfile.verticalPodAutoscaler.enabled', False),
+        ])
+
+        # delete
+        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_again_should_fail(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
