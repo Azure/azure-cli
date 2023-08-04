@@ -32,9 +32,13 @@ class ContainerAppIngressStickySessionsTest(ScenarioTest):
         self.cmd('containerapp env show -n {} -g {}'.format(env, resource_group), checks=[
             JMESPathCheck('name', env)            
         ])
-
         self.cmd("az containerapp create -g {} --target-port 80 --ingress external --image mcr.microsoft.com/k8se/quickstart:latest --environment {} -n {} ".format(resource_group, env, app))        
-        self.cmd("az containerapp ingress sticky-sessions set -n {} -g {} --affinity sticky".format(app, resource_group))        
+        self.cmd("az containerapp ingress sticky-sessions set -n {} -g {} --affinity sticky".format(app, resource_group), expect_failure=False, checks=[
+            JMESPathCheck('stickySessions.affinity', "sticky")
+        ])
+        self.cmd("az containerapp ingress sticky-sessions show -n {} -g {}".format(app, resource_group), expect_failure=False, checks=[
+            JMESPathCheck('stickySessions.affinity', "sticky")
+        ])
         self.cmd('containerapp show -g {} -n {}'.format(resource_group, app), checks=[
             JMESPathCheck('properties.configuration.ingress.stickySessions.affinity', "sticky"),        
         ])

@@ -1115,6 +1115,21 @@ class ContainerappScaleTests(ScenarioTest):
             JMESPathCheck("properties.template.scale.rules[0].custom.auth[1].secretRef", "app-key"),
 
         ])
+        revisions_list = self.cmd('containerapp revision list -g {} -n {}'.format(resource_group, app)).get_output_in_json()
+
+        self.cmd(f'containerapp revision show -g {resource_group} -n {app} --revision {revisions_list[0]["name"]}', expect_failure=False)
+        self.cmd(f'containerapp revision restart -g {resource_group} -n {app} --revision {revisions_list[0]["name"]}', expect_failure=False)
+        self.cmd(f'containerapp revision deactivate -g {resource_group} -n {app} --revision {revisions_list[0]["name"]}', expect_failure=False)
+        self.cmd(f'containerapp revision activate -g {resource_group} -n {app} --revision {revisions_list[0]["name"]}', expect_failure=False)
+
+        restart_result = self.cmd(f'containerapp revision restart -g {resource_group} -n {app} --revision {revisions_list[0]["name"]}', expect_failure=False).get_output_in_json()
+        self.assertTrue(restart_result == "Restart succeeded")
+
+        replica_list = self.cmd(f'containerapp replica list -g {resource_group} -n {app} --revision {revisions_list[0]["name"]}', expect_failure=False).get_output_in_json()
+        self.cmd(f'containerapp replica show -g {resource_group} -n {app} --revision {revisions_list[0]["name"]} --replica {replica_list[0]["name"]}', expect_failure=False).get_output_in_json()
+
+        self.cmd(f'containerapp browse -g {resource_group} -n {app}', expect_failure=False)
+        self.cmd(f'containerapp delete -g {resource_group} -n {app} --yes', expect_failure=False)
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="westeurope")
