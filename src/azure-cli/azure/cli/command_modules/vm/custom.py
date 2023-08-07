@@ -2341,7 +2341,8 @@ def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=N
                                     skus=sku, version=version)
     else:
         client = _compute_client_factory(cmd.cli_ctx)
-        return client.virtual_machine_images.get(location, publisher, offer, sku, version)
+        return client.virtual_machine_images.get(location=location, publisher_name=publisher,
+                                                 offer=offer, skus=sku, version=version)
 
 
 def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan=None):

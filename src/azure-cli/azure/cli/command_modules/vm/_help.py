@@ -558,6 +558,10 @@ examples:
         az image builder output add -n mytemplate -g my-group \\
             --output-name my_vhd_image --is-vhd  --defer
 
+  - name: Add a VHD distributor with specifying storage uri to an image template in the cli object cache.
+    text: |
+        az image builder output add -n mytemplate -g my-group \\
+            --output-name my_vhd_image --is-vhd --vhd-uri https://mystorageaccount.blob.core.windows.net/container/path_to_vhd_file --defer
 """
 
 helps['image builder output clear'] = """
@@ -570,6 +574,51 @@ helps['image builder output remove'] = """
 type: command
 short-summary: Remove an image builder output distributor from an image builder template.
 long-summary: Must be used with --defer
+"""
+
+helps['image builder output versioning'] = """
+type: group
+short-summary: Manage image builder template output versioner.
+long-summary: >
+    Describe how to generate new x.y.z version number for distribution.
+"""
+
+helps['image builder output versioning set'] = """
+type: command
+short-summary: Set the image builder output versioner of an image builder template.
+long-summary: Must be used with --defer.
+examples:
+  - name: Set the image builder output versioner generating version number that will be latest based on existing version numbers.
+    text: |
+        az image builder output versioning set -n MyTemplate -g MyResourceGroup --output-name MyVhdImage --scheme Latest --defer
+
+  - name: Set the image builder output versioner generating version number that will be latest based on specified major version.
+    text: |
+        az image builder output versioning set -n MyTemplate -g MyResourceGroup --output-name MyVhdImage --scheme Latest --major 1 --defer
+
+  - name: Set the image builder output versioner generating version number based on version number of source image.
+    text: |
+        az image builder output versioning set -n MyTemplate -g MyResourceGroup --output-name MyVhdImage --scheme Source --defer
+"""
+
+helps['image builder output versioning remove'] = """
+type: command
+short-summary: Remove all versioning options on specified outputs.
+long-summary: Must be used with --defer
+examples:
+  - name: Remove the image builder output versioner of specified outputs.
+    text: |
+        az image builder output versioning remove -n MyTemplate -g MyResourceGroup --output-name MyVhdImage --defer
+"""
+
+helps['image builder output versioning show'] = """
+type: command
+short-summary: Show versioning options on specified outputs.
+long-summary: Must be used with --defer
+examples:
+  - name: Show the image builder output versioner of specified outputs.
+    text: |
+        az image builder output versioning show -n MyTemplate -g MyResourceGroup --output-name MyVhdImage --defer
 """
 
 helps['image builder run'] = """
