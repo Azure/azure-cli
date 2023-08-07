@@ -20,6 +20,7 @@ from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import is_valid_resource_id
 from msrestazure.tools import parse_resource_id
 from msrestazure.tools import resource_id
+from azure.cli.command_modules.aro.aaz.latest.network.vnet.subnet import Show as subnet_show
 
 logger = get_logger(__name__)
 
@@ -177,10 +178,8 @@ def validate_subnet(key):
         if parts['child_type_1'].lower() != 'subnets':
             raise InvalidArgumentValueError(f"--{key.replace('_', '-')} child type '{subnet}' must equal subnets.")
 
-        from .aaz.latest.network.vnet.subnet import Show
-
         try:
-            Show(cli_ctx=cmd.cli_ctx)(command_args={
+            subnet_show(cli_ctx=cmd.cli_ctx)(command_args={
                 "name": parts['child_name_1'],
                 "vnet_name": parts['name'],
                 "resource_group": parts['resource_group']
