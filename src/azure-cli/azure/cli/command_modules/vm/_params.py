@@ -785,7 +785,7 @@ def load_arguments(self, _):
         c.argument('enable_secure_boot', enable_secure_boot_type)
         c.argument('enable_vtpm', enable_vtpm_type)
         c.argument('custom_data', help='Custom init script file or text (cloud-init, cloud-config, etc..)', completer=FilesCompleter(), type=file_type)
-        c.argument('security_type', arg_type=get_enum_type(["TrustedLaunch"], default=None), min_api='2020-06-01', help='Specify the security type of the virtual machine scale set.')
+        c.argument('security_type', arg_type=get_enum_type(["TrustedLaunch"]), min_api='2020-06-01', help='Specify the security type of the virtual machine scale set.')
 
     with self.argument_context('vmss update', min_api='2018-10-01', arg_group='Automatic Repairs') as c:
 
