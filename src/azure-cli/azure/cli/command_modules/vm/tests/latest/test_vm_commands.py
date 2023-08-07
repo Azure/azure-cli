@@ -3380,7 +3380,8 @@ class VMSSCreateAndModify(ScenarioTest):
         self.kwargs.update({
             'vmss': 'vmss1',
             'count': 5,
-            'new_count': 4
+            'new_count': 4,
+            'vmss2': self.create_random_name('vmss', 10)
         })
 
         self.cmd('vmss create --admin-password testPassword0 --name {vmss} -g {rg} --admin-username myadmin --image Win2012R2Datacenter --instance-count {count}')
@@ -3436,6 +3437,10 @@ class VMSSCreateAndModify(ScenarioTest):
         self.cmd('vmss deallocate --resource-group {rg} --name {vmss}')
         self.cmd('vmss delete --resource-group {rg} --name {vmss}')
         self.cmd('vmss list --resource-group {rg}', checks=self.is_empty())
+
+        self.cmd('vmss create -g {rg} -n {vmss2} --image Canonical:UbuntuServer:18.04-LTS:latest --orchestration-mode Flexible --admin-username vmtest --enable-hibernation true', checks=[
+            self.check('vmss.additionalCapabilities.hibernationEnabled', True),
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_scale_in_policy_')
     def test_vmss_scale_in_policy(self, resource_group):
@@ -3858,7 +3863,8 @@ class VMSSUpdateTests(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_')
     def test_vmss_update(self, resource_group):
         self.kwargs.update({
-            'vmss': 'winvmss'
+            'vmss': 'winvmss',
+            'vmss2': self.create_random_name('vmss', 10)
         })
 
         self.cmd('vmss create -g {rg} -n {vmss} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --instance-count 1')
@@ -3894,6 +3900,14 @@ class VMSSUpdateTests(ScenarioTest):
         # test that cannot try to update protection policy on VMSS itself
         self.cmd('vmss update -g {rg} -n {vmss} --protect-from-scale-in True --protect-from-scale-set-actions True', expect_failure=True)
 
+        self.cmd('vmss create -g {rg} -n {vmss2} --image Canonical:UbuntuServer:18.04-LTS:latest --orchestration-mode Flexible --admin-username vmtest')
+        self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
+            self.check('additionalCapabilities.hibernationEnabled', None),
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss2} --enable-hibernation True', checks=[
+            self.check('additionalCapabilities.hibernationEnabled', True),
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_policy_')
     def test_vmss_update_policy(self, resource_group):
 
@@ -3917,12 +3931,12 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('upgradePolicy.rollingUpgradePolicy.prioritizeUnhealthyInstances', True)
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_image_')
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_image_', location='westus')
     def test_vmss_update_image(self):
         self.kwargs.update({
             'vm': 'vm1',
             'img': 'img1',
-            'vmss': 'vmss1'
+            'vmss': 'vmss1',
         })
         self.cmd('vm create -g {rg} -n {vm} --image OpenLogic:CentOS:7.5:latest --admin-username clitest1 --generate-ssh-key --nsg-rule None --admin-username vmtest')
         self.cmd('vm run-command invoke -g {rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes" --no-wait')
@@ -3936,6 +3950,35 @@ class VMSSUpdateTests(ScenarioTest):
         self.cmd('vmss create -g {rg} -n {vmss} --image {image_id} --admin-username vmtest')
         self.cmd('vmss update -g {rg} -n {vmss} --set tags.foo=bar', checks=[
             self.check('tags.foo', 'bar')
+        ])
+        from azure.core.exceptions import HttpResponseError
+        with self.assertRaisesRegex(HttpResponseError, 'UEFI settings are not supported for VMs and VM Scale Sets using Generation 1 Image\.'):
+            self.cmd('vmss update -g {rg} -n {vmss} --security-type TrustedLaunch')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_security_type_', location='westus')
+    def test_vmss_update_security_type(self):
+        self.kwargs.update({
+            'vmss2': self.create_random_name('vmss', 10),
+            'img2': 'microsoftwindowsserver:windowsserver:2019-datacenter-zhcn:latest',
+            'img2_sku_gen2': '2022-datacenter-azure-edition',
+            'vmss3': self.create_random_name('vmss', 10),
+            'img3': 'OpenLogic:CentOS:8_5-gen2:latest'
+        })
+        self.cmd('vmss create -n {vmss2} -g {rg} --image {img2} --admin-username vmtest --admin-password Test123456789#')
+        self.cmd('vmss update -g {rg} -n {vmss2} --set virtualMachineProfile.storageProfile.imageReference.sku={img2_sku_gen2} --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm true', checks=[
+            self.check('virtualMachineProfile.storageProfile.imageReference.offer', 'windowsserver'),
+            self.check('virtualMachineProfile.storageProfile.imageReference.sku', '{img2_sku_gen2}'),
+            self.check('virtualMachineProfile.securityProfile.securityType', 'TrustedLaunch'),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True),
+        ])
+
+        self.cmd('vmss create -n {vmss3} -g {rg} --image {img3} --admin-username vmtest')
+        self.cmd('vmss update -g {rg} -n {vmss3} --security-type TrustedLaunch', checks=[
+            self.check('virtualMachineProfile.storageProfile.imageReference.offer', 'CentOS'),
+            self.check('virtualMachineProfile.securityProfile.securityType', 'TrustedLaunch'),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', False),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True),
         ])
 
     @AllowLargeResponse()
