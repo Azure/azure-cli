@@ -2345,7 +2345,6 @@ class TestSnapShotAccess(ScenarioTest):
                      self.check('length(@)', '1'),
                  ])
         self.cmd('snapshot revoke-access -n {snapshot} -g {rg}')
-        self.cmd('snapshot delete -n {snapshot} -g {rg}')
 # endregion
 
 # endregion
