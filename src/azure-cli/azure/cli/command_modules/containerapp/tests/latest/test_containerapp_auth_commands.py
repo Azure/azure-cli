@@ -184,7 +184,26 @@ class ContainerAppAuthTest(ScenarioTest):
             JMESPathCheck('registration.clientSecretSettingName',
                           "google-provider-authentication-secret"),
         ])
+        # apple
+        app = self.create_random_name(prefix='containerapp-auth', length=24)
 
+        self.cmd(
+            'containerapp create -g {} -n {} --environment {} --image mcr.microsoft.com/k8se/quickstart:latest --ingress external --target-port 80'.format(
+                resource_group, app, env))
+
+        self.cmd(
+            'containerapp auth apple update -g {} --name {} --client-id {} --client-secret {} --yes'
+            .format(resource_group, app, client_id, test_secret), checks=[
+                JMESPathCheck('registration.clientId', client_id),
+                JMESPathCheck('registration.clientSecretSettingName',
+                              "apple-provider-authentication-secret"),
+            ])
+
+        self.cmd('containerapp auth apple show -g {} --name {}'.format(resource_group, app), checks=[
+            JMESPathCheck('registration.clientId', client_id),
+            JMESPathCheck('registration.clientSecretSettingName',
+                          "apple-provider-authentication-secret"),
+        ])
         # twitter
         app = self.create_random_name(prefix='containerapp-auth', length=24)
 
