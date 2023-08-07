@@ -3629,12 +3629,16 @@ def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=No
     # .operations.html#azure.mgmt.compute.v2023_03_01.operations.VirtualMachineScaleSetVMsOperations
     if instance_ids and len(instance_ids) == 1 and hibernate is None:
         return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_deallocate,
-                           resource_group_name, vm_scale_set_name, instance_ids[0], hibernate=hibernate)
+                           resource_group_name, vm_scale_set_name, instance_ids[0])
 
     VirtualMachineScaleSetVMInstanceIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceIDs')
     vm_instance_i_ds = VirtualMachineScaleSetVMInstanceIDs(instance_ids=instance_ids)
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_deallocate,
-                       resource_group_name, vm_scale_set_name, vm_instance_i_ds, hibernate=hibernate)
+    if hibernate is not None:
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_deallocate,
+                           resource_group_name, vm_scale_set_name, vm_instance_i_ds, hibernate=hibernate)
+    else:
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_deallocate,
+                           resource_group_name, vm_scale_set_name, vm_instance_i_ds)
 
 
 def delete_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
