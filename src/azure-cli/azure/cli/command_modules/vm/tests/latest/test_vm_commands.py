@@ -3915,6 +3915,9 @@ class VMSSUpdateTests(ScenarioTest):
         self.cmd('vmss update -g {rg} -n {vmss} --protect-from-scale-in True --protect-from-scale-set-actions True', expect_failure=True)
 
         self.cmd('vmss create -g {rg} -n {vmss2} --image Canonical:UbuntuServer:18.04-LTS:latest --orchestration-mode Flexible --admin-username vmtest')
+        self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
+            self.check('additionalCapabilities.hibernationEnabled', None),
+        ])
         self.cmd('vmss update -g {rg} -n {vmss2} --enable-hibernation True', checks=[
             self.check('additionalCapabilities.hibernationEnabled', True),
         ])
