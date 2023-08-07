@@ -97,7 +97,7 @@ examples:
         --assign-identity "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/MyMsiRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyMSI" \\
         --cluster-admin-account MyAdminAccount@MyDomain.onmicrosoft.com \\
         --cluster-users-group-dns MyGroup
-  - name: Create a Kafka cluster with disk encryption. See https://docs.microsoft.com/azure/hdinsight/kafka/apache-kafka-byok.
+  - name: Create a Kafka cluster with disk encryption. See https://learn.microsoft.com/azure/hdinsight/kafka/apache-kafka-byok.
     text: |-
         az hdinsight create -t kafka -g MyResourceGroup -n MyCluster \\
         -p "HttpPassword1234!" --workernode-data-disks-per-node 2 \\

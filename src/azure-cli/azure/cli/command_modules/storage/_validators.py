@@ -203,7 +203,7 @@ It is recommended to provide --connection-string, --account-key or --sas-token i
         if 'auth_mode' in cmd.arguments:
             message += """
 You also can add `--auth-mode login` in your command to use Azure Active Directory (Azure AD) for authorization if your login account is assigned required RBAC roles.
-For more information about RBAC roles in storage, visit https://docs.microsoft.com/azure/storage/common/storage-auth-aad-rbac-cli.
+For more information about RBAC roles in storage, visit https://learn.microsoft.com/azure/storage/common/storage-auth-aad-rbac-cli.
 """
         logger.warning('%s\nIn addition, setting the corresponding environment variables can avoid inputting '
                        'credentials in your command. Please use --help to get more information about environment '
@@ -222,7 +222,7 @@ Please provide --connection-string, --account-key or --sas-token in your command
         if 'auth_mode' in cmd.arguments:
             message += """
 You also can add `--auth-mode login` in your command to use Azure Active Directory (Azure AD) for authorization if your login account is assigned required RBAC roles.
-For more information about RBAC roles in storage, visit https://docs.microsoft.com/azure/storage/common/storage-auth-aad-rbac-cli."
+For more information about RBAC roles in storage, visit https://learn.microsoft.com/azure/storage/common/storage-auth-aad-rbac-cli."
             """
         from azure.cli.core.azclierror import InvalidArgumentValueError
         raise InvalidArgumentValueError(message)
@@ -1854,7 +1854,7 @@ def validate_logging_version(namespace):
     if validate_service_type(namespace.services, 'table') and namespace.version and namespace.version != 1.0:
         raise CLIError(
             'incorrect usage: for table service, the supported version for logging is `1.0`. For more information, '
-            'please refer to https://docs.microsoft.com/rest/api/storageservices/storage-analytics-log-format.')
+            'please refer to https://learn.microsoft.com/rest/api/storageservices/storage-analytics-log-format.')
 
 
 def validate_match_condition(namespace):

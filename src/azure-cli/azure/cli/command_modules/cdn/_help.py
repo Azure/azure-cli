@@ -1054,7 +1054,7 @@ examples:
 
 helps['afd'] = """
 type: group
-short-summary: Manage Azure Front Door Standard/Premium. For classical Azure Front Door, please refer https://docs.microsoft.com/en-us/cli/azure/network/front-door?view=azure-cli-latest
+short-summary: Manage Azure Front Door Standard/Premium. For classical Azure Front Door, please refer https://learn.microsoft.com/en-us/cli/azure/network/front-door?view=azure-cli-latest
 """
 
 helps['afd profile'] = """

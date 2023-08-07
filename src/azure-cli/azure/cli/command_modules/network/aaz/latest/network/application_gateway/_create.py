@@ -102,7 +102,7 @@ class Create(AAZCommand):
         _args_schema.authentication_certificates = AAZListArg(
             options=["--authentication-certificates"],
             arg_group="Properties",
-            help="Authentication certificates of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="Authentication certificates of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.autoscale_configuration = AAZObjectArg(
             options=["--autoscale-configuration"],
@@ -112,17 +112,17 @@ class Create(AAZCommand):
         _args_schema.backend_address_pools = AAZListArg(
             options=["--backend-address-pools"],
             arg_group="Properties",
-            help="Backend address pool of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="Backend address pool of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.backend_http_settings_collection = AAZListArg(
             options=["--backend-http-settings-collection"],
             arg_group="Properties",
-            help="Backend http settings of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="Backend http settings of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.backend_settings_collection = AAZListArg(
             options=["--backend-settings-collection"],
             arg_group="Properties",
-            help="Backend settings of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="Backend settings of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.custom_error_configurations = AAZListArg(
             options=["--custom-error-configurations"],
@@ -153,17 +153,17 @@ class Create(AAZCommand):
         _args_schema.frontend_ip_configurations = AAZListArg(
             options=["--frontend-ip-configurations"],
             arg_group="Properties",
-            help="Frontend IP addresses of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="Frontend IP addresses of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.frontend_ports = AAZListArg(
             options=["--frontend-ports"],
             arg_group="Properties",
-            help="Frontend ports of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="Frontend ports of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.gateway_ip_configurations = AAZListArg(
             options=["--gateway-ip-configurations"],
             arg_group="Properties",
-            help="Subnets of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="Subnets of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.global_configuration = AAZObjectArg(
             options=["--global-configuration"],
@@ -173,12 +173,12 @@ class Create(AAZCommand):
         _args_schema.http_listeners = AAZListArg(
             options=["--http-listeners"],
             arg_group="Properties",
-            help="Http listeners of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="Http listeners of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.listeners = AAZListArg(
             options=["--listeners"],
             arg_group="Properties",
-            help="Listeners of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="Listeners of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.load_distribution_policies = AAZListArg(
             options=["--load-distribution-policies"],
@@ -198,7 +198,7 @@ class Create(AAZCommand):
         _args_schema.redirect_configurations = AAZListArg(
             options=["--redirect-configurations"],
             arg_group="Properties",
-            help="Redirect configurations of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="Redirect configurations of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.request_routing_rules = AAZListArg(
             options=["--request-routing-rules"],
@@ -223,7 +223,7 @@ class Create(AAZCommand):
         _args_schema.ssl_certificates = AAZListArg(
             options=["--ssl-certificates"],
             arg_group="Properties",
-            help="SSL certificates of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="SSL certificates of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.ssl_policy = AAZObjectArg(
             options=["--ssl-policy"],
@@ -234,22 +234,22 @@ class Create(AAZCommand):
         _args_schema.ssl_profiles = AAZListArg(
             options=["--ssl-profiles"],
             arg_group="Properties",
-            help="SSL profiles of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="SSL profiles of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.trusted_client_certificates = AAZListArg(
             options=["--trusted-client-certificates"],
             arg_group="Properties",
-            help="Trusted client certificates of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="Trusted client certificates of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.trusted_root_certificates = AAZListArg(
             options=["--trusted-root-certificates"],
             arg_group="Properties",
-            help="Trusted Root certificates of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="Trusted Root certificates of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.url_path_maps = AAZListArg(
             options=["--url-path-maps"],
             arg_group="Properties",
-            help="URL path map of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="URL path map of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.web_application_firewall_configuration = AAZObjectArg(
             options=["--web-application-firewall-configuration"],

@@ -4674,7 +4674,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
             raise ValidationError("The webapp '{}' is a {} app. The code detected at '{}' will default to "
                                   "'{}'. Please create a new app "
                                   "to continue this operation. For more information on default behaviors, "
-                                  "see https://docs.microsoft.com/cli/azure/webapp?view=azure-cli-latest#az_webapp_up."
+                                  "see https://learn.microsoft.com/cli/azure/webapp?view=azure-cli-latest#az_webapp_up."
                                   .format(name, current_os, src_dir, os_name))
         _is_linux = plan_info.reserved
         # for an existing app check if the runtime version needs to be updated

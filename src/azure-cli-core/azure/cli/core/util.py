@@ -28,10 +28,10 @@ COMPONENT_PREFIX = 'azure-cli-'
 SSLERROR_TEMPLATE = ('Certificate verification failed. This typically happens when using Azure CLI behind a proxy '
                      'that intercepts traffic with a self-signed certificate. '
                      # pylint: disable=line-too-long
-                     'Please add this certificate to the trusted CA bundle. More info: https://docs.microsoft.com/cli/azure/use-cli-effectively#work-behind-a-proxy.')
+                     'Please add this certificate to the trusted CA bundle. More info: https://learn.microsoft.com/cli/azure/use-cli-effectively#work-behind-a-proxy.')
 
 QUERY_REFERENCE = ("To learn more about --query, please visit: "
-                   "'https://docs.microsoft.com/cli/azure/query-azure-cli'")
+                   "'https://learn.microsoft.com/cli/azure/query-azure-cli'")
 
 
 _PROXYID_RE = re.compile(
@@ -588,7 +588,7 @@ def shell_safe_json_parse(json_or_dict_string, preserve_order=False, strict=True
             # Recommendation for all shells
             from azure.cli.core.azclierror import InvalidArgumentValueError
             recommendation = "The provided JSON string may have been parsed by the shell. See " \
-                             "https://docs.microsoft.com/cli/azure/use-cli-effectively#use-quotation-marks-in-arguments"
+                             "https://learn.microsoft.com/cli/azure/use-cli-effectively#use-quotation-marks-in-arguments"
 
             # Recommendation especially for PowerShell
             parent_proc = get_parent_proc_name()
@@ -723,7 +723,7 @@ def open_page_in_browser(url):
 
     if is_wsl():   # windows 10 linux subsystem
         try:
-            # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_exe
+            # https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_exe
             # Ampersand (&) should be quoted
             return subprocess.Popen(
                 ['powershell.exe', '-NoProfile', '-Command', 'Start-Process "{}"'.format(url)]).wait()

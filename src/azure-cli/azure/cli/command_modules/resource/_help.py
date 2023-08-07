@@ -2255,9 +2255,9 @@ helps['resource invoke-action'] = """
 type: command
 short-summary: Invoke an action on the resource.
 long-summary: >
-    A list of possible actions corresponding to a resource can be found at https://docs.microsoft.com/rest/api/. All POST requests are actions that can be invoked and are specified at the end of the URI path. For instance, to stop a VM, the
+    A list of possible actions corresponding to a resource can be found at https://learn.microsoft.com/rest/api/. All POST requests are actions that can be invoked and are specified at the end of the URI path. For instance, to stop a VM, the
     request URI is https://management.azure.com/subscriptions/{SubscriptionId}/resourceGroups/{ResourceGroup}/providers/Microsoft.Compute/virtualMachines/{VM}/powerOff?api-version={APIVersion} and the corresponding action is `powerOff`. This can
-    be found at https://docs.microsoft.com/rest/api/compute/virtualmachines/virtualmachines-stop.
+    be found at https://learn.microsoft.com/rest/api/compute/virtualmachines/virtualmachines-stop.
 examples:
   - name: Power-off a vm, specified by Id.
     text: >
