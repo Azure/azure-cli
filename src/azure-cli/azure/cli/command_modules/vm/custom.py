@@ -3153,7 +3153,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None,
                 os_disk_delete_option=None, data_disk_delete_option=None, regular_priority_count=None,
                 regular_priority_percentage=None, disk_controller_type=None, nat_rule_name=None,
-                enable_osimage_notification=None, max_surge=None, disable_integrity_monitoring_autoupgrade=False):
+                enable_osimage_notification=None, max_surge=None, disable_integrity_monitoring_autoupgrade=False,
+                enable_hibernation=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -3472,7 +3473,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             os_disk_secure_vm_disk_encryption_set=os_disk_secure_vm_disk_encryption_set,
             os_disk_delete_option=os_disk_delete_option, regular_priority_count=regular_priority_count,
             regular_priority_percentage=regular_priority_percentage, disk_controller_type=disk_controller_type,
-            enable_osimage_notification=enable_osimage_notification, max_surge=max_surge)
+            enable_osimage_notification=enable_osimage_notification, max_surge=max_surge,
+            enable_hibernation=enable_hibernation)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -3875,7 +3877,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 vm_sku=None, ephemeral_os_disk_placement=None, force_deletion=None, enable_secure_boot=None,
                 enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None, v_cpus_per_core=None,
                 regular_priority_count=None, regular_priority_percentage=None, disk_controller_type=None,
-                enable_osimage_notification=None, custom_data=None, **kwargs):
+                enable_osimage_notification=None, custom_data=None, enable_hibernation=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -4057,6 +4059,13 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     if custom_data is not None:
         custom_data = read_content_if_is_file(custom_data)
         vmss.virtual_machine_profile.os_profile.custom_data = b64encode(custom_data)
+
+    if enable_hibernation is not None:
+        if vmss.additional_capabilities is None:
+            AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
+            vmss.additional_capabilities = AdditionalCapabilities(hibernation_enabled=enable_hibernation)
+        else:
+            vmss.additional_capabilities.hibernation_enabled = enable_hibernation
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, name, **kwargs)
