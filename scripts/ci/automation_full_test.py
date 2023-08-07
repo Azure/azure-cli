@@ -577,7 +577,7 @@ class AutomaticScheduling(object):
             serial_tests.append('cloud')
         pipeline_result = build_pipeline_result() if enable_pipeline_result else None
         pytest_args = '-o junit_family=xunit1 --durations=10'
-        if enable_traceback:
+        if not enable_traceback:
             pytest_args += ' --tb=no'
         if parallel_tests:
             azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{python_version}_{profile}_{instance_idx}.parallel.xml")
