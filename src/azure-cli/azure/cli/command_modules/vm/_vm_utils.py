@@ -638,5 +638,6 @@ def display_region_recommendation(cmd, namespace):
 
 
 def import_aaz_by_profile(profile, module_name):
-    profile_module_name = profile.lower().replace('-', '_')
+    from azure.cli.core.aaz.utils import get_aaz_profile_module_name
+    profile_module_name = get_aaz_profile_module_name(profile_name=profile)
     return importlib.import_module(f"azure.cli.command_modules.vm.aaz.{profile_module_name}.{module_name}")

@@ -4656,6 +4656,7 @@ class NetworkVNetScenarioTest(ScenarioTest):
             self.check('type(@)', 'array'),
             self.check("length([?type == '{rt}']) == length(@)", True),
         ])
+        self.cmd("network vnet list -o table")
         self.cmd('network vnet show --resource-group {rg} --name {vnet}', checks=[
             self.check('type(@)', 'object'),
             self.check('name', '{vnet}'),
@@ -4666,7 +4667,7 @@ class NetworkVNetScenarioTest(ScenarioTest):
             self.check('length(addressSpace.addressPrefixes)', 2),
             self.check('dhcpOptions.dnsServers[0]', '1.2.3.4')
         ])
-        self.cmd('network vnet update -g {rg} -n {vnet} --dns-servers ""', checks=[
+        self.cmd('network vnet update -g {rg} -n {vnet} --dns-servers null', checks=[
             self.check('length(addressSpace.addressPrefixes)', 2),
             self.check('dhcpOptions.dnsServers', [])
         ])
