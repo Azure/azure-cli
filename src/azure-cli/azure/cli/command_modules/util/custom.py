@@ -191,7 +191,7 @@ def _upgrade_on_windows():
         msi_url = 'https://aka.ms/installazurecliwindows'
     else:
         msi_url = 'https://aka.ms/installazurecliwindowsx64'
-    logger.warning(f"Updating Azure CLI with MSI from %s", msi_url)
+    logger.warning("Updating Azure CLI with MSI from %s", msi_url)
     tmp_dir, msi_path = _download_from_url(msi_url)
 
     logger.warning("Installing MSI")
