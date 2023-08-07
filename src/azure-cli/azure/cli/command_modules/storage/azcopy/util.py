@@ -193,7 +193,7 @@ def _get_default_install_location():
     else:
         raise CLIError('The {} platform is not currently supported. If you want to know which platforms are supported, '
                        'please refer to the document for supported platforms: '
-                       'https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azcopy-v10#download-azcopy'
+                       'https://learn.microsoft.com/azure/storage/common/storage-use-azcopy-v10#download-azcopy'
                        .format(system))
     return install_location
 

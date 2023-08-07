@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class ListEffectiveNsg(AAZCommand):
     """List all effective network security groups applied to a network interface.
 
-    To learn more about troubleshooting using effective security rules visit https://learn.microsoft.com/en-us/azure/virtual-network/diagnose-network-traffic-filter-problem.
+    To learn more about troubleshooting using effective security rules visit https://learn.microsoft.com/azure/virtual-network/diagnose-network-traffic-filter-problem.
 
     :example: List the effective security groups associated with a NIC.
         az network nic list-effective-nsg -g MyResourceGroup -n MyNic

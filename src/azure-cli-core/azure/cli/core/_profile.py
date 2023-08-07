@@ -27,7 +27,7 @@ _SUBSCRIPTION_NAME = 'name'
 # Tenant of the token which is used to list the subscription
 _TENANT_ID = 'tenantId'
 # Home tenant of the subscription, which maps to tenantId in 'Subscriptions - List REST API'
-# https://learn.microsoft.com/en-us/rest/api/resources/subscriptions/list
+# https://learn.microsoft.com/rest/api/resources/subscriptions/list
 _HOME_TENANT_ID = 'homeTenantId'
 _MANAGED_BY_TENANTS = 'managedByTenants'
 _USER_ENTITY = 'user'

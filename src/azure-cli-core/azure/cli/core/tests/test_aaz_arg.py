@@ -31,7 +31,7 @@ class TestAAZArgShorthandSyntax(unittest.TestCase):
 
         self.assertEqual(parser('"\'"', is_simple=True), '"\'"')
         self.assertEqual(parser('"\""', is_simple=True), '"\""')
-        self.assertEqual(parser("'https://azure.microsoft.com/en-us/'", is_simple=True), "https://azure.microsoft.com/en-us/")
+        self.assertEqual(parser("'https://azure.microsoft.com/'", is_simple=True), "https://azure.microsoft.com/")
         self.assertEqual(parser("'C:\\Program Files (x86)\\'", is_simple=True), "C:\\Program Files (x86)\\")
         self.assertEqual(parser("'/usr/lib/python3.8/'", is_simple=True), "/usr/lib/python3.8/")
 

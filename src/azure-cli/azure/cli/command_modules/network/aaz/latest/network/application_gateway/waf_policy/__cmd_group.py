@@ -18,7 +18,7 @@ from azure.cli.core.aaz import *
 class __CMDGroup(AAZCommandGroup):
     """Manage application gateway web application firewall (WAF) policies.
 
-    To learn more about Web Application Firewall visit https://learn.microsoft.com/en-us/azure/web-application-firewall/ag/ag-overview.
+    To learn more about Web Application Firewall visit https://learn.microsoft.com/azure/web-application-firewall/ag/ag-overview.
     """
     pass
 

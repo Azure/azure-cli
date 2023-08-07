@@ -85,7 +85,7 @@ def _polish_bad_errors(ex, creating_plan):
                         detail = ("Plan with requested features is not supported in current region. \n"
                                   "If creating an App Service Plan with --zone-redundant/-z, "
                                   "please see supported regions here: "
-                                  "https://learn.microsoft.com/en-us/azure/app-service/how-to-zone-redundancy#requirements")
+                                  "https://learn.microsoft.com/azure/app-service/how-to-zone-redundancy#requirements")
                     elif 'Not enough available reserved instance servers to satisfy' in detail:
                         detail = ("Plan with Linux worker can only be created in a group " +
                                   "which has never contained a Windows worker, and vice versa. " +

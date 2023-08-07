@@ -1344,7 +1344,7 @@ type: command
 short-summary: Update the firewall configuration of a web application.
 long-summary: >
     This command is only applicable to application gateways with an SKU type of WAF. To learn
-    more, visit https://learn.microsoft.com/en-us/azure/web-application-firewall/ag/tutorial-restrict-web-traffic-cli.
+    more, visit https://learn.microsoft.com/azure/web-application-firewall/ag/tutorial-restrict-web-traffic-cli.
 parameters:
   - name: --rule-set-type
     short-summary: Rule set type.
@@ -3386,7 +3386,7 @@ examples:
 helps['network cross-region-lb'] = """
 type: group
 short-summary: Manage and configure cross-region load balancers.
-long-summary: To learn more about Azure Load Balancer visit https://learn.microsoft.com/en-us/azure/load-balancer/tutorial-cross-region-cli.
+long-summary: To learn more about Azure Load Balancer visit https://learn.microsoft.com/azure/load-balancer/tutorial-cross-region-cli.
 """
 
 helps['network cross-region-lb create'] = """

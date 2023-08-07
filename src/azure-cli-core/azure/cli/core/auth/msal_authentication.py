@@ -23,7 +23,7 @@ from msal import PublicClientApplication, ConfidentialClientApplication
 from .util import check_result, build_sdk_access_token
 
 # OAuth 2.0 client credentials flow parameter
-# https://learn.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow
+# https://learn.microsoft.com/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow
 _TENANT = 'tenant'
 _CLIENT_ID = 'client_id'
 _CLIENT_SECRET = 'client_secret'

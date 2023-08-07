@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class ShowNextHop(AAZCommand):
     """Get information on the `next hop` of a VM.
 
-    Requires that Network Watcher is enabled for the region in which the VM is located. For more information about show-next-hop visit https://learn.microsoft.com/en-us/azure/network-watcher/diagnose-vm-network-routing-problem-cli.
+    Requires that Network Watcher is enabled for the region in which the VM is located. For more information about show-next-hop visit https://learn.microsoft.com/azure/network-watcher/diagnose-vm-network-routing-problem-cli.
 
     :example: Get the next hop from a VMs assigned IP address to a destination at 10.1.0.4.
         az network watcher show-next-hop -g MyResourceGroup --vm MyVm --source-ip 10.0.0.4 --dest-ip 10.1.0.4

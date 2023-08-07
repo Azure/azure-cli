@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class ShowEffectiveRouteTable(AAZCommand):
     """Show the effective route table applied to a network interface.
 
-    To learn more about troubleshooting using the effective route tables visit https://learn.microsoft.com/en-us/azure/virtual-network/diagnose-network-routing-problem#using-effective-routes-to-troubleshoot-vm-traffic-flow.
+    To learn more about troubleshooting using the effective route tables visit https://learn.microsoft.com/azure/virtual-network/diagnose-network-routing-problem#using-effective-routes-to-troubleshoot-vm-traffic-flow.
 
     :example: Show the effective routes applied to a network interface.
         az network nic show-effective-route-table -g MyResourceGroup -n MyNic

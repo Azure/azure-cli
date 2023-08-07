@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class TestIpFlow(AAZCommand):
     """Test IP flow to/from a VM given the currently configured network security group rules.
 
-    Requires that Network Watcher is enabled for the region in which the VM is located. For more information visit https://learn.microsoft.com/en-us/azure/network-watcher/diagnose-vm-network-traffic-filtering-problem-cli.
+    Requires that Network Watcher is enabled for the region in which the VM is located. For more information visit https://learn.microsoft.com/azure/network-watcher/diagnose-vm-network-traffic-filtering-problem-cli.
 
     :example: Run test-ip-flow verify to test logical connectivity from a VM to the specified destination IPv4 address and port.
         az network watcher test-ip-flow -g MyResourceGroup --direction Outbound --protocol TCP --local 10.0.0.4:* --remote 10.1.0.4:80 --vm MyVm
