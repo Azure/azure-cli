@@ -22,7 +22,7 @@ from azure.cli.command_modules.keyvault.security_domain.security_domain import D
 from azure.cli.command_modules.keyvault.security_domain.shared_secret import SharedSecret
 from azure.cli.command_modules.keyvault.security_domain.sp800_108 import KDF
 from azure.cli.command_modules.keyvault.security_domain.utils import Utils
-from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError,\
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, \
     MutuallyExclusiveArgumentError
 from azure.cli.core.profiles import ResourceType, AZURE_API_PROFILES, SDKProfile
 from azure.cli.core.util import sdk_no_wait

@@ -551,6 +551,7 @@ def aks_create(
     enable_image_cleaner=False,
     image_cleaner_interval_hours=None,
     enable_keda=False,
+    enable_vpa=False,
     # addons
     enable_addons=None,
     workspace_resource_id=None,
@@ -652,6 +653,7 @@ def aks_update(
     disable_local_accounts=False,
     enable_local_accounts=False,
     network_plugin_mode=None,
+    network_dataplane=None,
     pod_cidr=None,
     load_balancer_managed_outbound_ip_count=None,
     load_balancer_managed_outbound_ipv6_count=None,
@@ -712,6 +714,8 @@ def aks_update(
     http_proxy_config=None,
     enable_keda=False,
     disable_keda=False,
+    enable_vpa=False,
+    disable_vpa=False,
     # addons
     enable_secret_rotation=False,
     disable_secret_rotation=False,
