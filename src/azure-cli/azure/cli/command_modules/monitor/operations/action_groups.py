@@ -3,186 +3,256 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from ..aaz.latest.monitor.action_group import Show as _ActionGroupShow
-from ..aaz.latest.monitor.action_group import List as _ActionGroupList
-from ..aaz.latest.monitor.action_group import EnableReceiver as _ActionGroupEnableReceiver
+from azure.cli.core.aaz import has_value, AAZStrArg, AAZListArg
+from azure.cli.core.commands.validators import validate_tags
+from azure.cli.core.azclierror import ValidationError
+from ..aaz.latest.monitor.action_group import Create as _ActionGroupCreate, Update as _ActionGroupUpdate
+from ..aaz.latest.monitor.action_group.test_notifications import Create as _ActionGroupTestNotificationCreate
 
 
-class ActionGroupShow(_ActionGroupShow):
+def update_action_group_receivers(args):
+    syntax = {
+        'email': 'NAME EMAIL_ADDRESS [usecommonalertschema]',
+        'sms': 'NAME COUNTRY_CODE PHONE_NUMBER',
+        'webhook': 'NAME URI [useaadauth OBJECT_ID IDENTIFIER URI] [usecommonalertschema]',
+        'armrole': 'NAME ROLE_ID [usecommonalertschema]',
+        'azureapppush': 'NAME EMAIL_ADDRESS',
+        'itsm': 'NAME WORKSPACE_ID CONNECTION_ID TICKET_CONFIG REGION',
+        'automationrunbook': 'NAME AUTOMATION_ACCOUNT_ID RUNBOOK_NAME WEBHOOK_RESOURCE_ID '
+                             'SERVICE_URI [isglobalrunbook] [usecommonalertschema]',
+        'voice': 'NAME COUNTRY_CODE PHONE_NUMBER',
+        'logicapp': 'NAME RESOURCE_ID CALLBACK_URL [usecommonalertschema]',
+        'azurefunction': 'NAME FUNCTION_APP_RESOURCE_ID '
+                         'FUNCTION_NAME HTTP_TRIGGER_URL [usecommonalertschema]',
+        'eventhub': 'NAME SUBSCRIPTION_ID EVENT_HUB_NAME_SPACE EVENT_HUB_NAME [usecommonalertschema] '
+    }
+    for receiver_item in args.receiver_actions:
+        receiver_item_arr = receiver_item.to_serialized_data()
+        type_name = receiver_item_arr[0].to_serialized_data()
+        type_properties = [t.to_serialized_data() for t in receiver_item_arr[1:]]
+        useCommonAlertSchema = 'usecommonalertschema' in (t_property.lower() for t_property in type_properties)
+        try:
+            if type_name == 'email':
+                args.email_receivers.append({
+                    'name': type_properties[0],
+                    "email_address": type_properties[1],
+                    "use_common_alert_schema": useCommonAlertSchema
+                })
+            elif type_name == 'sms':
+                args.sms_receivers.append({
+                    "name": type_properties[0],
+                    "country_code": type_properties[1],
+                    "phone_number": type_properties[2]
+                })
+            elif type_name == 'webhook':
+                useAadAuth = len(type_properties) >= 3 and type_properties[2] == 'useaadauth'
+                object_id = type_properties[3] if useAadAuth else None
+                identifier_uri = type_properties[4] if useAadAuth else None
+                args.webhook_receivers.append({
+                    "name": type_properties[0],
+                    "service_uri": type_properties[1],
+                    "use_common_alert_schema": useCommonAlertSchema,
+                    "use_aad_auth": useAadAuth,
+                    "object_id": object_id,
+                    "identifier_uri": identifier_uri
+                })
+            elif type_name == 'armrole':
+                args.arm_role_receivers.append({
+                    "name": type_properties[0],
+                    "role_id": type_properties[1],
+                    "use_common_alert_schema": useCommonAlertSchema
+                })
+            elif type_name == 'azureapppush':
+                args.azure_app_push_receivers.append({
+                    "name": type_properties[0],
+                    "email_address": type_properties[1]
+                })
+            elif type_name == 'itsm':
+                args.itsm_receivers.append({
+                    "name": type_properties[0],
+                    "workspace_id": type_properties[1],
+                    "connection_id": type_properties[2],
+                    "ticket_configuration": type_properties[3],
+                    "region": type_properties[4]
+                })
+            elif type_name == 'automationrunbook':
+                isGlobalRunbook = 'isglobalrunbook' in (t_property.lower() for t_property in type_properties)
+                args.automation_runbook_receivers.append({
+                    "name": type_properties[0],
+                    "automation_account_id": type_properties[1],
+                    "runbook_name": type_properties[2],
+                    "webhook_resource_id": type_properties[3],
+                    "service_uri": type_properties[4],
+                    "is_global_runbook": isGlobalRunbook,
+                    "use_common_alert_schema": useCommonAlertSchema
+                })
+            elif type_name == 'voice':
+                args.voice_receivers.append({
+                    "name": type_properties[0],
+                    "country_code": type_properties[1],
+                    "phone_number": type_properties[2]
+                })
+            elif type_name == 'logicapp':
+                args.logic_app_receivers.append({
+                    "name": type_properties[0],
+                    "resource_id": type_properties[1],
+                    "callback_url": type_properties[2],
+                    "use_common_alert_schema": useCommonAlertSchema
+                })
+            elif type_name == 'azurefunction':
+                args.azure_function_receivers.append({
+                    "name": type_properties[0],
+                    "function_app_resource_id": type_properties[1],
+                    "function_name": type_properties[2],
+                    "http_trigger_url": type_properties[3],
+                    "use_common_alert_schema": useCommonAlertSchema
+                })
+            elif type_name == 'eventhub':
+                args.event_hub_receivers.append({
+                    "name": type_properties[0],
+                    "subscription_id": type_properties[1],
+                    "event_hub_name_space": type_properties[2],
+                    "event_hub_name": type_properties[3],
+                    "use_common_alert_schema": useCommonAlertSchema
+                })
+            else:
+                raise ValidationError('The type "{}" is not recognizable.'.format(type_name))
+
+        except IndexError:
+            raise ValidationError('--action {}'.format(syntax[type_name]))
+
+
+class ActionGroupCreate(_ActionGroupCreate):
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        arg_schema = super()._build_arguments_schema(*args, **kwargs)
-        return arg_schema
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.arm_role_receivers._registered = False
+        args_schema.automation_runbook_receivers._registered = False
+        args_schema.azure_app_push_receivers._registered = False
+        args_schema.azure_function_receivers._registered = False
+        args_schema.email_receivers._registered = False
+        args_schema.enabled._registered = False
+        args_schema.event_hub_receivers._registered = False
+        args_schema.itsm_receivers._registered = False
+        args_schema.logic_app_receivers._registered = False
+        args_schema.sms_receivers._registered = False
+        args_schema.voice_receivers._registered = False
+        args_schema.webhook_receivers._registered = False
+        args_schema.receiver_actions = AAZListArg(
+            options=["--actions"],
+            singular_options=["--action", "-a"],
+            help="Add receivers to the action group during the creation.",
+            arg_group="Actions",
+        )
+        args_schema.receiver_actions.Element = AAZListArg()
+        args_schema.receiver_actions.Element.Element = AAZStrArg()
+        return args_schema
 
     def pre_operations(self):
-        pass
+
+        args = self.ctx.args
+        validate_tags(args)
+        action_group_name = args.action_group_name.to_serialized_data()
+        if not has_value(args.location):
+            # both inputed or 'global' location are available for action group
+            args.location = "Global"
+        if not has_value(args.group_short_name):
+            # '12' is the short name length limitation
+            args.group_short_name = action_group_name[:12]
+        if not has_value(args.receiver_actions):
+            return
+        update_action_group_receivers(args)
 
 
-class ActionGroupList(_ActionGroupList):
+class ActionGroupUpdate(_ActionGroupUpdate):
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        arg_schema = super()._build_arguments_schema(*args, **kwargs)
-        return arg_schema
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.arm_role_receivers._registered = False
+        args_schema.automation_runbook_receivers._registered = False
+        args_schema.azure_app_push_receivers._registered = False
+        args_schema.azure_function_receivers._registered = False
+        args_schema.email_receivers._registered = False
+        args_schema.enabled._registered = False
+        args_schema.event_hub_receivers._registered = False
+        args_schema.itsm_receivers._registered = False
+        args_schema.logic_app_receivers._registered = False
+        args_schema.sms_receivers._registered = False
+        args_schema.voice_receivers._registered = False
+        args_schema.webhook_receivers._registered = False
+        args_schema.receiver_add_actions = AAZListArg(
+            options=["--add-actions"],
+            singular_options=["--add-action", "-a"],
+            help="Add receivers to the action group.",
+            arg_group="Actions",
+        )
+        args_schema.receiver_add_actions.Element = AAZListArg()
+        args_schema.receiver_add_actions.Element.Element = AAZStrArg()
+
+        args_schema.receiver_remove_list = AAZListArg(
+            options=["--remove-action", "-r"],
+            help="Remove receivers from the action group. Accept space-separated list of receiver names.",
+            arg_group="Actions",
+        )
+        args_schema.receiver_remove_list.Element = AAZStrArg()
+        return args_schema
 
     def pre_operations(self):
-        pass
+        args = self.ctx.args
+        update_action_group_receivers(args)
 
-
-class ActionGroupEnableReceiver(_ActionGroupEnableReceiver):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        arg_schema = super()._build_arguments_schema(*args, **kwargs)
-        return arg_schema
-
-    def pre_operations(self):
-        pass
-
-
-def list_action_groups(client, resource_group_name=None):
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list_by_subscription_id()
-
-
-def update_action_groups(instance, tags=None, short_name=None, add_receivers=None, remove_receivers=None):
-    if tags:
-        instance.tags = tags
-
-    if short_name:
-        instance.group_short_name = short_name
-
-    if remove_receivers:
-        remove_receivers = set(remove_receivers)
+    def post_instance_delete(self):
+        args = self.ctx.args
+        instance = self.ctx.vars.instance
+        if not has_value(args.receiver_remove_list):
+            return
+        receiver_remove_list = [t.to_serialized_data() for t in args.receiver_remove_list]
 
         def filter_receivers(collection):
-            return [receiver for receiver in collection if receiver.name not in remove_receivers]
+            return [receiver for receiver in collection if receiver.name not in receiver_remove_list]
 
-        instance.email_receivers = filter_receivers(instance.email_receivers)
-        instance.sms_receivers = filter_receivers(instance.sms_receivers)
-        instance.webhook_receivers = filter_receivers(instance.webhook_receivers)
-        instance.arm_role_receivers = filter_receivers(instance.arm_role_receivers)
-        instance.azure_app_push_receivers = filter_receivers(instance.azure_app_push_receivers)
-        instance.itsm_receivers = filter_receivers(instance.itsm_receivers)
-        instance.automation_runbook_receivers = filter_receivers(instance.automation_runbook_receivers)
-        instance.voice_receivers = filter_receivers(instance.voice_receivers)
-        instance.logic_app_receivers = filter_receivers(instance.logic_app_receivers)
-        instance.azure_function_receivers = filter_receivers(instance.azure_function_receivers)
-        instance.event_hub_receivers = filter_receivers(instance.event_hub_receivers)
-
-    if add_receivers:
-        from azure.mgmt.monitor.models import EmailReceiver, SmsReceiver, WebhookReceiver, \
-            ArmRoleReceiver, AzureAppPushReceiver, ItsmReceiver, AutomationRunbookReceiver, \
-            VoiceReceiver, LogicAppReceiver, AzureFunctionReceiver, EventHubReceiver
-        for r in add_receivers:
-            if isinstance(r, EmailReceiver):
-                instance.email_receivers.append(r)
-            elif isinstance(r, SmsReceiver):
-                instance.sms_receivers.append(r)
-            elif isinstance(r, WebhookReceiver):
-                instance.webhook_receivers.append(r)
-            elif isinstance(r, ArmRoleReceiver):
-                instance.arm_role_receivers.append(r)
-            elif isinstance(r, AzureAppPushReceiver):
-                instance.azure_app_push_receivers.append(r)
-            elif isinstance(r, ItsmReceiver):
-                instance.itsm_receivers.append(r)
-            elif isinstance(r, AutomationRunbookReceiver):
-                instance.automation_runbook_receivers.append(r)
-            elif isinstance(r, VoiceReceiver):
-                instance.voice_receivers.append(r)
-            elif isinstance(r, LogicAppReceiver):
-                instance.logic_app_receivers.append(r)
-            elif isinstance(r, AzureFunctionReceiver):
-                instance.azure_function_receivers.append(r)
-            elif isinstance(r, EventHubReceiver):
-                instance.event_hub_receivers.append(r)
-
-    return instance
+        instance.properties.email_receivers = filter_receivers(instance.email_receivers)
+        instance.properties.sms_receivers = filter_receivers(instance.sms_receivers)
+        instance.properties.webhook_receivers = filter_receivers(instance.webhook_receivers)
+        instance.properties.arm_role_receivers = filter_receivers(instance.arm_role_receivers)
+        instance.properties.azure_app_push_receivers = filter_receivers(instance.azure_app_push_receivers)
+        instance.properties.itsm_receivers = filter_receivers(instance.itsm_receivers)
+        instance.properties.automation_runbook_receivers = filter_receivers(instance.automation_runbook_receivers)
+        instance.properties.voice_receivers = filter_receivers(instance.voice_receivers)
+        instance.properties.logic_app_receivers = filter_receivers(instance.logic_app_receivers)
+        instance.properties.azure_function_receivers = filter_receivers(instance.azure_function_receivers)
+        instance.properties.event_hub_receivers = filter_receivers(instance.event_hub_receivers)
 
 
-def enable_receiver(client, resource_group_name, action_group_name, receiver_name):
-    from azure.mgmt.monitor.models import EnableRequest
-    enable_request = EnableRequest(receiver_name=receiver_name)
-    return client.enable_receiver(resource_group_name=resource_group_name,
-                                  action_group_name=action_group_name,
-                                  enable_request=enable_request)
+class ActionGroupTestNotificationCreate(_ActionGroupTestNotificationCreate):
 
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.arm_role_receivers._registered = False
+        args_schema.automation_runbook_receivers._registered = False
+        args_schema.azure_app_push_receivers._registered = False
+        args_schema.azure_function_receivers._registered = False
+        args_schema.email_receivers._registered = False
 
-# pylint: disable=too-many-locals
-# pylint: disable=no-else-return
-def post_notifications(client, alert_type, resource_group_name, action_group_name, add_receivers=None,
-                       no_wait=False):
-    from azure.mgmt.monitor.models import NotificationRequestBody
-    EmailReceivers = []
-    SmsReceivers = []
-    WebhookReceivers = []
-    ItsmReceivers = []
-    AzureAppPushReceivers = []
-    AutomationRunbookReceivers = []
-    VoiceReceivers = []
-    LogicAppReceivers = []
-    AzureFunctionReceivers = []
-    ArmRoleReceivers = []
-    EventHubReceivers = []
-    for r in add_receivers:
-        from azure.mgmt.monitor.models import EmailReceiver, SmsReceiver, WebhookReceiver, ItsmReceiver, \
-            AzureAppPushReceiver, AutomationRunbookReceiver, VoiceReceiver, LogicAppReceiver, AzureFunctionReceiver, \
-            ArmRoleReceiver, EventHubReceiver
-        if isinstance(r, EmailReceiver):
-            EmailReceivers.append(EmailReceiver(name=r.name, email_address=r.email_address,
-                                                use_common_alert_schema=r.use_common_alert_schema))
-        elif isinstance(r, SmsReceiver):
-            SmsReceivers.append(SmsReceiver(name=r.name, country_code=r.country_code, phone_number=r.phone_number))
-        elif isinstance(r, WebhookReceiver):
-            WebhookReceivers.append(WebhookReceiver(name=r.name, service_uri=r.service_uri,
-                                                    use_common_alert_schema=r.use_common_alert_schema,
-                                                    use_aad_auth=r.use_aad_auth, object_id=r.object_id,
-                                                    identifier_uri=r.identifier_uri, tenant_id=r.tenant_id))
-        elif isinstance(r, ItsmReceiver):
-            ItsmReceivers.append(ItsmReceiver(name=r.name, workspace_id=r.workspace_id, connection_id=r.connection_id,
-                                              ticket_configuration=r.ticket_configuration, region=r.region))
-        elif isinstance(r, AzureAppPushReceiver):
-            AzureAppPushReceivers.append(AzureAppPushReceiver(name=r.name, email_address=r.email_address))
-        elif isinstance(r, AutomationRunbookReceiver):
-            AutomationRunbookReceivers\
-                .append(AutomationRunbookReceiver(automation_account_id=r.automation_account_id,
-                                                  runbook_name=r.runbook_name,
-                                                  webhook_resource_id=r.webhook_resource_id,
-                                                  is_global_runbook=r.is_global_runbook,
-                                                  name=r.name,
-                                                  service_uri=r.service_uri,
-                                                  use_common_alert_schema=r.use_common_alert_schema))
-        elif isinstance(r, VoiceReceiver):
-            VoiceReceivers.append(VoiceReceiver(name=r.name, country_code=r.country_code, phone_number=r.phone_number))
-        elif isinstance(r, LogicAppReceiver):
-            LogicAppReceivers.append(LogicAppReceiver(name=r.name, resource_id=r.resource_id,
-                                                      callback_url=r.callback_url))
-        elif isinstance(r, AzureFunctionReceiver):
-            AzureFunctionReceivers.append(AzureFunctionReceiver(name=r.name,
-                                                                function_app_resource_id=r.function_app_resource_id,
-                                                                function_name=r.function_name,
-                                                                http_trigger_url=r.http_trigger_url,
-                                                                use_common_alert_schema=r.use_common_alert_schema))
-        elif isinstance(r, ArmRoleReceiver):
-            ArmRoleReceivers.append(ArmRoleReceiver(name=r.name, role_id=r.role_id,
-                                                    use_common_alert_schema=r.use_common_alert_schema))
-        elif isinstance(r, EventHubReceiver):
-            EventHubReceivers.append(EventHubReceiver(name=r.name,
-                                                      event_hub_name_space=r.event_hub_name_space,
-                                                      event_hub_name=r.event_hub_name,
-                                                      subscription_id=r.subscription_id))
+        args_schema.event_hub_receivers._registered = False
+        args_schema.itsm_receivers._registered = False
+        args_schema.logic_app_receivers._registered = False
+        args_schema.sms_receivers._registered = False
+        args_schema.voice_receivers._registered = False
+        args_schema.webhook_receivers._registered = False
+        args_schema.receiver_add_actions = AAZListArg(
+            options=["--add-actions"],
+            singular_options=["--add-action", "-a"],
+            help="Add receivers to the action group.",
+            arg_group="Actions",
+        )
+        args_schema.receiver_add_actions.Element = AAZListArg()
+        args_schema.receiver_add_actions.Element.Element = AAZStrArg()
+        return args_schema
 
-    notification_request = NotificationRequestBody(alert_type=alert_type, email_receivers=EmailReceivers,
-                                                   sms_receivers=SmsReceivers, webhook_receivers=WebhookReceivers,
-                                                   itsm_receivers=ItsmReceivers,
-                                                   azure_app_push_receivers=AzureAppPushReceivers,
-                                                   automation_runbook_receivers=AutomationRunbookReceivers,
-                                                   voice_receivers=VoiceReceivers,
-                                                   logic_app_receivers=LogicAppReceivers,
-                                                   azure_function_receivers=AzureFunctionReceivers,
-                                                   arm_role_receivers=ArmRoleReceivers,
-                                                   event_hub_receivers=EventHubReceivers)
-    from azure.cli.core.util import sdk_no_wait
-    if action_group_name:
-        return sdk_no_wait(no_wait, client.begin_create_notifications_at_action_group_resource_level,
-                           resource_group_name, action_group_name, notification_request)
+    def pre_operations(self):
+        args = self.ctx.args
+        update_action_group_receivers(args)
