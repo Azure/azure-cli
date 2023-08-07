@@ -75,7 +75,7 @@ def import_config(cmd,
                   appservice_account=None):
 
     if src_snapshot and (src_key or src_label):
-        raise CLIErrors.MutuallyExclusiveArgumentError("'snapshot' cannot be specified with 'key' or 'label' filters.")
+        raise CLIErrors.MutuallyExclusiveArgumentError("'--src-snapshot' cannot be specified with '--src-key' or '--src-label' filters.")
 
     src_features = []
     dest_features = []
