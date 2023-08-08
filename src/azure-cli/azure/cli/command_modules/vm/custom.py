@@ -3624,8 +3624,7 @@ def _build_identities_info_from_system_user_assigned(cmd, mi_system_assigned, mi
 
 def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False, hibernate=None):
     client = _compute_client_factory(cmd.cli_ctx)
-    # a walkaround because `VirtualMachineScaleSetVMs#begin_deallocate` does not accept `hibernate`
-    # https://learn.microsoft.com/en-us/rest/api/compute/virtual-machine-scale-set-vms/deallocate?tabs=HTTP
+    # This is a walkaround because the REST service of `VirtualMachineScaleSetVMs#begin_deallocate` does not accept `hibernate` at present
     if instance_ids and len(instance_ids) == 1 and hibernate is None:
         return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_deallocate,
                            resource_group_name, vm_scale_set_name, instance_ids[0])
