@@ -3624,9 +3624,8 @@ def _build_identities_info_from_system_user_assigned(cmd, mi_system_assigned, mi
 
 def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False, hibernate=None):
     client = _compute_client_factory(cmd.cli_ctx)
-    # a walkaround because `VirtualMachineScaleSetVMsOperations.begin_deallocate` does not accept `hibernate`
-    # https://azuresdkdocs.blob.core.windows.net/$web/python/azure-mgmt-compute/30.0.0/azure.mgmt.compute.v2023_03_01
-    # .operations.html#azure.mgmt.compute.v2023_03_01.operations.VirtualMachineScaleSetVMsOperations
+    # a walkaround because `VirtualMachineScaleSetVMs#begin_deallocate` does not accept `hibernate`
+    # https://learn.microsoft.com/en-us/rest/api/compute/virtual-machine-scale-set-vms/deallocate?tabs=HTTP
     if instance_ids and len(instance_ids) == 1 and hibernate is None:
         return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_deallocate,
                            resource_group_name, vm_scale_set_name, instance_ids[0])
