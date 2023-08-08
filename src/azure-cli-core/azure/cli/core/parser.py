@@ -4,10 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import difflib
-import json
-import os
-import openai
-import requests
 
 import argparse
 import argcomplete
@@ -24,10 +20,12 @@ from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.core.azclierror import CommandNotFoundError
 from azure.cli.core.azclierror import ValidationError
+from azure.cli.core.error_assistance import error_assistance
 
 from knack.log import get_logger
 from knack.parser import CLICommandParser
 from knack.util import CLIError
+
 
 logger = get_logger(__name__)
 
@@ -163,7 +161,7 @@ class AzCliCommandParser(CLICommandParser):
 
         # Get error reason from Azure OpenAI
         prompt = command_arguments[0] + ' ' + command_arguments[1][0]
-        ai_error_assistance = self.error_assistance(prompt=prompt, error_message=message)
+        ai_error_assistance = error_assistance(prompt=prompt, error_message=message)
 
         az_error = ArgumentUsageError(message)
         if 'unrecognized arguments' in message:
@@ -343,36 +341,3 @@ class AzCliCommandParser(CLICommandParser):
             az_error.send_telemetry()
 
             self.exit(2)
-
-    def error_assistance(self, prompt, error_message):      
-        headers = {
-        'Content-Type': 'application/json',
-        'api-key': <api-key>
-        }
-
-        revised_prompt = "Azure CLI Command: " + prompt + ", Error received: " + error_message + ". What am I doing wrong?"
-
-        """data = {
-        'prompt': revised_prompt,
-        'max_tokens': 500,  # Specify the maximum number of tokens in the response
-        'temperature': 0.2,  # Higher values (e.g., 0.8) make the output more random, lower values (e.g., 0.2) make it more focused
-        }"""
-
-        data = {
-            "messages": [
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": revised_prompt}
-            ]
-        }
-
-        url = 'https://internsopenai.openai.azure.com/openai/deployments/openai-interns-model/chat/completions?api-version=2023-05-15'
-
-        response = requests.post(url, json=data, headers=headers)
-
-        if response.status_code == 200:
-            return response.json()['choices'][0]['message']['content']
-        else:
-            print(f"API call failed with status code {response.status_code}: {response.text}")
-            return None
-
-        return response
