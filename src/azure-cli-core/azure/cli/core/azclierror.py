@@ -59,7 +59,7 @@ class AzCLIError(CLIError):
     def set_exception_trace(self, exception_trace):
         self.exception_trace = exception_trace
 
-    def print_error(self, error_assistance):
+    def print_error(self, error_assistance = None):
         from azure.cli.core.azlogging import CommandLoggerContext
         from azure.cli.core.style import print_styled_text
 
