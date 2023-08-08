@@ -7,7 +7,7 @@ import os
 import time
 
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck)
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, LogAnalyticsWorkspacePreparer)
 from azure.cli.command_modules.containerapp.tests.latest.common import (write_test_file, clean_up_test_file)
 
 from azure.cli.command_modules.containerapp.tests.latest.common import TEST_LOCATION
@@ -22,7 +22,8 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 class ContainerAppJobsExecutionsTest(ScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northcentralus")
-    def test_containerapp_job_executionstest_e2e(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_containerapp_job_executionstest_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         import requests
         
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
@@ -30,7 +31,7 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
         env = self.create_random_name(prefix='env', length=24)
         job = self.create_random_name(prefix='job2', length=24)
 
-        create_containerapp_env(self, env, resource_group)
+        create_containerapp_env(self, env, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
 
         # create a container app environment for a Container App Job resource
         self.cmd('containerapp env show -n {} -g {}'.format(env, resource_group), checks=[
@@ -84,7 +85,8 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northcentralus")
-    def test_containerapp_job_custom_executionstest_e2e(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_containerapp_job_custom_executionstest_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         import requests
 
         TEST_LOCATION = "northcentralusstage"
@@ -93,7 +95,7 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
         env = self.create_random_name(prefix='env', length=24)
         job = self.create_random_name(prefix='job3', length=24)
 
-        create_containerapp_env(self, env, resource_group)
+        create_containerapp_env(self, env, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
 
         # create a container app environment for a Container App Job resource
         self.cmd('containerapp env show -n {} -g {}'.format(env, resource_group), checks=[
@@ -175,7 +177,8 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northcentralus")
-    def test_containerappjob_create_with_yaml(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_containerappjob_create_with_yaml(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env = self.create_random_name(prefix='env', length=24)
@@ -188,7 +191,7 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
         self.cmd(
             f'az storage share-rm create --resource-group {resource_group}  --storage-account {storage} --name {share} --quota 1024 --enabled-protocols SMB --output none')
 
-        create_containerapp_env(self, env, resource_group)
+        create_containerapp_env(self, env, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
         containerapp_env = self.cmd(
             'containerapp env show -g {} -n {}'.format(resource_group, env)).get_output_in_json()
 
@@ -405,13 +408,14 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northcentralus")
-    def test_containerappjob_eventtriggered_create_with_yaml(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_containerappjob_eventtriggered_create_with_yaml(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env = self.create_random_name(prefix='env', length=24)
         job = self.create_random_name(prefix='yaml', length=24)
 
-        create_containerapp_env(self, env, resource_group)
+        create_containerapp_env(self, env, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
         containerapp_env = self.cmd(
             'containerapp env show -g {} -n {}'.format(resource_group, env)).get_output_in_json()
 

@@ -8,15 +8,16 @@ import requests
 from azure.cli.command_modules.containerapp.tests.latest.common import TEST_LOCATION
 
 
-def create_containerapp_env(test_cls, env_name, resource_group, location=None):
-    logs_workspace_name = test_cls.create_random_name(prefix='containerapp-env', length=24)
-    logs_workspace_id = test_cls.cmd('monitor log-analytics workspace create -g {} -n {} -l eastus'.format(resource_group, logs_workspace_name)).get_output_in_json()["customerId"]
-    logs_workspace_key = test_cls.cmd('monitor log-analytics workspace get-shared-keys -g {} -n {}'.format(resource_group, logs_workspace_name)).get_output_in_json()["primarySharedKey"]
+def create_containerapp_env(test_cls, env_name, resource_group, location=None, logs_workspace=None, logs_workspace_shared_key=None):
+    if logs_workspace is None:
+        logs_workspace_name = test_cls.create_random_name(prefix='containerapp-env', length=24)
+        logs_workspace = test_cls.cmd('monitor log-analytics workspace create -g {} -n {} -l eastus'.format(resource_group, logs_workspace_name)).get_output_in_json()["customerId"]
+        logs_workspace_shared_key = test_cls.cmd('monitor log-analytics workspace get-shared-keys -g {} -n {}'.format(resource_group, logs_workspace_name)).get_output_in_json()["primarySharedKey"]
 
     if location:
-        test_cls.cmd(f'containerapp env create -g {resource_group} -n {env_name} --logs-workspace-id {logs_workspace_id} --logs-workspace-key {logs_workspace_key} -l {location}')
+        test_cls.cmd(f'containerapp env create -g {resource_group} -n {env_name} --logs-workspace-id {logs_workspace} --logs-workspace-key {logs_workspace_shared_key} -l {location}')
     else:
-        test_cls.cmd(f'containerapp env create -g {resource_group} -n {env_name} --logs-workspace-id {logs_workspace_id} --logs-workspace-key {logs_workspace_key}')
+        test_cls.cmd(f'containerapp env create -g {resource_group} -n {env_name} --logs-workspace-id {logs_workspace} --logs-workspace-key {logs_workspace_shared_key}')
 
     containerapp_env = test_cls.cmd('containerapp env show -g {} -n {}'.format(resource_group, env_name)).get_output_in_json()
 
