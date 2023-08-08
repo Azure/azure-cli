@@ -3933,9 +3933,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         if flexconsumption_location is not None:
-            logger.warning("No functions version specified so defaulting to 4. In the future, specifying a "
-                           "version will be required. To create a 4.x function you would pass in the flag "
-                           "`--functions-version 4`")
             functions_version = '4'
         else:
             logger.warning("No functions version specified so defaulting to 3. In the future, specifying a "
