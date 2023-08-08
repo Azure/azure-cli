@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import difflib
+import requests
 
 import argparse
 import argcomplete
@@ -157,6 +158,9 @@ class AzCliCommandParser(CLICommandParser):
         recommender.set_help_examples(self.get_examples(self.prog))
         recommendations = recommender.provide_recommendations()
 
+        # Get error reason from Azure OpenAI
+        ai_error_assistance = self.error_assistance("thecommand", message)
+
         az_error = ArgumentUsageError(message)
         if 'unrecognized arguments' in message:
             az_error = UnrecognizedArgumentError(message)
@@ -170,7 +174,7 @@ class AzCliCommandParser(CLICommandParser):
             az_error.set_recommendation(QUERY_REFERENCE)
         elif recommendations:
             az_error.set_aladdin_recommendation(recommendations)
-        az_error.print_error()
+        az_error.print_error(ai_error_assistance)
         az_error.send_telemetry()
         self.exit(2)
 
@@ -335,3 +339,21 @@ class AzCliCommandParser(CLICommandParser):
             az_error.send_telemetry()
 
             self.exit(2)
+    def error_assistance(self, prompt, error_message):
+        headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer ad0edea56170c4e8784b26ca7de8eccac'
+        }
+
+        data = {
+        'prompt': prompt,
+        'max_tokens': 100,  # Specify the maximum number of tokens in the response
+        'temperature': 0.7,  # Higher values (e.g., 0.8) make the output more random, lower values (e.g., 0.2) make it more focused
+        'stop': '###',  # Optional, use a custom stop sequence to control the response length
+        }
+
+        url = <endpoint>
+
+        response = requests.post(url, headers=headers, json=data)
+
+        return response
