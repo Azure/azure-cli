@@ -622,7 +622,7 @@ def check_flex_app_after_deployment(cmd, resource_group_name, name):
         time.sleep(2)
         response = requests.get(host_status_url, headers=headers,
                                 verify=not should_disable_connection_verify())
-        if response.status_code == 200:
+        if 200 <= response.status_code <= 299:
             break
 
     if response.status_code != 200:
