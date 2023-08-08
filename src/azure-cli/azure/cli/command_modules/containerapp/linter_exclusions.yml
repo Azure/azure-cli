@@ -12,6 +12,7 @@ containerapp env create:
     platform_reserved_dns_ip:
       rule_exclusions:
       - option_length_too_long
+
 containerapp exec:
   rule_exclusions:
     - missing_command_test_coverage
@@ -34,6 +35,7 @@ containerapp exec:
     resource-group-name:
       rule_exclusions:
         - missing_parameter_test_coverage
+
 containerapp github-action add:
   rule_exclusions:
     - missing_command_test_coverage
@@ -47,12 +49,15 @@ containerapp github-action add:
     service_principal_tenant_id:
       rule_exclusions:
       - option_length_too_long
+
 containerapp github-action show:
   rule_exclusions:
     - missing_command_test_coverage
+
 containerapp github-action delete:
   rule_exclusions:
     - missing_command_test_coverage
+
 containerapp:
     rule_exclusions:
     - require_wait_command_if_no_wait

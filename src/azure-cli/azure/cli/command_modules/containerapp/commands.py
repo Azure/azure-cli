@@ -219,7 +219,6 @@ def load_command_table(self, _):
         g.custom_command('list-supported', 'list_supported_workload_profiles')
         g.custom_command('list', 'list_workload_profiles')
         g.custom_show_command('show', 'show_workload_profile')
-        g.custom_command('set', 'set_workload_profile', deprecate_info=g.deprecate(hide=True))
         g.custom_command('add', 'add_workload_profile')
         g.custom_command('update', 'update_workload_profile')
         g.custom_command('delete', 'delete_workload_profile')
