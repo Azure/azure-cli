@@ -24,8 +24,9 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set,
                                                           cf_community_gallery_image_version)
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
-    transform_sku_for_table_output, transform_disk_show_table_output, transform_extension_show_table_output,
-    get_vmss_table_output_transformer, transform_vm_encryption_show_table_output, transform_log_analytics_query_output)
+    transform_sku_for_table_output, transform_disk_create_table_output, transform_disk_show_table_output,
+    transform_extension_show_table_output, get_vmss_table_output_transformer,
+    transform_vm_encryption_show_table_output, transform_log_analytics_query_output)
 from azure.cli.command_modules.vm._validators import (
     process_vm_create_namespace, process_vmss_create_namespace, process_image_create_namespace,
     process_disk_create_namespace, process_snapshot_create_namespace,
@@ -248,14 +249,14 @@ def load_command_table(self, _):
         self.command_table["ppg show"] = PPGShow(loader=self)
 
     with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
-        g.custom_command('create', 'create_managed_disk', supports_no_wait=True, table_transformer=transform_disk_show_table_output, validator=process_disk_create_namespace)
-        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
+        g.custom_command('create', 'create_managed_disk', supports_no_wait=True, table_transformer=transform_disk_create_table_output, validator=process_disk_create_namespace)
         g.custom_command('grant-access', 'grant_disk_access')
-        g.custom_command('list', 'list_managed_disks', table_transformer='[].' + transform_disk_show_table_output)
-        g.command('revoke-access', 'begin_revoke_access')
-        g.show_command('show', 'get', table_transformer=transform_disk_show_table_output)
         g.generic_update_command('update', custom_func_name='update_managed_disk', setter_name='begin_create_or_update', setter_arg_name='disk', supports_no_wait=True)
-        g.wait_command('wait')
+
+        from azure.cli.command_modules.vm._vm_utils import import_aaz_by_profile
+        Disk = import_aaz_by_profile(self.cli_ctx.cloud.profile, "disk")
+        self.command_table['disk list'] = Disk.List(loader=self, table_transformer='[].' + transform_disk_show_table_output)
+        self.command_table['disk show'] = Disk.Show(loader=self, table_transformer=transform_disk_show_table_output)
 
     with self.command_group('disk-encryption-set', compute_disk_encryption_set_sdk, operation_group='disk_encryption_sets', client_factory=cf_disk_encryption_set, min_api='2019-07-01') as g:
         g.custom_command('create', 'create_disk_encryption_set', supports_no_wait=True)
@@ -318,13 +319,8 @@ def load_command_table(self, _):
 
     with self.command_group('snapshot', compute_snapshot_sdk, operation_group='snapshots', min_api='2016-04-30-preview') as g:
         g.custom_command('create', 'create_snapshot', validator=process_snapshot_create_namespace, supports_no_wait=True)
-        g.command('delete', 'begin_delete')
         g.custom_command('grant-access', 'grant_snapshot_access')
-        g.custom_command('list', 'list_snapshots')
-        g.command('revoke-access', 'begin_revoke_access')
-        g.show_command('show', 'get')
         g.generic_update_command('update', custom_func_name='update_snapshot', setter_name='begin_create_or_update', setter_arg_name='snapshot', supports_no_wait=True)
-        g.wait_command('wait')
 
     with self.command_group('vm', compute_vm_sdk) as g:
         g.custom_command('identity assign', 'assign_vm_identity', validator=process_assign_identity_namespace)
@@ -368,10 +364,7 @@ def load_command_table(self, _):
     with self.command_group('vm availability-set', compute_availset_sdk) as g:
         g.custom_command('convert', 'convert_av_set_to_managed_disk', min_api='2016-04-30-preview')
         g.custom_command('create', 'create_av_set', table_transformer=deployment_validate_table_format, supports_no_wait=True, exception_handler=handle_template_based_exception)
-        g.command('delete', 'delete')
         g.custom_command('list', 'list_av_sets')
-        g.command('list-sizes', 'list_available_sizes')
-        g.show_command('show', 'get')
         g.generic_update_command('update', custom_func_name='update_av_set')
 
     with self.command_group('vm boot-diagnostics', compute_vm_sdk) as g:
