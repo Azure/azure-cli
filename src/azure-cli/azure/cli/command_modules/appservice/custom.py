@@ -63,6 +63,7 @@ from .utils import (_normalize_sku,
                     is_functionapp,
                     _rename_server_farm_props,
                     _get_location_from_webapp,
+                    _normalize_flex_location,
                     _normalize_location_for_vnet_integration,
                     get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
                     get_resource_if_exists, repo_url_to_name, get_token,
@@ -3995,6 +3996,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                 '--maximum-instances exceeds the maximum allowed for Azure Functions on the Flex Consumption plan. '
                 'Please try again with a valid --maximum-instances value.'
             )
+
+        flexconsumption_location = _normalize_flex_location(flexconsumption_location)
 
     if ((always_ready_instances is not None or maximum_instances is not None or instance_size is not None) and
             flexconsumption_location is None):
