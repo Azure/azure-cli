@@ -370,7 +370,6 @@ class AzCliCommandParser(CLICommandParser):
         response = requests.post(url, json=data, headers=headers)
 
         if response.status_code == 200:
-            #return response.json()['choices'][0]['text']
             return response.json()['choices'][0]['message']['content']
         else:
             print(f"API call failed with status code {response.status_code}: {response.text}")
