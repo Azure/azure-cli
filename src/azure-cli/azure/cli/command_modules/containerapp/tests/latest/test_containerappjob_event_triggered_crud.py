@@ -7,7 +7,8 @@ import os
 import time
 
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, live_only, StorageAccountPreparer)
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, live_only, StorageAccountPreparer,
+                               LogAnalyticsWorkspacePreparer)
 
 from azure.cli.command_modules.containerapp.tests.latest.common import TEST_LOCATION
 from .utils import create_containerapp_env
@@ -21,8 +22,9 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 class ContainerAppJobsCRUDOperationsTest(ScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northcentralus")
+    @LogAnalyticsWorkspacePreparer(location="eastus")
     # test for CRUD operations on Container App Job resource with trigger type as event
-    def test_containerapp_eventjob_crudoperations_e2e(self, resource_group):
+    def test_containerapp_eventjob_crudoperations_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         import requests
         
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
@@ -30,7 +32,7 @@ class ContainerAppJobsCRUDOperationsTest(ScenarioTest):
         env = self.create_random_name(prefix='env', length=24)
         job = self.create_random_name(prefix='job1', length=24)
 
-        create_containerapp_env(self, env, resource_group)
+        create_containerapp_env(self, env, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
 
         # create a container app environment for a Container App Job resource
         self.cmd('containerapp env show -n {} -g {}'.format(env, resource_group), checks=[

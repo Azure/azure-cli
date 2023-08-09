@@ -147,11 +147,17 @@ class ContainerAppJobDecorator(BaseResource):
     def get_argument_registry_pass(self):
         return self.get_param("registry_pass")
 
+    def set_argument_registry_pass(self, registry_pass):
+        self.set_param("registry_pass", registry_pass)
+
     def get_argument_registry_server(self):
         return self.get_param("registry_server")
 
     def get_argument_registry_user(self):
         return self.get_param("registry_user")
+
+    def set_argument_registry_user(self, registry_user):
+        self.set_param("registry_user", registry_user)
 
     def get_argument_tags(self):
         return self.get_param("tags")
@@ -313,6 +319,8 @@ class ContainerAppJobCreateDecorator(ContainerAppJobDecorator):
             # Infer credentials if not supplied and its azurecr
             if (self.get_argument_registry_user() is None or self.get_argument_registry_pass() is None) and self.get_argument_registry_identity() is None:
                 registry_user, registry_pass = _infer_acr_credentials(self.cmd, self.get_argument_registry_server(), self.get_argument_disable_warnings())
+                self.set_argument_registry_user(registry_user)
+                self.set_argument_registry_pass(registry_pass)
 
             if not self.get_argument_registry_identity():
                 registries_def["username"] = self.get_argument_registry_user()

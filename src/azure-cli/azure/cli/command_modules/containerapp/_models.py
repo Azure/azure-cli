@@ -169,6 +169,7 @@ Ingress = {
     "targetPort": None,
     "transport": None,  # 'auto', 'http', 'http2', 'tcp'
     "exposedPort": None,
+    "allowInsecure": False,
     "traffic": None,  # TrafficWeight
     "customDomains": None,  # [CustomDomain]
     "ipSecurityRestrictions": None,  # [IPSecurityRestrictions]

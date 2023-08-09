@@ -8,7 +8,7 @@ import time
 import unittest
 
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse, live_only
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck)
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, LogAnalyticsWorkspacePreparer)
 from msrestazure.tools import parse_resource_id
 
 from azure.cli.command_modules.containerapp.tests.latest.common import (write_test_file, clean_up_test_file)
@@ -24,14 +24,16 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 class ContainerappIdentityTests(ScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="eastus2")
-    def test_containerapp_identity_e2e(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_containerapp_identity_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env_name = self.create_random_name(prefix='containerapp-env', length=24)
         ca_name = self.create_random_name(prefix='containerapp', length=24)
         user_identity_name = self.create_random_name(prefix='containerapp', length=24)
 
-        create_containerapp_env(self, env_name, resource_group)
+        create_containerapp_env(self, env_name, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
+
 
         self.cmd('containerapp create -g {} -n {} --environment {}'.format(resource_group, ca_name, env_name))
 
@@ -67,17 +69,14 @@ class ContainerappIdentityTests(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="canadacentral")
-    def test_containerapp_identity_system(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_containerapp_identity_system(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env_name = self.create_random_name(prefix='containerapp-env', length=24)
         ca_name = self.create_random_name(prefix='containerapp', length=24)
-        logs_workspace_name = self.create_random_name(prefix='containerapp-env', length=24)
 
-        logs_workspace_id = self.cmd('monitor log-analytics workspace create -g {} -n {} -l eastus'.format(resource_group, logs_workspace_name)).get_output_in_json()["customerId"]
-        logs_workspace_key = self.cmd('monitor log-analytics workspace get-shared-keys -g {} -n {}'.format(resource_group, logs_workspace_name)).get_output_in_json()["primarySharedKey"]
-
-        self.cmd('containerapp env create -g {} -n {} --logs-workspace-id {} --logs-workspace-key {}'.format(resource_group, env_name, logs_workspace_id, logs_workspace_key))
+        self.cmd('containerapp env create -g {} -n {} --logs-workspace-id {} --logs-workspace-key {}'.format(resource_group, env_name, laworkspace_customer_id, laworkspace_shared_key))
 
         containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env_name)).get_output_in_json()
 
@@ -105,7 +104,8 @@ class ContainerappIdentityTests(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="westeurope")
-    def test_containerapp_identity_user(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_containerapp_identity_user(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env_name = self.create_random_name(prefix='containerapp-env', length=24)
@@ -113,11 +113,11 @@ class ContainerappIdentityTests(ScenarioTest):
         user_identity_name1 = self.create_random_name(prefix='containerapp-user1', length=24)
         user_identity_name2 = self.create_random_name(prefix='containerapp-user2', length=24)
 
-        create_containerapp_env(self, env_name, resource_group)
+        create_containerapp_env(self, env_name, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
 
         self.cmd('containerapp create -g {} -n {} --environment {}'.format(resource_group, ca_name, env_name))
 
-        self.cmd('identity create -g {} -n {}'.format(resource_group, user_identity_name1))
+        user_identity_id1 = self.cmd('identity create -g {} -n {}'.format(resource_group, user_identity_name1)).get_output_in_json()["id"]
 
         self.cmd('identity create -g {} -n {}'.format(resource_group, user_identity_name2))
 
@@ -153,22 +153,30 @@ class ContainerappIdentityTests(ScenarioTest):
             JMESPathCheck('type', 'None'),
         ])
 
+        self.cmd('containerapp create -g {} -n {} --environment {} --user-assigned {}'.format(resource_group, ca_name, env_name, user_identity_id1), expect_failure=False)
+        self.cmd('containerapp identity show -g {} -n {}'.format(resource_group, ca_name), checks=[
+            JMESPathCheck('type', 'UserAssigned'),
+        ])
+
+
 class ContainerappIngressTests(ScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="eastus2")
-    def test_containerapp_ingress_e2e(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_containerapp_ingress_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env_name = self.create_random_name(prefix='containerapp-env', length=24)
         ca_name = self.create_random_name(prefix='containerapp', length=24)
 
-        create_containerapp_env(self, env_name, resource_group)
+        create_containerapp_env(self, env_name, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
 
-        self.cmd('containerapp create -g {} -n {} --environment {} --ingress external --target-port 80'.format(resource_group, ca_name, env_name))
+        self.cmd('containerapp create -g {} -n {} --environment {} --ingress external --target-port 80 --allow-insecure'.format(resource_group, ca_name, env_name))
 
         self.cmd('containerapp ingress show -g {} -n {}'.format(resource_group, ca_name, env_name), checks=[
             JMESPathCheck('external', True),
             JMESPathCheck('targetPort', 80),
+            JMESPathCheck('allowInsecure', True),
         ])
 
         self.cmd('containerapp ingress disable -g {} -n {}'.format(resource_group, ca_name, env_name))
@@ -197,13 +205,14 @@ class ContainerappIngressTests(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="eastus2")
-    def test_containerapp_ingress_traffic_e2e(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_containerapp_ingress_traffic_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env_name = self.create_random_name(prefix='containerapp-env', length=24)
         ca_name = self.create_random_name(prefix='containerapp', length=24)
 
-        create_containerapp_env(self, env_name, resource_group)
+        create_containerapp_env(self, env_name, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
 
         self.cmd('containerapp create -g {} -n {} --environment {} --ingress external --target-port 80 --revisions-mode multiple'.format(resource_group, ca_name, env_name))
 
@@ -243,13 +252,15 @@ class ContainerappIngressTests(ScenarioTest):
     @AllowLargeResponse(8192)
     @live_only()  # encounters 'CannotOverwriteExistingCassetteException' only when run from recording (passes when run live)
     @ResourceGroupPreparer(location="westeurope")
-    def test_containerapp_custom_domains_e2e(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_containerapp_custom_domains_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env_name = self.create_random_name(prefix='containerapp-env', length=24)
         ca_name = self.create_random_name(prefix='containerapp', length=24)
 
-        create_containerapp_env(self, env_name, resource_group)
+        create_containerapp_env(self, env_name, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
+
 
         app = self.cmd('containerapp create -g {} -n {} --environment {} --ingress external --target-port 80'.format(resource_group, ca_name, env_name)).get_output_in_json()
 
@@ -362,22 +373,19 @@ class ContainerappIngressTests(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")
+    @LogAnalyticsWorkspacePreparer(location="eastus")
     @live_only()  # encounters 'CannotOverwriteExistingCassetteException' only when run from recording (passes when run live) and vnet command error in cli pipeline
-    def test_containerapp_tcp_ingress(self, resource_group):
+    def test_containerapp_tcp_ingress(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env_name = self.create_random_name(prefix='env', length=24)
-        logs = self.create_random_name(prefix='logs', length=24)
         vnet = self.create_random_name(prefix='name', length=24)
         ca_name = self.create_random_name(prefix='containerapp', length=24)
 
         self.cmd(f"az network vnet create --address-prefixes '14.0.0.0/23' -g {resource_group} -n {vnet}")
         sub_id = self.cmd(f"az network vnet subnet create --address-prefixes '14.0.0.0/23' -n sub -g {resource_group} --vnet-name {vnet}").get_output_in_json()["id"]
 
-        logs_id = self.cmd(f"monitor log-analytics workspace create -g {resource_group} -n {logs} -l eastus").get_output_in_json()["customerId"]
-        logs_key = self.cmd(f'monitor log-analytics workspace get-shared-keys -g {resource_group} -n {logs}').get_output_in_json()["primarySharedKey"]
-
-        self.cmd(f'containerapp env create -g {resource_group} -n {env_name} --logs-workspace-id {logs_id} --logs-workspace-key {logs_key} --internal-only -s {sub_id}')
+        self.cmd(f'containerapp env create -g {resource_group} -n {env_name} --logs-workspace-id {laworkspace_customer_id} --logs-workspace-key {laworkspace_shared_key} --internal-only -s {sub_id}')
 
         containerapp_env = self.cmd(f'containerapp env show -g {resource_group} -n {env_name}').get_output_in_json()
 
@@ -419,13 +427,15 @@ class ContainerappIngressTests(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")
-    def test_containerapp_ip_restrictions(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_containerapp_ip_restrictions(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env_name = self.create_random_name(prefix='containerapp-env', length=24)
         ca_name = self.create_random_name(prefix='containerapp', length=24)
 
-        create_containerapp_env(self, env_name, resource_group)
+        create_containerapp_env(self, env_name, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
+
 
         # self.cmd('containerapp create -g {} -n {} --environment {}'.format(resource_group, ca_name, env_name))
         self.cmd('containerapp create -g {} -n {} --environment {} --ingress external --target-port 80'.format(resource_group, ca_name, env_name))
@@ -490,13 +500,15 @@ class ContainerappIngressTests(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")
-    def test_containerapp_ip_restrictions_deny(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_containerapp_ip_restrictions_deny(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env_name = self.create_random_name(prefix='containerapp-env', length=24)
         ca_name = self.create_random_name(prefix='containerapp', length=24)
 
-        create_containerapp_env(self, env_name, resource_group)
+        create_containerapp_env(self, env_name, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
+
 
         # self.cmd('containerapp create -g {} -n {} --environment {}'.format(resource_group, ca_name, env_name))
         self.cmd('containerapp create -g {} -n {} --environment {} --ingress external --target-port 80'.format(resource_group, ca_name, env_name))
@@ -561,13 +573,15 @@ class ContainerappIngressTests(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")
-    def test_containerapp_cors_policy(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_containerapp_cors_policy(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env_name = self.create_random_name(prefix='containerapp-env', length=24)
         ca_name = self.create_random_name(prefix='containerapp', length=24)
 
-        create_containerapp_env(self, env_name, resource_group)
+        create_containerapp_env(self, env_name, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
+
 
         self.cmd('containerapp create -g {} -n {} --environment {} --ingress external --target-port 80'.format(resource_group, ca_name, env_name))
 
@@ -620,13 +634,15 @@ class ContainerappIngressTests(ScenarioTest):
 class ContainerappDaprTests(ScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="eastus2")
-    def test_containerapp_dapr_e2e(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_containerapp_dapr_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env_name = self.create_random_name(prefix='containerapp-env', length=24)
         ca_name = self.create_random_name(prefix='containerapp', length=24)
 
-        create_containerapp_env(self, env_name, resource_group)
+        create_containerapp_env(self, env_name, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
+
 
         self.cmd('containerapp create -g {} -n {} --environment {} --dapr-app-id containerapp --dapr-app-port 800 --dapr-app-protocol grpc --dhmrs 4 --dhrbs 50 --dapr-log-level debug --enable-dapr'.format(resource_group, ca_name, env_name), checks=[
             JMESPathCheck('properties.configuration.dapr.appId', "containerapp"),
@@ -685,7 +701,8 @@ class ContainerappDaprTests(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="eastus2")
-    def test_containerapp_up_dapr_e2e(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_containerapp_up_dapr_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         """ Ensure that dapr can be enabled if the app has been created using containerapp up """
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
@@ -693,7 +710,8 @@ class ContainerappDaprTests(ScenarioTest):
         env_name = self.create_random_name(prefix='containerapp-env', length=24)
         ca_name = self.create_random_name(prefix='containerapp', length=24)
 
-        create_containerapp_env(self, env_name, resource_group)
+        create_containerapp_env(self, env_name, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
+
 
         self.cmd(
             'containerapp up -g {} -n {} --environment {} --image {}'.format(
@@ -711,7 +729,8 @@ class ContainerappDaprTests(ScenarioTest):
 class ContainerappServiceBindingTests(ScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="eastus2")
-    def test_containerapp_dev_service_binding_e2e(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_containerapp_dev_service_binding_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env_name = self.create_random_name(prefix='containerapp-env', length=24)
@@ -722,7 +741,8 @@ class ContainerappServiceBindingTests(ScenarioTest):
         kafka_ca_name = 'kafka'
         mariadb_ca_name = 'mariadb'
 
-        create_containerapp_env(self, env_name, resource_group)
+        create_containerapp_env(self, env_name, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
+
 
         self.cmd('containerapp service redis create -g {} -n {} --environment {}'.format(
             resource_group, redis_ca_name, env_name))
@@ -776,14 +796,16 @@ class ContainerappEnvStorageTests(ScenarioTest):
     @AllowLargeResponse(8192)
     @live_only()  # Passes locally but fails in CI
     @ResourceGroupPreparer(location="eastus")
-    def test_containerapp_env_storage(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_containerapp_env_storage(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env_name = self.create_random_name(prefix='containerapp-env', length=24)
         storage_name = self.create_random_name(prefix='storage', length=24)
         shares_name = self.create_random_name(prefix='share', length=24)
 
-        create_containerapp_env(self, env_name, resource_group)
+        create_containerapp_env(self, env_name, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
+
 
         self.cmd('storage account create -g {} -n {} --kind StorageV2 --sku Standard_LRS --enable-large-file-share'.format(resource_group, storage_name))
         self.cmd('storage share-rm create -g {} -n {} --storage-account {} --access-tier "TransactionOptimized" --quota 1024'.format(resource_group, shares_name, storage_name))
@@ -812,13 +834,15 @@ class ContainerappEnvStorageTests(ScenarioTest):
 class ContainerappRevisionTests(ScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")
-    def test_containerapp_revision_label_e2e(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_containerapp_revision_label_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env_name = self.create_random_name(prefix='containerapp-env', length=24)
         ca_name = self.create_random_name(prefix='containerapp', length=24)
 
-        create_containerapp_env(self, env_name, resource_group)
+        create_containerapp_env(self, env_name, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
+
 
         self.cmd('containerapp create -g {} -n {} --environment {} --image mcr.microsoft.com/k8se/quickstart:latest --ingress external --target-port 80'.format(resource_group, ca_name, env_name))
 
@@ -879,14 +903,15 @@ class ContainerappRevisionTests(ScenarioTest):
 class ContainerappAnonymousRegistryTests(ScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")
-    def test_containerapp_anonymous_registry(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_containerapp_anonymous_registry(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env = self.create_random_name(prefix='env', length=24)
         app = self.create_random_name(prefix='aca', length=24)
         image = "mcr.microsoft.com/k8se/quickstart:latest"
 
-        create_containerapp_env(self, env, resource_group)
+        create_containerapp_env(self, env, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
 
         self.cmd(f'containerapp create -g {resource_group} -n {app} --image {image} --ingress external --target-port 80 --environment {env}')
 
@@ -896,8 +921,9 @@ class ContainerappAnonymousRegistryTests(ScenarioTest):
 class ContainerappRegistryIdentityTests(ScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="westeurope")
+    @LogAnalyticsWorkspacePreparer(location="eastus")
     @live_only()  # encounters 'CannotOverwriteExistingCassetteException' only when run from recording (passes when run live)
-    def test_containerapp_registry_identity_user(self, resource_group):
+    def test_containerapp_registry_identity_user(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env = self.create_random_name(prefix='env', length=24)
@@ -907,7 +933,7 @@ class ContainerappRegistryIdentityTests(ScenarioTest):
         image_source = "mcr.microsoft.com/k8se/quickstart:latest"
         image_name = f"{acr}.azurecr.io/k8se/quickstart:latest"
 
-        create_containerapp_env(self, env, resource_group)
+        create_containerapp_env(self, env, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
 
         identity_rid = self.cmd(f'identity create -g {resource_group} -n {identity}').get_output_in_json()["id"]
 
@@ -929,8 +955,9 @@ class ContainerappRegistryIdentityTests(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="westeurope")
+    @LogAnalyticsWorkspacePreparer(location="eastus")
     @live_only()  # encounters 'CannotOverwriteExistingCassetteException' only when run from recording (passes when run live)
-    def test_containerapp_registry_identity_system(self, resource_group):
+    def test_containerapp_registry_identity_system(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env = self.create_random_name(prefix='env', length=24)
@@ -939,7 +966,7 @@ class ContainerappRegistryIdentityTests(ScenarioTest):
         image_source = "mcr.microsoft.com/k8se/quickstart:latest"
         image_name = f"{acr}.azurecr.io/k8se/quickstart:latest"
 
-        create_containerapp_env(self, env, resource_group)
+        create_containerapp_env(self, env, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
 
         self.cmd(f'acr create --sku basic -n {acr} -g {resource_group} --admin-enabled')
         self.cmd(f'acr import -n {acr} --source {image_source}')
@@ -959,7 +986,8 @@ class ContainerappRegistryIdentityTests(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="westeurope")
-    def test_containerapp_private_registry_port(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_containerapp_private_registry_port(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
         env = self.create_random_name(prefix='env', length=24)
         app = self.create_random_name(prefix='aca', length=24)
@@ -967,7 +995,7 @@ class ContainerappRegistryIdentityTests(ScenarioTest):
         image_source = "mcr.microsoft.com/k8se/quickstart:latest"
         image_name = f"{acr}.azurecr.io:443/k8se/quickstart:latest"
 
-        create_containerapp_env(self, env, resource_group)
+        create_containerapp_env(self, env, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
 
         self.cmd(f'acr create --sku basic -n {acr} -g {resource_group} --admin-enabled')
         self.cmd(f'acr import -n {acr} --source {image_source}')
@@ -975,11 +1003,12 @@ class ContainerappRegistryIdentityTests(ScenarioTest):
 
         self.cmd(f'containerapp create -g {resource_group} -n {app}  --image {image_name} --ingress external --target-port 80 --environment {env} --registry-server {acr}.azurecr.io:443 --registry-username {acr} --registry-password {password}')
 
-        self.cmd(f'containerapp show -g {resource_group} -n {app}', checks=[
+        self.cmd(f'containerapp show -g {resource_group} -n {app} --show-secrets', checks=[
             JMESPathCheck("properties.provisioningState", "Succeeded"),
             JMESPathCheck("properties.configuration.registries[0].server", f"{acr}.azurecr.io:443"),
             JMESPathCheck("properties.template.containers[0].image", image_name),
-            JMESPathCheck("properties.configuration.secrets[0].name", f"{acr}azurecrio-443-{acr}")
+            JMESPathCheck("properties.configuration.secrets[0].name", f"{acr}azurecrio-443-{acr}"),
+            JMESPathCheck("properties.configuration.secrets[0].value", password)
         ])
 
         app2 = self.create_random_name(prefix='aca', length=24)
@@ -998,13 +1027,14 @@ class ContainerappRegistryIdentityTests(ScenarioTest):
 class ContainerappScaleTests(ScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="westeurope")
-    def test_containerapp_scale_create(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_containerapp_scale_create(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env = self.create_random_name(prefix='env', length=24)
         app = self.create_random_name(prefix='aca', length=24)
 
-        create_containerapp_env(self, env, resource_group)
+        create_containerapp_env(self, env, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
 
         self.cmd(f'containerapp create -g {resource_group} -n {app} --image nginx --ingress external --target-port 80 --environment {env} --scale-rule-name http-scale-rule --scale-rule-http-concurrency 50 --scale-rule-auth trigger=secretref --scale-rule-metadata key=value')
 
@@ -1033,13 +1063,14 @@ class ContainerappScaleTests(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="westeurope")
-    def test_containerapp_scale_update(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_containerapp_scale_update(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env = self.create_random_name(prefix='env', length=24)
         app = self.create_random_name(prefix='aca', length=24)
 
-        create_containerapp_env(self, env, resource_group)
+        create_containerapp_env(self, env, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
 
         self.cmd(f'containerapp create -g {resource_group} -n {app} --image nginx --ingress external --target-port 80 --environment {env} --scale-rule-name http-scale-rule --scale-rule-http-concurrency 50 --scale-rule-auth trigger=secretref --scale-rule-metadata key=value')
 
@@ -1083,13 +1114,14 @@ class ContainerappScaleTests(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="westeurope")
-    def test_containerapp_scale_revision_copy(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_containerapp_scale_revision_copy(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env = self.create_random_name(prefix='env', length=24)
         app = self.create_random_name(prefix='aca', length=24)
 
-        create_containerapp_env(self, env, resource_group)
+        create_containerapp_env(self, env, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
 
         self.cmd(f'containerapp create -g {resource_group} -n {app} --image nginx --ingress external --target-port 80 --environment {env} --scale-rule-name http-scale-rule --scale-rule-http-concurrency 50 --scale-rule-auth trigger=secretref --scale-rule-metadata key=value')
 
@@ -1126,7 +1158,9 @@ class ContainerappScaleTests(ScenarioTest):
         self.assertTrue(restart_result == "Restart succeeded")
 
         replica_list = self.cmd(f'containerapp replica list -g {resource_group} -n {app} --revision {revisions_list[0]["name"]}', expect_failure=False).get_output_in_json()
-        self.cmd(f'containerapp replica show -g {resource_group} -n {app} --revision {revisions_list[0]["name"]} --replica {replica_list[0]["name"]}', expect_failure=False).get_output_in_json()
+        self.cmd(f'containerapp replica show -g {resource_group} --name {app} --revision {revisions_list[0]["name"]} --replica {replica_list[0]["name"]}', expect_failure=False).get_output_in_json()
+
+        self.cmd(f'containerapp logs show -g {resource_group} --name {app} --container {app} --revision {revisions_list[0]["name"]} --replica {replica_list[0]["name"]}', expect_failure=False)
 
         self.cmd(f'containerapp browse -g {resource_group} -n {app}', expect_failure=False)
 
@@ -1139,13 +1173,14 @@ class ContainerappScaleTests(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="westeurope")
-    def test_containerapp_create_with_yaml(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_containerapp_create_with_yaml(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env = self.create_random_name(prefix='env', length=24)
         app = self.create_random_name(prefix='yaml', length=24)
 
-        create_containerapp_env(self, env, resource_group)
+        create_containerapp_env(self, env, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
         containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env)).get_output_in_json()
 
         user_identity_name = self.create_random_name(prefix='containerapp-user', length=24)
@@ -1513,14 +1548,15 @@ class ContainerappScaleTests(ScenarioTest):
 class ContainerappOtherPropertyTests(ScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")
-    def test_containerapp_termination_grace_period_seconds(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_containerapp_termination_grace_period_seconds(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env = self.create_random_name(prefix='env', length=24)
         app = self.create_random_name(prefix='aca', length=24)
         image = "mcr.microsoft.com/k8se/quickstart:latest"
         terminationGracePeriodSeconds = 90
-        create_containerapp_env(self, env, resource_group)
+        create_containerapp_env(self, env, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
 
         self.cmd(f'containerapp create -g {resource_group} -n {app} --image {image} --ingress external --target-port 80 --environment {env} --termination-grace-period {terminationGracePeriodSeconds}')
 

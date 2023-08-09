@@ -36,25 +36,15 @@ containerapp exec:
       rule_exclusions:
         - missing_parameter_test_coverage
 
-containerapp github-action add:
-  rule_exclusions:
-    - missing_command_test_coverage
-  parameters:
-    service_principal_client_id:
-      rule_exclusions:
-      - option_length_too_long
-    service_principal_client_secret:
-      rule_exclusions:
-      - option_length_too_long
-    service_principal_tenant_id:
-      rule_exclusions:
-      - option_length_too_long
-
 containerapp github-action show:
   rule_exclusions:
     - missing_command_test_coverage
 
 containerapp github-action delete:
+  rule_exclusions:
+    - missing_command_test_coverage
+
+containerapp github-action add:
   rule_exclusions:
     - missing_command_test_coverage
 

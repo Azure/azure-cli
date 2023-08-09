@@ -329,6 +329,7 @@ def create_containerapp(cmd,
                         exposed_port=None,
                         transport="auto",
                         ingress=None,
+                        allow_insecure=False,
                         revisions_mode="single",
                         secrets=None,
                         env_vars=None,
@@ -370,10 +371,10 @@ def create_containerapp(cmd,
     containerapp_create_decorator.register_provider(CONTAINER_APPS_RP)
     containerapp_create_decorator.validate_arguments()
 
-    containerapp_create_decorator.construct_containerapp()
-    r = containerapp_create_decorator.create_containerapp()
-    containerapp_create_decorator.construct_containerapp_for_post_process(r)
-    r = containerapp_create_decorator.post_process_containerapp(r)
+    containerapp_create_decorator.construct_payload()
+    r = containerapp_create_decorator.create()
+    containerapp_create_decorator.construct_for_post_process(r)
+    r = containerapp_create_decorator.post_process(r)
     return r
 
 

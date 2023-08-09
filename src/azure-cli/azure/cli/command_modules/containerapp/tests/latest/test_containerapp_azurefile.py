@@ -8,7 +8,8 @@ import time
 import unittest
 
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, live_only, StorageAccountPreparer)
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, live_only, StorageAccountPreparer,
+                               LogAnalyticsWorkspacePreparer)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 from .common import TEST_LOCATION
@@ -26,7 +27,8 @@ from azure.cli.command_modules.containerapp.tests.latest.common import (
 class ContainerAppMountAzureFileTest(ScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=TEST_LOCATION)
-    def test_container_app_mount_azurefile_e2e(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_container_app_mount_azurefile_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env = self.create_random_name(prefix='env', length=24)
@@ -39,7 +41,7 @@ class ContainerAppMountAzureFileTest(ScenarioTest):
         self.cmd(
             f'az storage share-rm create --resource-group {resource_group}  --storage-account {storage} --name {share} --quota 1024 --enabled-protocols SMB --output none')
 
-        create_containerapp_env(self, env, resource_group, TEST_LOCATION)
+        create_containerapp_env(self, env, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
         account_key = self.cmd(f'az storage account keys list -g {resource_group} -n {storage} --query "[0].value" '
                                '-otsv').output.strip()
 

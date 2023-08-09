@@ -5,7 +5,7 @@
 import os
 import unittest  # pylint: disable=unused-import
 
-from azure.cli.testsdk import (ResourceGroupPreparer)
+from azure.cli.testsdk import (ResourceGroupPreparer, LogAnalyticsWorkspacePreparer)
 from azure.cli.testsdk.decorators import serial_test
 from azure.cli.command_modules.containerapp.tests.latest.common import (
     ContainerappComposePreviewScenarioTest,  # pylint: disable=unused-import
@@ -21,7 +21,8 @@ from .utils import create_containerapp_env
 class ContainerappComposePreviewTransportOverridesScenarioTest(ContainerappComposePreviewScenarioTest):
     @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_test_containerapp_preview', location='eastus')
-    def test_containerapp_compose_create_with_transport_arg(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_containerapp_compose_create_with_transport_arg(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         compose_text = """
@@ -41,7 +42,7 @@ services:
             'second_transport': "baz=http",
         })
 
-        create_containerapp_env(self, env_name, resource_group)
+        create_containerapp_env(self, env_name, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
         
         command_string = 'containerapp compose create'
         command_string += ' --compose-file-path {compose}'
@@ -57,7 +58,8 @@ services:
 
     @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_test_containerapp_preview', location='eastus')
-    def test_containerapp_compose_create_with_transport_mapping_arg(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus")
+    def test_containerapp_compose_create_with_transport_mapping_arg(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         compose_text = """
@@ -70,7 +72,7 @@ services:
         write_test_file(compose_file_name, compose_text)
         env_name = self.create_random_name(prefix='containerapp-compose', length=24)
 
-        create_containerapp_env(self, env_name, resource_group)
+        create_containerapp_env(self, env_name, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
 
         self.kwargs.update({
             'environment': env_name,

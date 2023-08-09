@@ -180,6 +180,9 @@ class BaseContainerAppDecorator(BaseResource):
     def get_argument_ingress(self):
         return self.get_param("ingress")
 
+    def get_argument_allow_insecure(self):
+        return self.get_param("allow_insecure")
+
     def get_argument_revisions_mode(self):
         return self.get_param("revisions_mode")
 
@@ -295,7 +298,7 @@ class ContainerAppCreateDecorator(BaseContainerAppDecorator):
         validate_create(self.get_argument_registry_identity(), self.get_argument_registry_pass(), self.get_argument_registry_user(), self.get_argument_registry_server(), self.get_argument_no_wait())
         validate_revision_suffix(self.get_argument_revision_suffix())
 
-    def construct_containerapp(self):
+    def construct_payload(self):
         if self.get_argument_registry_identity() and not is_registry_msi_system(self.get_argument_registry_identity()):
             logger.info("Creating an acrpull role assignment for the registry identity")
             create_acrpull_role_assignment(self.cmd, self.get_argument_registry_server(), self.get_argument_registry_identity(), skip_error=True)
@@ -349,6 +352,7 @@ class ContainerAppCreateDecorator(BaseContainerAppDecorator):
             ingress_def["targetPort"] = self.get_argument_target_port()
             ingress_def["transport"] = self.get_argument_transport()
             ingress_def["exposedPort"] = self.get_argument_exposed_port() if self.get_argument_transport() == "tcp" else None
+            ingress_def["allowInsecure"] = self.get_argument_allow_insecure()
 
         secrets_def = None
         if self.get_argument_secrets() is not None:
@@ -502,7 +506,7 @@ class ContainerAppCreateDecorator(BaseContainerAppDecorator):
             else:
                 set_managed_identity(self.cmd, self.get_argument_resource_group_name(), self.containerapp_def, user_assigned=[self.get_argument_registry_identity()])
 
-    def create_containerapp(self):
+    def create(self):
         try:
             r = self.client.create_or_update(
                 cmd=self.cmd, resource_group_name=self.get_argument_resource_group_name(), name=self.get_argument_name(), container_app_envelope=self.containerapp_def,
@@ -512,7 +516,7 @@ class ContainerAppCreateDecorator(BaseContainerAppDecorator):
         except Exception as e:
             handle_raw_exception(e)
 
-    def construct_containerapp_for_post_process(self, r):
+    def construct_for_post_process(self, r):
         if is_registry_msi_system(self.get_argument_registry_identity()):
             while r["properties"]["provisioningState"] == "InProgress":
                 r = self.client.show(self.cmd, self.get_argument_resource_group_name(), self.get_argument_name())
@@ -530,9 +534,9 @@ class ContainerAppCreateDecorator(BaseContainerAppDecorator):
             registries_def["identity"] = self.get_argument_registry_identity()
             safe_set(self.containerapp_def, "properties", "configuration", "registries", value=[registries_def])
 
-    def post_process_containerapp(self, r):
+    def post_process(self, r):
         if is_registry_msi_system(self.get_argument_registry_identity()):
-            r = self.create_containerapp()
+            r = self.create()
 
         if "properties" in r and "provisioningState" in r["properties"] and r["properties"]["provisioningState"].lower() == "waiting" and not self.get_argument_no_wait():
             not self.get_argument_disable_warnings() and logger.warning('Containerapp creation in progress. Please monitor the creation using `az containerapp show -n {} -g {}`'.format(self.get_argument_name(), self.get_argument_resource_group_name()))
