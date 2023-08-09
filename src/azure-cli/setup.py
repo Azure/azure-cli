@@ -138,6 +138,7 @@ DEPENDENCIES = [
     'javaproperties~=0.5.1',
     'jsondiff~=2.0.0',
     'packaging>=20.9',
+    'pycomposefile>=0.0.29'
     'PyGithub~=1.38',
     'PyNaCl~=1.5.0',
     'scp~=0.13.2',
@@ -146,8 +147,7 @@ DEPENDENCIES = [
     'sshtunnel~=0.1.4',
     'urllib3',
     'websocket-client~=1.3.1',
-    'xmltodict~=0.12',
-    'pycomposefile>=0.0.29'
+    'xmltodict~=0.12'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
