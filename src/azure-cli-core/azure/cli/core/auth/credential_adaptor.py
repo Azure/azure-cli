@@ -60,6 +60,7 @@ class CredentialAdaptor:
         # SDK azure-keyvault-keys 4.5.0b5 passes tenant_id as kwargs, but we don't support tenant_id for now,
         # so discard it.
         kwargs.pop('tenant_id', None)
+        kwargs.pop('enable_cae', None)
 
         scopes = _normalize_scopes(scopes)
         token, _ = self._get_token(scopes, **kwargs)

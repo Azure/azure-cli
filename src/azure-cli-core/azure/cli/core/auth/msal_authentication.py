@@ -20,7 +20,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 from msal import PublicClientApplication, ConfidentialClientApplication
 
-from .util import check_result, build_sdk_access_token
+from .util import check_result, build_sdk_access_token, clean_get_token_kwargs
 
 # OAuth 2.0 client credentials flow parameter
 # https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow
@@ -62,6 +62,7 @@ class UserCredential(PublicClientApplication):
     def get_token(self, *scopes, claims=None, **kwargs):
         # scopes = ['https://pas.windows.net/CheckMyAccess/Linux/.default']
         logger.debug("UserCredential.get_token: scopes=%r, claims=%r, kwargs=%r", scopes, claims, kwargs)
+        clean_get_token_kwargs(kwargs)
 
         if claims:
             logger.warning('Acquiring new access token silently for tenant %s with claims challenge: %s',
@@ -133,7 +134,7 @@ class ServicePrincipalCredential(ConfidentialClientApplication):
 
     def get_token(self, *scopes, **kwargs):
         logger.debug("ServicePrincipalCredential.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
-
+        clean_get_token_kwargs(kwargs)
         scopes = list(scopes)
         result = self.acquire_token_silent(scopes, None, **kwargs)
         if not result:

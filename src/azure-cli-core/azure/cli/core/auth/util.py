@@ -188,3 +188,12 @@ def read_response_templates():
         error_template = f.read()
 
     return success_template, error_template
+
+
+def clean_get_token_kwargs(kwargs):
+    """Remove kwargs that are not meant for further propagation."""
+    kwargs_to_remove = ["enable_cae"]
+    if not kwargs:
+        return
+    for key in kwargs_to_remove:
+        kwargs.pop(key, None)
