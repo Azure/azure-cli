@@ -204,7 +204,9 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
     if restore_mode == "AlternateLocation":
         if target_resource_group_name is None:
             target_resource_group_name = resource_group_name
-        target_sa_name, target_sa_rg = helper.get_resource_name_and_rg(target_resource_group_name, target_storage_account_name)
+        target_sa_name, target_sa_rg = helper.get_resource_name_and_rg(
+            target_resource_group_name,
+            target_storage_account_name)
         target_details = TargetAFSRestoreInfo()
         target_details.name = target_file_share_name
         target_details.target_resource_id = _get_storage_account_id(cmd.cli_ctx, target_sa_name, target_sa_rg)
