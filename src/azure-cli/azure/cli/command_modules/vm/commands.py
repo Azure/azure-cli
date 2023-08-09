@@ -6,8 +6,7 @@
 from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set,
                                                           cf_vm_ext, cf_vm_ext_image,
                                                           cf_vm_image, cf_vm_image_term, cf_usage,
-                                                          cf_vmss, cf_vmss_vm,
-                                                          cf_vm_sizes, cf_disks, cf_snapshots,
+                                                          cf_vmss, cf_vm_sizes, cf_disks, cf_snapshots,
                                                           cf_disk_accesses, cf_images, cf_run_commands,
                                                           cf_galleries, cf_gallery_images, cf_gallery_image_versions,
                                                           cf_proximity_placement_groups,
@@ -142,12 +141,6 @@ def load_command_table(self, _):
     compute_vmss_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#VirtualMachineScaleSetsOperations.{}',
         client_factory=cf_vmss,
-        operation_group='virtual_machine_scale_sets'
-    )
-
-    compute_vmss_vm_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineScaleSetVMsOperations.{}',
-        client_factory=cf_vmss_vm,
         operation_group='virtual_machine_scale_sets'
     )
 
