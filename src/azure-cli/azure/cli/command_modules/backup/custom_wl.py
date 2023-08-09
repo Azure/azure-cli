@@ -49,6 +49,7 @@ workload_type_map = {'MSSQL': 'SQLDataBase',
                      'SAPHANA': 'SAPHanaDatabase',
                      'SQLDataBase': 'SQLDataBase',
                      'SAPHanaDatabase': 'SAPHanaDatabase',
+                     'SAPHanaDBInstance': 'SAPHanaDBInstance',
                      'SAPASE': 'SAPAseDatabase'}
 
 # Mapping of module name
@@ -67,6 +68,7 @@ protectable_item_type_map = {'SQLDatabase': 'SQLDataBase',
                              'HANAInstance': 'SAPHanaSystem',
                              'SAPHanaSystem': 'SAPHanaSystem',
                              'SQLInstance': 'SQLInstance',
+                             'SAPHanaDBInstance': 'SAPHanaDBInstance',
                              'SQLAG': 'SQLAvailabilityGroupContainer'}
 
 
