@@ -188,6 +188,15 @@ jobs:
 
     displayName: 'Verify History'
 
+- job: VerifyLineEndings
+  displayName: 'Verify that no CRLF is checked in git'
+  condition: succeeded()
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+
+  steps:
+  - bash: if find . -not -type d -exec file "{}" ";" | grep -q CRLF; then echo "Checking in CRLF-ending files is not allowed, please convert them first to LF."; exit 1; fi
+
 - job: BuildWindowsMSI
   displayName: Build Windows MSI
   strategy:
