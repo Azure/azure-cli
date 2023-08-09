@@ -271,8 +271,23 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
         containerappjob_file_name = f"{self._testMethodName}_containerappjob.yml"
 
         write_test_file(containerappjob_file_name, containerappjob_yaml_text)
-        self.cmd(
-            f'containerapp job create -n {job} -g {resource_group} --environment {env} --yaml {containerappjob_file_name}')
+        self.cmd(f'containerapp job create -n {job} -g {resource_group} --environment {env} --yaml {containerappjob_file_name}', checks=[
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck("properties.configuration.triggerType", "Manual", case_sensitive=False),
+            JMESPathCheck('properties.configuration.replicaTimeout', 100),
+            JMESPathCheck('properties.configuration.replicaRetryLimit', 1),
+            JMESPathCheck('properties.template.containers[0].image', "mcr.microsoft.com/k8se/quickstart-jobs:latest"),
+            JMESPathCheck('properties.template.containers[0].resources.cpu', "0.5"),
+            JMESPathCheck('properties.template.containers[0].resources.memory', "1Gi"),
+            JMESPathCheck('identity.type', "UserAssigned"),
+            JMESPathCheck('properties.template.volumes[0].storageType', 'AzureFile'),
+            JMESPathCheck('properties.template.volumes[0].storageName', share),
+            JMESPathCheck('properties.template.volumes[0].name', 'azure-files-volume'),
+            JMESPathCheck('properties.template.volumes[0].mountOptions', 'uid=999,gid=999'),
+            JMESPathCheck('properties.template.containers[0].volumeMounts[0].subPath', 'sub'),
+            JMESPathCheck('properties.template.containers[0].volumeMounts[0].mountPath', '/mnt/data'),
+            JMESPathCheck('properties.template.containers[0].volumeMounts[0].volumeName', 'azure-files-volume')
+        ])
 
         self.cmd(f'containerapp job show -g {resource_group} -n {job}', checks=[
             JMESPathCheck("properties.provisioningState", "Succeeded"),
