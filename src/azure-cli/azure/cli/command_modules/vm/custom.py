@@ -46,6 +46,7 @@ from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_
                        load_images_thru_services, _get_latest_image_version)
 from ._client_factory import (_compute_client_factory, cf_vm_image_term, _dev_test_labs_client_factory)
 from .aaz.latest.ppg import Show as _PPGShow
+from .aaz.latest.vmss import ListInstances as _VMSSListInstances
 
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 try:
@@ -5864,3 +5865,18 @@ class PPGShow(_PPGShow):
         args_schema.include_colocation_status.enum = AAZArgEnum({"True": "True", "False": "False"})
 
         return args_schema
+
+
+class VMSSListInstances(_VMSSListInstances):
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined, has_value
+
+        if has_value(self.ctx.vars.instance.properties.nat_rules):
+            nat_rules = self.ctx.vars.instance.properties.natRules.to_serialized_data()
+            for nat_rule in nat_rules:
+                if 'type' in nat_rule['properties']:
+                    # `properties.type` conflict with the `type` property when flatten `properties`
+                    nat_rule['properties']['type'] = AAZUndefined
+            self.ctx.vars.instance.properties.nat_rules = nat_rules
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return {'vnetGateway': result}
