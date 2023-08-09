@@ -29,6 +29,8 @@ from azure.cli.command_modules.resource.custom import (
     format_bicep_file,
 )
 
+from azure.cli.command_modules.resource._bicep import (run_bicep_command)
+
 from azure.cli.core.mock import DummyCli
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import AzCliCommand
@@ -339,6 +341,7 @@ class TestCustom(unittest.TestCase):
     def test_deployment_prompt_alphabetical_order(self):
         # check that params are prompted for in alphabetical order when the file is loaded with preserve_order=False
         curr_dir = os.path.dirname(os.path.realpath(__file__))
+
         template_path = os.path.join(curr_dir, 'param-validation-template.json').replace('\\', '\\\\')
         parameters_path = os.path.join(curr_dir, 'param-validation-params.json').replace('\\', '\\\\')
         parameters_with_reference_path = os.path.join(curr_dir, 'param-validation-ref-params.json').replace('\\', '\\\\')
@@ -361,6 +364,11 @@ class TestCustom(unittest.TestCase):
         self.assertEqual(_is_bicepparam_file_provided([['test.json']]), False)
         self.assertEqual(_is_bicepparam_file_provided([['test.bicepparam']]), True)
         self.assertEqual(_is_bicepparam_file_provided([['test.bicepparam'], ['test.json'],  ['{ \"foo\": { \"value\": \"bar\" } }']]), True)
+
+    def test_bicep_generate_params(self):
+        run_bicep_command(cli_ctx, ["generate-params", "./sample_params.bicep"])
+        is_generated_params_file_exists = os.path.exists("./sample_params.parameters.json")
+        self.assertTrue(is_generated_params_file_exists)
 
     @mock.patch("knack.prompting.prompt_y_n", autospec=True)
     @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_resource_group_core", autospec=True)
