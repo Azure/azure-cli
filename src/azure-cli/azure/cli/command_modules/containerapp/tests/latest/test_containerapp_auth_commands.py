@@ -28,8 +28,8 @@ class ContainerAppAuthTest(ScenarioTest):
 
         self.cmd('containerapp create -g {} -n {} --environment {} --image mcr.microsoft.com/k8se/quickstart:latest --ingress external --target-port 80'.format(resource_group, app, env))
 
-        client_id = 'c0d23eb5-ea9f-4a4d-9519-bfa0a422c491'
-        test_secret = 'c0d23eb5-ea9f-4a4d-9519-bfa0a422c491'
+        client_id = 'abc123'
+        test_secret = 'abc123'
         issuer = 'https://sts.windows.net/54826b22-38d6-4fb2-bad9-b7983a3e9c5a/'
 
         self.cmd(
@@ -111,8 +111,8 @@ class ContainerAppAuthTest(ScenarioTest):
             'containerapp create -g {} -n {} --environment {} --image mcr.microsoft.com/k8se/quickstart:latest --ingress external --target-port 80'.format(
                 resource_group, app, env))
 
-        app_id = 'c0d23eb5-ea9f-4a4d-9519-bfa0a422c491'
-        test_secret = 'c0d23eb5-ea9f-4a4d-9519-bfa0a422c491'
+        app_id = 'abc123'
+        test_secret = 'abc123'
         issuer = 'https://sts.windows.net/54826b22-38d6-4fb2-bad9-b7983a3e9c5a/'
 
         self.cmd(
@@ -150,8 +150,8 @@ class ContainerAppAuthTest(ScenarioTest):
             'containerapp create -g {} -n {} --environment {} --image mcr.microsoft.com/k8se/quickstart:latest --ingress external --target-port 80'.format(
                 resource_group, app, env))
 
-        client_id = 'c0d23eb5-ea9f-4a4d-9519-bfa0a422c491'
-        test_secret = 'c0d23eb5-ea9f-4a4d-9519-bfa0a422c491'
+        client_id = 'abc123'
+        test_secret = 'abc123'
         # github
         self.cmd(
             'containerapp auth github update -g {} --name {} --client-id {} --client-secret {} --yes'
@@ -247,8 +247,8 @@ class ContainerAppAuthTest(ScenarioTest):
             'containerapp create -g {} -n {} --environment {} --image mcr.microsoft.com/k8se/quickstart:latest --ingress external --target-port 80'.format(
                 resource_group, app, env))
 
-        client_id = 'c0d23eb5-ea9f-4a4d-9519-bfa0a422c491'
-        test_secret = 'c0d23eb5-ea9f-4a4d-9519-bfa0a422c491'
+        client_id = 'abc123'
+        test_secret = 'abc123'
 
         # openid-connect
         app = self.create_random_name(prefix='containerapp-auth', length=24)
