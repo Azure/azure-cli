@@ -110,7 +110,7 @@ def load_command_table(self, _):
 
     with self.command_group('monitor activity-log', activity_log_sdk) as g:
         g.custom_command('list', 'list_activity_log', client_factory=cf_activity_log)
-        g.command('list-categories', 'list')
+        # g.command('list-categories', 'list')
 
     with self.command_group('monitor activity-log alert', activity_log_alerts_sdk,
                             custom_command_type=activity_log_alerts_custom) as g:
