@@ -95,7 +95,7 @@ def load_command_table(self, _):
         #           validator=process_action_group_detail_for_creation)
         # g.command('delete', 'delete')
         # g.custom_command('enable-receiver', 'enable_receiver', table_transformer=action_group_list_table)
-        # # g.custom_command('list', 'list_action_groups', table_transformer=action_group_list_table)
+        # g.custom_command('list', 'list_action_groups', table_transformer=action_group_list_table)
         # g.generic_update_command('update', custom_func_name='update_action_groups', setter_arg_name='action_group',
         #                          table_transformer=action_group_list_table)
         # g.custom_command('test-notifications create', 'post_notifications', table_transformer=action_group_list_table,

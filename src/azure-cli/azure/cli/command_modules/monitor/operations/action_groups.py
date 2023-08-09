@@ -26,10 +26,12 @@ def update_action_group_receivers(args):
                          'FUNCTION_NAME HTTP_TRIGGER_URL [usecommonalertschema]',
         'eventhub': 'NAME SUBSCRIPTION_ID EVENT_HUB_NAME_SPACE EVENT_HUB_NAME [usecommonalertschema] '
     }
+
     for receiver_item in args.receiver_actions:
         receiver_item_arr = receiver_item.to_serialized_data()
-        type_name = receiver_item_arr[0].to_serialized_data()
-        type_properties = [t.to_serialized_data() for t in receiver_item_arr[1:]]
+        print(receiver_item_arr)
+        type_name = receiver_item_arr[0]
+        type_properties = receiver_item_arr[1:]
         useCommonAlertSchema = 'usecommonalertschema' in (t_property.lower() for t_property in type_properties)
         try:
             if type_name == 'email':
@@ -182,14 +184,14 @@ class ActionGroupUpdate(_ActionGroupUpdate):
         args_schema.sms_receivers._registered = False
         args_schema.voice_receivers._registered = False
         args_schema.webhook_receivers._registered = False
-        args_schema.receiver_add_actions = AAZListArg(
+        args_schema.receiver_actions = AAZListArg(
             options=["--add-actions"],
             singular_options=["--add-action", "-a"],
             help="Add receivers to the action group.",
             arg_group="Actions",
         )
-        args_schema.receiver_add_actions.Element = AAZListArg()
-        args_schema.receiver_add_actions.Element.Element = AAZStrArg()
+        args_schema.receiver_actions.Element = AAZListArg()
+        args_schema.receiver_actions.Element.Element = AAZStrArg()
 
         args_schema.receiver_remove_list = AAZListArg(
             options=["--remove-action", "-r"],
@@ -243,14 +245,14 @@ class ActionGroupTestNotificationCreate(_ActionGroupTestNotificationCreate):
         args_schema.sms_receivers._registered = False
         args_schema.voice_receivers._registered = False
         args_schema.webhook_receivers._registered = False
-        args_schema.receiver_add_actions = AAZListArg(
+        args_schema.receiver_actions = AAZListArg(
             options=["--add-actions"],
             singular_options=["--add-action", "-a"],
             help="Add receivers to the action group.",
             arg_group="Actions",
         )
-        args_schema.receiver_add_actions.Element = AAZListArg()
-        args_schema.receiver_add_actions.Element.Element = AAZStrArg()
+        args_schema.receiver_actions.Element = AAZListArg()
+        args_schema.receiver_actions.Element.Element = AAZStrArg()
         return args_schema
 
     def pre_operations(self):
