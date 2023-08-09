@@ -380,6 +380,11 @@ class TestCustom(unittest.TestCase):
         is_generated_params_file_exists = os.path.exists("./sample_params.parameters.json")
         self.assertTrue(is_generated_params_file_exists)
 
+    def test_bicep_build_params_defaults(self):
+        run_bicep_command(cli_ctx, ["build-params", "./sample_params.bicepparam"])
+        is_generated_params_file_exists = os.path.exists("./sample_params.parameters.json")
+        self.assertTrue(is_generated_params_file_exists)
+
     @mock.patch("knack.prompting.prompt_y_n", autospec=True)
     @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_resource_group_core", autospec=True)
     def test_confirm_with_what_if_prompt_at_resource_group(self, what_if_command_mock, prompt_y_n_mock):
