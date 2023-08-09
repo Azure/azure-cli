@@ -300,38 +300,38 @@ def load_arguments(self, _):
     with self.argument_context('monitor activity-log alert') as c:
         c.argument('activity_log_alert_name', options_list=['--name', '-n'], id_part='name')
 
-    with self.argument_context('monitor activity-log alert create') as c:
-        from .operations.activity_log_alerts import process_condition_parameter
-        c.argument('disable', action='store_true')
-        c.argument('scopes', options_list=['--scope', '-s'], nargs='+')
-        c.argument('condition', options_list=['--condition', '-c'], nargs='+', validator=process_condition_parameter)
-        c.argument('action_groups', options_list=['--action-group', '-a'], nargs='+')
-        c.argument('webhook_properties', options_list=['--webhook-properties', '-w'], arg_type=webhook_prop_type)
+    # with self.argument_context('monitor activity-log alert create') as c:
+    #     from .operations.activity_log_alerts import process_condition_parameter
+    #     c.argument('disable', action='store_true')
+    #     c.argument('scopes', options_list=['--scope', '-s'], nargs='+')
+    #     c.argument('condition', options_list=['--condition', '-c'], nargs='+', validator=process_condition_parameter)
+    #     c.argument('action_groups', options_list=['--action-group', '-a'], nargs='+')
+    #     c.argument('webhook_properties', options_list=['--webhook-properties', '-w'], arg_type=webhook_prop_type)
 
     with self.argument_context('monitor activity-log alert update-condition') as c:
         c.argument('reset', action='store_true')
         c.argument('add_conditions', options_list=['--add-condition', '-a'], nargs='+')
         c.argument('remove_conditions', options_list=['--remove-condition', '-r'], nargs='+')
 
-    with self.argument_context('monitor activity-log alert update') as c:
-        from .operations.activity_log_alerts import process_condition_parameter
-        c.argument('condition', options_list=['--condition', '-c'], nargs='+', validator=process_condition_parameter)
-        c.argument('enabled', arg_type=get_three_state_flag())
+    # with self.argument_context('monitor activity-log alert update') as c:
+    #     from .operations.activity_log_alerts import process_condition_parameter
+    #     c.argument('condition', options_list=['--condition', '-c'], nargs='+', validator=process_condition_parameter)
+    #     c.argument('enabled', arg_type=get_three_state_flag())
 
-    with self.argument_context('monitor activity-log alert action-group add') as c:
-        c.argument('reset', action='store_true')
-        c.argument('action_group_ids', options_list=['--action-group', '-a'], nargs='+')
-        c.argument('webhook_properties', options_list=['--webhook-properties', '-w'], arg_type=webhook_prop_type)
+    # with self.argument_context('monitor activity-log alert action-group add') as c:
+    #     c.argument('reset', action='store_true')
+    #     c.argument('action_group_ids', options_list=['--action-group', '-a'], nargs='+')
+    #     c.argument('webhook_properties', options_list=['--webhook-properties', '-w'], arg_type=webhook_prop_type)
 
-    with self.argument_context('monitor activity-log alert action-group remove') as c:
-        c.argument('action_group_ids', options_list=['--action-group', '-a'], nargs='+')
+    # with self.argument_context('monitor activity-log alert action-group remove') as c:
+    #     c.argument('action_group_ids', options_list=['--action-group', '-a'], nargs='+')
 
-    with self.argument_context('monitor activity-log alert scope add') as c:
-        c.argument('scopes', options_list=['--scope', '-s'], nargs='+')
-        c.argument('reset', action='store_true')
-
-    with self.argument_context('monitor activity-log alert scope remove') as c:
-        c.argument('scopes', options_list=['--scope', '-s'], nargs='+')
+    # with self.argument_context('monitor activity-log alert scope add') as c:
+    #     c.argument('scopes', options_list=['--scope', '-s'], nargs='+')
+    #     c.argument('reset', action='store_true')
+    #
+    # with self.argument_context('monitor activity-log alert scope remove') as c:
+    #     c.argument('scopes', options_list=['--scope', '-s'], nargs='+')
     # endregion
 
     # region Log Analytics Workspace

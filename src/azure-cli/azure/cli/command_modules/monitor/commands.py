@@ -114,15 +114,25 @@ def load_command_table(self, _):
 
     with self.command_group('monitor activity-log alert', activity_log_alerts_sdk,
                             custom_command_type=activity_log_alerts_custom) as g:
-        g.custom_command('list', 'list_activity_logs_alert')
-        g.custom_command('create', 'create')
-        g.show_command('show', 'get')
-        g.command('delete', 'delete')
-        g.generic_update_command('update', custom_func_name='update', setter_arg_name='activity_log_alert')
-        g.custom_command('action-group add', 'add_action_group')
-        g.custom_command('action-group remove', 'remove_action_group')
-        g.custom_command('scope add', 'add_scope')
-        g.custom_command('scope remove', 'remove_scope')
+        # g.custom_command('list', 'list_activity_logs_alert')
+        # g.custom_command('create', 'create')
+        # g.show_command('show', 'get')
+        # g.command('delete', 'delete')
+        # g.generic_update_command('update', custom_func_name='update', setter_arg_name='activity_log_alert')
+        # g.custom_command('action-group add', 'add_action_group')
+        # g.custom_command('action-group remove', 'remove_action_group')
+        # g.custom_command('scope add', 'add_scope')
+        # g.custom_command('scope remove', 'remove_scope')
+        from .operations.activity_log_alerts import ActivityLogAlertCreate, ActivityLogAlertUpdate, \
+            ActivityLogAlertActionGroupAdd, ActivityLogAlertActionGroupRemove, \
+            ActivityLogAlertScopeAdd, ActivityLogAlertScopeRemove
+        self.command_table['monitor activity-log alert create'] = ActivityLogAlertCreate(loader=self)
+        self.command_table['monitor activity-log alert update'] = ActivityLogAlertUpdate(loader=self)
+        self.command_table['monitor activity-log alert action-group add'] = ActivityLogAlertActionGroupAdd(loader=self)
+        self.command_table['monitor activity-log alert action-group remove'] = ActivityLogAlertActionGroupRemove(loader=
+                                                                                                                 self)
+        self.command_table['monitor activity-log alert scope add'] = ActivityLogAlertScopeAdd(loader=self)
+        self.command_table['monitor activity-log alert scope remove'] = ActivityLogAlertScopeRemove(loader=self)
 
     with self.command_group('monitor autoscale', autoscale_sdk, custom_command_type=autoscale_custom) as g:
         g.custom_command('create', 'autoscale_create', validator=process_autoscale_create_namespace)
