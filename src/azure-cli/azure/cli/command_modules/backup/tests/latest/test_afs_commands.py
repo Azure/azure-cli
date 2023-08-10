@@ -215,10 +215,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
     #@record_only()
     @ResourceGroupPreparer(location="eastus2euap", random_name_length=20)
-    @ResourceGroupPreparer(location="centraluseuap", random_name_length=20, parameter_name="resource_group2")
+    @ResourceGroupPreparer(location="centraluseuap", random_name_length=30, parameter_name="resource_group2")
     @VaultPreparer()
-    @StorageAccountPreparer(location="eastus2euap")
-    # @StorageAccountPreparer(location="centraluseuap", parameter_name="storage_account_rg2", resource_group_parameter_name="resource_group2")
+    @StorageAccountPreparer(location="centraluseuap", parameter_name="storage_account", resource_group_parameter_name="resource_group")
+    @StorageAccountPreparer(location="centraluseuap", parameter_name="storage_account_rg2", resource_group_parameter_name="resource_group2")
     @FilePreparer()
     @FilePreparer(parameter_name="file2")
     @FileSharePreparer(file_upload=True, file_parameter_name=['file_name', 'file2'])
@@ -227,21 +227,38 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @AFSRPPreparer()
     @FileSharePreparer(parameter_name="afs2")
     # @FileSharePreparer(parameter_name="afs_rg2", storage_account_parameter_name="storage_account_rg2", resource_group_parameter_name="resource_group2")
-    def test_afs_backup_restore(self, resource_group, vault_name, storage_account, file_name, afs_name, afs2, file2, resource_group2):
-        # , storage_account_rg2, afs_rg2):
+    def test_afs_backup_restore(self, resource_group, vault_name, storage_account, file_name, afs_name, afs2, file2, resource_group2, storage_account_rg2, afs_rg2):
         self.kwargs.update({
             'vault': vault_name,
             'item1': afs_name,
             'item2': afs2,
-            # 'item_rg2': afs_rg2,
+            'item_rg2': afs_rg2,
             'container': storage_account,
-            # 'container_rg2': storage_account_rg2, 
+            'container_rg2': storage_account_rg2, 
             'rg': resource_group,
             'rg2': resource_group2,
             'type': "AzureStorage",
             'file': file_name,
             'file2': file2
         })
+        # full share restore alternate location with a different resource group
+
+        self.cmd('backup restore restore-azurefileshare -g {rg} -v {vault} -c {container} -i {item1} -r {rp1} --resolve-conflict Overwrite --restore-mode AlternateLocation --target-storage-account {container_rg2} --target-file-share {item_rg2}', expect_failure=True)
+
+        trigger_restore_job3_json = self.cmd('backup restore restore-azurefileshare -g {rg} -v {vault} -c {container} -i {item1} -r {rp1} --resolve-conflict Overwrite --restore-mode AlternateLocation --target-storage-account {container_rg2} --target-file-share {item_rg2} --target-rg-name {rg2}', checks=[
+            self.check("properties.entityFriendlyName", '{item1}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "InProgress"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+        self.kwargs['job3'] = trigger_restore_job3_json['name']
+        self.cmd('backup job wait -g {rg} -v {vault} -n {job3}')
+
+        self.cmd('backup job show -g {rg} -v {vault} -n {job3}', checks=[
+            self.check("properties.entityFriendlyName", '{item1}'),
+            self.check("properties.operation", "Restore"),
+            self.check("resourceGroup", '{rg}')
+        ])
 
         # full share restore original location
 
@@ -275,25 +292,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup job wait -g {rg} -v {vault} -n {job2}')
 
         self.cmd('backup job show -g {rg} -v {vault} -n {job2}', checks=[
-            self.check("properties.entityFriendlyName", '{item1}'),
-            self.check("properties.operation", "Restore"),
-            self.check("resourceGroup", '{rg}')
-        ])
-
-        # full share restore alternate location with a different resource group
-
-        self.cmd('backup restore restore-azurefileshare -g {rg} -v {vault} -c {container} -i {item1} -r {rp1} --resolve-conflict Overwrite --restore-mode AlternateLocation --target-storage-account {container_rg2} --target-file-share {item_rg2}', expect_failure=True)
-
-        trigger_restore_job3_json = self.cmd('backup restore restore-azurefileshare -g {rg} -v {vault} -c {container} -i {item1} -r {rp1} --resolve-conflict Overwrite --restore-mode AlternateLocation --target-storage-account {container_rg2} --target-file-share {item_rg2} --target-rg-name {rg2}', checks=[
-            self.check("properties.entityFriendlyName", '{item1}'),
-            self.check("properties.operation", "Restore"),
-            self.check("properties.status", "InProgress"),
-            self.check("resourceGroup", '{rg}')
-        ]).get_output_in_json()
-        self.kwargs['job3'] = trigger_restore_job3_json['name']
-        self.cmd('backup job wait -g {rg} -v {vault} -n {job3}')
-
-        self.cmd('backup job show -g {rg} -v {vault} -n {job3}', checks=[
             self.check("properties.entityFriendlyName", '{item1}'),
             self.check("properties.operation", "Restore"),
             self.check("resourceGroup", '{rg}')
