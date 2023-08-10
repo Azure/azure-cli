@@ -381,8 +381,14 @@ class TestCustom(unittest.TestCase):
         self.assertTrue(is_generated_params_file_exists)
 
     def test_bicep_build_params_defaults(self):
-        run_bicep_command(cli_ctx, ["build-params", "./sample_params.bicepparam"])
-        is_generated_params_file_exists = os.path.exists("./sample_params.parameters.json")
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+
+        param_file = os.path.join(curr_dir, 'sample_params.bicepparam').replace('\\', '\\\\')
+        json_file = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
+
+        run_bicep_command(cli_ctx, ["build-params", param_file])
+        is_generated_params_file_exists = os.path.exists(json_file)
+
         self.assertTrue(is_generated_params_file_exists)
 
     def test_bicep_decompile_params_defaults(self):
