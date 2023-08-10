@@ -1,6 +1,3 @@
-import json
-import os
-import openai
 import requests
 
 def error_assistance(prompt, error_message):      
