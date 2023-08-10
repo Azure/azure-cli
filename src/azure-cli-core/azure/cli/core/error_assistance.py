@@ -1,6 +1,5 @@
-import requests
-import os
 import openai
+import json
 
 def error_assistance(prompt, error_message):      
         openai.api_key = <api-key>
@@ -42,5 +41,19 @@ def error_assistance(prompt, error_message):
             functions=functions,
             function_call={"name": "error_response"}, 
         )   
-        
+
         return response
+
+def print_error_assistance(response):
+        args = response['choices'][0]['message']['function_call']['arguments']
+
+        arg_json = json.loads(args)
+
+        explanation = arg_json['explanation']
+        corrected_command = arg_json['corrected_command']
+
+        print("\n Issue: ")
+        print(explanation)
+        print("\n Corrected Command: ")
+        print(corrected_command)
+        
