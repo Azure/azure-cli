@@ -8,4 +8,5 @@
 # flake8: noqa
 import warnings
 
+from .v7_0.models import *
 from .v7_2.models import *

@@ -71,7 +71,7 @@ class CreateForRbacScenarioTest(RoleScenarioTestBase):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_new_cert')
     @KeyVaultPreparer(name_prefix='test-rbac-new-kv')
     def test_create_for_rbac_create_cert_keyvault(self, resource_group, key_vault):
-        KeyVaultErrorException = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_error#KeyVaultErrorException')
+        KeyVaultErrorException = get_sdk(self.cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT, 'models.key_vault_error#KeyVaultErrorException')
         subscription_id = self.get_subscription_id()
 
         self.kwargs.update({

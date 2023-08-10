@@ -61,7 +61,6 @@ DEPENDENCIES = [
     'azure-keyvault-certificates==4.7.0',
     'azure-keyvault-keys==4.8.0b2',
     'azure-keyvault-secrets==4.7.0',
-    'azure-keyvault~=1.1.0',
     'azure-loganalytics~=0.1.0',
     'azure-mgmt-advisor==9.0.0',
     'azure-mgmt-apimanagement==4.0.0',

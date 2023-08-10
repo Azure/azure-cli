@@ -9,10 +9,10 @@ import threading
 from collections import namedtuple
 
 import requests
-from azure.keyvault import http_bearer_challenge_cache as ChallengeCache
-from azure.keyvault.http_challenge import HttpChallenge
-from azure.keyvault.http_message_security import HttpMessageSecurity
-from azure.keyvault._internal import _RsaKey
+from . import http_bearer_challenge_cache as ChallengeCache
+from .http_challenge import HttpChallenge
+from .http_message_security import HttpMessageSecurity
+from ._internal import _RsaKey
 from msrest.authentication import OAuthTokenAuthentication
 from requests.auth import AuthBase
 from requests.cookies import extract_cookies_to_jar

@@ -45,7 +45,7 @@ def load_command_table(self, _):
     mgmt_vaults_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.vaults)
     mgmt_pec_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.private_endpoint_connections)
     mgmt_plr_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.private_link_resources)
-    data_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT)
+    data_entity = get_client(self.cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT)
     data_key_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_KEYS)
     data_certificate_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_CERTIFICATES)
     data_secret_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_SECRETS)
@@ -53,7 +53,7 @@ def load_command_table(self, _):
     if not is_azure_stack_profile(self):
         mgmt_hsms_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)
         mgmt_hsms_regions_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.mhsm_regions)
-        private_data_entity = get_client(self.cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT)
+        private_data_entity = get_client(self.cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT, Clients.private_7_2)
         data_backup_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)
         data_access_control_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL)
         data_setting_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING)
@@ -273,7 +273,7 @@ def load_command_table(self, _):
         g.keyvault_custom('download', 'download_certificate')
         g.keyvault_custom('get-default-policy', 'get_default_policy')
 
-    data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT)). \
+    data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT)). \
         replace('.', '_').replace('-', '_')
 
     if data_api_version != '2016_10_01':
@@ -331,7 +331,7 @@ def load_command_table(self, _):
             g.keyvault_command('show', 'get_setting')
             g.keyvault_custom('update', 'update_hsm_setting')
 
-    data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT)).\
+    data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT)).\
         replace('.', '_').replace('-', '_')
 
     if data_api_version != '2016_10_01':

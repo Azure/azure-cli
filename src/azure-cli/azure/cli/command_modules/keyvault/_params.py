@@ -42,7 +42,7 @@ def load_arguments(self, _):
      SasDefinitionAttributes, StorageAccountAttributes) = self.get_models(
          'JsonWebKeyOperation', 'SasTokenType',
          'SasDefinitionAttributes', 'StorageAccountAttributes',
-         resource_type=ResourceType.DATA_KEYVAULT)
+         resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
 
     JsonWebKeyType = self.get_sdk('KeyType', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_enums')
     KeyCurveName = self.get_sdk('KeyCurveName', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_enums')
@@ -774,7 +774,7 @@ def load_arguments(self, _):
                 type=get_json_object, validator=process_certificate_policy)
         c.extra('tags', tags_type)
 
-    data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT)). \
+    data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT)). \
         replace('.', '_').replace('-', '_')
 
     if data_api_version != "2016_10_01":
