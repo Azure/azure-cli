@@ -26,7 +26,7 @@ import azure.cli.core.azclierror as CLIErrors
 from ._constants import (FeatureFlagConstants, KeyVaultConstants,
                          SearchFilterOptions, StatusCodes,
                          ImportExportProfiles, CompareFieldsMap,
-                         JsonDiff)
+                         JsonDiff, ImportMode)
 from ._models import (convert_configurationsetting_to_keyvalue, convert_keyvalue_to_configurationsetting)
 from ._utils import get_appconfig_data_client, prep_label_filter_for_url_encoding, resolve_store_metadata, get_store_endpoint_from_connection_string, is_json_content_type
 
@@ -54,6 +54,7 @@ def import_config(cmd,
                   content_type=None,
                   auth_mode="key",
                   endpoint=None,
+                  import_mode=ImportMode.IGNORE_MATCH,
                   # from-file parameters
                   path=None,
                   format_=None,
@@ -83,7 +84,7 @@ def import_config(cmd,
     # fetch key values from source
     if source == 'file':
         if profile == ImportExportProfiles.KVSET:
-            __import_kvset_from_file(client=azconfig_client, path=path, strict=strict, yes=yes)
+            __import_kvset_from_file(client=azconfig_client, path=path, strict=strict, yes=yes, import_mode=import_mode)
             return
         if format_ and content_type:
             # JSON content type is only supported with JSON format.
@@ -140,7 +141,7 @@ def import_config(cmd,
         src_kvs = __read_kv_from_app_service(
             cmd, appservice_account=appservice_account, prefix_to_add=prefix, content_type=content_type)
 
-    if strict or not yes:
+    if strict or not yes or import_mode == ImportMode.IGNORE_MATCH:
         # fetch key values from user's configstore
         dest_kvs = __read_kv_from_config_store(azconfig_client,
                                                key=prefix + SearchFilterOptions.ANY_KEY if prefix else SearchFilterOptions.ANY_KEY,
@@ -201,8 +202,20 @@ def import_config(cmd,
             __delete_configuration_setting_from_config_store(azconfig_client, kv)
 
     # import into configstore
+    # write only added and updated kvs
+    if import_mode == ImportMode.IGNORE_MATCH:
+        kvs_to_write = []
+        kvs_to_write.extend(kv_diff.get(JsonDiff.ADD, []))
+        kvs_to_write.extend(ff_diff.get(JsonDiff.ADD, []))
+        kvs_to_write.extend((update["new"] for update in kv_diff.get(JsonDiff.UPDATE, [])))
+        kvs_to_write.extend((update["new"] for update in ff_diff.get(JsonDiff.UPDATE, [])))
+
+    # write all kvs
+    else:
+        kvs_to_write = src_kvs
+
     __write_kv_and_features_to_config_store(azconfig_client,
-                                            key_values=src_kvs,
+                                            key_values=kvs_to_write,
                                             label=label,
                                             preserve_labels=preserve_labels,
                                             content_type=content_type)

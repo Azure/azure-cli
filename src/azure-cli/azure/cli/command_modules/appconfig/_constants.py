@@ -100,3 +100,8 @@ CompareFieldsMap = {
     "kvset": (CompareFields.CONTENT_TYPE, CompareFields.VALUE, CompareFields.TAGS),
     "restore": (CompareFields.VALUE, CompareFields.CONTENT_TYPE, CompareFields.LOCKED, CompareFields.TAGS)
 }
+
+
+class ImportMode:
+    ALL = "all"
+    IGNORE_MATCH = "ignore-match"
