@@ -6,7 +6,8 @@
 
 from knack.arguments import CLIArgumentType
 
-from azure.cli.core.commands.parameters import (get_location_type,
+from azure.cli.core.commands.parameters import (resource_group_name_type,
+                                                get_location_type,
                                                 file_type,
                                                 get_three_state_flag, get_enum_type, tags_type)
 
@@ -23,6 +24,7 @@ def load_arguments(self, _):
     with self.argument_context('containerapp') as c:
         # Base arguments
         c.argument('name', name_type, metavar='NAME', id_part='name', help=f"The name of the Containerapp. A name must consist of lower case alphanumeric characters or '-', start with a letter, end with an alphanumeric character, cannot have '--', and must be less than {MAXIMUM_CONTAINER_APP_NAME_LENGTH} characters.")
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.ignore('disable_warnings')
 
@@ -37,6 +39,7 @@ def load_arguments(self, _):
         c.argument('revision', help="The name of the container app revision to ssh into. Defaults to the latest revision.")
         c.argument('startup_command', options_list=["--command"], help="The startup command (bash, zsh, sh, etc.).")
         c.argument('name', name_type, id_part=None, help="The name of the Containerapp.")
+        c.argument('resource_group_name', arg_type=resource_group_name_type, id_part=None)
 
     with self.argument_context('containerapp logs show') as c:
         c.argument('follow', help="Print logs in real time if present.", arg_type=get_three_state_flag())
@@ -46,6 +49,7 @@ def load_arguments(self, _):
         c.argument('replica', help="The name of the replica. List replicas with 'az containerapp replica list'. A replica may not exist if there is not traffic to your app.")
         c.argument('revision', help="The name of the container app revision. Defaults to the latest revision.")
         c.argument('name', name_type, id_part=None, help="The name of the Containerapp.")
+        c.argument('resource_group_name', arg_type=resource_group_name_type, id_part=None)
         c.argument('kind', options_list=["--type", "-t"], help="Type of logs to stream", arg_type=get_enum_type([LOG_TYPE_CONSOLE, LOG_TYPE_SYSTEM]), default=LOG_TYPE_CONSOLE)
 
     with self.argument_context('containerapp env logs show') as c:
@@ -57,6 +61,7 @@ def load_arguments(self, _):
         c.argument('replica', help="The name of the replica. ")
         c.argument('revision', help="The name of the container app revision. Defaults to the latest revision.")
         c.argument('name', name_type, id_part=None, help="The name of the Containerapp.")
+        c.argument('resource_group_name', arg_type=resource_group_name_type, id_part=None)
 
     # Container
     with self.argument_context('containerapp', arg_group='Container') as c:
@@ -151,6 +156,7 @@ def load_arguments(self, _):
 
     with self.argument_context('containerapp env') as c:
         c.argument('name', name_type, help='Name of the Container Apps environment.')
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('location', arg_type=get_location_type(self.cli_ctx), help='Location of resource. Examples: eastus2, northeurope')
         c.argument('tags', arg_type=tags_type)
 
@@ -180,6 +186,7 @@ def load_arguments(self, _):
     with self.argument_context('containerapp service') as c:
         c.argument('service_name', options_list=['--name', '-n'], help="The service name.")
         c.argument('environment_name', options_list=['--environment'], help="The environment name.")
+        c.argument('resource_group_name', arg_type=resource_group_name_type, id_part=None)
 
     with self.argument_context('containerapp env create') as c:
         c.argument('zone_redundant', options_list=["--zone-redundant", "-z"], help="Enable zone redundancy on the environment. Cannot be used without --infrastructure-subnet-resource-id. If used with --location, the subnet's location must match")
@@ -339,6 +346,7 @@ def load_arguments(self, _):
         c.argument('name', id_part=None)
 
     with self.argument_context('containerapp up') as c:
+        c.argument('resource_group_name', configured_default='resource_group_name', id_part=None)
         c.argument('location', configured_default='location')
         c.argument('name', configured_default='name', id_part=None)
         c.argument('managed_env', configured_default='managed_env')
