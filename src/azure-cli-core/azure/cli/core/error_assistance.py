@@ -2,11 +2,6 @@ import openai
 import json
 import shutil
 
-from prompt_toolkit.layout.dimension import LayoutDimension
-from prompt_toolkit.layout.containers import VSplit, HSplit, Window, FloatContainer, Float, ConditionalContainer
-from prompt_toolkit.layout.controls import FillControl
-from pygments.token import Token
-
 def error_assistance(prompt, error_message):      
         openai.api_key = <api-key>
         openai.api_version = "2023-07-01-preview"
@@ -23,17 +18,17 @@ def error_assistance(prompt, error_message):
         functions = [  
             {
                 "name": "error_response",
-                "description": "Receives an Azure CLI error message and the user's command and provides an explanation as to what the problem is as well as the corrected command",
+                "description": "Receives an Azure CLI error message and the user's command that triggered the error and provides an explanation as to what the problem is as well as the corrected command without any additional text",
                 "parameters": {
                     "type": "object",
                     "properties": {
                         "explanation": {
                             "type": "string",
-                            "description": "The explanation of what the user did wrong in their initial command"
+                            "description": "The explanation of what the user did wrong in their initial command (i.e. The error was triggered because --name flag is missing before the resource name)"
                         },
                         "corrected_command": {
                             "type": "string",
-                            "description": "The corrected command"
+                            "description": "The corrected command (i.e. az keyvault create --name <UniqueKeyvaultName> --resource-group <myResourceGroup> --location <eastus>)"
                         }
                     },
                     "required": ["explanation", "corrected_command"],
