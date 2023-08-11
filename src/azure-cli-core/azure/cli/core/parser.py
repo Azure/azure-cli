@@ -324,6 +324,10 @@ class AzCliCommandParser(CLICommandParser):
             if candidates:
                 az_error.set_recommendation("Did you mean '{}' ?".format(candidates[0]))
 
+            # Get error reason from Azure OpenAI
+            prompt = command_arguments[0] + ' ' + command_arguments[1][0]
+            ai_error_assistance = error_assistance(prompt=prompt, error_message=error_msg)
+
             # recommend a command for user
             recommender = CommandRecommender(*command_arguments, error_msg, cli_ctx)
             recommender.set_help_examples(self.get_examples(command_name_inferred))
@@ -337,7 +341,7 @@ class AzCliCommandParser(CLICommandParser):
                     and use_dynamic_install == 'no':
                 az_error.set_recommendation(EXTENSION_REFERENCE)
 
-            az_error.print_error()
+            az_error.print_error(ai_error_assistance)
             az_error.send_telemetry()
 
             self.exit(2)
