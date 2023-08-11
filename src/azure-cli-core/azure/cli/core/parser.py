@@ -325,7 +325,7 @@ class AzCliCommandParser(CLICommandParser):
                 az_error.set_recommendation("Did you mean '{}' ?".format(candidates[0]))
 
             # Get error reason from Azure OpenAI
-            prompt = command_arguments[0] + ' ' + command_arguments[1][0]
+            prompt = command_arguments[0] + ' ' + command_arguments[1][1]
             ai_error_assistance = error_assistance(prompt=prompt, error_message=error_msg)
 
             # recommend a command for user
