@@ -41,7 +41,7 @@ def error_assistance(prompt, error_message):
             messages=messages,
             functions=functions,
             function_call={"name": "error_response"}, 
-        )   
+        )  
 
         return response
 
