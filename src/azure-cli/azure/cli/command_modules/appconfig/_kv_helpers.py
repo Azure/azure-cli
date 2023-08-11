@@ -18,7 +18,7 @@ import yaml
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azure.keyvault.key_vault_id import KeyVaultIdentifier
+from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1.key_vault_id import KeyVaultIdentifier
 from azure.appconfiguration import ResourceReadOnlyError, ConfigurationSetting
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.util import user_confirmation
@@ -829,7 +829,7 @@ def __compact_key_values(key_values):
 
 
 def __resolve_secret(keyvault_client, keyvault_reference):
-    from azure.keyvault.key_vault_id import SecretId
+    from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1.key_vault_id import SecretId
     try:
         secret_id = json.loads(keyvault_reference.value)["uri"]
         kv_identifier = SecretId(uri=secret_id)

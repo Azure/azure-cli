@@ -39,10 +39,7 @@ OPERATIONS_NAME = {
 KEYVAULT_TEMPLATE_STRINGS = {
     ResourceType.MGMT_KEYVAULT:
         'azure.mgmt.keyvault{api_version}.{module_name}#{class_name}{obj_name}',
-    ResourceType.DATA_PRIVATE_KEYVAULT:
-        'azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1{api_version}.'
-        'key_vault_client#{class_name}{obj_name}',
-    ResourceType.DATA_PRIVATE_KEYVAULT:
+    ResourceType.DATA_KEYVAULT:
         'azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1{api_version}.'
         'key_vault_client#{class_name}{obj_name}',
     ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP:
@@ -111,7 +108,7 @@ def get_docs_tmpl(cli_ctx, resource_type, client_name, module_name='operations')
 def get_client_factory(resource_type, client_name=''):
     if is_mgmt_plane(resource_type):
         return keyvault_mgmt_client_factory(resource_type, client_name)
-    if resource_type == ResourceType.DATA_PRIVATE_KEYVAULT:
+    if resource_type == ResourceType.DATA_KEYVAULT:
         if client_name == Clients.private_7_2:
             return keyvault_private_data_plane_factory_v7_2_preview
         return keyvault_data_plane_factory
@@ -175,7 +172,7 @@ def keyvault_data_plane_factory(cli_ctx, *_):
         KeyVaultAuthentication, KeyVaultClient)
     from azure.cli.core.util import should_disable_connection_verify
 
-    version = str(get_api_version(cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT))
+    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
 
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
         return Profile(cli_ctx=cli_ctx).get_raw_token(resource=resource,

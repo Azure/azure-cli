@@ -1121,7 +1121,7 @@ def _create_certificate(cmd,
 
             policy = _get_default_policy(cli_ctx, certificate_subject_name)
             logger.info("Creating self-signed certificate")
-            _create_self_signed_key_vault_certificate.__doc__ = get_sdk(cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT, 'key_vault_client#KeyVaultClient').__doc__
+            _create_self_signed_key_vault_certificate.__doc__ = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'key_vault_client#KeyVaultClient').__doc__
             result = _create_self_signed_key_vault_certificate(
                 cli_ctx, vault_uri, certificate_name, policy, certificate_output_folder=certificate_output_folder)
             kv_result = result[0]
@@ -1406,9 +1406,9 @@ def _get_certificate(client, vault_base_url, certificate_name):
 
 def import_certificate(cli_ctx, vault_base_url, certificate_name, certificate_data,
                        disabled=False, password=None, certificate_policy=None, tags=None):
-    CertificateAttributes = get_sdk(cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT, 'models.certificate_attributes#CertificateAttributes')
-    CertificatePolicy = get_sdk(cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT, 'models.certificate_policy#CertificatePolicy')
-    SecretProperties = get_sdk(cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT, 'models.secret_properties#SecretProperties')
+    CertificateAttributes = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.certificate_attributes#CertificateAttributes')
+    CertificatePolicy = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.certificate_policy#CertificatePolicy')
+    SecretProperties = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.secret_properties#SecretProperties')
     import binascii
     certificate_data = open(certificate_data, 'rb').read()
     x509 = None
@@ -1526,17 +1526,17 @@ def _get_default_policy(cli_ctx, subject):
 
 
 def _default_certificate_profile(cli_ctx, subject):
-    CertificateAttributes = get_sdk(cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT, 'models.certificate_attributes#CertificateAttributes')
-    CertificatePolicy = get_sdk(cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT, 'models.certificate_policy#CertificatePolicy')
-    ActionType = get_sdk(cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT, 'models.key_vault_client_enums#ActionType')
-    KeyUsageType = get_sdk(cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT, 'models.key_vault_client_enums#KeyUsageType')
-    IssuerParameters = get_sdk(cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT, 'models.issuer_parameters#IssuerParameters')
-    KeyProperties = get_sdk(cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT, 'models.key_properties#KeyProperties')
-    LifetimeAction = get_sdk(cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT, 'models.lifetime_action#LifetimeAction')
-    SecretProperties = get_sdk(cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT, 'models.secret_properties#SecretProperties')
-    X509CertificateProperties = get_sdk(cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT, 'models.x509_certificate_properties#X509CertificateProperties')
-    Trigger = get_sdk(cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT, 'models.trigger#Trigger')
-    Action = get_sdk(cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT, 'models.action#Action')
+    CertificateAttributes = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.certificate_attributes#CertificateAttributes')
+    CertificatePolicy = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.certificate_policy#CertificatePolicy')
+    ActionType = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_client_enums#ActionType')
+    KeyUsageType = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_client_enums#KeyUsageType')
+    IssuerParameters = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.issuer_parameters#IssuerParameters')
+    KeyProperties = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_properties#KeyProperties')
+    LifetimeAction = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.lifetime_action#LifetimeAction')
+    SecretProperties = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.secret_properties#SecretProperties')
+    X509CertificateProperties = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.x509_certificate_properties#X509CertificateProperties')
+    Trigger = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.trigger#Trigger')
+    Action = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.action#Action')
     template = CertificatePolicy(key_properties=KeyProperties(exportable=True,
                                                               key_type=u'RSA',
                                                               key_size=2048,
@@ -1561,7 +1561,7 @@ def _default_certificate_profile(cli_ctx, subject):
 
 
 def _create_self_signed_key_vault_certificate(cli_ctx, vault_base_url, certificate_name, certificate_policy, certificate_output_folder=None, disabled=False, tags=None, validity=None):
-    CertificateAttributes = get_sdk(cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT, 'models.certificate_attributes#CertificateAttributes')
+    CertificateAttributes = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.certificate_attributes#CertificateAttributes')
     cert_attrs = CertificateAttributes(enabled=not disabled)
     logger.info("Starting long-running operation 'keyvault certificate create'")
     if validity is not None:

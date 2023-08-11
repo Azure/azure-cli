@@ -183,7 +183,7 @@ def process_secret_set_namespace(namespace):
 
 
 def process_sas_token_parameter(cmd, ns):
-    SASTokenParameter = cmd.get_models('SASTokenParameter', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
+    SASTokenParameter = cmd.get_models('SASTokenParameter', resource_type=ResourceType.DATA_KEYVAULT)
     return SASTokenParameter(storage_resource_uri=ns.storage_resource_uri, token=ns.token)
 
 
