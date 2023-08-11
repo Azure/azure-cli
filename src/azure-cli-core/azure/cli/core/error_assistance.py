@@ -25,7 +25,7 @@ def error_assistance(prompt, error_message):
                     "properties": {
                         "explanation": {
                             "type": "string",
-                            "description": "The explanation of what the user did wrong in their initial command (i.e. The error was triggered because --name flag is missing before the resource name)"
+                            "description": "The explanation of what the user did wrong in their initial command (i.e. The --name flag is missing before the resource name)"
                         },
                         "corrected_command": {
                             "type": "string",
