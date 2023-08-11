@@ -8,7 +8,8 @@
 # Changes may cause incorrect behavior and will be lost if the code is
 # regenerated.
 # --------------------------------------------------------------------------
-
+# pylint: skip-file
+# flake8: noqa
 from msrest.serialization import Model
 from msrest.exceptions import HttpOperationError
 
