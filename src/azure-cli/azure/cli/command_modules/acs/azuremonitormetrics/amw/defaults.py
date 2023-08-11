@@ -7,7 +7,7 @@ from azure.cli.command_modules.acs.azuremonitormetrics.deaults import get_defaul
 from azure.cli.command_modules.acs.azuremonitormetrics.responseparsers.amwlocationresponseparser import (
     parseResourceProviderResponseForLocations
 )
-from azure.cli.command_modules.acs.azuremonitormetrics.constants import RP_LOCATION_API
+from azure.cli.command_modules.acs.azuremonitormetrics.constants import RP_LOCATION_API, MapToClosestMACRegion
 from knack.util import CLIError
 
 
@@ -25,6 +25,8 @@ def get_supported_rp_locations(cmd, rp_name):
 
 def get_default_mac_region(cmd, cluster_region):
     supported_locations = get_supported_rp_locations(cmd, 'Microsoft.Monitor')
+    if cluster_region == 'centraluseuap':
+        return MapToClosestMACRegion[cluster_region]
     if cluster_region in supported_locations:
         return cluster_region
     if len(supported_locations) > 0:
