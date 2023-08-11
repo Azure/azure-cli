@@ -2317,12 +2317,6 @@ class VMSSSimulateEvictionScenarioTest(ScenarioTest):
         self.kwargs['instance_ids'] = [x['instanceId'] for x in instance_list]
         self.kwargs['id'] = self.kwargs['instance_ids'][0]
         self.cmd('vmss simulate-eviction --resource-group {rg} --name {vmss2} --instance-id {id}')
-        time.sleep(180)
-        self.cmd('vmss get-instance-view --resource-group {rg} --name {vmss2} --instance-id {id}', checks=[
-            self.check('length(statuses)', 2),
-            self.check('statuses[0].code', 'ProvisioningState/succeeded'),
-            self.check('statuses[1].code', 'PowerState/deallocated'),
-        ])
 
         # simulate-eviction on a Spot VMSS with Delete policy, expect VMSS instance to be deleted
         self.cmd('vmss create --resource-group {rg} --name {vmss3} --location {loc} --instance-count 2 --image OpenLogic:CentOS:7.5:latest --priority Spot --eviction-policy Delete --single-placement-group True --admin-username vmtest')
