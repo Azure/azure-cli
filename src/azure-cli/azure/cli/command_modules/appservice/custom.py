@@ -659,8 +659,8 @@ def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, sl
 
     # check the status of async deployment
     if res.status_code == 202:
-        response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
-                                                slot, timeout)
+        response = _check_zip_deployment_status_flex(cmd, resource_group_name, name, deployment_status_url,
+                                                     timeout)
         return response
 
     # check if there's an ongoing process
@@ -4550,6 +4550,41 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, slot
     headers = get_scm_site_headers(cmd.cli_ctx, name, rg_name, slot)
     total_trials = (int(timeout) // 2) if timeout else 450
     num_trials = 0
+    while num_trials < total_trials:
+        time.sleep(2)
+        response = requests.get(deployment_status_url, headers=headers,
+                                verify=not should_disable_connection_verify())
+        try:
+            res_dict = response.json()
+        except json.decoder.JSONDecodeError:
+            logger.warning("Deployment status endpoint %s returns malformed data. Retrying...", deployment_status_url)
+            res_dict = {}
+        finally:
+            num_trials = num_trials + 1
+
+        if res_dict.get('status', 0) == 3:
+            _configure_default_logging(cmd, rg_name, name)
+            raise CLIError("Zip deployment failed. {}. Please run the command az webapp log deployment show "
+                           "-n {} -g {}".format(res_dict, name, rg_name))
+        if res_dict.get('status', 0) == 4:
+            break
+        if 'progress' in res_dict:
+            logger.info(res_dict['progress'])  # show only in debug mode, customers seem to find this confusing
+    # if the deployment is taking longer than expected
+    if res_dict.get('status', 0) != 4:
+        _configure_default_logging(cmd, rg_name, name)
+        raise CLIError("""Timeout reached by the command, however, the deployment operation
+                       is still on-going. Navigate to your scm site to check the deployment status""")
+    return res_dict
+
+
+def _check_zip_deployment_status_flex(cmd, rg_name, name, deployment_status_url, timeout=None):
+    import requests
+    from azure.cli.core.util import should_disable_connection_verify
+
+    headers = get_scm_site_headers_flex(cmd.cli_ctx)
+    total_trials = (int(timeout) // 2) if timeout else 450
+    num_trials = 0
     # Indicates whether the status has been non empty in previous calls
     has_response = False
     while num_trials < total_trials:
@@ -4573,8 +4608,6 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, slot
         if status == -1:
             raise CLIError("Deployment was cancelled.")
         elif status == 3:
-            if not is_flex_functionapp(cmd, rg_name, name):
-                _configure_default_logging(cmd, rg_name, name)
             raise CLIError("Zip deployment failed. {}. These are the deployment logs: \n{}".format(
                            res_dict, json.dumps(show_deployment_log(cmd, rg_name, name))))
         elif status == 4:
@@ -4588,8 +4621,6 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, slot
             logger.info(res_dict['progress'])  # show only in debug mode, customers seem to find this confusing
     # if the deployment is taking longer than expected
     if res_dict.get('status', 0) != 4:
-        if not is_flex_functionapp(cmd, rg_name, name):
-            _configure_default_logging(cmd, rg_name, name)
         raise CLIError("""Timeout reached by the command, however, the deployment operation
                        is still on-going. Navigate to your scm site to check the deployment status""")
     return res_dict
