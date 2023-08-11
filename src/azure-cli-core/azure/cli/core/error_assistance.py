@@ -8,7 +8,8 @@ def error_assistance(prompt, error_message):
         openai.api_type = "azure"
         openai.api_base = <endpoint>
 
-        revised_prompt = "Azure CLI Command: " + prompt + ", Error received: " + error_message + ". What am I doing wrong?"
+        #revised_prompt = "Azure CLI Command: " + prompt + ", Error received: " + error_message + ". What am I doing wrong?"
+        revised_prompt = "Azure CLI Command: " + prompt + ", This isn't working, why not?"
 
         messages = [
                 {"role": "system", "content": "You are a helpful assistant that provides concise explanations about the Azure CLI error provided and provides a remedied command."},
