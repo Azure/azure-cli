@@ -4592,11 +4592,12 @@ def _check_zip_deployment_status_flex(cmd, rg_name, name, deployment_status_url,
         response = requests.get(deployment_status_url, headers=headers,
                                 verify=not should_disable_connection_verify())
         try:
-            res_dict = response.json()
-            if res_dict.get('status') is None and has_response:
-                raise CLIError("Failed to retrieve deployment status. Please visit {}".format(deployment_status_url))
-            elif res_dict.get('status') is not None and not has_response:
+            if (response.status_code == 404 or response.json().get('status') is None) and has_response:
+                raise CLIError("Failed to retrieve deployment status. Please try again in a few minutes.".format(deployment_status_url))
+            elif (response.status_code != 404 and response.json().get('status') is not None) and not has_response:
                 has_response = True
+
+            res_dict = response.json()
         except json.decoder.JSONDecodeError:
             logger.warning("Deployment status endpoint %s returns malformed data. Retrying...", deployment_status_url)
             res_dict = {}
