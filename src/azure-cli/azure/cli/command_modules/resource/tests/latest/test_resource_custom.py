@@ -366,28 +366,36 @@ class TestCustom(unittest.TestCase):
         self.assertEqual(_is_bicepparam_file_provided([['test.bicepparam'], ['test.json'],  ['{ \"foo\": { \"value\": \"bar\" } }']]), True)
 
     def test_bicep_generate_params_defaults(self):
-        run_bicep_command(cli_ctx, ["generate-params", "./sample_params.bicep"])
-        is_generated_params_file_exists = os.path.exists("./sample_params.parameters.json")
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        bicep_file = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+        json_file = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
+
+        run_bicep_command(cli_ctx, ["generate-params", bicep_file])
+        is_generated_params_file_exists = os.path.exists(json_file)
         self.assertTrue(is_generated_params_file_exists)
 
     def test_bicep_generate_params_output_format(self):
-        run_bicep_command(cli_ctx, ["generate-params", "./sample_params.bicep", "--output-format", "json"])
-        is_generated_params_file_exists = os.path.exists("./sample_params.parameters.json")
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        bicep_file = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+        json_file = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
+
+        run_bicep_command(cli_ctx, ["generate-params", bicep_file, "--output-format", "json"])
+        is_generated_params_file_exists = os.path.exists(json_file)
         self.assertTrue(is_generated_params_file_exists)
 
     def test_bicep_generate_params_include_params(self):
-        run_bicep_command(cli_ctx, ["generate-params", "./sample_params.bicep", "--include-params", "all"])
-        is_generated_params_file_exists = os.path.exists("./sample_params.parameters.json")
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        bicep_file = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+        json_file = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
+
+        run_bicep_command(cli_ctx, ["generate-params", bicep_file, "--include-params", "all"])
+        is_generated_params_file_exists = os.path.exists(json_file)
         self.assertTrue(is_generated_params_file_exists)
 
     def test_bicep_build_params_defaults(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-
         param_file = os.path.join(curr_dir, 'sample_params.bicepparam').replace('\\', '\\\\')
         json_file = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
-
-        print(param_file)
-        print(json_file)
 
         run_bicep_command(cli_ctx, ["build-params", param_file])
         is_generated_params_file_exists = os.path.exists(json_file)
@@ -396,12 +404,8 @@ class TestCustom(unittest.TestCase):
 
     def test_bicep_decompile_params_defaults(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-
         param_file = os.path.join(curr_dir, 'param-validation-params.bicepparam').replace('\\', '\\\\')
         json_file = os.path.join(curr_dir, 'param-validation-params.json').replace('\\', '\\\\')
-
-        print(param_file)
-        print(json_file)
 
         run_bicep_command(cli_ctx, ["decompile-params", json_file, "--force"])
         is_generated_params_file_exists = os.path.exists(param_file)
