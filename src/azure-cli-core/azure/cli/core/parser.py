@@ -159,24 +159,25 @@ class AzCliCommandParser(CLICommandParser):
         recommender.set_help_examples(self.get_examples(self.prog))
         recommendations = recommender.provide_recommendations()
 
-        # Get error reason from Azure OpenAI
-        prompt = command_arguments[0] + ' ' + command_arguments[1][0]
-        ai_error_assistance = error_assistance(prompt=prompt, error_message=message)
+        # Get command to provide to error help
+        command = self._namespace.command 
+        parameters = AzCliCommandInvoker._extract_parameter_names(self._raw_arguments)
+        full_command = str(command) + ' ' + ''.join(parameters)
 
-        az_error = ArgumentUsageError(message)
+        az_error = ArgumentUsageError(message, full_command)
         if 'unrecognized arguments' in message:
-            az_error = UnrecognizedArgumentError(message)
+            az_error = UnrecognizedArgumentError(message, full_command)
         elif 'arguments are required' in message:
-            az_error = RequiredArgumentMissingError(message)
+            az_error = RequiredArgumentMissingError(message, full_command)
         elif 'invalid' in message:
-            az_error = InvalidArgumentValueError(message)
+            az_error = InvalidArgumentValueError(message, full_command)
 
         if '--query' in message:
             from azure.cli.core.util import QUERY_REFERENCE
             az_error.set_recommendation(QUERY_REFERENCE)
         elif recommendations:
             az_error.set_aladdin_recommendation(recommendations)
-        az_error.print_error(ai_error_assistance)
+        az_error.print_error()
         az_error.send_telemetry()
         self.exit(2)
 
@@ -295,6 +296,11 @@ class AzCliCommandParser(CLICommandParser):
             # use cli_ctx from cli_help which is not lost.
             cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
 
+            # Get command to provide to error help
+            command = self._namespace.command 
+            parameters = AzCliCommandInvoker._extract_parameter_names(self._raw_arguments)
+            full_command = str(command) + ' ' + ''.join(parameters)
+
             command_name_inferred = self.prog
             use_dynamic_install = 'no'
             if not self.command_source:
@@ -306,7 +312,7 @@ class AzCliCommandParser(CLICommandParser):
                 use_dynamic_install = try_install_extension(self, args)
                 # parser has no `command_source`, value is part of command itself
                 error_msg = "'{value}' is misspelled or not recognized by the system.".format(value=value)
-                az_error = CommandNotFoundError(error_msg)
+                az_error = CommandNotFoundError(error_msg, full_command)
                 candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
                 if candidates:
                     # use the most likely candidate to replace the misspelled command
@@ -317,16 +323,12 @@ class AzCliCommandParser(CLICommandParser):
                 parameter = action.option_strings[0] if action.option_strings else action.dest
                 error_msg = "{prog}: '{value}' is not a valid value for '{param}'. Allowed values: {choices}.".format(
                     prog=self.prog, value=value, param=parameter, choices=', '.join([str(x) for x in action.choices]))
-                az_error = InvalidArgumentValueError(error_msg)
+                az_error = InvalidArgumentValueError(error_msg, full_command)
                 candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
 
             command_arguments = self._get_failure_recovery_arguments(action)
             if candidates:
                 az_error.set_recommendation("Did you mean '{}' ?".format(candidates[0]))
-
-            # Get error reason from Azure OpenAI
-            prompt = command_arguments[0] + ' ' + command_arguments[1][1]
-            ai_error_assistance = error_assistance(prompt=prompt, error_message=error_msg)
 
             # recommend a command for user
             recommender = CommandRecommender(*command_arguments, error_msg, cli_ctx)
