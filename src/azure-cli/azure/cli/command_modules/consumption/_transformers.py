@@ -74,14 +74,25 @@ def transform_marketplace_list_output(result):
     return [marketplace_list_output(item) for item in result]
 
 
+# def budget_output(result):
+#     result.amount = str(result.amount)
+#     if result.current_spend:
+#         result.current_spend.amount = str(result.current_spend.amount)
+#     if result.notifications:
+#         for key in result.notifications:
+#             value = result.notifications[key]
+#             value.threshold = str(value.threshold)
+#     return result
+
+
 def budget_output(result):
-    result.amount = str(result.amount)
-    if result.current_spend:
-        result.current_spend.amount = str(result.current_spend.amount)
-    if result.notifications:
-        for key in result.notifications:
-            value = result.notifications[key]
-            value.threshold = str(value.threshold)
+    result['amount'] = str(result['amount'])
+    if 'currentSpend' in result:
+        result['currentSpend']['amount'] = str(result['currentSpend'].get('amount', None))
+    if 'notifications' in result:
+        for key in result['notifications']:
+            value = result['notifications'][key]
+            value['threshold'] = str(value.get('threshold', None))
     return result
 
 
