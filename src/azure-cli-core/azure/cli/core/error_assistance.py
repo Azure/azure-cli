@@ -1,5 +1,11 @@
 import openai
 import json
+import shutil
+
+from prompt_toolkit.layout.dimension import LayoutDimension
+from prompt_toolkit.layout.containers import VSplit, HSplit, Window, FloatContainer, Float, ConditionalContainer
+from prompt_toolkit.layout.controls import FillControl
+from pygments.token import Token
 
 def error_assistance(prompt, error_message):      
         openai.api_key = <api-key>
@@ -52,8 +58,19 @@ def print_error_assistance(response):
         explanation = arg_json['explanation']
         corrected_command = arg_json['corrected_command']
 
-        print("\n Issue: ")
+        
+        print("\n")
+        print_line()
+        print("Issue: ")
         print(explanation)
-        print("\n Corrected Command: ")
+        print("\n")
+        print("Corrected Command: ")
         print(corrected_command)
+        print_line()
+
+def print_line():
+        console_width = shutil.get_terminal_size().columns
+        dashed_line = "-" * console_width
+
+        print(dashed_line)
         
