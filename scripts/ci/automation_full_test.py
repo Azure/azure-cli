@@ -36,7 +36,7 @@ job_name = os.environ.get('JOB_NAME', None)
 pull_request_number = os.environ.get('PULL_REQUEST_NUMBER', None)
 enable_pipeline_result = bool(job_name and python_version)
 unique_job_name = ' '.join([job_name, python_version, profile, str(instance_idx)]) if enable_pipeline_result else None
-enable_traceback = True if os.environ.get('ENABLE_TRACEBACK').lower() == 'true' else False
+enable_traceback = True if os.environ.get('ENABLE_TRACEBACK') and os.environ.get('ENABLE_TRACEBACK').lower() == 'true' else False
 cli_jobs = {
             'acr': 45,
             'acs': 62,
