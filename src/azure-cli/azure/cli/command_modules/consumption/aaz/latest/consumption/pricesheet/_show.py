@@ -45,7 +45,7 @@ class Show(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.billing_period_name = AAZStrArg(
             options=["-p", "--billing-period-name"],
-            help="Name of the billing period to get the marketplace.",
+            help="Name of the billing period to get the price sheet.",
             id_part="name",
         )
         _args_schema.expand = AAZStrArg(

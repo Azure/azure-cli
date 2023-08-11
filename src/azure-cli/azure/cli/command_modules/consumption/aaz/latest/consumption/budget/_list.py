@@ -16,7 +16,7 @@ from azure.cli.core.aaz import *
     is_preview=True,
 )
 class List(AAZCommand):
-    """List all budgets for a subscription.
+    """List budgets for an Azure subscription.
     """
 
     _aaz_info = {

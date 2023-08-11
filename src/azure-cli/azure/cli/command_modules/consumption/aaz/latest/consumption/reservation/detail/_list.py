@@ -45,11 +45,11 @@ class List(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.reservation_id = AAZStrArg(
             options=["--reservation-id"],
-            help="Id of the reservation",
+            help="Reservation id.",
         )
         _args_schema.reservation_order_id = AAZStrArg(
             options=["--reservation-order-id"],
-            help="Order Id of the reservation",
+            help="Reservation order id.",
             required=True,
         )
         _args_schema.filter = AAZStrArg(

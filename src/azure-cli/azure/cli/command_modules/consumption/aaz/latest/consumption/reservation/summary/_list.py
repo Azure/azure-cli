@@ -49,7 +49,7 @@ class List(AAZCommand):
         )
         _args_schema.reservation_order_id = AAZStrArg(
             options=["--reservation-order-id"],
-            help="Order Id of the reservation",
+            help="Reservation order id.",
             required=True,
         )
         _args_schema.filter = AAZStrArg(
@@ -58,7 +58,7 @@ class List(AAZCommand):
         )
         _args_schema.grain = AAZStrArg(
             options=["--grain"],
-            help="Can be daily or monthly",
+            help="Reservation summary grain. Possible values are daily or monthly.",
             required=True,
             enum={"daily": "daily", "monthly": "monthly"},
         )
