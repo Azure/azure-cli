@@ -28,9 +28,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-01-01",
+        "version": "2022-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkinterfaces/{}", "2022-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkinterfaces/{}", "2022-11-01"],
         ]
     }
 
@@ -121,10 +121,22 @@ class Create(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.auxiliary_mode = AAZStrArg(
+            options=["--auxiliary-mode"],
+            arg_group="Properties",
+            help="Auxiliary mode of Network Interface resource.",
+            enum={"AcceleratedConnections": "AcceleratedConnections", "Floating": "Floating", "MaxConnections": "MaxConnections", "None": "None"},
+        )
+        _args_schema.auxiliary_sku = AAZStrArg(
+            options=["--auxiliary-sku"],
+            arg_group="Properties",
+            help="Auxiliary sku of Network Interface resource.",
+            enum={"A1": "A1", "A2": "A2", "A4": "A4", "A8": "A8", "None": "None"},
+        )
         _args_schema.ip_configurations = AAZListArg(
             options=["--ip-configurations"],
             arg_group="Properties",
-            help="A list of IPConfigurations of the network interface.",
+            help="List of IP configurations of the network interface.",
         )
         _args_schema.nsg = AAZObjectArg(
             options=["--nsg"],
@@ -266,6 +278,11 @@ class Create(AAZCommand):
             options=["tunnel-interfaces"],
             help="An array of gateway load balancer tunnel interfaces.",
         )
+        _element.virtual_network = AAZObjectArg(
+            options=["virtual-network"],
+            help="A reference to a virtual network.",
+        )
+        cls._build_args_sub_resource_create(_element.virtual_network)
 
         load_balancer_backend_addresses = cls._args_schema.ip_configurations.Element.load_balancer_backend_address_pools.Element.load_balancer_backend_addresses
         load_balancer_backend_addresses.Element = AAZObjectArg()
@@ -278,7 +295,7 @@ class Create(AAZCommand):
         _element.admin_state = AAZStrArg(
             options=["admin-state"],
             help="A list of administrative states which once set can override health probe so that Load Balancer will always forward new connections to backend, or deny new connections and reset existing connections.",
-            enum={"Down": "Down", "Drain": "Drain", "None": "None", "Up": "Up"},
+            enum={"Down": "Down", "None": "None", "Up": "Up"},
         )
         _element.ip_address = AAZStrArg(
             options=["ip-address"],
@@ -465,25 +482,26 @@ class Create(AAZCommand):
         )
 
         ddos_settings = cls._args_schema.ip_configurations.Element.public_ip_address.ddos_settings
-        ddos_settings.ddos_custom_policy = AAZObjectArg(
-            options=["ddos-custom-policy"],
-            help="The DDoS custom policy associated with the public IP.",
+        ddos_settings.ddos_protection_plan = AAZObjectArg(
+            options=["ddos-protection-plan"],
+            help="The DDoS protection plan associated with the public IP. Can only be set if ProtectionMode is Enabled",
         )
-        cls._build_args_sub_resource_create(ddos_settings.ddos_custom_policy)
-        ddos_settings.protected_ip = AAZBoolArg(
-            options=["protected-ip"],
-            help="Enables DDoS protection on the public IP.",
-        )
-        ddos_settings.protection_coverage = AAZStrArg(
-            options=["protection-coverage"],
-            help="The DDoS protection policy customizability of the public IP. Only standard coverage will have the ability to be customized.",
-            enum={"Basic": "Basic", "Standard": "Standard"},
+        cls._build_args_sub_resource_create(ddos_settings.ddos_protection_plan)
+        ddos_settings.protection_mode = AAZStrArg(
+            options=["protection-mode"],
+            help="The DDoS protection mode of the public IP",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled", "VirtualNetworkInherited": "VirtualNetworkInherited"},
         )
 
         dns_settings = cls._args_schema.ip_configurations.Element.public_ip_address.dns_settings
         dns_settings.domain_name_label = AAZStrArg(
             options=["domain-name-label"],
             help="The domain name label. The concatenation of the domain name label and the regionalized DNS zone make up the fully qualified domain name associated with the public IP address. If a domain name label is specified, an A DNS record is created for the public IP in the Microsoft Azure DNS system.",
+        )
+        dns_settings.domain_name_label_scope = AAZStrArg(
+            options=["domain-name-label-scope"],
+            help="The domain name label scope. If a domain name label and a domain name label scope are specified, an A DNS record is created for the public IP in the Microsoft Azure DNS system with a hashed value includes in FQDN.",
+            enum={"NoReuse": "NoReuse", "ResourceGroupReuse": "ResourceGroupReuse", "SubscriptionReuse": "SubscriptionReuse", "TenantReuse": "TenantReuse"},
         )
         dns_settings.fqdn = AAZStrArg(
             options=["fqdn"],
@@ -1007,6 +1025,11 @@ class Create(AAZCommand):
             options=["tunnel-interfaces"],
             help="An array of gateway load balancer tunnel interfaces.",
         )
+        _element.virtual_network = AAZObjectArg(
+            options=["virtual-network"],
+            help="A reference to a virtual network.",
+        )
+        cls._build_args_sub_resource_create(_element.virtual_network)
 
         load_balancer_backend_addresses = cls._args_network_interface_ip_configuration_create.load_balancer_backend_address_pools.Element.load_balancer_backend_addresses
         load_balancer_backend_addresses.Element = AAZObjectArg()
@@ -1019,7 +1042,7 @@ class Create(AAZCommand):
         _element.admin_state = AAZStrArg(
             options=["admin-state"],
             help="A list of administrative states which once set can override health probe so that Load Balancer will always forward new connections to backend, or deny new connections and reset existing connections.",
-            enum={"Down": "Down", "Drain": "Drain", "None": "None", "Up": "Up"},
+            enum={"Down": "Down", "None": "None", "Up": "Up"},
         )
         _element.ip_address = AAZStrArg(
             options=["ip-address"],
@@ -1215,25 +1238,26 @@ class Create(AAZCommand):
         )
 
         ddos_settings = cls._args_network_interface_ip_configuration_create.public_ip_address.ddos_settings
-        ddos_settings.ddos_custom_policy = AAZObjectArg(
-            options=["ddos-custom-policy"],
-            help="The DDoS custom policy associated with the public IP.",
+        ddos_settings.ddos_protection_plan = AAZObjectArg(
+            options=["ddos-protection-plan"],
+            help="The DDoS protection plan associated with the public IP. Can only be set if ProtectionMode is Enabled",
         )
-        cls._build_args_sub_resource_create(ddos_settings.ddos_custom_policy)
-        ddos_settings.protected_ip = AAZBoolArg(
-            options=["protected-ip"],
-            help="Enables DDoS protection on the public IP.",
-        )
-        ddos_settings.protection_coverage = AAZStrArg(
-            options=["protection-coverage"],
-            help="The DDoS protection policy customizability of the public IP. Only standard coverage will have the ability to be customized.",
-            enum={"Basic": "Basic", "Standard": "Standard"},
+        cls._build_args_sub_resource_create(ddos_settings.ddos_protection_plan)
+        ddos_settings.protection_mode = AAZStrArg(
+            options=["protection-mode"],
+            help="The DDoS protection mode of the public IP",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled", "VirtualNetworkInherited": "VirtualNetworkInherited"},
         )
 
         dns_settings = cls._args_network_interface_ip_configuration_create.public_ip_address.dns_settings
         dns_settings.domain_name_label = AAZStrArg(
             options=["domain-name-label"],
             help="The domain name label. The concatenation of the domain name label and the regionalized DNS zone make up the fully qualified domain name associated with the public IP address. If a domain name label is specified, an A DNS record is created for the public IP in the Microsoft Azure DNS system.",
+        )
+        dns_settings.domain_name_label_scope = AAZStrArg(
+            options=["domain-name-label-scope"],
+            help="The domain name label scope. If a domain name label and a domain name label scope are specified, an A DNS record is created for the public IP in the Microsoft Azure DNS system with a hashed value includes in FQDN.",
+            enum={"NoReuse": "NoReuse", "ResourceGroupReuse": "ResourceGroupReuse", "SubscriptionReuse": "SubscriptionReuse", "TenantReuse": "TenantReuse"},
         )
         dns_settings.fqdn = AAZStrArg(
             options=["fqdn"],
@@ -1349,25 +1373,26 @@ class Create(AAZCommand):
         )
 
         ddos_settings = cls._args_network_interface_ip_configuration_create.public_ip_address.linked_public_ip_address.ddos_settings
-        ddos_settings.ddos_custom_policy = AAZObjectArg(
-            options=["ddos-custom-policy"],
-            help="The DDoS custom policy associated with the public IP.",
+        ddos_settings.ddos_protection_plan = AAZObjectArg(
+            options=["ddos-protection-plan"],
+            help="The DDoS protection plan associated with the public IP. Can only be set if ProtectionMode is Enabled",
         )
-        cls._build_args_sub_resource_create(ddos_settings.ddos_custom_policy)
-        ddos_settings.protected_ip = AAZBoolArg(
-            options=["protected-ip"],
-            help="Enables DDoS protection on the public IP.",
-        )
-        ddos_settings.protection_coverage = AAZStrArg(
-            options=["protection-coverage"],
-            help="The DDoS protection policy customizability of the public IP. Only standard coverage will have the ability to be customized.",
-            enum={"Basic": "Basic", "Standard": "Standard"},
+        cls._build_args_sub_resource_create(ddos_settings.ddos_protection_plan)
+        ddos_settings.protection_mode = AAZStrArg(
+            options=["protection-mode"],
+            help="The DDoS protection mode of the public IP",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled", "VirtualNetworkInherited": "VirtualNetworkInherited"},
         )
 
         dns_settings = cls._args_network_interface_ip_configuration_create.public_ip_address.linked_public_ip_address.dns_settings
         dns_settings.domain_name_label = AAZStrArg(
             options=["domain-name-label"],
             help="The domain name label. The concatenation of the domain name label and the regionalized DNS zone make up the fully qualified domain name associated with the public IP address. If a domain name label is specified, an A DNS record is created for the public IP in the Microsoft Azure DNS system.",
+        )
+        dns_settings.domain_name_label_scope = AAZStrArg(
+            options=["domain-name-label-scope"],
+            help="The domain name label scope. If a domain name label and a domain name label scope are specified, an A DNS record is created for the public IP in the Microsoft Azure DNS system with a hashed value includes in FQDN.",
+            enum={"NoReuse": "NoReuse", "ResourceGroupReuse": "ResourceGroupReuse", "SubscriptionReuse": "SubscriptionReuse", "TenantReuse": "TenantReuse"},
         )
         dns_settings.fqdn = AAZStrArg(
             options=["fqdn"],
@@ -1484,25 +1509,26 @@ class Create(AAZCommand):
         )
 
         ddos_settings = cls._args_network_interface_ip_configuration_create.public_ip_address.linked_public_ip_address.linked_public_ip_address.ddos_settings
-        ddos_settings.ddos_custom_policy = AAZObjectArg(
-            options=["ddos-custom-policy"],
-            help="The DDoS custom policy associated with the public IP.",
+        ddos_settings.ddos_protection_plan = AAZObjectArg(
+            options=["ddos-protection-plan"],
+            help="The DDoS protection plan associated with the public IP. Can only be set if ProtectionMode is Enabled",
         )
-        cls._build_args_sub_resource_create(ddos_settings.ddos_custom_policy)
-        ddos_settings.protected_ip = AAZBoolArg(
-            options=["protected-ip"],
-            help="Enables DDoS protection on the public IP.",
-        )
-        ddos_settings.protection_coverage = AAZStrArg(
-            options=["protection-coverage"],
-            help="The DDoS protection policy customizability of the public IP. Only standard coverage will have the ability to be customized.",
-            enum={"Basic": "Basic", "Standard": "Standard"},
+        cls._build_args_sub_resource_create(ddos_settings.ddos_protection_plan)
+        ddos_settings.protection_mode = AAZStrArg(
+            options=["protection-mode"],
+            help="The DDoS protection mode of the public IP",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled", "VirtualNetworkInherited": "VirtualNetworkInherited"},
         )
 
         dns_settings = cls._args_network_interface_ip_configuration_create.public_ip_address.linked_public_ip_address.linked_public_ip_address.dns_settings
         dns_settings.domain_name_label = AAZStrArg(
             options=["domain-name-label"],
             help="The domain name label. The concatenation of the domain name label and the regionalized DNS zone make up the fully qualified domain name associated with the public IP address. If a domain name label is specified, an A DNS record is created for the public IP in the Microsoft Azure DNS system.",
+        )
+        dns_settings.domain_name_label_scope = AAZStrArg(
+            options=["domain-name-label-scope"],
+            help="The domain name label scope. If a domain name label and a domain name label scope are specified, an A DNS record is created for the public IP in the Microsoft Azure DNS system with a hashed value includes in FQDN.",
+            enum={"NoReuse": "NoReuse", "ResourceGroupReuse": "ResourceGroupReuse", "SubscriptionReuse": "SubscriptionReuse", "TenantReuse": "TenantReuse"},
         )
         dns_settings.fqdn = AAZStrArg(
             options=["fqdn"],
@@ -1949,25 +1975,26 @@ class Create(AAZCommand):
         )
 
         ddos_settings = cls._args_public_ip_address_create.ddos_settings
-        ddos_settings.ddos_custom_policy = AAZObjectArg(
-            options=["ddos-custom-policy"],
-            help="The DDoS custom policy associated with the public IP.",
+        ddos_settings.ddos_protection_plan = AAZObjectArg(
+            options=["ddos-protection-plan"],
+            help="The DDoS protection plan associated with the public IP. Can only be set if ProtectionMode is Enabled",
         )
-        cls._build_args_sub_resource_create(ddos_settings.ddos_custom_policy)
-        ddos_settings.protected_ip = AAZBoolArg(
-            options=["protected-ip"],
-            help="Enables DDoS protection on the public IP.",
-        )
-        ddos_settings.protection_coverage = AAZStrArg(
-            options=["protection-coverage"],
-            help="The DDoS protection policy customizability of the public IP. Only standard coverage will have the ability to be customized.",
-            enum={"Basic": "Basic", "Standard": "Standard"},
+        cls._build_args_sub_resource_create(ddos_settings.ddos_protection_plan)
+        ddos_settings.protection_mode = AAZStrArg(
+            options=["protection-mode"],
+            help="The DDoS protection mode of the public IP",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled", "VirtualNetworkInherited": "VirtualNetworkInherited"},
         )
 
         dns_settings = cls._args_public_ip_address_create.dns_settings
         dns_settings.domain_name_label = AAZStrArg(
             options=["domain-name-label"],
             help="The domain name label. The concatenation of the domain name label and the regionalized DNS zone make up the fully qualified domain name associated with the public IP address. If a domain name label is specified, an A DNS record is created for the public IP in the Microsoft Azure DNS system.",
+        )
+        dns_settings.domain_name_label_scope = AAZStrArg(
+            options=["domain-name-label-scope"],
+            help="The domain name label scope. If a domain name label and a domain name label scope are specified, an A DNS record is created for the public IP in the Microsoft Azure DNS system with a hashed value includes in FQDN.",
+            enum={"NoReuse": "NoReuse", "ResourceGroupReuse": "ResourceGroupReuse", "SubscriptionReuse": "SubscriptionReuse", "TenantReuse": "TenantReuse"},
         )
         dns_settings.fqdn = AAZStrArg(
             options=["fqdn"],
@@ -2443,7 +2470,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01",
+                    "api-version", "2022-11-01",
                     required=True,
                 ),
             }
@@ -2480,6 +2507,8 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
+                properties.set_prop("auxiliaryMode", AAZStrType, ".auxiliary_mode")
+                properties.set_prop("auxiliarySku", AAZStrType, ".auxiliary_sku")
                 properties.set_prop("dnsSettings", AAZObjectType)
                 properties.set_prop("enableAcceleratedNetworking", AAZBoolType, ".accelerated_networking")
                 properties.set_prop("enableIPForwarding", AAZBoolType, ".ip_forwarding")
@@ -2563,6 +2592,7 @@ class Create(AAZCommand):
                 properties.set_prop("loadBalancerBackendAddresses", AAZListType, ".load_balancer_backend_addresses")
                 properties.set_prop("location", AAZStrType, ".location")
                 properties.set_prop("tunnelInterfaces", AAZListType, ".tunnel_interfaces")
+                _CreateHelper._build_schema_sub_resource_create(properties.set_prop("virtualNetwork", AAZObjectType, ".virtual_network"))
 
             load_balancer_backend_addresses = _builder.get(".properties.ipConfigurations[].properties.loadBalancerBackendAddressPools[].properties.loadBalancerBackendAddresses")
             if load_balancer_backend_addresses is not None:
@@ -2641,13 +2671,13 @@ class Create(AAZCommand):
 
             ddos_settings = _builder.get(".properties.ipConfigurations[].properties.publicIPAddress.properties.ddosSettings")
             if ddos_settings is not None:
-                _CreateHelper._build_schema_sub_resource_create(ddos_settings.set_prop("ddosCustomPolicy", AAZObjectType, ".ddos_custom_policy"))
-                ddos_settings.set_prop("protectedIP", AAZBoolType, ".protected_ip")
-                ddos_settings.set_prop("protectionCoverage", AAZStrType, ".protection_coverage")
+                _CreateHelper._build_schema_sub_resource_create(ddos_settings.set_prop("ddosProtectionPlan", AAZObjectType, ".ddos_protection_plan"))
+                ddos_settings.set_prop("protectionMode", AAZStrType, ".protection_mode")
 
             dns_settings = _builder.get(".properties.ipConfigurations[].properties.publicIPAddress.properties.dnsSettings")
             if dns_settings is not None:
                 dns_settings.set_prop("domainNameLabel", AAZStrType, ".domain_name_label")
+                dns_settings.set_prop("domainNameLabelScope", AAZStrType, ".domain_name_label_scope")
                 dns_settings.set_prop("fqdn", AAZStrType, ".fqdn")
                 dns_settings.set_prop("reverseFqdn", AAZStrType, ".reverse_fqdn")
 
@@ -2741,7 +2771,7 @@ class Create(AAZCommand):
                 properties.set_prop("destinationPortRange", AAZStrType, ".destination_port_range")
                 properties.set_prop("destinationPortRanges", AAZListType, ".destination_port_ranges")
                 properties.set_prop("direction", AAZStrType, ".direction", typ_kwargs={"flags": {"required": True}})
-                properties.set_prop("priority", AAZIntType, ".priority")
+                properties.set_prop("priority", AAZIntType, ".priority", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("protocol", AAZStrType, ".protocol", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("sourceAddressPrefix", AAZStrType, ".source_address_prefix")
                 properties.set_prop("sourceAddressPrefixes", AAZListType, ".source_address_prefixes")
@@ -2877,13 +2907,13 @@ class _CreateHelper:
 
         _elements = _builder.get(".properties.applicationGatewayBackendAddressPools[]")
         if _elements is not None:
-            _elements.set_prop("id", AAZStrType, "@NetworkInterfaceIPConfiguration_create.application_gateway_backend_address_pools.[].id")
-            _elements.set_prop("name", AAZStrType, "@NetworkInterfaceIPConfiguration_create.application_gateway_backend_address_pools.[].name")
+            _elements.set_prop("id", AAZStrType, ".id")
+            _elements.set_prop("name", AAZStrType, ".name")
             _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
         properties = _builder.get(".properties.applicationGatewayBackendAddressPools[].properties")
         if properties is not None:
-            properties.set_prop("backendAddresses", AAZListType, "@NetworkInterfaceIPConfiguration_create.application_gateway_backend_address_pools.[].backend_addresses")
+            properties.set_prop("backendAddresses", AAZListType, ".backend_addresses")
 
         backend_addresses = _builder.get(".properties.applicationGatewayBackendAddressPools[].properties.backendAddresses")
         if backend_addresses is not None:
@@ -2891,8 +2921,8 @@ class _CreateHelper:
 
         _elements = _builder.get(".properties.applicationGatewayBackendAddressPools[].properties.backendAddresses[]")
         if _elements is not None:
-            _elements.set_prop("fqdn", AAZStrType, "@NetworkInterfaceIPConfiguration_create.application_gateway_backend_address_pools.[].backend_addresses.[].fqdn")
-            _elements.set_prop("ipAddress", AAZStrType, "@NetworkInterfaceIPConfiguration_create.application_gateway_backend_address_pools.[].backend_addresses.[].ip_address")
+            _elements.set_prop("fqdn", AAZStrType, ".fqdn")
+            _elements.set_prop("ipAddress", AAZStrType, ".ip_address")
 
         application_security_groups = _builder.get(".properties.applicationSecurityGroups")
         if application_security_groups is not None:
@@ -2904,16 +2934,17 @@ class _CreateHelper:
 
         _elements = _builder.get(".properties.loadBalancerBackendAddressPools[]")
         if _elements is not None:
-            _elements.set_prop("id", AAZStrType, "@NetworkInterfaceIPConfiguration_create.load_balancer_backend_address_pools.[].id")
-            _elements.set_prop("name", AAZStrType, "@NetworkInterfaceIPConfiguration_create.load_balancer_backend_address_pools.[].name")
+            _elements.set_prop("id", AAZStrType, ".id")
+            _elements.set_prop("name", AAZStrType, ".name")
             _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
         properties = _builder.get(".properties.loadBalancerBackendAddressPools[].properties")
         if properties is not None:
-            properties.set_prop("drainPeriodInSeconds", AAZIntType, "@NetworkInterfaceIPConfiguration_create.load_balancer_backend_address_pools.[].drain_period_in_seconds")
-            properties.set_prop("loadBalancerBackendAddresses", AAZListType, "@NetworkInterfaceIPConfiguration_create.load_balancer_backend_address_pools.[].load_balancer_backend_addresses")
-            properties.set_prop("location", AAZStrType, "@NetworkInterfaceIPConfiguration_create.load_balancer_backend_address_pools.[].location")
-            properties.set_prop("tunnelInterfaces", AAZListType, "@NetworkInterfaceIPConfiguration_create.load_balancer_backend_address_pools.[].tunnel_interfaces")
+            properties.set_prop("drainPeriodInSeconds", AAZIntType, ".drain_period_in_seconds")
+            properties.set_prop("loadBalancerBackendAddresses", AAZListType, ".load_balancer_backend_addresses")
+            properties.set_prop("location", AAZStrType, ".location")
+            properties.set_prop("tunnelInterfaces", AAZListType, ".tunnel_interfaces")
+            cls._build_schema_sub_resource_create(properties.set_prop("virtualNetwork", AAZObjectType, ".virtual_network"))
 
         load_balancer_backend_addresses = _builder.get(".properties.loadBalancerBackendAddressPools[].properties.loadBalancerBackendAddresses")
         if load_balancer_backend_addresses is not None:
@@ -2921,16 +2952,16 @@ class _CreateHelper:
 
         _elements = _builder.get(".properties.loadBalancerBackendAddressPools[].properties.loadBalancerBackendAddresses[]")
         if _elements is not None:
-            _elements.set_prop("name", AAZStrType, "@NetworkInterfaceIPConfiguration_create.load_balancer_backend_address_pools.[].load_balancer_backend_addresses.[].name")
+            _elements.set_prop("name", AAZStrType, ".name")
             _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
         properties = _builder.get(".properties.loadBalancerBackendAddressPools[].properties.loadBalancerBackendAddresses[].properties")
         if properties is not None:
-            properties.set_prop("adminState", AAZStrType, "@NetworkInterfaceIPConfiguration_create.load_balancer_backend_address_pools.[].load_balancer_backend_addresses.[].admin_state")
-            properties.set_prop("ipAddress", AAZStrType, "@NetworkInterfaceIPConfiguration_create.load_balancer_backend_address_pools.[].load_balancer_backend_addresses.[].ip_address")
-            cls._build_schema_sub_resource_create(properties.set_prop("loadBalancerFrontendIPConfiguration", AAZObjectType, "@NetworkInterfaceIPConfiguration_create.load_balancer_backend_address_pools.[].load_balancer_backend_addresses.[].load_balancer_frontend_ip_configuration"))
-            cls._build_schema_sub_resource_create(properties.set_prop("subnet", AAZObjectType, "@NetworkInterfaceIPConfiguration_create.load_balancer_backend_address_pools.[].load_balancer_backend_addresses.[].subnet"))
-            cls._build_schema_sub_resource_create(properties.set_prop("virtualNetwork", AAZObjectType, "@NetworkInterfaceIPConfiguration_create.load_balancer_backend_address_pools.[].load_balancer_backend_addresses.[].virtual_network"))
+            properties.set_prop("adminState", AAZStrType, ".admin_state")
+            properties.set_prop("ipAddress", AAZStrType, ".ip_address")
+            cls._build_schema_sub_resource_create(properties.set_prop("loadBalancerFrontendIPConfiguration", AAZObjectType, ".load_balancer_frontend_ip_configuration"))
+            cls._build_schema_sub_resource_create(properties.set_prop("subnet", AAZObjectType, ".subnet"))
+            cls._build_schema_sub_resource_create(properties.set_prop("virtualNetwork", AAZObjectType, ".virtual_network"))
 
         tunnel_interfaces = _builder.get(".properties.loadBalancerBackendAddressPools[].properties.tunnelInterfaces")
         if tunnel_interfaces is not None:
@@ -2938,10 +2969,10 @@ class _CreateHelper:
 
         _elements = _builder.get(".properties.loadBalancerBackendAddressPools[].properties.tunnelInterfaces[]")
         if _elements is not None:
-            _elements.set_prop("identifier", AAZIntType, "@NetworkInterfaceIPConfiguration_create.load_balancer_backend_address_pools.[].tunnel_interfaces.[].identifier")
-            _elements.set_prop("port", AAZIntType, "@NetworkInterfaceIPConfiguration_create.load_balancer_backend_address_pools.[].tunnel_interfaces.[].port")
-            _elements.set_prop("protocol", AAZStrType, "@NetworkInterfaceIPConfiguration_create.load_balancer_backend_address_pools.[].tunnel_interfaces.[].protocol")
-            _elements.set_prop("type", AAZStrType, "@NetworkInterfaceIPConfiguration_create.load_balancer_backend_address_pools.[].tunnel_interfaces.[].type")
+            _elements.set_prop("identifier", AAZIntType, ".identifier")
+            _elements.set_prop("port", AAZIntType, ".port")
+            _elements.set_prop("protocol", AAZStrType, ".protocol")
+            _elements.set_prop("type", AAZStrType, ".type")
 
         load_balancer_inbound_nat_rules = _builder.get(".properties.loadBalancerInboundNatRules")
         if load_balancer_inbound_nat_rules is not None:
@@ -2949,22 +2980,22 @@ class _CreateHelper:
 
         _elements = _builder.get(".properties.loadBalancerInboundNatRules[]")
         if _elements is not None:
-            _elements.set_prop("id", AAZStrType, "@NetworkInterfaceIPConfiguration_create.load_balancer_inbound_nat_rules.[].id")
-            _elements.set_prop("name", AAZStrType, "@NetworkInterfaceIPConfiguration_create.load_balancer_inbound_nat_rules.[].name")
+            _elements.set_prop("id", AAZStrType, ".id")
+            _elements.set_prop("name", AAZStrType, ".name")
             _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
         properties = _builder.get(".properties.loadBalancerInboundNatRules[].properties")
         if properties is not None:
-            cls._build_schema_sub_resource_create(properties.set_prop("backendAddressPool", AAZObjectType, "@NetworkInterfaceIPConfiguration_create.load_balancer_inbound_nat_rules.[].backend_address_pool"))
-            properties.set_prop("backendPort", AAZIntType, "@NetworkInterfaceIPConfiguration_create.load_balancer_inbound_nat_rules.[].backend_port")
-            properties.set_prop("enableFloatingIP", AAZBoolType, "@NetworkInterfaceIPConfiguration_create.load_balancer_inbound_nat_rules.[].enable_floating_ip")
-            properties.set_prop("enableTcpReset", AAZBoolType, "@NetworkInterfaceIPConfiguration_create.load_balancer_inbound_nat_rules.[].enable_tcp_reset")
-            cls._build_schema_sub_resource_create(properties.set_prop("frontendIPConfiguration", AAZObjectType, "@NetworkInterfaceIPConfiguration_create.load_balancer_inbound_nat_rules.[].frontend_ip_configuration"))
-            properties.set_prop("frontendPort", AAZIntType, "@NetworkInterfaceIPConfiguration_create.load_balancer_inbound_nat_rules.[].frontend_port")
-            properties.set_prop("frontendPortRangeEnd", AAZIntType, "@NetworkInterfaceIPConfiguration_create.load_balancer_inbound_nat_rules.[].frontend_port_range_end")
-            properties.set_prop("frontendPortRangeStart", AAZIntType, "@NetworkInterfaceIPConfiguration_create.load_balancer_inbound_nat_rules.[].frontend_port_range_start")
-            properties.set_prop("idleTimeoutInMinutes", AAZIntType, "@NetworkInterfaceIPConfiguration_create.load_balancer_inbound_nat_rules.[].idle_timeout_in_minutes")
-            properties.set_prop("protocol", AAZStrType, "@NetworkInterfaceIPConfiguration_create.load_balancer_inbound_nat_rules.[].protocol")
+            cls._build_schema_sub_resource_create(properties.set_prop("backendAddressPool", AAZObjectType, ".backend_address_pool"))
+            properties.set_prop("backendPort", AAZIntType, ".backend_port")
+            properties.set_prop("enableFloatingIP", AAZBoolType, ".enable_floating_ip")
+            properties.set_prop("enableTcpReset", AAZBoolType, ".enable_tcp_reset")
+            cls._build_schema_sub_resource_create(properties.set_prop("frontendIPConfiguration", AAZObjectType, ".frontend_ip_configuration"))
+            properties.set_prop("frontendPort", AAZIntType, ".frontend_port")
+            properties.set_prop("frontendPortRangeEnd", AAZIntType, ".frontend_port_range_end")
+            properties.set_prop("frontendPortRangeStart", AAZIntType, ".frontend_port_range_start")
+            properties.set_prop("idleTimeoutInMinutes", AAZIntType, ".idle_timeout_in_minutes")
+            properties.set_prop("protocol", AAZStrType, ".protocol")
 
         public_ip_address = _builder.get(".properties.publicIPAddress")
         if public_ip_address is not None:
@@ -2994,13 +3025,13 @@ class _CreateHelper:
 
         ddos_settings = _builder.get(".properties.publicIPAddress.properties.ddosSettings")
         if ddos_settings is not None:
-            cls._build_schema_sub_resource_create(ddos_settings.set_prop("ddosCustomPolicy", AAZObjectType, ".ddos_custom_policy"))
-            ddos_settings.set_prop("protectedIP", AAZBoolType, ".protected_ip")
-            ddos_settings.set_prop("protectionCoverage", AAZStrType, ".protection_coverage")
+            cls._build_schema_sub_resource_create(ddos_settings.set_prop("ddosProtectionPlan", AAZObjectType, ".ddos_protection_plan"))
+            ddos_settings.set_prop("protectionMode", AAZStrType, ".protection_mode")
 
         dns_settings = _builder.get(".properties.publicIPAddress.properties.dnsSettings")
         if dns_settings is not None:
             dns_settings.set_prop("domainNameLabel", AAZStrType, ".domain_name_label")
+            dns_settings.set_prop("domainNameLabelScope", AAZStrType, ".domain_name_label_scope")
             dns_settings.set_prop("fqdn", AAZStrType, ".fqdn")
             dns_settings.set_prop("reverseFqdn", AAZStrType, ".reverse_fqdn")
 
@@ -3010,8 +3041,8 @@ class _CreateHelper:
 
         _elements = _builder.get(".properties.publicIPAddress.properties.ipTags[]")
         if _elements is not None:
-            _elements.set_prop("ipTagType", AAZStrType, "@NetworkInterfaceIPConfiguration_create.public_ip_address.ip_tags.[].ip_tag_type")
-            _elements.set_prop("tag", AAZStrType, "@NetworkInterfaceIPConfiguration_create.public_ip_address.ip_tags.[].tag")
+            _elements.set_prop("ipTagType", AAZStrType, ".ip_tag_type")
+            _elements.set_prop("tag", AAZStrType, ".tag")
 
         linked_public_ip_address = _builder.get(".properties.publicIPAddress.properties.linkedPublicIPAddress")
         if linked_public_ip_address is not None:
@@ -3041,13 +3072,13 @@ class _CreateHelper:
 
         ddos_settings = _builder.get(".properties.publicIPAddress.properties.linkedPublicIPAddress.properties.ddosSettings")
         if ddos_settings is not None:
-            cls._build_schema_sub_resource_create(ddos_settings.set_prop("ddosCustomPolicy", AAZObjectType, ".ddos_custom_policy"))
-            ddos_settings.set_prop("protectedIP", AAZBoolType, ".protected_ip")
-            ddos_settings.set_prop("protectionCoverage", AAZStrType, ".protection_coverage")
+            cls._build_schema_sub_resource_create(ddos_settings.set_prop("ddosProtectionPlan", AAZObjectType, ".ddos_protection_plan"))
+            ddos_settings.set_prop("protectionMode", AAZStrType, ".protection_mode")
 
         dns_settings = _builder.get(".properties.publicIPAddress.properties.linkedPublicIPAddress.properties.dnsSettings")
         if dns_settings is not None:
             dns_settings.set_prop("domainNameLabel", AAZStrType, ".domain_name_label")
+            dns_settings.set_prop("domainNameLabelScope", AAZStrType, ".domain_name_label_scope")
             dns_settings.set_prop("fqdn", AAZStrType, ".fqdn")
             dns_settings.set_prop("reverseFqdn", AAZStrType, ".reverse_fqdn")
 
@@ -3057,8 +3088,8 @@ class _CreateHelper:
 
         _elements = _builder.get(".properties.publicIPAddress.properties.linkedPublicIPAddress.properties.ipTags[]")
         if _elements is not None:
-            _elements.set_prop("ipTagType", AAZStrType, "@NetworkInterfaceIPConfiguration_create.public_ip_address.linked_public_ip_address.ip_tags.[].ip_tag_type")
-            _elements.set_prop("tag", AAZStrType, "@NetworkInterfaceIPConfiguration_create.public_ip_address.linked_public_ip_address.ip_tags.[].tag")
+            _elements.set_prop("ipTagType", AAZStrType, ".ip_tag_type")
+            _elements.set_prop("tag", AAZStrType, ".tag")
 
         linked_public_ip_address = _builder.get(".properties.publicIPAddress.properties.linkedPublicIPAddress.properties.linkedPublicIPAddress")
         if linked_public_ip_address is not None:
@@ -3088,13 +3119,13 @@ class _CreateHelper:
 
         ddos_settings = _builder.get(".properties.publicIPAddress.properties.linkedPublicIPAddress.properties.linkedPublicIPAddress.properties.ddosSettings")
         if ddos_settings is not None:
-            cls._build_schema_sub_resource_create(ddos_settings.set_prop("ddosCustomPolicy", AAZObjectType, ".ddos_custom_policy"))
-            ddos_settings.set_prop("protectedIP", AAZBoolType, ".protected_ip")
-            ddos_settings.set_prop("protectionCoverage", AAZStrType, ".protection_coverage")
+            cls._build_schema_sub_resource_create(ddos_settings.set_prop("ddosProtectionPlan", AAZObjectType, ".ddos_protection_plan"))
+            ddos_settings.set_prop("protectionMode", AAZStrType, ".protection_mode")
 
         dns_settings = _builder.get(".properties.publicIPAddress.properties.linkedPublicIPAddress.properties.linkedPublicIPAddress.properties.dnsSettings")
         if dns_settings is not None:
             dns_settings.set_prop("domainNameLabel", AAZStrType, ".domain_name_label")
+            dns_settings.set_prop("domainNameLabelScope", AAZStrType, ".domain_name_label_scope")
             dns_settings.set_prop("fqdn", AAZStrType, ".fqdn")
             dns_settings.set_prop("reverseFqdn", AAZStrType, ".reverse_fqdn")
 
@@ -3104,8 +3135,8 @@ class _CreateHelper:
 
         _elements = _builder.get(".properties.publicIPAddress.properties.linkedPublicIPAddress.properties.linkedPublicIPAddress.properties.ipTags[]")
         if _elements is not None:
-            _elements.set_prop("ipTagType", AAZStrType, "@NetworkInterfaceIPConfiguration_create.public_ip_address.linked_public_ip_address.linked_public_ip_address.ip_tags.[].ip_tag_type")
-            _elements.set_prop("tag", AAZStrType, "@NetworkInterfaceIPConfiguration_create.public_ip_address.linked_public_ip_address.linked_public_ip_address.ip_tags.[].tag")
+            _elements.set_prop("ipTagType", AAZStrType, ".ip_tag_type")
+            _elements.set_prop("tag", AAZStrType, ".tag")
 
         nat_gateway = _builder.get(".properties.publicIPAddress.properties.linkedPublicIPAddress.properties.linkedPublicIPAddress.properties.natGateway")
         if nat_gateway is not None:
@@ -3257,16 +3288,16 @@ class _CreateHelper:
 
         _elements = _builder.get(".properties.virtualNetworkTaps[]")
         if _elements is not None:
-            _elements.set_prop("id", AAZStrType, "@NetworkInterfaceIPConfiguration_create.virtual_network_taps.[].id")
-            _elements.set_prop("location", AAZStrType, "@NetworkInterfaceIPConfiguration_create.virtual_network_taps.[].location")
+            _elements.set_prop("id", AAZStrType, ".id")
+            _elements.set_prop("location", AAZStrType, ".location")
             _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _elements.set_prop("tags", AAZDictType, "@NetworkInterfaceIPConfiguration_create.virtual_network_taps.[].tags")
+            _elements.set_prop("tags", AAZDictType, ".tags")
 
         properties = _builder.get(".properties.virtualNetworkTaps[].properties")
         if properties is not None:
-            cls._build_schema_frontend_ip_configuration_create(properties.set_prop("destinationLoadBalancerFrontEndIPConfiguration", AAZObjectType, "@NetworkInterfaceIPConfiguration_create.virtual_network_taps.[].destination_load_balancer_front_end_ip_configuration"))
-            cls._build_schema_network_interface_ip_configuration_create(properties.set_prop("destinationNetworkInterfaceIPConfiguration", AAZObjectType, "@NetworkInterfaceIPConfiguration_create.virtual_network_taps.[].destination_network_interface_ip_configuration"))
-            properties.set_prop("destinationPort", AAZIntType, "@NetworkInterfaceIPConfiguration_create.virtual_network_taps.[].destination_port")
+            cls._build_schema_frontend_ip_configuration_create(properties.set_prop("destinationLoadBalancerFrontEndIPConfiguration", AAZObjectType, ".destination_load_balancer_front_end_ip_configuration"))
+            cls._build_schema_network_interface_ip_configuration_create(properties.set_prop("destinationNetworkInterfaceIPConfiguration", AAZObjectType, ".destination_network_interface_ip_configuration"))
+            properties.set_prop("destinationPort", AAZIntType, ".destination_port")
 
         tags = _builder.get(".properties.virtualNetworkTaps[].tags")
         if tags is not None:
@@ -3307,13 +3338,13 @@ class _CreateHelper:
 
         ddos_settings = _builder.get(".properties.ddosSettings")
         if ddos_settings is not None:
-            cls._build_schema_sub_resource_create(ddos_settings.set_prop("ddosCustomPolicy", AAZObjectType, ".ddos_custom_policy"))
-            ddos_settings.set_prop("protectedIP", AAZBoolType, ".protected_ip")
-            ddos_settings.set_prop("protectionCoverage", AAZStrType, ".protection_coverage")
+            cls._build_schema_sub_resource_create(ddos_settings.set_prop("ddosProtectionPlan", AAZObjectType, ".ddos_protection_plan"))
+            ddos_settings.set_prop("protectionMode", AAZStrType, ".protection_mode")
 
         dns_settings = _builder.get(".properties.dnsSettings")
         if dns_settings is not None:
             dns_settings.set_prop("domainNameLabel", AAZStrType, ".domain_name_label")
+            dns_settings.set_prop("domainNameLabelScope", AAZStrType, ".domain_name_label_scope")
             dns_settings.set_prop("fqdn", AAZStrType, ".fqdn")
             dns_settings.set_prop("reverseFqdn", AAZStrType, ".reverse_fqdn")
 
@@ -3323,8 +3354,8 @@ class _CreateHelper:
 
         _elements = _builder.get(".properties.ipTags[]")
         if _elements is not None:
-            _elements.set_prop("ipTagType", AAZStrType, "@PublicIPAddress_create.ip_tags.[].ip_tag_type")
-            _elements.set_prop("tag", AAZStrType, "@PublicIPAddress_create.ip_tags.[].tag")
+            _elements.set_prop("ipTagType", AAZStrType, ".ip_tag_type")
+            _elements.set_prop("tag", AAZStrType, ".tag")
 
         sku = _builder.get(".sku")
         if sku is not None:
@@ -3358,7 +3389,7 @@ class _CreateHelper:
         if properties is not None:
             properties.set_prop("addressPrefix", AAZStrType, ".address_prefix")
             properties.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
-            properties.set_prop("applicationGatewayIpConfigurations", AAZListType, ".application_gateway_ip_configurations")
+            properties.set_prop("applicationGatewayIPConfigurations", AAZListType, ".application_gateway_ip_configurations")
             properties.set_prop("delegations", AAZListType, ".delegations")
             properties.set_prop("ipAllocations", AAZListType, ".ip_allocations")
             cls._build_schema_sub_resource_create(properties.set_prop("natGateway", AAZObjectType, ".nat_gateway"))
@@ -3373,19 +3404,19 @@ class _CreateHelper:
         if address_prefixes is not None:
             address_prefixes.set_elements(AAZStrType, ".")
 
-        application_gateway_ip_configurations = _builder.get(".properties.applicationGatewayIpConfigurations")
+        application_gateway_ip_configurations = _builder.get(".properties.applicationGatewayIPConfigurations")
         if application_gateway_ip_configurations is not None:
             application_gateway_ip_configurations.set_elements(AAZObjectType, ".")
 
-        _elements = _builder.get(".properties.applicationGatewayIpConfigurations[]")
+        _elements = _builder.get(".properties.applicationGatewayIPConfigurations[]")
         if _elements is not None:
-            _elements.set_prop("id", AAZStrType, "@Subnet_create.application_gateway_ip_configurations.[].id")
-            _elements.set_prop("name", AAZStrType, "@Subnet_create.application_gateway_ip_configurations.[].name")
+            _elements.set_prop("id", AAZStrType, ".id")
+            _elements.set_prop("name", AAZStrType, ".name")
             _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
-        properties = _builder.get(".properties.applicationGatewayIpConfigurations[].properties")
+        properties = _builder.get(".properties.applicationGatewayIPConfigurations[].properties")
         if properties is not None:
-            cls._build_schema_sub_resource_create(properties.set_prop("subnet", AAZObjectType, "@Subnet_create.application_gateway_ip_configurations.[].subnet"))
+            cls._build_schema_sub_resource_create(properties.set_prop("subnet", AAZObjectType, ".subnet"))
 
         delegations = _builder.get(".properties.delegations")
         if delegations is not None:
@@ -3393,14 +3424,14 @@ class _CreateHelper:
 
         _elements = _builder.get(".properties.delegations[]")
         if _elements is not None:
-            _elements.set_prop("id", AAZStrType, "@Subnet_create.delegations.[].id")
-            _elements.set_prop("name", AAZStrType, "@Subnet_create.delegations.[].name")
+            _elements.set_prop("id", AAZStrType, ".id")
+            _elements.set_prop("name", AAZStrType, ".name")
             _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _elements.set_prop("type", AAZStrType, "@Subnet_create.delegations.[].type")
+            _elements.set_prop("type", AAZStrType, ".type")
 
         properties = _builder.get(".properties.delegations[].properties")
         if properties is not None:
-            properties.set_prop("serviceName", AAZStrType, "@Subnet_create.delegations.[].service_name")
+            properties.set_prop("serviceName", AAZStrType, ".service_name")
 
         ip_allocations = _builder.get(".properties.ipAllocations")
         if ip_allocations is not None:
@@ -3424,17 +3455,17 @@ class _CreateHelper:
 
         _elements = _builder.get(".properties.routeTable.properties.routes[]")
         if _elements is not None:
-            _elements.set_prop("id", AAZStrType, "@Subnet_create.route_table.routes.[].id")
-            _elements.set_prop("name", AAZStrType, "@Subnet_create.route_table.routes.[].name")
+            _elements.set_prop("id", AAZStrType, ".id")
+            _elements.set_prop("name", AAZStrType, ".name")
             _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _elements.set_prop("type", AAZStrType, "@Subnet_create.route_table.routes.[].type")
+            _elements.set_prop("type", AAZStrType, ".type")
 
         properties = _builder.get(".properties.routeTable.properties.routes[].properties")
         if properties is not None:
-            properties.set_prop("addressPrefix", AAZStrType, "@Subnet_create.route_table.routes.[].address_prefix")
-            properties.set_prop("hasBgpOverride", AAZBoolType, "@Subnet_create.route_table.routes.[].has_bgp_override")
-            properties.set_prop("nextHopIpAddress", AAZStrType, "@Subnet_create.route_table.routes.[].next_hop_ip_address")
-            properties.set_prop("nextHopType", AAZStrType, "@Subnet_create.route_table.routes.[].next_hop_type", typ_kwargs={"flags": {"required": True}})
+            properties.set_prop("addressPrefix", AAZStrType, ".address_prefix")
+            properties.set_prop("hasBgpOverride", AAZBoolType, ".has_bgp_override")
+            properties.set_prop("nextHopIpAddress", AAZStrType, ".next_hop_ip_address")
+            properties.set_prop("nextHopType", AAZStrType, ".next_hop_type", typ_kwargs={"flags": {"required": True}})
 
         tags = _builder.get(".properties.routeTable.tags")
         if tags is not None:
@@ -3446,16 +3477,16 @@ class _CreateHelper:
 
         _elements = _builder.get(".properties.serviceEndpointPolicies[]")
         if _elements is not None:
-            _elements.set_prop("id", AAZStrType, "@Subnet_create.service_endpoint_policies.[].id")
-            _elements.set_prop("location", AAZStrType, "@Subnet_create.service_endpoint_policies.[].location")
+            _elements.set_prop("id", AAZStrType, ".id")
+            _elements.set_prop("location", AAZStrType, ".location")
             _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _elements.set_prop("tags", AAZDictType, "@Subnet_create.service_endpoint_policies.[].tags")
+            _elements.set_prop("tags", AAZDictType, ".tags")
 
         properties = _builder.get(".properties.serviceEndpointPolicies[].properties")
         if properties is not None:
-            properties.set_prop("contextualServiceEndpointPolicies", AAZListType, "@Subnet_create.service_endpoint_policies.[].contextual_service_endpoint_policies")
-            properties.set_prop("serviceAlias", AAZStrType, "@Subnet_create.service_endpoint_policies.[].service_alias")
-            properties.set_prop("serviceEndpointPolicyDefinitions", AAZListType, "@Subnet_create.service_endpoint_policies.[].service_endpoint_policy_definitions")
+            properties.set_prop("contextualServiceEndpointPolicies", AAZListType, ".contextual_service_endpoint_policies")
+            properties.set_prop("serviceAlias", AAZStrType, ".service_alias")
+            properties.set_prop("serviceEndpointPolicyDefinitions", AAZListType, ".service_endpoint_policy_definitions")
 
         contextual_service_endpoint_policies = _builder.get(".properties.serviceEndpointPolicies[].properties.contextualServiceEndpointPolicies")
         if contextual_service_endpoint_policies is not None:
@@ -3467,16 +3498,16 @@ class _CreateHelper:
 
         _elements = _builder.get(".properties.serviceEndpointPolicies[].properties.serviceEndpointPolicyDefinitions[]")
         if _elements is not None:
-            _elements.set_prop("id", AAZStrType, "@Subnet_create.service_endpoint_policies.[].service_endpoint_policy_definitions.[].id")
-            _elements.set_prop("name", AAZStrType, "@Subnet_create.service_endpoint_policies.[].service_endpoint_policy_definitions.[].name")
+            _elements.set_prop("id", AAZStrType, ".id")
+            _elements.set_prop("name", AAZStrType, ".name")
             _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _elements.set_prop("type", AAZStrType, "@Subnet_create.service_endpoint_policies.[].service_endpoint_policy_definitions.[].type")
+            _elements.set_prop("type", AAZStrType, ".type")
 
         properties = _builder.get(".properties.serviceEndpointPolicies[].properties.serviceEndpointPolicyDefinitions[].properties")
         if properties is not None:
-            properties.set_prop("description", AAZStrType, "@Subnet_create.service_endpoint_policies.[].service_endpoint_policy_definitions.[].description")
-            properties.set_prop("service", AAZStrType, "@Subnet_create.service_endpoint_policies.[].service_endpoint_policy_definitions.[].service")
-            properties.set_prop("serviceResources", AAZListType, "@Subnet_create.service_endpoint_policies.[].service_endpoint_policy_definitions.[].service_resources")
+            properties.set_prop("description", AAZStrType, ".description")
+            properties.set_prop("service", AAZStrType, ".service")
+            properties.set_prop("serviceResources", AAZListType, ".service_resources")
 
         service_resources = _builder.get(".properties.serviceEndpointPolicies[].properties.serviceEndpointPolicyDefinitions[].properties.serviceResources")
         if service_resources is not None:
@@ -3492,8 +3523,8 @@ class _CreateHelper:
 
         _elements = _builder.get(".properties.serviceEndpoints[]")
         if _elements is not None:
-            _elements.set_prop("locations", AAZListType, "@Subnet_create.service_endpoints.[].locations")
-            _elements.set_prop("service", AAZStrType, "@Subnet_create.service_endpoints.[].service")
+            _elements.set_prop("locations", AAZListType, ".locations")
+            _elements.set_prop("service", AAZStrType, ".service")
 
         locations = _builder.get(".properties.serviceEndpoints[].locations")
         if locations is not None:
@@ -3883,6 +3914,10 @@ class _CreateHelper:
         properties.tunnel_interfaces = AAZListType(
             serialized_name="tunnelInterfaces",
         )
+        properties.virtual_network = AAZObjectType(
+            serialized_name="virtualNetwork",
+        )
+        cls._build_schema_sub_resource_read(properties.virtual_network)
 
         backend_ip_configurations = _schema_network_interface_ip_configuration_read.properties.load_balancer_backend_address_pools.Element.properties.backend_ip_configurations
         backend_ip_configurations.Element = AAZObjectType()
@@ -4125,6 +4160,12 @@ class _CreateHelper:
         properties.auxiliary_mode = AAZStrType(
             serialized_name="auxiliaryMode",
         )
+        properties.auxiliary_sku = AAZStrType(
+            serialized_name="auxiliarySku",
+        )
+        properties.disable_tcp_state_tracking = AAZBoolType(
+            serialized_name="disableTcpStateTracking",
+        )
         properties.dns_settings = AAZObjectType(
             serialized_name="dnsSettings",
         )
@@ -4354,6 +4395,10 @@ class _CreateHelper:
             serialized_name="privateEndpoint",
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
+        properties.private_endpoint_location = AAZStrType(
+            serialized_name="privateEndpointLocation",
+            flags={"read_only": True},
+        )
         properties.private_link_service_connection_state = AAZObjectType(
             serialized_name="privateLinkServiceConnectionState",
         )
@@ -4867,20 +4912,20 @@ class _CreateHelper:
         cls._build_schema_public_ip_address_read(properties.service_public_ip_address)
 
         ddos_settings = _schema_public_ip_address_read.properties.ddos_settings
-        ddos_settings.ddos_custom_policy = AAZObjectType(
-            serialized_name="ddosCustomPolicy",
+        ddos_settings.ddos_protection_plan = AAZObjectType(
+            serialized_name="ddosProtectionPlan",
         )
-        cls._build_schema_sub_resource_read(ddos_settings.ddos_custom_policy)
-        ddos_settings.protected_ip = AAZBoolType(
-            serialized_name="protectedIP",
-        )
-        ddos_settings.protection_coverage = AAZStrType(
-            serialized_name="protectionCoverage",
+        cls._build_schema_sub_resource_read(ddos_settings.ddos_protection_plan)
+        ddos_settings.protection_mode = AAZStrType(
+            serialized_name="protectionMode",
         )
 
         dns_settings = _schema_public_ip_address_read.properties.dns_settings
         dns_settings.domain_name_label = AAZStrType(
             serialized_name="domainNameLabel",
+        )
+        dns_settings.domain_name_label_scope = AAZStrType(
+            serialized_name="domainNameLabelScope",
         )
         dns_settings.fqdn = AAZStrType()
         dns_settings.reverse_fqdn = AAZStrType(
@@ -5027,7 +5072,9 @@ class _CreateHelper:
         properties.direction = AAZStrType(
             flags={"required": True},
         )
-        properties.priority = AAZIntType()
+        properties.priority = AAZIntType(
+            flags={"required": True},
+        )
         properties.protocol = AAZStrType(
             flags={"required": True},
         )
@@ -5125,7 +5172,7 @@ class _CreateHelper:
             serialized_name="addressPrefixes",
         )
         properties.application_gateway_ip_configurations = AAZListType(
-            serialized_name="applicationGatewayIpConfigurations",
+            serialized_name="applicationGatewayIPConfigurations",
         )
         properties.delegations = AAZListType()
         properties.ip_allocations = AAZListType(

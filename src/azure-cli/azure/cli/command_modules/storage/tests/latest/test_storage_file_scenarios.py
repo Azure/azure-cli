@@ -10,7 +10,7 @@ from ..storage_test_util import StorageScenarioMixin
 from azure.cli.testsdk.scenario_tests import record_only
 
 
-class StorageFileShareScenarios(StorageScenarioMixin, ScenarioTest):
+class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(location='EastUS2')
     def test_storage_file_copy_scenario(self, resource_group, storage_account):
@@ -103,6 +103,18 @@ class StorageFileShareScenarios(StorageScenarioMixin, ScenarioTest):
 
         self.validate_file_scenario(account_info, s1)
         self.validate_directory_scenario(account_info, s1)
+
+        self.storage_cmd('storage share delete -n {}', account_info, s1) \
+            .assert_with_checks(JMESPathCheck('deleted', True))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(location='EastUS2', allow_blob_public_access=True)
+    def test_storage_file_main_oauth_scenario(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        s1 = self.create_share(account_info)
+
+        self.validate_file_oauth_scenario(storage_account, s1)
+        self.validate_directory_oauth_scenario(storage_account, s1)
 
         self.storage_cmd('storage share delete -n {}', account_info, s1) \
             .assert_with_checks(JMESPathCheck('deleted', True))
@@ -311,6 +323,17 @@ class StorageFileShareScenarios(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage file url -s {} -p "{}"', account_info, share, filename) \
             .assert_with_checks(StringCheck(file_url))
 
+        # try uploading with file url
+        new_source_file = self.create_temp_file(64, full_random=False)
+        self.storage_cmd('storage file upload --source "{}" --file-url {}', account_info, new_source_file, file_url)
+        # download to validate the new upload with file-url uploaded file with new size
+        if os.path.isfile(dest_file):
+            os.remove(dest_file)
+        self.storage_cmd('storage file download --share-name {} -p "{}" --dest "{}"', account_info,
+                         share, filename, dest_file)
+        self.assertTrue(os.path.isfile(dest_file))
+        self.assertEqual(os.stat(dest_file).st_size, 64 * 1024)
+
         self.assertIn(filename,
                       self.storage_cmd('storage file list -s {} --query "[].name"',
                                        account_info, share).get_output_in_json())
@@ -360,3 +383,89 @@ class StorageFileShareScenarios(StorageScenarioMixin, ScenarioTest):
                          account_info, share, directory, filename)
         self.storage_cmd('storage file exists -s {} -p "{}"', account_info, share, filename) \
             .assert_with_checks(JMESPathCheck('exists', False))
+
+    def validate_directory_oauth_scenario(self, account, share):
+        directory = self.create_random_name('dir', 16)
+        self.file_oauth_cmd('storage directory create --account-name {} --share-name {} --name {} --fail-on-exist',
+                            account, share, directory) \
+            .assert_with_checks(JMESPathCheck('created', True))
+        self.file_oauth_cmd('storage directory list --account-name {} -s {}', account, share) \
+            .assert_with_checks(JMESPathCheck('length(@)', 1))
+        self.file_oauth_cmd('storage directory exists --account-name {} --share-name {} -n {}',
+                            account, share, directory) \
+            .assert_with_checks(JMESPathCheck('exists', True))
+        self.file_oauth_cmd('storage directory metadata update --account-name {} -s {} -n {} --metadata a=b c=d',
+                            account, share, directory)
+        self.file_oauth_cmd('storage directory metadata show --account-name {} --share-name {} -n {}',
+                            account, share, directory) \
+            .assert_with_checks(JMESPathCheck('a', 'b'), JMESPathCheck('c', 'd'))
+        self.file_oauth_cmd('storage directory show --account-name {} --share-name {} -n {}',
+                            account, share, directory) \
+            .assert_with_checks(JMESPathCheck('metadata', {'a': 'b', 'c': 'd'}),
+                                JMESPathCheck('name', directory))
+
+        self.file_oauth_cmd('storage directory delete --account-name {} --share-name {} --name {} --fail-not-exist',
+                            account, share, directory) \
+            .assert_with_checks(JMESPathCheck('deleted', True))
+        self.file_oauth_cmd('storage directory exists --account-name {} --share-name {} --name {}',
+                            account, share, directory) \
+            .assert_with_checks(JMESPathCheck('exists', False))
+
+    def validate_file_oauth_scenario(self, account, share):
+        source_file = self.create_temp_file(128, full_random=False)
+        dest_file = self.create_temp_file(1)
+        filename = "sample_file.bin"
+
+        self.file_oauth_cmd('storage file upload --account-name {} --share-name {} --source "{}" -p {}',
+                            account, share, source_file, filename)
+        self.file_oauth_cmd('storage file exists --account-name {} -s {} -p {}', account, share, filename) \
+            .assert_with_checks(JMESPathCheck('exists', True))
+
+        if os.path.isfile(dest_file):
+            os.remove(dest_file)
+
+        self.file_oauth_cmd('storage file download --account-name {} --share-name {} -p "{}" --dest "{}"',
+                            account, share, filename, dest_file)
+
+        self.assertTrue(os.path.isfile(dest_file))
+        self.assertEqual(os.stat(dest_file).st_size, 128 * 1024)
+
+        self.file_oauth_cmd(
+            'storage file download --account-name {} --share-name {} -p "{}" --dest "{}" --start-range 0 --end-range 511',
+            account, share, filename, dest_file)
+
+        self.assertTrue(os.path.isfile(dest_file))
+        self.assertEqual(os.stat(dest_file).st_size, 512)
+
+        # test resize command
+        self.file_oauth_cmd('storage file resize --account-name {} --share-name {} -p "{}" --size 1234', account, share, filename)
+        self.file_oauth_cmd('storage file show --account-name {} -s {} -p "{}"', account, share, filename) \
+            .assert_with_checks(JMESPathCheck('properties.contentLength', 1234))
+
+        # test ability to set and reset metadata
+        self.file_oauth_cmd('storage file metadata update --account-name {} --share-name {} -p "{}" --metadata a=b c=d',
+                            account, share, filename)
+        self.file_oauth_cmd('storage file metadata show --account-name {} -s {} -p "{}"', account, share, filename) \
+            .assert_with_checks(JMESPathCheck('a', 'b'), JMESPathCheck('c', 'd'))
+        self.file_oauth_cmd('storage file metadata update --account-name {} --share-name {} -p "{}"', account, share, filename)
+        self.file_oauth_cmd('storage file metadata show --account-name {} -s {} -p "{}"', account, share, filename) \
+            .assert_with_checks(NoneCheck())
+
+        file_url = 'https://{}.file.core.windows.net/{}/{}'.format(account, share, filename)
+        self.file_oauth_cmd('storage file url --account-name {} -s {} -p "{}"', account, share, filename) \
+            .assert_with_checks(StringCheck(file_url))
+
+        self.assertIn(filename,
+                      self.file_oauth_cmd('storage file list --account-name {} -s {} --query "[].name"',
+                                          account, share).get_output_in_json())
+
+        self.file_oauth_cmd('storage file update --account-name {} -s {} -p {} --content-type "test/type"',
+                            account, share, filename)
+        self.file_oauth_cmd('storage file show --account-name {} -s {} -p {}', account, share, filename) \
+            .assert_with_checks(JMESPathCheck('properties.contentSettings.contentType',
+                                              'test/type'))
+
+        self.file_oauth_cmd('storage file delete --account-name {} --share-name {} -p "{}"', account, share, filename)
+        self.file_oauth_cmd('storage file exists --account-name {} --share-name {} -p "{}"', account, share, filename) \
+            .assert_with_checks(JMESPathCheck('exists', False))
+

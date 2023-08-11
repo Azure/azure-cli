@@ -1,0 +1,102 @@
+name: "Bug Report"
+description: Use this template to report a bug
+labels: ["bug"]
+body:
+  - type: markdown
+    id: example
+    attributes:
+      value: >
+        Thanks for reporting.
+        
+        - Make sure you are able to reproduce this issue on the latest released version of [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli).
+        
+        - Please search the existing issues to see if there has been a similar issue filed.
+        
+        - If you want to discover useful tips on how to avoid common pitfalls and use the Azure CLI successfully, please refer to [Tips for using the Azure CLI successfully](https://learn.microsoft.com/en-us/cli/azure/use-cli-effectively).
+  - type: textarea
+    id: desc
+    attributes:
+      label: Describe the bug
+      description: >
+        Please describe the bug.
+      placeholder: >
+        A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: cmd
+    attributes:
+      label: Related command
+      description: Please provide the related commands with az {command} if you can, so that we can quickly route to the related team for help.
+      placeholder: e.g., `az vm create`
+    validations:
+      required: true
+  - type: textarea
+    id: error
+    attributes:
+      label: Errors
+      description: >
+        Please paste here the error message you have received. 
+        
+        **⚠ ATTENTION:** Make sure to remove all sensitive information, such as username, password, credential, subscription ID, etc.
+      placeholder: |
+        The command failed with an unexpected error. 
+        Here is the traceback: {The rest of the error message}
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Issue script & Debug output
+      description: >
+        Append `--debug` to each command in the script and rerun the script and paste the debug log here
+        
+        **⚠ ATTENTION:** Be sure to remove any sensitive information that may be in the logs
+      placeholder: >
+        Please provide the script and debug output here.
+    validations:
+      required: true
+  - type: textarea
+    id: expect
+    attributes:
+      label: Expected behavior
+      description: >
+        Please describe the expected behavior here.
+      placeholder: >
+        A clear and concise description of what you expected to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment Summary
+      description: Please provide the output of `az --version`.
+      placeholder: |
+        azure-cli                         2.48.1
+
+        core                              2.48.1
+        telemetry                          1.0.8
+
+        Extensions:
+        aks-preview                      0.5.130
+        cloud-service                      0.2.0
+        Dependencies:
+        msal                              1.20.0
+        azure-mgmt-resource               22.0.0
+
+        Python location 'C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\python.exe'
+        Extensions directory 'C:\Users\zelinwang\.azure\cliextensions'
+
+        Python (Windows) 3.10.10 (tags/v3.10.10:aad5f6a, Feb  7 2023, 17:05:00) [MSC v.1929 32 bit (Intel)]
+    validations:
+      required: true
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: >
+        Add any other context about the bug.
+      placeholder: >
+        Add any other context about the bug here.
+    validations:
+      required: false

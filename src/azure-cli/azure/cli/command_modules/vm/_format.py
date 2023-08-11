@@ -107,9 +107,14 @@ transform_extension_show_table_output = '{Name:name, ProvisioningState:provision
                                         'Version:typeHandlerVersion, AutoUpgradeMinorVersion:autoUpgradeMinorVersion}'
 
 
+transform_disk_create_table_output = '{Name:name, ResourceGroup:resourceGroup, Location:location, Zones: ' \
+                                     '(!zones && \' \') || join(` `, zones), Sku:sku.name, OsType:osType, ' \
+                                     'SizeGb:diskSizeGb, ProvisioningState:provisioningState}'
+
+
 transform_disk_show_table_output = '{Name:name, ResourceGroup:resourceGroup, Location:location, Zones: ' \
                                    '(!zones && \' \') || join(` `, zones), Sku:sku.name, OsType:osType, ' \
-                                   'SizeGb:diskSizeGb, ProvisioningState:provisioningState}'
+                                   'SizeGb:diskSizeGB, ProvisioningState:provisioningState}'
 
 
 def get_vmss_table_output_transformer(loader, for_list=True):

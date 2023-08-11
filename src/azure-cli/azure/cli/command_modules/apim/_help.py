@@ -68,6 +68,21 @@ type: group
 short-summary: Manage Azure API Management API Schema's.
 """
 
+helps['apim graphql'] = """
+type: group
+short-summary: Manage Azure API Management GraphQL API's.
+"""
+
+helps['apim graphql resolver'] = """
+type: group
+short-summary: Manage Azure API Management GraphQL API's Resolvers.
+"""
+
+helps['apim graphql resolver policy'] = """
+type: group
+short-summary: Manage Azure API Management GraphQL API's Resolvers Policies.
+"""
+
 helps['apim deletedservice'] = """
 type: group
 short-summary: Manage soft-deleted Azure API Management services.
@@ -652,4 +667,76 @@ examples:
   - name: Purge a soft-deleted serivce.
     text: |
         az apim deletedservice purge --service-name MyApim --location westus
+"""
+
+helps['apim graphql resolver create'] = """
+type: command
+short-summary: Create a new resolver in the GraphQL API or updates an existing one.
+examples:
+  - name: Create a new resolver.
+    text: |
+        az apim graphql resolver create --service-name MyApim -g MyResourceGroup --api-id MyApi --resolver-id MyResolverId --display-name "Query-allFamilies" --path "Query/allFamilies" --description "A GraphQL Resolver example"
+"""
+
+helps['apim graphql resolver delete'] = """
+type: command
+short-summary: Delete the specified resolver in the GraphQL API.
+examples:
+  - name: Delete resolver.
+    text: |
+        az apim graphql resolver delete --service-name MyApim -g MyResourceGroup --api-id MyApi --resolver-id MyResolverId
+"""
+
+helps['apim graphql resolver show'] = """
+type: command
+short-summary: Get the details of the GraphQL API Resolver specified by its identifier.
+examples:
+  - name: Get details of resolver.
+    text: |
+        az apim graphql resolver show --service-name MyApim -g MyResourceGroup --api-id MyApi --resolver-id MyResolverId
+"""
+
+helps['apim graphql resolver list'] = """
+type: command
+short-summary: List a collection of the resolvers for the specified GraphQL API.
+examples:
+  - name: Get list of resolvers of an API.
+    text: |
+        az apim graphql resolver list --service-name MyApim -g MyResourceGroup --api-id MyApi
+"""
+
+helps['apim graphql resolver policy create'] = """
+type: command
+short-summary: Create or updates policy configuration for the GraphQL API Resolver level.
+examples:
+  - name: Create a resolver policy.
+    text: |
+        az apim graphql resolver policy create --service-name MyApim -g MyResourceGroup --api-id MyApi --resolver-id MyResolverId --policy-format xml --value-path 'path to xml file'
+"""
+
+helps['apim graphql resolver policy show'] = """
+type: command
+short-summary: Get the policy configuration at the GraphQL API Resolver level.
+examples:
+  - name: Get policy configuration.
+    text: |
+        az apim graphql resolver policy show --service-name MyApim -g MyResourceGroup --api-id MyApi --resolver-id MyResolverId
+"""
+
+helps['apim graphql resolver policy delete'] = """
+type: command
+short-summary: Delete the policy configuration at the GraphQL Api Resolver.
+examples:
+  - name: Delete policy configuration.
+    text: |
+        az apim graphql resolver policy delete --service-name MyApim -g MyResourceGroup --api-id MyApi --resolver-id MyResolverId
+"""
+
+helps['apim graphql resolver policy list'] = """
+type: command
+short-summary: Get the list of policy configuration at the GraphQL API Resolver level.
+examples:
+  - name: Get list of policy configuration.
+    text: |
+        az apim graphql resolver policy list --service-name MyApim -g MyResourceGroup --api-id MyApi --resolver-id MyResolverId
 """

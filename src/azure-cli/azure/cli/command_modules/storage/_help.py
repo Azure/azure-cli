@@ -105,6 +105,38 @@ examples:
     text: az storage account blob-service-properties update --default-service-version 2020-04-08 -n mystorageaccount -g myresourcegroup
 """
 
+helps['storage account blob-service-properties cors-rule'] = """
+type: group
+short-summary: Manage the Cross-Origin Resource Sharing (CORS) rules of a storage account's blob service properties.
+"""
+
+helps['storage account blob-service-properties cors-rule list'] = """
+type: command
+short-summary: List all CORS rules of a storage account's blob service properties.
+examples:
+  - name: List all CORS rules of a storage account
+    text: |
+        az storage account blob-service-properties cors-rule list --account-name mystorageaccount --resource-group myresourcegroup
+"""
+
+helps['storage account blob-service-properties cors-rule clear'] = """
+type: command
+short-summary: Clear all CORS rules for a storage account.
+examples:
+  - name: Clear all CORS rules for a storage account
+    text: |
+        az storage account blob-service-properties cors-rule clear --account-name mystorageaccount --resource-group myresourcegroup
+"""
+
+helps['storage account blob-service-properties cors-rule add'] = """
+type: command
+short-summary: Add a CORS rule for a storage account.
+examples:
+  - name: Add a CORS rule for a storage account
+    text: |
+        az storage account blob-service-properties cors-rule add --account-name mystorageaccount --resource-group myresourcegroup --allowed-origins "http://*.contoso.com" --allowed-methods PUT GET --max-age 200
+"""
+
 helps['storage account create'] = """
 type: command
 short-summary: Create a storage account.
@@ -636,6 +668,9 @@ examples:
     text: |
         az storage account update --default-action Allow --name MyStorageAccount --resource-group MyResourceGroup
     crafted: true
+  - name: Use a user-assigned managed identity instead of system-assigned managed identity
+    text: |
+        az storage account update --name <storage-account-name> --resource-group <resource-group-name> --encryption-key-vault <keyvault-uri> --encryption-key-name <key-name-in-keyvault> --encryption-key-source Microsoft.Keyvault --key-vault-user-identity-id <user-assigned-identity-id> --identity-type UserAssigned --user-identity-id <user-assigned-identity-id>`
 """
 
 helps['storage account hns-migration'] = """
@@ -1214,6 +1249,8 @@ examples:
     text: az storage blob sync -c mycontainer -s "path/to/file" -d NewBlob
   - name: Sync a directory to a container.
     text: az storage blob sync -c mycontainer --account-name mystorageccount --account-key 00000000 -s "path/to/directory"
+  - name: Sync a directory to a container with azcopy options pass-through (in this case capping the upload bandwith to 20 MBit/s).
+    text: az storage blob sync -c mycontainer --account-name mystorageccount --account-key 00000000 -s "path/to/directory" -- --cap-mbps=20
 """
 
 helps['storage blob upload'] = """

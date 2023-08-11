@@ -13,10 +13,9 @@ if sys.version_info[1] > 5:
 else:
 	from typing.io import TextIO
 
-
 def serializedATN():
     with StringIO() as buf:
-        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\36")
+        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3 ")
         buf.write("\u00c7\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
         buf.write("\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4\f\t\f\4\r\t\r\4\16")
         buf.write("\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22\4\23\t\23")
@@ -36,60 +35,60 @@ def serializedATN():
         buf.write("\27\16\27\u00b8\13\27\3\30\6\30\u00bb\n\30\r\30\16\30")
         buf.write("\u00bc\3\31\3\31\3\31\3\32\3\32\3\32\3\33\3\33\3\33\2")
         buf.write("\2\34\2\4\6\b\n\f\16\20\22\24\26\30\32\34\36 \"$&(*,.")
-        buf.write("\60\62\64\2\t\5\2\3\5\32\32\36\36\6\2\3\13\32\32\34\34")
-        buf.write("\36\36\b\2\3\3\5\5\b\b\f\f\32\32\36\36\4\2\n\n\20\20\3")
-        buf.write("\2\21\22\4\2\n\n\23\23\t\2\3\3\5\6\b\13\r\16\32\32\34")
-        buf.write("\34\36\36\2\u00b9\2\66\3\2\2\2\4]\3\2\2\2\6a\3\2\2\2\b")
-        buf.write("f\3\2\2\2\nj\3\2\2\2\fm\3\2\2\2\16o\3\2\2\2\20r\3\2\2")
-        buf.write("\2\22\u0080\3\2\2\2\24\u0083\3\2\2\2\26\u0086\3\2\2\2")
-        buf.write("\30\u0089\3\2\2\2\32\u008b\3\2\2\2\34\u008f\3\2\2\2\36")
-        buf.write("\u0093\3\2\2\2 \u0096\3\2\2\2\"\u00a0\3\2\2\2$\u00a4\3")
-        buf.write("\2\2\2&\u00a7\3\2\2\2(\u00aa\3\2\2\2*\u00ad\3\2\2\2,\u00b0")
-        buf.write("\3\2\2\2.\u00ba\3\2\2\2\60\u00be\3\2\2\2\62\u00c1\3\2")
-        buf.write("\2\2\64\u00c4\3\2\2\2\66<\5\4\3\2\678\5\6\4\289\7\3\2")
-        buf.write("\29;\3\2\2\2:\67\3\2\2\2;>\3\2\2\2<:\3\2\2\2<=\3\2\2\2")
-        buf.write("=E\3\2\2\2><\3\2\2\2?@\7\33\2\2@A\5\b\5\2AB\7\33\2\2B")
-        buf.write("C\7\34\2\2CF\3\2\2\2DF\5\b\5\2E?\3\2\2\2ED\3\2\2\2FG\3")
-        buf.write("\2\2\2GJ\5\n\6\2HK\5\f\7\2IK\5\20\t\2JH\3\2\2\2JI\3\2")
-        buf.write("\2\2KP\3\2\2\2LM\7\34\2\2MO\5 \21\2NL\3\2\2\2OR\3\2\2")
-        buf.write("\2PN\3\2\2\2PQ\3\2\2\2QU\3\2\2\2RP\3\2\2\2ST\7\34\2\2")
-        buf.write("TV\5\60\31\2US\3\2\2\2UV\3\2\2\2VZ\3\2\2\2WY\7\35\2\2")
-        buf.write("XW\3\2\2\2Y\\\3\2\2\2ZX\3\2\2\2Z[\3\2\2\2[\3\3\2\2\2\\")
-        buf.write("Z\3\2\2\2]^\7\36\2\2^_\7\34\2\2_\5\3\2\2\2`b\t\2\2\2a")
-        buf.write("`\3\2\2\2bc\3\2\2\2ca\3\2\2\2cd\3\2\2\2d\7\3\2\2\2eg\t")
-        buf.write("\3\2\2fe\3\2\2\2gh\3\2\2\2hf\3\2\2\2hi\3\2\2\2i\t\3\2")
-        buf.write("\2\2jk\7\31\2\2kl\7\34\2\2l\13\3\2\2\2mn\7\32\2\2n\r\3")
-        buf.write("\2\2\2op\7\24\2\2pq\7\34\2\2q\17\3\2\2\2rs\5\16\b\2st")
-        buf.write("\5\22\n\2tu\5\24\13\2uv\5\26\f\2v}\5\30\r\2wx\7\34\2\2")
-        buf.write("xy\5\32\16\2yz\5\34\17\2z|\3\2\2\2{w\3\2\2\2|\177\3\2")
-        buf.write("\2\2}{\3\2\2\2}~\3\2\2\2~\21\3\2\2\2\177}\3\2\2\2\u0080")
-        buf.write("\u0081\7\36\2\2\u0081\u0082\7\34\2\2\u0082\23\3\2\2\2")
-        buf.write("\u0083\u0084\7\32\2\2\u0084\u0085\7\34\2\2\u0085\25\3")
-        buf.write("\2\2\2\u0086\u0087\7\25\2\2\u0087\u0088\7\34\2\2\u0088")
-        buf.write("\27\3\2\2\2\u0089\u008a\7\32\2\2\u008a\31\3\2\2\2\u008b")
-        buf.write("\u008c\7\26\2\2\u008c\u008d\7\34\2\2\u008d\33\3\2\2\2")
-        buf.write("\u008e\u0090\t\4\2\2\u008f\u008e\3\2\2\2\u0090\u0091\3")
-        buf.write("\2\2\2\u0091\u008f\3\2\2\2\u0091\u0092\3\2\2\2\u0092\35")
-        buf.write("\3\2\2\2\u0093\u0094\7\17\2\2\u0094\u0095\7\34\2\2\u0095")
-        buf.write("\37\3\2\2\2\u0096\u0097\5\36\20\2\u0097\u009d\5\"\22\2")
-        buf.write("\u0098\u0099\5$\23\2\u0099\u009a\5\"\22\2\u009a\u009c")
-        buf.write("\3\2\2\2\u009b\u0098\3\2\2\2\u009c\u009f\3\2\2\2\u009d")
-        buf.write("\u009b\3\2\2\2\u009d\u009e\3\2\2\2\u009e!\3\2\2\2\u009f")
-        buf.write("\u009d\3\2\2\2\u00a0\u00a1\5*\26\2\u00a1\u00a2\5&\24\2")
-        buf.write("\u00a2\u00a3\5,\27\2\u00a3#\3\2\2\2\u00a4\u00a5\t\5\2")
-        buf.write("\2\u00a5\u00a6\7\34\2\2\u00a6%\3\2\2\2\u00a7\u00a8\t\6")
-        buf.write("\2\2\u00a8\u00a9\7\34\2\2\u00a9\'\3\2\2\2\u00aa\u00ab")
-        buf.write("\t\7\2\2\u00ab\u00ac\7\34\2\2\u00ac)\3\2\2\2\u00ad\u00ae")
-        buf.write("\7\36\2\2\u00ae\u00af\7\34\2\2\u00af+\3\2\2\2\u00b0\u00b6")
-        buf.write("\5.\30\2\u00b1\u00b2\5(\25\2\u00b2\u00b3\5.\30\2\u00b3")
-        buf.write("\u00b5\3\2\2\2\u00b4\u00b1\3\2\2\2\u00b5\u00b8\3\2\2\2")
-        buf.write("\u00b6\u00b4\3\2\2\2\u00b6\u00b7\3\2\2\2\u00b7-\3\2\2")
-        buf.write("\2\u00b8\u00b6\3\2\2\2\u00b9\u00bb\t\b\2\2\u00ba\u00b9")
-        buf.write("\3\2\2\2\u00bb\u00bc\3\2\2\2\u00bc\u00ba\3\2\2\2\u00bc")
-        buf.write("\u00bd\3\2\2\2\u00bd/\3\2\2\2\u00be\u00bf\5\62\32\2\u00bf")
-        buf.write("\u00c0\5\64\33\2\u00c0\61\3\2\2\2\u00c1\u00c2\7\27\2\2")
-        buf.write("\u00c2\u00c3\7\34\2\2\u00c3\63\3\2\2\2\u00c4\u00c5\7\30")
-        buf.write("\2\2\u00c5\65\3\2\2\2\17<EJPUZch}\u0091\u009d\u00b6\u00bc")
+        buf.write("\60\62\64\2\t\5\2\3\5\34\34  \6\2\3\r\34\34\36\36  \b")
+        buf.write("\2\3\3\5\5\b\b\16\16\34\34  \4\2\n\n\22\22\3\2\23\24\4")
+        buf.write("\2\n\n\25\25\t\2\3\3\5\6\b\13\17\20\34\34\36\36  \2\u00b9")
+        buf.write("\2\66\3\2\2\2\4]\3\2\2\2\6a\3\2\2\2\bf\3\2\2\2\nj\3\2")
+        buf.write("\2\2\fm\3\2\2\2\16o\3\2\2\2\20r\3\2\2\2\22\u0080\3\2\2")
+        buf.write("\2\24\u0083\3\2\2\2\26\u0086\3\2\2\2\30\u0089\3\2\2\2")
+        buf.write("\32\u008b\3\2\2\2\34\u008f\3\2\2\2\36\u0093\3\2\2\2 \u0096")
+        buf.write("\3\2\2\2\"\u00a0\3\2\2\2$\u00a4\3\2\2\2&\u00a7\3\2\2\2")
+        buf.write("(\u00aa\3\2\2\2*\u00ad\3\2\2\2,\u00b0\3\2\2\2.\u00ba\3")
+        buf.write("\2\2\2\60\u00be\3\2\2\2\62\u00c1\3\2\2\2\64\u00c4\3\2")
+        buf.write("\2\2\66<\5\4\3\2\678\5\6\4\289\7\3\2\29;\3\2\2\2:\67\3")
+        buf.write("\2\2\2;>\3\2\2\2<:\3\2\2\2<=\3\2\2\2=E\3\2\2\2><\3\2\2")
+        buf.write("\2?@\7\35\2\2@A\5\b\5\2AB\7\35\2\2BC\7\36\2\2CF\3\2\2")
+        buf.write("\2DF\5\b\5\2E?\3\2\2\2ED\3\2\2\2FG\3\2\2\2GJ\5\n\6\2H")
+        buf.write("K\5\f\7\2IK\5\20\t\2JH\3\2\2\2JI\3\2\2\2KP\3\2\2\2LM\7")
+        buf.write("\36\2\2MO\5 \21\2NL\3\2\2\2OR\3\2\2\2PN\3\2\2\2PQ\3\2")
+        buf.write("\2\2QU\3\2\2\2RP\3\2\2\2ST\7\36\2\2TV\5\60\31\2US\3\2")
+        buf.write("\2\2UV\3\2\2\2VZ\3\2\2\2WY\7\37\2\2XW\3\2\2\2Y\\\3\2\2")
+        buf.write("\2ZX\3\2\2\2Z[\3\2\2\2[\3\3\2\2\2\\Z\3\2\2\2]^\7 \2\2")
+        buf.write("^_\7\36\2\2_\5\3\2\2\2`b\t\2\2\2a`\3\2\2\2bc\3\2\2\2c")
+        buf.write("a\3\2\2\2cd\3\2\2\2d\7\3\2\2\2eg\t\3\2\2fe\3\2\2\2gh\3")
+        buf.write("\2\2\2hf\3\2\2\2hi\3\2\2\2i\t\3\2\2\2jk\7\33\2\2kl\7\36")
+        buf.write("\2\2l\13\3\2\2\2mn\7\34\2\2n\r\3\2\2\2op\7\26\2\2pq\7")
+        buf.write("\36\2\2q\17\3\2\2\2rs\5\16\b\2st\5\22\n\2tu\5\24\13\2")
+        buf.write("uv\5\26\f\2v}\5\30\r\2wx\7\36\2\2xy\5\32\16\2yz\5\34\17")
+        buf.write("\2z|\3\2\2\2{w\3\2\2\2|\177\3\2\2\2}{\3\2\2\2}~\3\2\2")
+        buf.write("\2~\21\3\2\2\2\177}\3\2\2\2\u0080\u0081\7 \2\2\u0081\u0082")
+        buf.write("\7\36\2\2\u0082\23\3\2\2\2\u0083\u0084\7\34\2\2\u0084")
+        buf.write("\u0085\7\36\2\2\u0085\25\3\2\2\2\u0086\u0087\7\27\2\2")
+        buf.write("\u0087\u0088\7\36\2\2\u0088\27\3\2\2\2\u0089\u008a\7\34")
+        buf.write("\2\2\u008a\31\3\2\2\2\u008b\u008c\7\30\2\2\u008c\u008d")
+        buf.write("\7\36\2\2\u008d\33\3\2\2\2\u008e\u0090\t\4\2\2\u008f\u008e")
+        buf.write("\3\2\2\2\u0090\u0091\3\2\2\2\u0091\u008f\3\2\2\2\u0091")
+        buf.write("\u0092\3\2\2\2\u0092\35\3\2\2\2\u0093\u0094\7\21\2\2\u0094")
+        buf.write("\u0095\7\36\2\2\u0095\37\3\2\2\2\u0096\u0097\5\36\20\2")
+        buf.write("\u0097\u009d\5\"\22\2\u0098\u0099\5$\23\2\u0099\u009a")
+        buf.write("\5\"\22\2\u009a\u009c\3\2\2\2\u009b\u0098\3\2\2\2\u009c")
+        buf.write("\u009f\3\2\2\2\u009d\u009b\3\2\2\2\u009d\u009e\3\2\2\2")
+        buf.write("\u009e!\3\2\2\2\u009f\u009d\3\2\2\2\u00a0\u00a1\5*\26")
+        buf.write("\2\u00a1\u00a2\5&\24\2\u00a2\u00a3\5,\27\2\u00a3#\3\2")
+        buf.write("\2\2\u00a4\u00a5\t\5\2\2\u00a5\u00a6\7\36\2\2\u00a6%\3")
+        buf.write("\2\2\2\u00a7\u00a8\t\6\2\2\u00a8\u00a9\7\36\2\2\u00a9")
+        buf.write("\'\3\2\2\2\u00aa\u00ab\t\7\2\2\u00ab\u00ac\7\36\2\2\u00ac")
+        buf.write(")\3\2\2\2\u00ad\u00ae\7 \2\2\u00ae\u00af\7\36\2\2\u00af")
+        buf.write("+\3\2\2\2\u00b0\u00b6\5.\30\2\u00b1\u00b2\5(\25\2\u00b2")
+        buf.write("\u00b3\5.\30\2\u00b3\u00b5\3\2\2\2\u00b4\u00b1\3\2\2\2")
+        buf.write("\u00b5\u00b8\3\2\2\2\u00b6\u00b4\3\2\2\2\u00b6\u00b7\3")
+        buf.write("\2\2\2\u00b7-\3\2\2\2\u00b8\u00b6\3\2\2\2\u00b9\u00bb")
+        buf.write("\t\b\2\2\u00ba\u00b9\3\2\2\2\u00bb\u00bc\3\2\2\2\u00bc")
+        buf.write("\u00ba\3\2\2\2\u00bc\u00bd\3\2\2\2\u00bd/\3\2\2\2\u00be")
+        buf.write("\u00bf\5\62\32\2\u00bf\u00c0\5\64\33\2\u00c0\61\3\2\2")
+        buf.write("\2\u00c1\u00c2\7\31\2\2\u00c2\u00c3\7\36\2\2\u00c3\63")
+        buf.write("\3\2\2\2\u00c4\u00c5\7\32\2\2\u00c5\65\3\2\2\2\17<EJP")
+        buf.write("UZch}\u0091\u009d\u00b6\u00bc")
         return buf.getvalue()
 
 
@@ -104,15 +103,15 @@ class MetricAlertConditionParser ( Parser ):
     sharedContextCache = PredictionContextCache()
 
     literalNames = [ "<INVALID>", "'.'", "'/'", "'-'", "'_'", "'\\'", "':'", 
-                     "'%'", "','", "'|'", "'+'", "'*'", "'~'" ]
+                     "'%'", "','", "'|'", "'('", "')'", "'+'", "'*'", "'~'" ]
 
     symbolicNames = [ "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
-                      "<INVALID>", "WHERE", "AND", "INCLUDES", "EXCLUDES", 
-                      "OR", "DYNAMIC", "OF", "SINCE", "WITH", "SKIPMETRICVALIDATION", 
-                      "OPERATOR", "NUMBER", "QUOTE", "WHITESPACE", "NEWLINE", 
-                      "WORD" ]
+                      "<INVALID>", "<INVALID>", "<INVALID>", "WHERE", "AND", 
+                      "INCLUDES", "EXCLUDES", "OR", "DYNAMIC", "OF", "SINCE", 
+                      "WITH", "SKIPMETRICVALIDATION", "OPERATOR", "NUMBER", 
+                      "QUOTE", "WHITESPACE", "NEWLINE", "WORD" ]
 
     RULE_expression = 0
     RULE_aggregation = 1
@@ -162,22 +161,24 @@ class MetricAlertConditionParser ( Parser ):
     T__9=10
     T__10=11
     T__11=12
-    WHERE=13
-    AND=14
-    INCLUDES=15
-    EXCLUDES=16
-    OR=17
-    DYNAMIC=18
-    OF=19
-    SINCE=20
-    WITH=21
-    SKIPMETRICVALIDATION=22
-    OPERATOR=23
-    NUMBER=24
-    QUOTE=25
-    WHITESPACE=26
-    NEWLINE=27
-    WORD=28
+    T__12=13
+    T__13=14
+    WHERE=15
+    AND=16
+    INCLUDES=17
+    EXCLUDES=18
+    OR=19
+    DYNAMIC=20
+    OF=21
+    SINCE=22
+    WITH=23
+    SKIPMETRICVALIDATION=24
+    OPERATOR=25
+    NUMBER=26
+    QUOTE=27
+    WHITESPACE=28
+    NEWLINE=29
+    WORD=30
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
@@ -300,7 +301,7 @@ class MetricAlertConditionParser ( Parser ):
                 self.state = 64
                 self.match(MetricAlertConditionParser.WHITESPACE)
                 pass
-            elif token in [MetricAlertConditionParser.T__0, MetricAlertConditionParser.T__1, MetricAlertConditionParser.T__2, MetricAlertConditionParser.T__3, MetricAlertConditionParser.T__4, MetricAlertConditionParser.T__5, MetricAlertConditionParser.T__6, MetricAlertConditionParser.T__7, MetricAlertConditionParser.T__8, MetricAlertConditionParser.NUMBER, MetricAlertConditionParser.WHITESPACE, MetricAlertConditionParser.WORD]:
+            elif token in [MetricAlertConditionParser.T__0, MetricAlertConditionParser.T__1, MetricAlertConditionParser.T__2, MetricAlertConditionParser.T__3, MetricAlertConditionParser.T__4, MetricAlertConditionParser.T__5, MetricAlertConditionParser.T__6, MetricAlertConditionParser.T__7, MetricAlertConditionParser.T__8, MetricAlertConditionParser.T__9, MetricAlertConditionParser.T__10, MetricAlertConditionParser.NUMBER, MetricAlertConditionParser.WHITESPACE, MetricAlertConditionParser.WORD]:
                 self.state = 66
                 self.metric()
                 pass
@@ -531,7 +532,7 @@ class MetricAlertConditionParser ( Parser ):
             while True:
                 self.state = 99
                 _la = self._input.LA(1)
-                if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__1) | (1 << MetricAlertConditionParser.T__2) | (1 << MetricAlertConditionParser.T__3) | (1 << MetricAlertConditionParser.T__4) | (1 << MetricAlertConditionParser.T__5) | (1 << MetricAlertConditionParser.T__6) | (1 << MetricAlertConditionParser.T__7) | (1 << MetricAlertConditionParser.T__8) | (1 << MetricAlertConditionParser.NUMBER) | (1 << MetricAlertConditionParser.WHITESPACE) | (1 << MetricAlertConditionParser.WORD))) != 0)):
+                if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__1) | (1 << MetricAlertConditionParser.T__2) | (1 << MetricAlertConditionParser.T__3) | (1 << MetricAlertConditionParser.T__4) | (1 << MetricAlertConditionParser.T__5) | (1 << MetricAlertConditionParser.T__6) | (1 << MetricAlertConditionParser.T__7) | (1 << MetricAlertConditionParser.T__8) | (1 << MetricAlertConditionParser.T__9) | (1 << MetricAlertConditionParser.T__10) | (1 << MetricAlertConditionParser.NUMBER) | (1 << MetricAlertConditionParser.WHITESPACE) | (1 << MetricAlertConditionParser.WORD))) != 0)):
                     self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
@@ -539,7 +540,7 @@ class MetricAlertConditionParser ( Parser ):
                 self.state = 102 
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__1) | (1 << MetricAlertConditionParser.T__2) | (1 << MetricAlertConditionParser.T__3) | (1 << MetricAlertConditionParser.T__4) | (1 << MetricAlertConditionParser.T__5) | (1 << MetricAlertConditionParser.T__6) | (1 << MetricAlertConditionParser.T__7) | (1 << MetricAlertConditionParser.T__8) | (1 << MetricAlertConditionParser.NUMBER) | (1 << MetricAlertConditionParser.WHITESPACE) | (1 << MetricAlertConditionParser.WORD))) != 0)):
+                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__1) | (1 << MetricAlertConditionParser.T__2) | (1 << MetricAlertConditionParser.T__3) | (1 << MetricAlertConditionParser.T__4) | (1 << MetricAlertConditionParser.T__5) | (1 << MetricAlertConditionParser.T__6) | (1 << MetricAlertConditionParser.T__7) | (1 << MetricAlertConditionParser.T__8) | (1 << MetricAlertConditionParser.T__9) | (1 << MetricAlertConditionParser.T__10) | (1 << MetricAlertConditionParser.NUMBER) | (1 << MetricAlertConditionParser.WHITESPACE) | (1 << MetricAlertConditionParser.WORD))) != 0)):
                     break
 
         except RecognitionException as re:
@@ -1056,7 +1057,7 @@ class MetricAlertConditionParser ( Parser ):
             while True:
                 self.state = 140
                 _la = self._input.LA(1)
-                if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__2) | (1 << MetricAlertConditionParser.T__5) | (1 << MetricAlertConditionParser.T__9) | (1 << MetricAlertConditionParser.NUMBER) | (1 << MetricAlertConditionParser.WORD))) != 0)):
+                if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__2) | (1 << MetricAlertConditionParser.T__5) | (1 << MetricAlertConditionParser.T__11) | (1 << MetricAlertConditionParser.NUMBER) | (1 << MetricAlertConditionParser.WORD))) != 0)):
                     self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
@@ -1064,7 +1065,7 @@ class MetricAlertConditionParser ( Parser ):
                 self.state = 143 
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__2) | (1 << MetricAlertConditionParser.T__5) | (1 << MetricAlertConditionParser.T__9) | (1 << MetricAlertConditionParser.NUMBER) | (1 << MetricAlertConditionParser.WORD))) != 0)):
+                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__2) | (1 << MetricAlertConditionParser.T__5) | (1 << MetricAlertConditionParser.T__11) | (1 << MetricAlertConditionParser.NUMBER) | (1 << MetricAlertConditionParser.WORD))) != 0)):
                     break
 
         except RecognitionException as re:
@@ -1570,7 +1571,7 @@ class MetricAlertConditionParser ( Parser ):
                 if _alt == 1:
                     self.state = 183
                     _la = self._input.LA(1)
-                    if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__2) | (1 << MetricAlertConditionParser.T__3) | (1 << MetricAlertConditionParser.T__5) | (1 << MetricAlertConditionParser.T__6) | (1 << MetricAlertConditionParser.T__7) | (1 << MetricAlertConditionParser.T__8) | (1 << MetricAlertConditionParser.T__10) | (1 << MetricAlertConditionParser.T__11) | (1 << MetricAlertConditionParser.NUMBER) | (1 << MetricAlertConditionParser.WHITESPACE) | (1 << MetricAlertConditionParser.WORD))) != 0)):
+                    if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__2) | (1 << MetricAlertConditionParser.T__3) | (1 << MetricAlertConditionParser.T__5) | (1 << MetricAlertConditionParser.T__6) | (1 << MetricAlertConditionParser.T__7) | (1 << MetricAlertConditionParser.T__8) | (1 << MetricAlertConditionParser.T__12) | (1 << MetricAlertConditionParser.T__13) | (1 << MetricAlertConditionParser.NUMBER) | (1 << MetricAlertConditionParser.WHITESPACE) | (1 << MetricAlertConditionParser.WORD))) != 0)):
                         self._errHandler.recoverInline(self)
                     else:
                         self._errHandler.reportMatch(self)

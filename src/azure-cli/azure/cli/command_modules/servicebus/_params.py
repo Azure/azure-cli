@@ -5,20 +5,19 @@
 # pylint: disable=line-too-long
 # pylint: disable=too-many-statements
 
-from azure.cli.core.commands.parameters import tags_type, get_enum_type, resource_group_name_type, name_type,\
+from azure.cli.core.commands.parameters import tags_type, get_enum_type, resource_group_name_type, name_type, \
     get_location_type, get_three_state_flag, get_resource_name_completion_list
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
-from azure.cli.command_modules.servicebus.action import AlertAddEncryption
+from azure.cli.command_modules.servicebus.action import AlertAddEncryption, AlertAddIpRule, AlertAddVirtualNetwork
 from azure.cli.core.profiles import ResourceType
 
 
 def load_arguments_sb(self, _):
-    from azure.cli.command_modules.servicebus._completers import get_queue_command_completion_list, \
-        get_rules_command_completion_list, get_subscriptions_command_completion_list, get_topic_command_completion_list
+    from azure.cli.command_modules.servicebus._completers import get_rules_command_completion_list
     from azure.cli.command_modules.servicebus._validators import _validate_auto_delete_on_idle, \
         _validate_duplicate_detection_history_time_window, \
         _validate_default_message_time_to_live, \
-        _validate_lock_duration, validate_partner_namespace, validate_premiumsku_capacity, validate_target_namespace
+        _validate_lock_duration, validate_partner_namespace, validate_premiumsku_capacity
 
     (SkuName, FilterType, TlsVersion) = self.get_models('SkuName', 'FilterType', 'TlsVersion', resource_type=ResourceType.MGMT_SERVICEBUS)
 
@@ -50,110 +49,12 @@ def load_arguments_sb(self, _):
         c.argument('premium_messaging_partitions', options_list=['--premium-messaging-partitions', '--premium-partitions'], type=int, help='The number of partitions of a Service Bus namespace. This property is only applicable to Premium SKU namespaces. The default value is 1 and possible values are 1, 2 and 4')
         c.argument('alternate_name', help='Alternate name specified when alias and namespace names are same.')
 
-    with self.argument_context('servicebus namespace exists') as c:
-        c.argument('name', arg_type=name_type, help='Namespace name. Name can contain only letters, numbers, and hyphens. The namespace must start with a letter, and it must end with a letter or number.')
-
     with self.argument_context('servicebus namespace create') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('zone_redundant', options_list=['--zone-redundant'], is_preview=True, arg_type=get_three_state_flag(),
                    help='Enabling this property creates a ServiceBus Zone Redundant Namespace in regions supported availability zones')
 
-    # region Queue
-    with self.argument_context('servicebus queue') as c:
-        c.argument('queue_name', arg_type=name_type, id_part='child_name_1', completer=get_queue_command_completion_list, help='Name of Queue')
-
-    # region - Queue Create
-    for scope in ['create', 'update']:
-        with self.argument_context('servicebus queue {}'.format(scope)) as c:
-            c.argument('queue_name', arg_type=name_type, id_part='child_name_1', help='Name of Queue')
-            c.argument('lock_duration', validator=_validate_lock_duration, help='String ISO 8601 timespan or duration format for duration of a peek-lock; that is, the amount of time that the message is locked for other receivers. The maximum value for LockDuration is 5 minutes; the default value is 1 minute.')
-            c.argument('max_size_in_megabytes', options_list=['--max-size'], type=int, choices=[1024, 2048, 3072, 4096, 5120, 10240, 20480, 40960, 81920], help='Maximum size of queue in megabytes, which is the size of the memory allocated for the queue. Default is 1024. Max for Standard SKU is 5120 and for Premium SKU is 81920')
-            c.argument('max_message_size_in_kilobytes', options_list=['--max-message-size', '--max-message-size-in-kilobytes'], type=int, help='Maximum size (in KB) of the message payload that can be accepted by the queue. This property is only used in Premium today and default is 1024.')
-            c.argument('requires_duplicate_detection', options_list=['--enable-duplicate-detection'], arg_type=get_three_state_flag(), help='A boolean value indicating if this queue requires duplicate detection.')
-            c.argument('requires_session', options_list=['--enable-session'], arg_type=get_three_state_flag(), help='A boolean value indicating whether the queue supports the concept of sessions.')
-            c.argument('default_message_time_to_live', validator=_validate_default_message_time_to_live, help='ISO 8601 timespan or duration time format for default message to live value. This is the duration after which the message expires, starting from when the message is sent to Service Bus. This is the default value used when TimeToLive is not set on a message itself.')
-            c.argument('dead_lettering_on_message_expiration', options_list=['--enable-dead-lettering-on-message-expiration'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether this queue has dead letter support when a message expires.')
-            c.argument('duplicate_detection_history_time_window', validator=_validate_duplicate_detection_history_time_window, help='ISO 8601 timeSpan structure that defines the duration of the duplicate detection history. The default value is 10 minutes.')
-            c.argument('max_delivery_count', type=int, help='The maximum delivery count. A message is automatically deadlettered after this number of deliveries. default value is 10.')
-            c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled', 'ReceiveDisabled']), help='Enumerates the possible values for the status of a messaging entity.')
-            c.argument('auto_delete_on_idle', validator=_validate_auto_delete_on_idle, help='ISO 8601 timeSpan or duration time format for idle interval after which the queue is automatically deleted. The minimum duration is 5 minutes.')
-            c.argument('enable_partitioning', arg_type=get_three_state_flag(), help='A boolean value that indicates whether the queue is to be partitioned across multiple message brokers.')
-            c.argument('enable_express', arg_type=get_three_state_flag(), help='A boolean value that indicates whether Express Entities are enabled. An express queue holds a message in memory temporarily before writing it to persistent storage.')
-            c.argument('forward_to', help='Queue/Topic name to forward the messages')
-            c.argument('forward_dead_lettered_messages_to', help='Queue/Topic name to forward the Dead Letter message')
-            c.argument('enable_batched_operations', arg_type=get_three_state_flag(), help='Allow server-side batched operations.')
-
-    with self.argument_context('servicebus queue update') as c:
-        c.argument('enable_partitioning', arg_type=get_three_state_flag(),
-                   help='A boolean value that indicates whether the queue is to be partitioned across multiple message brokers.', deprecate_info=c.deprecate(hide=True, expiration='2.49.0'))
-        c.argument('requires_session', options_list=['--enable-session'], arg_type=get_three_state_flag(), help='A boolean value indicating whether the queue supports the concept of sessions.', deprecate_info=c.deprecate(hide=True, expiration='2.49.0'))
-        c.argument('requires_duplicate_detection', options_list=['--enable-duplicate-detection'],
-                   arg_type=get_three_state_flag(),
-                   help='A boolean value indicating if this queue requires duplicate detection.', deprecate_info=c.deprecate(hide=True, expiration='2.49.0'))
-
-    with self.argument_context('servicebus queue list') as c:
-        c.argument('namespace_name', id_part=None, options_list=['--namespace-name'], help='Name of Namespace')
-
-    # region - Topic
-    for scope in ['servicebus topic show', 'servicebus topic delete']:
-        with self.argument_context(scope) as c:
-            c.argument('topic_name', arg_type=name_type, id_part='child_name_1', completer=get_topic_command_completion_list, help='Name of Topic')
-
-    # region - Topic Create
-    for scope in ['create', 'update']:
-        with self.argument_context('servicebus topic {}'.format(scope)) as c:
-            c.argument('topic_name', arg_type=name_type, id_part='child_name_1', completer=get_topic_command_completion_list, help='Name of Topic')
-            c.argument('default_message_time_to_live', validator=_validate_default_message_time_to_live, help='ISO 8601 or duration time format for Default message timespan to live value. This is the duration after which the message expires, starting from when the message is sent to Service Bus. This is the default value used when TimeToLive is not set on a message itself.')
-            c.argument('max_size_in_megabytes', options_list=['--max-size'], type=int, choices=[1024, 2048, 3072, 4096, 5120, 10240, 20480, 40960, 81920], help='Maximum size of topic in megabytes, which is the size of the memory allocated for the topic. Default is 1024. Max for Standard SKU is 5120 and for Premium SKU is 81920')
-            c.argument('requires_duplicate_detection', options_list=['--enable-duplicate-detection'], arg_type=get_three_state_flag(), help='A boolean value indicating if this topic requires duplicate detection.')
-            c.argument('duplicate_detection_history_time_window', validator=_validate_duplicate_detection_history_time_window, help='ISO 8601 timespan or duration time format for structure that defines the duration of the duplicate detection history. The default value is 10 minutes.')
-            c.argument('enable_batched_operations', arg_type=get_three_state_flag(), help='Allow server-side batched operations.')
-            c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled']), help='Enumerates the possible values for the status of a messaging entity.')
-            c.argument('support_ordering', options_list=['--enable-ordering'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether the topic supports ordering.')
-            c.argument('auto_delete_on_idle', validator=_validate_auto_delete_on_idle, help='ISO 8601 timespan or duration time format for idle interval after which the topic is automatically deleted. The minimum duration is 5 minutes.')
-            c.argument('enable_partitioning', arg_type=get_three_state_flag(), help='A boolean value that indicates whether the topic to be partitioned across multiple message brokers is enabled.')
-            c.argument('enable_express', arg_type=get_three_state_flag(), help='A boolean value that indicates whether Express Entities are enabled. An express topic holds a message in memory temporarily before writing it to persistent storage.')
-            c.argument('max_message_size_in_kilobytes', options_list=['--max-message-size', '--max-message-size-in-kilobytes'], type=int, help='Maximum size (in KB) of the message payload that can be accepted by the queue. This property is only used in Premium today and default is 1024.')
-
-    for scope in ['servicebus topic show', 'servicebus topic delete']:
-        with self.argument_context(scope) as c:
-            c.argument('topic_name', arg_type=name_type, id_part='child_name_1', completer=get_topic_command_completion_list, help='Name of Topic')
-
-    with self.argument_context('servicebus topic list') as c:
-        c.argument('namespace_name', id_part=None, options_list=['--namespace-name'], help='Name of Namespace')
-
-    with self.argument_context('servicebus topic subscription') as c:
-        c.argument('subscription_name', arg_type=name_type, id_part='child_name_2', completer=get_subscriptions_command_completion_list, help='Name of Subscription')
-        c.argument('topic_name', id_part='child_name_1', options_list=['--topic-name'], help='Name of Topic')
-
-    # region - Subscription Create and update
-    for scope in ['create', 'update']:
-        with self.argument_context('servicebus topic subscription {}'.format(scope)) as c:
-            c.argument('lock_duration', validator=_validate_lock_duration, help='ISO 8601 or duration format (day:minute:seconds) for lock duration timespan for the subscription. The default value is 1 minute.')
-            c.argument('requires_session', options_list=['--enable-session'], arg_type=get_three_state_flag(), help='A boolean value indicating if a subscription supports the concept of sessions.')
-            c.argument('default_message_time_to_live', validator=_validate_default_message_time_to_live, help='ISO 8601 or duration time format for Default message timespan to live value. This is the duration after which the message expires, starting from when the message is sent to Service Bus. This is the default value used when TimeToLive is not set on a message itself.')
-            c.argument('dead_lettering_on_message_expiration', options_list=['--enable-dead-lettering-on-message-expiration'], arg_type=get_three_state_flag(), help='A boolean Value that indicates whether a subscription has dead letter support when a message expires.')
-            c.argument('max_delivery_count', type=int, help='Number of maximum deliveries.')
-            c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled', 'ReceiveDisabled']), help='Enumerates the possible values for the status of a messaging entity.')
-            c.argument('enable_batched_operations', arg_type=get_three_state_flag(), help='Allow server-side batched operations.')
-            c.argument('auto_delete_on_idle', validator=_validate_auto_delete_on_idle, options_list=['--auto-delete-on-idle'], help='ISO 8601 timeSpan  or duration time format for idle interval after which the subscription is automatically deleted. The minimum duration is 5 minutes.')
-            c.argument('forward_to', help='Queue/Topic name to forward the messages')
-            c.argument('forward_dead_lettered_messages_to', help='Queue/Topic name to forward the Dead Letter message')
-            c.argument('dead_lettering_on_filter_evaluation_exceptions', options_list=['--dead-letter-on-filter-exceptions'], arg_type=get_three_state_flag(), help='Allow dead lettering when filter evaluation exceptions occur.')
-
-    with self.argument_context('servicebus topic subscription create') as c:
-        c.argument('is_client_affine', arg_type=get_three_state_flag(), help='Value that indicates whether the subscription has an affinity to the client id.')
-        c.argument('client_id', help='Indicates the Client ID of the application that created the client-affine subscription.')
-        c.argument('is_shared', arg_type=get_three_state_flag(), help='For client-affine subscriptions, this value indicates whether the subscription is shared or not.')
-        c.argument('is_durable', arg_type=get_three_state_flag(), help='For client-affine subscriptions, this value indicates whether the subscription is durable or not.')
-
-    with self.argument_context('servicebus topic subscription list') as c:
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
-        c.argument('topic_name', options_list=['--topic-name'], id_part=None, help='Name of Topic')
-
-    # Region Subscription Rules
-    # Region Rules Create
-
+# Region Subscription Rules
     with self.argument_context('servicebus topic subscription rule') as c:
         c.argument('rule_name', arg_type=name_type, id_part='child_name_3', completer=get_rules_command_completion_list, help='Name of Rule')
         c.argument('subscription_name', options_list=['--subscription-name'], id_part='child_name_2', help='Name of Subscription')
@@ -185,15 +86,7 @@ def load_arguments_sb(self, _):
         c.argument('topic_name', options_list=['--topic-name'], id_part=None, help='Name of Topic')
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
 
-    # Geo DR - Disaster Recovery Configs - Alias  : Region
-    with self.argument_context('servicebus georecovery-alias exists') as c:
-        c.argument('resource_group_name', arg_type=resource_group_name_type)
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part='name', help='Name of Namespace')
-        c.argument('name', options_list=['--alias', '-a'], arg_type=name_type, help='Name of Geo-Disaster Recovery Configuration Alias to check availability')
-
-    with self.argument_context('servicebus georecovery-alias') as c:
-        c.argument('alias', options_list=['--alias', '-a'], id_part='child_name_1', help='Name of the Geo-Disaster Recovery Configuration Alias')
-
+# Geo DR - Disaster Recovery Configs - Alias  : Region
     with self.argument_context('servicebus georecovery-alias set') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('namespace_name', options_list=['--namespace-name'], id_part='name', help='Name of Namespace')
@@ -201,62 +94,21 @@ def load_arguments_sb(self, _):
         c.argument('partner_namespace', required=True, options_list=['--partner-namespace'], validator=validate_partner_namespace, help='Name (if within the same resource group) or ARM Id of Primary/Secondary Service Bus  namespace name, which is part of GEO DR pairing')
         c.argument('alternate_name', help='Alternate Name (Post failover) for Primary Namespace, when Namespace name and Alias name are same')
 
-    for scope in ['servicebus georecovery-alias authorization-rule show', 'servicebus georecovery-alias authorization-rule keys list']:
-        with self.argument_context(scope)as c:
-            c.argument('authorization_rule_name', arg_type=name_type, id_part='child_name_2', help='name of Namespace Authorization Rule')
-
-    with self.argument_context('servicebus georecovery-alias list') as c:
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
-
-    with self.argument_context('servicebus georecovery-alias authorization-rule list') as c:
-        c.argument('alias', options_list=['--alias', '-a'], help='Name of Geo-Disaster Recovery Configuration Alias')
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
-
-    with self.argument_context('servicebus georecovery-alias authorization-rule keys list') as c:
-        c.argument('alias', options_list=['--alias', '-a'], id_part=None, help='Name of Geo-Disaster Recovery Configuration Alias')
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
-        c.argument('authorization_rule_name', arg_type=name_type, help='Name of Namespace AuthorizationRule')
-
-    # Standard to Premium Migration: Region
-
-    with self.argument_context('servicebus migration start') as c:
-        c.ignore('config_name')
-        c.argument('namespace_name', arg_type=name_type, help='Name of Standard Namespace used as source of the migration')
-        # c.argument('config_name', options_list=['--config-name'], id_part=None, help='Name of configuration. Should always be "$default"')
-        c.argument('target_namespace', options_list=['--target-namespace'], validator=validate_target_namespace, help='Name (if within the same resource group) or ARM Id of empty Premium Service Bus namespace name that will be target of the migration')
-        c.argument('post_migration_name', options_list=['--post-migration-name'], help='Post migration name is the name that can be used to connect to standard namespace after migration is complete.')
-
-    for scope in ['show', 'complete', 'abort']:
-        with self.argument_context('servicebus migration {}'.format(scope)) as c:
-            c.ignore('config_name')
-            c.argument('namespace_name', arg_type=name_type, help='Name of Standard Namespace')
-
 # Region Namespace NetworkRuleSet
-    with self.argument_context('servicebus namespace network-rule') as c:
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
-
-    for scope in ['servicebus namespace network-rule add', 'servicebus namespace network-rule remove']:
+    with self.argument_context('servicebus namespace network-rule-set') as c:
+        c.argument('namespace_name', options_list=['--namespace-name', '--name', '-n'], id_part=None,
+                   help='Name of the Namespace')
+    for scope in ['servicebus namespace network-rule-set ip-rule add', 'servicebus namespace network-rule-set ip-rule remove']:
         with self.argument_context(scope) as c:
-            c.argument('subnet', arg_group='Virtual Network Rule', options_list=['--subnet'], help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
-            c.argument('ip_mask', arg_group='IP Address Rule', options_list=['--ip-address'], help='IPv4 address or CIDR range.')
+            c.argument('ip_rule', action=AlertAddIpRule, nargs='+', help='List VirtualNetwork Rules.')
+            c.argument('namespace_name', options_list=['--namespace-name', '--name', '-n'], id_part=None,
+                       help='Name of the Namespace')
+    for scope in ['servicebus namespace network-rule-set virtual-network-rule add', 'servicebus namespace network-rule-set virtual-network-rule remove']:
+        with self.argument_context(scope) as c:
+            c.argument('namespace_name', options_list=['--namespace-name', '--name', '-n'], id_part=None,
+                       help='Name of the Namespace')
+            c.argument('subnet', action=AlertAddVirtualNetwork, nargs='+', help='List VirtualNetwork Rules.')
             c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
-            c.extra('vnet_name', arg_group='Virtual Network Rule', options_list=['--vnet-name'], help='Name of the Virtual Network')
-
-    with self.argument_context('servicebus namespace network-rule update', resource_type=ResourceType.MGMT_SERVICEBUS,
-                               min_api='2017-04-01') as c:
-        c.argument('public_network_access', options_list=['--public-network-access', '--public-network'],
-                   arg_type=get_enum_type(['Enabled', 'Disabled']),
-                   help='This determines if traffic is allowed over public network. By default it is enabled. If value is SecuredByPerimeter then Inbound and Outbound communication is controlled by the network security perimeter and profile\' access rules.')
-        c.argument('trusted_service_access_enabled', options_list=['--enable-trusted-service-access', '-t'],
-                   arg_type=get_three_state_flag(),
-                   help='A boolean value that indicates whether Trusted Service Access is enabled for Network Rule Set.')
-        c.argument('default_action', arg_group='networkrule', options_list=['--default-action'],
-                   arg_type=get_enum_type(['Allow', 'Deny']),
-                   help='Default Action for Network Rule Set.')
-
-    with self.argument_context('servicebus namespace network-rule add') as c:
-        c.argument('ignore_missing_vnet_service_endpoint', arg_group='Virtual Network Rule', options_list=['--ignore-missing-endpoint'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether to ignore missing vnet Service Endpoint')
-        c.argument('action', arg_group='IP Address Rule', options_list=['--action'], arg_type=get_enum_type(['Allow']), help='Action of the IP rule')
 
 # Private end point connection
     with self.argument_context('servicebus namespace private-endpoint-connection') as c:

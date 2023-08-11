@@ -272,15 +272,18 @@ def list_staticsite_functions(cmd, name, resource_group_name=None, environment_n
     return client.list_static_site_build_functions(resource_group_name, name, environment_name)
 
 
-def list_staticsite_app_settings(cmd, name, resource_group_name=None):
+def list_staticsite_app_settings(cmd, name, resource_group_name=None, environment_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
-    return client.list_static_site_app_settings(resource_group_name, name)
+    if not environment_name:
+        return client.list_static_site_app_settings(resource_group_name, name)
+
+    return client.list_static_site_build_app_settings(resource_group_name, name, environment_name)
 
 
-def set_staticsite_app_settings(cmd, name, setting_pairs, resource_group_name=None):
+def set_staticsite_app_settings(cmd, name, setting_pairs, resource_group_name=None, environment_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
@@ -291,20 +294,24 @@ def set_staticsite_app_settings(cmd, name, setting_pairs, resource_group_name=No
         setting_dict[key] = value
 
     # fetch current settings to prevent deleting existing app settings
-    settings = list_staticsite_app_settings(cmd, name, resource_group_name)
+    app_settings = list_staticsite_app_settings(cmd, name, resource_group_name, environment_name)
     for k, v in setting_dict.items():
-        settings.properties[k] = v
+        app_settings.properties[k] = v
 
-    return client.create_or_update_static_site_app_settings(
-        resource_group_name, name, app_settings=settings)
+    if not environment_name:
+        return client.create_or_update_static_site_app_settings(
+            resource_group_name, name, app_settings=app_settings)
+
+    return client.create_or_update_static_site_build_app_settings(
+        resource_group_name, name, environment_name, app_settings=app_settings)
 
 
-def delete_staticsite_app_settings(cmd, name, setting_names, resource_group_name=None):
+def delete_staticsite_app_settings(cmd, name, setting_names, resource_group_name=None, environment_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
-    app_settings = client.list_static_site_app_settings(resource_group_name, name)
+    app_settings = list_staticsite_app_settings(cmd, name, resource_group_name, environment_name)
 
     for key in setting_names:
         if key in app_settings.properties:
@@ -312,8 +319,12 @@ def delete_staticsite_app_settings(cmd, name, setting_names, resource_group_name
         else:
             logger.warning("key '%s' not found in app settings", key)
 
-    return client.create_or_update_static_site_app_settings(
-        resource_group_name, name, app_settings=app_settings)
+    if not environment_name:
+        return client.create_or_update_static_site_app_settings(
+            resource_group_name, name, app_settings=app_settings)
+
+    return client.create_or_update_static_site_build_app_settings(
+        resource_group_name, name, environment_name, app_settings=app_settings)
 
 
 def list_staticsite_users(cmd, name, resource_group_name=None, authentication_provider='all'):
@@ -509,7 +520,7 @@ def delete_staticsite(cmd, name, resource_group_name=None, no_wait=False):
 
 def _parse_pair(pair, delimiter):
     if delimiter not in pair:
-        InvalidArgumentValueError("invalid format of pair {0}".format(pair))
+        raise InvalidArgumentValueError("invalid format of pair {0}".format(pair))
 
     index = pair.index(delimiter)
     return pair[:index], pair[1 + index:]

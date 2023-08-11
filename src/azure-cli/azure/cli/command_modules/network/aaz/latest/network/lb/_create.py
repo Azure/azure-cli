@@ -243,6 +243,7 @@ class Create(AAZCommand):
         _element.backend_port = AAZIntArg(
             options=["backend-port"],
             help="The port used for internal connections on the endpoint. Acceptable values are between 1 and 65535.",
+            required=True,
         )
         _element.enable_floating_ip = AAZBoolArg(
             options=["enable-floating-ip"],
@@ -260,10 +261,12 @@ class Create(AAZCommand):
         _element.frontend_port_range_end = AAZIntArg(
             options=["frontend-port-range-end"],
             help="The last port number in the range of external ports that will be used to provide Inbound Nat to NICs associated with a load balancer. Acceptable values range between 1 and 65535.",
+            required=True,
         )
         _element.frontend_port_range_start = AAZIntArg(
             options=["frontend-port-range-start"],
             help="The first port number in the range of external ports that will be used to provide Inbound Nat to NICs associated with a load balancer. Acceptable values range between 1 and 65534.",
+            required=True,
         )
         _element.idle_timeout_in_minutes = AAZIntArg(
             options=["idle-timeout-in-minutes"],
@@ -272,6 +275,7 @@ class Create(AAZCommand):
         _element.protocol = AAZStrArg(
             options=["protocol"],
             help="The reference to the transport protocol used by the inbound NAT pool.",
+            required=True,
             enum={"All": "All", "Tcp": "Tcp", "Udp": "Udp"},
         )
 
@@ -539,6 +543,7 @@ class Create(AAZCommand):
             _schema.delete_option = cls._args_public_ip_address_create.delete_option
             _schema.dns_settings = cls._args_public_ip_address_create.dns_settings
             _schema.extended_location = cls._args_public_ip_address_create.extended_location
+            _schema.id = cls._args_public_ip_address_create.id
             _schema.idle_timeout_in_minutes = cls._args_public_ip_address_create.idle_timeout_in_minutes
             _schema.ip_address = cls._args_public_ip_address_create.ip_address
             _schema.ip_tags = cls._args_public_ip_address_create.ip_tags
@@ -563,6 +568,13 @@ class Create(AAZCommand):
             help="The extended location of the public ip address.",
         )
         cls._build_args_extended_location_create(public_ip_address_create.extended_location)
+        public_ip_address_create.id = AAZResourceIdArg(
+            options=["id"],
+            help="Resource ID.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/publicIPAddresses/{}",
+            ),
+        )
         public_ip_address_create.location = AAZResourceLocationArg(
             options=["l", "location"],
             help="Resource location.",
@@ -764,6 +776,7 @@ class Create(AAZCommand):
         _schema.delete_option = cls._args_public_ip_address_create.delete_option
         _schema.dns_settings = cls._args_public_ip_address_create.dns_settings
         _schema.extended_location = cls._args_public_ip_address_create.extended_location
+        _schema.id = cls._args_public_ip_address_create.id
         _schema.idle_timeout_in_minutes = cls._args_public_ip_address_create.idle_timeout_in_minutes
         _schema.ip_address = cls._args_public_ip_address_create.ip_address
         _schema.ip_tags = cls._args_public_ip_address_create.ip_tags
@@ -971,7 +984,7 @@ class Create(AAZCommand):
             if _elements is not None:
                 _elements.set_prop("id", AAZStrType, ".id")
                 _elements.set_prop("name", AAZStrType, ".name")
-                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                _elements.set_prop("properties", AAZObjectType, ".", typ_kwargs={"flags": {"required": True, "client_flatten": True}})
 
             properties = _builder.get(".properties.inboundNatPools[].properties")
             if properties is not None:
@@ -1172,7 +1185,7 @@ class Create(AAZCommand):
             _element.id = AAZStrType()
             _element.name = AAZStrType()
             _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
+                flags={"required": True, "client_flatten": True},
             )
             _element.type = AAZStrType(
                 flags={"read_only": True},
@@ -1411,6 +1424,7 @@ class _CreateHelper:
         if _builder is None:
             return
         cls._build_schema_extended_location_create(_builder.set_prop("extendedLocation", AAZObjectType, ".extended_location"))
+        _builder.set_prop("id", AAZStrType, ".id")
         _builder.set_prop("location", AAZStrType, ".location")
         _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
         _builder.set_prop("sku", AAZObjectType, ".sku")
@@ -1450,8 +1464,8 @@ class _CreateHelper:
 
         _elements = _builder.get(".properties.ipTags[]")
         if _elements is not None:
-            _elements.set_prop("ipTagType", AAZStrType, "@PublicIPAddress_create.ip_tags.[].ip_tag_type")
-            _elements.set_prop("tag", AAZStrType, "@PublicIPAddress_create.ip_tags.[].tag")
+            _elements.set_prop("ipTagType", AAZStrType, ".ip_tag_type")
+            _elements.set_prop("tag", AAZStrType, ".tag")
 
         nat_gateway = _builder.get(".properties.natGateway")
         if nat_gateway is not None:

@@ -163,8 +163,7 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
         az_error = azclierror.CLIInternalError(error_msg)
         az_error.set_exception_trace(ex)
         az_error.set_recommendation(
-            "To check existing issues, please visit: https://github.com/Azure/azure-cli/issues\n"
-            "To open a new issue, please run `az feedback`")
+            "To check existing issues, please visit: https://github.com/Azure/azure-cli/issues")
 
     if isinstance(az_error, azclierror.ResourceNotFoundError):
         exit_code = 3
@@ -314,7 +313,7 @@ def get_latest_from_github(package_path='azure-cli'):
 
 
 def _update_latest_from_github(versions):
-    if not check_connectivity(max_retries=0):
+    if not check_connectivity(url='https://raw.githubusercontent.com', max_retries=0):
         return versions, False
     success = True
     for pkg in ['azure-cli-core', 'azure-cli-telemetry']:

@@ -8,7 +8,6 @@ import os
 import shutil
 import stat
 import tempfile
-from knack.config import CLIConfig
 
 
 class RecordsCollection:
@@ -36,11 +35,8 @@ class RecordsCollection:
         if not os.path.isdir(folder):
             return
 
-        # Collect all cache.x files. If it has been a long time since last sent, also collect cache file itself.
-        push_interval = datetime.timedelta(hours=self._get_push_interval_config())
-        include_cache = datetime.datetime.now() - self._last_sent > push_interval
-        candidates = [(fn, os.stat(os.path.join(folder, fn))) for fn in os.listdir(folder)
-                      if include_cache or fn != 'cache']
+        # Collect all cache/cache.x files
+        candidates = [(fn, os.stat(os.path.join(folder, fn))) for fn in os.listdir(folder)]
 
         # sort the cache files base on their last modification time.
         candidates = [(fn, file_stat) for fn, file_stat in candidates if stat.S_ISREG(file_stat.st_mode)]
@@ -71,12 +67,6 @@ class RecordsCollection:
                       ignore_errors=True,
                       onerror=lambda _, p, tr: self._logger.error('Fail to remove file %s', p))
         self._logger.info('Remove directory %s', tmp)
-
-    def _get_push_interval_config(self):
-        config = CLIConfig(config_dir=self._config_dir)
-        threshold = config.getint('telemetry', 'push_interval_in_hours', fallback=24)
-        # the threshold for push telemetry can't be less than 1 hour, default value is 24 hours
-        return threshold if threshold >= 1 else 24
 
     def _read_file(self, path):
         """ Read content of a telemetry cache file and parse them into records. """

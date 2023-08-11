@@ -163,7 +163,7 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
 
     # verify the extension was ok
     extension_result = compute_client.virtual_machine_extensions.get(
-        resource_group_name, vm_name, extension['name'], 'instanceView')
+        resource_group_name, vm_name, extension['name'], expand='instanceView')
     if extension_result.provisioning_state != 'Succeeded':
         raise CLIError('Extension needed for disk encryption was not provisioned correctly')
 
@@ -260,7 +260,7 @@ def decrypt_vm(cmd, resource_group_name, vm_name, volume_type=None, force=False)
     poller.result()
     extension_result = compute_client.virtual_machine_extensions.get(resource_group_name, vm_name,
                                                                      extension['name'],
-                                                                     'instanceView')
+                                                                     expand='instanceView')
     if extension_result.provisioning_state != 'Succeeded':
         raise CLIError("Extension updating didn't succeed")
 
@@ -298,7 +298,7 @@ def show_vm_encryption_status(cmd, resource_group_name, vm_name):
         'osType': None
     }
     compute_client = _compute_client_factory(cmd.cli_ctx)
-    vm = compute_client.virtual_machines.get(resource_group_name, vm_name, 'instanceView')
+    vm = compute_client.virtual_machines.get(resource_group_name, vm_name, expand='instanceView')
     has_new_ade, has_old_ade = _detect_ade_status(vm)
     if not has_new_ade and not has_old_ade:
         logger.warning('Azure Disk Encryption is not enabled')
@@ -315,7 +315,7 @@ def show_vm_encryption_status(cmd, resource_group_name, vm_name):
     extension_result = compute_client.virtual_machine_extensions.get(resource_group_name,
                                                                      vm_name,
                                                                      extension['name'],
-                                                                     'instanceView')
+                                                                     expand='instanceView')
     logger.debug(extension_result)
     if extension_result.instance_view and extension_result.instance_view.statuses:
         encryption_status['progressMessage'] = extension_result.instance_view.statuses[0].message
@@ -362,8 +362,9 @@ def show_vm_encryption_status(cmd, resource_group_name, vm_name):
 
 
 def _get_keyvault_key_url(cli_ctx, keyvault_name, key_name):
-    client = create_keyvault_data_plane_client(cli_ctx)
-    result = client.get_key(get_key_vault_base_url(cli_ctx, keyvault_name), key_name, '')
+    vault_base_url = get_key_vault_base_url(cli_ctx, keyvault_name)
+    client = create_keyvault_data_plane_client(cli_ctx, vault_base_url)
+    result = client.get_key(key_name)
     return result.key.kid  # pylint: disable=no-member
 
 

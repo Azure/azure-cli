@@ -28,7 +28,7 @@ One of the key decisions you will need to make is whether to create your command
 - Common uses for extensions include experimental commands, commands in private or public preview, or to separate between frequently used and rarely used functionality (where infrequently used commands are acquired via extension).
 - Note that if you are trying to get commands into the CLI out of step with the normal release cycle, extensions are your **only** option.
 - Because non-standard, experimental authoring patterns are permitted for extensions, simply trying to "move an extension into the CLI" is often **not** a trivial process and will necessitate a full review with higher scrutiny from the CLI team. Expect to need to make changes.
-- If you want to use CLI code generator to generate CLI code automatically, extension is your **only** option. Please reference [AZ CLI Codegen On boarding](https://github.com/Azure/autorest.az/blob/master/doc/00-onboarding-guide.md) and start from **Step 2** now.
+- If you want to use CLI code generator to generate CLI code automatically. Please reference [aaz-dev-tools](https://github.com/Azure/aaz-dev-tools/blob/dev/README.md).
 
 ## Initial Timeline and Milestones
 
