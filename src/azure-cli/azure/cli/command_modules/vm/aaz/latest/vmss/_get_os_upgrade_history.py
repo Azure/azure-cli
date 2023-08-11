@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "vmss get-os-upgrade-history",
 )
 class GetOsUpgradeHistory(AAZCommand):
-    """List list of OS upgrades on a VM scale set instance.
+    """List the OS upgrades on a VM scale set instance.
     """
 
     _aaz_info = {

@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "vmss list-skus",
 )
 class ListSkus(AAZCommand):
-    """List a list of SKUs available for your VM scale set, including the minimum and maximum VM instances allowed for each SKU.
+    """List SKUs available for your VM scale set, including the minimum and maximum VM instances allowed for each SKU.
     """
 
     _aaz_info = {

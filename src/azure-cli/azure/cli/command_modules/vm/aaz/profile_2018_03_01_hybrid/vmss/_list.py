@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "vmss list",
 )
 class List(AAZCommand):
-    """List a list of all VM scale sets under a resource group.
+    """List all VM scale sets under a resource group.
 
     :example: List VMSS
         az vmss list --resource-group MyResourceGroup

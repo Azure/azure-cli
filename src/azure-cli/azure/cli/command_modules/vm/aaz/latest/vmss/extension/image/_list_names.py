@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "vmss extension image list-names",
 )
 class ListNames(AAZCommand):
-    """List a list of virtual machine extension image types.
+    """List virtual machine extension image types.
     """
 
     _aaz_info = {
