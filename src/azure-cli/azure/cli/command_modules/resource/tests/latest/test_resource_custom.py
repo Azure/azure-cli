@@ -395,7 +395,7 @@ class TestCustom(unittest.TestCase):
     def test_bicep_build_params_defaults(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         param_file = os.path.join(curr_dir, 'sample_params.bicepparam').replace('\\', '\\\\')
-        json_file = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
+        json_file = os.path.join(curr_dir, 'sample_params.json').replace('\\', '\\\\')
 
         run_bicep_command(cli_ctx, ["build-params", param_file])
         is_generated_params_file_exists = os.path.exists(json_file)
