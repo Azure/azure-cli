@@ -86,7 +86,7 @@ class Create(AAZCommand):
             default=True,
         )
         _args_schema.scopes = AAZListArg(
-            options=["--scopes"],
+            options=["-s", "--scope", "--scopes"],
             help="A list of resourceIds that will be used as prefixes. The alert will only apply to activityLogs with resourceIds that fall under one of these prefixes. This list must include at least one item.",
         )
         _args_schema.tags = AAZDictArg(
@@ -103,13 +103,13 @@ class Create(AAZCommand):
             help="The resourceId of the action group. This cannot be null or empty.",
             required=True,
         )
-        _element.webhook_properties = AAZDictArg(
-            options=["webhook-properties"],
+        _element.webhook_properties_raw = AAZDictArg(
+            options=["webhook-properties-raw"],
             help="the dictionary of custom properties to include with the post operation. These data are appended to the webhook payload.",
         )
 
-        webhook_properties = cls._args_schema.action_groups.Element.webhook_properties
-        webhook_properties.Element = AAZStrArg()
+        webhook_properties_raw = cls._args_schema.action_groups.Element.webhook_properties_raw
+        webhook_properties_raw.Element = AAZStrArg()
 
         all_of = cls._args_schema.all_of
         all_of.Element = AAZObjectArg()
@@ -246,7 +246,7 @@ class Create(AAZCommand):
             _elements = _builder.get(".properties.actions.actionGroups[]")
             if _elements is not None:
                 _elements.set_prop("actionGroupId", AAZStrType, ".action_group_id", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("webhookProperties", AAZDictType, ".webhook_properties")
+                _elements.set_prop("webhookProperties", AAZDictType, ".webhook_properties_raw")
 
             webhook_properties = _builder.get(".properties.actions.actionGroups[].webhookProperties")
             if webhook_properties is not None:

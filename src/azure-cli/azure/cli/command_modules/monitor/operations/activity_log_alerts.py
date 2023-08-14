@@ -7,8 +7,6 @@ from azure.cli.core.aaz import has_value, AAZStrArg, AAZListArg, AAZBoolArg
 from azure.cli.core.azclierror import ValidationError
 from ..aaz.latest.monitor.activity_log.alert import Create as _ActivityLogAlertCreate, \
     Update as _ActivityLogAlertUpdate
-from ..aaz.latest.monitor.activity_log.alert.action_group import Add as _ActivityLogAlertActionGroupAdd
-
 
 def _get_alert_settings_for_alert(cmd, resource_group_name, activity_log_alert_name, throw_if_missing=True):
     from azure.core.exceptions import HttpResponseError
@@ -51,10 +49,12 @@ def process_condition_parameter_for_alert(args):
         return
 
     error = 'incorrect usage: --condition requires an expression in the form of FIELD=VALUE[ and FIELD=VALUE...]'
-
+    print(args.condition)
     if not expression:
         raise ValidationError(error)
-
+    conditions = dict(_normalize_condition_for_alert(expression[i]) for i in range(0, len(expression), 1))
+    setattr(args, 'all_of', list(conditions.values()))
+    return
     if len(expression) == 1:
         expression = [each.strip() for each in expression[0].split(' ')]
     elif isinstance(expression, list):
@@ -108,7 +108,7 @@ class ActivityLogAlertCreate(_ActivityLogAlertCreate):
             help="Disable the activity log alert rule after it is created.",
         )
         args_schema.condition = AAZListArg(
-            options=["--conditions", "-c"],
+            options=["--condition", "-c"],
             help="The condition that will cause the alert rule to activate. "
                  "The format is FIELD=VALUE[ and FIELD=VALUE...]",
         )
@@ -157,7 +157,7 @@ class ActivityLogAlertCreate(_ActivityLogAlertCreate):
         for i in action_group_rids:
             args.action_groups.append({
                 "action_group_id": i,
-                "webhook_properties": webhook_properties
+                "webhook_properties_raw": webhook_properties
             })
         if has_value(args.disable):
             args.enabled = not args.disable
@@ -185,14 +185,17 @@ class ActivityLogAlertUpdate(_ActivityLogAlertUpdate):
         process_condition_parameter_for_alert(args)
 
 
-class ActivityLogAlertActionGroupAdd(_ActivityLogAlertActionGroupAdd):
+class ActivityLogAlertActionGroupAdd(_ActivityLogAlertUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.action_group_index._registered = False
-        args_schema.action_group_id._registered = False
-        args_schema.webhook_properties._registered = False
+        args_schema.action_groups._registered = False
+        args_schema.all_of._registered = False
+        args_schema.description._registered = False
+        args_schema.enabled._registered = False
+        args_schema.scopes._registered = False
+        args_schema.tags._registered = False
 
         args_schema.action_group_ids = AAZListArg(
             options=["--action-group", "-a"],
@@ -207,9 +210,10 @@ class ActivityLogAlertActionGroupAdd(_ActivityLogAlertActionGroupAdd):
         )
         args_schema.webhook_properties_list.Element = AAZStrArg()
 
-        args_schema.reset = AAZStrArg(
+        args_schema.reset = AAZBoolArg(
             options=["--reset"],
             help="Remove all the existing action groups before add new conditions.",
+            default=True
         )
         args_schema.strict = AAZStrArg(
             options=["--strict"],
@@ -217,14 +221,10 @@ class ActivityLogAlertActionGroupAdd(_ActivityLogAlertActionGroupAdd):
         )
         return args_schema
 
-    def pre_operations(self):
-        args = self.ctx.args
-        webhook_properties = process_webhook_properties(args)
-        args.webhook_properties = webhook_properties
-
     def pre_instance_create(self):
         args = self.ctx.args
         instance = self.ctx.vars.instance
+        webhook_properties = process_webhook_properties(args)
 
         # normalize the action group ids
         rids = _normalize_names(self.cli_ctx, args.action_group_ids.to_serialized_data(), args.resource_group,
@@ -234,32 +234,32 @@ class ActivityLogAlertActionGroupAdd(_ActivityLogAlertActionGroupAdd):
             for rid in rids:
                 action_groups.append({
                     "action_group_id": rid,
-                    "webhook_properties": args.webhook_properties
+                    "webhook_properties_raw": webhook_properties
                 })
         else:
             action_groups = dict((each.action_group_id, each) for each in instance.properties.actions.action_groups)
             for rid in rids:
-                if rid in action_groups and args.webhook_properties != action_groups[rid].webhook_properties \
+                if rid in action_groups and webhook_properties != action_groups[rid].webhook_properties \
                         and args.strict:
                     raise ValueError(
                         'Fails to override webhook properties of action group {} in strict mode.'.format(rid))
 
                 action_groups[rid] = {
                     "action_group_id": rid,
-                    "webhook_properties": args.webhook_properties
+                    "webhook_properties_raw": webhook_properties
                 }
             action_groups = list(action_groups.values())
-        instance.actions.action_groups = action_groups
+        instance.properties.actions.action_groups = action_groups
 
 
-class ActivityLogAlertActionGroupRemove(_ActivityLogAlertActionGroupAdd):
+class ActivityLogAlertActionGroupRemove(_ActivityLogAlertUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.action_group_index._registered = False
         args_schema.action_group_id._registered = False
-        args_schema.webhook_properties._registered = False
+        args_schema.webhook_properties_raw._registered = False
 
         args_schema.action_group_ids = AAZListArg(
             options=["--action-group", "-a"],
@@ -292,9 +292,10 @@ class ActivityLogAlertScopeAdd(_ActivityLogAlertUpdate):
         args_schema.action_groups._registered = False
         args_schema.tags._registered = False
         args_schema.description._registered = False
-        args_schema.reset = AAZStrArg(
+        args_schema.reset = AAZBoolArg(
             options=["--reset"],
             help="Remove all the existing action groups before add new conditions.",
+            default=True
         )
         return args_schema
 
