@@ -118,9 +118,9 @@ def load_arguments(self, _):
         c.argument('exposed_port', type=int, help="Additional exposed port. Only supported by tcp transport protocol. Must be unique per environment if the app ingress is external.")
 
     with self.argument_context('containerapp create') as c:
-        c.argument('workload_profile_name', options_list=['--workload-profile-name', '-w'], help="Name of the workload profile to run the app on.", is_preview=True)
-        c.argument('secret_volume_mount', help="Path to mount all secrets e.g. mnt/secrets", is_preview=True)
-        c.argument('termination_grace_period', type=int, options_list=['--termination-grace-period', '--tgp'], help="Duration in seconds a replica is given to gracefully shut down before it is forcefully terminated. (Default: 30)", is_preview=True)
+        c.argument('workload_profile_name', options_list=['--workload-profile-name', '-w'], help="Name of the workload profile to run the app on.")
+        c.argument('secret_volume_mount', help="Path to mount all secrets e.g. mnt/secrets")
+        c.argument('termination_grace_period', type=int, options_list=['--termination-grace-period', '--tgp'], help="Duration in seconds a replica is given to gracefully shut down before it is forcefully terminated. (Default: 30)")
         c.argument('allow_insecure', validator=validate_allow_insecure, arg_type=get_three_state_flag(), help='Allow insecure connections for ingress traffic.')
 
     with self.argument_context('containerapp create', arg_group='Identity') as c:
@@ -141,9 +141,9 @@ def load_arguments(self, _):
 
     with self.argument_context('containerapp update', arg_group='Container') as c:
         c.argument('image', options_list=['--image', '-i'], help="Container image, e.g. publisher/image-name:tag.")
-        c.argument('workload_profile_name', options_list=['--workload-profile-name', '-w'], help='The friendly name for the workload profile', is_preview=True)
-        c.argument('secret_volume_mount', help="Path to mount all secrets e.g. mnt/secrets", is_preview=True)
-        c.argument('termination_grace_period', type=int, options_list=['--termination-grace-period', '--tgp'], help="Duration in seconds a replica is given to gracefully shut down before it is forcefully terminated. (Default: 30)", is_preview=True)
+        c.argument('workload_profile_name', options_list=['--workload-profile-name', '-w'], help='The friendly name for the workload profile')
+        c.argument('secret_volume_mount', help="Path to mount all secrets e.g. mnt/secrets")
+        c.argument('termination_grace_period', type=int, options_list=['--termination-grace-period', '--tgp'], help="Duration in seconds a replica is given to gracefully shut down before it is forcefully terminated. (Default: 30)")
 
     # Springboard
     with self.argument_context('containerapp update', arg_group='Service Binding') as c:
@@ -270,7 +270,7 @@ def load_arguments(self, _):
     with self.argument_context('containerapp revision copy') as c:
         c.argument('from_revision', help='Revision to copy from. Default: latest revision.')
         c.argument('image', options_list=['--image', '-i'], help="Container image, e.g. publisher/image-name:tag.")
-        c.argument('workload_profile_name', options_list=['--workload-profile-name', '-w'], help='The friendly name for the workload profile', is_preview=True)
+        c.argument('workload_profile_name', options_list=['--workload-profile-name', '-w'], help='The friendly name for the workload profile')
 
     with self.argument_context('containerapp revision label') as c:
         c.argument('name', id_part=None)
@@ -417,7 +417,7 @@ def load_arguments(self, _):
         c.argument('thumbprint', options_list=['--thumbprint', '-t'], help='Thumbprint of the certificate.')
         c.argument('certificate', options_list=['--certificate', '-c'], help='Name or resource id of the certificate.')
         c.argument('environment', options_list=['--environment', '-e'], help='Name or resource id of the Container App environment.')
-        c.argument('validation_method', options_list=['--validation-method', '-v'], help='Validation method of custom domain ownership.', is_preview=True)
+        c.argument('validation_method', options_list=['--validation-method', '-v'], help='Validation method of custom domain ownership.')
 
     with self.argument_context('containerapp hostname add') as c:
         c.argument('hostname', help='The custom domain name.')
