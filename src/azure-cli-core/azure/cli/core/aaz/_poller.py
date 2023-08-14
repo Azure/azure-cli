@@ -123,13 +123,11 @@ class AAZLROPoller:
         """
         if self._thread is None:
             return
+
         self._thread.join(timeout=timeout)
-        try:
-            # Let's handle possible None in forgiveness here
-            # https://github.com/python/mypy/issues/8165
-            raise self._exception  # type: ignore
-        except TypeError:  # Was None
-            pass
+
+        if self._exception:  # derive from BaseException
+            raise self._exception
 
     def done(self):
         """Check status of the long running operation.

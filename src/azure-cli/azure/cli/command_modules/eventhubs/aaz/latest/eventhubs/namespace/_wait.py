@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}", "2022-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}", "2023-01-01-preview"],
         ]
     }
 
@@ -120,7 +120,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01-preview",
+                    "api-version", "2023-01-01-preview",
                     required=True,
                 ),
             }
@@ -217,6 +217,9 @@ class Wait(AAZWaitCommand):
                 serialized_name="disableLocalAuth",
             )
             properties.encryption = AAZObjectType()
+            properties.geo_data_replication = AAZObjectType(
+                serialized_name="geoDataReplication",
+            )
             properties.is_auto_inflate_enabled = AAZBoolType(
                 serialized_name="isAutoInflateEnabled",
             )
@@ -273,9 +276,7 @@ class Wait(AAZWaitCommand):
             key_vault_properties.Element = AAZObjectType()
 
             _element = cls._schema_on_200.properties.encryption.key_vault_properties.Element
-            _element.identity = AAZObjectType(
-                flags={"client_flatten": True},
-            )
+            _element.identity = AAZObjectType()
             _element.key_name = AAZStrType(
                 serialized_name="keyName",
             )
@@ -289,6 +290,26 @@ class Wait(AAZWaitCommand):
             identity = cls._schema_on_200.properties.encryption.key_vault_properties.Element.identity
             identity.user_assigned_identity = AAZStrType(
                 serialized_name="userAssignedIdentity",
+            )
+
+            geo_data_replication = cls._schema_on_200.properties.geo_data_replication
+            geo_data_replication.locations = AAZListType()
+            geo_data_replication.max_replication_lag_duration_in_seconds = AAZIntType(
+                serialized_name="maxReplicationLagDurationInSeconds",
+            )
+
+            locations = cls._schema_on_200.properties.geo_data_replication.locations
+            locations.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.geo_data_replication.locations.Element
+            _element.cluster_arm_id = AAZStrType(
+                serialized_name="clusterArmId",
+            )
+            _element.location_name = AAZStrType(
+                serialized_name="locationName",
+            )
+            _element.role_type = AAZStrType(
+                serialized_name="roleType",
             )
 
             private_endpoint_connections = cls._schema_on_200.properties.private_endpoint_connections

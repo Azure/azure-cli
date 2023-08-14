@@ -19,11 +19,13 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-10-01-preview",
+        "version": "2023-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs", "2022-10-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs", "2023-01-01-preview"],
         ]
     }
+
+    AZ_SUPPORT_PAGINATION = True
 
     def _handler(self, command_args):
         super()._handler(command_args)
@@ -45,6 +47,7 @@ class List(AAZCommand):
             help="The Namespace name",
             required=True,
             fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z][a-zA-Z0-9-]{6,50}[a-zA-Z0-9]$",
                 max_length=50,
                 min_length=6,
             ),
@@ -142,7 +145,7 @@ class List(AAZCommand):
                     "$top", self.ctx.args.top,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2022-10-01-preview",
+                    "api-version", "2023-01-01-preview",
                     required=True,
                 ),
             }
@@ -246,9 +249,16 @@ class List(AAZCommand):
             )
 
             destination = cls._schema_on_200.value.Element.properties.capture_description.destination
+            destination.identity = AAZObjectType()
             destination.name = AAZStrType()
             destination.properties = AAZObjectType(
                 flags={"client_flatten": True},
+            )
+
+            identity = cls._schema_on_200.value.Element.properties.capture_description.destination.identity
+            identity.type = AAZStrType()
+            identity.user_assigned_identity = AAZStrType(
+                serialized_name="userAssignedIdentity",
             )
 
             properties = cls._schema_on_200.value.Element.properties.capture_description.destination.properties

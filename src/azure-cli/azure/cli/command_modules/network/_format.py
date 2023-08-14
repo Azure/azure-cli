@@ -32,9 +32,9 @@ def transform_dns_record_set_table_output(result):
         table_row = OrderedDict()
         table_row['Name'] = item['name']
         table_row['ResourceGroup'] = item['resourceGroup']
-        table_row['Ttl'] = item['ttl']
+        table_row['Ttl'] = item.get('ttl') or item.get('TTL')
         table_row['Type'] = item['type'].rsplit('/', 1)[1]
-        metadata = item['metadata']
+        metadata = item.get('metadata')
         if metadata:
             table_row['Metadata'] = ' '.join(['{}="{}"'.format(x, metadata[x]) for x in sorted(metadata)])
         else:
@@ -91,8 +91,8 @@ def transform_vnet_table_output(result):
         item['NumSubnets'] = len(result.get('subnets', []))
         item['Prefixes'] = ', '.join(result['addressSpace']['addressPrefixes']) or ' '
         item['DnsServers'] = ', '.join((result.get('dhcpOptions') or {}).get('dnsServers', [])) or ' '
-        item['DDOSProtection'] = result['enableDdosProtection']
-        item['VMProtection'] = result['enableVmProtection']
+        item["DDOSProtection"] = result.get("enableDdosProtection", " ")
+        item["VMProtection"] = result.get("enableVmProtection", " ")
         return item
     if isinstance(result, list):
         return [_transform(r) for r in result]

@@ -3481,7 +3481,7 @@ def db_sensitivity_label_update(
         sensitivity_label.information_type_id = current_label.information_type_id
 
     except ResourceNotFoundError as ex:
-        if not(ex and 'SensitivityLabelsLabelNotFound' in str(ex)):
+        if not (ex and 'SensitivityLabelsLabelNotFound' in str(ex)):
             raise ex
 
     # Find the label id and information type id in the policy by the label name provided
@@ -6013,6 +6013,227 @@ def managed_ledger_digest_uploads_disable(
         database_name=database_name,
         ledger_digest_uploads=LedgerDigestUploadsName.CURRENT)
 
+
+def managed_db_move_start(
+        cmd,
+        client,
+        resource_group_name,
+        managed_instance_name,
+        database_name,
+        dest_resource_group_name,
+        dest_instance_name,
+        **kwargs):
+    '''
+    Starts managed database move operation
+    '''
+
+    return managed_db_move_copy_start(
+        cmd,
+        client,
+        resource_group_name,
+        managed_instance_name,
+        database_name,
+        dest_resource_group_name,
+        dest_instance_name,
+        'Move',
+        **kwargs)
+
+
+def managed_db_copy_start(
+        cmd,
+        client,
+        resource_group_name,
+        managed_instance_name,
+        database_name,
+        dest_resource_group_name,
+        dest_instance_name,
+        **kwargs):
+    '''
+    Starts managed database copy operation
+    '''
+
+    return managed_db_move_copy_start(
+        cmd,
+        client,
+        resource_group_name,
+        managed_instance_name,
+        database_name,
+        dest_resource_group_name,
+        dest_instance_name,
+        'Copy',
+        **kwargs)
+
+
+def managed_db_move_copy_start(
+        cmd,
+        client,
+        resource_group_name,
+        managed_instance_name,
+        database_name,
+        dest_resource_group_name,
+        dest_instance_name,
+        operation_mode,
+        **kwargs):
+    '''
+    Starts managed database move/copy operation
+    '''
+
+    kwargs['operation_mode'] = operation_mode
+    kwargs['destination_managed_database_id'] = _get_managed_db_resource_id(
+        cmd.cli_ctx,
+        dest_resource_group_name or resource_group_name,
+        dest_instance_name,
+        database_name)
+
+    return client.begin_start_move(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        database_name=database_name,
+        parameters=kwargs)
+
+
+def managed_db_move_copy_complete(
+        cmd,
+        client,
+        resource_group_name,
+        managed_instance_name,
+        database_name,
+        dest_resource_group_name,
+        dest_instance_name,
+        **kwargs):
+    '''
+    Completes managed database move/copy operation
+    '''
+
+    kwargs['destination_managed_database_id'] = _get_managed_db_resource_id(
+        cmd.cli_ctx,
+        dest_resource_group_name or resource_group_name,
+        dest_instance_name,
+        database_name)
+
+    return client.begin_complete_move(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        database_name=database_name,
+        parameters=kwargs)
+
+
+def managed_db_move_copy_cancel(
+        cmd,
+        client,
+        resource_group_name,
+        managed_instance_name,
+        database_name,
+        dest_resource_group_name,
+        dest_instance_name,
+        **kwargs):
+    '''
+    Cancels managed database move/copy operation
+    '''
+
+    kwargs['destination_managed_database_id'] = _get_managed_db_resource_id(
+        cmd.cli_ctx,
+        dest_resource_group_name or resource_group_name,
+        dest_instance_name,
+        database_name)
+
+    return client.begin_cancel_move(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        database_name=database_name,
+        parameters=kwargs)
+
+
+def managed_db_move_list(
+        cmd,
+        client,
+        resource_group_name,
+        managed_instance_name,
+        database_name=None,
+        dest_instance_name=None,
+        dest_resource_group=None,
+        only_latest_per_database=False):
+    '''
+    Lists managed database move operations
+    '''
+
+    return managed_db_move_copy_list(
+        cmd,
+        client,
+        resource_group_name,
+        managed_instance_name,
+        'Move',
+        database_name,
+        dest_instance_name,
+        dest_resource_group,
+        only_latest_per_database)
+
+
+def managed_db_copy_list(
+        cmd,
+        client,
+        resource_group_name,
+        managed_instance_name,
+        database_name=None,
+        dest_instance_name=None,
+        dest_resource_group=None,
+        only_latest_per_database=False):
+    '''
+    Lists managed database copy operations
+    '''
+
+    return managed_db_move_copy_list(
+        cmd,
+        client,
+        resource_group_name,
+        managed_instance_name,
+        'Copy',
+        database_name,
+        dest_instance_name,
+        dest_resource_group,
+        only_latest_per_database,)
+
+
+def managed_db_move_copy_list(
+        cmd,
+        client,
+        resource_group_name,
+        managed_instance_name,
+        operation_mode,
+        database_name,
+        dest_instance_name,
+        dest_resource_group,
+        only_latest_per_database):
+    '''
+    Lists managed database move/copy operations
+    '''
+
+    location = _get_managed_instance_location(
+        cmd.cli_ctx,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name)
+
+    custom_filter = "Properties/OperationMode eq '{}' and Properties/SourceManagedInstanceName eq '{}'".format(
+        operation_mode,
+        managed_instance_name
+    )
+
+    if dest_instance_name is not None:
+        custom_filter += " and Properties/TargetManagedInstanceName eq '{}'".format(dest_instance_name)
+
+    if database_name is not None:
+        custom_filter += " and Properties/TargetDatabaseName eq '{}'".format(database_name)
+
+    result = client.list_by_location(
+        resource_group_name=resource_group_name,
+        location_name=location,
+        only_latest_per_database=only_latest_per_database,
+        filter=custom_filter)
+
+    if dest_resource_group is not None:
+        result = list(filter(lambda operation: "resourceGroups/{}/".format(dest_resource_group).lower() in operation.target_managed_instance_id.lower(), result))
+
+    return result
 
 ###############################################
 #              sql failover-group             #

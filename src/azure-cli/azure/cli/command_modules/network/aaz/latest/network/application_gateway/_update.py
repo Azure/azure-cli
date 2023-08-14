@@ -25,9 +25,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-05-01",
+        "version": "2023-02-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2022-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2023-02-01"],
         ]
     }
 
@@ -223,7 +223,7 @@ class Update(AAZCommand):
             options=["status-code"],
             help="Status code of the application gateway customer error.",
             nullable=True,
-            enum={"HttpStatus403": "HttpStatus403", "HttpStatus502": "HttpStatus502"},
+            enum={"HttpStatus400": "HttpStatus400", "HttpStatus403": "HttpStatus403", "HttpStatus404": "HttpStatus404", "HttpStatus405": "HttpStatus405", "HttpStatus408": "HttpStatus408", "HttpStatus500": "HttpStatus500", "HttpStatus502": "HttpStatus502", "HttpStatus503": "HttpStatus503", "HttpStatus504": "HttpStatus504"},
         )
 
         _schema.custom_error_page_url = cls._args_application_gateway_custom_error_update.custom_error_page_url
@@ -420,7 +420,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-05-01",
+                    "api-version", "2023-02-01",
                     required=True,
                 ),
             }
@@ -519,7 +519,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-05-01",
+                    "api-version", "2023-02-01",
                     required=True,
                 ),
             }
@@ -962,6 +962,9 @@ class _UpdateHelper:
         )
         properties.custom_error_configurations = AAZListType(
             serialized_name="customErrorConfigurations",
+        )
+        properties.default_predefined_ssl_policy = AAZStrType(
+            serialized_name="defaultPredefinedSslPolicy",
         )
         properties.enable_fips = AAZBoolType(
             serialized_name="enableFips",
@@ -2446,6 +2449,10 @@ class _UpdateHelper:
         properties.tunnel_interfaces = AAZListType(
             serialized_name="tunnelInterfaces",
         )
+        properties.virtual_network = AAZObjectType(
+            serialized_name="virtualNetwork",
+        )
+        cls._build_schema_sub_resource_read(properties.virtual_network)
 
         backend_ip_configurations = _schema_network_interface_ip_configuration_read.properties.load_balancer_backend_address_pools.Element.properties.backend_ip_configurations
         backend_ip_configurations.Element = AAZObjectType()
@@ -2688,6 +2695,9 @@ class _UpdateHelper:
         properties.auxiliary_mode = AAZStrType(
             serialized_name="auxiliaryMode",
         )
+        properties.auxiliary_sku = AAZStrType(
+            serialized_name="auxiliarySku",
+        )
         properties.disable_tcp_state_tracking = AAZBoolType(
             serialized_name="disableTcpStateTracking",
         )
@@ -2920,6 +2930,10 @@ class _UpdateHelper:
             serialized_name="privateEndpoint",
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
+        properties.private_endpoint_location = AAZStrType(
+            serialized_name="privateEndpointLocation",
+            flags={"read_only": True},
+        )
         properties.private_link_service_connection_state = AAZObjectType(
             serialized_name="privateLinkServiceConnectionState",
         )
@@ -3445,6 +3459,9 @@ class _UpdateHelper:
         dns_settings.domain_name_label = AAZStrType(
             serialized_name="domainNameLabel",
         )
+        dns_settings.domain_name_label_scope = AAZStrType(
+            serialized_name="domainNameLabelScope",
+        )
         dns_settings.fqdn = AAZStrType()
         dns_settings.reverse_fqdn = AAZStrType(
             serialized_name="reverseFqdn",
@@ -3590,7 +3607,9 @@ class _UpdateHelper:
         properties.direction = AAZStrType(
             flags={"required": True},
         )
-        properties.priority = AAZIntType()
+        properties.priority = AAZIntType(
+            flags={"required": True},
+        )
         properties.protocol = AAZStrType(
             flags={"required": True},
         )
@@ -3688,7 +3707,7 @@ class _UpdateHelper:
             serialized_name="addressPrefixes",
         )
         properties.application_gateway_ip_configurations = AAZListType(
-            serialized_name="applicationGatewayIpConfigurations",
+            serialized_name="applicationGatewayIPConfigurations",
         )
         properties.delegations = AAZListType()
         properties.ip_allocations = AAZListType(

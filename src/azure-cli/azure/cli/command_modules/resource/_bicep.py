@@ -93,9 +93,9 @@ def run_bicep_command(cli_ctx, args, auto_install=True):
             # Users may continue using the current installed version.
             installed_version = _get_bicep_installed_version(installation_path)
             latest_release_tag = get_bicep_latest_release_tag() if cache_expired else latest_release_tag
-            latest_version = _extract_semver(latest_release_tag)
+            latest_version = _extract_version(latest_release_tag)
 
-            if installed_version and latest_version and semver.compare(installed_version, latest_version) < 0:
+            if installed_version and latest_version and installed_version < latest_version:
                 _logger.warning(
                     'A new Bicep release is available: %s. Upgrade now by running "az bicep upgrade".',
                     latest_release_tag,
@@ -116,8 +116,8 @@ def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, s
             return
 
         installed_version = _get_bicep_installed_version(installation_path)
-        target_version = _extract_semver(release_tag)
-        if installed_version and target_version and semver.compare(installed_version, target_version) == 0:
+        target_version = _extract_version(release_tag)
+        if installed_version and target_version and installed_version == target_version:
             return
 
     installation_dir = os.path.dirname(installation_path)
@@ -192,7 +192,7 @@ def get_bicep_latest_release_tag():
         response = requests.get("https://aka.ms/BicepLatestRelease", verify=_requests_verify)
         response.raise_for_status()
         return response.json()["tag_name"]
-    except IOError as err:
+    except requests.RequestException as err:
         raise ClientRequestError(f"Error while attempting to retrieve the latest Bicep version: {err}.")
 
 
@@ -200,14 +200,8 @@ def bicep_version_greater_than_or_equal_to(version):
     system = platform.system()
     installation_path = _get_bicep_installation_path(system)
     installed_version = _get_bicep_installed_version(installation_path)
-    return semver.compare(installed_version, version) >= 0
-
-
-def supports_bicep_publish():
-    system = platform.system()
-    installation_path = _get_bicep_installation_path(system)
-    installed_version = _get_bicep_installed_version(installation_path)
-    return semver.compare(installed_version, "0.4.1008") >= 0
+    parsed_version = semver.VersionInfo.parse(version)
+    return installed_version >= parsed_version
 
 
 def _bicep_installed_in_ci():
@@ -260,18 +254,18 @@ def _load_bicep_version_check_result_from_cache():
         return None, True
 
 
-def _refresh_bicep_version_check_cache(lastest_release_tag):
+def _refresh_bicep_version_check_cache(latest_release_tag):
     with open(_bicep_version_check_file_path, "w+") as version_check_file:
         version_check_data = {
             "lastCheckTime": datetime.now().strftime(_bicep_version_check_time_format),
-            "latestReleaseTag": lastest_release_tag,
+            "latestReleaseTag": latest_release_tag,
         }
         json.dump(version_check_data, version_check_file)
 
 
 def _get_bicep_installed_version(bicep_executable_path):
     installed_version_output = _run_command(bicep_executable_path, ["--version"])
-    return _extract_semver(installed_version_output)
+    return _extract_version(installed_version_output)
 
 
 def _get_bicep_download_url(system, release_tag, target_platform=None):
@@ -302,9 +296,9 @@ def _get_bicep_installation_path(system):
     raise ValidationError(f'The platform "{system}" is not supported.')
 
 
-def _extract_semver(text):
+def _extract_version(text):
     semver_match = re.search(_semver_pattern, text)
-    return semver_match.group(0) if semver_match else None
+    return semver.VersionInfo.parse(semver_match.group(0)) if semver_match else None
 
 
 def _run_command(bicep_installation_path, args):

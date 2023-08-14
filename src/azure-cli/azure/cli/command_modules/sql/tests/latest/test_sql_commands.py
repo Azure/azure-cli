@@ -110,7 +110,7 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix=managed_instance_name_prefix, parameter_name='mi', admin_user='admin123',
                  minimalTlsVersion='', user_assigned_identity_id='', identity_type='', pid='', otherParams='',
                  admin_password='SecretPassword123SecretPassword', public=True, tags='', is_geo_secondary=False,
-                 skip_delete=False, vnet_name = 'vnet-mi-tooling'):
+                 skip_delete=False, vnet_name = 'vnet-mi-tooling', v_core = 4):
         super(ManagedInstancePreparer, self).__init__(name_prefix, server_name_max_length)
         self.parameter_name = parameter_name
         self.admin_user = admin_user
@@ -125,6 +125,7 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
         self.otherParams = otherParams
         self.is_geo_secondary = is_geo_secondary
         self.subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(self.subscription_id, self.group, vnet_name, self.subnet_name)
+        self.v_core = v_core
 
 
     def create_resource(self, name, **kwargs):
@@ -5260,6 +5261,100 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         # test list sql managed_instance in the subscription should be at least 1
         self.cmd('sql mi list', checks=[JMESPathCheckGreaterThan('length(@)', 0)])
 
+class SqlManagedInstanceStartStopMgmtScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
+    @ManagedInstancePreparer(parameter_name = 'mi', vnet_name='vnet-managed-instance-v2', v_core=8)
+    def test_sql_mi_startstop_mgmt(self, mi, rg):
+        self.kwargs.update({
+            'rg': rg,
+            'mi': mi,
+        })
+        # check managed instance
+        self.cmd('sql mi show -g {rg} -n {mi}',
+        checks=[
+            JMESPathCheck('name', mi),
+            JMESPathCheck('resourceGroup', rg)])
+
+        # test the manual stop command
+        self.cmd('sql mi stop -g {rg} --mi {mi}',
+        checks=[
+            JMESPathCheck('name', mi),
+            JMESPathCheck('state', 'Stopped')])
+
+        # test the manual start command
+        self.cmd('sql mi start -g {rg} --mi {mi}',
+        checks=[
+            JMESPathCheck('name', mi),
+            JMESPathCheck('state', 'Ready')])
+        
+    @AllowLargeResponse()
+    @ManagedInstancePreparer(parameter_name = 'mi', vnet_name='vnet-managed-instance-v2', v_core=8)
+    def test_sql_mi_scheduledstartstop_mgmt(self, mi, rg):
+        schedule = "[{'startDay':'Friday','startTime':'10:00 AM','stopDay':'Friday','stopTime':'11:10 AM'}]"
+        schedule_item = "{'startDay':'Monday','startTime':'10:00 AM','stopDay':'Monday','stopTime':'11:10 AM'}"
+        description = "test description"
+        self.kwargs.update({
+            'rg': rg,
+            'mi': mi,
+            'schedule': schedule,
+            'desc': description,
+            'schedule_item': schedule_item,
+        })
+        # check if test MI got created
+        self.cmd('sql mi show -g {rg} -n {mi}',
+        checks=[
+            JMESPathCheck('name', mi),
+            JMESPathCheck('resourceGroup', rg)])
+
+        # test the create schedule
+        self.cmd('az sql mi start-stop-schedule create -g {rg} --mi {mi} --schedule-list \"{schedule}\" --description \"{desc}\"',
+        checks=[
+            JMESPathCheck('name', 'default'),
+            JMESPathCheck('description', description),
+            JMESPathCheck('scheduleList[0].startDay', 'Friday'),
+            JMESPathCheck('scheduleList[0].startTime', '10:00'),
+            JMESPathCheck('scheduleList[0].stopDay', 'Friday'),
+            JMESPathCheck('scheduleList[0].stopTime', '11:10'),
+            JMESPathCheck('timeZoneId', 'UTC')])
+        
+        # test the update schedule - add item
+        self.cmd('az sql mi start-stop-schedule update -g {rg} --mi {mi} --add schedule_list \"{schedule_item}\"',
+        checks=[
+            JMESPathCheck('description', description),
+            JMESPathCheck('scheduleList[1].startDay', 'Monday'),
+            JMESPathCheck('scheduleList[1].startTime', '10:00'),
+            JMESPathCheck('scheduleList[1].stopDay', 'Monday'),
+            JMESPathCheck('scheduleList[1].stopTime', '11:10')])
+
+        # test the update schedule - overwrite schedule
+        self.cmd('az sql mi start-stop-schedule update -g {rg} --mi {mi} --schedule-list \"{schedule}\"',
+        checks=[
+            JMESPathCheck('scheduleList[0].startDay', 'Friday'),
+            JMESPathCheck('scheduleList[0].startTime', '10:00'),
+            JMESPathCheck('scheduleList[0].stopDay', 'Friday'),
+            JMESPathCheck('scheduleList[0].stopTime', '11:10')])
+
+        # test the show schedule
+        self.cmd('az sql mi start-stop-schedule show -g {rg} --mi {mi}',
+        checks=[
+            JMESPathCheck('description', description),
+            JMESPathCheck('scheduleList[0].startDay', 'Friday'),
+            JMESPathCheck('scheduleList[0].startTime', '10:00'),
+            JMESPathCheck('scheduleList[0].stopDay', 'Friday'),
+            JMESPathCheck('scheduleList[0].stopTime', '11:10')])
+        
+        # test the list schedule
+        self.cmd('az sql mi start-stop-schedule list -g {rg} --mi {mi}',
+        checks=[
+            JMESPathCheck('[0].description', description),
+            JMESPathCheck('[0].scheduleList[0].startDay', 'Friday'),
+            JMESPathCheck('[0].scheduleList[0].startTime', '10:00'),
+            JMESPathCheck('[0].scheduleList[0].stopDay', 'Friday'),
+            JMESPathCheck('[0].scheduleList[0].stopTime', '11:10')])
+
+        # test the delete schedule
+        self.cmd('az sql mi start-stop-schedule delete -g {rg} --mi {mi} --yes')
+
 class SqlManagedInstanceBackupStorageRedundancyTest(ScenarioTest):
     bsr_geo = "Geo"
 
@@ -5920,6 +6015,74 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('name', database_name_two),
                      JMESPathCheck('isLedgerOn', True)])
+    
+    @ManagedInstancePreparer(parameter_name="mi1")
+    @ManagedInstancePreparer(parameter_name="mi2")
+    def test_sql_midb_move_copy(self, mi1, rg, mi2):
+        self.kwargs.update({
+            'loc': ManagedInstancePreparer.location,
+            'rg': rg,
+            'mi1': mi1,
+            'mi2': mi2,
+            'database_name': 'test-db'
+        })
+
+        # Create source and target instance
+        source_mi = self.cmd('sql mi show -g {rg} -n {mi1}').get_output_in_json()
+        target_mi = self.cmd('sql mi show -g {rg} -n {mi2}').get_output_in_json()
+
+        self.kwargs.update({
+            'source_mi_name': source_mi['name'],
+            'target_mi_name': target_mi['name']
+        })
+
+        # Create managed database to be moved and copied
+        mdb = self.cmd('sql midb create -g {rg} --mi {source_mi_name} -n {database_name}',
+                 checks=[
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('name', '{database_name}'),
+                     self.check('location', '{loc}'),
+                     self.check('status', 'Online')]).get_output_in_json()
+        
+        self.kwargs.update({
+            'database_id': mdb['id']
+        })
+        
+        # Start the copy operation from source to target instance
+        self.cmd('sql midb copy start -g {rg} --mi {source_mi_name} -n {database_name} --dest-mi {target_mi_name}')
+        
+        # Cancel the move operation from source to target instance
+        self.cmd('sql midb copy cancel -g {rg} --mi {source_mi_name} -n {database_name} --dest-mi {target_mi_name}')
+
+        # Start the move operation from source to target instance
+        self.cmd('sql midb move start -g {rg} --mi {source_mi_name} -n {database_name} --dest-mi {target_mi_name}')
+
+        # Complete the move operation from source to target instance
+        self.cmd('sql midb move complete --ids {database_id} --dest-mi {target_mi_name}')
+
+        # List the move operation
+        self.cmd('sql midb move list -g {rg} --mi {source_mi_name} -n {database_name} --dest-mi {target_mi_name}',
+                                checks=[
+                                    self.check('[0].state', 'Succeeded'),
+                                    self.check('[0].sourceManagedInstanceName', '{source_mi_name}'),
+                                    self.check('[0].targetManagedInstanceName', '{target_mi_name}'),
+                                    self.check('[0].resourceGroup', '{rg}'),
+                                    self.check('[0].operationMode', 'Move')])
+
+        # Copy the database back from target to source
+        self.cmd('sql midb copy start -g {rg} --mi {target_mi_name} -n {database_name} --dest-mi {source_mi_name}')
+
+        # Complete the copy operation
+        self.cmd('sql midb copy complete -g {rg} --mi {target_mi_name} -n {database_name} --dest-mi {source_mi_name}')
+
+        # List the copy operation
+        self.cmd('sql midb copy list -g {rg} --mi {target_mi_name} -n {database_name} --dest-mi {source_mi_name} --latest',
+                                checks=[
+                                    self.check('[0].state', 'Succeeded'),
+                                    self.check('[0].sourceManagedInstanceName', '{target_mi_name}'),
+                                    self.check('[0].targetManagedInstanceName', '{source_mi_name}'),
+                                    self.check('[0].resourceGroup', '{rg}'),
+                                    self.check('[0].operationMode', 'Copy')])
 
 
 class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):

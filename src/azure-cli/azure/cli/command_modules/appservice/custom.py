@@ -68,7 +68,7 @@ from .utils import (_normalize_sku,
                     _normalize_location,
                     get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
                     get_resource_if_exists, repo_url_to_name, get_token,
-                    app_service_plan_exists, is_centauri_functionapp)
+                    app_service_plan_exists, is_centauri_functionapp, _remove_list_duplicates)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -993,6 +993,7 @@ def show_app(cmd, resource_group_name, name, slot=None):
     if not is_centauri_functionapp(cmd, resource_group_name, name):
         _rename_server_farm_props(app)
         _fill_ftp_publishing_url(cmd, app, resource_group_name, name, slot)
+        _remove_list_duplicates(app)
     return app
 
 
@@ -1337,7 +1338,7 @@ def get_connection_strings(cmd, resource_group_name, name, slot=None):
                               .connection_string_names or []
     result = [{'name': p,
                'value': result.properties[p].value,
-               'type':result.properties[p].type,
+               'type': result.properties[p].type,
                'slotSetting': p in slot_constr_names} for p in result.properties]
     return result
 
@@ -2177,7 +2178,7 @@ def update_app_service_plan(instance, sku=None, number_of_workers=None, elastic_
 def show_plan(cmd, resource_group_name, name):
     from azure.cli.core.commands.client_factory import get_subscription_id
     client = web_client_factory(cmd.cli_ctx)
-    serverfarm_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/serverfarms/{}?api-version={}'
+    serverfarm_url_base = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/serverfarms/{}?api-version={}'
     subscription_id = get_subscription_id(cmd.cli_ctx)
     serverfarm_url = serverfarm_url_base.format(subscription_id, resource_group_name, name, client.DEFAULT_API_VERSION)
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + serverfarm_url
@@ -2794,13 +2795,6 @@ def get_scm_site_headers(cli_ctx, name, resource_group_name, slot=None, addition
 
 
 def _get_log(url, headers, log_file=None):
-    import urllib3
-    try:
-        import urllib3.contrib.pyopenssl
-        urllib3.contrib.pyopenssl.inject_into_urllib3()
-    except ImportError:
-        pass
-
     http = get_pool_manager(url)
     r = http.request(
         'GET',
@@ -3066,14 +3060,20 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
     webapp_certs = client.certificates.list_by_resource_group(cert_resource_group_name)
 
     found_cert = None
+    # search for a cert that matches in the app service plan's RG
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
             found_cert = webapp_cert
+    # search for a cert that matches in the webapp's RG
     if not found_cert:
         webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
         for webapp_cert in webapp_certs:
             if webapp_cert.thumbprint == certificate_thumbprint:
                 found_cert = webapp_cert
+    # search for a cert that matches in the subscription, filtering on the serverfarm
+    if not found_cert:
+        sub_certs = client.certificates.list(filter=f"ServerFarmId eq '{webapp.server_farm_id}'")
+        found_cert = next(iter([c for c in sub_certs if c.thumbprint == certificate_thumbprint]), None)
     if found_cert:
         if not hostname:
             if len(found_cert.host_names) == 1 and not found_cert.host_names[0].startswith('*'):
@@ -5011,6 +5011,12 @@ class OneDeployParams:
 
 
 def _build_onedeploy_url(params):
+    if params.src_url:
+        return _build_onedeploy_arm_url(params)
+    return _build_onedeploy_scm_url(params)
+
+
+def _build_onedeploy_scm_url(params):
     scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
     deploy_url = scm_url + '/api/publish?type=' + params.artifact_type
 
@@ -5030,6 +5036,24 @@ def _build_onedeploy_url(params):
         deploy_url = deploy_url + '&path=' + params.target_path
 
     return deploy_url
+
+
+def _build_onedeploy_arm_url(params):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    client = web_client_factory(params.cmd.cli_ctx)
+    sub_id = get_subscription_id(params.cmd.cli_ctx)
+    if not params.slot:
+        base_url = (
+            f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
+            f"{params.webapp_name}/extensions/onedeploy?api-version={client.DEFAULT_API_VERSION}"
+        )
+    else:
+        base_url = (
+            f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
+            f"{params.webapp_name}/slots/{params.slot}/extensions/onedeploy"
+            f"?api-version={client.DEFAULT_API_VERSION}"
+        )
+    return params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
 
 
 def _get_ondeploy_headers(params):
@@ -5064,9 +5088,18 @@ def _get_onedeploy_request_body(params):
                                         "access it".format(params.src_path)) from e
     elif params.src_url:
         logger.info('Deploying from URL: %s', params.src_url)
-        body = json.dumps({
-            "packageUri": params.src_url
-        })
+        body = {
+            "properties": {
+                "packageUri": params.src_url,
+                "type": params.artifact_type,
+                "path": params.target_path,
+                "ignorestack": params.should_ignore_stack,
+                "clean": params.is_clean_deployment,
+                "restart": params.should_restart,
+            }
+        }
+        body = {"properties": {k: v for k, v in body["properties"].items() if v is not None}}
+        body = json.dumps(body)
     else:
         raise ResourceNotFoundError('Unable to determine source location of the artifact being deployed')
 
@@ -5074,14 +5107,14 @@ def _get_onedeploy_request_body(params):
 
 
 def _update_artifact_type(params):
-    import ntpath
+    import os
 
     if params.artifact_type is not None:
         return
 
     # Interpret deployment type from the file extension if the type parameter is not passed
-    file_name = ntpath.basename(params.src_path)
-    file_extension = file_name.split(".", 1)[1]
+    _, file_extension = os.path.splitext(params.src_path)
+    file_extension = file_extension[1:]
     if file_extension in ('war', 'jar', 'ear', 'zip'):
         params.artifact_type = file_extension
     elif file_extension in ('sh', 'bat'):
@@ -5102,12 +5135,15 @@ def _make_onedeploy_request(params):
     deployment_status_url = _get_onedeploy_status_url(params)
     headers = _get_ondeploy_headers(params)
 
-    logger.info("Deployment API: %s", deploy_url)
-    response = requests.post(deploy_url, data=body, headers=headers, verify=not should_disable_connection_verify())
-
     # For debugging purposes only, you can change the async deployment into a sync deployment by polling the API status
     # For that, set poll_async_deployment_for_debugging=True
-    poll_async_deployment_for_debugging = True
+    logger.info("Deployment API: %s", deploy_url)
+    if not params.src_url:  # use SCM endpoint
+        response = requests.post(deploy_url, data=body, headers=headers, verify=not should_disable_connection_verify())
+        poll_async_deployment_for_debugging = True
+    else:
+        response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_url, body=body)
+        poll_async_deployment_for_debugging = False
 
     # check the status of async deployment
     if response.status_code == 202 or response.status_code == 200:
@@ -5117,6 +5153,12 @@ def _make_onedeploy_request(params):
             response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
                                                          deployment_status_url, params.slot, params.timeout)
             logger.info('Async deployment complete. Server response: %s', response_body)
+        else:
+            if 'application/json' in response.headers.get('content-type', ""):
+                state = response.json().get("properties", {}).get("provisioningState")
+                if state:
+                    logger.warning("Deployment status is: \"%s\"", state)
+                response_body = response.json().get("properties", {})
         return response_body
 
     # API not available yet!
@@ -5426,7 +5468,7 @@ def add_github_actions(cmd, resource_group, name, repo, runtime=None, token=None
         cmd=cmd, resource_group=resource_group, name=name, slot=slot, is_linux=is_linux)
 
     app_runtime_string = None
-    if(app_runtime_info and app_runtime_info['display_name']):
+    if (app_runtime_info and app_runtime_info['display_name']):
         app_runtime_string = app_runtime_info['display_name']
 
     github_actions_version = None

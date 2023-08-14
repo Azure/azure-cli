@@ -6,6 +6,7 @@
 
 from enum import Enum
 
+from knack.log import get_logger
 from knack.util import CLIError
 
 from azure.cli.core.azclierror import ValidationError, InvalidArgumentValueError
@@ -14,6 +15,8 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.arm import ArmTemplateBuilder
 
 from azure.cli.command_modules.vm._vm_utils import get_target_network_api
+
+logger = get_logger(__name__)
 
 
 # pylint: disable=too-few-public-methods
@@ -626,7 +629,10 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
     if encryption_at_host is not None:
         vm_properties['securityProfile']['encryptionAtHost'] = encryption_at_host
 
-    if security_type is not None:
+    # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
+    # after changing the default values to Trusted Launch VMs in the future.
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
+    if security_type is not None and security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
         vm_properties['securityProfile']['securityType'] = security_type
 
     if enable_secure_boot is not None or enable_vtpm is not None:
@@ -948,7 +954,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         v_cpus_per_core=None, os_disk_security_encryption_type=None,
                         os_disk_secure_vm_disk_encryption_set=None, os_disk_delete_option=None,
                         regular_priority_count=None, regular_priority_percentage=None, disk_controller_type=None,
-                        enable_osimage_notification=None, max_surge=None):
+                        enable_osimage_notification=None, max_surge=None, enable_hibernation=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1377,7 +1383,10 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if encryption_at_host:
         security_profile['encryptionAtHost'] = encryption_at_host
 
-    if security_type is not None:
+    # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
+    # after changing the default values to Trusted Launch VMs in the future.
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
+    if security_type is not None and security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
         security_profile['securityType'] = security_type
 
     if enable_secure_boot is not None or enable_vtpm is not None:
@@ -1411,6 +1420,11 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if orchestration_mode and cmd.supported_api_version(min_api='2020-06-01',
                                                         operation_group='virtual_machine_scale_sets'):
         vmss_properties['orchestrationMode'] = orchestration_mode
+
+    if enable_hibernation is not None:
+        if not vmss_properties.get('additionalCapabilities'):
+            vmss_properties['additionalCapabilities'] = {}
+        vmss_properties['additionalCapabilities']['hibernationEnabled'] = enable_hibernation
 
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',
