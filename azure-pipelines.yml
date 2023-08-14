@@ -301,17 +301,13 @@ jobs:
 
 - job: BuildDockerImage
   displayName: Build Docker Image
-
-  dependsOn: ExtractMetadata
-  condition: succeeded()
   strategy:
     matrix:
-      AMD64:
-        pool: ${{ variables.ubuntu_pool }}
-        artifactName: docker-amd64
-      ARM64:
-        pool: ${{ variables.ubuntu_arm64_pool }}
-        artifactName: docker-arm64
+      ${{ each arch in parameters.architectures }}:
+        Alpine {{ arch.name }}:
+          pool: ${{ arch.pool }}
+          artifactName: docker-{{ arch.name }}
+          dockerfile: Dockerfile
   pool:
     name: $(pool)
   steps:
@@ -337,17 +333,16 @@ jobs:
 
 - job: TestDockerImage
   displayName: Test Docker Image
-
-  dependsOn: BuildDockerImage
+  dependsOn:
+    - BuildDockerImage
+    - ExtractMetadata
   condition: succeeded()
   strategy:
     matrix:
-      AMD64:
-        pool: ${{ variables.ubuntu_pool }}
-        artifactName: docker-amd64
-      ARM64:
-        pool: ${{ variables.ubuntu_arm64_pool }}
-        artifactName: docker-arm64
+      ${{ each arch in parameters.architectures }}:
+        Alpine {{ arch.name }}:
+          pool: ${{ arch.pool }}
+          artifactName: docker-{{ arch.name }}
   pool:
     name: $(pool)
   steps:
@@ -356,7 +351,6 @@ jobs:
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
-
 
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Docker Image'
@@ -379,6 +373,87 @@ jobs:
       docker load < $TAR_FILE
       docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && sleep 5"
     displayName: 'Bash Script'
+
+- job: BuildExtraDockerImage
+  displayName: Build Extra Docker Image
+  dependsOn: BuildRpmPackageMariner
+  strategy:
+    matrix:
+      ${{ each arch in parameters.architectures }}:
+        Azure Linux {{ arch.name }}:
+          pool: ${{ arch.pool }}
+          artifactName: docker-azure-{{ arch.value }}
+          dockerfile: Dockerfile.azure
+          packageArtifactName: rpm-mariner2.0-{{ arch.value }}
+  pool:
+    name: $(pool)
+  steps:
+    - bash: ./scripts/ci/install_docker.sh
+      displayName: Install Docker
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Download Build Artifacts'
+      inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
+        artifactName: $(packageArtifactName)
+    - bash: |
+        mv $(Build.ArtifactStagingDirectory)/docker/*.rpm $(Build.ArtifactStagingDirectory)/docker/azure-cli.rpm
+        
+        bash scripts/release/docker/pipeline.sh
+      displayName: 'Build Docker'
+
+    - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+      displayName: 'SBOM'
+      inputs:
+        BuildDropPath: $(Build.ArtifactStagingDirectory)
+        DockerImagesToScan: 'clibuild$BUILD_BUILDNUMBER:latest'
+
+    - task: PublishPipelineArtifact@0
+      displayName: 'Publish Artifact: docker image'
+      inputs:
+        TargetPath: $(Build.ArtifactStagingDirectory)
+        ArtifactName: $(artifactName)
+
+- job: TestExtraDockerImage
+  displayName: Test Extra Docker Image
+  dependsOn:
+    - BuildExtraDockerImage
+    - ExtractMetadata
+  strategy:
+    matrix:
+      ${{ each arch in parameters.architectures }}:
+        Azure Linux {{ arch.name }}:
+          pool: ${{ arch.pool }}
+          artifactName: docker-azure-{{ arch.value }}
+  pool:
+    name: $(pool)
+  steps:
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Download Metadata'
+      inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+        artifactName: metadata
+
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Download Docker Image'
+      inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
+        artifactName: $(artifactName)
+
+    - bash: ./scripts/ci/install_docker.sh
+      displayName: Install Docker
+
+    - bash: |
+        set -exv
+        
+        CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
+        IMAGE_NAME=clibuild$BUILD_BUILDNUMBER:latest
+        TAR_FILE=$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-$CLI_VERSION.tar
+        
+        echo "== Test docker image =="
+        
+        docker load < $TAR_FILE
+        docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && sleep 5"
+      displayName: 'Bash Script'
 
 - job: BuildPythonWheel
   displayName: Build Python Wheels
