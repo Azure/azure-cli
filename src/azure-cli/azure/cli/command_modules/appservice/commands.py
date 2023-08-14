@@ -281,16 +281,11 @@ def load_command_table(self, _):
 
     with self.command_group('webapp hybrid-connection') as g:
         g.custom_command('list', 'list_hc')
-        g.custom_command('add', 'add_hc')
         g.custom_command('remove', 'remove_hc')
 
     with self.command_group('functionapp hybrid-connection') as g:
         g.custom_command('list', 'list_hc')
-        g.custom_command('add', 'add_hc')
         g.custom_command('remove', 'remove_hc')
-
-    with self.command_group('appservice hybrid-connection') as g:
-        g.custom_command('set-key', 'set_hc_key')
 
     with self.command_group('webapp vnet-integration') as g:
         g.custom_command('add', 'add_webapp_vnet_integration', validator=validate_add_vnet, exception_handler=ex_handler_factory())
