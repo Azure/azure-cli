@@ -61,8 +61,8 @@ def print_error_assistance(response):
         print("\n")
         print("Corrected Command: ")
         print(corrected_command)
-        print("\n")
         print_line()
+        print("\n")
 
 def print_line():
         console_width = shutil.get_terminal_size().columns
