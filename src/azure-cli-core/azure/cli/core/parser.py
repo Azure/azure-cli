@@ -160,7 +160,7 @@ class AzCliCommandParser(CLICommandParser):
         recommendations = recommender.provide_recommendations()
 
         # Get command to provide to error help
-        command = self._namespace.command 
+        command = command_arguments[0] # Get the command without the parameter, command return from _get_failure_recover_arguments with two other var
         parameters = AzCliCommandInvoker._extract_parameter_names(self._raw_arguments)
         full_command = str(command) + ' ' + ''.join(parameters)
 
@@ -297,7 +297,7 @@ class AzCliCommandParser(CLICommandParser):
             cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
 
             # Get command to provide to error help
-            command = self._namespace.command 
+            command = str(self.prog) + ' ' + value
             parameters = AzCliCommandInvoker._extract_parameter_names(self._raw_arguments)
             full_command = str(command) + ' ' + ''.join(parameters)
 
@@ -343,7 +343,7 @@ class AzCliCommandParser(CLICommandParser):
                     and use_dynamic_install == 'no':
                 az_error.set_recommendation(EXTENSION_REFERENCE)
 
-            az_error.print_error(ai_error_assistance)
+            az_error.print_error()
             az_error.send_telemetry()
 
             self.exit(2)
