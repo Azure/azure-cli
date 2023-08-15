@@ -75,9 +75,6 @@ def import_config(cmd,
                   # from-appservice parameters
                   appservice_account=None):
 
-    if src_snapshot and (src_key or src_label or skip_features):
-        raise CLIErrors.MutuallyExclusiveArgumentError("'--src-snapshot' cannot be specified with '--src-key', '--src-label' filters, or '--skip-features' options.")
-
     src_features = []
     dest_features = []
     dest_kvs = []
@@ -263,9 +260,6 @@ def export_config(cmd,
                   # to-app-service parameters
                   appservice_account=None,
                   export_as_reference=False):
-
-    if snapshot and (key or label or skip_features or skip_keyvault):
-        raise CLIErrors.MutuallyExclusiveArgumentError("'--snapshot' cannot be specified with '--key',  '--label', 'skip-keyvault' or '--skip-features' arguments.")
 
     src_features = []
     dest_features = []
