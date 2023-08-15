@@ -171,9 +171,31 @@ class AAZContentBuilder:
         """Get sub builder by key"""
         if not key or key == '.':
             return self
-        parts = [part for part in key.replace('[', '.[').replace('{', '.{').split('.') if part]
+        parts = self._split_key(key)
 
         return self._get(*parts)
+
+    @staticmethod
+    def _split_key(key):
+        parts = []
+        # when discriminator value contains `.` value, like `Microsoft.Network/publicIPAddresses` the key.
+        # It will separate the value in several parts.
+        pending_disc_part = None
+        for part in key.replace('[', '.[').replace('{', '.{').split('.'):
+            if pending_disc_part is not None:
+                pending_disc_part += '.' + part
+                if pending_disc_part.endswith("}"):
+                    parts.append(pending_disc_part)
+                    pending_disc_part = None
+                continue
+            if part.startswith("{") and not part.endswith("}"):
+                # value is separated
+                pending_disc_part = part
+                continue
+            if not part:
+                continue
+            parts.append(part)
+        return parts
 
     def _get(self, *key_parts):
         if not key_parts:
@@ -190,7 +212,8 @@ class AAZContentBuilder:
             sub_builder = self._sub_elements_builder
         elif key_parts[0].startswith('{'):
             # discriminator
-            key, value = key_parts[0][1:-1].split(":")
+            assert key_parts[0].endswith('}'), "Invalid key_parts {}".format(key_parts)
+            key, value = key_parts[0][1:-1].split(":", maxsplit=1)
             if key != self._discriminator_prop_name:
                 return None
             sub_builder = self._discriminator_builders.get(value, None)

@@ -158,14 +158,16 @@ The __order__ of them is important!!! If you reverse the order, the final data w
 
 ## use `??` to show help
 
-`??` is a special keyword to show argument or its sub property help message. It can be use in any place of shorthand syntax.
+`??` is a special keyword to show argument or its sub property help message. It can be used in any place of shorthand syntax.
 
+> **Note**
+> For some shells like Bash, which use `?` as a wildcards, please make sure `??` is wrapped in the **double quotes**.
 
 ### use `??` to show argument's help message
 
 Show help message of `--contact` argument:
 ```bash
-az some-command --contact ??
+az some-command --contact "??"
 ```
 
 ### use `??` in `Full Value` format
@@ -202,17 +204,17 @@ az some-command --contact "{name:Bill,address:{country:USA},emails:[??"
 
 Show help message of `--contant.address` property when writing `Partial Value`:
 ```bash
-az some-command --contact address=??
+az some-command --contact address="??"
 ```
 
 Show help message of `--contant.emails` property when writing `Partial Value`:
 ```bash
-az some-command --contact emails=??
+az some-command --contact emails="??"
 ```
 
 Show help message of the element of `--contant.emails` property when writing `Partial Value`:
 ```bash
-az some-command --contact emails[0]=??
+az some-command --contact emails[0]="??"
 ```
 
 ## Pass a `null` Value

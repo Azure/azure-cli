@@ -451,6 +451,18 @@ def is_valid_image_version_id(image_version_id):
     return False
 
 
+def is_valid_vm_image_id(image_image_id):
+    if not image_image_id:
+        return False
+
+    image_version_id_pattern = re.compile(r'^/subscriptions/[^/]*/resourceGroups/[^/]*/providers/Microsoft.Compute/'
+                                          r'images/.*$', re.IGNORECASE)
+    if image_version_id_pattern.match(image_image_id):
+        return True
+
+    return False
+
+
 def parse_gallery_image_id(image_reference):
     from azure.cli.core.azclierror import InvalidArgumentValueError
 
@@ -485,6 +497,20 @@ def parse_shared_gallery_image_id(image_reference):
 
     # Return the gallery unique name and gallery image name parsed from shared gallery image id
     return image_info.group(1), image_info.group(2)
+
+
+def parse_vm_image_id(image_id):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+
+    image_info = re.search(r'^/subscriptions/([^/]*)/resourceGroups/([^/]*)/providers/Microsoft.Compute/'
+                           r'images/(.*$)', image_id, re.IGNORECASE)
+    if not image_info or len(image_info.groups()) < 2:
+        raise InvalidArgumentValueError(
+            'The gallery image id is invalid. The valid format should be "/subscriptions/{sub_id}'
+            '/resourceGroups/{rg}/providers/Microsoft.Compute/images/{image_name}"')
+
+    # Return the gallery subscription id, resource group name and image name.
+    return image_info.group(1), image_info.group(2), image_info.group(3)
 
 
 def is_compute_gallery_image_id(image_reference):
