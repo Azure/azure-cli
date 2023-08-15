@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-ARG PYTHON_VERSION="3.10"
+ARG PYTHON_VERSION="3.11"
 
 FROM python:${PYTHON_VERSION}-alpine
 
