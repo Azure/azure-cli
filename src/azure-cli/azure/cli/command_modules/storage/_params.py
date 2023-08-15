@@ -431,14 +431,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    arg_group='IPv6 Endpoint',
                    help='A boolean flag which indicates whether dual-stack storage endpoints are to be published. '
                         'When set to true, this will switch the default storage account endpoints to dual stack.')
-        c.argument('publish_ipv4_endpoint', arg_type=get_three_state_flag(), min_api='2023-01-01',
-                   arg_group='IPv6 Endpoint',
-                   help='A boolean flag which indicates whether IPv4 storage endpoints are to be published. '
-                        'When set to true, this will publish an IPv4 only endpoint for the storage account.')
-        c.argument('publish_ipv6_endpoint', arg_type=get_three_state_flag(), min_api='2023-01-01',
-                   arg_group='IPv6 Endpoint',
-                   help='A boolean flag which indicates whether IPv6 storage endpoints are to be published. '
-                        'When set to true, this will publish an IPv6 only endpoint for the storage account.')
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -529,14 +521,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    arg_group='IPv6 Endpoint',
                    help='A boolean flag which indicates whether dual-stack storage endpoints are to be published. '
                         'When set to true, this will switch the default storage account endpoints to dual stack.')
-        c.argument('publish_ipv4_endpoint', arg_type=get_three_state_flag(), min_api='2023-01-01',
-                   arg_group='IPv6 Endpoint',
-                   help='A boolean flag which indicates whether IPv4 storage endpoints are to be published. '
-                        'When set to true, this will publish an IPv4 only endpoint for the storage account.')
-        c.argument('publish_ipv6_endpoint', arg_type=get_three_state_flag(), min_api='2023-01-01',
-                   arg_group='IPv6 Endpoint',
-                   help='A boolean flag which indicates whether IPv6 storage endpoints are to be published. '
-                        'When set to true, this will publish an IPv6 only endpoint for the storage account.')
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, arg_group='Customer managed key', min_api='2017-06-01',
