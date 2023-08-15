@@ -694,6 +694,36 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             exported_kvs = json.load(json_file)
         assert imported_kvs == exported_kvs
 
+        # ignore already existing kvs
+        ignore_match_file_path = os.path.join(TEST_DIR, 'ignore_match_import.json')
+        key_name = 'BackgroundColor'
+        self.kwargs.update({
+            'key': key_name,
+            'imported_file_path': ignore_match_file_path
+        })
+
+        background_color_kv = self.cmd('appconfig kv show -n {config_store_name} --key {key}').get_output_in_json()
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} -y')
+
+        # Confirm that the key has the same etag after re-importing
+        self.cmd('appconfig kv show -n {config_store_name} --key {key}',
+                 checks=[
+                     self.check('key', key_name),
+                     self.check('etag', background_color_kv['etag']),
+                     ])
+        
+        self.kwargs.update({
+            'imported_file_path': imported_file_path
+        })
+
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} -y --import-mode all')
+        
+        updated_background_color_kv = self.cmd('appconfig kv show -n {config_store_name} --key {key}').get_output_in_json()
+
+        self.assertNotEquals(background_color_kv['etag'], updated_background_color_kv['etag'])
+
         # skip key vault reference while exporting
         self.kwargs.update({
             'key': "key_vault_reference",
