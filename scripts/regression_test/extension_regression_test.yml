@@ -86,6 +86,12 @@ jobs:
       inlineScript: |
         set -ev
         pwd
+        if [[ -n "$(CUSTOM_CLI_REPO)" && -n "$(CUSTOM_CLI_BRANCH)" ]]; then
+          git remote add ${CUSTOM_CLI_REPO} https://github.com/${CUSTOM_CLI_REPO}/azure-cli.git
+          git fetch ${CUSTOM_CLI_REPO} $(CUSTOM_CLI_BRANCH)
+          git checkout -b ${CUSTOM_CLI_BRANCH} ${CUSTOM_CLI_REPO}/${CUSTOM_CLI_BRANCH}
+        fi
+
         git clone https://github.com/Azure/azure-cli-extensions.git
         cd azure-cli-extensions
 
@@ -146,7 +152,7 @@ jobs:
 - job: ResultSummary
   displayName: CLI Extension Regression Test Result Summary
   dependsOn: CLIExtensionRegressionTest
-  condition: succeededOrFailed()
+  condition: and(succeededOrFailed(), eq(variables['CUSTOM_CLI_REPO'], ''))
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:

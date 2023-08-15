@@ -428,6 +428,7 @@ def ensure_container_insights_for_monitoring(
                 {
                     "location": location,
                     "tags": existing_tags,
+                    "kind": "Linux",
                     "properties": {
                         "dataSources": {
                             "extensions": [
@@ -461,6 +462,7 @@ def ensure_container_insights_for_monitoring(
                 {
                     "location": location,
                     "tags": existing_tags,
+                    "kind": "Linux",
                     "properties": {
                         "dataSources": {
                             "syslog": [

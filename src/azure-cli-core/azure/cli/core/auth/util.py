@@ -129,6 +129,12 @@ def check_result(result, **kwargs):
     if not result:
         raise AuthenticationError("Can't find token from MSAL cache.",
                                   recommendation="To re-authenticate, please run:\naz login")
+
+    # msal_telemetry should be sent no matter if the MSAL response is a success or an error
+    if 'msal_telemetry' in result:
+        from azure.cli.core.telemetry import set_msal_telemetry
+        set_msal_telemetry(result['msal_telemetry'])
+
     if 'error' in result:
         aad_error_handler(result, **kwargs)
 

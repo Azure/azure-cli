@@ -414,6 +414,27 @@ def cf_share_directory_client(cli_ctx, kwargs):
 
 
 def cf_share_file_client(cli_ctx, kwargs):
+    if kwargs.get('file_url'):
+        from azure.cli.core.azclierror import RequiredArgumentMissingError
+        t_file_client = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILESHARE, '_file_client#ShareFileClient')
+        token_credential = kwargs.get('token_credential')
+        enable_file_backup_request_intent = kwargs.pop('enable_file_backup_request_intent', None)
+        token_intent = 'backup' if enable_file_backup_request_intent else None
+        if token_credential is not None and not enable_file_backup_request_intent:
+            raise RequiredArgumentMissingError("--enable-file-backup-request-intent is required for file share OAuth")
+        credential = get_credential(kwargs)
+        # del unused kwargs
+        kwargs.pop('connection_string')
+        kwargs.pop('account_name')
+        kwargs.pop('account_url')
+        kwargs.pop('share_name')
+        kwargs.pop('directory_name')
+        kwargs.pop('file_name')
+        return t_file_client.from_file_url(file_url=kwargs.pop('file_url'),
+                                           credential=credential, token_intent=token_intent)
+    if 'file_url' in kwargs:
+        kwargs.pop('file_url')
+
     return cf_share_client(cli_ctx, kwargs).get_directory_client(directory_path=kwargs.pop('directory_name')).\
         get_file_client(file_name=kwargs.pop('file_name'))
 

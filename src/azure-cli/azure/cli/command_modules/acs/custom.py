@@ -3,6 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=line-too-long
+# pylint: disable=ungrouped-imports
+
 import base64
 import errno
 import io
@@ -25,13 +28,12 @@ import zipfile
 from distutils.version import StrictVersion  # pylint: disable=deprecated-module
 from urllib.error import URLError
 from urllib.request import urlopen
+from azure.cli.command_modules.acs.maintenanceconfiguration import aks_maintenanceconfiguration_update_internal
 
 import colorama
 import requests
 import yaml
-from azure.cli.command_modules.acs._client_factory import (
-    cf_agent_pools,
-)
+from azure.cli.command_modules.acs._client_factory import cf_agent_pools
 from azure.cli.command_modules.acs._consts import (
     ADDONS,
     CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
@@ -343,6 +345,105 @@ def which(binary):
     return None
 
 
+def aks_maintenanceconfiguration_list(
+    cmd,
+    client,
+    resource_group_name,
+    cluster_name
+):
+    return client.list_by_managed_cluster(resource_group_name, cluster_name)
+
+
+def aks_maintenanceconfiguration_show(
+    cmd,
+    client,
+    resource_group_name,
+    cluster_name,
+    config_name
+):
+    logger.warning('resource_group_name: %s, cluster_name: %s, config_name: %s ',
+                   resource_group_name, cluster_name, config_name)
+    return client.get(resource_group_name, cluster_name, config_name)
+
+
+def aks_maintenanceconfiguration_delete(
+    cmd,
+    client,
+    resource_group_name,
+    cluster_name,
+    config_name
+):
+    logger.warning('resource_group_name: %s, cluster_name: %s, config_name: %s ',
+                   resource_group_name, cluster_name, config_name)
+    return client.delete(resource_group_name, cluster_name, config_name)
+
+
+def aks_maintenanceconfiguration_add(
+    cmd,
+    client,
+    resource_group_name,
+    cluster_name,
+    config_name,
+    config_file=None,
+    weekday=None,
+    start_hour=None,
+    schedule_type=None,
+    interval_days=None,
+    interval_weeks=None,
+    interval_months=None,
+    day_of_week=None,
+    day_of_month=None,
+    week_index=None,
+    duration_hours=None,
+    utc_offset=None,
+    start_date=None,
+    start_time=None
+):
+    configs = client.list_by_managed_cluster(resource_group_name, cluster_name)
+    for config in configs:
+        if config.name == config_name:
+            raise CLIError("Maintenance configuration '{}' already exists, please try a different name, "
+                           "use 'aks maintenanceconfiguration list' to get current list of maitenance configurations".format(config_name))
+    # DO NOT MOVE: get all the original parameters and save them as a dictionary
+    raw_parameters = locals()
+    return aks_maintenanceconfiguration_update_internal(cmd, client, raw_parameters)
+
+
+def aks_maintenanceconfiguration_update(
+    cmd,
+    client,
+    resource_group_name,
+    cluster_name,
+    config_name,
+    config_file=None,
+    weekday=None,
+    start_hour=None,
+    schedule_type=None,
+    interval_days=None,
+    interval_weeks=None,
+    interval_months=None,
+    day_of_week=None,
+    day_of_month=None,
+    week_index=None,
+    duration_hours=None,
+    utc_offset=None,
+    start_date=None,
+    start_time=None
+):
+    configs = client.list_by_managed_cluster(resource_group_name, cluster_name)
+    found = False
+    for config in configs:
+        if config.name == config_name:
+            found = True
+            break
+    if not found:
+        raise ResourceNotFoundError("Maintenance configuration '{}' doesn't exist."
+                                    "use 'aks maintenanceconfiguration list' to get current list of maitenance configurations".format(config_name))
+    # DO NOT MOVE: get all the original parameters and save them as a dictionary
+    raw_parameters = locals()
+    return aks_maintenanceconfiguration_update_internal(cmd, client, raw_parameters)
+
+
 def wait_then_open(url):
     """
     Waits for a bit then opens a URL.  Useful for waiting for a proxy to come up, and then open the URL.
@@ -450,6 +551,7 @@ def aks_create(
     enable_image_cleaner=False,
     image_cleaner_interval_hours=None,
     enable_keda=False,
+    enable_vpa=False,
     # addons
     enable_addons=None,
     workspace_resource_id=None,
@@ -551,6 +653,7 @@ def aks_update(
     disable_local_accounts=False,
     enable_local_accounts=False,
     network_plugin_mode=None,
+    network_dataplane=None,
     pod_cidr=None,
     load_balancer_managed_outbound_ip_count=None,
     load_balancer_managed_outbound_ipv6_count=None,
@@ -560,6 +663,7 @@ def aks_update(
     load_balancer_idle_timeout=None,
     nat_gateway_managed_outbound_ip_count=None,
     nat_gateway_idle_timeout=None,
+    outbound_type=None,
     auto_upgrade_channel=None,
     cluster_autoscaler_profile=None,
     uptime_sla=False,
@@ -610,6 +714,8 @@ def aks_update(
     http_proxy_config=None,
     enable_keda=False,
     disable_keda=False,
+    enable_vpa=False,
+    disable_vpa=False,
     # addons
     enable_secret_rotation=False,
     disable_secret_rotation=False,
@@ -872,10 +978,10 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                       enable_sgxquotehelper=False,
                       enable_secret_rotation=False,
                       rotation_poll_interval=None,
-                      no_wait=False,
                       enable_msi_auth_for_monitoring=True,
                       enable_syslog=False,
-                      data_collection_settings=None,):
+                      data_collection_settings=None,
+                      no_wait=False,):
     instance = client.get(resource_group_name, name)
     msi_auth = False
     if instance.service_principal_profile.client_id == "msi":

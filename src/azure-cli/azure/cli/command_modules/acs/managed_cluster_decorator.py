@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=line-too-long
 
 import os
 import re
@@ -41,7 +42,7 @@ from azure.cli.command_modules.acs._helpers import (
 )
 from azure.cli.command_modules.acs._loadbalancer import create_load_balancer_profile
 from azure.cli.command_modules.acs._loadbalancer import update_load_balancer_profile as _update_load_balancer_profile
-from azure.cli.command_modules.acs._natgateway import create_nat_gateway_profile, is_nat_gateway_profile_provided
+from azure.cli.command_modules.acs._natgateway import create_nat_gateway_profile
 from azure.cli.command_modules.acs._natgateway import update_nat_gateway_profile as _update_nat_gateway_profile
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._roleassignments import (
@@ -135,6 +136,8 @@ class AKSManagedClusterModels(AKSAgentPoolModels):
         self.__loadbalancer_models = None
         # holder for nat gateway related models
         self.__nat_gateway_models = None
+        # holder for maintenance configuration related models
+        self.__maintenance_configuration_models = None
 
     @property
     def load_balancer_models(self) -> SimpleNamespace:
@@ -182,6 +185,31 @@ class AKSManagedClusterModels(AKSAgentPoolModels):
             )   # backward compatibility
             self.__nat_gateway_models = SimpleNamespace(**nat_gateway_models)
         return self.__nat_gateway_models
+
+    @property
+    def maintenance_configuration_models(self) -> SimpleNamespace:
+        """Get maintenance configuration related models.
+
+        The models are stored in a SimpleNamespace object, could be accessed by the dot operator like
+        `maintenance_configuration_models.ManagedClusterMaintenanceConfigurationProfile`.
+
+        :return: SimpleNamespace
+        """
+        if self.__maintenance_configuration_models is None:
+            maintenance_configuration_models = {}
+            # getting maintenance configuration related models
+            maintenance_configuration_models["MaintenanceConfiguration"] = self.MaintenanceConfiguration
+            maintenance_configuration_models["MaintenanceConfigurationListResult"] = self.MaintenanceConfigurationListResult
+            maintenance_configuration_models["MaintenanceWindow"] = self.MaintenanceWindow
+            maintenance_configuration_models["Schedule"] = self.Schedule
+            maintenance_configuration_models["DailySchedule"] = self.DailySchedule
+            maintenance_configuration_models["WeeklySchedule"] = self.WeeklySchedule
+            maintenance_configuration_models["AbsoluteMonthlySchedule"] = self.AbsoluteMonthlySchedule
+            maintenance_configuration_models["RelativeMonthlySchedule"] = self.RelativeMonthlySchedule
+            maintenance_configuration_models["TimeSpan"] = self.TimeSpan
+            maintenance_configuration_models["TimeInWeek"] = self.TimeInWeek
+            self.__maintenance_configuration_models = SimpleNamespace(**maintenance_configuration_models)
+        return self.__maintenance_configuration_models
 
 
 # pylint: disable=too-few-public-methods
@@ -2037,13 +2065,14 @@ class AKSManagedClusterContext(BaseAKSContext):
         outbound_type = self.raw_param.get("outbound_type")
         # try to read the property value corresponding to the parameter from the `mc` object
         read_from_mc = False
-        if (
-            self.mc and
-            self.mc.network_profile and
-            self.mc.network_profile.outbound_type is not None
-        ):
-            outbound_type = self.mc.network_profile.outbound_type
-            read_from_mc = True
+        if outbound_type is None and self.decorator_mode != DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.network_profile and
+                self.mc.network_profile.outbound_type is not None
+            ):
+                outbound_type = self.mc.network_profile.outbound_type
+                read_from_mc = True
 
         # skip dynamic completion & validation if option read_only is specified
         if read_only:
@@ -4841,6 +4870,58 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self._get_disable_azure_monitor_metrics(enable_validation=True)
 
+    def _get_enable_vpa(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of enable_vpa.
+        This function supports the option of enable_vpa. When enabled, if both enable_vpa and enable_vpa are
+        specified, raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        # Read the original value passed by the command.
+        enable_vpa = self.raw_param.get("enable_vpa")
+
+        # This parameter does not need dynamic completion.
+        if enable_validation:
+            if enable_vpa and self._get_disable_vpa(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-vpa and --disable-vpa at the same time."
+                )
+
+        return enable_vpa
+
+    def get_enable_vpa(self) -> bool:
+        """Obtain the value of enable_vpa.
+        This function will verify the parameter by default. If both enable_vpa and disable_vpa are specified, raise
+        a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        return self._get_enable_vpa(enable_validation=True)
+
+    def _get_disable_vpa(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of disable_vpa.
+        This function supports the option of enable_vpa. When enabled, if both enable_vpa and disable_vpa are specified,
+        raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        # Read the original value passed by the command.
+        disable_vpa = self.raw_param.get("disable_vpa")
+
+        # This option is not supported in create mode, hence we do not read the property value from the `mc` object.
+        # This parameter does not need dynamic completion.
+        if enable_validation:
+            if disable_vpa and self._get_enable_vpa(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-vpa and --disable-vpa at the same time."
+                )
+
+        return disable_vpa
+
+    def get_disable_vpa(self) -> bool:
+        """Obtain the value of disable_vpa.
+        This function will verify the parameter by default. If both enable_vpa and disable_vpa are specified, raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        return self._get_disable_vpa(enable_validation=True)
+
 
 class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
     def __init__(
@@ -5712,6 +5793,13 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoScalerProfile()
             mc.workload_auto_scaler_profile.keda = self.models.ManagedClusterWorkloadAutoScalerProfileKeda(enabled=True)
 
+        if self.context.get_enable_vpa():
+            if mc.workload_auto_scaler_profile is None:
+                mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoScalerProfile()
+            if mc.workload_auto_scaler_profile.vertical_pod_autoscaler is None:
+                mc.workload_auto_scaler_profile.vertical_pod_autoscaler = self.models.ManagedClusterWorkloadAutoScalerProfileVerticalPodAutoscaler(enabled=True)
+            else:
+                mc.workload_auto_scaler_profile.vertical_pod_autoscaler.enabled = True
         return mc
 
     def set_up_api_server_access_profile(self, mc: ManagedCluster) -> ManagedCluster:
@@ -5978,11 +6066,11 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_http_proxy_config(mc)
         # set up workload autoscaler profile
         mc = self.set_up_workload_auto_scaler_profile(mc)
+
         # setup k8s support plan
         mc = self.set_up_k8s_support_plan(mc)
         # set up azure monitor metrics profile
         mc = self.set_up_azure_monitor_profile(mc)
-
         # DO NOT MOVE: keep this at the bottom, restore defaults
         if not bypass_restore_defaults:
             mc = self._restore_defaults_in_mc(mc)
@@ -6422,6 +6510,33 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             )
         return mc
 
+    def update_outbound_type_in_network_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update outbound type of network profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        outboundType = self.context.get_outbound_type()
+        if outboundType:
+            vnet_subnet_id = self.context.get_vnet_subnet_id()
+            if vnet_subnet_id is None and outboundType not in [
+                CONST_OUTBOUND_TYPE_LOAD_BALANCER,
+                CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
+                CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
+            ]:
+                raise InvalidArgumentValueError("Invalid outbound type, supported values are loadBalancer,"
+                                                " managedNATGateway, userAssignedNATGateway and userDefinedRouting.")
+            if vnet_subnet_id is not None and outboundType not in [
+                CONST_OUTBOUND_TYPE_LOAD_BALANCER,
+                CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
+                CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
+            ]:
+                raise InvalidArgumentValueError("Invalid outbound type, supported values are loadBalancer,"
+                                                " managedNATGateway, userAssignedNATGateway and userDefinedRouting.")
+            mc.network_profile.outbound_type = outboundType
+        return mc
+
     def update_load_balancer_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Update load balancer profile for the ManagedCluster object.
 
@@ -6434,25 +6549,28 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 "Encounter an unexpected error while getting network profile from the cluster in the process of "
                 "updating its load balancer profile."
             )
-
-        load_balancer_managed_outbound_ip_count = self.context.get_load_balancer_managed_outbound_ip_count()
-        load_balancer_managed_outbound_ipv6_count = self.context.get_load_balancer_managed_outbound_ipv6_count()
-        load_balancer_outbound_ips = self.context.get_load_balancer_outbound_ips()
-        load_balancer_outbound_ip_prefixes = self.context.get_load_balancer_outbound_ip_prefixes()
-        load_balancer_outbound_ports = self.context.get_load_balancer_outbound_ports()
-        load_balancer_idle_timeout = self.context.get_load_balancer_idle_timeout()
-        # In the internal function "_update_load_balancer_profile", it will check whether the provided parameters
-        # have been assigned, and if there are any, the corresponding profile will be modified; otherwise, it will
-        # remain unchanged.
-        mc.network_profile.load_balancer_profile = _update_load_balancer_profile(
-            managed_outbound_ip_count=load_balancer_managed_outbound_ip_count,
-            managed_outbound_ipv6_count=load_balancer_managed_outbound_ipv6_count,
-            outbound_ips=load_balancer_outbound_ips,
-            outbound_ip_prefixes=load_balancer_outbound_ip_prefixes,
-            outbound_ports=load_balancer_outbound_ports,
-            idle_timeout=load_balancer_idle_timeout,
-            profile=mc.network_profile.load_balancer_profile,
-            models=self.models.load_balancer_models)
+        outbound_type = self.context.get_outbound_type()
+        if outbound_type and outbound_type != CONST_OUTBOUND_TYPE_LOAD_BALANCER:
+            mc.network_profile.load_balancer_profile = None
+        else:
+            load_balancer_managed_outbound_ip_count = self.context.get_load_balancer_managed_outbound_ip_count()
+            load_balancer_managed_outbound_ipv6_count = self.context.get_load_balancer_managed_outbound_ipv6_count()
+            load_balancer_outbound_ips = self.context.get_load_balancer_outbound_ips()
+            load_balancer_outbound_ip_prefixes = self.context.get_load_balancer_outbound_ip_prefixes()
+            load_balancer_outbound_ports = self.context.get_load_balancer_outbound_ports()
+            load_balancer_idle_timeout = self.context.get_load_balancer_idle_timeout()
+            # In the internal function "_update_load_balancer_profile", it will check whether the provided parameters
+            # have been assigned, and if there are any, the corresponding profile will be modified; otherwise, it will
+            # remain unchanged.
+            mc.network_profile.load_balancer_profile = _update_load_balancer_profile(
+                managed_outbound_ip_count=load_balancer_managed_outbound_ip_count,
+                managed_outbound_ipv6_count=load_balancer_managed_outbound_ipv6_count,
+                outbound_ips=load_balancer_outbound_ips,
+                outbound_ip_prefixes=load_balancer_outbound_ip_prefixes,
+                outbound_ports=load_balancer_outbound_ports,
+                idle_timeout=load_balancer_idle_timeout,
+                profile=mc.network_profile.load_balancer_profile,
+                models=self.models.load_balancer_models)
         return mc
 
     def update_nat_gateway_profile(self, mc: ManagedCluster) -> ManagedCluster:
@@ -6462,17 +6580,17 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
-        nat_gateway_managed_outbound_ip_count = self.context.get_nat_gateway_managed_outbound_ip_count()
-        nat_gateway_idle_timeout = self.context.get_nat_gateway_idle_timeout()
-        if is_nat_gateway_profile_provided(nat_gateway_managed_outbound_ip_count, nat_gateway_idle_timeout):
-            if not mc.network_profile:
-                raise UnknownError(
-                    "Unexpectedly get an empty network profile in the process of updating nat gateway profile."
-                )
-
+        if not mc.network_profile:
+            raise UnknownError(
+                "Unexpectedly get an empty network profile in the process of updating nat gateway profile."
+            )
+        outbound_type = self.context.get_outbound_type()
+        if outbound_type and outbound_type != CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY:
+            mc.network_profile.nat_gateway_profile = None
+        else:
             mc.network_profile.nat_gateway_profile = _update_nat_gateway_profile(
-                nat_gateway_managed_outbound_ip_count,
-                nat_gateway_idle_timeout,
+                self.context.get_nat_gateway_managed_outbound_ip_count(),
+                self.context.get_nat_gateway_idle_timeout(),
                 mc.network_profile.nat_gateway_profile,
                 models=self.models.nat_gateway_models,
             )
@@ -6628,6 +6746,11 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             _,
             _
         ) = self.context.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
+
+        network_dataplane = self.context.get_network_dataplane()
+        if network_dataplane:
+            mc.network_profile.network_dataplane = network_dataplane
+
         if pod_cidr:
             mc.network_profile.pod_cidr = pod_cidr
         return mc
@@ -7034,6 +7157,24 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 enabled=False
             )
 
+        if self.context.get_enable_vpa():
+            if mc.workload_auto_scaler_profile is None:
+                mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoScalerProfile()
+            if mc.workload_auto_scaler_profile.vertical_pod_autoscaler is None:
+                mc.workload_auto_scaler_profile.vertical_pod_autoscaler = self.models.ManagedClusterWorkloadAutoScalerProfileVerticalPodAutoscaler()
+
+            # set enabled
+            mc.workload_auto_scaler_profile.vertical_pod_autoscaler.enabled = True
+
+        if self.context.get_disable_vpa():
+            if mc.workload_auto_scaler_profile is None:
+                mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoScalerProfile()
+            if mc.workload_auto_scaler_profile.vertical_pod_autoscaler is None:
+                mc.workload_auto_scaler_profile.vertical_pod_autoscaler = self.models.ManagedClusterWorkloadAutoScalerProfileVerticalPodAutoscaler()
+
+            # set disabled
+            mc.workload_auto_scaler_profile.vertical_pod_autoscaler.enabled = False
+
         return mc
 
     def update_azure_monitor_profile(self, mc: ManagedCluster) -> ManagedCluster:
@@ -7103,6 +7244,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         self.process_attach_detach_acr(mc)
         # update sku (uptime sla)
         mc = self.update_sku(mc)
+        # update outbound type
+        mc = self.update_outbound_type_in_network_profile(mc)
         # update load balancer profile
         mc = self.update_load_balancer_profile(mc)
         # update nat gateway profile
