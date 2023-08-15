@@ -14,8 +14,7 @@ from azure.cli.command_modules.dla._validators import validate_resource_group_na
 
 # pylint: disable=line-too-long, too-many-statements
 def load_arguments(self, _):
-    from azure.cli.command_modules.dla.vendored_sdks.azure_mgmt_datalake_analytics.account.models import (FirewallState, TierType, FirewallAllowAzureIpsState,
-                                                              AADObjectType)
+    from azure.cli.command_modules.dla.vendored_sdks.azure_mgmt_datalake_analytics.account.models import (FirewallState, TierType, FirewallAllowAzureIpsState, AADObjectType)
 
     from azure.cli.command_modules.dla.vendored_sdks.azure_mgmt_datalake_analytics.job.models import (CompileMode, JobState, JobResult)
 
