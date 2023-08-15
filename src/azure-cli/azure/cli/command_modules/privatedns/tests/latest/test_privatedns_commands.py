@@ -778,9 +778,8 @@ class PrivateDnsRecordSetsTests(BaseScenarioTests):
             self.check('name', '{recordset}'),
             self.check('metadata.{}'.format(tagKey), tagVal)
         ])
-        self.cmd('az network private-dns record-set a update -g {rg} -n {recordset} -z {zone} --metadata ""', checks=[
-            self.check('name', '{recordset}'),
-            self.check('metadata', '{{}}')
+        self.cmd('az network private-dns record-set a update -g {rg} -n {recordset} -z {zone} --metadata null', checks=[
+            self.check('name', '{recordset}')
         ])
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')

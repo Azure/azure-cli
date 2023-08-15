@@ -470,8 +470,8 @@ def public_access_validator(ns):
 
 
 def _validate_start_and_end_ip_address_order(start_ip, end_ip):
-    start_ip_elements = start_ip.split('.')
-    end_ip_elements = end_ip.split('.')
+    start_ip_elements = [int(octet) for octet in start_ip.split('.')]
+    end_ip_elements = [int(octet) for octet in end_ip.split('.')]
 
     for idx in range(4):
         if start_ip_elements[idx] < end_ip_elements[idx]:

@@ -574,13 +574,6 @@ def grant_disk_access(cmd, resource_group_name, disk_name, duration_in_seconds, 
                          access_level=access_level, secure_vm_guest_state_sas=secure_vm_guest_state_sas)
 
 
-def list_managed_disks(cmd, resource_group_name=None):
-    client = _compute_client_factory(cmd.cli_ctx)
-    if resource_group_name:
-        return client.disks.list_by_resource_group(resource_group_name)
-    return client.disks.list()
-
-
 def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=None, disk_iops_read_write=None,  # pylint: disable=too-many-branches
                         disk_mbps_read_write=None, encryption_type=None, disk_encryption_set=None,
                         network_access_policy=None, disk_access=None, max_shares=None, disk_iops_read_only=None,
@@ -786,13 +779,6 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
 def grant_snapshot_access(cmd, resource_group_name, snapshot_name, duration_in_seconds, access_level=None):
     return _grant_access(cmd, resource_group_name, snapshot_name, duration_in_seconds, is_disk=False,
                          access_level=access_level)
-
-
-def list_snapshots(cmd, resource_group_name=None):
-    client = _compute_client_factory(cmd.cli_ctx)
-    if resource_group_name:
-        return client.snapshots.list_by_resource_group(resource_group_name)
-    return client.snapshots.list()
 
 
 def update_snapshot(cmd, resource_group_name, instance, sku=None, disk_encryption_set=None,
@@ -3669,16 +3655,22 @@ def _build_identities_info_from_system_user_assigned(cmd, mi_system_assigned, mi
     return identity_types, user_assigned_identities
 
 
-def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
+def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False, hibernate=None):
     client = _compute_client_factory(cmd.cli_ctx)
-    if instance_ids and len(instance_ids) == 1:
+    # This is a walkaround because the REST service of `VirtualMachineScaleSetVMs#begin_deallocate`
+    # does not accept `hibernate` at present
+    if instance_ids and len(instance_ids) == 1 and hibernate is None:
         return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_deallocate,
                            resource_group_name, vm_scale_set_name, instance_ids[0])
 
     VirtualMachineScaleSetVMInstanceIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceIDs')
     vm_instance_i_ds = VirtualMachineScaleSetVMInstanceIDs(instance_ids=instance_ids)
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_deallocate,
-                       resource_group_name, vm_scale_set_name, vm_instance_i_ds)
+    if hibernate is not None:
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_deallocate,
+                           resource_group_name, vm_scale_set_name, vm_instance_i_ds, hibernate=hibernate)
+    else:
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_deallocate,
+                           resource_group_name, vm_scale_set_name, vm_instance_i_ds)
 
 
 def delete_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):

@@ -820,12 +820,17 @@ class TestSnapShotAccess(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_snapshot_access_')
     def test_snapshot_access(self, resource_group):
         self.kwargs.update({
-            'snapshot':'snapshot'
+            'snapshot': 'snapshot'
         })
         
         self.cmd('snapshot create -n {snapshot} -g {rg} --size-gb 1', checks=self.check('diskState', 'Unattached'))
         self.cmd('snapshot grant-access --duration-in-seconds 600 -n {snapshot} -g {rg}')
         self.cmd('snapshot show -n {snapshot} -g {rg}', checks=self.check('diskState', 'ActiveSAS'))
+        self.cmd('snapshot list -g {rg}',
+                 checks=[
+                     self.check('length(@)', '1'),
+                     self.check('[0].diskState', 'ActiveSAS'),
+                 ])
         self.cmd('snapshot revoke-access -n {snapshot} -g {rg}')
         self.cmd('snapshot show -n {snapshot} -g {rg}', checks=self.check('diskState', 'Unattached'))
 
@@ -3438,9 +3443,23 @@ class VMSSCreateAndModify(ScenarioTest):
         self.cmd('vmss delete --resource-group {rg} --name {vmss}')
         self.cmd('vmss list --resource-group {rg}', checks=self.is_empty())
 
-        self.cmd('vmss create -g {rg} -n {vmss2} --image Canonical:UbuntuServer:18.04-LTS:latest --orchestration-mode Flexible --admin-username vmtest --enable-hibernation true', checks=[
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_hibernate_')
+    def test_vmss_hibernate(self, resource_group):
+        self.kwargs.update({
+            'vmss1': self.create_random_name('vmss1', 10),
+            'vmss2': self.create_random_name('vmss2', 10),
+        })
+        self.cmd('vmss create -g {rg} -n {vmss1} --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --enable-hibernation true --orchestration-mode Flexible --admin-username vmtest --admin-password Test123456789#', checks=[
             self.check('vmss.additionalCapabilities.hibernationEnabled', True),
         ])
+        self.cmd('vmss deallocate -g {rg} -n {vmss1} --hibernate true')
+
+        self.cmd('vmss create -g {rg} -n {vmss2} --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --enable-hibernation true --orchestration-mode Flexible --admin-username vmtest --admin-password Test123456789#', checks=[
+            self.check('vmss.additionalCapabilities.hibernationEnabled', True),
+        ])
+        result = self.cmd('vmss list-instances -g {rg} -n {vmss2}')
+        self.kwargs['vms_id'] = result.get_output_in_json()[0]['instanceId']
+        self.cmd('vmss deallocate -g {rg} -n {vmss2} --instance-id {vms_id} --hibernate true')
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_scale_in_policy_')
     def test_vmss_scale_in_policy(self, resource_group):
