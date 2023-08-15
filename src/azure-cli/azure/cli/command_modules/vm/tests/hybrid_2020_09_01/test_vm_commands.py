@@ -18,7 +18,7 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint,
-    StorageAccountPreparer)
+    StorageAccountPreparer, KeyVaultPreparer)
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 # pylint: disable=line-too-long
@@ -233,6 +233,15 @@ class VMGeneralizeScenarioTest(ScenarioTest):
             self.check('sourceVirtualMachine.id', vm['id']),
             self.check('storageProfile.zoneResilient', None)
         ])
+        self.cmd('image show -g {rg} -n {image}', checks=[
+            self.check('name', '{image}'),
+            self.check('sourceVirtualMachine.id', vm['id']),
+            self.check('storageProfile.zoneResilient', None)
+        ])
+        self.cmd('image list -g {rg}', checks=[
+            self.check('length(@)', '1')
+        ])
+        self.cmd('image delete -g {rg} -n {image}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_generalize_vm')
     def test_vm_capture_zone_resilient_image(self, resource_group):
@@ -2193,6 +2202,9 @@ class VMGalleryImage(ScenarioTest):
         self.kwargs.update({
             'gallery': self.create_random_name('sig_', 10),
             'image': 'image1',
+            'disk': 'disk',
+            'snapshot': 'snapshot',
+            'version': '1.0.0',
         })
 
         self.cmd('sig create -g {rg} -r {gallery}', checks=[
@@ -2208,6 +2220,24 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-definition list -g {rg} --gallery-name {gallery}', checks=self.check('length(@)', 1))
         res = self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image}',
                        checks=self.check('name', self.kwargs['image'])).get_output_in_json()
+
+        self.cmd('snapshot create -g {rg} -n {snapshot} --size-gb 1 --sku Premium_LRS --tags tag1=s1')
+        self.cmd('sig image-version create --resource-group {rg} --gallery-name {gallery} '
+                 '--gallery-image-definition {image} --gallery-image-version {version} --os-snapshot {snapshot}',
+                 checks=[
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('sig image-version show -g {rg} -r {gallery} -i {image} -e {version}', checks=[
+            self.check('name', '{version}')
+        ])
+
+        self.cmd('sig image-version list -g {rg} -r {gallery} -i {image}', checks=[
+            self.check('length(@)', 1),
+            self.check('[0].name', '{version}')
+        ])
+        self.cmd('sig image-version delete -g {rg} -r {gallery} -i {image} -e {version}')
+        time.sleep(60)
 
         self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
         time.sleep(60)  # service end latency
@@ -2254,6 +2284,68 @@ class DiskAccessTest(ScenarioTest):
         self.cmd('disk-access list -g {rg}', checks=[
             self.check('length(@)', 0)
         ])
+# endregion
+
+
+class VMAvailSetScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer()
+    def test_vm_availset(self, resource_group):
+
+        self.kwargs.update({
+            'availset': 'availset-test'
+        })
+        self.cmd('vm availability-set create -g {rg} -n {availset}', checks=[
+            self.check('name', '{availset}'),
+            self.check('platformFaultDomainCount', 2),
+            self.check('platformUpdateDomainCount', 5),  # server defaults to 5
+            self.check('sku.name', 'Aligned')
+        ])
+
+        # create with explict UD count
+        self.cmd('vm availability-set create -g {rg} -n avset2 --platform-fault-domain-count 2 --platform-update-domain-count 2', checks=[
+            self.check('platformFaultDomainCount', 2),
+            self.check('platformUpdateDomainCount', 2),
+            self.check('sku.name', 'Aligned')
+        ])
+        self.cmd('vm availability-set delete -g {rg} -n avset2')
+
+        self.cmd('vm availability-set update -g {rg} -n {availset} --set tags.test=success',
+                 checks=self.check('tags.test', 'success'))
+        self.cmd('vm availability-set list -g {rg}', checks=[
+            self.check('length(@)', 1),
+            self.check('[0].name', '{availset}')
+        ])
+        result = self.cmd('vm availability-set list --query "[?name==\'availset-test\']"').get_output_in_json()
+        self.assertEqual(1, len(result))
+        self.cmd('vm availability-set list-sizes -g {rg} -n {availset}',
+                 checks=self.check('type(@)', 'array'))
+        self.cmd('vm availability-set show -g {rg} -n {availset}',
+                 checks=[self.check('name', '{availset}')])
+        self.cmd('vm availability-set delete -g {rg} -n {availset}')
+        self.cmd('vm availability-set list -g {rg}',
+                 checks=self.check('length(@)', 0))
+# endregion
+
+
+class TestSnapShotAccess(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='test_snapshot_access_')
+    def test_snapshot_access(self, resource_group):
+        self.kwargs.update({
+            'snapshot': 'snapshot'
+        })
+
+        self.cmd('snapshot create -n {snapshot} -g {rg} --size-gb 1')
+        self.cmd('snapshot grant-access --duration-in-seconds 600 -n {snapshot} -g {rg}')
+        self.cmd('snapshot show -n {snapshot} -g {rg}')
+        self.cmd('snapshot list -g {rg}',
+                 checks=[
+                     self.check('length(@)', '1'),
+                 ])
+        self.cmd('snapshot revoke-access -n {snapshot} -g {rg}')
+        self.cmd('snapshot delete -n {snapshot} -g {rg}')
 # endregion
 
 # endregion

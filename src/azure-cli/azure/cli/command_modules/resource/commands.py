@@ -78,8 +78,7 @@ def transform_resource_list(result):
 def transform_stacks(result):
     return OrderedDict([('Name', result['name']),
                         ('State', result['provisioningState']),
-                        ('Last Modified', result['systemData']['lastModifiedAt']),
-                        ('Deployment Id', result['deploymentId'])])
+                        ('Last Modified', result['systemData']['lastModifiedAt'])])
 
 
 def transform_stacks_list(result):
@@ -91,7 +90,7 @@ def transform_stacks_list(result):
                 resources += reslist['id'] + ","
 
             res = OrderedDict([('Name', r['name']), ('State', r['provisioningState']),
-                              ('Last Modified', r['systemData']['lastModifiedAt']), ('Resource IDs', resources[:-1])])
+                              ('Last Modified', r['systemData']['lastModifiedAt'])])
             transformed.append(res)
     return transformed
 
@@ -284,7 +283,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_resources', table_transformer=transform_resource_list)
         g.custom_command('tag', 'tag_resource')
         g.custom_command('move', 'move_resource')
-        g.custom_command('invoke-action', 'invoke_resource_action', transform=DeploymentOutputLongRunningOperation(self.cli_ctx))
+        g.custom_command('invoke-action', 'invoke_resource_action', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), supports_no_wait=True)
         g.generic_update_command('update', getter_name='show_resource', setter_name='update_resource',
                                  client_factory=None)
         g.custom_command('patch', 'patch_resource')

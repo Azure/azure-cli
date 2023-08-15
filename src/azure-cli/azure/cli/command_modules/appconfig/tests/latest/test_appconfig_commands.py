@@ -19,7 +19,7 @@ from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants,
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse, RecordingProcessor
 from azure.cli.testsdk.scenario_tests.utilities import is_json_payload
 from azure.core.exceptions import ResourceNotFoundError
-from azure.cli.core.azclierror import ResourceNotFoundError as CliResourceNotFoundError
+from azure.cli.core.azclierror import ResourceNotFoundError as CliResourceNotFoundError, RequiredArgumentMissingError
 from azure.cli.core.util import shell_safe_json_parse
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -411,6 +411,10 @@ class AppConfigKVScenarioTest(ScenarioTest):
             'appconfig revision list -n {config_store_name} --key {key} --label *').get_output_in_json()
         assert len(revisions) == 3
 
+        # Confirm that delete action errors out for empty or whitespace key
+        with self.assertRaisesRegex(RequiredArgumentMissingError, "Key cannot be empty."):
+            self.cmd('appconfig kv delete -n {config_store_name} --key " " -y')
+
         # IN CLI, since we support delete by key/label filters, return is a list of deleted items
         deleted = self.cmd('appconfig kv delete -n {config_store_name} --key {key} --label {label} -y',
                            checks=[self.check('[0].key', entry_key),
@@ -689,6 +693,36 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
         assert imported_kvs == exported_kvs
+
+        # ignore already existing kvs
+        ignore_match_file_path = os.path.join(TEST_DIR, 'ignore_match_import.json')
+        key_name = 'BackgroundColor'
+        self.kwargs.update({
+            'key': key_name,
+            'imported_file_path': ignore_match_file_path
+        })
+
+        background_color_kv = self.cmd('appconfig kv show -n {config_store_name} --key {key}').get_output_in_json()
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} -y')
+
+        # Confirm that the key has the same etag after re-importing
+        self.cmd('appconfig kv show -n {config_store_name} --key {key}',
+                 checks=[
+                     self.check('key', key_name),
+                     self.check('etag', background_color_kv['etag']),
+                     ])
+        
+        self.kwargs.update({
+            'imported_file_path': imported_file_path
+        })
+
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} -y --import-mode all')
+        
+        updated_background_color_kv = self.cmd('appconfig kv show -n {config_store_name} --key {key}').get_output_in_json()
+
+        self.assertNotEquals(background_color_kv['etag'], updated_background_color_kv['etag'])
 
         # skip key vault reference while exporting
         self.kwargs.update({

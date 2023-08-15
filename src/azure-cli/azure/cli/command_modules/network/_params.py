@@ -614,6 +614,7 @@ def load_arguments(self, _):
         c.argument('name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), help='The name of the public IP address.')
         c.argument('reverse_fqdn', help='Reverse FQDN (fully qualified domain name).')
         c.argument('dns_name', help='Globally unique DNS entry.')
+        c.argument('dns_name_scope', help='The domain name label scope. If a domain name label and a domain name label scope are specified, an A DNS record is created for the public IP in the Microsoft Azure DNS system with a hashed value includes in FQDN.', arg_type=get_enum_type(["NoReuse", "ResourceGroupReuse", "SubscriptionReuse", "TenantReuse"]))
         c.argument('idle_timeout', type=int, help='Idle timeout in minutes.')
         c.argument('zone', zone_type)
         c.argument('zone', zone_compatible_type)

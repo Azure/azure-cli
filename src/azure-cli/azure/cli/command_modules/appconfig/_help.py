@@ -636,6 +636,9 @@ helps['appconfig snapshot list'] = """
         - name: List all provisioning snapshots with names starting with the prefix 'app'.
           text:
             az appconfig snapshot list -s app* --status provisioning -n MyAppConfiguration
+        - name: List all failed and provisioning snapshots.
+          text:
+            az appconfig snapshot list --status failed provisioning -n MyAppConfiguration
     """
 
 helps['appconfig snapshot archive'] = """
