@@ -139,8 +139,8 @@ def import_config(cmd,
             else:
                 # Get all Feature flags with matching label
                 all_features = __read_kv_from_config_store(src_azconfig_client,
-                                                        key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + '*',
-                                                        label=src_label if src_label else SearchFilterOptions.EMPTY_LABEL)
+                                                           key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + '*',
+                                                           label=src_label if src_label else SearchFilterOptions.EMPTY_LABEL)
 
             for feature in all_features:
                 if feature.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
@@ -305,18 +305,19 @@ def export_config(cmd,
             logger.warning("Exporting feature flags to properties file or appservice is currently not supported.")
         else:
             if snapshot:
-                src_features = [map_keyvalue_to_featureflag(kv) for kv in src_kvs if kv.key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX)]
+                src_features = [map_keyvalue_to_featureflag(
+                    kv) for kv in src_kvs if kv.key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX)]
 
             # src_features is a list of FeatureFlag objects
             else:
                 src_features = list_feature(cmd,
-                            feature='*',
-                            label=label if label else SearchFilterOptions.EMPTY_LABEL,
-                            name=name,
-                            connection_string=connection_string,
-                            all_=True,
-                            auth_mode=auth_mode,
-                            endpoint=endpoint)
+                                            feature='*',
+                                            label=label if label else SearchFilterOptions.EMPTY_LABEL,
+                                            name=name,
+                                            connection_string=connection_string,
+                                            all_=True,
+                                            auth_mode=auth_mode,
+                                            endpoint=endpoint)
 
     # We need to separate KV from feature flags for the default export profile and only need to discard
     # if skip_features is true for the appconfig/kvset export profile.
