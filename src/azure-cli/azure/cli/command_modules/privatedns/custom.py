@@ -77,14 +77,14 @@ def import_zone(cmd, resource_group_name, private_zone_name, file_name):
 
                     record_set = RecordSet(ttl=record_set_ttl)
                     record_sets[record_set_key] = record_set
-                _privatedns_add_record(record_set, record, record_set_type, is_list=record_set_type.lower() not in ['soa', 'cname'])
+                _add_record(record_set, record, record_set_type, is_list=record_set_type.lower() not in ['soa', 'cname'])
 
     total_records = 0
     for key, rs in record_sets.items():
         rs_name, rs_type = key.lower().rsplit('.', 1)
         rs_name = rs_name[:-(len(origin) + 1)] if rs_name != origin else '@'
         try:
-            record_count = len(getattr(rs, _privatedns_type_to_property_name(rs_type)))
+            record_count = len(getattr(rs, _type_to_property_name(rs_type)))
         except TypeError:
             record_count = 1
         total_records += record_count
@@ -111,7 +111,7 @@ def import_zone(cmd, resource_group_name, private_zone_name, file_name):
             rs_name = rs_name[:-(len(origin) + 1)]
 
         try:
-            record_count = len(getattr(rs, _privatedns_type_to_property_name(rs_type)))
+            record_count = len(getattr(rs, _type_to_property_name(rs_type)))
         except TypeError:
             record_count = 1
         if rs_name == '@' and rs_type == 'soa':
@@ -148,7 +148,7 @@ def export_zone(cmd, resource_group_name, private_zone_name, file_name=None):
         record_type = record_set.type.rsplit('/', 1)[1].lower()
         if record_type == 'soa':
             record_set_name = record_set.name
-            record_data = getattr(record_set, _privatedns_type_to_property_name(record_type), None)
+            record_data = getattr(record_set, _type_to_property_name(record_type), None)
 
             if not isinstance(record_data, list):
                 record_data = [record_data]
@@ -173,7 +173,7 @@ def export_zone(cmd, resource_group_name, private_zone_name, file_name=None):
     for record_set in record_sets_all:
         record_type = record_set.type.rsplit('/', 1)[1].lower()
         record_set_name = record_set.name
-        record_data = getattr(record_set, _privatedns_type_to_property_name(record_type), None)
+        record_data = getattr(record_set, _type_to_property_name(record_type), None)
 
         # ignore empty record sets
         if not record_data:
@@ -829,6 +829,33 @@ class RecordSetTXTUpdate(RecordSetUpdate):
         args = self.ctx.args
         args.record_type = "TXT"
 # endregion RecordSetUpdate
+
+
+def _type_to_property_name(key):
+    type_dict = {
+        'a': 'a_records',
+        'aaaa': 'aaaa_records',
+        'cname': 'cname_record',
+        'mx': 'mx_records',
+        'ptr': 'ptr_records',
+        'soa': 'soa_record',
+        'srv': 'srv_records',
+        'txt': 'txt_records',
+    }
+    return type_dict[key.lower()]
+
+
+def _add_record(record_set, record, record_type, is_list=False):
+    record_property = _type_to_property_name(record_type)
+
+    if is_list:
+        record_list = getattr(record_set, record_property)
+        if record_list is None:
+            setattr(record_set, record_property, [])
+            record_list = getattr(record_set, record_property)
+        record_list.append(record)
+    else:
+        setattr(record_set, record_property, record)
 
 
 def _to_snake(s):
