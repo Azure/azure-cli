@@ -6,7 +6,8 @@
 from azure.cli.core.util import get_json_object
 
 from azure.cli.core.commands.parameters import (
-    get_location_type, tags_type, get_three_state_flag, get_enum_type, get_datetime_type, resource_group_name_type)
+    get_location_type, tags_type, get_three_state_flag, get_enum_type, get_datetime_type, get_date_type,
+    resource_group_name_type)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
 from azure.cli.command_modules.monitor.actions import (
@@ -345,8 +346,8 @@ def load_arguments(self, _):
         c.argument('end_search_time', arg_type=get_datetime_type(help='Datetime format.'))
 
     with self.argument_context('monitor log-analytics workspace table restore create') as c:
-        c.argument('start_restore_time', arg_type=get_datetime_type(help='Datetime format.'))
-        c.argument('end_restore_time', arg_type=get_datetime_type(help='Datetime format.'))
+        c.argument('start_restore_time', arg_type=get_date_type(help='Datetime format.'))
+        c.argument('end_restore_time', arg_type=get_date_type(help='Datetime format.'))
         c.argument('restore_source_table', help='The table to restore data from.')
 
     with self.argument_context('monitor log-analytics workspace table update') as c:

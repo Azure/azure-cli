@@ -86,6 +86,48 @@ def get_datetime_type(help=None, date=True, time=True, timezone=True):
     return CLIArgumentType(action=DatetimeAction, nargs='+', help=help_string)
 
 
+def get_date_type(help=None):
+
+    help_string = help + ' ' if help else ''
+    accepted_formats = ['date (yyyy-mm-dd)', 'time (hh:mm:ss.xxxxx)', 'timezone (+/-hh:mm)']
+    help_string = help_string + 'Format: ' + ' '.join(accepted_formats)
+
+    # pylint: disable=too-few-public-methods
+    class DateAction(argparse.Action):
+
+        def __call__(self, parser, namespace, values, option_string=None):
+            """ Parse a date value and return the ISO8601 string. """
+            import dateutil.parser
+            import dateutil.tz
+
+            value_string = ' '.join(values)
+            dt_val = None
+            try:
+                # attempt to parse ISO 8601
+                dt_val = dateutil.parser.parse(value_string)
+            except ValueError:
+                pass
+
+            # TODO: custom parsing attempts here
+            if not dt_val:
+                raise CLIError("Unable to parse: '{}'. Expected format: {}".format(value_string, help_string))
+
+            if not dt_val.tzinfo:
+                dt_val = dt_val.replace(tzinfo=dateutil.tz.tzlocal())
+
+            # Issue warning if any supplied time will be ignored
+            if any([dt_val.hour, dt_val.minute, dt_val.second, dt_val.microsecond]):
+                logger.warning('Time info will be set to midnight in %s.', value_string)
+
+            if dt_val.tzinfo:
+                logger.warning('Timezone info will be ignored in %s.', value_string)
+
+            format_string = dt_val.date().strftime("%m-%d-%YZ")
+            setattr(namespace, self.dest, format_string)
+
+    return CLIArgumentType(action=DateAction, nargs='+', help=help_string)
+
+
 def file_type(path):
     import os
     return os.path.expanduser(path)
