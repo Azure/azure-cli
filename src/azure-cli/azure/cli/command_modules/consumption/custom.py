@@ -13,6 +13,7 @@ from .aaz.latest.consumption.usage import List as _ConsumptionUsageList
 from azure.cli.core.aaz import has_value
 from datetime import datetime
 
+
 # pylint: disable=line-too-long
 def validate_both_start_end_dates(args):
     """Validates the existence of both start and end dates in the parameter or neither"""
@@ -89,9 +90,9 @@ class ConsumptionUsageList(_ConsumptionUsageList):
 
 
 def transform_usage_output(result):
-    import dateutil
-    usageStart = dateutil.parser.parse(result['usageStart'])
-    usageEnd = dateutil.parser.parse(result['usageEnd'])
+    from dateutil import parser
+    usageStart = parser.parse(result['usageStart'])
+    usageEnd = parser.parse(result['usageEnd'])
     result['usageStart'] = usageStart.strftime("%Y-%m-%dT%H:%M:%SZ")
     result['usageEnd'] = usageEnd.strftime("%Y-%m-%dT%H:%M:%SZ")
     result['usageQuantity'] = str(result['usageQuantity'])
@@ -198,7 +199,6 @@ class ConsumptionReservationDetailList(_ConsumptionReservationDetailList):
 
 
 def reservation_detail_output(result):
-
     result['reservedHours'] = str(result['reservedHours'])
     usage_date = datetime.strptime(result['usageDate'], "%Y-%m-%dT%H:%M:%SZ")
     result['usageDate'] = usage_date.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -244,24 +244,6 @@ def pricesheet_show_properties(result):
     else:
         result['meterDetails'] = None
     return result
-
-
-def cli_consumption_list_marketplace(client, billing_period_name=None, start_date=None, end_date=None, top=None):
-    filter_from = None
-    filter_to = None
-    filter_expression = None
-    if start_date and end_date:
-        filter_from = "properties/usageEnd ge \'{}\'".format(start_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
-        filter_to = "properties/usageEnd le \'{}\'".format(end_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
-        filter_expression = "{} and {}".format(filter_from, filter_to)
-
-    if billing_period_name and top:
-        return list(client.list_by_billing_period(billing_period_name, filter=filter_expression, top=top).advance_page())
-    if billing_period_name and not top:
-        return list(client.list_by_billing_period(billing_period_name, filter=filter_expression))
-    if not billing_period_name and top:
-        return list(client.list(filter=filter_expression, top=top).advance_page())
-    return client.list(filter=filter_expression)
 
 
 class ConsumptionMarketplaceList(_ConsumptionMarketplaceList):
@@ -318,10 +300,7 @@ class ConsumptionBudgetsList(_ConsumptionBudgetsList):
         return result, next_link
 
 
-def cli_consumption_show_budget(cmd, client, budget_name, resource_group_name=None):
-    # if resource_group_name:
-    #     return client.get_by_resource_group_name(resource_group_name, budget_name)
-    # return client.get(budget_name)
+def cli_consumption_show_budget(cmd, budget_name, resource_group_name=None):
     args = {"budget_name": budget_name}
     if resource_group_name:
         from azure.cli.command_modules.consumption.aaz.latest.consumption.budget import ShowWithRg
@@ -331,13 +310,7 @@ def cli_consumption_show_budget(cmd, client, budget_name, resource_group_name=No
     return Show(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
-def cli_consumption_create_budget(cmd, client, budget_name, category, amount, time_grain, start_date, end_date, resource_groups=None, resources=None, meters=None, resource_group_name=None):
-    time_period = client.models.BudgetTimePeriod(start_date, end_date)
-    # filters = client.models.Filters(resource_groups=resource_groups, resources=resources, meters=meters)
-    # parameters = client.models.Budget(category=category, amount=amount, time_grain=time_grain, time_period=time_period, filters=filters, notifications=None)
-    # if resource_group_name:
-    #     return client.create_or_update_by_resource_group_name(resource_group_name, budget_name, parameters)
-    # return client.create_or_update(budget_name, parameters)
+def cli_consumption_create_budget(cmd, budget_name, category, amount, time_grain, start_date, end_date, resource_groups=None, resources=None, meters=None, resource_group_name=None):
     args = {
         "budget_name": budget_name,
         "category": category,
@@ -354,10 +327,7 @@ def cli_consumption_create_budget(cmd, client, budget_name, category, amount, ti
     return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
-def cli_consumption_delete_budget(cmd, client, budget_name, resource_group_name=None):
-    # if resource_group_name:
-    #     return client.delete(resource_group_name, budget_name)
-    # return client.delete(budget_name)
+def cli_consumption_delete_budget(cmd, budget_name, resource_group_name=None):
     args = {"budget_name": budget_name}
     if resource_group_name:
         args['resource_group'] = resource_group_name
