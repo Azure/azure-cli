@@ -183,11 +183,6 @@ def load_arguments(self, _):
     with self.argument_context('containerapp env', arg_group='Peer Authentication') as c:
         c.argument('mtls_enabled', arg_type=get_three_state_flag(), options_list=['--enable-mtls'], help='Boolean indicating if mTLS peer authentication is enabled for the environment.')
 
-    with self.argument_context('containerapp service') as c:
-        c.argument('service_name', options_list=['--name', '-n'], help="The service name.")
-        c.argument('environment_name', options_list=['--environment'], help="The environment name.")
-        c.argument('resource_group_name', arg_type=resource_group_name_type, id_part=None)
-
     with self.argument_context('containerapp env create') as c:
         c.argument('zone_redundant', options_list=["--zone-redundant", "-z"], help="Enable zone redundancy on the environment. Cannot be used without --infrastructure-subnet-resource-id. If used with --location, the subnet's location must match")
         c.argument('enable_workload_profiles', action='store_true', options_list=["--enable-workload-profiles", "-w"], help="Allow this environment to have workload profiles", is_preview=True)

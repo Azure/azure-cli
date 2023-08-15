@@ -85,25 +85,6 @@ def load_command_table(self, _):
         g.custom_command('set', 'create_or_update_storage', supports_no_wait=True, exception_handler=ex_handler_factory())
         g.custom_command('remove', 'remove_storage', supports_no_wait=True, confirmation=True, exception_handler=ex_handler_factory())
 
-    with self.command_group('containerapp service', is_preview=True) as g:
-        g.custom_command('list', 'list_all_services')
-
-    with self.command_group('containerapp service redis') as g:
-        g.custom_command('create', 'create_redis_service', supports_no_wait=True)
-        g.custom_command('delete', 'delete_redis_service', confirmation=True, supports_no_wait=True)
-
-    with self.command_group('containerapp service postgres') as g:
-        g.custom_command('create', 'create_postgres_service', supports_no_wait=True)
-        g.custom_command('delete', 'delete_postgres_service', confirmation=True, supports_no_wait=True)
-
-    with self.command_group('containerapp service kafka') as g:
-        g.custom_command('create', 'create_kafka_service', supports_no_wait=True)
-        g.custom_command('delete', 'delete_kafka_service', confirmation=True, supports_no_wait=True)
-
-    with self.command_group('containerapp service mariadb') as g:
-        g.custom_command('create', 'create_mariadb_service', supports_no_wait=True)
-        g.custom_command('delete', 'delete_mariadb_service', confirmation=True, supports_no_wait=True)
-
     with self.command_group('containerapp identity') as g:
         g.custom_command('assign', 'assign_managed_identity', supports_no_wait=True, exception_handler=ex_handler_factory())
         g.custom_command('remove', 'remove_managed_identity', supports_no_wait=True, exception_handler=ex_handler_factory())

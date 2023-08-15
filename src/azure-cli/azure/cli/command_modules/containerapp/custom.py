@@ -44,7 +44,6 @@ from ._clients import (
     WorkloadProfileClient,
     ContainerAppsJobClient
 )
-from ._dev_service_utils import DevServiceUtils
 from ._github_oauth import get_github_access_token
 from ._models import (
     Ingress as IngressModel,
@@ -162,62 +161,6 @@ def create_deserializer():
         deserializer[sdkClass[0]] = sdkClass[1]
 
     return Deserializer(deserializer)
-
-
-def list_all_services(cmd, environment_name, resource_group_name):
-    services = list_containerapp(cmd, resource_group_name=resource_group_name, managed_env=environment_name)
-    dev_service_list = []
-
-    for service in services:
-        service_type = safe_get(service, "properties", "configuration", "service", "type", default="")
-        if service_type in DEV_SERVICE_LIST:
-            dev_service_list.append(service)
-
-    return dev_service_list
-
-
-def create_redis_service(cmd, service_name, environment_name, resource_group_name, no_wait=False,
-                         disable_warnings=True):
-    return DevServiceUtils.create_service(cmd, service_name, environment_name, resource_group_name, no_wait,
-                                          disable_warnings, DEV_REDIS_IMAGE, DEV_REDIS_SERVICE_TYPE,
-                                          DEV_REDIS_CONTAINER_NAME)
-
-
-def delete_redis_service(cmd, service_name, resource_group_name, no_wait=False):
-    return DevServiceUtils.delete_service(cmd, service_name, resource_group_name, no_wait, DEV_REDIS_SERVICE_TYPE)
-
-
-def create_postgres_service(cmd, service_name, environment_name, resource_group_name, no_wait=False,
-                            disable_warnings=True):
-    return DevServiceUtils.create_service(cmd, service_name, environment_name, resource_group_name, no_wait,
-                                          disable_warnings, DEV_POSTGRES_IMAGE, DEV_POSTGRES_SERVICE_TYPE,
-                                          DEV_POSTGRES_CONTAINER_NAME)
-
-
-def delete_postgres_service(cmd, service_name, resource_group_name, no_wait=False):
-    return DevServiceUtils.delete_service(cmd, service_name, resource_group_name, no_wait, DEV_POSTGRES_SERVICE_TYPE)
-
-
-def create_kafka_service(cmd, service_name, environment_name, resource_group_name, no_wait=False,
-                         disable_warnings=True):
-    return DevServiceUtils.create_service(cmd, service_name, environment_name, resource_group_name, no_wait,
-                                          disable_warnings, DEV_KAFKA_IMAGE, DEV_KAFKA_SERVICE_TYPE,
-                                          DEV_KAFKA_CONTAINER_NAME)
-
-
-def delete_kafka_service(cmd, service_name, resource_group_name, no_wait=False):
-    return DevServiceUtils.delete_service(cmd, service_name, resource_group_name, no_wait, DEV_KAFKA_SERVICE_TYPE)
-
-
-def create_mariadb_service(cmd, service_name, environment_name, resource_group_name, no_wait=False,
-                           disable_warnings=True):
-    return DevServiceUtils.create_service(cmd, service_name, environment_name, resource_group_name, no_wait,
-                                          disable_warnings, DEV_MARIADB_IMAGE, DEV_MARIADB_SERVICE_TYPE,
-                                          DEV_MARIADB_CONTAINER_NAME)
-
-
-def delete_mariadb_service(cmd, service_name, resource_group_name, no_wait=False):
-    return DevServiceUtils.delete_service(cmd, service_name, resource_group_name, no_wait, DEV_MARIADB_SERVICE_TYPE)
 
 
 def update_containerapp_yaml(cmd, name, resource_group_name, file_name, from_revision=None, no_wait=False):
