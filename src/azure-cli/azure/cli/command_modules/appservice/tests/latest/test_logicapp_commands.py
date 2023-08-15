@@ -109,6 +109,7 @@ class LogicappBasicE2ETest(ScenarioTest):
 
 
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    @StorageAccountPreparer()
     def test_logicapp_e2etest_logicapp_versions_e2e(self, resource_group):
         logicapp_name = self.create_random_name(prefix='logic-e2e', length=24)
         plan = self.create_random_name(prefix='logic-e2e-plan', length=24)
