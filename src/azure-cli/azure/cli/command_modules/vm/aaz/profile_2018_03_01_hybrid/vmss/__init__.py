@@ -9,4 +9,8 @@
 # flake8: noqa
 
 from .__cmd_group import *
+from ._delete import *
+from ._list import *
 from ._list_instance_public_ips import *
+from ._list_instances import *
+from ._list_skus import *
