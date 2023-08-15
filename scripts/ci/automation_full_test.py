@@ -36,7 +36,7 @@ job_name = os.environ.get('JOB_NAME', None)
 pull_request_number = os.environ.get('PULL_REQUEST_NUMBER', None)
 enable_pipeline_result = bool(job_name and python_version)
 unique_job_name = ' '.join([job_name, python_version, profile, str(instance_idx)]) if enable_pipeline_result else None
-enable_traceback = True if os.environ.get('ENABLE_TRACEBACK').lower() == 'true' else False
+enable_traceback = True if (os.environ.get('ENABLE_TRACEBACK') is not None and os.environ.get('ENABLE_TRACEBACK').lower() == 'true') else False
 cli_jobs = {
             'acr': 45,
             'acs': 62,
@@ -264,6 +264,19 @@ def install_extension(extension_module):
 def remove_extension(extension_module):
     try:
         cmd = ['azdev', 'extension', 'remove', extension_module]
+        error_flag = run_command(cmd, check_return_code=True)
+    except Exception:
+        error_flag = True
+
+    return error_flag
+
+
+def rerun_setup(cli_repo_path, extension_repo_path):
+    try:
+        if extension_repo_path:
+            cmd = ['azdev', 'setup', '-c', cli_repo_path, '-r', extension_repo_path, '--debug']
+        else:
+            cmd = ['azdev', 'setup', '-c', cli_repo_path, '--debug']
         error_flag = run_command(cmd, check_return_code=True)
     except Exception:
         error_flag = True
@@ -599,12 +612,17 @@ class AutomaticScheduling(object):
         for module, path in instance_modules.items():
             run_command(["git", "checkout", f"regression_test_{os.getenv('BUILD_BUILDID')}"], check_return_code=True)
             error_flag = install_extension(module)
+            logger.info(f"Finish installing extension {module}, error_flag: {error_flag}")
             if not error_flag:
                 azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{module}.xml")
                 cmd = ['azdev', 'test', module, '--discover', '--no-exitfirst', '--verbose',
                        '--xml-path', azdev_test_result_fp, '--pytest-args', '"--durations=10"']
                 error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests, modules=[module])
+                logger.info(f"Finish testing extension {module}, error_flag: {error_flag}")
             remove_extension(module)
+            logger.info(f"Finish removing extension {module}, error_flag: {error_flag}")
+            if error_flag:
+                rerun_setup(cli_repo_path=os.getenv('BUILD_SOURCESDIRECTORY'), extension_repo_path=working_directory)
             global_error_flag = global_error_flag or error_flag
         return global_error_flag
 
