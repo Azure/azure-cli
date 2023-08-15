@@ -127,9 +127,9 @@ def load_command_table(self, _):
     with self.command_group('monitor autoscale', autoscale_sdk, custom_command_type=autoscale_custom) as g:
         g.custom_command('create', 'autoscale_create', validator=process_autoscale_create_namespace)
         g.generic_update_command('update', custom_func_name='autoscale_update', custom_func_type=autoscale_custom)
-        g.command('delete', 'delete')
-        g.show_command('show', 'get')
-        g.command('list', 'list_by_resource_group')
+        # g.command('delete', 'delete')
+        # g.show_command('show', 'get')
+        # g.command('list', 'list_by_resource_group')
 
     with self.command_group('monitor autoscale profile', autoscale_sdk, custom_command_type=autoscale_custom) as g:
         g.custom_command('create', 'autoscale_profile_create')
