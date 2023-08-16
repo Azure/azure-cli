@@ -5,6 +5,7 @@
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, record_only, StorageAccountPreparer
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+from azure.core.exceptions import HttpResponseError
 
 
 class TestLogProfileScenarios(ScenarioTest):
@@ -584,3 +585,34 @@ class TestLogProfileScenarios(ScenarioTest):
 
         self.cmd('monitor log-analytics workspace table delete -g {rg} -n {table_name} --workspace-name {ws_name} -y')
 
+
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_table', location='WestEurope')
+    @AllowLargeResponse()
+    def test_monitor_log_analytics_workspace_table_restore_datetime_adjust(self, resource_group):
+
+        self.kwargs.update({
+            'ws_name':self.create_random_name('ws-', 10),
+            'table_name': self.create_random_name('TB', 10) + '_CL',
+            'table2_name': self.create_random_name('TB', 10) + '_RST'
+        })
+
+        self.cmd('monitor log-analytics workspace create -g {rg} -n {ws_name}')
+        self.cmd('monitor log-analytics workspace table create -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 45 --total-retention-time 70 --plan Analytics --columns col1=guid TimeGenerated=datetime', checks=[
+            self.check('name', '{table_name}'),
+            self.check('retentionInDays', 45),
+            self.check('totalRetentionInDays', 70),
+            self.check('schema.columns[0].name', 'col1'),
+            self.check('schema.columns[0].type', 'guid'),
+            self.check('schema.columns[1].name', 'TimeGenerated'),
+            self.check('schema.columns[1].type', 'datetime'),
+        ])
+
+        self.cmd('monitor log-analytics workspace table show -g {rg} -n {table_name} --workspace-name {ws_name}', checks=[
+            self.check('name', '{table_name}')
+        ])
+
+        error_str = "Table {0} has no data on the specified date range".format(self.kwargs["table_name"])
+        with self.assertRaisesRegex(HttpResponseError, error_str):
+            self.cmd('monitor log-analytics workspace table restore create -n {table2_name} -g {rg} --workspace-name {ws_name} --restore-source-table {table_name} --start-restore-time "2023-08-11 05:29:18" --end-restore-time "2023-08-17 05:29:18"')
+
+        self.cmd('monitor log-analytics workspace table delete -g {rg} -n {table_name} --workspace-name {ws_name} -y')
