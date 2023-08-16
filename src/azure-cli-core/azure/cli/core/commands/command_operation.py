@@ -134,6 +134,9 @@ class CommandOperation(BaseCommandOperation):
             if client_arg_name in op_args:
                 command_args[client_arg_name] = client
 
+        if not self._is_enable_api_version_validation(self.op_path):
+            command_args['enable_api_version_validation'] = False
+
         return op(**command_args)
 
     def arguments_loader(self):
@@ -142,9 +145,6 @@ class CommandOperation(BaseCommandOperation):
         self.apply_doc_string(op)
         cmd_args = list(extract_args_from_signature(
             op, excluded_params=self.command_loader.excluded_command_handler_args))
-
-        if not self._is_enable_api_version_validation(self.op_path):
-            cmd_args['enable_api_version_validation'] = False
 
         return cmd_args
 
@@ -382,6 +382,9 @@ class ShowCommandOperation(BaseCommandOperation):
 
         op = self.get_op_handler(self.op_path)  # Fetch op handler again after cmd property is set
 
+        if not self._is_enable_api_version_validation(self.op_path):
+            command_args['enable_api_version_validation'] = False
+
         try:
             return op(**command_args)
         except Exception as ex:  # pylint: disable=broad-except
@@ -390,9 +393,6 @@ class ShowCommandOperation(BaseCommandOperation):
     def arguments_loader(self):
         """ Callback function of CLICommand arguments_loader """
         cmd_args = self.load_getter_op_arguments(self.op_path)
-
-        if not self._is_enable_api_version_validation(self.op_path):
-            cmd_args['enable_api_version_validation'] = False
 
         return list(cmd_args.items())
 
@@ -427,6 +427,9 @@ class WaitCommandOperation(BaseCommandOperation):
             command_args[client_arg_name] = client
 
         getter = self.get_op_handler(self.op_path)      # Fetch op handler again after cmd property is set
+
+        if not self._is_enable_api_version_validation(self.op_path):
+            command_args['enable_api_version_validation'] = False
 
         return self.wait(command_args, cli_ctx=self.cli_ctx, getter=getter)
 
@@ -513,9 +516,6 @@ class WaitCommandOperation(BaseCommandOperation):
         cmd_args = self.load_getter_op_arguments(self.op_path)
 
         cmd_args.update(self.wait_args())
-
-        if not self._is_enable_api_version_validation(self.op_path):
-            cmd_args['enable_api_version_validation'] = False
 
         return list(cmd_args.items())
 
