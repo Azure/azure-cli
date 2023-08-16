@@ -56,17 +56,17 @@ def print_error_assistance(response):
         
         print("\n")
         print_line()
-        print("Issue: ")
+        print("\x1b[91mIssue: \x1b[0m")
         print(explanation)
         print("\n")
-        print("Corrected Command: ")
+        print("\x1b[91mCorrected Command: \x1b[0m")
         print(corrected_command)
         print_line()
         print("\n")
 
 def print_line():
         console_width = shutil.get_terminal_size().columns
-        dashed_line = "-" * console_width
+        dashed_line = "\x1b[91m-\x1b[0m" * console_width
 
         print(dashed_line)
         
