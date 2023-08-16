@@ -69,28 +69,9 @@ class ComputeCommandsLoader(AzCommandsLoader):
 class ComputeCommandGroup(AzCommandGroup):
     def __init__(self, command_loader, group_name, **kwargs):
         kwargs.update({
-            'ignore_sdk_api_version_folder': True,
             'enable_sdk_api_version_validation': False
         })
         super().__init__(command_loader, group_name, **kwargs)
-    #
-    # def custom_command(self, name, method_name=None, **kwargs):
-    #     kwargs.update({
-    #         'enable_sdk_api_version_validation': True
-    #     })
-    #     super().custom_command(name, method_name, **kwargs)
-    #
-    # def custom_show_command(self, name, getter_name='get', **kwargs):
-    #     kwargs.update({
-    #         'enable_sdk_api_version_validation': True
-    #     })
-    #     super(ComputeCommandGroup, self).custom_show_command(name, getter_name, **kwargs)
-    #
-    # def custom_wait_command(self, name, getter_name='get', **kwargs):
-    #     kwargs.update({
-    #         'enable_sdk_api_version_validation': True
-    #     })
-    #     super(ComputeCommandGroup, self).custom_wait_command(name, getter_name, **kwargs)
 
 
 COMMAND_LOADER_CLS = ComputeCommandsLoader

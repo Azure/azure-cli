@@ -219,8 +219,7 @@ class TestVmCustom(unittest.TestCase):
         get_vmss_instance_view(cmd, 'rg1', 'vmss1', '*')
         # assert
         vm_client.virtual_machine_scale_set_vms.list.assert_called_once_with(
-            resource_group_name='rg1', virtual_machine_scale_set_name='vmss1',
-            select='instanceView', expand='instanceView')
+            'rg1', 'vmss1', select='instanceView', expand='instanceView')
 
     # pylint: disable=line-too-long
     @mock.patch('azure.cli.command_modules.vm.disk_encryption._compute_client_factory', autospec=True)

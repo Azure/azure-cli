@@ -445,6 +445,9 @@ AZURE_API_PROFILES = {
 AZURE_SDK_WITH_API_VERSION_VALIDATION = [ResourceType.MGMT_COMPUTE]
 
 
+AZURE_SDK_WITHOUT_API_VERSION_FOLDER = [ResourceType.MGMT_COMPUTE]
+
+
 # We should avoid using ad hoc API versions,
 # use the version in a profile as much as possible.
 AD_HOC_API_VERSIONS = {

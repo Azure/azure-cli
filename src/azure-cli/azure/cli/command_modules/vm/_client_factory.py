@@ -47,10 +47,6 @@ def cf_vmss(cli_ctx, _):
     return _compute_client_factory(cli_ctx).virtual_machine_scale_sets
 
 
-def cf_vmss_vm(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).virtual_machine_scale_set_vms
-
-
 def cf_vm_sizes(cli_ctx, _):
     return _compute_client_factory(cli_ctx).virtual_machine_sizes
 

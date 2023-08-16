@@ -20,7 +20,6 @@ class BaseCommandOperation:
         self.merged_kwargs = merged_kwargs
         self.client_factory = merged_kwargs.get('client_factory')
         self.operation_group = merged_kwargs.get('operation_group')
-        self.ignore_sdk_api_version_folder = merged_kwargs.get('ignore_sdk_api_version_folder')
         self.enable_sdk_api_version_validation = merged_kwargs.get('enable_sdk_api_version_validation')
 
     @property
@@ -48,9 +47,15 @@ class BaseCommandOperation:
         import types
 
         from azure.cli.core.profiles import AZURE_API_PROFILES
-        from azure.cli.core.profiles._shared import get_versioned_sdk_path
+        from azure.cli.core.profiles._shared import get_versioned_sdk_path, AZURE_SDK_WITHOUT_API_VERSION_FOLDER
 
-        if not self.ignore_sdk_api_version_folder:
+        is_add_api_version = True
+        for rt in AZURE_SDK_WITHOUT_API_VERSION_FOLDER:
+            if op_path.startswith(rt.import_prefix + '.'):
+                is_add_api_version = False
+                break
+
+        if is_add_api_version:
             for rt in AZURE_API_PROFILES[self.cli_ctx.cloud.profile]:
                 if op_path.startswith(rt.import_prefix + '.'):
                     op_path = op_path.replace(rt.import_prefix,
