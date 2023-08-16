@@ -14,7 +14,7 @@ from azure.cli.core.aaz import has_value
 from datetime import datetime
 
 
-# pylint: disable=line-too-long, disable=protected-access
+# pylint: disable=line-too-long, disable=protected-access, consider-using-generator
 def validate_both_start_end_dates(args):
     """Validates the existence of both start and end dates in the parameter or neither"""
     if bool(has_value(args.start_date)) != bool(has_value(args.end_date)):
