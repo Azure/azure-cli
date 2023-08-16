@@ -14,7 +14,7 @@ from azure.cli.core.aaz import has_value
 from datetime import datetime
 
 
-# pylint: disable=line-too-long
+# pylint: disable=line-too-long, disable=protected-access
 def validate_both_start_end_dates(args):
     """Validates the existence of both start and end dates in the parameter or neither"""
     if bool(has_value(args.start_date)) != bool(has_value(args.end_date)):
@@ -32,6 +32,7 @@ def validate_reservation_summary(self):
 
 
 class ConsumptionUsageList(_ConsumptionUsageList):
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZStrArg
@@ -119,6 +120,7 @@ def datetime_type(string):
 
 
 class ConsumptionReservationSummaryList(_ConsumptionReservationSummaryList):
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZStrArg
@@ -164,6 +166,7 @@ def reservation_summary_output(result):
 
 
 class ConsumptionReservationDetailList(_ConsumptionReservationDetailList):
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZStrArg
@@ -208,6 +211,7 @@ def reservation_detail_output(result):
 
 
 class ConsumptionPricesheetShow(_ConsumptionPricesheetShow):
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZStrArg
@@ -247,6 +251,7 @@ def pricesheet_show_properties(result):
 
 
 class ConsumptionMarketplaceList(_ConsumptionMarketplaceList):
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZStrArg
@@ -292,9 +297,10 @@ def marketplace_list_output(result):
 
 
 class ConsumptionBudgetsList(_ConsumptionBudgetsList):
+
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
-        from azure.cli.command_modules.consumption._transformers import budget_output
+        from ._transformers import budget_output
         result = [budget_output(item) for item in result]
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
@@ -303,10 +309,10 @@ class ConsumptionBudgetsList(_ConsumptionBudgetsList):
 def cli_consumption_show_budget(cmd, budget_name, resource_group_name=None):
     args = {"budget_name": budget_name}
     if resource_group_name:
-        from azure.cli.command_modules.consumption.aaz.latest.consumption.budget import ShowWithRg
+        from .aaz.latest.consumption.budget import ShowWithRg
         args['resource_group'] = resource_group_name
         return ShowWithRg(cli_ctx=cmd.cli_ctx)(command_args=args)
-    from azure.cli.command_modules.consumption.aaz.latest.consumption.budget import Show
+    from .aaz.latest.consumption.budget import Show
     return Show(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
@@ -320,10 +326,10 @@ def cli_consumption_create_budget(cmd, budget_name, category, amount, time_grain
         "filters": {"resource_groups": resource_groups, "meters": meters, "resources": resources},
     }
     if resource_group_name:
-        from azure.cli.command_modules.consumption.aaz.latest.consumption.budget import CreateWithRg
+        from .aaz.latest.consumption.budget import CreateWithRg
         args['resource_group'] = resource_group_name
         return CreateWithRg(cli_ctx=cmd.cli_ctx)(command_args=args)
-    from azure.cli.command_modules.consumption.aaz.latest.consumption.budget import Create
+    from .aaz.latest.consumption.budget import Create
     return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
@@ -331,7 +337,7 @@ def cli_consumption_delete_budget(cmd, budget_name, resource_group_name=None):
     args = {"budget_name": budget_name}
     if resource_group_name:
         args['resource_group'] = resource_group_name
-        from azure.cli.command_modules.consumption.aaz.latest.consumption.budget import DeleteWithRg
+        from .aaz.latest.consumption.budget import DeleteWithRg
         return DeleteWithRg(cli_ctx=cmd.cli_ctx)(command_args=args)
-    from azure.cli.command_modules.consumption.aaz.latest.consumption.budget import Delete
+    from .aaz.latest.consumption.budget import Delete
     return Delete(cli_ctx=cmd.cli_ctx)(command_args=args)
