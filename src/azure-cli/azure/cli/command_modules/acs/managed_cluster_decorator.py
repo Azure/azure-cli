@@ -2196,7 +2196,7 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         This function supports the option of enable_validation. When enabled, in case network_plugin is assigned, if
         pod_cidr is assigned and the value of network_plugin is azure, an InvalidArgumentValueError will be
-        raised; otherwise, if any of pod_cidr, service_cidr, dns_service_ip, docker_bridge_address or network_policy
+        raised; otherwise, if any of pod_cidr, service_cidr, dns_service_ip, or network_policy
         is assigned, a RequiredArgumentMissingError will be raised.
 
         :return: string or None
@@ -2218,9 +2218,8 @@ class AKSManagedClusterContext(BaseAKSContext):
                 pod_cidr,
                 service_cidr,
                 dns_service_ip,
-                docker_bridge_address,
                 network_policy,
-            ) = self._get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
+            ) = self._get_pod_cidr_and_service_cidr_and_dns_service_ip_and_and_network_policy(
                 enable_validation=False
             )
             network_plugin_mode = self._get_network_plugin_mode(enable_validation=False)
@@ -2236,7 +2235,6 @@ class AKSManagedClusterContext(BaseAKSContext):
                     pod_cidr or
                     service_cidr or
                     dns_service_ip or
-                    docker_bridge_address or
                     network_policy
                 ):
                     raise RequiredArgumentMissingError(
@@ -2251,7 +2249,7 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         This function will verify the parameter by default. In case network_plugin is assigned, if pod_cidr is assigned
         and the value of network_plugin is azure, an InvalidArgumentValueError will be raised; otherwise, if any of
-        pod_cidr, service_cidr, dns_service_ip, docker_bridge_address or network_policy is assigned, a
+        pod_cidr, service_cidr, dns_service_ip, or network_policy is assigned, a
         RequiredArgumentMissingError will be raised.
 
         :return: string or None
@@ -2266,16 +2264,15 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self.raw_param.get("network_dataplane")
 
-    def _get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
+    def _get_pod_cidr_and_service_cidr_and_dns_service_ip_and_and_network_policy(
         self, enable_validation: bool = False
     ) -> Tuple[
         Union[str, None],
         Union[str, None],
         Union[str, None],
         Union[str, None],
-        Union[str, None],
     ]:
-        """Internal function to obtain the value of pod_cidr, service_cidr, dns_service_ip, docker_bridge_address and
+        """Internal function to obtain the value of pod_cidr, service_cidr, dns_service_ip, and
         network_policy.
 
         Note: SDK provides default value "10.244.0.0/16" and performs the following validation
@@ -2288,11 +2285,11 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         This function supports the option of enable_validation. When enabled, if pod_cidr is assigned and the value of
         network_plugin is azure, an InvalidArgumentValueError will be raised; otherwise, if any of pod_cidr,
-        service_cidr, dns_service_ip, docker_bridge_address or network_policy is assigned, a
+        service_cidr, dns_service_ip,  or network_policy is assigned, a
         RequiredArgumentMissingError will be raised.
 
         :return: a tuple of five elements: pod_cidr of string type or None, service_cidr of string type or None,
-        dns_service_ip of string type or None, docker_bridge_address of string type or None, network_policy of
+        dns_service_ip of string type or None  network_policy of
         string type or None.
         """
         # get network profile from `mc`
@@ -2347,7 +2344,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                     )
         return pod_cidr, service_cidr, dns_service_ip, None, network_policy
 
-    def get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
+    def get_pod_cidr_and_service_cidr_and_dns_service_ip_and_and_network_policy(
         self,
     ) -> Tuple[
         Union[str, None],
@@ -2356,7 +2353,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         Union[str, None],
         Union[str, None],
     ]:
-        """Obtain the value of pod_cidr, service_cidr, dns_service_ip, docker_bridge_address and network_policy.
+        """Obtain the value of pod_cidr, service_cidr, dns_service_ip, and network_policy.
 
         Note: SDK provides default value "10.244.0.0/16" and performs the following validation
         {'pattern': r'^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$'} for pod_cidr.
@@ -2365,19 +2362,17 @@ class AKSManagedClusterContext(BaseAKSContext):
         Note: SDK provides default value "10.0.0.10" and performs the following validation
         {'pattern': r'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'}
         for dns_service_ip.
-        Note: SDK provides default value "172.17.0.1/16" and performs the following validation
-        {'pattern': r'^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$'} for docker_bridge_address.
 
         This function will verify the parameters by default. If pod_cidr is assigned and the value of network_plugin
         is azure, an InvalidArgumentValueError will be raised; otherwise, if any of pod_cidr, service_cidr,
-        dns_service_ip, docker_bridge_address or network_policy is assigned, a RequiredArgumentMissingError will be
+        dns_service_ip, or network_policy is assigned, a RequiredArgumentMissingError will be
         raised.
 
         :return: a tuple of five elements: pod_cidr of string type or None, service_cidr of string type or None,
-        dns_service_ip of string type or None, docker_bridge_address of string type or None, network_policy of
+        dns_service_ip of string type or None,  network_policy of
         string type or None.
         """
-        return self._get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
+        return self._get_pod_cidr_and_service_cidr_and_dns_service_ip_and_and_network_policy(
             enable_validation=True
         )
 
@@ -5311,17 +5306,16 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         # verify load balancer sku
         load_balancer_sku = safe_lower(self.context.get_load_balancer_sku())
 
-        # verify network_plugin, pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy
+        # verify network_plugin, pod_cidr, service_cidr, dns_service_ip,  network_policy
         network_plugin = self.context.get_network_plugin()
         network_plugin_mode = self.context.get_network_plugin_mode()
         (
             pod_cidr,
             service_cidr,
             dns_service_ip,
-            docker_bridge_address,
             network_policy,
         ) = (
-            self.context.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
+            self.context.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_network_policy()
         )
         network_profile = None
         # set up pod_cidrs, service_cidrs and ip_families
@@ -5345,14 +5339,13 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 service_cidrs,
                 ip_families,
                 dns_service_ip,
-                docker_bridge_address,
                 network_policy,
                 network_dataplane,
             ]
         ):
             # Attention: RP would return UnexpectedLoadBalancerSkuForCurrentOutboundConfiguration internal server error
             # if load_balancer_sku is set to basic and load_balancer_profile is assigned.
-            # Attention: SDK provides default values for pod_cidr, service_cidr, dns_service_ip, docker_bridge_cidr
+            # Attention: SDK provides default values for pod_cidr, service_cidr, dns_service_ip
             # and outbound_type, and they might be overwritten to None.
             network_profile = self.models.ContainerServiceNetworkProfile(
                 network_plugin=network_plugin,
@@ -5363,7 +5356,6 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 service_cidrs=service_cidrs,
                 ip_families=ip_families,
                 dns_service_ip=dns_service_ip,
-                docker_bridge_cidr=docker_bridge_address,
                 network_policy=network_policy,
                 network_dataplane=network_dataplane,
                 load_balancer_sku=load_balancer_sku,
@@ -6684,9 +6676,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             pod_cidr,
             _,
             _,
-            _,
             _
-        ) = self.context.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
+        ) = self.context.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_network_policy()
         if pod_cidr:
             mc.network_profile.pod_cidr = pod_cidr
         return mc
