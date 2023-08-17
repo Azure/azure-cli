@@ -101,6 +101,7 @@ def get_period_type(as_timedelta=False):
     return period_type
 
 
+# pylint: disable=redefined-builtin
 def get_date_midnight_type(help=None):
 
     help_string = help + ' ' if help else ''
