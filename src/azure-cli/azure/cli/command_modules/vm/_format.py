@@ -125,6 +125,16 @@ def get_vmss_table_output_transformer(loader, for_list=True):
     return transform if not for_list else '[].' + transform
 
 
+transform_vmss_list_with_zones_table_output = '[].{Name:name, ResourceGroup:resourceGroup, Location:location, ' \
+                                              'Zones: (!zones && \' \') || join(\' \', zones), ' \
+                                              'Capacity:sku.capacity, Overprovision:overprovision, ' \
+                                              'UpgradePolicy:upgradePolicy.mode}'
+
+transform_vmss_list_without_zones_table_output = '[].{Name:name, ResourceGroup:resourceGroup, Location:location, ' \
+                                                 'Capacity:sku.capacity, Overprovision:overprovision, ' \
+                                                 'UpgradePolicy:upgradePolicy.mode}'
+
+
 def transform_vm_encryption_show_table_output(result):
     from collections import OrderedDict
     if result.get("status", []):

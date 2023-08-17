@@ -21,7 +21,7 @@ from azure.cli.command_modules.dla._validators import process_dla_job_submit_nam
 # pylint: disable=too-many-statements
 def load_command_table(self, _):
 
-    adla_format_path = 'azure.mgmt.datalake.analytics.{}.operations.{}#{}.{{}}'
+    adla_format_path = 'azure.cli.command_modules.dla.vendored_sdks.azure_mgmt_datalake_analytics.{}.operations.{}#{}.{{}}'
 
     dla_account_sdk = CliCommandType(
         operations_tmpl=adla_format_path.format('account', 'account_operations', 'AccountOperations'),

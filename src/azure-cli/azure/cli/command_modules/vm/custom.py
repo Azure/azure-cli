@@ -46,6 +46,7 @@ from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_
                        load_images_thru_services, _get_latest_image_version)
 from ._client_factory import (_compute_client_factory, cf_vm_image_term, _dev_test_labs_client_factory)
 from .aaz.latest.ppg import Show as _PPGShow
+from .aaz.latest.vmss import ListInstances as _VMSSListInstances
 
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 try:
@@ -3746,13 +3747,6 @@ def get_vmss_instance_view(cmd, resource_group_name, vm_scale_set_name, instance
     return client.virtual_machine_scale_sets.get_instance_view(resource_group_name, vm_scale_set_name)
 
 
-def list_vmss(cmd, resource_group_name=None):
-    client = _compute_client_factory(cmd.cli_ctx)
-    if resource_group_name:
-        return client.virtual_machine_scale_sets.list(resource_group_name)
-    return client.virtual_machine_scale_sets.list_all()
-
-
 def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_name):
     from msrestazure.tools import parse_resource_id
 
@@ -5871,3 +5865,20 @@ class PPGShow(_PPGShow):
         args_schema.include_colocation_status.enum = AAZArgEnum({"True": "True", "False": "False"})
 
         return args_schema
+
+
+class VMSSListInstances(_VMSSListInstances):
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined, has_value
+
+        # Resolve flatten conflict
+        # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+        for value in self.ctx.vars.instance.value:
+            if has_value(value.resources):
+                for resource in value.resources:
+                    if has_value(resource.type):
+                        resource.type = AAZUndefined
+
+        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
+        next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
+        return result, next_link
