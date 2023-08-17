@@ -284,39 +284,23 @@ class ContainerappEnvScenarioTest(ScenarioTest):
             JMESPathCheck('[0].bindingType', "Disabled"),
         })
         self.cmd('containerapp hostname add -g {} -n {} --hostname {}'.format(resource_group, ca_name, hostname_1), expect_failure=True)
-        self.cmd('containerapp env certificate list -g {} -n {} -c {} -p'.format(resource_group, env_name, cert_name), checks=[
-            JMESPathCheck('length(@)', 1),
-        ])
-
-        # create a managed certificate
-        self.cmd('containerapp env certificate create -n {} -g {} --hostname {} -v cname -c {}'.format(env_name, resource_group, hostname_1, cert_name), checks=[
-            JMESPathCheck('type', "Microsoft.App/managedEnvironments/managedCertificates"),
-            JMESPathCheck('name', cert_name),
-            JMESPathCheck('properties.subjectName', hostname_1),
-        ]).get_output_in_json()
-
-        self.cmd('containerapp env certificate list -g {} -n {} -m'.format(resource_group, env_name), checks=[
-            JMESPathCheck('length(@)', 1),
-        ])
         self.cmd('containerapp env certificate list -g {} -n {} -c {}'.format(resource_group, env_name, cert_name), checks=[
-            JMESPathCheck('length(@)', 2),
+            JMESPathCheck('length(@)', 1),
         ])
 
-        self.cmd('containerapp env certificate delete -n {} -g {} --certificate {} --yes'.format(env_name, resource_group, cert_name), expect_failure=True)
-        self.cmd('containerapp env certificate delete -n {} -g {} --thumbprint {} --yes'.format(env_name, resource_group, cert_thumbprint))
-        self.cmd('containerapp env certificate delete -n {} -g {} --certificate {} --yes'.format(env_name, resource_group, cert_name))
-        self.cmd('containerapp env certificate list -g {} -n {}'.format(resource_group, env_name), checks=[
-            JMESPathCheck('length(@)', 0),
-        ])
-        
-        self.cmd('containerapp hostname bind -g {} -n {} --hostname {} --environment {} -v cname'.format(resource_group, ca_name, hostname_1, env_name))
         certs = self.cmd('containerapp env certificate list -g {} -n {}'.format(resource_group, env_name), checks=[
             JMESPathCheck('length(@)', 1),
         ]).get_output_in_json()
+
+        self.cmd('containerapp hostname bind -g {} -n {} --hostname {} --environment {} --thumbprint {}'.format(resource_group, ca_name, hostname_1, env_name, cert_thumbprint), expect_failure=False)
+        # CertificateInUse
         self.cmd('containerapp env certificate delete -n {} -g {} --certificate {} --yes'.format(env_name, resource_group, certs[0]["name"]), expect_failure=True)
 
-        self.cmd('containerapp hostname delete -g {} -n {} --hostname {} --yes'.format(resource_group, ca_name, hostname_1))
-        self.cmd('containerapp env certificate delete -n {} -g {} --certificate {} --yes'.format(env_name, resource_group, certs[0]["name"]))
+        self.cmd('containerapp hostname delete -g {} -n {} --hostname {} --yes'.format(resource_group, ca_name, hostname_1), expect_failure=False)
+
+        self.cmd('containerapp env certificate delete -n {} -g {} --certificate {} --yes'.format(env_name, resource_group, cert_name), expect_failure=False)
+        # certificate already deleted, throw ResourceNotFound error
+        self.cmd('containerapp env certificate delete -n {} -g {} --thumbprint {} --yes'.format(env_name, resource_group, cert_thumbprint), expect_failure=True)
         self.cmd('containerapp env certificate list -g {} -n {}'.format(resource_group, env_name), checks=[
             JMESPathCheck('length(@)', 0),
         ])

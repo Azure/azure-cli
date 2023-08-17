@@ -1324,15 +1324,6 @@ def generate_randomized_cert_name(thumbprint, prefix, initial="rg"):
     return cert_name.lower()
 
 
-def generate_randomized_managed_cert_name(hostname, env_name):
-    from random import randint
-    cert_name = "mc-{}-{}-{:04}".format(env_name[:14], hostname[:16].lower(), randint(0, 9999))
-    for c in cert_name:
-        if not (c.isalnum() or c == '-'):
-            cert_name = cert_name.replace(c, '-')
-    return cert_name.lower()
-
-
 def _set_webapp_up_default_args(cmd, resource_group_name, location, name, registry_server):
     from azure.cli.core.util import ConfiguredDefaultSetter
     with ConfiguredDefaultSetter(cmd.cli_ctx.config, True):
@@ -1603,29 +1594,6 @@ def check_cert_name_availability(cmd, resource_group_name, name, cert_name):
     return r
 
 
-def prepare_managed_certificate_envelop(cmd, name, resource_group_name, hostname, validation_method, location=None):
-    certificate_envelop = ManagedCertificateEnvelopModel
-    certificate_envelop["location"] = location
-    certificate_envelop["properties"]["subjectName"] = hostname
-    certificate_envelop["properties"]["validationMethod"] = validation_method
-    if not location:
-        try:
-            managed_env = ManagedEnvironmentClient.show(cmd, resource_group_name, name)
-            certificate_envelop["location"] = managed_env["location"]
-        except Exception as e:
-            handle_raw_exception(e)
-    return certificate_envelop
-
-
-def check_managed_cert_name_availability(cmd, resource_group_name, name, cert_name):
-    try:
-        certs = ManagedEnvironmentClient.list_managed_certificates(cmd, resource_group_name, name)
-        r = any(cert["name"] == cert_name and cert["properties"]["provisioningState"] in [PENDING_STATUS, SUCCEEDED_STATUS, UPDATING_STATUS] for cert in certs)
-    except CLIError as e:
-        handle_raw_exception(e)
-    return not r
-
-
 def validate_hostname(cmd, resource_group_name, name, hostname):
     passed = False
     message = None
@@ -1644,6 +1612,7 @@ def validate_hostname(cmd, resource_group_name, name, hostname):
 def patch_new_custom_domain(cmd, resource_group_name, name, new_custom_domains):
     envelope = ContainerAppCustomDomainEnvelopeModel
     envelope["properties"]["configuration"]["ingress"]["customDomains"] = new_custom_domains
+    r = None
     try:
         r = ContainerAppClient.update(cmd, resource_group_name, name, envelope)
     except CLIError as e:
@@ -1661,9 +1630,9 @@ def get_custom_domains(cmd, resource_group_name, name, location=None, environmen
         if environment and (_get_name(environment) != _get_name(app["properties"]["environmentId"])):
             raise ResourceNotFoundError('Container app {} is not under environment {}.'.format(name, environment))
         custom_domains = safe_get(app, "properties", "configuration", "ingress", "customDomains", default=[])
+        return custom_domains
     except CLIError as e:
         handle_raw_exception(e)
-    return custom_domains
 
 
 def set_managed_identity(cmd, resource_group_name, containerapp_def, system_assigned=False, user_assigned=None):
@@ -1673,10 +1642,7 @@ def set_managed_identity(cmd, resource_group_name, containerapp_def, system_assi
     assign_user_identities = [x.lower() for x in user_assigned]
 
     # If identity not returned
-    try:
-        containerapp_def["identity"]
-        containerapp_def["identity"]["type"]
-    except:
+    if safe_get(containerapp_def, "identity", "type") is None:
         containerapp_def["identity"] = {}
         containerapp_def["identity"]["type"] = "None"
 
