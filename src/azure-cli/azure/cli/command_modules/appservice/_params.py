@@ -804,8 +804,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-d'], help='The container registry server username.')
         c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'],
                    help='The container registry server password. Required for private registries.')
-        c.argument('runtime_version', options_list=['--runtime-version'],
-                   help='The runtime version for logic app.', arg_type=get_enum_type(LOGICAPPS_NODE_RUNTIME_VERSIONS))
+        c.argument('runtime_version', help='The runtime version for logic app.', arg_type=get_enum_type(LOGICAPPS_NODE_RUNTIME_VERSIONS))
         c.argument('functions_version', options_list=['--functions-version', '-v'],
                    help='The functions version for logic app.', arg_type=get_enum_type(FUNCTIONS_VERSIONS))
 

@@ -109,21 +109,19 @@ class LogicappBasicE2ETest(ScenarioTest):
 
 
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
-    @StorageAccountPreparer()
-    def test_logicapp_e2etest_logicapp_versions_e2e(self, resource_group):
+    @StorageAccountPreparer(location=DEFAULT_LOCATION)
+    def test_logicapp_e2etest_logicapp_versions_e2e(self, resource_group, storage_account):
         logicapp_name = self.create_random_name(prefix='logic-e2e', length=24)
         plan = self.create_random_name(prefix='logic-e2e-plan', length=24)
-        storage = self.create_random_name(prefix='logicstorage', length=24)
         runtime_version = '~16'
         functions_version = '4'
         self.cmd('appservice plan create -g {} -n {} --sku WS1'.format(resource_group, plan)).get_output_in_json()['id']
         self.cmd('appservice plan list -g {}'.format(resource_group))
-        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, DEFAULT_LOCATION))
         self.cmd('logicapp create -g {} -n {} -p {} -s {} --runtime-version {} --functions-version {}'.format(
             resource_group,
             logicapp_name,
             plan,
-            storage,
+            storage_account,
             runtime_version,
             functions_version
             ),
