@@ -4120,7 +4120,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
 
     if enable_hibernation is not None:
         if vmss.additional_capabilities is None:
-            AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
+            from azure.mgmt.compute.models import AdditionalCapabilities
             vmss.additional_capabilities = AdditionalCapabilities(hibernation_enabled=enable_hibernation)
         else:
             vmss.additional_capabilities.hibernation_enabled = enable_hibernation
