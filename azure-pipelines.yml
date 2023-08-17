@@ -304,10 +304,11 @@ jobs:
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
-        Alpine {{ arch.name }}:
+        Alpine ${{ arch.name }}:
           pool: ${{ arch.pool }}
-          artifactName: docker-{{ arch.name }}
+          artifactName: docker-${{ arch.name }}
           dockerfile: Dockerfile
+
   pool:
     name: $(pool)
   steps:
@@ -340,9 +341,9 @@ jobs:
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
-        Alpine {{ arch.name }}:
+        Alpine ${{ arch.name }}:
           pool: ${{ arch.pool }}
-          artifactName: docker-{{ arch.name }}
+          artifactName: docker-${{ arch.name }}
   pool:
     name: $(pool)
   steps:
@@ -380,11 +381,11 @@ jobs:
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
-        Azure Linux {{ arch.name }}:
+        Azure Linux ${{ arch.name }}:
           pool: ${{ arch.pool }}
-          artifactName: docker-azure-{{ arch.value }}
+          artifactName: docker-azure-${{ arch.value }}
           dockerfile: Dockerfile.azure
-          packageArtifactName: rpm-mariner2.0-{{ arch.value }}
+          packageArtifactName: rpm-mariner2.0-${{ arch.value }}
   pool:
     name: $(pool)
   steps:
@@ -421,9 +422,9 @@ jobs:
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
-        Azure Linux {{ arch.name }}:
+        Azure Linux ${{ arch.name }}:
           pool: ${{ arch.pool }}
-          artifactName: docker-azure-{{ arch.value }}
+          artifactName: docker-azure-${{ arch.value }}
   pool:
     name: $(pool)
   steps:
