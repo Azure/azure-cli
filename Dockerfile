@@ -44,7 +44,7 @@ RUN apk add --no-cache bash openssh ca-certificates jq curl openssl perl git zip
 
 ARG JP_VERSION="0.2.1"
 
-RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/)  && curl -L https://github.com/jmespath/jp/releases/download/${JP_VERSION}/jp-linux-$arch -o /usr/local/bin/jp \
+RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && curl -L https://github.com/jmespath/jp/releases/download/${JP_VERSION}/jp-linux-$arch -o /usr/local/bin/jp \
  && chmod +x /usr/local/bin/jp
 
 WORKDIR azure-cli
@@ -61,6 +61,7 @@ RUN ./scripts/install_full.sh && python ./scripts/trim_sdk.py \
         | xargs -r apk info --installed \
         | sort -u \
     )" \
+ && echo rundeps $runDeps
  && apk add --virtual .rundeps $runDeps
 
 WORKDIR /
