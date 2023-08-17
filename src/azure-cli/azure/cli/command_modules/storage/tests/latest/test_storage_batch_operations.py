@@ -307,14 +307,14 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         self.storage_cmd('storage file upload-batch -s "{}" -d {} --max-connections 3', storage_account_info,
                          test_dir, src_share)
         self.storage_cmd('storage file download-batch -s {} -d "{}"', storage_account_info, src_share, local_folder)
-        self.assertEqual(41, sum(len(f) for r, d, f in os.walk(local_folder)))
+        self.assertEqual(41, sum(len(f) for _, _, f in os.walk(local_folder)))
         multi_thread_time = time.time() - start_time
         start_time = time.time()
         src_share = self.create_share(storage_account_info)
         self.storage_cmd('storage file upload-batch -s "{}" -d {} --max-connections 1', storage_account_info,
                          test_dir, src_share)
         self.storage_cmd('storage file download-batch -s {} -d "{}"', storage_account_info, src_share, local_folder)
-        self.assertEqual(41, sum(len(f) for r, d, f in os.walk(local_folder)))
+        self.assertEqual(41, sum(len(f) for _, _, f in os.walk(local_folder)))
         single_thread_time = time.time() - start_time
         self.assertGreater(single_thread_time, multi_thread_time)
 
