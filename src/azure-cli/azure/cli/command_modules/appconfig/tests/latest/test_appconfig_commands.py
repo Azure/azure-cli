@@ -2975,6 +2975,8 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
         entry_key2 = "TestKey2"
         entry_value2 = "TestValue2"
         dev_label = "dev"
+        entry_key3 = "LastTestKey"
+        entry_value3 = "LastTestValue"
         
         # Create 2 keys with a common prefix and label "dev"
         self.kwargs.update({
@@ -2996,6 +2998,16 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
         self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --label {label} -y',
                  checks=[self.check('key', entry_key2),
                          self.check('value', entry_value2),
+                         self.check('label', dev_label)])
+
+        self.kwargs.update({
+            'key': entry_key3,
+            'value': entry_value3,
+        })
+
+        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --label {label} -y',
+                 checks=[self.check('key', entry_key3),
+                         self.check('value', entry_value3),
                          self.check('label', dev_label)])
 
         # Create a snapshot of all key-values that begin with the prefix 'Test'
@@ -3055,6 +3067,37 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
         with self.assertRaisesRegex(CliResourceNotFoundError, f'No snapshot with name \'{non_existent_snapshot_name}\' was found.'):
             self.cmd('appconfig kv list --connection-string {connection_string} --snapshot {snapshot_name}')
 
+        # Test snapshot import/export
+        config_store_2_name = self.create_random_name(prefix='SnapshotStore', length=24)
+
+        self.kwargs.update({
+            'config_store_name': config_store_2_name,
+            'snapshot_name': snapshot_name,
+        })
+
+        _create_config_store(self, self.kwargs)
+
+        credential_list_2 =  self.cmd('appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
+        self.kwargs.update({
+            'dest_connection_string': credential_list_2[0]['connectionString']
+        })
+
+        # Export snapshot kvs to store
+        self.cmd('appconfig kv export -d appconfig --connection-string {connection_string} --dest-connection-string {dest_connection_string} --snapshot {snapshot_name} -y')
+
+        # List snapshots in store
+        dest_kvs = self.cmd('appconfig kv list --connection-string {dest_connection_string} --key * --label *').get_output_in_json()
+        self.assertEqual(len(dest_kvs), 2)
+
+        # Delete all kvs
+        self.cmd('appconfig kv delete --connection-string {dest_connection_string} --key * --label * -y')
+
+        # Import snapshot kvs from source
+        self.cmd('appconfig kv import -s appconfig --connection-string {dest_connection_string} --src-connection-string {connection_string} --src-snapshot {snapshot_name} -y')
+
+        # List snapshots in store
+        current_kvs = self.cmd('appconfig kv list --connection-string {dest_connection_string} --key * --label *').get_output_in_json()
+        self.assertEqual(len(current_kvs), 2)
 
 def _create_config_store(test, kwargs):
     if 'retention_days' not in kwargs:
