@@ -282,6 +282,8 @@ def _get_bicep_download_url(system, release_tag, target_platform=None):
             return download_url.format("bicep-linux-musl-x64")
         return download_url.format("bicep-linux-x64")
     if system == "Darwin":
+        if platform.processor() == 'arm':
+            return download_url.format("bicep-osx-arm64")
         return download_url.format("bicep-osx-x64")
 
     raise ValidationError(f'The platform "{system}" is not supported.')
