@@ -972,7 +972,7 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
             ensure_bicep_installation(cli_ctx)
 
             minimum_supported_version = "0.14.85"
-            if not bicep_version_greater_than_or_equal_to(minimum_supported_version):
+            if not bicep_version_greater_than_or_equal_to(cli_ctx, minimum_supported_version):
                 raise ArgumentUsageError(f"Unable to compile .bicepparam file with the current version of Bicep CLI. Please upgrade Bicep CLI to {minimum_supported_version} or later.")
             if len(parameters) > 1:
                 raise ArgumentUsageError("Can not use --parameters argument more than once when using a .bicepparam file")
@@ -1175,7 +1175,7 @@ def _prepare_stacks_templates_and_parameters(cmd, rcf, deployment_stack_model, t
             ensure_bicep_installation(cmd.cli_ctx)
 
             minimum_supported_version = "0.14.85"
-            if not bicep_version_greater_than_or_equal_to(minimum_supported_version):
+            if not bicep_version_greater_than_or_equal_to(cmd.cli_ctx, minimum_supported_version):
                 raise ArgumentUsageError(
                     "Unable to compile .bicepparam file with the current version of Bicep CLI. Please use az bicep upgrade to upgrade Bicep CLI.")
             if len(parameters) > 1:
@@ -4289,7 +4289,7 @@ def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline
     ensure_bicep_installation(cmd.cli_ctx)
 
     minimum_supported_version = "0.12.1"
-    if bicep_version_greater_than_or_equal_to(minimum_supported_version):
+    if bicep_version_greater_than_or_equal_to(cmd.cli_ctx, minimum_supported_version):
         args = ["format", file]
         if outdir:
             args += ["--outdir", outdir]
@@ -4318,17 +4318,17 @@ def publish_bicep_file(cmd, file, target, documentationUri=None, force=None):
     ensure_bicep_installation(cmd.cli_ctx)
 
     minimum_supported_version = "0.4.1008"
-    if bicep_version_greater_than_or_equal_to(minimum_supported_version):
+    if bicep_version_greater_than_or_equal_to(cmd.cli_ctx, minimum_supported_version):
         args = ["publish", file, "--target", target]
         if documentationUri:
             minimum_supported_version_for_documentationUri_parameter = "0.14.46"
-            if bicep_version_greater_than_or_equal_to(minimum_supported_version_for_documentationUri_parameter):
+            if bicep_version_greater_than_or_equal_to(cmd.cli_ctx, minimum_supported_version_for_documentationUri_parameter):
                 args += ["--documentationUri", documentationUri]
             else:
                 logger.error("az bicep publish with --documentationUri/-d parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version_for_documentationUri_parameter)
         if force:
             minimum_supported_version_for_publish_force = "0.17.1"
-            if bicep_version_greater_than_or_equal_to(minimum_supported_version_for_publish_force):
+            if bicep_version_greater_than_or_equal_to(cmd.cli_ctx, minimum_supported_version_for_publish_force):
                 args += ["--force"]
             else:
                 logger.error("az bicep publish with --force parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version_for_publish_force)
@@ -4341,7 +4341,7 @@ def restore_bicep_file(cmd, file, force=None):
     ensure_bicep_installation(cmd.cli_ctx)
 
     minimum_supported_version = "0.4.1008"
-    if bicep_version_greater_than_or_equal_to(minimum_supported_version):
+    if bicep_version_greater_than_or_equal_to(cmd.cli_ctx, minimum_supported_version):
         args = ["restore", file]
         if force:
             args += ["--force"]
@@ -4369,7 +4369,7 @@ def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, 
     ensure_bicep_installation(cmd.cli_ctx)
 
     minimum_supported_version = "0.7.4"
-    if bicep_version_greater_than_or_equal_to(minimum_supported_version):
+    if bicep_version_greater_than_or_equal_to(cmd.cli_ctx, minimum_supported_version):
         args = ["generate-params", file]
         if no_restore:
             args += ["--no-restore"]
