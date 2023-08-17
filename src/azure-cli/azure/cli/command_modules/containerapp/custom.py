@@ -67,20 +67,16 @@ from ._models import (
 from ._utils import (_validate_subscription_registered,
                      parse_secret_flags, store_as_secret_and_return_secret_ref, parse_env_var_flags,
                      _get_existing_secrets, _convert_object_from_snake_to_camel_case,
-                     _object_to_dict, _add_or_update_secrets, _remove_additional_attributes,
-                     _remove_readonly_attributes,
+                     _object_to_dict, _add_or_update_secrets, _remove_additional_attributes, _remove_readonly_attributes,
                      _add_or_update_env_vars, _add_or_update_tags, _update_revision_weights, _append_label_weights,
                      _get_app_from_revision, raise_missing_token_suggestion, _remove_registry_secret, _remove_secret,
-                     _ensure_identity_resource_id, _remove_dapr_readonly_attributes, _remove_env_vars,
-                     _validate_traffic_sum,
+                     _ensure_identity_resource_id, _remove_dapr_readonly_attributes, _remove_env_vars, _validate_traffic_sum,
                      _update_revision_env_secretrefs, _get_acr_cred, safe_get, await_github_action, repo_url_to_name,
                      validate_container_app_name, _update_weights, register_provider_if_needed,
                      generate_randomized_cert_name, _get_name, load_cert_file, check_cert_name_availability,
-                     validate_hostname, patch_new_custom_domain, get_custom_domains, _validate_revision_name,
-                     set_managed_identity,
+                     validate_hostname, patch_new_custom_domain, get_custom_domains, _validate_revision_name, set_managed_identity,
                      is_registry_msi_system, clean_null_values, _populate_secret_values,
-                     safe_set, parse_metadata_flags, parse_auth_flags,
-                     set_ip_restrictions, certificate_matches,
+                     safe_set, parse_metadata_flags, parse_auth_flags, set_ip_restrictions, certificate_matches,
                      ensure_workload_profile_supported, _generate_secret_volume_name,
                      parse_service_bindings, get_linker_client,
                      trigger_workflow, AppType,
@@ -3924,10 +3920,8 @@ def bind_hostname(cmd, resource_group_name, name, hostname, thumbprint=None, cer
         cert_id = certs[0]["id"]
     else:  # look for or create a managed certificate if no certificate info provided
         managed_certs = get_managed_certificates(cmd, env_name, resource_group_name, None, None)
-        managed_cert = [cert for cert in managed_certs if
-                        cert["properties"]["subjectName"].lower() == standardized_hostname]
-        if len(managed_cert) > 0 and managed_cert[0]["properties"]["provisioningState"] in [SUCCEEDED_STATUS,
-                                                                                            PENDING_STATUS]:
+        managed_cert = [cert for cert in managed_certs if cert["properties"]["subjectName"].lower() == standardized_hostname]
+        if len(managed_cert) > 0 and managed_cert[0]["properties"]["provisioningState"] in [SUCCEEDED_STATUS, PENDING_STATUS]:
             cert_id = managed_cert[0]["id"]
             cert_name = managed_cert[0]["name"]
         else:
@@ -3937,24 +3931,17 @@ def bind_hostname(cmd, resource_group_name, name, hostname, thumbprint=None, cer
                 available = check_managed_cert_name_availability(cmd, resource_group_name, env_name, cert_name)
                 if available:
                     cert_name = random_name
-            logger.warning(
-                "Creating managed certificate '%s' for %s.\nIt may take up to 20 minutes to create and issue a managed certificate.",
-                cert_name, standardized_hostname)
+            logger.warning("Creating managed certificate '%s' for %s.\nIt may take up to 20 minutes to create and issue a managed certificate.", cert_name, standardized_hostname)
 
             if validation_method is None:
                 raise RequiredArgumentMissingError('Please specify the parameter: --validation-method')
             validation = validation_method.upper()
             while validation not in ["TXT", "CNAME", "HTTP"]:
-                validation = prompt_str(
-                    '\nPlease choose one of the following domain validation methods: TXT, CNAME, HTTP\nYour answer: ').upper()
+                validation = prompt_str('\nPlease choose one of the following domain validation methods: TXT, CNAME, HTTP\nYour answer: ').upper()
 
-            certificate_envelop = prepare_managed_certificate_envelop(cmd, env_name, resource_group_name,
-                                                                      standardized_hostname, validation, location)
+            certificate_envelop = prepare_managed_certificate_envelop(cmd, env_name, resource_group_name, standardized_hostname, validation, location)
             try:
-                managed_cert = ManagedEnvironmentClient.create_or_update_managed_certificate(cmd, resource_group_name,
-                                                                                             env_name, cert_name,
-                                                                                             certificate_envelop, False,
-                                                                                             validation == 'TXT')
+                managed_cert = ManagedEnvironmentClient.create_or_update_managed_certificate(cmd, resource_group_name, env_name, cert_name, certificate_envelop, False, validation == 'TXT')
             except Exception as e:
                 handle_raw_exception(e)
             cert_id = managed_cert["id"]
