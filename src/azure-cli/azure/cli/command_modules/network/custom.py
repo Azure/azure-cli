@@ -5198,7 +5198,7 @@ class PublicIPCreate(_PublicIPCreate):
 class PublicIPUpdate(_PublicIPUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        from azure.cli.core.aaz import AAZStrArg, AAZDictArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.public_ip_prefix._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
@@ -5208,7 +5208,19 @@ class PublicIPUpdate(_PublicIPUpdate):
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/ddosProtectionPlans/{}",
         )
+        args_schema.ip_tags = AAZDictArg(
+            options=["--ip-tags"],
+            help="Space-separated list of IP tags in `TYPE=VAL` format.",
+        )
+        args_schema.ip_tags.Element = AAZStrArg()
+        args_schema.ip_tags_list._registered = False
+
         return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.ip_tags):
+            args.ip_tags_list = [{"ip_tag_type": k, "tag": v} for k, v in args.ip_tags.to_serialized_data().items()]
 
     def post_instance_update(self, instance):
         if not has_value(instance.properties.ddos_settings.ddos_protection_plan.id):
