@@ -67,21 +67,25 @@ from ._models import (
 from ._utils import (_validate_subscription_registered,
                      parse_secret_flags, store_as_secret_and_return_secret_ref, parse_env_var_flags,
                      _get_existing_secrets, _convert_object_from_snake_to_camel_case,
-                     _object_to_dict, _add_or_update_secrets, _remove_additional_attributes, _remove_readonly_attributes,
+                     _object_to_dict, _add_or_update_secrets, _remove_additional_attributes,
+                     _remove_readonly_attributes,
                      _add_or_update_env_vars, _add_or_update_tags, _update_revision_weights, _append_label_weights,
                      _get_app_from_revision, raise_missing_token_suggestion, _remove_registry_secret, _remove_secret,
-                     _ensure_identity_resource_id, _remove_dapr_readonly_attributes, _remove_env_vars, _validate_traffic_sum,
+                     _ensure_identity_resource_id, _remove_dapr_readonly_attributes, _remove_env_vars,
+                     _validate_traffic_sum,
                      _update_revision_env_secretrefs, _get_acr_cred, safe_get, await_github_action, repo_url_to_name,
                      validate_container_app_name, _update_weights, register_provider_if_needed,
                      generate_randomized_cert_name, _get_name, load_cert_file, check_cert_name_availability,
-                     validate_hostname, patch_new_custom_domain, get_custom_domains, _validate_revision_name, set_managed_identity,
+                     validate_hostname, patch_new_custom_domain, get_custom_domains, _validate_revision_name,
+                     set_managed_identity,
                      is_registry_msi_system, clean_null_values, _populate_secret_values,
                      safe_set, parse_metadata_flags, parse_auth_flags,
                      set_ip_restrictions, certificate_matches,
                      ensure_workload_profile_supported, _generate_secret_volume_name,
                      parse_service_bindings, get_linker_client,
                      trigger_workflow, AppType,
-                     format_location)
+                     format_location, certificate_location_matches, generate_randomized_managed_cert_name,
+                     check_managed_cert_name_availability, prepare_managed_certificate_envelop)
 from ._validators import validate_revision_suffix
 from ._ssh_utils import (SSH_DEFAULT_ENCODING, WebSocketConnection, read_ssh, get_stdin_writer, SSH_CTRL_C_MSG,
                          SSH_BACKUP_ENCODING)
@@ -3710,10 +3714,21 @@ def list_certificates(cmd, name, resource_group_name, location=None, certificate
 
     if certificate and is_valid_resource_id(certificate):
         certificate_name = parse_resource_id(certificate)["resource_name"]
+        certificate_type = parse_resource_id(certificate)["resource_type"]
     else:
         certificate_name = certificate
+        certificate_type = PRIVATE_CERTIFICATE_RT
 
-    return get_private_certificates(cmd, name, resource_group_name, certificate_name, thumbprint, location)
+    if certificate_type and certificate_type.lower() != PRIVATE_CERTIFICATE_RT.lower():
+        raise ValidationError(f"The certificate {certificate} is not private-key certificate.")
+
+    if certificate_type == MANAGED_CERTIFICATE_RT:
+        return get_managed_certificates(cmd, name, resource_group_name, certificate_name, location)
+    if certificate_type == PRIVATE_CERTIFICATE_RT:
+        return get_private_certificates(cmd, name, resource_group_name, certificate_name, thumbprint, location)
+    managed_certs = get_managed_certificates(cmd, name, resource_group_name, certificate_name, location)
+    private_certs = get_private_certificates(cmd, name, resource_group_name, certificate_name, thumbprint, location)
+    return managed_certs + private_certs
 
 
 def get_private_certificates(cmd, name, resource_group_name, certificate_name=None, thumbprint=None, location=None):
@@ -3728,6 +3743,22 @@ def get_private_certificates(cmd, name, resource_group_name, certificate_name=No
         try:
             r = ManagedEnvironmentClient.list_certificates(cmd, resource_group_name, name)
             return list(filter(lambda c: certificate_matches(c, location, thumbprint), r))
+        except Exception as e:
+            handle_raw_exception(e)
+
+
+def get_managed_certificates(cmd, name, resource_group_name, certificate_name=None, location=None):
+    if certificate_name:
+        try:
+            r = ManagedEnvironmentClient.show_managed_certificate(cmd, resource_group_name, name, certificate_name)
+            return [r] if certificate_location_matches(r, location) else []
+        except Exception as e:
+            handle_non_404_exception(e)
+            return []
+    else:
+        try:
+            r = ManagedEnvironmentClient.list_managed_certificates(cmd, resource_group_name, name)
+            return list(filter(lambda c: certificate_location_matches(c, location), r))
         except Exception as e:
             handle_raw_exception(e)
 
@@ -3792,18 +3823,42 @@ def delete_certificate(cmd, resource_group_name, name, location=None, certificat
     if certificate and is_valid_resource_id(certificate):
         cert_type = parse_resource_id(certificate)["resource_type"]
         cert_name = parse_resource_id(certificate)["resource_name"]
+    if thumbprint:
+        cert_type = PRIVATE_CERTIFICATE_RT
 
-    if cert_type and cert_type != PRIVATE_CERTIFICATE_RT:
+    # validate for GA
+    if certificate and not is_valid_resource_id(certificate):
+        cert_type = PRIVATE_CERTIFICATE_RT
+    if cert_type != PRIVATE_CERTIFICATE_RT:
         raise ValidationError(f"The certificate {cert_name} is not private-key certificate.")
 
-    certs = list_certificates(cmd, name, resource_group_name, location, certificate, thumbprint)
-    if len(certs) == 0:
-        msg = "'{}'".format(cert_name) if cert_name else "with thumbprint '{}'".format(thumbprint)
-        raise ResourceNotFoundError(f"The certificate {msg} does not exist in Container app environment '{name}'.")
-    for cert in certs:
+    if cert_type == PRIVATE_CERTIFICATE_RT:
+        certs = list_certificates(cmd, name, resource_group_name, location, certificate, thumbprint)
+        if len(certs) == 0:
+            msg = "'{}'".format(cert_name) if cert_name else "with thumbprint '{}'".format(thumbprint)
+            raise ResourceNotFoundError(f"The certificate {msg} does not exist in Container app environment '{name}'.")
+        for cert in certs:
+            try:
+                ManagedEnvironmentClient.delete_certificate(cmd, resource_group_name, name, cert["name"])
+                logger.warning('Successfully deleted certificate: %s', cert["name"])
+            except Exception as e:
+                handle_raw_exception(e)
+    elif cert_type == MANAGED_CERTIFICATE_RT:
         try:
-            ManagedEnvironmentClient.delete_certificate(cmd, resource_group_name, name, cert["name"])
-            logger.warning('Successfully deleted certificate: %s', cert["name"])
+            ManagedEnvironmentClient.delete_managed_certificate(cmd, resource_group_name, name, cert_name)
+            logger.warning('Successfully deleted certificate: {}'.format(cert_name))
+        except Exception as e:
+            handle_raw_exception(e)
+    else:
+        managed_certs = list(filter(lambda c: c["name"] == cert_name, get_managed_certificates(cmd, name, resource_group_name, None, location)))
+        private_certs = list(filter(lambda c: c["name"] == cert_name, get_private_certificates(cmd, name, resource_group_name, None, None, location)))
+        if len(managed_certs) == 0 and len(private_certs) == 0:
+            raise ResourceNotFoundError(f"The certificate '{cert_name}' does not exist in Container app environment '{name}'.")
+        if len(managed_certs) > 0 and len(private_certs) > 0:
+            raise RequiredArgumentMissingError(f"Found more than one certificates with name '{cert_name}':\n'{managed_certs[0]['id']}',\n'{private_certs[0]['id']}'.\nPlease specify the certificate id using --certificate.")
+        try:
+            ManagedEnvironmentClient.delete_managed_certificate(cmd, resource_group_name, name, cert_name)
+            logger.warning('Successfully deleted certificate: %s', cert_name)
         except Exception as e:
             handle_raw_exception(e)
 
@@ -3836,7 +3891,8 @@ def upload_ssl(cmd, resource_group_name, name, environment, certificate_file, ho
 
 def bind_hostname(cmd, resource_group_name, name, hostname, thumbprint=None, certificate=None, location=None, environment=None):
     _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
-
+    # validate for GA
+    validation_method = ""
     if not thumbprint and not certificate:
         raise RequiredArgumentMissingError('Please specify at least one of parameters: --certificate and --thumbprint')
 
@@ -3851,7 +3907,7 @@ def bind_hostname(cmd, resource_group_name, name, hostname, thumbprint=None, cer
         raise ValidationError(message or 'Please configure the DNS records before adding the hostname.')
 
     env_name = _get_name(environment) if environment else None
-    cert_id = None
+
     if certificate:
         if is_valid_resource_id(certificate):
             cert_id = certificate
@@ -3866,6 +3922,44 @@ def bind_hostname(cmd, resource_group_name, name, hostname, thumbprint=None, cer
         if len(certs) == 0:
             raise ResourceNotFoundError(f"The certificate with thumbprint '{thumbprint}' does not exist in Container app environment '{env_name}'.")
         cert_id = certs[0]["id"]
+    else:  # look for or create a managed certificate if no certificate info provided
+        managed_certs = get_managed_certificates(cmd, env_name, resource_group_name, None, None)
+        managed_cert = [cert for cert in managed_certs if
+                        cert["properties"]["subjectName"].lower() == standardized_hostname]
+        if len(managed_cert) > 0 and managed_cert[0]["properties"]["provisioningState"] in [SUCCEEDED_STATUS,
+                                                                                            PENDING_STATUS]:
+            cert_id = managed_cert[0]["id"]
+            cert_name = managed_cert[0]["name"]
+        else:
+            cert_name = None
+            while not cert_name:
+                random_name = generate_randomized_managed_cert_name(standardized_hostname, env_name)
+                available = check_managed_cert_name_availability(cmd, resource_group_name, env_name, cert_name)
+                if available:
+                    cert_name = random_name
+            logger.warning(
+                "Creating managed certificate '%s' for %s.\nIt may take up to 20 minutes to create and issue a managed certificate.",
+                cert_name, standardized_hostname)
+
+            if validation_method is None:
+                raise RequiredArgumentMissingError('Please specify the parameter: --validation-method')
+            validation = validation_method.upper()
+            while validation not in ["TXT", "CNAME", "HTTP"]:
+                validation = prompt_str(
+                    '\nPlease choose one of the following domain validation methods: TXT, CNAME, HTTP\nYour answer: ').upper()
+
+            certificate_envelop = prepare_managed_certificate_envelop(cmd, env_name, resource_group_name,
+                                                                      standardized_hostname, validation, location)
+            try:
+                managed_cert = ManagedEnvironmentClient.create_or_update_managed_certificate(cmd, resource_group_name,
+                                                                                             env_name, cert_name,
+                                                                                             certificate_envelop, False,
+                                                                                             validation == 'TXT')
+            except Exception as e:
+                handle_raw_exception(e)
+            cert_id = managed_cert["id"]
+
+        logger.warning("\nBinding managed certificate '%s' to %s\n", cert_name, standardized_hostname)
 
     custom_domains = get_custom_domains(cmd, resource_group_name, name, location, environment)
     new_custom_domains = list(filter(lambda c: safe_get(c, "name", default=[]) != standardized_hostname, custom_domains))
