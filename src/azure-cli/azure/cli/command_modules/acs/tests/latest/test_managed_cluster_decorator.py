@@ -2185,7 +2185,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         )
         self.assertEqual(ctx_3.get_ip_families(), ["IPv4", "IPv6"])
 
-    def test_get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
+    def test_get_pod_cidr_and_service_cidr_and_dns_service_ip_and_network_policy(
         self,
     ):
         # default
@@ -2203,7 +2203,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
         )
         self.assertEqual(
-            ctx_1.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(),
+            ctx_1.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_and_network_policy(),
             (None, None, None, None, None),
         )
         network_profile_1 = self.models.ContainerServiceNetworkProfile(
@@ -2214,7 +2214,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         mc = self.models.ManagedCluster(location="test_location", network_profile=network_profile_1)
         ctx_1.attach_mc(mc)
         self.assertEqual(
-            ctx_1.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(),
+            ctx_1.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_and_network_policy(),
             (
                 "test_pod_cidr",
                 "test_service_cidr",
@@ -2246,6 +2246,8 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                 None,
             )
         )
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_2.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_and_network_policy()
 
         # invalid parameter
         ctx_3 = AKSManagedClusterContext(
@@ -2262,7 +2264,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         )
         # fail on network_plugin not specified
         with self.assertRaises(RequiredArgumentMissingError):
-            ctx_3.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
+            ctx_3.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_and_network_policy()
 
         # require network_plugin when netpol is provided
         ctx_4 = AKSManagedClusterContext(
