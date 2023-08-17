@@ -1,6 +1,9 @@
 import openai
 import json
 import shutil
+import configparser
+
+from azure.cli.core._config import GLOBAL_CONFIG_PATH
 
 def error_assistance(command):      
         openai.api_key = <api-key>
@@ -70,3 +73,19 @@ def print_line():
 
         print(dashed_line)
         
+def error_enabled():
+        enabled = get_config()
+        if enabled:
+                return True
+        return False
+
+def get_config():
+        config = configparser.ConfigParser()
+        config.read(GLOBAL_CONFIG_PATH)
+        return str_to_bool(config.get('core', 'error_assistance'))
+
+def str_to_bool(string):
+        if string=='True' or string=='true':
+                return True
+        else:
+                return False

@@ -8,7 +8,7 @@ import sys
 from azure.cli.core import telemetry
 from knack.util import CLIError
 from knack.log import get_logger
-from azure.cli.core.error_assistance import print_error_assistance, error_assistance
+from azure.cli.core.error_assistance import print_error_assistance, error_assistance, error_enabled
 
 logger = get_logger(__name__)
 # pylint: disable=unnecessary-pass
@@ -31,7 +31,7 @@ class AzCLIError(CLIError):
         self.error_msg = error_msg
 
         # Get error reason from Azure OpenAI
-        if command is not None:
+        if command is not None and error_enabled():
             self.error_help = error_assistance(command=command)
         else:
             self.error_help = None
