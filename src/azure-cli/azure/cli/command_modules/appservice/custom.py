@@ -578,7 +578,7 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
     if is_consumption and app.reserved:
         validate_zip_deploy_app_setting_exists(cmd, resource_group_name, name, slot)
 
-    if is_flex_functionapp(cmd, resource_group_name, name):
+    if is_flex_functionapp(cmd.cli_ctx, resource_group_name, name):
         enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout, slot, build_remote)
         response = check_flex_app_after_deployment(cmd, resource_group_name, name)
         return response
@@ -1380,7 +1380,7 @@ def get_app_settings(cmd, resource_group_name, name, slot=None):
     result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory(cmd.cli_ctx)
     is_centauri = is_centauri_functionapp(cmd, resource_group_name, name)
-    is_flex = is_flex_functionapp(cmd, resource_group_name, name)
+    is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
     slot_app_setting_names = [] if (is_centauri or is_flex) \
         else client.web_apps.list_slot_configuration_names(resource_group_name, name) \
         .app_setting_names
@@ -1649,7 +1649,7 @@ def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory(cmd.cli_ctx)
     is_centauri = is_centauri_functionapp(cmd, resource_group_name, name)
-    is_flex = is_flex_functionapp(cmd, resource_group_name, name)
+    is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
     slot_cfg_names = {} if (is_centauri or is_flex) \
         else client.web_apps.list_slot_configuration_names(resource_group_name, name)
     is_slot_settings = False
@@ -2989,7 +2989,9 @@ def basic_auth_supported(cli_ctx, name, resource_group_name, slot=None):
 def get_scm_site_headers(cli_ctx, name, resource_group_name, slot=None, additional_headers=None):
     import urllib3
 
-    if basic_auth_supported(cli_ctx, name, resource_group_name, slot):
+    is_flex = is_flex_functionapp(cli_ctx, resource_group_name, name)
+
+    if not is_flex and basic_auth_supported(cli_ctx, name, resource_group_name, slot):
         logger.info("[AUTH]: basic")
         username, password = _get_site_credential(cli_ctx, resource_group_name, name, slot)
         headers = urllib3.util.make_headers(basic_auth=f"{username}:{password}")
@@ -4971,7 +4973,7 @@ def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=Non
 
     parsed_plan = parse_resource_id(app.server_farm_id)
     plan_info = client.app_service_plans.get(parsed_plan['resource_group'], parsed_plan["name"])
-    is_flex = is_flex_functionapp(cmd, resource_group_name, name)
+    is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     if skip_delegation_check:
         logger.warning('Skipping delegation check. Ensure that subnet is delegated to Microsoft.Web/serverFarms.'
