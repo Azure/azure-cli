@@ -203,7 +203,6 @@ def load_arguments(self, _):
                    completer=FilesCompleter(), validator=validate_ssh_key)
         c.argument('no_ssh_key', options_list=['--no-ssh-key', '-x'])
         c.argument('dns_service_ip')
-        c.argument('docker_bridge_address', deprecate_info=c.deprecate(target='--docker-bridge-address', hide=True))
         c.argument('pod_cidr')
         c.argument('service_cidr')
         c.argument('ip_families')

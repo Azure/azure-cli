@@ -490,7 +490,6 @@ def aks_create(
     pod_cidrs=None,
     service_cidrs=None,
     dns_service_ip=None,
-    docker_bridge_address=None,
     load_balancer_sku=None,
     load_balancer_managed_outbound_ip_count=None,
     load_balancer_managed_outbound_ipv6_count=None,
