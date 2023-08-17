@@ -171,20 +171,22 @@ def _try_get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, 
 
 def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name, item, restore_mode,
                            resolve_conflict, restore_request_type, source_file_type=None, source_file_path=None,
-                           target_storage_account_name=None, target_file_share_name=None, target_folder=None):
+                           target_storage_account_name=None, target_file_share_name=None, target_folder=None,
+                           target_resource_group_name=None):
 
     container_uri = helper.get_protection_container_uri_from_id(item.id)
     item_uri = helper.get_protected_item_uri_from_id(item.id)
 
-    sa_name = item.properties.container_name
+    # sa_name = item.properties.container_name
 
     afs_restore_request = AzureFileShareRestoreRequest()
     target_details = None
 
     afs_restore_request.copy_options = resolve_conflict
     afs_restore_request.recovery_type = restore_mode
-    afs_restore_request.source_resource_id = _get_storage_account_id(cmd.cli_ctx, sa_name.split(';')[-1],
-                                                                     sa_name.split(';')[-2])
+    afs_restore_request.source_resource_id = _get_storage_account_id(cmd.cli_ctx,
+                                                                     item.properties.container_name.split(';')[-1],
+                                                                     item.properties.container_name.split(';')[-2])
     afs_restore_request.restore_request_type = restore_request_type
 
     restore_file_specs = None
@@ -201,7 +203,11 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
                                                        target_folder_path=target_folder))
 
     if restore_mode == "AlternateLocation":
-        target_sa_name, target_sa_rg = helper.get_resource_name_and_rg(resource_group_name, target_storage_account_name)
+        if target_resource_group_name is None:
+            target_resource_group_name = resource_group_name
+        target_sa_name, target_sa_rg = helper.get_resource_name_and_rg(
+            target_resource_group_name,
+            target_storage_account_name)
         target_details = TargetAFSRestoreInfo()
         target_details.name = target_file_share_name
         target_details.target_resource_id = _get_storage_account_id(cmd.cli_ctx, target_sa_name, target_sa_rg)

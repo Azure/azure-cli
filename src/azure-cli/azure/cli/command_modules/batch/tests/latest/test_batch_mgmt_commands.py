@@ -54,7 +54,8 @@ class BatchMgmtScenarioTests(ScenarioTest):
             self.check('encryption.keySource', 'Microsoft.Batch'),
             self.check('resourceGroup', '{rg}')])
 
-        time.sleep(100)
+        if self.in_recording:
+            time.sleep(100)
 
         self.cmd('batch account set -g {rg} -n {acc} --storage-account {str_n}').assert_with_checks([
             self.check('name', '{acc}'),
