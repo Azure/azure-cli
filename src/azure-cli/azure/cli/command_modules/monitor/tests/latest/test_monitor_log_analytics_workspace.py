@@ -611,8 +611,9 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check('name', '{table_name}')
         ])
 
-        error_str = "Table {0} has no data on the specified date range".format(self.kwargs["table_name"])
-        with self.assertRaisesRegex(HttpResponseError, error_str):
+        import re
+        pattern = re.compile("Table {0} has no data on the specified date range".format(self.kwargs["table_name"]) + r"(.*?)8/11/2023 12:00:00 AM(.*?)8/17/2023 12:00:00 AM(.*?)")
+        with self.assertRaisesRegex(HttpResponseError, pattern):
             self.cmd('monitor log-analytics workspace table restore create -n {table2_name} -g {rg} --workspace-name {ws_name} --restore-source-table {table_name} --start-restore-time "2023-08-11 05:29:18" --end-restore-time "2023-08-17 05:29:18"')
 
         self.cmd('monitor log-analytics workspace table delete -g {rg} -n {table_name} --workspace-name {ws_name} -y')

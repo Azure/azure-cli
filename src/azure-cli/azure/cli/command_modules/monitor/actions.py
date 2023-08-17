@@ -135,7 +135,7 @@ def get_date_midnight_type(help=None):
                 logger.warning('Time info will be set to midnight UTC for %s.', value_string)
             date_midnight = dt_val.replace(hour=0, minute=0, second=0, microsecond=0)
             format_string = date_midnight.isoformat()
-            logger.warning('Time info set to midnight UTC from %s to %s', value_string, format_string)
+            logger.info('Time info set to midnight UTC from %s to %s', value_string, format_string)
             setattr(namespace, self.dest, format_string)
 
     return CLIArgumentType(action=DateAction, nargs='+', help=help_string)
