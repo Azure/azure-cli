@@ -612,7 +612,10 @@ def flexible_server_import_create(cmd, client,
         high_availability = mysql_flexibleservers.models.HighAvailability(mode=high_availability,
                                                                           standby_availability_zone=standby_availability_zone)
         
-        if create_mode != 'Migrate':
+        if create_mode == 'Migrate':
+            administrator_login = source_single_server.administrator_login
+            administrator_login_password = None
+        else:
             administrator_login_password = generate_password(administrator_login_password)
 
         identity, data_encryption = build_identity_and_data_encryption(db_engine='mysql',
