@@ -1602,31 +1602,52 @@ def _build_app_settings_output(app_settings, slot_cfg_names):
              'slotSetting': p in slot_cfg_names} for p in _mask_creds_related_appsettings(app_settings)]
 
 
-def update_connection_strings(cmd, resource_group_name, name, connection_string_type,
+def _build_app_settings_input(settings, connection_string_type):
+    if not settings:
+        return []
+    try:
+        # check if its a json file
+        settings_str = ''.join([i.rstrip() for i in settings])
+        json_obj = json.loads(settings_str)
+        for i in json_obj:
+            keys = i.keys()
+            if 'value' not in keys or 'name' not in keys or 'type' not in keys:
+                raise KeyError
+        return json_obj
+    except:
+        # this is not a json file
+        if not connection_string_type:
+            raise ArgumentUsageError('if json file is used to update settings, please check the format. Otherwise, --connection-string-type is required')
+        results = []
+        for name_value in settings:
+            conn_string_name, value = name_value.split('=', 1)
+            if value[0] in ["'", '"']:  # strip away the quots used as separators
+                value = value[1:-1]
+            results.append({'name': conn_string_name, 'value': value, 'type':connection_string_type})
+        return results
+        
+def update_connection_strings(cmd, resource_group_name, name, connection_string_type=None,
                               settings=None, slot=None, slot_settings=None):
     from azure.mgmt.web.models import ConnStringValueTypePair
     if not settings and not slot_settings:
         raise ArgumentUsageError('Usage Error: --settings |--slot-settings')
-
-    settings = settings or []
-    slot_settings = slot_settings or []
-
+    settings = _build_app_settings_input(settings, connection_string_type)
+    slot_settings = _build_app_settings_input(slot_settings, connection_string_type)
+    
     conn_strings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                            'list_connection_strings', slot)
-    for name_value in settings + slot_settings:
+    
+    for name_value_type in settings + slot_settings:
         # split at the first '=', connection string should not have '=' in the name
-        conn_string_name, value = name_value.split('=', 1)
-        if value[0] in ["'", '"']:  # strip away the quots used as separators
-            value = value[1:-1]
-        conn_strings.properties[conn_string_name] = ConnStringValueTypePair(value=value,
-                                                                            type=connection_string_type)
+        conn_strings.properties[name_value_type['name']] = ConnStringValueTypePair(value=name_value_type['value'],
+                                                                            type=name_value_type['type'])
     client = web_client_factory(cmd.cli_ctx)
     result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
                                          'update_connection_strings',
                                          conn_strings, slot, client)
 
     if slot_settings:
-        new_slot_setting_names = [n.split('=', 1)[0] for n in slot_settings]
+        new_slot_setting_names = [n['name'] [0] for n in slot_settings] # add setting name
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
         slot_cfg_names.connection_string_names = slot_cfg_names.connection_string_names or []
         slot_cfg_names.connection_string_names += new_slot_setting_names
