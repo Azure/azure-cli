@@ -3273,7 +3273,7 @@ class ExpressRouteUpdate(_ExpressRouteUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.sku_tier) or has_value(args.sku_family):
+        if has_value(args.sku_tier) and has_value(args.sku_family):
             args.sku_name = f"{args.sku_tier}_{args.sku_family}"
 
         if has_value(args.bandwidth):
