@@ -54,8 +54,8 @@ class Update(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.autoscale_setting_name = AAZStrArg(
-            options=["-n", "--name", "--autoscale-setting-name"],
+        _args_schema.autoscale_name = AAZStrArg(
+            options=["-n", "--name", "--autoscale-name"],
             help="The autoscale setting name.",
             required=True,
             id_part="name",
@@ -469,7 +469,7 @@ class Update(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "autoscaleSettingName", self.ctx.args.autoscale_setting_name,
+                    "autoscaleSettingName", self.ctx.args.autoscale_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -552,7 +552,7 @@ class Update(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "autoscaleSettingName", self.ctx.args.autoscale_setting_name,
+                    "autoscaleSettingName", self.ctx.args.autoscale_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -634,7 +634,7 @@ class Update(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("enabled", AAZBoolType, ".enabled")
-                properties.set_prop("name", AAZStrType, ".autoscale_setting_name")
+                properties.set_prop("name", AAZStrType, ".autoscale_name")
                 properties.set_prop("notifications", AAZListType, ".notifications")
                 properties.set_prop("predictiveAutoscalePolicy", AAZObjectType)
                 properties.set_prop("profiles", AAZListType, ".profiles", typ_kwargs={"flags": {"required": True}})

@@ -3,14 +3,104 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
 from knack.log import get_logger
 from knack.util import CLIError
 
+from azure.cli.core.aaz import has_value, AAZListArg, AAZStrArg
+from azure.cli.command_modules.monitor._autoscale_util import build_autoscale_profile_from_instance
+from ..aaz.latest.monitor.autoscale import Create as _AutoScaleCreate, Update as _AutoScaleUpdate, \
+    Show as _AutoScaleShow, List as _AutoScaleList
 
 logger = get_logger(__name__)
 
 
 DEFAULT_PROFILE_NAME = 'default'
+
+
+class AutoScaleShow(_AutoScaleShow):
+
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined
+        if has_value(self.ctx.vars.instance.properties.name):
+            self.ctx.vars.instance.properties.name = AAZUndefined
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class AutoScaleList(_AutoScaleList):
+
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined
+        # When the name field conflicts, the name in inner layer is ignored and the outer layer is applied
+        for value in self.ctx.vars.instance.value:
+            if has_value(value.properties):
+                value.properties.name = AAZUndefined
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+# pylint: disable=too-many-locals
+def autoscale_create_new(cmd, resource, count, autoscale_name=None, resource_group_name=None,
+                         min_count=None, max_count=None, location=None, tags=None, disabled=None,
+                         actions=None, email_administrator=None, email_coadministrators=None,
+                         scale_mode=None, scale_look_ahead_time=None):
+
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    if not autoscale_name:
+        from msrestazure.tools import parse_resource_id
+        autoscale_name = parse_resource_id(resource)['name']
+    min_count = min_count or count
+    max_count = max_count or count
+    args = {}
+    default_profile = {
+        "name": DEFAULT_PROFILE_NAME,
+        "capacity": {
+            "default": str(count),
+            "minimum": str(min_count),
+            "maximum": str(max_count)
+        },
+        "rules": []
+    }
+
+    notification = {
+        "operation": "scale",
+        "email": {
+            "custom_emails": [],
+            "send_to_subscription_administrator": email_administrator,
+            "send_to_subscription_co_administrators": email_coadministrators,
+        },
+        "webhooks": []
+    }
+
+    for action in actions or []:
+        key = action["key"]
+        value = action["value"]
+        if key == "email":
+            for email in value["custom_emails"]:
+                notification["email"]["custom_emails"].append(email)
+        elif key == "webhook":
+            notification["webhooks"].append(value)
+
+    if scale_mode is not None and scale_look_ahead_time is not None:
+        args["scale_mode"] = scale_mode
+        args["scale_look_ahead_time"] = scale_look_ahead_time
+    elif scale_mode is not None:
+        args["scale_mode"] = scale_mode
+    elif scale_look_ahead_time is not None:
+        raise InvalidArgumentValueError('scale-mode is required for setting predictive autoscale policy.')
+    args["location"] = location
+    args["profiles"] = [default_profile]
+    args["tags"] = tags
+    args["notifications"] = [notification]
+    args["enabled"] = not disabled
+    args["autoscale_name"] = autoscale_name
+    args["target_resource_uri"] = resource
+    args["resource_group"] = resource_group_name
+
+    if not (min_count == count and max_count == count):
+        logger.warning('Follow up with `az monitor autoscale rule create` to add scaling rules.')
+    return _AutoScaleCreate(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
 # pylint: disable=too-many-locals
@@ -79,7 +169,6 @@ def autoscale_create(client, resource, count, autoscale_name=None, resource_grou
 def autoscale_update(instance, count=None, min_count=None, max_count=None, tags=None, enabled=None,  # pylint:disable=too-many-statements,too-many-branches
                      add_actions=None, remove_actions=None, email_administrator=None,
                      email_coadministrators=None, scale_mode=None, scale_look_ahead_time=None):
-    import json
     from azure.mgmt.monitor.models import EmailNotification, WebhookNotification, PredictiveAutoscalePolicy
     from azure.cli.command_modules.monitor._autoscale_util import build_autoscale_profile
     from azure.cli.core.azclierror import InvalidArgumentValueError
@@ -203,7 +292,6 @@ def _create_recurring_profile(autoscale_settings, profile_name, start, end, recu
     from azure.cli.command_modules.monitor._autoscale_util import build_autoscale_profile, validate_autoscale_profile
     import dateutil
     from datetime import time
-    import json
 
     def _build_recurrence(base, time):
         recurrence = Recurrence(
@@ -262,9 +350,11 @@ def autoscale_profile_create(client, autoscale_name, resource_group_name, profil
     return profile
 
 
-def autoscale_profile_list(cmd, client, autoscale_name, resource_group_name):
-    autoscale_settings = client.get(resource_group_name, autoscale_name)
-    return autoscale_settings.profiles
+def autoscale_profile_list(cmd, autoscale_name, resource_group_name):
+    autoscale_settings = AutoScaleShow(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "autoscale_name": autoscale_name})
+    return autoscale_settings["profiles"]
 
 
 def autoscale_profile_list_timezones(cmd, client, offset=None, search_query=None):
@@ -279,14 +369,59 @@ def autoscale_profile_list_timezones(cmd, client, offset=None, search_query=None
     return timezones
 
 
-def autoscale_profile_show(cmd, client, autoscale_name, resource_group_name, profile_name):
-    autoscale_settings = client.get(resource_group_name, autoscale_name)
-    return _identify_profile(autoscale_settings.profiles, profile_name)
+def autoscale_profile_show(cmd, autoscale_name, resource_group_name, profile_name):
+    autoscale_settings = AutoScaleShow(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "autoscale_name": autoscale_name})
+    return _identify_profile_cg(autoscale_settings["profiles"], profile_name)
+
+
+class AutoScaleProfileDelete(_AutoScaleUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.profile_name = AAZStrArg(
+            options=["--profile-name"],
+            help='Name of the autoscale profile.',
+            required=True,
+            registered=False,
+        )
+        return args_schema
+
+    def pre_instance_update(self, instance):
+        args = self.ctx.args
+        profile_name = args.profile_name.to_serialized_data()
+        instance = self.ctx.vars.instance
+        default_profile, _ = build_autoscale_profile_from_instance(instance)
+
+        def _should_retain_profile(profile):
+            name = profile.name
+            try:
+                name = json.loads(profile.name)['for']
+            except ValueError:
+                pass
+            return name.lower() != profile_name.lower()
+
+        retained_profiles = [x for x in instance.properties.profiles if _should_retain_profile(x)]
+        instance.properties.profiles = retained_profiles
+
+        # if we removed the last "default" of a recurring pair, we need to preserve it
+        new_default, _ = build_autoscale_profile_from_instance(instance)
+        if not new_default:
+            instance.properties.profiles.append(default_profile)
+
+
+def autoscale_profile_delete_new(cmd, autoscale_name, resource_group_name, profile_name):
+    AutoScaleProfileDelete(cli_ctx=cmd.cli_ctx)(command_args={
+        "autoscale_name": autoscale_name,
+        "resource_group": resource_group_name,
+        "profile_name": profile_name,
+    })
 
 
 def autoscale_profile_delete(cmd, client, autoscale_name, resource_group_name, profile_name):
     from azure.cli.command_modules.monitor._autoscale_util import build_autoscale_profile
-    import json
 
     autoscale_settings = client.get(resource_group_name, autoscale_name)
     default_profile, _ = build_autoscale_profile(autoscale_settings)
@@ -364,15 +499,70 @@ def autoscale_rule_create(cmd, client, autoscale_name, resource_group_name, cond
     return rule
 
 
-def autoscale_rule_list(cmd, client, autoscale_name, resource_group_name, profile_name=DEFAULT_PROFILE_NAME):
-    autoscale_settings = client.get(resource_group_name, autoscale_name)
-    profile = _identify_profile(autoscale_settings.profiles, profile_name)
+def autoscale_rule_list(cmd, autoscale_name, resource_group_name, profile_name=DEFAULT_PROFILE_NAME):
+    autoscale_settings = AutoScaleShow(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "autoscale_name": autoscale_name})
+    profile = _identify_profile_cg(autoscale_settings["profiles"], profile_name)
     index = 0
     # we artificially add indices to the rules so the user can target them with the remove command
-    for rule in profile.rules:
-        setattr(rule, 'index', index)
+    for rule in profile["rules"]:
+        rule["index"] = index
         index += 1
-    return profile.rules
+    return profile["rules"]
+
+
+class AutoScaleRuleDelete(_AutoScaleUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.profile_name = AAZStrArg(
+            options=["--profile-name"],
+            help='Name of the autoscale profile.',
+            registered=False,
+            default=DEFAULT_PROFILE_NAME
+        )
+        args_schema.index = AAZListArg(
+            options=["--index"],
+            help="Space-separated list of rule indices to remove, or '*' to clear all rules.",
+            registered=False,
+            required=True,
+        )
+        args_schema.index.Element = AAZStrArg()
+        return args_schema
+
+    def pre_instance_update(self, instance):
+        args = self.ctx.args
+        profile_name = args.profile_name.to_serialized_data()
+        index = args.index.to_serialized_data()
+        instance = self.ctx.vars.instance
+        profile = _identify_profile(instance.properties.profiles, profile_name)
+        if '*' in index:
+            profile.rules = []
+        else:
+            remained_rules = []
+            for i, rule in enumerate(profile.rules):
+                if str(i) in index:
+                    pass
+                remained_rules.append(rule)
+            profile.rules = remained_rules
+
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined
+        if has_value(self.ctx.vars.instance.properties.name):
+            self.ctx.vars.instance.properties.name = AAZUndefined
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+def autoscale_rule_delete_new(cmd, autoscale_name, resource_group_name, index, profile_name=DEFAULT_PROFILE_NAME):
+    AutoScaleRuleDelete(cli_ctx=cmd.cli_ctx)(command_args={
+        "autoscale_name": autoscale_name,
+        "resource_group": resource_group_name,
+        "profile_name": profile_name,
+        "index": index
+    })
 
 
 def autoscale_rule_delete(cmd, client, autoscale_name, resource_group_name, index, profile_name=DEFAULT_PROFILE_NAME):
@@ -385,6 +575,66 @@ def autoscale_rule_delete(cmd, client, autoscale_name, resource_group_name, inde
         for i in index:
             del profile.rules[int(i)]
     autoscale_settings = client.create_or_update(resource_group_name, autoscale_name, autoscale_settings)
+
+
+class AutoScaleRuleCopy(_AutoScaleUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.source_profile = AAZStrArg(
+            options=["--source-profile"],
+            help='Name of the autoscale profile.',
+            required=True,
+            registered=False,
+            default=DEFAULT_PROFILE_NAME
+        )
+        args_schema.dest_profile = AAZStrArg(
+            options=["--dest-profile"],
+            help='Name of the autoscale profile.',
+            required=True,
+            registered=False,
+        )
+        args_schema.index = AAZListArg(
+            options=["--index"],
+            help="Space-separated list of rule indices to remove, or '*' to clear all rules.",
+            registered=False,
+        )
+        args_schema.index.Element = AAZStrArg()
+        return args_schema
+
+    def pre_instance_update(self, instance):
+        args = self.ctx.args
+        source_profile_name = args.source_profile.to_serialized_data()
+        dest_profile_name = args.dest_profile.to_serialized_data()
+        index = args.index.to_serialized_data()
+        instance = self.ctx.vars.instance
+
+        src_profile = _identify_profile(instance.properties.profiles, source_profile_name)
+        dst_profile = _identify_profile(instance.properties.profiles, dest_profile_name)
+        if '*' in index:
+            dst_profile.rules = src_profile.rules
+        else:
+            for i in index:
+                dst_profile.rules.append(src_profile.rules[int(i)])
+
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined
+        if has_value(self.ctx.vars.instance.properties.name):
+            self.ctx.vars.instance.properties.name = AAZUndefined
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+def autoscale_rule_copy_new(cmd, autoscale_name, resource_group_name, dest_profile, index,
+                            source_profile=DEFAULT_PROFILE_NAME):
+    AutoScaleRuleCopy(cli_ctx=cmd.cli_ctx)(command_args={
+        "autoscale_name": autoscale_name,
+        "resource_group": resource_group_name,
+        "source_profile": source_profile,
+        "dest_profile": dest_profile,
+        "index": index
+    })
 
 
 def autoscale_rule_copy(cmd, client, autoscale_name, resource_group_name, dest_profile, index,
@@ -403,6 +653,15 @@ def autoscale_rule_copy(cmd, client, autoscale_name, resource_group_name, dest_p
 def _identify_profile(profiles, profile_name):
     try:
         profile = next(x for x in profiles if x.name == profile_name)
+    except StopIteration:
+        raise CLIError('Cannot find profile {}. '
+                       'Please double check the name of the autoscale profile.'.format(profile_name))
+    return profile
+
+
+def _identify_profile_cg(profiles, profile_name):
+    try:
+        profile = next(x for x in profiles if x["name"] == profile_name)
     except StopIteration:
         raise CLIError('Cannot find profile {}. '
                        'Please double check the name of the autoscale profile.'.format(profile_name))

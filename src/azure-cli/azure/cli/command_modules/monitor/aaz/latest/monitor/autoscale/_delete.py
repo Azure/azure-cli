@@ -41,8 +41,8 @@ class Delete(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.autoscale_setting_name = AAZStrArg(
-            options=["-n", "--name", "--autoscale-setting-name"],
+        _args_schema.autoscale_name = AAZStrArg(
+            options=["-n", "--name", "--autoscale-name"],
             help="The autoscale setting name.",
             required=True,
             id_part="name",
@@ -97,7 +97,7 @@ class Delete(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "autoscaleSettingName", self.ctx.args.autoscale_setting_name,
+                    "autoscaleSettingName", self.ctx.args.autoscale_name,
                     required=True,
                 ),
                 **self.serialize_url_param(

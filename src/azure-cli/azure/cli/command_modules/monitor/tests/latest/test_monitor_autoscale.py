@@ -288,7 +288,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
         schedules = self.cmd('monitor autoscale profile list -g {rg} --autoscale-name {vmss}').get_output_in_json()
 
         def _is_default(val):
-            if not val['fixedDate'] and not val['recurrence']:
+            if not val.get('fixedDate', None) and not val.get('recurrence', None):
                 return True
             try:
                 json.loads(val['name'])

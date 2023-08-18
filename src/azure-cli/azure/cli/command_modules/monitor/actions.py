@@ -238,16 +238,25 @@ class AutoscaleAddAction(argparse._AppendAction):
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         _type = values[0].lower()
         if _type == 'email':
-            from azure.mgmt.monitor.models import EmailNotification
-            return EmailNotification(custom_emails=values[1:])
+            return {
+                "key": "email",
+                "value": {
+                    "custom_emails": values[1:]
+                }
+            }
         if _type == 'webhook':
-            from azure.mgmt.monitor.models import WebhookNotification
             uri = values[1]
             try:
                 properties = dict(x.split('=', 1) for x in values[2:])
             except ValueError:
                 raise InvalidArgumentValueError('{} webhook URI [KEY=VALUE ...]'.format(option_string))
-            return WebhookNotification(service_uri=uri, properties=properties)
+            return {
+                "key": "webhook",
+                "value": {
+                    "service_uri": uri,
+                    "properties": properties
+                }
+            }
         raise InvalidArgumentValueError('{} TYPE KEY [ARGS]'.format(option_string))
 
 
