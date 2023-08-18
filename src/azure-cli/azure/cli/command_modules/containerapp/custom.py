@@ -3706,17 +3706,29 @@ def containerapp_up_logic(cmd, resource_group_name, name, managed_env, image, en
 
 
 def list_certificates(cmd, name, resource_group_name, location=None, certificate=None, thumbprint=None):
+    if certificate and is_valid_resource_id(certificate):
+        certificate_type = parse_resource_id(certificate)["resource_type"]
+    else:
+        certificate_type = PRIVATE_CERTIFICATE_RT
+
+    if certificate_type != PRIVATE_CERTIFICATE_RT:
+        raise ValidationError(f"The certificate {certificate} is not private-key certificate.")
+    return list_certificates_logic(cmd, name, resource_group_name, location, certificate, thumbprint, private_key_certificates_only=True)
+
+
+def list_certificates_logic(cmd, name, resource_group_name, location=None, certificate=None, thumbprint=None, managed_certificates_only=False, private_key_certificates_only=False):
     _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
+    if managed_certificates_only and private_key_certificates_only:
+        raise MutuallyExclusiveArgumentError("Use either '--managed-certificates-only' or '--private-key-certificates-only'.")
+    if managed_certificates_only and thumbprint:
+        raise MutuallyExclusiveArgumentError("'--thumbprint' not supported for managed certificates.")
 
     if certificate and is_valid_resource_id(certificate):
         certificate_name = parse_resource_id(certificate)["resource_name"]
         certificate_type = parse_resource_id(certificate)["resource_type"]
     else:
         certificate_name = certificate
-        certificate_type = PRIVATE_CERTIFICATE_RT
-
-    if certificate_type != PRIVATE_CERTIFICATE_RT:
-        raise ValidationError(f"The certificate {certificate} is not private-key certificate.")
+        certificate_type = PRIVATE_CERTIFICATE_RT if private_key_certificates_only or thumbprint else (MANAGED_CERTIFICATE_RT if managed_certificates_only else None)
 
     if certificate_type == MANAGED_CERTIFICATE_RT:
         return get_managed_certificates(cmd, name, resource_group_name, certificate_name, location)
@@ -3809,17 +3821,14 @@ def upload_certificate(cmd, name, resource_group_name, certificate_file, certifi
 
 
 def delete_certificate(cmd, resource_group_name, name, location=None, certificate=None, thumbprint=None):
-    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
-
     if not certificate and not thumbprint:
         raise RequiredArgumentMissingError('Please specify at least one of parameters: --certificate and --thumbprint')
-
-    cert_type = None
+    # validate for GA
     cert_name = certificate
     if certificate and is_valid_resource_id(certificate):
         cert_type = parse_resource_id(certificate)["resource_type"]
         cert_name = parse_resource_id(certificate)["resource_name"]
-    else:  # validate for GA
+    else:
         cert_type = PRIVATE_CERTIFICATE_RT
 
     if thumbprint:
@@ -3827,6 +3836,22 @@ def delete_certificate(cmd, resource_group_name, name, location=None, certificat
 
     if cert_type != PRIVATE_CERTIFICATE_RT:
         raise ValidationError(f"The certificate {cert_name} is not private-key certificate.")
+
+    delete_certificate_logic(cmd, resource_group_name, name, cert_name, location, certificate, thumbprint, cert_type)
+
+
+# this function will be used in extension
+def delete_certificate_logic(cmd, resource_group_name, name, cert_name, location=None, certificate=None, thumbprint=None, cert_type=None):
+    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
+    if not certificate and not thumbprint:
+        raise RequiredArgumentMissingError('Please specify at least one of parameters: --certificate and --thumbprint')
+
+    cert_name = certificate
+    if certificate and is_valid_resource_id(certificate):
+        cert_type = parse_resource_id(certificate)["resource_type"]
+        cert_name = parse_resource_id(certificate)["resource_name"]
+    if thumbprint:
+        cert_type = PRIVATE_CERTIFICATE_RT
 
     if cert_type == PRIVATE_CERTIFICATE_RT:
         certs = list_certificates(cmd, name, resource_group_name, location, certificate, thumbprint)
@@ -3886,11 +3911,14 @@ def upload_ssl(cmd, resource_group_name, name, environment, certificate_file, ho
 
 
 def bind_hostname(cmd, resource_group_name, name, hostname, thumbprint=None, certificate=None, location=None, environment=None):
-    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
     # validate for GA
-    validation_method = ""
     if not thumbprint and not certificate:
         raise RequiredArgumentMissingError('Please specify at least one of parameters: --certificate and --thumbprint')
+    return bind_hostname_logic(cmd, resource_group_name, name, hostname, thumbprint, certificate, location, environment)
+
+
+def bind_hostname_logic(cmd, resource_group_name, name, hostname, thumbprint=None, certificate=None, location=None, environment=None, validation_method=None):
+    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
 
     if not environment and not certificate:
         raise RequiredArgumentMissingError('Please specify at least one of parameters: --certificate and --environment')
