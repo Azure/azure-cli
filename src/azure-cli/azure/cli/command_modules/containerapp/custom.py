@@ -3715,7 +3715,7 @@ def list_certificates(cmd, name, resource_group_name, location=None, certificate
         certificate_name = certificate
         certificate_type = PRIVATE_CERTIFICATE_RT
 
-    if certificate_type and certificate_type.lower() != PRIVATE_CERTIFICATE_RT.lower():
+    if certificate_type != PRIVATE_CERTIFICATE_RT:
         raise ValidationError(f"The certificate {certificate} is not private-key certificate.")
 
     if certificate_type == MANAGED_CERTIFICATE_RT:
@@ -3819,12 +3819,12 @@ def delete_certificate(cmd, resource_group_name, name, location=None, certificat
     if certificate and is_valid_resource_id(certificate):
         cert_type = parse_resource_id(certificate)["resource_type"]
         cert_name = parse_resource_id(certificate)["resource_name"]
+    else:  # validate for GA
+        cert_type = PRIVATE_CERTIFICATE_RT
+
     if thumbprint:
         cert_type = PRIVATE_CERTIFICATE_RT
 
-    # validate for GA
-    if certificate and not is_valid_resource_id(certificate):
-        cert_type = PRIVATE_CERTIFICATE_RT
     if cert_type != PRIVATE_CERTIFICATE_RT:
         raise ValidationError(f"The certificate {cert_name} is not private-key certificate.")
 
