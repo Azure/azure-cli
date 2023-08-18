@@ -479,6 +479,11 @@ def flexible_server_import_create(cmd, client,
 
     single_server_client = cf_mysql_servers(cli_ctx=cmd.cli_ctx, _=None)
 
+    if data_source_type.lower() == 'mysql_single':
+        create_mode = 'Migrate'
+    else:
+        create_mode = 'Create'
+        
     try:
 
         id_parts = parse_resource_id(source_server_id)
@@ -607,7 +612,8 @@ def flexible_server_import_create(cmd, client,
         high_availability = mysql_flexibleservers.models.HighAvailability(mode=high_availability,
                                                                           standby_availability_zone=standby_availability_zone)
         
-        administrator_login_password = generate_password(administrator_login_password)
+        if create_mode != 'Migrate':
+            administrator_login_password = generate_password(administrator_login_password)
 
         identity, data_encryption = build_identity_and_data_encryption(db_engine='mysql',
                                                                        byok_identity=byok_identity,
