@@ -21,14 +21,14 @@ from azure.mgmt.rdbms import mysql_flexibleservers
 from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError, ValidationError
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, cf_mysql_flexible_db, \
     cf_mysql_check_resource_availability, cf_mysql_check_resource_availability_without_location, cf_mysql_flexible_config, \
-    cf_mysql_flexible_servers, cf_mysql_flexible_replica, cf_mysql_flexible_adadmin, cf_mysql_flexible_private_dns_zone_suffix_operations
+    cf_mysql_flexible_servers, cf_mysql_flexible_replica, cf_mysql_flexible_adadmin, cf_mysql_flexible_private_dns_zone_suffix_operations, cf_mysql_servers
 from ._util import resolve_poller, generate_missing_parameters, get_mysql_list_skus_info, generate_password, parse_maintenance_window, \
     replace_memory_optimized_tier, build_identity_and_data_encryption, get_identity_and_data_encryption, get_tenant_id, run_subprocess, \
     run_subprocess_get_output, fill_action_template, get_git_root_dir, get_location_from_resource_group, GITHUB_ACTION_PATH
 from ._network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_private_network, prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from ._validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, mysql_restore_tier_validator, \
     mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, validate_mysql_replica, validate_server_name, validate_georestore_location, \
-    validate_mysql_tier_update, validate_and_format_restore_point_in_time, validate_public_access_server
+    validate_mysql_tier_update, validate_and_format_restore_point_in_time, validate_public_access_server, mysql_import_storage_validator, mysql_import_version_validator
 
 logger = get_logger(__name__)
 DELEGATION_SERVICE_NAME = "Microsoft.DBforMySQL/flexibleServers"
@@ -477,8 +477,61 @@ def flexible_server_import_create(cmd, client,
     else:
         source_server_id = data_source
 
+    single_server_client = cf_mysql_servers(cli_ctx=cmd.cli_ctx, _=None)
+
     try:
-        location = get_location_from_resource_group(cmd, resource_group_name, location)
+
+        id_parts = parse_resource_id(source_server_id)
+        source_single_server = single_server_client.get(id_parts['resource_group'], id_parts['name'])
+        location = ''.join(source_single_server.location.lower().split())
+        list_skus_info = get_mysql_list_skus_info(cmd, location)
+        sku_mapping = {"Basic":{1:"Standard_B1ms",2:"Standard_B2ms"},"GeneralPurpose":{2:"Standard_D2ds_v4",4:"Standard_D4ds_v4",8:"Standard_D8ds_v4",16:"Standard_D16ds_v4",32:"Standard_D32ds_v4",64:"Standard_D64ds_v4"},"MemoryOptimized":{2:"Standard_E2ds_v4",4:"Standard_E4ds_v4",8:"Standard_E8ds_v4",16:"Standard_E16ds_v4",32:"Standard_E32ds_v4"}}
+
+        if not tier:
+            single_server_tier = source_single_server.sku.tier
+            if single_server_tier == 'Basic':
+                tier = 'Burstable'
+            else:
+                tier = single_server_tier
+
+        if not sku_name:
+            if tier == 'Burstable':
+                sku_name = sku_mapping.get('Basic').get(source_single_server.sku.capacity)
+            else:
+                sku_name = sku_mapping.get(tier).get(source_single_server.sku.capacity)
+
+        if not storage_gb:
+            storage_gb = source_single_server.storage_profile.storage_mb / 1024
+
+        if not auto_grow:
+            auto_grow = source_single_server.storage_profile.auto_grow
+
+        if not backup_retention:
+            backup_retention = source_single_server.storage_profile.backup_retention_days
+
+        if not geo_redundant_backup:
+            geo_redundant_backup = source_single_server.storage_profile.geo_redundant_backup
+        
+        if not version:
+            version = source_single_server.version
+            if version.startswith('8.0'):
+                version = '8.0.21'
+
+        if not tags:
+            tags = source_single_server.tags
+
+        if not public_access:
+            public_access = source_single_server.public_network_access
+
+        # if source_single_server.byok_enforcement == 'Enabled':
+        #     if byok_key is None or byok_identity is None:
+        #         raise CLIError('Source Single Server has byok enabled. Please provide byok_key and byok_identity')
+        
+        # if source_single_server.private_endpoint_connections is not None:
+        #     raise CLIError('Source Single Server has private endpoint connection. Please provide vnet and subnet')
+            
+        # if source_single_server.infrastructure_encryption== 'Enabled':
+        #     raise CLIError('Source Single Server has infrastructure encryption enabled. Please provide byok_key and byok_identity')
 
         db_context = DbContext(
             cmd=cmd, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
@@ -553,7 +606,7 @@ def flexible_server_import_create(cmd, client,
 
         high_availability = mysql_flexibleservers.models.HighAvailability(mode=high_availability,
                                                                           standby_availability_zone=standby_availability_zone)
-
+        
         administrator_login_password = generate_password(administrator_login_password)
 
         identity, data_encryption = build_identity_and_data_encryption(db_engine='mysql',
