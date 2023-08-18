@@ -397,9 +397,8 @@ jobs:
         artifactName: $(packageArtifactName)
     - bash: |
         set -ex
-        mv $(Build.ArtifactStagingDirectory)/docker/*.rpm $(Build.ArtifactStagingDirectory)/docker/azure-cli.rpm
-        pwd
-        ls ./docker
+        mkdir docker
+        mv $(Build.ArtifactStagingDirectory)/docker/*.rpm ./docker/azure-cli.rpm
         
         bash scripts/release/docker/pipeline.sh
       displayName: 'Build Docker'
