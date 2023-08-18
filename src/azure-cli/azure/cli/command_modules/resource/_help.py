@@ -2831,7 +2831,7 @@ examples:
 
 helps['bicep decompile-params'] = """
 type: command
-short-summary: Attempts to decompile a parameters .json file to .bicepparam.
+short-summary: Decompile a parameters .json file to .bicepparam.
 examples:
   - name: Attempts to decompile a parameters .json file to .bicepparam.
     text: az bicep decompile-params --file {json_template_file}
