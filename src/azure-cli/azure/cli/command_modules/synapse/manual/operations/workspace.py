@@ -125,17 +125,14 @@ def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin
     if user_assigned_identity_id:
         if user_assigned_identity_action == 'Add':
             if existing_ws.identity.user_assigned_identities:
-                for uami_id in user_assigned_identity_id:
-                    userAssignedIdentities = UserAssignedManagedIdentity()
-                    existing_ws.identity.user_assigned_identities[uami_id] = userAssignedIdentities
-                identity = existing_ws.identity
+                keysList = list(existing_ws.identity.user_assigned_identities.keys())
             else:
                 keysList = []
-                for uami_id in user_assigned_identity_id:
-                    keysList.append(uami_id)
-                userAssignedIdentities = UserAssignedManagedIdentity()
-                userAssignedIdentitiesdict = dict.fromkeys(keysList, userAssignedIdentities)
-                identity = ManagedIdentity(type="SystemAssigned,UserAssigned", user_assigned_identities=userAssignedIdentitiesdict)
+            for uami_id in user_assigned_identity_id:
+                keysList.append(uami_id)
+            userAssignedIdentities = UserAssignedManagedIdentity()
+            userAssignedIdentitiesdict = dict.fromkeys(keysList, userAssignedIdentities)
+            identity = ManagedIdentity(type="SystemAssigned,UserAssigned", user_assigned_identities=userAssignedIdentitiesdict)
         elif user_assigned_identity_action == 'Remove':
             keysList = list(existing_ws.identity.user_assigned_identities.keys())
             for uami_id in user_assigned_identity_id:
