@@ -176,16 +176,12 @@ def is_centauri_functionapp(cmd, resource_group, name):
     return function_app.get("properties", {}).get("managedEnvironmentId", None) is not None
 
 
-def is_flex_functionapp(cmd, resource_group, name):
-    client = web_client_factory(cmd.cli_ctx)
+def is_flex_functionapp(cli_ctx, resource_group, name):
+    client = web_client_factory(cli_ctx)
     app = client.web_apps.get(resource_group, name)
     parse_plan_id = parse_resource_id(app.server_farm_id)
     plan_info = client.app_service_plans.get(parse_plan_id['resource_group'], parse_plan_id['name'])
-    SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
-    if isinstance(plan_info, AppServicePlan):
-        if isinstance(plan_info.sku, SkuDescription):
-            return plan_info.sku.tier.lower() == 'flexconsumption'
-    return False
+    return plan_info.sku.tier.lower() == 'flexconsumption'
 
 
 def _list_app(cli_ctx, resource_group_name=None):
