@@ -162,7 +162,7 @@ class AzCliCommandParser(CLICommandParser):
         # Get command to provide to error help
         command = command_arguments[0] # Get the command without the parameter, command return from _get_failure_recover_arguments with two other var
         parameters = AzCliCommandInvoker._extract_parameter_names(self._raw_arguments)
-        full_command = str(command) + ' ' + ''.join(parameters)
+        full_command = str(command) + ' ' + ' '.join(parameters)
 
         az_error = ArgumentUsageError(message, full_command)
         if 'unrecognized arguments' in message:
