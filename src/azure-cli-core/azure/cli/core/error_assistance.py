@@ -5,13 +5,18 @@ import configparser
 
 from azure.cli.core._config import GLOBAL_CONFIG_PATH
 
-def error_assistance(command):      
+def error_assistance(command, message=None):      
         openai.api_key = <api-key>
         openai.api_version = "2023-07-01-preview"
         openai.api_type = "azure"
         openai.api_base = <endpoint>
 
-        prompt = "Azure CLI Command: " + command + ", This isn't working, why not?"
+        if message==None:
+                prompt = "Azure CLI Command: " + command + ", This isn't working, why not?"
+        #elif command is not None:
+         #       prompt = "Azure CLI Command: " + command + ", Azure CLI Error: " + message + ", What did I do wrong?"
+        else:
+                prompt = "Azure CLI Error: " + message + ", What did I do wrong?"
 
         messages = [
                 {"role": "system", "content": "You are a helpful assistant that provides concise explanations about the Azure CLI error provided and provides a remedied command."},
@@ -21,7 +26,7 @@ def error_assistance(command):
         functions = [  
             {
                 "name": "error_response",
-                "description": "Receives an Azure CLI error message and the user's command that triggered the error and provides an explanation as to what the problem is as well as the corrected command without any additional text",
+                "description": "Receives an Azure CLI error message and the user's command (with parameter values removed) that triggered the error and provides an explanation as to what the problem is as well as the corrected command without any additional text",
                 "parameters": {
                     "type": "object",
                     "properties": {
