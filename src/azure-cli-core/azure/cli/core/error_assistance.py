@@ -32,11 +32,11 @@ def error_assistance(command, message=None):
                     "properties": {
                         "explanation": {
                             "type": "string",
-                            "description": "Tell the user what to fix in their command (i.e. The --name flag is missing before the resource name). Do not describe the error message. The parameter values have been removed, so if there is a parameter issue or nothing wrong with the command tell the user to double check the parameters (i.e. Please double check the parameter values)"
+                            "description": "The explanation as to what the user did wrong in their initial command (i.e. The --name flag is missing before the resource name). Do not describe the error message. The parameter values have been removed, so if there is nothing wrong with the command tell the user to double check the parameters (i.e. Please double check the parameter values)"
                         },
                         "corrected_command": {
                             "type": "string",
-                            "description": "The corrected command (i.e. az keyvault create --name <UniqueKeyvaultName> --resource-group <myResourceGroup> --location <eastus>). Don't return anything if no command was provided."
+                            "description": "The corrected command (i.e. az keyvault create --name <UniqueKeyvaultName> --resource-group <myResourceGroup> --location <eastus>)."
                         }
                     },
                     "required": ["explanation", "corrected_command"],
