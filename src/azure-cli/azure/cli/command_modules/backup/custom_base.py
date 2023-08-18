@@ -448,7 +448,7 @@ def enable_for_azurefileshare(cmd, client, resource_group_name, vault_name, poli
 
 def restore_azurefileshare(cmd, client, resource_group_name, vault_name, rp_name, container_name, item_name,
                            restore_mode, resolve_conflict, target_storage_account=None, target_file_share=None,
-                           target_folder=None):
+                           target_folder=None, target_resource_group_name=None):
     backup_management_type = "AzureStorage"
     workload_type = "AzureFileShare"
     items_client = backup_protected_items_cf(cmd.cli_ctx)
@@ -462,12 +462,13 @@ def restore_azurefileshare(cmd, client, resource_group_name, vault_name, rp_name
     return custom_afs.restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name, item, restore_mode,
                                              resolve_conflict, "FullShareRestore",
                                              target_storage_account_name=target_storage_account,
-                                             target_file_share_name=target_file_share, target_folder=target_folder)
+                                             target_file_share_name=target_file_share, target_folder=target_folder,
+                                             target_resource_group_name=target_resource_group_name)
 
 
 def restore_azurefiles(cmd, client, resource_group_name, vault_name, rp_name, container_name, item_name, restore_mode,
                        resolve_conflict, target_storage_account=None, target_file_share=None, target_folder=None,
-                       source_file_type=None, source_file_path=None,):
+                       source_file_type=None, source_file_path=None):
     backup_management_type = "AzureStorage"
     workload_type = "AzureFileShare"
     items_client = backup_protected_items_cf(cmd.cli_ctx)
