@@ -122,7 +122,7 @@ set PYTHON_EXE=%PYTHON_DIR%\python.exe
 robocopy %PYTHON_DIR% %BUILDING_DIR% /s /NFL /NDL
 
 set CLI_SRC=%REPO_ROOT%\src
-%BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --force-reinstall pycparser==2.18
+%BUILDING_DIR%\python.exe -m pip install --upgrade --no-warn-script-location setuptools
 for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-telemetry) do (
    pushd %%a
    %BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --no-cache-dir --no-deps .
