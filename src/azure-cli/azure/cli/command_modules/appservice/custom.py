@@ -4551,7 +4551,7 @@ def get_tunnel(cmd, resource_group_name, name, port=None, slot=None, instance=No
 
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
 
-    tunnel_server = TunnelServer('', port, scm_url, profile_user_name, profile_user_password, instance)
+    tunnel_server = TunnelServer('127.0.0.1', port, scm_url, profile_user_name, profile_user_password, instance)
     _ping_scm_site(cmd, resource_group_name, name, instance=instance)
 
     _wait_for_webapp(tunnel_server)
@@ -4564,7 +4564,7 @@ def create_tunnel(cmd, resource_group_name, name, port=None, slot=None, timeout=
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
     t.daemon = True
     t.start()
-
+    logger.warning('Opening tunnel on addr: %s', tunnel_server.local_addr)
     logger.warning('Opening tunnel on port: %s', tunnel_server.local_port)
 
     config = get_site_configs(cmd, resource_group_name, name, slot)
