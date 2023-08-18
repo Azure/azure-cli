@@ -1763,7 +1763,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             "load_balancer_managed_outbound_ip_count"
         )
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
+        if load_balancer_managed_outbound_ip_count is None and self.decorator_mode == DecoratorMode.UPDATE:
             if (
                 self.mc and
                 self.mc.network_profile and
@@ -1788,7 +1788,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         count_ipv6 = self.raw_param.get('load_balancer_managed_outbound_ipv6_count')
 
-        if self.decorator_mode == DecoratorMode.CREATE:
+        if count_ipv6 is None and self.decorator_mode == DecoratorMode.UPDATE:
             if (
                 self.mc and
                 self.mc.network_profile and
@@ -1799,23 +1799,6 @@ class AKSManagedClusterContext(BaseAKSContext):
                 count_ipv6 = (
                     self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count_ipv6
                 )
-        elif self.decorator_mode == DecoratorMode.UPDATE:
-            if (
-                not self.get_load_balancer_outbound_ips() and
-                not self.get_load_balancer_outbound_ip_prefixes() and
-                count_ipv6 is None
-            ):
-                if (
-                    self.mc and
-                    self.mc.network_profile and
-                    self.mc.network_profile.load_balancer_profile and
-                    self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps and
-                    self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count_ipv6 is not None
-                ):
-                    count_ipv6 = (
-                        self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count_ipv6
-                    )
-
         return count_ipv6
 
     def get_load_balancer_outbound_ips(self) -> Union[str, List[ResourceReference], None]:
@@ -1830,7 +1813,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             "load_balancer_outbound_ips"
         )
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
+        if load_balancer_outbound_ips is None and self.decorator_mode == DecoratorMode.UPDATE:
             if (
                 self.mc and
                 self.mc.network_profile and
@@ -1856,7 +1839,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             "load_balancer_outbound_ip_prefixes"
         )
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
+        if load_balancer_outbound_ip_prefixes is None and self.decorator_mode == DecoratorMode.UPDATE:
             if (
                 self.mc and
                 self.mc.network_profile and
@@ -1884,7 +1867,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             "load_balancer_outbound_ports"
         )
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
+        if load_balancer_outbound_ports is None and self.decorator_mode == DecoratorMode.UPDATE:
             if (
                 self.mc and
                 self.mc.network_profile and
@@ -1911,7 +1894,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             "load_balancer_idle_timeout"
         )
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
+        if load_balancer_idle_timeout is None and self.decorator_mode == DecoratorMode.UPDATE:
             if (
                 self.mc and
                 self.mc.network_profile and
@@ -1936,7 +1919,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         # read the original value passed by the command
         nat_gateway_managed_outbound_ip_count = self.raw_param.get("nat_gateway_managed_outbound_ip_count")
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
+        if nat_gateway_managed_outbound_ip_count is None and self.decorator_mode == DecoratorMode.UPDATE:
             if (
                 self.mc and
                 self.mc.network_profile and
@@ -1962,7 +1945,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         # read the original value passed by the command
         nat_gateway_idle_timeout = self.raw_param.get("nat_gateway_idle_timeout")
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
+        if nat_gateway_idle_timeout is None and self.decorator_mode == DecoratorMode.UPDATE:
             if (
                 self.mc and
                 self.mc.network_profile and
