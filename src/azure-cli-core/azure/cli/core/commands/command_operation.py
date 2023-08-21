@@ -47,10 +47,10 @@ class BaseCommandOperation:
         import types
 
         from azure.cli.core.profiles import AZURE_API_PROFILES
-        from azure.cli.core.profiles._shared import get_versioned_sdk_path, AZURE_SDK_WITHOUT_API_VERSION_FOLDER
+        from azure.cli.core.profiles._shared import get_versioned_sdk_path, AZURE_SDK_WITH_API_VERSION_VALIDATION
 
         is_add_api_version = True
-        for rt in AZURE_SDK_WITHOUT_API_VERSION_FOLDER:
+        for rt in AZURE_SDK_WITH_API_VERSION_VALIDATION:
             if op_path.startswith(rt.import_prefix + '.'):
                 is_add_api_version = False
                 break
