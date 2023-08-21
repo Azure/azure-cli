@@ -125,20 +125,20 @@ def load_command_table(self, _):
         g.custom_command('scope remove', 'remove_scope')
 
     with self.command_group('monitor autoscale', autoscale_sdk, custom_command_type=autoscale_custom) as g:
-        g.custom_command('create', 'autoscale_create', validator=process_autoscale_create_namespace)  # done
+        g.custom_command('create', 'autoscale_create_new', validator=process_autoscale_create_namespace)  # done
         g.generic_update_command('update', custom_func_name='autoscale_update', custom_func_type=autoscale_custom)
         # g.command('delete', 'delete')
         # g.show_command('show', 'get')
-        g.command('list', 'list_by_resource_group')
-        from .operations.autoscale_settings import AutoScaleShow
+        # g.command('list', 'list_by_resource_group')
+        from .operations.autoscale_settings import AutoScaleShow, AutoScaleList
         self.command_table['monitor autoscale show'] = AutoScaleShow(loader=self)
-        # self.command_table['monitor autoscale list'] = AutoScaleList(loader=self)
+        self.command_table['monitor autoscale list'] = AutoScaleList(loader=self)
 
     with self.command_group('monitor autoscale profile', autoscale_sdk, custom_command_type=autoscale_custom) as g:
         g.custom_command('create', 'autoscale_profile_create')
         g.custom_command('list', 'autoscale_profile_list')  # done
         g.custom_show_command('show', 'autoscale_profile_show')  # done
-        g.custom_command('delete', 'autoscale_profile_delete')
+        g.custom_command('delete', 'autoscale_profile_delete_new')  # done
         g.custom_command('list-timezones', 'autoscale_profile_list_timezones')  # no need
 
     with self.command_group('monitor autoscale rule', autoscale_sdk, custom_command_type=autoscale_custom) as g:

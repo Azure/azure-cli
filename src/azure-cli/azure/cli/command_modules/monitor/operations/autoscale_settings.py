@@ -18,6 +18,16 @@ logger = get_logger(__name__)
 DEFAULT_PROFILE_NAME = 'default'
 
 
+class AutoScaleCreate(_AutoScaleCreate):
+
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined
+        if has_value(self.ctx.vars.instance.properties.name):
+            self.ctx.vars.instance.properties.name = AAZUndefined
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
 class AutoScaleShow(_AutoScaleShow):
 
     def _output(self, *args, **kwargs):
@@ -36,8 +46,9 @@ class AutoScaleList(_AutoScaleList):
         for value in self.ctx.vars.instance.value:
             if has_value(value.properties):
                 value.properties.name = AAZUndefined
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
+        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
+        next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
+        return result, next_link
 
 
 # pylint: disable=too-many-locals
@@ -100,7 +111,7 @@ def autoscale_create_new(cmd, resource, count, autoscale_name=None, resource_gro
 
     if not (min_count == count and max_count == count):
         logger.warning('Follow up with `az monitor autoscale rule create` to add scaling rules.')
-    return _AutoScaleCreate(cli_ctx=cmd.cli_ctx)(command_args=args)
+    return AutoScaleCreate(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
 # pylint: disable=too-many-locals
@@ -396,9 +407,9 @@ class AutoScaleProfileDelete(_AutoScaleUpdate):
         default_profile, _ = build_autoscale_profile_from_instance(instance)
 
         def _should_retain_profile(profile):
-            name = profile.name
+            name = profile.name.to_serialized_data()
             try:
-                name = json.loads(profile.name)['for']
+                name = json.loads(profile.name.to_serialized_data())['for']
             except ValueError:
                 pass
             return name.lower() != profile_name.lower()
@@ -410,6 +421,13 @@ class AutoScaleProfileDelete(_AutoScaleUpdate):
         new_default, _ = build_autoscale_profile_from_instance(instance)
         if not new_default:
             instance.properties.profiles.append(default_profile)
+
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined
+        if has_value(self.ctx.vars.instance.properties.name):
+            self.ctx.vars.instance.properties.name = AAZUndefined
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
 def autoscale_profile_delete_new(cmd, autoscale_name, resource_group_name, profile_name):
