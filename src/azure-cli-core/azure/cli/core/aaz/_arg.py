@@ -78,7 +78,8 @@ class AAZBaseArg(AAZBaseType):
     """Base argument"""
 
     def __init__(self, options=None, required=False, help=None, arg_group=None, is_preview=False, is_experimental=False,
-                 id_part=None, default=AAZUndefined, blank=AAZUndefined, nullable=False, fmt=None, registered=True):
+                 id_part=None, default=AAZUndefined, blank=AAZUndefined, nullable=False, fmt=None, registered=True,
+                 configured_default=None):
         """
 
         :param options: argument optional names.
@@ -94,6 +95,7 @@ class AAZBaseArg(AAZBaseType):
         :param nullable: argument can accept `None` as value
         :param fmt: argument format
         :param registered: control whether register argument into command display
+        :param configured_default: the key to retrieve the default value from cli configuration
         """
         super().__init__(options=options, nullable=nullable)
         self._help = {}  # the key in self._help can be 'name', 'short-summary', 'long-summary', 'populator-commands'
@@ -114,6 +116,7 @@ class AAZBaseArg(AAZBaseType):
         self._blank = blank
         self._fmt = fmt
         self._registered = registered
+        self._configured_default = configured_default
 
     def to_cmd_arg(self, name, **kwargs):
         """ convert AAZArg to CLICommandArgument """
@@ -179,6 +182,9 @@ class AAZBaseArg(AAZBaseType):
                 message_func=_get_experimental_arg_message
             )
 
+        if self._configured_default:
+            arg.configured_default = self._configured_default
+
         action = self._build_cmd_action()   # call sub class's implementation to build CLICommandArgument action
         if action:
             arg.action = action
@@ -199,17 +205,14 @@ class AAZBaseArg(AAZBaseType):
 class AAZSimpleTypeArg(AAZBaseArg, AAZSimpleType):
     """Argument accept simple value"""
 
-    def __init__(self, enum=None, enum_case_sensitive=False, configured_default=None, **kwargs):
+    def __init__(self, enum=None, enum_case_sensitive=False, **kwargs):
         super().__init__(**kwargs)
         self.enum = AAZArgEnum(enum, case_sensitive=enum_case_sensitive) if enum else None
-        self._configured_default = configured_default
 
     def to_cmd_arg(self, name, **kwargs):
         arg = super().to_cmd_arg(name, **kwargs)
         if self.enum:
             arg.choices = self.enum.to_choices()    # convert it's enum value into choices in arg
-        if self._configured_default:
-            arg.configured_default = self._configured_default
         return arg
 
     def _build_cmd_action(self):
