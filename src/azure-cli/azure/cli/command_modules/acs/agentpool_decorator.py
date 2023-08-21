@@ -1044,17 +1044,14 @@ class AKSAgentPoolContext(BaseAKSContext):
         return zones
 
     def get_max_pods(self) -> Union[int, None]:
-        """Obtain the value of max_pods, default value is 0.
+        """Obtain the value of max_pods.
 
-        This function will normalize the parameter by default. Int 0 would be converted to None.
+        This function will normalize the parameter by default.
 
         :return: int or None
         """
         # read the original value passed by the command
-        max_pods = self.raw_param.get("max_pods", 0)
-        # normalize
-        if max_pods == 0:
-            max_pods = None
+        max_pods = self.raw_param.get("max_pods")
 
         # try to read the property value corresponding to the parameter from the `agentpool` object
         if self.agentpool and self.agentpool.max_pods is not None:

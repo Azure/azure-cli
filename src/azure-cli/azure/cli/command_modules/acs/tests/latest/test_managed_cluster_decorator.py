@@ -7169,7 +7169,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             enable_auto_scaling=False,
             count=3,
             node_taints=[],
-            os_disk_size_gb=0,
             upgrade_settings=upgrade_settings_1,
             type=CONST_VIRTUAL_MACHINE_SCALE_SETS,
             enable_encryption_at_host=False,

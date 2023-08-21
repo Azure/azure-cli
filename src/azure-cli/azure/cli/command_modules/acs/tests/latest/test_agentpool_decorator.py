@@ -1065,7 +1065,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
             self.agentpool_decorator_mode,
         )
-        self.assertEqual(ctx_1.get_max_pods(), None)
+        self.assertEqual(ctx_1.get_max_pods(), 0)
         agentpool = self.create_initialized_agentpool_instance(max_pods=110)
         ctx_1.attach_agentpool(agentpool)
         self.assertEqual(ctx_1.get_max_pods(), 110)
@@ -2132,7 +2132,6 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
             enable_auto_scaling=False,
             count=3,
             node_taints=[],
-            os_disk_size_gb=0,
             upgrade_settings=ground_truth_upgrade_settings_1,
             type_properties_type=CONST_VIRTUAL_MACHINE_SCALE_SETS,
             enable_encryption_at_host=False,
@@ -2277,7 +2276,6 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
             enable_auto_scaling=False,
             count=3,
             node_taints=[],
-            os_disk_size_gb=0,
             upgrade_settings=upgrade_settings_1,
             type=CONST_VIRTUAL_MACHINE_SCALE_SETS,
             enable_encryption_at_host=False,
