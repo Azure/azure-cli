@@ -77,26 +77,6 @@ def _log_analytics_client_factory(cli_ctx, **kwargs):
     return get_mgmt_service_client(cli_ctx, LogAnalyticsManagementClient, **kwargs)
 
 
-def cf_private_link_resources(cli_ctx, _):
-    return cf_monitor(cli_ctx).private_link_resources
-
-
-def cf_private_link_scoped_resources(cli_ctx, _):
-    return cf_monitor(cli_ctx).private_link_scoped_resources
-
-
-def cf_private_link_scope_operation_status(cli_ctx, _):
-    return cf_monitor(cli_ctx).private_link_scope_operation_status
-
-
-def cf_private_link_scopes(cli_ctx, _):
-    return cf_monitor(cli_ctx).private_link_scopes
-
-
-def cf_private_endpoint_connections(cli_ctx, _):
-    return cf_monitor(cli_ctx).private_endpoint_connections
-
-
 def cf_log_analytics_workspace(cli_ctx, _):
     return _log_analytics_client_factory(cli_ctx).workspaces
 

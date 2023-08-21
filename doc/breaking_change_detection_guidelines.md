@@ -2,11 +2,11 @@
 
 ## Overview
 
-Azure cli provides two types of tools to help users and developers check cli changes: one is a command line tool called [command-change](https://github.com/Azure/azure-cli-extensions/blob/main/src/command-change/README.md), the other is [azure-cli-diff-site](https://azure-cli-diff-site.azurewebsites.net/) that wraps the command line tool into a site with a more user-friendly interface. 
+Azure cli provides command line tool to help users and developers check cli changes: [command-change](https://github.com/Azure/azure-cli-extensions/blob/main/src/command-change/README.md) 
 
 There are two categories of breaking change detection users can check for Azure CLI: [version-diff](https://github.com/Azure/azure-cli-extensions/blob/main/src/command-change/README.md#version-diff) and [meta-diff](https://github.com/Azure/azure-cli-extensions/blob/main/src/command-change/README.md#meta-diff) .
 
-#### Prerequisite for command line tool
+#### Prerequisite
 
 Install cli extension `command-change`
 
@@ -43,15 +43,6 @@ az command-change meta-diff --base-meta-file fileA --diff-meta-file fileB
 ```
 
 By the way, both these two commands can add `--only-break` to just pull the break change list if needed.
-
-
-
-### azure-cli-diff-site
-
-This site works the same way as the command line tool:
-
-![azure-cli-diff-site](assets/azure-cli-diff-site.gif)
-
 
 
 ### Analysis

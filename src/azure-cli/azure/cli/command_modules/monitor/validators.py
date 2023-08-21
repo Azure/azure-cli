@@ -383,20 +383,6 @@ def get_action_group_id_validator(dest):
     return validate_action_group_ids
 
 
-def validate_private_endpoint_connection_id(namespace):
-    if namespace.connection_id:
-        from azure.cli.core.util import parse_proxy_resource_id
-        result = parse_proxy_resource_id(namespace.connection_id)
-        namespace.resource_group_name = result['resource_group']
-        namespace.scope_name = result['name']
-        namespace.private_endpoint_connection_name = result['child_name_1']
-
-    if not all([namespace.scope_name, namespace.resource_group_name, namespace.private_endpoint_connection_name]):
-        raise CLIError('incorrect usage. Please provide [--id ID] or [--name NAME --scope-name NAME -g NAME]')
-
-    del namespace.connection_id
-
-
 def validate_storage_accounts_name_or_id(cmd, namespace):
     if namespace.storage_account_ids:
         from msrestazure.tools import is_valid_resource_id, resource_id

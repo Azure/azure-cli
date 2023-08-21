@@ -540,8 +540,11 @@ class AFSItemPreparer(AbstractPreparer, SingleValueReplacer):
         return {self.parameter_name: os.environ.get('AZURE_CLI_TEST_DEV_BACKUP_ITEM_NAME', None)}
 
     def remove_resource(self, name, **kwargs):
-        # Vault deletion will take care of this.
-        pass
+        resource_group = self._get_resource_group(**kwargs)
+        storage_account = self._get_storage_account(**kwargs)
+        vault = self._get_vault(**kwargs)
+        afs = self._get_file_share(**kwargs)
+        self._cleanup(resource_group, storage_account, vault, afs)
 
     def _get_resource_group(self, **kwargs):
         try:
@@ -584,6 +587,35 @@ class AFSItemPreparer(AbstractPreparer, SingleValueReplacer):
             template = 'To create an item, a policy is required. Please add ' \
                        'decorator @AFSPolicyPreparer in front of this Item preparer.'
             raise CliTestError(template)
+
+    def _cleanup(self, resource_group, storage_account, vault, afs):
+        # Need to remove any resource locks on the Storage Account, and also manually delete the item
+        command_string = 'az lock list -g {}'.format(resource_group)
+        list_of_locks = execute(self.cli_ctx, command_string).get_output_in_json()
+        for lock in list_of_locks:
+            lock_id = lock["id"]
+            try:
+                command_string = 'az lock delete --ids {}'.format(lock_id)
+                execute(self.cli_ctx, command_string)
+            except Exception:
+                raise CliTestError('Unable to delete the lock with ID {}, please delete it manually'.format(lock_id))
+
+        command_string = 'az backup protection disable'
+        command_string += ' -g {} -v {} --container-name {} --item-name {}'
+        command_string += ' --backup-management-type AzureStorage --workload-type AzureFileShare --delete-backup-data true --yes'
+        command_string = command_string.format(resource_group, vault, storage_account, afs)
+        try:
+            execute(self.cli_ctx, command_string)
+        except Exception:
+            print('Warning: Unable to unregister AFS item during AFS Item test cleanup.')
+
+        command_string = 'az backup container unregister'
+        command_string += ' --vault-name {} --resource-group {} --container-name {} --backup-management-type AzureStorage --yes'
+        command_string = command_string.format(vault, resource_group, storage_account)
+        try:
+            execute(self.cli_ctx, command_string)
+        except Exception:
+            print('Warning: Unable to unregister storage container during AFS Item test cleanup.')
 
 
 class AFSRPPreparer(AbstractPreparer, SingleValueReplacer):
