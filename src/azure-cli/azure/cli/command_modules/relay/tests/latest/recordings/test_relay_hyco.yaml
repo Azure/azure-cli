@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"location": "westus2", "tags": {"{tag1": "value1,", "tag2": "value2}"}}'
+    body: '{"location": "westus2", "tags": {"tag1": "value1tag2=value2"}}'
     headers:
       Accept:
       - application/json
@@ -11,40 +11,37 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '72'
+      - '62'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - --resource-group --name --location --tags
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-relay/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.68
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002?api-version=2017-04-01
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002","name":"relay-nscli000002","type":"Microsoft.Relay/Namespaces","location":"West
-        US 2","tags":{"{tag1":"value1,","tag2":"value2}"},"properties":{"provisioningState":"Created","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:relay-nscli000002","createdAt":"2019-07-09T23:30:39.813Z","updatedAt":"2019-07-09T23:30:39.813Z","serviceBusEndpoint":"https://relay-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+        US 2","tags":{"tag1":"value1tag2=value2"},"properties":{"provisioningState":"Created","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:relay-nscli000002","createdAt":"2023-08-21T06:27:12.203Z","updatedAt":"2023-08-21T06:27:12.203Z","serviceBusEndpoint":"https://relay-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '682'
+      - '612'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 09 Jul 2019 23:30:39 GMT
+      - Mon, 21 Aug 2023 06:27:13 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -53,8 +50,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '48'
     status:
       code: 200
       message: OK
@@ -62,46 +59,41 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
       - relay namespace create
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - --resource-group --name --location --tags
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-relay/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.68
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002?api-version=2017-04-01
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002","name":"relay-nscli000002","type":"Microsoft.Relay/Namespaces","location":"West
-        US 2","tags":{"{tag1":"value1,","tag2":"value2}"},"properties":{"provisioningState":"Created","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:relay-nscli000002","createdAt":"2019-07-09T23:30:39.813Z","updatedAt":"2019-07-09T23:30:39.813Z","serviceBusEndpoint":"https://relay-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+        US 2","tags":{"tag1":"value1tag2=value2"},"properties":{"provisioningState":"Created","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:relay-nscli000002","createdAt":"2023-08-21T06:27:12.203Z","updatedAt":"2023-08-21T06:27:12.203Z","serviceBusEndpoint":"https://relay-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '682'
+      - '612'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 09 Jul 2019 23:31:10 GMT
+      - Mon, 21 Aug 2023 06:27:14 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -117,46 +109,91 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
       - relay namespace create
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - --resource-group --name --location --tags
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-relay/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.68
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002?api-version=2017-04-01
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002","name":"relay-nscli000002","type":"Microsoft.Relay/Namespaces","location":"West
-        US 2","tags":{"{tag1":"value1,","tag2":"value2}"},"properties":{"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:relay-nscli000002","createdAt":"2019-07-09T23:30:39.813Z","updatedAt":"2019-07-09T23:31:23.33Z","serviceBusEndpoint":"https://relay-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US 2","tags":{"tag1":"value1tag2=value2"},"properties":{"provisioningState":"Created","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:relay-nscli000002","createdAt":"2023-08-21T06:27:12.203Z","updatedAt":"2023-08-21T06:27:12.203Z","serviceBusEndpoint":"https://relay-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '679'
+      - '612'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 09 Jul 2019 23:31:40 GMT
+      - Mon, 21 Aug 2023 06:27:43 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --tags
+      User-Agent:
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002?api-version=2017-04-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002","name":"relay-nscli000002","type":"Microsoft.Relay/Namespaces","location":"West
+        US 2","tags":{"tag1":"value1tag2=value2"},"properties":{"provisioningState":"Succeeded","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:relay-nscli000002","createdAt":"2023-08-21T06:27:12.203Z","updatedAt":"2023-08-21T06:27:57.373Z","serviceBusEndpoint":"https://relay-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '610'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Aug 2023 06:28:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/CH3
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -179,39 +216,34 @@ interactions:
       - relay namespace show
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-relay/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.68
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002?api-version=2017-04-01
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002","name":"relay-nscli000002","type":"Microsoft.Relay/Namespaces","location":"West
-        US 2","tags":{"{tag1":"value1,","tag2":"value2}"},"properties":{"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:relay-nscli000002","createdAt":"2019-07-09T23:30:39.813Z","updatedAt":"2019-07-09T23:31:23.33Z","serviceBusEndpoint":"https://relay-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US 2","tags":{"tag1":"value1tag2=value2"},"properties":{"provisioningState":"Succeeded","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:relay-nscli000002","createdAt":"2023-08-21T06:27:12.203Z","updatedAt":"2023-08-21T06:27:57.373Z","serviceBusEndpoint":"https://relay-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '679'
+      - '610'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 09 Jul 2019 23:31:40 GMT
+      - Mon, 21 Aug 2023 06:28:16 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -237,38 +269,31 @@ interactions:
       Content-Length:
       - '2'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - --resource-group --namespace-name --name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-relay/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.68
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridConnections/relay-hycocli000004?api-version=2017-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridConnections/relay-hycocli000004","name":"relay-hycocli000004","type":"Microsoft.Relay/Namespaces/HybridConnections","location":"West
-        US 2","properties":{"createdAt":"2019-07-09T23:31:43.5869033Z","updatedAt":"2019-07-09T23:31:43.5869033Z","listenerCount":0,"requiresClientAuthorization":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridconnections/relay-hycocli000004","name":"relay-hycocli000004","type":"Microsoft.Relay/namespaces/hybridconnections","location":"westus2","properties":{"createdAt":"2023-08-21T06:28:21.0169828Z","updatedAt":"2023-08-21T06:28:21.0169828Z","listenerCount":0,"requiresClientAuthorization":true}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '519'
+      - '452'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 09 Jul 2019 23:31:43 GMT
+      - Mon, 21 Aug 2023 06:28:20 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -278,7 +303,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -293,39 +318,30 @@ interactions:
       - relay hyco show
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - --resource-group --namespace-name --name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-relay/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.68
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridConnections/relay-hycocli000004?api-version=2017-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridConnections/relay-hycocli000004","name":"relay-hycocli000004","type":"Microsoft.Relay/Namespaces/HybridConnections","location":"West
-        US 2","properties":{"createdAt":"2019-07-09T23:31:43.5869033Z","updatedAt":"2019-07-09T23:31:43.5869033Z","listenerCount":0,"requiresClientAuthorization":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridconnections/relay-hycocli000004","name":"relay-hycocli000004","type":"Microsoft.Relay/namespaces/hybridconnections","location":"westus2","properties":{"createdAt":"2023-08-21T06:28:21.0169828Z","updatedAt":"2023-08-21T06:28:21.0169828Z","listenerCount":0,"requiresClientAuthorization":true}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '519'
+      - '452'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 09 Jul 2019 23:31:44 GMT
+      - Mon, 21 Aug 2023 06:28:22 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -348,39 +364,30 @@ interactions:
       - relay hyco update
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - --resource-group --namespace-name --name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-relay/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.68
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridConnections/relay-hycocli000004?api-version=2017-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridConnections/relay-hycocli000004","name":"relay-hycocli000004","type":"Microsoft.Relay/Namespaces/HybridConnections","location":"West
-        US 2","properties":{"createdAt":"2019-07-09T23:31:43.5869033Z","updatedAt":"2019-07-09T23:31:43.5869033Z","listenerCount":0,"requiresClientAuthorization":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridconnections/relay-hycocli000004","name":"relay-hycocli000004","type":"Microsoft.Relay/namespaces/hybridconnections","location":"westus2","properties":{"createdAt":"2023-08-21T06:28:21.0169828Z","updatedAt":"2023-08-21T06:28:21.0169828Z","listenerCount":0,"requiresClientAuthorization":true}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '519'
+      - '452'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 09 Jul 2019 23:31:45 GMT
+      - Mon, 21 Aug 2023 06:28:23 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -393,7 +400,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{}'
+    body: '{"properties": {"requiresClientAuthorization": true}}'
     headers:
       Accept:
       - application/json
@@ -404,40 +411,33 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '2'
+      - '53'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - --resource-group --namespace-name --name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-relay/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.68
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridConnections/relay-hycocli000004?api-version=2017-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridConnections/relay-hycocli000004","name":"relay-hycocli000004","type":"Microsoft.Relay/Namespaces/HybridConnections","location":"West
-        US 2","properties":{"createdAt":"0001-01-01T00:00:00","updatedAt":"0001-01-01T00:00:00","listenerCount":0,"requiresClientAuthorization":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridconnections/relay-hycocli000004","name":"relay-hycocli000004","type":"Microsoft.Relay/namespaces/hybridconnections","location":"westus2","properties":{"createdAt":"2023-08-21T06:28:21.0169828Z","updatedAt":"2023-08-21T06:28:21.0169828Z","listenerCount":0,"requiresClientAuthorization":true}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '501'
+      - '452'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 09 Jul 2019 23:31:46 GMT
+      - Mon, 21 Aug 2023 06:28:24 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -462,39 +462,30 @@ interactions:
       - relay hyco list
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - --resource-group --namespace-name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-relay/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.68
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridConnections?api-version=2017-04-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridConnections/relay-hycocli000004","name":"relay-hycocli000004","type":"Microsoft.Relay/Namespaces/HybridConnections","location":"West
-        US 2","properties":{"createdAt":"2019-07-09T23:31:43.5869033Z","updatedAt":"2019-07-09T23:31:46.5610622Z","listenerCount":0,"requiresClientAuthorization":true}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridconnections/relay-hycocli000004","name":"relay-hycocli000004","type":"Microsoft.Relay/namespaces/hybridconnections","location":"westus2","properties":{"createdAt":"2023-08-21T06:28:21.0169828Z","updatedAt":"2023-08-21T06:28:21.0169828Z","listenerCount":0,"requiresClientAuthorization":true}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '531'
+      - '464'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 09 Jul 2019 23:31:48 GMT
+      - Mon, 21 Aug 2023 06:28:25 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -522,38 +513,31 @@ interactions:
       Content-Length:
       - '38'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - --resource-group --namespace-name --hybrid-connection-name --name --rights
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-relay/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.68
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridConnections/relay-hycocli000004/authorizationRules/cliAutho000003?api-version=2017-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridConnections/relay-hycocli000004/authorizationRules/cliAutho000003","name":"cliAutho000003","type":"Microsoft.Relay/Namespaces/HybridConnections/AuthorizationRules","location":"West
-        US 2","properties":{"rights":["Listen"]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridConnections/relay-hycocli000004/authorizationRules/cliAutho000003","name":"cliAutho000003","type":"Microsoft.Relay/namespaces/hybridconnections/authorizationrules","properties":{"rights":["Listen"]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '454'
+      - '360'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 09 Jul 2019 23:31:49 GMT
+      - Mon, 21 Aug 2023 06:28:26 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -563,7 +547,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -578,39 +562,30 @@ interactions:
       - relay hyco authorization-rule show
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - --resource-group --namespace-name --hybrid-connection-name --name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-relay/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.68
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridConnections/relay-hycocli000004/authorizationRules/cliAutho000003?api-version=2017-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridConnections/relay-hycocli000004/authorizationRules/cliAutho000003","name":"cliAutho000003","type":"Microsoft.Relay/Namespaces/HybridConnections/AuthorizationRules","location":"West
-        US 2","properties":{"rights":["Listen"]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridconnections/relay-hycocli000004/authorizationrules/cliAutho000003","name":"cliAutho000003","type":"Microsoft.Relay/namespaces/hybridconnections/authorizationrules","location":"westus2","properties":{"rights":["Listen"]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '454'
+      - '381'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 09 Jul 2019 23:31:49 GMT
+      - Mon, 21 Aug 2023 06:28:29 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -633,39 +608,30 @@ interactions:
       - relay hyco authorization-rule update
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - --resource-group --namespace-name --hybrid-connection-name --name --rights
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-relay/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.68
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridConnections/relay-hycocli000004/authorizationRules/cliAutho000003?api-version=2017-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridConnections/relay-hycocli000004/authorizationRules/cliAutho000003","name":"cliAutho000003","type":"Microsoft.Relay/Namespaces/HybridConnections/AuthorizationRules","location":"West
-        US 2","properties":{"rights":["Listen"]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridconnections/relay-hycocli000004/authorizationrules/cliAutho000003","name":"cliAutho000003","type":"Microsoft.Relay/namespaces/hybridconnections/authorizationrules","location":"westus2","properties":{"rights":["Listen"]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '454'
+      - '381'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 09 Jul 2019 23:31:50 GMT
+      - Mon, 21 Aug 2023 06:28:29 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -691,38 +657,31 @@ interactions:
       Content-Length:
       - '36'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - --resource-group --namespace-name --hybrid-connection-name --name --rights
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-relay/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.68
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridConnections/relay-hycocli000004/authorizationRules/cliAutho000003?api-version=2017-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridConnections/relay-hycocli000004/authorizationRules/cliAutho000003","name":"cliAutho000003","type":"Microsoft.Relay/Namespaces/HybridConnections/AuthorizationRules","location":"West
-        US 2","properties":{"rights":["Send"]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridConnections/relay-hycocli000004/authorizationRules/cliAutho000003","name":"cliAutho000003","type":"Microsoft.Relay/namespaces/hybridconnections/authorizationrules","properties":{"rights":["Send"]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '452'
+      - '358'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 09 Jul 2019 23:31:50 GMT
+      - Mon, 21 Aug 2023 06:28:30 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -749,38 +708,30 @@ interactions:
       - keep-alive
       Content-Length:
       - '0'
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - --resource-group --namespace-name --hybrid-connection-name --name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-relay/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.68
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridConnections/relay-hycocli000004/authorizationRules/cliAutho000003/listKeys?api-version=2017-04-01
   response:
     body:
-      string: '{"primaryConnectionString":"Endpoint=sb://relay-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=RR1Q0/RZCsLz3cXg/+esqGANG1MvZQXm59JUogJ1F9E=;EntityPath=relay-hycocli000004","secondaryConnectionString":"Endpoint=sb://relay-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=CAGc19fIGLhzEgooexnJZFg5foh7ZQjR34Td7V/YZdU=;EntityPath=relay-hycocli000004","primaryKey":"RR1Q0/RZCsLz3cXg/+esqGANG1MvZQXm59JUogJ1F9E=","secondaryKey":"CAGc19fIGLhzEgooexnJZFg5foh7ZQjR34Td7V/YZdU=","keyName":"cliAutho000003"}'
+      string: '{"primaryConnectionString":"Endpoint=sb://relay-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=8Rvrp2kJKGiTjYGSxSRuuiwPyzz4FVXQk+ARmCE7XB8=;EntityPath=relay-hycocli000004","secondaryConnectionString":"Endpoint=sb://relay-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=bXh/WSyL1lhLtnf1nxtbaH2R07bmR97AF+ARmON8NHk=;EntityPath=relay-hycocli000004","primaryKey":"8Rvrp2kJKGiTjYGSxSRuuiwPyzz4FVXQk+ARmCE7XB8=","secondaryKey":"bXh/WSyL1lhLtnf1nxtbaH2R07bmR97AF+ARmON8NHk=","keyName":"cliAutho000003"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '610'
+      - '574'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 09 Jul 2019 23:31:51 GMT
+      - Mon, 21 Aug 2023 06:28:33 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -808,37 +759,31 @@ interactions:
       Content-Length:
       - '25'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - --resource-group --namespace-name --hybrid-connection-name --name --key
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-relay/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.68
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridConnections/relay-hycocli000004/authorizationRules/cliAutho000003/regenerateKeys?api-version=2017-04-01
   response:
     body:
-      string: '{"primaryConnectionString":"Endpoint=sb://relay-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=dwDp7feO4JwghL3Yl57QX+mrDO5h/O7LE+R8FEoFaeA=;EntityPath=relay-hycocli000004","secondaryConnectionString":"Endpoint=sb://relay-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=CAGc19fIGLhzEgooexnJZFg5foh7ZQjR34Td7V/YZdU=;EntityPath=relay-hycocli000004","primaryKey":"dwDp7feO4JwghL3Yl57QX+mrDO5h/O7LE+R8FEoFaeA=","secondaryKey":"CAGc19fIGLhzEgooexnJZFg5foh7ZQjR34Td7V/YZdU=","keyName":"cliAutho000003"}'
+      string: '{"primaryConnectionString":"Endpoint=sb://relay-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=2od3v6VOT9ALlbdKNrgTV3W2GXAetJ8PT+ARmLEomto=;EntityPath=relay-hycocli000004","secondaryConnectionString":"Endpoint=sb://relay-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=bXh/WSyL1lhLtnf1nxtbaH2R07bmR97AF+ARmON8NHk=;EntityPath=relay-hycocli000004","primaryKey":"2od3v6VOT9ALlbdKNrgTV3W2GXAetJ8PT+ARmLEomto=","secondaryKey":"bXh/WSyL1lhLtnf1nxtbaH2R07bmR97AF+ARmON8NHk=","keyName":"cliAutho000003"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '610'
+      - '574'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 09 Jul 2019 23:31:53 GMT
+      - Mon, 21 Aug 2023 06:28:33 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -866,37 +811,31 @@ interactions:
       Content-Length:
       - '27'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - --resource-group --namespace-name --hybrid-connection-name --name --key
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-relay/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.68
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridConnections/relay-hycocli000004/authorizationRules/cliAutho000003/regenerateKeys?api-version=2017-04-01
   response:
     body:
-      string: '{"primaryConnectionString":"Endpoint=sb://relay-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=dwDp7feO4JwghL3Yl57QX+mrDO5h/O7LE+R8FEoFaeA=;EntityPath=relay-hycocli000004","secondaryConnectionString":"Endpoint=sb://relay-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=FinYCY/QyJIJrN4LTNTH4yLZOy6todKzFpuZDe/TRJQ=;EntityPath=relay-hycocli000004","primaryKey":"dwDp7feO4JwghL3Yl57QX+mrDO5h/O7LE+R8FEoFaeA=","secondaryKey":"FinYCY/QyJIJrN4LTNTH4yLZOy6todKzFpuZDe/TRJQ=","keyName":"cliAutho000003"}'
+      string: '{"primaryConnectionString":"Endpoint=sb://relay-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=2od3v6VOT9ALlbdKNrgTV3W2GXAetJ8PT+ARmLEomto=;EntityPath=relay-hycocli000004","secondaryConnectionString":"Endpoint=sb://relay-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=n0g0OzQJmzBO3rV9uoGIDyOzHReRMh9i4+ARmF5XUYs=;EntityPath=relay-hycocli000004","primaryKey":"2od3v6VOT9ALlbdKNrgTV3W2GXAetJ8PT+ARmLEomto=","secondaryKey":"n0g0OzQJmzBO3rV9uoGIDyOzHReRMh9i4+ARmF5XUYs=","keyName":"cliAutho000003"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '610'
+      - '574'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 09 Jul 2019 23:31:53 GMT
+      - Mon, 21 Aug 2023 06:28:35 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -914,7 +853,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -923,15 +862,10 @@ interactions:
       - keep-alive
       Content-Length:
       - '0'
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - --resource-group --namespace-name --hybrid-connection-name --name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-relay/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.68
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridConnections/relay-hycocli000004/authorizationRules/cliAutho000003?api-version=2017-04-01
   response:
@@ -943,16 +877,13 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 09 Jul 2019 23:31:55 GMT
+      - Mon, 21 Aug 2023 06:28:35 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
@@ -966,7 +897,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -975,15 +906,10 @@ interactions:
       - keep-alive
       Content-Length:
       - '0'
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - --resource-group --namespace-name --name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-relay/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.68
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/hybridConnections/relay-hycocli000004?api-version=2017-04-01
   response:
@@ -995,16 +921,13 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 09 Jul 2019 23:31:56 GMT
+      - Mon, 21 Aug 2023 06:28:37 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
@@ -1018,7 +941,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1027,15 +950,10 @@ interactions:
       - keep-alive
       Content-Length:
       - '0'
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-relay/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.68
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002?api-version=2017-04-01
   response:
@@ -1047,7 +965,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 09 Jul 2019 23:31:56 GMT
+      - Mon, 21 Aug 2023 06:28:40 GMT
       expires:
       - '-1'
       location:
@@ -1064,7 +982,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14998'
     status:
       code: 202
       message: Accepted
@@ -1072,22 +990,65 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
       - relay namespace delete
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-relay/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.68
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/operationresults/relay-nscli000002?api-version=2017-04-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002","name":"relay-nscli000002","type":"Microsoft.Relay/Namespaces","location":"West
+        US 2","tags":{"tag1":"value1tag2=value2"},"properties":{"provisioningState":"Succeeded","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:relay-nscli000002","createdAt":"2023-08-21T06:27:12.203Z","updatedAt":"2023-08-21T06:28:39.767Z","serviceBusEndpoint":"https://relay-nscli000002.servicebus.windows.net:443/","status":"Removing"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '612'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Aug 2023 06:28:40 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/operationresults/relay-nscli000002?api-version=2017-04-01
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_hyco000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/operationresults/relay-nscli000002?api-version=2017-04-01
   response:
@@ -1099,7 +1060,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 09 Jul 2019 23:32:27 GMT
+      - Mon, 21 Aug 2023 06:29:13 GMT
       expires:
       - '-1'
       pragma:

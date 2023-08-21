@@ -45,7 +45,7 @@ def load_arguments_sb(self, _):
         c.argument('authorization_rule_name', arg_type=name_type, id_part='child_name_1', help='Name of Namespace Authorization Rule')
         c.argument('namespace_name', id_part='name', options_list=['--namespace-name'], help='Name of Namespace')
 
-    for scope in ['relay namespace authorization-rule create', 'relay namespace authorization-rule update', 'relay wcfrelay authorization-rule create', 'relay wcfrelay authorization-rule update', 'relay hyco authorization-rule create', 'relay hyco authorization-rule update']:
+    for scope in ['relay namespace authorization-rule create', 'relay namespace authorization-rule update']:
         with self.argument_context(scope) as c:
             c.argument('rights', arg_type=rights_arg_type)
 

@@ -2,6 +2,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+from .aaz.latest.relay.hyco import Update as _HycoUpdate
+from .aaz.latest.relay.hyco.authorization_rule import Create as _HycoAuthoCreate
+from .aaz.latest.relay.namespace.authorization_rule import Create as _NamespaceAuthoCreate
+from .aaz.latest.relay.wcfrelay import Update as _WcfrelayUpdate
+from .aaz.latest.relay.wcfrelay.authorization_rule import Create as _WcfrelayAuthoCreate
+
 
 # pylint: disable=line-too-long
 # pylint: disable=too-many-lines
@@ -45,6 +51,33 @@ def cli_namespaceautho_create(client, resource_group_name, namespace_name, name,
         authorization_rule_name=name,
         rights=accessrights_converter(access_rights)
     )
+
+
+class NamespaceAuthoCreate(_NamespaceAuthoCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.rights._required = False
+        return args_schema
+
+
+class WcfrelayAuthoCreate(_WcfrelayAuthoCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.rights._required = False
+        return args_schema
+
+
+class HycoAuthoCreate(_HycoAuthoCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.rights._required = False
+        return args_schema
 
 
 # Namespace Authorization rule:
@@ -101,6 +134,17 @@ def cli_wcfrelay_update(instance, relay_type=None, user_metadata=None, status=No
     return returnobj
 
 
+class WcfrelayUpdate(_WcfrelayUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.status = AAZStrArg(
+            options=["--status"],
+            help="Enumerates the possible values for the status of a messaging entity.",
+            enum={"Active": "Active", "Disabled": "Disabled", "ReceiveDisabled": "ReceiveDisabled", "SendDisabled": "SendDisabled"},
+        )
+        return args_schema
 # Hybrid Connection Region
 def cli_hyco_create(client, resource_group_name, namespace_name, hybrid_connection_name,
                     requires_client_authorization=None, user_metadata=None):
@@ -110,6 +154,19 @@ def cli_hyco_create(client, resource_group_name, namespace_name, hybrid_connecti
         namespace_name=namespace_name,
         hybrid_connection_name=hybrid_connection_name,
         requires_client_authorization=requires_client_authorization, user_metadata=user_metadata)
+
+
+class HycoUpdate(_HycoUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.status = AAZStrArg(
+            options=["--status"],
+            help="Enumerates the possible values for the status of a messaging entity.",
+            enum={"Active": "Active", "Disabled": "Disabled", "ReceiveDisabled": "ReceiveDisabled", "SendDisabled": "SendDisabled"},
+        )
+        return args_schema
 
 
 def cli_hyco_update(instance, requires_client_authorization=None, status=None, user_metadata=None):
