@@ -1609,6 +1609,7 @@ def _build_app_settings_input(settings, connection_string_type):
         # check if its a json file
         settings_str = ''.join([i.rstrip() for i in settings])
         json_obj = json.loads(settings_str)
+        print('json_obj:', json_obj)
         for i in json_obj:
             keys = i.keys()
             if 'value' not in keys or 'name' not in keys or 'type' not in keys:
@@ -1632,25 +1633,33 @@ def update_connection_strings(cmd, resource_group_name, name, connection_string_
     if not settings and not slot_settings:
         raise ArgumentUsageError('Usage Error: --settings |--slot-settings')
     settings = _build_app_settings_input(settings, connection_string_type)
-    slot_settings = _build_app_settings_input(slot_settings, connection_string_type)
+    sticky_slot_settings = _build_app_settings_input(slot_settings, connection_string_type)
+    rm_sticky_slot_settings = set()
     
     conn_strings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                            'list_connection_strings', slot)
     
-    for name_value_type in settings + slot_settings:
+    for name_value_type in settings + sticky_slot_settings:
         # split at the first '=', connection string should not have '=' in the name
         conn_strings.properties[name_value_type['name']] = ConnStringValueTypePair(value=name_value_type['value'],
                                                                             type=name_value_type['type'])
+        if 'slotSetting' in name_value_type:
+            if name_value_type['slotSetting']:
+                sticky_slot_settings.append(name_value_type)
+            else:
+                rm_sticky_slot_settings.add(name_value_type['name'])
+            
     client = web_client_factory(cmd.cli_ctx)
     result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
                                          'update_connection_strings',
                                          conn_strings, slot, client)
 
-    if slot_settings:
-        new_slot_setting_names = [n['name'] [0] for n in slot_settings] # add setting name
+    if sticky_slot_settings or rm_sticky_slot_settings:
+        new_slot_setting_names = set(n['name'] for n in sticky_slot_settings) # add setting name
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
-        slot_cfg_names.connection_string_names = slot_cfg_names.connection_string_names or []
-        slot_cfg_names.connection_string_names += new_slot_setting_names
+        slot_cfg_names.connection_string_names = set(slot_cfg_names.connection_string_names) or set()
+        slot_cfg_names.connection_string_names.update(new_slot_setting_names)
+        slot_cfg_names.connection_string_names -= rm_sticky_slot_settings
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
     return result.properties
