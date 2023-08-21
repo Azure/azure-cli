@@ -5213,7 +5213,7 @@ class PublicIPUpdate(_PublicIPUpdate):
             help="Space-separated list of IP tags in `TYPE=VAL` format.",
             nullable=True
         )
-        args_schema.ip_tags.Element = AAZStrArg(nullable=True)
+        args_schema.ip_tags.Element = AAZStrArg()
         args_schema.ip_tags_list._registered = False
 
         return args_schema
