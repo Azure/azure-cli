@@ -37,15 +37,15 @@ def validate_autoscale_recurrence(namespace):
             valid_days.remove(match)
 
         # validate, but don't process start and end time
-        recurrence_obj = Recurrence(
-            frequency=RecurrenceFrequency.week,
-            schedule=RecurrentSchedule(
-                time_zone=namespace.timezone,
-                days=days,
-                hours=[],  # will be filled in during custom command
-                minutes=[]  # will be filled in during custom command
-            )
-        )
+        recurrence_obj = {
+            "frequency": "Week",
+            "schedule": {
+                "time_zone": namespace.timezone,
+                "days": days,
+                "hours": [],  # will be filled in during custom command
+                "minutes": []  # will be filled in during custom command
+            }
+        }
         return recurrence_obj
 
     valid_recurrence = {

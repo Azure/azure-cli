@@ -6,11 +6,12 @@
 import json
 from knack.log import get_logger
 from knack.util import CLIError
-
-from azure.cli.core.aaz import has_value, AAZListArg, AAZStrArg
+from azure.cli.core.azclierror import ValidationError
+from azure.cli.core.aaz import has_value, AAZListArg, AAZStrArg, AAZIntArg, AAZDateTimeArg
 from azure.cli.command_modules.monitor._autoscale_util import build_autoscale_profile_from_instance
 from ..aaz.latest.monitor.autoscale import Create as _AutoScaleCreate, Update as _AutoScaleUpdate, \
     Show as _AutoScaleShow, List as _AutoScaleList
+from azure.cli.command_modules.network.custom import _convert_to_snake_case
 
 logger = get_logger(__name__)
 
@@ -29,6 +30,16 @@ class AutoScaleCreate(_AutoScaleCreate):
 
 
 class AutoScaleShow(_AutoScaleShow):
+
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined
+        if has_value(self.ctx.vars.instance.properties.name):
+            self.ctx.vars.instance.properties.name = AAZUndefined
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class AutoScaleUpdate(_AutoScaleUpdate):
 
     def _output(self, *args, **kwargs):
         from azure.cli.core.aaz import AAZUndefined
@@ -260,6 +271,113 @@ def autoscale_update(instance, count=None, min_count=None, max_count=None, tags=
     return instance
 
 
+# pylint: disable=too-many-locals
+def autoscale_update_new(cmd, autoscale_name=None, resource_group_name=None,  # pylint:disable=too-many-statements,too-many-branches
+                         count=None, min_count=None, max_count=None, tags=None, enabled=None,
+                         add_actions=None, remove_actions=None, email_administrator=None,
+                         email_coadministrators=None, scale_mode=None, scale_look_ahead_time=None):
+    from azure.cli.command_modules.monitor._autoscale_util import build_autoscale_profile_dict
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    import json
+    rets = AutoScaleShow(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "autoscale_name": autoscale_name})
+
+    rets = _convert_to_snake_case(rets)
+    autoscale_settings = {
+        "resource_group": resource_group_name,
+        "autoscale_name": autoscale_name,
+        "enabled": rets.get("enabled", False),
+        "tags": rets.get("tags", None),
+        "target_resource_location": rets.get("target_resource_location", None),
+        "target_resource_uri": rets.get("target_resource_uri", None)
+    }
+
+    scale_policy = rets.get("predictive_autoscale_policy", None)
+    if scale_policy:
+        autoscale_settings["scale_look_ahead_time"] = scale_policy.get("scale_look_ahead_time", None)
+        autoscale_settings["scale_mode"] = scale_policy.get("scale_mode", None)
+    if rets.get("notifications", None):
+        autoscale_settings["notifications"] = rets["notifications"]
+    if rets.get("profiles", None):
+        autoscale_settings["profiles"] = rets["profiles"]
+
+    if tags is not None:
+        autoscale_settings["tags"] = tags
+    if enabled is not None:
+        autoscale_settings["enabled"] = enabled
+
+    if count is not None or min_count is not None or max_count is not None:
+        # resolve the interrelated aspects of capacity
+        default_profile, _ = build_autoscale_profile_dict(autoscale_settings)
+        curr_count = default_profile["capacity"]["default"]
+        curr_min = default_profile["capacity"]["minimum"]
+        curr_max = default_profile["capacity"]["maximum"]
+        is_fixed_count = curr_count == curr_min and curr_count == curr_max
+
+        # check for special case where count is used to indicate fixed value and only
+        # count is updated
+        if count is not None and is_fixed_count and min_count is None and max_count is None:
+            min_count = count
+            max_count = count
+
+        count = curr_count if count is None else count
+        min_count = curr_min if min_count is None else min_count
+        max_count = curr_max if max_count is None else max_count
+
+        # There may be multiple "default" profiles. All need to updated.
+        for profile in autoscale_settings["profiles"]:
+            if profile.get("fixed_date", None):
+                continue
+            if profile.get("recurrence", None):
+                try:
+                    # portal denotes the "default" pairs by using a JSON string for their name
+                    # so if it can be decoded, we know this is a default profile
+                    json.loads(profile["name"])
+                except ValueError:
+                    continue
+            profile["capacity"]["default"] = count
+            profile["capacity"]["minimum"] = min_count
+            profile["capacity"]["maximum"] = max_count
+
+    if not autoscale_settings.get("notifications", None):
+        return autoscale_settings
+
+    notification = next(x for x in autoscale_settings["notifications"] if x["operation"].lower() == 'scale')
+
+    # process removals
+    if remove_actions is not None:
+        removed_emails, removed_webhooks = _parse_action_removals(remove_actions)
+        notification["email.custom_emails"] = [x for x in notification["email"]["custom_emails"] if x not in removed_emails]
+        notification["webhooks"] = [x for x in notification["webhooks"] if x["service_uri"] not in removed_webhooks]
+
+    # process additions
+    for action in add_actions or []:
+        key = action["key"]
+        value = action["value"]
+        if key == "email":
+            for email in value["custom_emails"]:
+                notification["email"]["custom_emails"].append(email)
+        elif key == "webhook":
+            notification["webhooks"].append(value)
+
+    if email_administrator is not None:
+        notification["email"]["send_to_subscription_administrator"] = email_administrator
+    if email_coadministrators is not None:
+        notification["email"]["send_to_subscription_co_administrators"] = email_coadministrators
+    predictive_policy = autoscale_settings["predictive_autoscale_policy"]
+    if scale_mode is not None:
+        if predictive_policy is None:
+            predictive_policy = {"scale_mode": scale_mode}
+        else:
+            predictive_policy["scale_mode"] = scale_mode
+    if scale_look_ahead_time is not None and predictive_policy is not None:
+        predictive_policy["scale_look_ahead_time"] = scale_look_ahead_time
+    elif scale_look_ahead_time is not None and predictive_policy is None:
+        raise InvalidArgumentValueError('scale-mode is required for setting scale-look-ahead-time.')
+    return AutoScaleUpdate(cli_ctx=cmd.cli_ctx)(command_args=autoscale_settings)
+
+
 def _parse_action_removals(actions):
     """ Separates the combined list of keys to remove into webhooks and emails. """
     flattened = list({x for sublist in actions for x in sublist})
@@ -280,6 +398,13 @@ def _apply_copy_rules(autoscale_settings, new_profile, copy_rules):
             new_profile.rules = copy_profile.rules[:]
 
 
+def _apply_copy_rules_new(autoscale_settings, new_profile, copy_rules):
+    if copy_rules:
+        copy_profile = next(x for x in autoscale_settings["profiles"] if x["name"] == copy_rules)
+        if copy_profile:
+            new_profile["rules"] = copy_profile["rules"]
+
+
 def _create_fixed_profile(autoscale_settings, profile_name, start, end, capacity,
                           copy_rules=None, timezone=None):
     from azure.mgmt.monitor.models import AutoscaleProfile, TimeWindow
@@ -293,6 +418,67 @@ def _create_fixed_profile(autoscale_settings, profile_name, start, end, capacity
     )
     _apply_copy_rules(autoscale_settings, profile, copy_rules)
     autoscale_settings.profiles.append(profile)
+
+
+def _create_fixed_profile_new(autoscale_settings, profile_name, start, end, capacity, copy_rules=None, timezone=None):
+    if not (start and end):
+        raise CLIError('usage error: fixed schedule: --start DATETIME --end DATETIME')
+    print("start: ", start, " end: ", end)
+    profile = {
+        "name": profile_name,
+        "capacity": capacity,
+        "rules": [],
+        "fixed_date": {
+            "start": start,
+            "end": end,
+            "time_zone": timezone
+        }
+    }
+    _apply_copy_rules_new(autoscale_settings, profile, copy_rules)
+    autoscale_settings["profiles"].append(profile)
+
+
+# pylint: disable=unused-argument
+def _create_recurring_profile_new(autoscale_settings, profile_name, start, end, recurrence, capacity,
+                                  copy_rules=None, timezone=None):
+    from azure.cli.command_modules.monitor._autoscale_util import build_autoscale_profile_dict, \
+        validate_autoscale_profile_dict
+    import dateutil
+    from datetime import time
+
+    def _build_recurrence(base, time):
+        recur = {
+            "frequency": base["frequency"],
+            "schedule": {
+                "time_zone": base["schedule"]["time_zone"],
+                "days": base["schedule"]["days"],
+                "hours": [time.hour],
+                "minutes": [time.minute]
+            }
+        }
+        return recur
+
+    start_time = dateutil.parser.parse(start).time() if start else time(hour=0, minute=0)
+    end_time = dateutil.parser.parse(end).time() if end else time(hour=23, minute=59)
+
+    default_profile, autoscale_profile = build_autoscale_profile_dict(autoscale_settings)
+    validate_autoscale_profile_dict(autoscale_profile, start_time, end_time, recurrence)
+    start_profile = {
+        "name": profile_name,
+        "capacity": capacity,
+        "rules": [],
+        "recurrence": _build_recurrence(recurrence, start_time)
+    }
+
+    _apply_copy_rules_new(autoscale_settings, start_profile, copy_rules)
+    end_profile = {
+        "name": json.dumps({'name': default_profile["name"], 'for': profile_name}),
+        "capacity": default_profile["capacity"],
+        "rules": default_profile["rules"],
+        "recurrence": _build_recurrence(recurrence, end_time)
+    }
+    autoscale_settings["profiles"].append(start_profile)
+    autoscale_settings["profiles"].append(end_profile)
 
 
 # pylint: disable=unused-argument
@@ -359,6 +545,196 @@ def autoscale_profile_create(client, autoscale_name, resource_group_name, profil
     autoscale_settings = client.create_or_update(resource_group_name, autoscale_name, autoscale_settings)
     profile = next(x for x in autoscale_settings.profiles if x.name == profile_name)
     return profile
+
+
+def autoscale_profile_create_new(cmd, autoscale_name, resource_group_name, profile_name,
+                                 count, timezone, start=None, end=None, copy_rules=None, min_count=None,
+                                 max_count=None, recurrence=None):
+    import json
+    rets = AutoScaleShow(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "autoscale_name": autoscale_name})
+
+    capacity = {
+        "default": str(count),
+        "minimum": str(min_count) if min_count else str(count),
+        "maximum": str(max_count) if max_count else str(count)
+    }
+    rets = _convert_to_snake_case(rets)
+    autoscale_settings = {
+        "resource_group": resource_group_name,
+        "autoscale_name": autoscale_name,
+        "enabled": rets.get("enabled", False),
+        "tags": rets.get("tags", None),
+        "target_resource_location": rets.get("target_resource_location", None),
+        "target_resource_uri": rets.get("target_resource_uri", None)
+    }
+
+    print(json.dumps(rets, indent=4))
+
+    scale_policy = rets.get("predictive_autoscale_policy", None)
+    if scale_policy:
+        autoscale_settings["scale_look_ahead_time"] = scale_policy.get("scale_look_ahead_time", None)
+        autoscale_settings["scale_mode"] = scale_policy.get("scale_mode", None)
+    if rets.get("notifications", None):
+        autoscale_settings["notifications"] = rets["notifications"]
+    if rets.get("profiles", None):
+        autoscale_settings["profiles"] = rets["profiles"]
+
+    if recurrence:
+        _create_recurring_profile_new(autoscale_settings, profile_name, start, end, recurrence, capacity, copy_rules, timezone)
+    else:
+        _create_fixed_profile_new(autoscale_settings, profile_name, start, end, capacity, copy_rules, timezone)
+    print("updated")
+    print(json.dumps(autoscale_settings, indent=4))
+    updated_rets = AutoScaleUpdate(cli_ctx=cmd.cli_ctx)(command_args=autoscale_settings)
+    profile = next(x for x in updated_rets["profiles"] if x["name"] == profile_name)
+    return profile
+
+
+def validate_timezone(args):
+    from azure.cli.command_modules.monitor._autoscale_util import AUTOSCALE_TIMEZONES
+    value = args.timezone.to_serialized_data()
+    zone = next((x['name'] for x in AUTOSCALE_TIMEZONES if x['name'].lower() == value.lower()), None)
+    if not zone:
+        raise ValidationError(
+            "Invalid time zone: '{}'. Run 'az monitor autoscale profile list-timezones' for values.".format(value))
+    args.timezone = zone
+
+
+def validate_recurrence(args):
+    def _validate_weekly_recurrence(args):
+        # Construct days
+        valid_days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+        days = []
+        for partial in args.recurrence[1:]:
+            if len(partial) < 2:
+                raise ValidationError('specifying fewer than 2 characters for day is ambiguous.')
+            try:
+                match = next(x for x in valid_days if x.lower().startswith(partial.to_serialized_data().lower()))
+            except StopIteration:
+                raise ValidationError("No match for day '{}'.".format(partial))
+            days.append(match)
+            valid_days.remove(match)
+
+        # validate, but don't process start and end time
+        recurrence_obj = {
+            "frequency": "Week",
+            "schedule": {
+                "time_zone": args.timezone,
+                "days": days,
+                "hours": [],  # will be filled in during custom command
+                "minutes": []  # will be filled in during custom command
+            }
+        }
+        return recurrence_obj
+
+    valid_recurrence = {
+        'week': {
+            'usage': '-r week [DAY DAY ...]',
+            'validator': _validate_weekly_recurrence
+        }
+    }
+    if has_value(args.recurrence):
+        raw_values = args.recurrence.to_serialized_data()
+        try:
+            delimiter = raw_values[0].lower()
+            usage = valid_recurrence[delimiter]['usage']
+            try:
+                args.recurrence_obj = valid_recurrence[delimiter]['validator'](args)
+            except ValidationError as ex:
+                raise ValidationError('{} invalid usage: {}'.format(ex, usage))
+        except KeyError:
+            raise ValidationError('invalid usage: -r {{{}}} [ARG ARG ...]'.format(','.join(valid_recurrence)))
+
+
+class AutoScaleProfileCreate(_AutoScaleUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.profile_name = AAZStrArg(
+            options=["--profile-name", "--name", "-n"],
+            help='Name of the autoscale profile.',
+            required=True,
+        )
+        args_schema.copy_rules = AAZStrArg(
+            options=["--copy-rules"],
+            help='Name of an existing schedule from which to copy the scaling rules for the new schedule.',
+        )
+        args_schema.count = AAZIntArg(
+            options=["--count"],
+            help='The numer of instances to use. If used with --min/max-count, the default number of instances to use.',
+            required=True,
+            arg_group="Instance Limit",
+        )
+        args_schema.min_count = AAZIntArg(
+            options=["--min-count"],
+            help='The minimum number of instances.',
+            arg_group="Instance Limit",
+        )
+        args_schema.max_count = AAZIntArg(
+            options=["--max-count"],
+            help='The maximum number of instances.',
+            arg_group="Instance Limit",
+        )
+
+        args_schema.timezone = AAZStrArg(
+            options=["--timezone"],
+            help="Timezone name. Values from: az monitor autoscale profile list-timezones.",
+            required=True,
+            arg_group='Schedule',
+        )
+
+        args_schema.start = AAZDateTimeArg(
+            options=["--start"],
+            help="When the autoscale profile begins. Format depends on the type of profile."
+                 "Fixed:  --start yyyy-mm-dd [hh:mm:ss] "
+                 "Weekly: [--start hh:mm].",
+            arg_group="Schedule",
+        )
+
+        args_schema.end = AAZDateTimeArg(
+            options=["--end"],
+            help="When the autoscale profile ends. Format depends on the type of profile. "
+                 "Fixed: --end yyyy-mm-dd [hh:mm:ss] "
+                 "Weekly: [--end hh:mm].",
+            arg_group="Schedule",
+        )
+
+        args_schema.recurrence = AAZListArg(
+            options = ["--recurrence", "-r"],
+            help = "When the profile recurs. If omitted, a fixed (non-recurring) profile is created."
+                   "Usage:     --recurrence {week} [ARG ARG ...] "
+                   "Weekly:    --recurrence week Sat Sun.",
+            arg_group="Schedule",
+        )
+        #
+        # with self.argument_context('monitor autoscale profile', arg_group='Schedule') as c:
+        #     c.argument('timezone', type=timezone_name_type)
+        #     c.argument('start', arg_type=get_datetime_type(help='Start time.', timezone=False))
+        #     c.argument('end', arg_type=get_datetime_type(help='End time.', timezone=False))
+        #     c.argument('recurrence', options_list=['--recurrence', '-r'], nargs='+',
+        #                validator=validate_autoscale_recurrence)
+
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        validate_timezone(args)
+        validate_recurrence(args)
+
+    def pre_instance_update(self, instance):
+        args = self.ctx.args
+        profile_name = args.profile_name.to_serialized_data()
+        instance = self.ctx.vars.instance
+        default_profile, _ = build_autoscale_profile_from_instance(instance)
+        count = args.count.to_serialized_data()
+        capacity = {
+            "default": count,
+            "minimum": args.min_count.to_serialized_data() if has_value(args.min_count) else count,
+            "maximum": args.max_count.to_serialized_data() if has_value(args.max_count) else count
+        }
 
 
 def autoscale_profile_list(cmd, autoscale_name, resource_group_name):
@@ -508,6 +884,84 @@ def autoscale_rule_create(cmd, client, autoscale_name, resource_group_name, cond
     # determine if there are unbalanced rules
     scale_out_rule_count = len([x for x in profile.rules if x.scale_action.direction == ScaleDirection.increase])
     scale_in_rule_count = len([x for x in profile.rules if x.scale_action.direction == ScaleDirection.decrease])
+    if scale_out_rule_count and not scale_in_rule_count:
+        logger.warning("Profile '%s' has rules to scale out but none to scale in. "
+                       "Recommend creating at least 1 scale in rule.", profile_name)
+    elif scale_in_rule_count and not scale_out_rule_count:
+        logger.warning("Profile '%s' has rules to scale in but none to scale out. "
+                       "Recommend creating at least 1 scale out rule.", profile_name)
+    return rule
+
+
+def autoscale_rule_create_new(cmd, client, autoscale_name, resource_group_name, condition,
+                              scale, profile_name=DEFAULT_PROFILE_NAME, cooldown=5, source=None,
+                              timegrain="avg 1m"):
+    from azure.mgmt.core.tools import parse_resource_id, resource_id
+    import json
+    rets = AutoScaleShow(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "autoscale_name": autoscale_name})
+    rets = _convert_to_snake_case(rets)
+    autoscale_settings = {
+        "resource_group": resource_group_name,
+        "autoscale_name": autoscale_name,
+        "enabled": rets.get("enabled", False),
+        "tags": rets.get("tags", None),
+        "target_resource_location": rets.get("target_resource_location", None),
+        "target_resource_uri": rets.get("target_resource_uri", None)
+    }
+    print(json.dumps(rets, indent=4))
+
+    scale_policy = rets.get("predictive_autoscale_policy", None)
+    if scale_policy:
+        autoscale_settings["scale_look_ahead_time"] = scale_policy.get("scale_look_ahead_time", None)
+        autoscale_settings["scale_mode"] = scale_policy.get("scale_mode", None)
+    if rets.get("notifications", None):
+        autoscale_settings["notifications"] = rets["notifications"]
+    if rets.get("profiles", None):
+        autoscale_settings["profiles"] = rets["profiles"]
+
+    profile = _identify_profile_cg(autoscale_settings["profiles"], profile_name)
+    condition.metric_resource_uri = source or autoscale_settings["target_resource_uri"]
+    condition.statistic = timegrain.statistic
+    condition.time_grain = timegrain.time_grain
+
+    def preprocess_for_spring_cloud_service():
+        try:
+            result = parse_resource_id(autoscale_settings["target_resource_uri"])
+            if result['namespace'].lower() == 'microsoft.appplatform' and result['type'].lower() == 'spring':
+                if condition.metric_namespace is None:
+                    condition.metric_namespace = "Microsoft.AppPlatform/Spring"
+                    logger.warning('Set metricNamespace to Microsoft.AppPlatform/Spring')
+                if source is None:
+                    condition.metric_resource_uri = resource_id(
+                        subscription=result['subscription'],
+                        resource_group=result['resource_group'],
+                        namespace=result['namespace'],
+                        type=result['type'],
+                        name=result['name']
+                    )
+                    logger.warning('Set metricResourceUri to Spring Cloud service')
+        except KeyError:
+            pass
+
+    preprocess_for_spring_cloud_service()
+
+    rule = {
+        "metric_trigger": condition,
+        "scale_action": {
+            "direction": scale.direction,
+            "type": scale.type,
+            "cooldown": 'PT{}M'.format(cooldown),
+            "value": scale.value
+        }
+    }
+    profile.rules.append(rule)
+    updated_rets = AutoScaleUpdate(cli_ctx=cmd.cli_ctx)(command_args=autoscale_settings)
+
+    # determine if there are unbalanced rules
+    scale_out_rule_count = len([x for x in profile["rules"] if x["scale_action"]["direction"] == "Increase"])
+    scale_in_rule_count = len([x for x in profile["rules"] if x["scale_action"]["direction"] == "Decrease"])
     if scale_out_rule_count and not scale_in_rule_count:
         logger.warning("Profile '%s' has rules to scale out but none to scale in. "
                        "Recommend creating at least 1 scale in rule.", profile_name)
