@@ -28,7 +28,7 @@ def _get_resource_group_from_account_name(client, account_name):
 
 # COMMAND NAMESPACE VALIDATORS
 def validate_resource_group_name(cmd, ns):
-    from azure.mgmt.datalake.analytics.account import DataLakeAnalyticsAccountManagementClient
+    from .vendored_sdks.azure_mgmt_datalake_analytics.account import DataLakeAnalyticsAccountManagementClient
     if not ns.resource_group_name:
         account_name = ns.account_name
         client = get_mgmt_service_client(cmd.cli_ctx, DataLakeAnalyticsAccountManagementClient).account

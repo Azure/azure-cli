@@ -33,11 +33,11 @@ class KVComparer:
 
     # Returns a diff in the form {"add": List[KeyValue], "delete": List[KeyValue], "update": List[{"new": KeyValue, "old": KeyValue}]}
     def compare(self, dest_kvs, strict=False):
-        if not dest_kvs:
-            return {JsonDiff.ADD: self._src_kvs}
-
         if not strict and not self._src_kvs:
             return {}
+
+        if not dest_kvs:
+            return {JsonDiff.ADD: self._src_kvs}
 
         dest_kv_lookup = self._build_lookup(dest_kvs)
 
