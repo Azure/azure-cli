@@ -44,7 +44,7 @@ RUN apk add --no-cache bash openssh ca-certificates jq curl openssl openssl1.1-c
  && apk add --no-cache bash-completion \
  && update-ca-certificates
 
-ARG JP_VERSION="1.1.0"
+ARG JP_VERSION="1.1.1"
 
 RUN curl -L https://github.com/jmespath-community/jp/releases/download/v${JP_VERSION}/jp-linux-amd64 -o /usr/local/bin/jp \
  && chmod +x /usr/local/bin/jp \
