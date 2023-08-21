@@ -1724,7 +1724,7 @@ class DedicatedHostScenarioTest(ScenarioTest):
             self.check('length(@)', 1),
             self.check('[0].name', '{host-group}')
         ])
-        self.cmd('vm host create -n {host} --host-group {host-group} -d 2 -g {rg} --sku DSv3-Type1')
+        self.cmd('vm host create -n {host} --host-group {host-group} -d 2 -g {rg} --sku DCsv2-Type1')
         self.cmd('vm host list --host-group {host-group} -g {rg}', checks=[
             self.check('length(@)', 1),
             self.check('[0].name', '{host}')
@@ -1738,6 +1738,8 @@ class DedicatedHostScenarioTest(ScenarioTest):
         ])
 
         self.cmd('vm host delete -n {host} --host-group {host-group} -g {rg} --yes')
+        if self.is_live:
+            time.sleep(30)
         self.cmd('vm host group delete -n {host-group} -g {rg} --yes')
 
     @AllowLargeResponse()

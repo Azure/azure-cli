@@ -374,12 +374,9 @@ class TestActions(unittest.TestCase):
         mock_resolve_role_id.assert_called_with(cmd.cli_ctx, 'reader', 'foo-scope')
 
     def test_normalize_disk_info(self):
-        from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType
         from importlib import import_module
 
-        api_version = AZURE_API_PROFILES['2019-03-01-hybrid'][ResourceType.MGMT_COMPUTE].default_api_version
-        api_version = "v" + api_version.replace("-", "_")
-        CachingTypes = import_module('azure.mgmt.compute.{}.models'.format(api_version)).CachingTypes
+        CachingTypes = import_module('azure.mgmt.compute.models').CachingTypes
 
         cmd = mock.MagicMock()
         cmd.get_models.return_value = CachingTypes
