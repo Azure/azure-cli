@@ -22,7 +22,7 @@ def list_activity_log(cmd, correlation_id=None, resource_group=None, resource_id
     logger.info('OData Filter: %s', odata_filters)
     logger.info('Select Filter: %s', select_filters)
 
-    from .aaz.latest.monitor.activity_log._list import List
+    from .aaz.latest.monitor.activity_log import List
     # activity_log = client.list(filter=odata_filters, select=select_filters)
     activity_log = List(cli_ctx=cmd.cli_ctx)(command_args={
         "filter": odata_filters,

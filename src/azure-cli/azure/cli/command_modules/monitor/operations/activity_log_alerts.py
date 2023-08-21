@@ -8,6 +8,7 @@ from azure.cli.core.azclierror import ValidationError
 from ..aaz.latest.monitor.activity_log.alert import Create as _ActivityLogAlertCreate, \
     Update as _ActivityLogAlertUpdate
 
+
 def _get_alert_settings_for_alert(cmd, resource_group_name, activity_log_alert_name, throw_if_missing=True):
     from azure.core.exceptions import HttpResponseError
     from ..aaz.latest.monitor.activity_log.alert import Show as ActivityLogAlertGet

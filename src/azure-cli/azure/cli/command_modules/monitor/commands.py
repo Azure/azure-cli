@@ -109,7 +109,7 @@ def load_command_table(self, _):
         ActionGroupTestNotificationCreate(loader=self, table_transformer=action_group_list_table)
 
     with self.command_group('monitor activity-log', activity_log_sdk) as g:
-        g.custom_command('list', 'list_activity_log', client_factory=cf_activity_log)
+        g.custom_command('list', 'list_activity_log')
         # g.command('list-categories', 'list')
 
     with self.command_group('monitor activity-log alert', activity_log_alerts_sdk,
@@ -126,7 +126,7 @@ def load_command_table(self, _):
         from .operations.activity_log_alerts import ActivityLogAlertCreate, ActivityLogAlertUpdate, \
             ActivityLogAlertActionGroupAdd, ActivityLogAlertActionGroupRemove, \
             ActivityLogAlertScopeAdd, ActivityLogAlertScopeRemove
-        # self.command_table['monitor activity-log alert create'] = ActivityLogAlertCreate(loader=self)
+        self.command_table['monitor activity-log alert create'] = ActivityLogAlertCreate(loader=self)
         # self.command_table['monitor activity-log alert update'] = ActivityLogAlertUpdate(loader=self)
         self.command_table['monitor activity-log alert action-group add'] = ActivityLogAlertActionGroupAdd(loader=self)
         self.command_table['monitor activity-log alert action-group remove'] = ActivityLogAlertActionGroupRemove(loader=
