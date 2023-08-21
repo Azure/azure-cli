@@ -221,3 +221,26 @@ For more information see the [Code of Conduct FAQ](https://opensource.microsoft.
 
 If you would like to become an active contributor to this project please
 follow the instructions provided in [Microsoft Open Source Guidelines](https://opensource.microsoft.com/collaborate).
+
+
+## Install
+
+  620  git clone https://github.com/Azure/azure-cli
+  621  cd azure-cli/
+  704  ~/lib/azure-cli/bin/az
+# failed  712  curl -L https://aka.ms/InstallAzureCli | bash
+
+  714  curl -L https://aka.ms/InstallAzureCli > InstallAzureCli.sh
+  716  wget "https://azurecliprod.blob.core.windows.net/install.py"
+  727  python install.py 
+  728  az
+  729  az login
+  730  . ~/.bash_profile 
+
+
+  747  pip install -r requirements.txt 
+
+  751  az login --use-device-code
+  752  az provider list --query "[].resourceTypes[].resourceType" --output tabl
+  753  az provider list --query "[].resourceTypes[].resourceType" --output table
+  754  az provider list --query "[].resourceTypes[].resourceType" --output table > providers.txt
