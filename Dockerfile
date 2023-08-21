@@ -29,7 +29,7 @@ LABEL maintainer="Microsoft" \
 # openssh - included for ssh-keygen
 # ca-certificates
 
-# wget - required for installing jp
+# curl - required for installing jp
 # jq - we include jq as a useful tool
 # pip wheel - required for CLI packaging
 # jmespath-community-terminal - we include jpterm as a useful tool

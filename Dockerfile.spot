@@ -17,7 +17,7 @@ RUN apt-get install -y ca-certificates curl openssl git \
 
 ARG JP_VERSION="1.1.0"
 
-RUN wget https://github.com/jmespath-community/jp/releases/download/v${JP_VERSION}/jp-linux-amd64 -O /usr/local/bin/jp \
+RUN curl -L https://github.com/jmespath-community/jp/releases/download/v${JP_VERSION}/jp-linux-amd64 -o /usr/local/bin/jp \
  && chmod +x /usr/local/bin/jp \
  && pip install --no-cache-dir --upgrade jmespath-community-terminal
 
