@@ -349,7 +349,7 @@ class CosmosDBBackupRestoreScenarioTest(ScenarioTest):
         # Create container
         self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {col} -p /pk ').get_output_in_json()   
 
-        print('Starting to perform restore.')
+        print('Starting to perform restore with public network access as DISABLED.')
 
         restorable_database_account = self.cmd('az cosmosdb restorable-database-account show --location {loc} --instance-id {ins_id}').get_output_in_json()
 
