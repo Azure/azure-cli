@@ -93,7 +93,7 @@ class Update(AAZCommand):
         )
         _args_schema.ip_tags_list = AAZListArg(
             options=["--ip-tags-list"],
-            help="Space-separated list of IP tags in 'TYPE=VAL' format.",
+            help="The list of tags associated with the public IP address.",
             nullable=True,
         )
         _args_schema.version = AAZStrArg(
