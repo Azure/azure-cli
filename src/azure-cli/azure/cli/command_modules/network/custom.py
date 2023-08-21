@@ -5211,8 +5211,9 @@ class PublicIPUpdate(_PublicIPUpdate):
         args_schema.ip_tags = AAZDictArg(
             options=["--ip-tags"],
             help="Space-separated list of IP tags in `TYPE=VAL` format.",
+            nullable=True
         )
-        args_schema.ip_tags.Element = AAZStrArg()
+        args_schema.ip_tags.Element = AAZStrArg(nullable=True)
         args_schema.ip_tags_list._registered = False
 
         return args_schema
@@ -5220,7 +5221,10 @@ class PublicIPUpdate(_PublicIPUpdate):
     def pre_operations(self):
         args = self.ctx.args
         if has_value(args.ip_tags):
-            args.ip_tags_list = [{"ip_tag_type": k, "tag": v} for k, v in args.ip_tags.to_serialized_data().items()]
+            if ip_tags := args.ip_tags.to_serialized_data() is None:
+                args.ip_tags_list = []
+            else:
+                args.ip_tags_list = [{"ip_tag_type": k, "tag": v} for k, v in ip_tags.items()]
 
     def post_instance_update(self, instance):
         if not has_value(instance.properties.ddos_settings.ddos_protection_plan.id):
