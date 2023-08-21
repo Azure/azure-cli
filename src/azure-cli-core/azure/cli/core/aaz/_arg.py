@@ -199,14 +199,17 @@ class AAZBaseArg(AAZBaseType):
 class AAZSimpleTypeArg(AAZBaseArg, AAZSimpleType):
     """Argument accept simple value"""
 
-    def __init__(self, enum=None, enum_case_sensitive=False, **kwargs):
+    def __init__(self, enum=None, enum_case_sensitive=False, configured_default=None, **kwargs):
         super().__init__(**kwargs)
         self.enum = AAZArgEnum(enum, case_sensitive=enum_case_sensitive) if enum else None
+        self._configured_default = configured_default
 
     def to_cmd_arg(self, name, **kwargs):
         arg = super().to_cmd_arg(name, **kwargs)
         if self.enum:
             arg.choices = self.enum.to_choices()    # convert it's enum value into choices in arg
+        if self._configured_default:
+            arg.configured_default = self._configured_default
         return arg
 
     def _build_cmd_action(self):
@@ -449,11 +452,13 @@ class AAZResourceGroupNameArg(AAZStrArg):
             self, options=('--resource-group', '-g'), id_part='resource_group',
             help="Name of resource group. "
                  "You can configure the default group using `az configure --defaults group=<name>`",
+            configured_default='group',
             **kwargs):
         super().__init__(
             options=options,
             id_part=id_part,
             help=help,
+            configured_default=configured_default,
             **kwargs
         )
 
@@ -462,7 +467,6 @@ class AAZResourceGroupNameArg(AAZStrArg):
         from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
         arg = super().to_cmd_arg(name, **kwargs)
         arg.completer = get_resource_group_completion_list
-        arg.configured_default = 'group'
         arg.local_context_attribute = LocalContextAttribute(
             name='resource_group_name',
             actions=[LocalContextAction.SET, LocalContextAction.GET],
@@ -478,12 +482,14 @@ class AAZResourceLocationArg(AAZStrArg):
             help="Location. Values from: `az account list-locations`. "
                  "You can configure the default location using `az configure --defaults location=<location>`.",
             fmt=None,
+            configured_default='location',
             **kwargs):
         fmt = fmt or AAZResourceLocationArgFormat()
         super().__init__(
             options=options,
             help=help,
             fmt=fmt,
+            configured_default=configured_default,
             **kwargs
         )
 
@@ -502,7 +508,6 @@ class AAZResourceLocationArg(AAZStrArg):
             arg.help = short_summary
 
         arg.completer = get_location_completion_list
-        arg.configured_default = 'location'
         arg.local_context_attribute = LocalContextAttribute(
             name='location',
             actions=[LocalContextAction.SET, LocalContextAction.GET],

@@ -1369,6 +1369,25 @@ class TestAAZArg(unittest.TestCase):
         with self.assertRaises(AAZUnregisteredArg):
             schema.properties.to_cmd_arg("properties")
 
+    def test_aaz_configured_default_arg(self):
+        from azure.cli.core.aaz._arg import AAZResourceGroupNameArg, AAZResourceLocationArg, AAZStrArg, AAZIntArg,\
+            AAZArgumentsSchema
+        schema = AAZArgumentsSchema()
+        v = schema()
+
+        schema.resource_group = AAZResourceGroupNameArg()
+        schema.location = AAZResourceLocationArg()
+        schema.name = AAZStrArg(configured_default="specialname")
+        schema.count = AAZIntArg(configured_default="specialcount")
+        arg = schema.resource_group.to_cmd_arg("resource_group")
+        self.assertEqual(arg.type.settings['configured_default'], 'group')
+        arg = schema.location.to_cmd_arg("location")
+        self.assertEqual(arg.type.settings['configured_default'], 'location')
+        arg = schema.name.to_cmd_arg("name")
+        self.assertEqual(arg.type.settings['configured_default'], 'specialname')
+        arg = schema.count.to_cmd_arg("count")
+        self.assertEqual(arg.type.settings['configured_default'], 'specialcount')
+
 
 class TestAAZArgUtils(unittest.TestCase):
 
