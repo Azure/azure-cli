@@ -332,7 +332,7 @@ class CosmosDBBackupRestoreScenarioTest(ScenarioTest):
             'user2' : self.create_random_name(prefix='user2-', length = 10)
         })
 
-        # Create PITR account
+        # Create normal PITR account
         self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --kind GlobalDocumentDB')
         account = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
         print(account)
