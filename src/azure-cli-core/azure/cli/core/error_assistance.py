@@ -93,7 +93,7 @@ def error_enabled():
 def get_config():
         config = configparser.ConfigParser()
         config.read(GLOBAL_CONFIG_PATH)
-        return str_to_bool(config.get('core', 'error_assistance'))
+        return str_to_bool(config.get('core', 'error_assistance', fallback=False)) or str_to_bool(config.get('interactive', 'error_assistance', fallback=False))
 
 def str_to_bool(string):
         if string=='True' or string=='true':
