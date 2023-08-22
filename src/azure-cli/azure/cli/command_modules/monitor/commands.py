@@ -166,10 +166,8 @@ def load_command_table(self, _):
     with self.command_group('monitor metrics') as g:
         from .transformers import metrics_table, metrics_definitions_table, metrics_namespaces_table
         g.command('list', 'list_metrics', command_type=monitor_custom, table_transformer=metrics_table)
-        g.command('list-definitions', 'list', command_type=metric_definitions_sdk,
-                  table_transformer=metrics_definitions_table)
-        g.command('list-namespaces', 'list', is_preview=True, command_type=metric_namespaces_sdk,
-                  table_transformer=metrics_namespaces_table)
+        g.custom_command('list-definitions', 'list_definations', command_type=monitor_custom, table_transformer=metrics_definitions_table)
+        g.command('list-namespaces', 'list_namespaces', is_preview=True, command_type=monitor_custom, table_transformer=metrics_namespaces_table)
 
     with self.command_group('monitor metrics alert', metric_alert_sdk, custom_command_type=alert_custom,
                             client_factory=cf_metric_alerts) as g:
