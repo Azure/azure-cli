@@ -57,7 +57,7 @@ class Update(AAZCommand):
         )
         _args_schema.namespace_name = AAZStrArg(
             options=["--namespace-name"],
-            help="The namespace name",
+            help="Name of Namespace.",
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
@@ -70,7 +70,7 @@ class Update(AAZCommand):
         )
         _args_schema.rights = AAZListArg(
             options=["--rights"],
-            help="The rights associated with the rule.",
+            help="Space-separated list of Authorization rule rights. Allowed values: Listen, Manage, Send.",
             fmt=AAZListArgFormat(
                 unique=True,
             ),

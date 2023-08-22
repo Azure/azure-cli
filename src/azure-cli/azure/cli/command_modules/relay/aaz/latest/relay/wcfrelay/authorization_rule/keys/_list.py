@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "relay wcfrelay authorization-rule keys list",
 )
 class List(AAZCommand):
-    """Primary and secondary connection strings to the WCF relay.
+    """List the keys and connection strings of Authorization Rule for the given Relay Service WCF Relay.
 
     :example: List the keys and connection strings of Authorization Rule for the given Relay Service WCF Relay
         az relay wcfrelay authorization-rule keys list --resource-group myresourcegroup --namespace- name mynamespace --relay-name myrelay --name myauthorule
@@ -46,7 +46,7 @@ class List(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
-            help="The authorization rule name.",
+            help="Name of WCF Relay Authorization Rule.",
             required=True,
             fmt=AAZStrArgFormat(
                 min_length=1,

@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update Authorization Rule for given Relay Service Hybrid Connection.
+
+    :example: Update Authorization Rule for given Relay Service Hybrid Connection
+        az relay hyco authorization-rule update --resource-group myresourcegroup --namespace-name mynamespace --hybrid-connection-name myhyco --name myauthorule --rights Send
     """
 
     _aaz_info = {
@@ -54,7 +57,7 @@ class Update(AAZCommand):
         )
         _args_schema.hybrid_connection_name = AAZStrArg(
             options=["--hybrid-connection-name"],
-            help="The hybrid connection name.",
+            help="Name of Hybrid Connection.",
             required=True,
             id_part="child_name_1",
             fmt=AAZStrArgFormat(
@@ -63,7 +66,7 @@ class Update(AAZCommand):
         )
         _args_schema.namespace_name = AAZStrArg(
             options=["--namespace-name"],
-            help="The namespace name",
+            help="Name of Namespace.",
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
@@ -76,7 +79,7 @@ class Update(AAZCommand):
         )
         _args_schema.rights = AAZListArg(
             options=["--rights"],
-            help="The rights associated with the rule.",
+            help="Space-separated list of Authorization rule rights. Allowed values: Listen, Manage, Send.",
             fmt=AAZListArgFormat(
                 unique=True,
             ),

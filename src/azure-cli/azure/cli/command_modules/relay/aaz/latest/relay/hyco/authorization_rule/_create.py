@@ -54,7 +54,7 @@ class Create(AAZCommand):
         )
         _args_schema.hybrid_connection_name = AAZStrArg(
             options=["--hybrid-connection-name"],
-            help="The hybrid connection name.",
+            help="Name of Hybrid Connection.",
             required=True,
             fmt=AAZStrArgFormat(
                 min_length=1,
@@ -62,7 +62,7 @@ class Create(AAZCommand):
         )
         _args_schema.namespace_name = AAZStrArg(
             options=["--namespace-name"],
-            help="The namespace name",
+            help="Name of Namespace.",
             required=True,
             fmt=AAZStrArgFormat(
                 max_length=50,
@@ -74,7 +74,7 @@ class Create(AAZCommand):
         )
         _args_schema.rights = AAZListArg(
             options=["--rights"],
-            help="The rights associated with the rule.",
+            help="Space-separated list of Authorization rule rights. Allowed values: Listen, Manage, Send.",
             required=True,
             fmt=AAZListArgFormat(
                 unique=True,

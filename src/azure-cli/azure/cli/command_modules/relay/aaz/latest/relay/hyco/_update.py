@@ -69,7 +69,7 @@ class Update(AAZCommand):
             required=True,
         )
         _args_schema.requires_client_authorization = AAZBoolArg(
-            options=["--requires-client-authorization"],
+            options=["-r", "--requires-client-authorization"],
             help="Indicates whether client authorization is required.",
             nullable=True,
         )

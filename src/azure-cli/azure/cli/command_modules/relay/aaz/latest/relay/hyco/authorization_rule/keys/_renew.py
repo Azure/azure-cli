@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "relay hyco authorization-rule keys renew",
 )
 class Renew(AAZCommand):
-    """Regenerates the primary or secondary connection strings to the hybrid connection.
+    """Regenerate keys of Authorization Rule for Relay Service Hybrid Connection.
 
     :example: Regenerate key of Relay Service Hybrid Connection.
         az relay hyco authorization-rule keys renew --resource-group myresourcegroup --namespace- name mynamespace --hybrid-connection-name myhyco --name myauthorule --key PrimaryKey
@@ -81,7 +81,7 @@ class Renew(AAZCommand):
         )
         _args_schema.key = AAZStrArg(
             options=["--key"],
-            help="The access key to regenerate.",
+            help="Specifies Primary or Secondary key needs to be reset.",
             required=True,
             enum={"PrimaryKey": "PrimaryKey", "SecondaryKey": "SecondaryKey"},
         )

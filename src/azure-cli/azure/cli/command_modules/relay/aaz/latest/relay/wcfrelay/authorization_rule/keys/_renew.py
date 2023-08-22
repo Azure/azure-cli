@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "relay wcfrelay authorization-rule keys renew",
 )
 class Renew(AAZCommand):
-    """Regenerates the primary or secondary connection strings to the WCF relay.
+    """Regenerate keys of Authorization Rule for Relay Service WCF Relay.
 
     :example: Regenerate keys of Authorization Rule for Relay Service WCF Relay
         az relay wcfrelay authorization-rule keys renew --resource-group myresourcegroup --namespace-name mynamespace --relay-name myrelay --name myauthorule --key PrimaryKey
@@ -46,7 +46,7 @@ class Renew(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
-            help="The authorization rule name.",
+            help="Name of WCF Relay Authorization Rule.",
             required=True,
             id_part="child_name_2",
             fmt=AAZStrArgFormat(

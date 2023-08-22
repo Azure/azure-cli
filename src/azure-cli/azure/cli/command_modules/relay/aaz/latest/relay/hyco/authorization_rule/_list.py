@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """Shows list of Authorization Rule by Relay Service Hybrid Connection.
+
+    :example: shows list of Authorization Rule by Relay Service Hybrid Connection
+        az relay hyco authorization-rule list --resource-group myresourcegroup --namespace-name mynamespace --hybrid-connection-name myhyco
     """
 
     _aaz_info = {
@@ -44,7 +47,7 @@ class List(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.hybrid_connection_name = AAZStrArg(
             options=["--hybrid-connection-name"],
-            help="The hybrid connection name.",
+            help="Name of Hybrid Connection.",
             required=True,
             fmt=AAZStrArgFormat(
                 min_length=1,
@@ -52,7 +55,7 @@ class List(AAZCommand):
         )
         _args_schema.namespace_name = AAZStrArg(
             options=["--namespace-name"],
-            help="The namespace name",
+            help="Name of Namespace.",
             required=True,
             fmt=AAZStrArgFormat(
                 max_length=50,

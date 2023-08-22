@@ -71,11 +71,11 @@ class Create(AAZCommand):
             enum={"Http": "Http", "NetTcp": "NetTcp"},
         )
         _args_schema.requires_client_authorization = AAZBoolArg(
-            options=["--requires-client-authorization"],
+            options=["-c", "--requires-client-authorization"],
             help="Indicates whether client authorization is required.",
         )
         _args_schema.requires_transport_security = AAZBoolArg(
-            options=["--requires-transport-security"],
+            options=["-t", "--requires-transport-security"],
             help="Indicates whether transport security is required.",
         )
         _args_schema.user_metadata = AAZStrArg(

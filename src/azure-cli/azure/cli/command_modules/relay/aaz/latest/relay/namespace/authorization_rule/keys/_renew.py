@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "relay namespace authorization-rule keys renew",
 )
 class Renew(AAZCommand):
-    """Regenerates the primary or secondary connection strings to the namespace.
+    """Regenerate keys of Authorization Rule for the Relay Service Namespace.
 
     :example: Regenerate keys of Authorization Rule for the Relay Service Namespace.
         az relay namespace authorization-rule keys renew --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule --key PrimaryKey
@@ -55,7 +55,7 @@ class Renew(AAZCommand):
         )
         _args_schema.namespace_name = AAZStrArg(
             options=["--namespace-name"],
-            help="The namespace name",
+            help="Name of Namespace.",
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
@@ -72,7 +72,7 @@ class Renew(AAZCommand):
         )
         _args_schema.key = AAZStrArg(
             options=["--key"],
-            help="The access key to regenerate.",
+            help="Specifies Primary or Secondary key needs to be reset.",
             required=True,
             enum={"PrimaryKey": "PrimaryKey", "SecondaryKey": "SecondaryKey"},
         )

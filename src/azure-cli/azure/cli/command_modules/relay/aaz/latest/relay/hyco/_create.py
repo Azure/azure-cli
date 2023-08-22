@@ -65,7 +65,7 @@ class Create(AAZCommand):
             required=True,
         )
         _args_schema.requires_client_authorization = AAZBoolArg(
-            options=["--requires-client-authorization"],
+            options=["-c", "--requires-client-authorization"],
             help="Indicates whether client authorization is required.",
         )
         _args_schema.user_metadata = AAZStrArg(

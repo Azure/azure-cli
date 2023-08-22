@@ -3,54 +3,16 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from .aaz.latest.relay.hyco import Update as _HycoUpdate
-from .aaz.latest.relay.hyco.authorization_rule import Create as _HycoAuthoCreate
+from .aaz.latest.relay.hyco.authorization_rule import Create as _HycoAuthoCreate, Update as _HycoAuthoUpdate
 from .aaz.latest.relay.namespace.authorization_rule import Create as _NamespaceAuthoCreate
 from .aaz.latest.relay.wcfrelay import Update as _WcfrelayUpdate
-from .aaz.latest.relay.wcfrelay.authorization_rule import Create as _WcfrelayAuthoCreate
+from .aaz.latest.relay.wcfrelay.authorization_rule import Create as _WcfrelayAuthoCreate, Update as _WcfrelayAuthoUpdate
 
 
 # pylint: disable=line-too-long
 # pylint: disable=too-many-lines
 # pylint: disable=inconsistent-return-statements
 # pylint: disable=unused-variable
-
-
-# Namespace Region
-def cli_namespace_create(client, resource_group_name, namespace_name, location=None, tags=None):
-    from azure.mgmt.relay.models import RelayNamespace
-    return client.create_or_update(
-        resource_group_name=resource_group_name,
-        namespace_name=namespace_name,
-        parameters=RelayNamespace(
-            location,
-            tags)
-    )
-
-
-def cli_namespace_update(instance, tags=None):
-
-    if tags is not None:
-        instance.tags = tags
-
-    return instance
-
-
-def cli_namespace_list(client, resource_group_name=None):
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name=resource_group_name)
-
-    return client.list()
-
-
-# Namespace Authorization rule:
-def cli_namespaceautho_create(client, resource_group_name, namespace_name, name, access_rights=None):
-    from azure.cli.command_modules.relay._utils import accessrights_converter
-    return client.create_or_update_authorization_rule(
-        resource_group_name=resource_group_name,
-        namespace_name=namespace_name,
-        authorization_rule_name=name,
-        rights=accessrights_converter(access_rights)
-    )
 
 
 class NamespaceAuthoCreate(_NamespaceAuthoCreate):
@@ -71,6 +33,15 @@ class WcfrelayAuthoCreate(_WcfrelayAuthoCreate):
         return args_schema
 
 
+class WcfrelayAuthoUpdate(_WcfrelayAuthoUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.rights._required = True
+        return args_schema
+
+
 class HycoAuthoCreate(_HycoAuthoCreate):
 
     @classmethod
@@ -80,58 +51,13 @@ class HycoAuthoCreate(_HycoAuthoCreate):
         return args_schema
 
 
-# Namespace Authorization rule:
-def cli_namespaceautho_update(instance, rights):
-    from azure.cli.command_modules.relay._utils import accessrights_converter
-    instance.rights = accessrights_converter(rights)
-    return instance
+class HycoAuthoUpdate(_HycoAuthoUpdate):
 
-
-# WCF Relay Region
-def cli_wcfrelay_create(client, resource_group_name, namespace_name, relay_name, relay_type,
-                        requires_client_authorization=None, requires_transport_security=None, user_metadata=None):
-
-    from azure.mgmt.relay.models import WcfRelay, Relaytype
-
-    if relay_type is None:
-        set_relay_type = Relaytype.net_tcp
-    elif relay_type == "Http":
-        set_relay_type = Relaytype.http
-    else:
-        set_relay_type = Relaytype.net_tcp
-
-    wcfrelay_params = WcfRelay(
-        relay_type=set_relay_type,
-        requires_client_authorization=requires_client_authorization,
-        requires_transport_security=requires_transport_security,
-        user_metadata=user_metadata
-    )
-
-    return client.create_or_update(
-        resource_group_name=resource_group_name,
-        namespace_name=namespace_name,
-        relay_name=relay_name,
-        parameters=wcfrelay_params)
-
-
-def cli_wcfrelay_update(instance, relay_type=None, user_metadata=None, status=None):
-
-    from azure.mgmt.relay.models import WcfRelay
-    returnobj = WcfRelay(relay_type=instance.relay_type,
-                         requires_client_authorization=instance.requires_client_authorization,
-                         requires_transport_security=instance.requires_transport_security,
-                         user_metadata=instance.user_metadata)
-
-    if relay_type:
-        returnobj.relay_type = relay_type
-
-    if user_metadata:
-        returnobj.user_metadata = user_metadata
-
-    if status:
-        returnobj.status = status
-
-    return returnobj
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.rights._required = True
+        return args_schema
 
 
 class WcfrelayUpdate(_WcfrelayUpdate):
@@ -145,15 +71,6 @@ class WcfrelayUpdate(_WcfrelayUpdate):
             enum={"Active": "Active", "Disabled": "Disabled", "ReceiveDisabled": "ReceiveDisabled", "SendDisabled": "SendDisabled"},
         )
         return args_schema
-# Hybrid Connection Region
-def cli_hyco_create(client, resource_group_name, namespace_name, hybrid_connection_name,
-                    requires_client_authorization=None, user_metadata=None):
-
-    return client.create_or_update(
-        resource_group_name=resource_group_name,
-        namespace_name=namespace_name,
-        hybrid_connection_name=hybrid_connection_name,
-        requires_client_authorization=requires_client_authorization, user_metadata=user_metadata)
 
 
 class HycoUpdate(_HycoUpdate):
@@ -167,28 +84,3 @@ class HycoUpdate(_HycoUpdate):
             enum={"Active": "Active", "Disabled": "Disabled", "ReceiveDisabled": "ReceiveDisabled", "SendDisabled": "SendDisabled"},
         )
         return args_schema
-
-
-def cli_hyco_update(instance, requires_client_authorization=None, status=None, user_metadata=None):
-
-    from azure.mgmt.relay.models import HybridConnection
-    hyco_params = HybridConnection(requires_client_authorization=instance.requires_client_authorization,
-                                   user_metadata=instance.user_metadata)
-
-    if requires_client_authorization:
-        hyco_params.requires_client_authorization = requires_client_authorization
-
-    if status:
-        hyco_params.status = status
-
-    if user_metadata:
-        hyco_params.user_metadata = user_metadata
-
-    return hyco_params
-
-
-def empty_on_404(ex):
-    from azure.mgmt.relay.models import ErrorResponseException
-    if isinstance(ex, ErrorResponseException) and ex.response.status_code == 404:
-        return None
-    raise ex

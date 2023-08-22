@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "relay hyco authorization-rule keys list",
 )
 class List(AAZCommand):
-    """Primary and secondary connection strings to the hybrid connection.
+    """List the keys and connection strings of Authorization Rule for Relay Service Hybrid Connection.
 
     :example: List the keys and connection strings of Authorization Rule for Relay Service Hybrid Connection.
         az relay hyco authorization-rule keys list --resource-group myresourcegroup --namespace-name mynamespace --hybrid-connection-name myhyco --name myauthorule

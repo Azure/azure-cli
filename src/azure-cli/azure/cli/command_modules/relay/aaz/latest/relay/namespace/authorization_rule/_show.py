@@ -55,7 +55,7 @@ class Show(AAZCommand):
         )
         _args_schema.namespace_name = AAZStrArg(
             options=["--namespace-name"],
-            help="The namespace name",
+            help="Name of Namespace.",
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(

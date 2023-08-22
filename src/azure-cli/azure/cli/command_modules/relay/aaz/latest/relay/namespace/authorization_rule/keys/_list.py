@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "relay namespace authorization-rule keys list",
 )
 class List(AAZCommand):
-    """Primary and secondary connection strings to the namespace.
+    """List the keys and connection strings of Authorization Rule for Relay Service Namespace.
 
     :example: List the keys and connection strings of Authorization Rule for Relay Service Namespace
         az relay namespace authorization-rule keys list --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule
@@ -57,7 +57,7 @@ class List(AAZCommand):
         )
         _args_schema.namespace_name = AAZStrArg(
             options=["--namespace-name"],
-            help="The namespace name",
+            help="Name of Namespace.",
             required=True,
             fmt=AAZStrArgFormat(
                 max_length=50,

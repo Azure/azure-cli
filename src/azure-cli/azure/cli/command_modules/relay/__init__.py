@@ -37,8 +37,8 @@ class RelayCommandsLoader(AzCommandsLoader):
         return self.command_table
 
     def load_arguments(self, command):
-        from azure.cli.command_modules.relay._params import load_arguments_sb
-        load_arguments_sb(self, command)
+        from azure.cli.command_modules.relay._params import load_arguments
+        load_arguments(self, command)
 
 
 COMMAND_LOADER_CLS = RelayCommandsLoader

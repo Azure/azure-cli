@@ -74,7 +74,7 @@ class Create(AAZCommand):
         )
         _args_schema.rights = AAZListArg(
             options=["--rights"],
-            help="Space-separated list of Authorization rule rights.  Allowed values: Listen, Manage, Send.",
+            help="The rights associated with the rule.",
             required=True,
             fmt=AAZListArgFormat(
                 unique=True,
