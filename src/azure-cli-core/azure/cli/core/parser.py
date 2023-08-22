@@ -160,9 +160,7 @@ class AzCliCommandParser(CLICommandParser):
         recommendations = recommender.provide_recommendations()
 
         # Get command to provide to error help
-        command = command_arguments[0] # Get the command without the parameter, command return from _get_failure_recover_arguments with two other var
-        parameters = AzCliCommandInvoker._extract_parameter_names(self._raw_arguments)
-        full_command = str(command) + ' ' + ' <parameter_placeholder> '.join(parameters) + ' <parameter_placeholder> '
+        full_command = self.full_raw_command
 
         az_error = ArgumentUsageError(message, full_command)
         if 'unrecognized arguments' in message:
@@ -284,6 +282,8 @@ class AzCliCommandParser(CLICommandParser):
     def parse_known_args(self, args=None, namespace=None):
         # retrieve the raw argument list in case parsing known arguments fails.
         self._raw_arguments = args
+
+        self.full_raw_command = ' '.join(args)
         # if parsing known arguments succeeds, get the command namespace and the argument list
         self._namespace, self._raw_arguments = super().parse_known_args(args=args, namespace=namespace)
         return self._namespace, self._raw_arguments
@@ -297,9 +297,7 @@ class AzCliCommandParser(CLICommandParser):
             cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
 
             # Get command to provide to error help
-            command = str(self.prog) + ' ' + value
-            parameters = AzCliCommandInvoker._extract_parameter_names(self._raw_arguments)
-            full_command = str(command) + ' ' + ''.join(parameters)
+            full_command = self.prog + ' ' + self.full_raw_command
 
             command_name_inferred = self.prog
             use_dynamic_install = 'no'
