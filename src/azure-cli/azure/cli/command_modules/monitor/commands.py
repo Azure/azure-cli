@@ -8,9 +8,9 @@ from azure.cli.core.commands import CliCommandType
 # pylint: disable=line-too-long, too-many-locals, too-many-statements
 def load_command_table(self, _):
     from ._client_factory import (
-        cf_alert_rules, cf_metric_def, cf_autoscale,
+        cf_alert_rules, cf_autoscale,
         cf_activity_log, cf_action_groups, cf_activity_log_alerts, cf_event_categories,
-        cf_metric_alerts, cf_metric_ns, cf_log_analytics_workspace, cf_log_analytics_linked_storage)
+        cf_metric_alerts, cf_log_analytics_workspace, cf_log_analytics_linked_storage)
     from .transformers import (action_group_list_table)
     from .validators import (process_autoscale_create_namespace,
                              process_action_group_detail_for_creation)
@@ -73,19 +73,6 @@ def load_command_table(self, _):
         client_factory=cf_metric_alerts,
         operation_group='metric_alerts',
         exception_handler=exception_handler)
-
-    metric_definitions_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations#MetricDefinitionsOperations.{}',
-        client_factory=cf_metric_def,
-        operation_group='metric_definitions',
-        exception_handler=exception_handler)
-
-    metric_namespaces_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations#MetricNamespacesOperations.{}',
-        client_factory=cf_metric_ns,
-        operation_group='metric_namespaces',
-        exception_handler=exception_handler
-    )
 
     log_analytics_workspace_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.log_analytics_workspace#{}',
