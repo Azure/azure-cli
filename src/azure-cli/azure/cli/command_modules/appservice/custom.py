@@ -1660,7 +1660,7 @@ def update_connection_strings(cmd, resource_group_name, name, connection_string_
     if sticky_slot_settings or rm_sticky_slot_settings:
         new_slot_setting_names = set(n['name'] for n in sticky_slot_settings)  # add setting name
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
-        slot_cfg_names.connection_string_names = set(slot_cfg_names.connection_string_names) or set()
+        slot_cfg_names.connection_string_names = set(slot_cfg_names.connection_string_names or [])
         slot_cfg_names.connection_string_names.update(new_slot_setting_names)
         slot_cfg_names.connection_string_names -= rm_sticky_slot_settings
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
