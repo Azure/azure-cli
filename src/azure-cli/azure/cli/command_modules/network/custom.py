@@ -3251,7 +3251,6 @@ class ExpressRouteCreate(_ExpressRouteCreate):
 
 
 class ExpressRouteUpdate(_ExpressRouteUpdate):
-
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArgFormat
@@ -3259,31 +3258,37 @@ class ExpressRouteUpdate(_ExpressRouteUpdate):
         args_schema.bandwidth = AAZListArg(
             options=["--bandwidth"],
             help="Bandwidth of the circuit. Usage: INT {Mbps,Gbps}. Defaults to Mbps.",
-            nullable=True,
+            nullable=True
         )
         args_schema.bandwidth.Element = AAZStrArg(nullable=True)
         args_schema.bandwidth_in_mbps._registered = False
         args_schema.bandwidth_in_gbps._registered = False
         args_schema.sku_name._registered = False
         args_schema.express_route_port._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRoutePorts/{}",
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/expressRoutePorts/{}"
         )
+
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
         if has_value(args.sku_tier) and has_value(args.sku_family):
-            args.sku_name = '{}_{}'.format(args.sku_tier, args.sku_family)
+            args.sku_name = f"{args.sku_tier}_{args.sku_family}"
+
         if has_value(args.bandwidth):
             converted_bandwidth = _validate_bandwidth(args.bandwidth)
-            args.bandwidth_in_gbps = (converted_bandwidth / 1000.0)
+            args.bandwidth_in_gbps = converted_bandwidth / 1000
             args.bandwidth_in_mbps = int(converted_bandwidth)
 
     def post_instance_update(self, instance):
-        if instance.properties.expressRoutePort is not None:
-            instance.properties.serviceProviderProperties = None
+        if not has_value(instance.properties.express_route_port.id):
+            instance.properties.express_route_port = None
+
+        if has_value(instance.properties.express_route_port):
+            instance.properties.service_provider_properties = None
         else:
-            instance.properties.bandwidthInGbps = None
+            instance.properties.bandwidth_in_gbps = None
 
 
 def _validate_ipv6_address_prefixes(prefixes):
