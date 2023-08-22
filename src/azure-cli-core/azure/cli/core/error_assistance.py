@@ -14,7 +14,7 @@ def error_assistance(command=None):
         if command==None:
                 return None
 
-        prompt = "Azure CLI Command: " + command + ", This isn't working, why not?"
+        prompt = "Azure CLI Command: '" + command + "'\n This isn't working, why not?"
 
         messages = [
                 {"role": "system", "content": "You are a helpful assistant that provides concise explanations about the Azure CLI error provided and provides a remedied command."},
@@ -24,7 +24,7 @@ def error_assistance(command=None):
         functions = [  
             {
                 "name": "error_response",
-                "description": "Receives an Azure CLI error message and the user's command that triggered the error and provides an explanation as to what the problem is as well as the corrected command without any additional text",
+                "description": "Receives an Azure CLI error message and the user's command that triggered the error and provides an explanation as to what the problem is as well as the corrected command with no additional text",
                 "parameters": {
                     "type": "object",
                     "properties": {
@@ -46,7 +46,7 @@ def error_assistance(command=None):
             deployment_id="openai-interns-model",
             messages=messages,
             functions=functions,
-            function_call={"name": "error_response"}, 
+            function_call={"name": "error_response"}
         )
 
         return response
