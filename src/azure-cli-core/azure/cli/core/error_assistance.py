@@ -26,7 +26,7 @@ def error_assistance(command, message=None):
         functions = [  
             {
                 "name": "error_response",
-                "description": "Receives an Azure CLI error message and the user's command (with parameter values removed) that triggered the error and provides an explanation as to what the problem is as well as the corrected command without any additional text",
+                "description": "Receives an Azure CLI error message and the user's command that triggered the error and provides an explanation as to what the problem is as well as the corrected command without any additional text",
                 "parameters": {
                     "type": "object",
                     "properties": {
