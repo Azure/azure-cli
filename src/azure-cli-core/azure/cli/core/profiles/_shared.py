@@ -256,7 +256,7 @@ AZURE_API_PROFILES = {
         }),
         ResourceType.MGMT_MSI: '2023-01-31',
         ResourceType.MGMT_APPSERVICE: '2022-03-01',
-        ResourceType.MGMT_IOTHUB: '2022-04-30-preview',
+        ResourceType.MGMT_IOTHUB: '2023-06-30-preview',
         ResourceType.MGMT_IOTDPS: '2021-10-15',
         ResourceType.MGMT_IOTCENTRAL: '2021-11-01-preview',
         ResourceType.MGMT_ARO: '2022-09-04',
