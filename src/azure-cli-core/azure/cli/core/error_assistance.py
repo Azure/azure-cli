@@ -49,7 +49,7 @@ def error_assistance(command, message=None):
             messages=messages,
             functions=functions,
             function_call={"name": "error_response"}, 
-        )  
+        )
 
         return response
 
@@ -59,8 +59,7 @@ def print_error_assistance(response):
         arg_json = json.loads(args)
 
         explanation = arg_json['explanation']
-        corrected_command = arg_json['corrected_command']
-
+        corrected_command = validate_command(arg_json['corrected_command'])
         
         print("\n")
         print_line()
@@ -71,6 +70,13 @@ def print_error_assistance(response):
         print(corrected_command)
         print_line()
         print("\n")
+
+def validate_command(command_response):
+        #if command syntax is correct:
+                return command_response
+        #else:
+                return "No command available."
+
 
 def print_line():
         console_width = shutil.get_terminal_size().columns
