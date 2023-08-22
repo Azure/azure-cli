@@ -5,11 +5,14 @@ import configparser
 
 from azure.cli.core._config import GLOBAL_CONFIG_PATH
 
-def error_assistance(command):      
+def error_assistance(command=None):      
         openai.api_key = <api-key>
         openai.api_version = "2023-07-01-preview"
         openai.api_type = "azure"
         openai.api_base = <endpoint>
+
+        if command==None:
+                return None
 
         prompt = "Azure CLI Command: " + command + ", This isn't working, why not?"
 
