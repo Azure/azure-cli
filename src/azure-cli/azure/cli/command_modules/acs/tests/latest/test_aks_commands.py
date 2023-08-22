@@ -2411,6 +2411,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      '--aad-server-app-secret fake-secret ' \
                      '--aad-client-app-id 00000000-0000-0000-0000-000000000002 ' \
                      '--aad-tenant-id d5b55040-0c14-48cc-a028-91457fc190d9 ' \
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AADv1AllowCreate ' \
                      '-o json'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -4820,6 +4821,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      '--aad-server-app-secret fake-secret ' \
                      '--aad-client-app-id 00000000-0000-0000-0000-000000000002 ' \
                      '--aad-tenant-id d5b55040-0c14-48cc-a028-91457fc190d9 ' \
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AADv1AllowCreate ' \
                      '-o json'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
