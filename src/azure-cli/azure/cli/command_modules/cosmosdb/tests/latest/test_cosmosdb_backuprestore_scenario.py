@@ -307,3 +307,75 @@ class CosmosDBBackupRestoreScenarioTest(ScenarioTest):
 
         restored_account_defaultIdentity = restored_account['defaultIdentity']
         assert user_id_2 in restored_account_defaultIdentity
+        
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_public_network_access_restore', location='eastus2')
+    def test_cosmosdb_public_network_access_restore(self, resource_group):
+        # Source account parameters
+        source_acc = self.create_random_name(prefix='cli-systemid-', length=25)
+        target_acc = source_acc + "-restored"
+        subscription = self.get_subscription_id()
+        col = self.create_random_name(prefix='cli', length=15)
+        db_name = self.create_random_name(prefix='cli', length=15)
+
+        self.kwargs.update({
+            'acc': source_acc,
+            'restored_acc': target_acc,
+            'db_name': db_name,
+            'col': col,
+            'loc': 'eastus2',
+            'subscriptionid': subscription
+        })
+
+        self.kwargs.update({
+            'user1' : self.create_random_name(prefix='user1-', length = 10),
+            'user2' : self.create_random_name(prefix='user2-', length = 10)
+        })
+
+        # Create PITR account
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --kind GlobalDocumentDB')
+        account = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
+        print(account)
+
+        print('Finished creating source account ' + account['id'])
+
+        self.kwargs.update({
+            'ins_id': account['instanceId']
+        })
+
+        # Create database
+        self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
+
+        # Create container
+        self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {col} -p /pk ').get_output_in_json()   
+
+        print('Starting to perform restore with public network access as DISABLED.')
+
+        restorable_database_account = self.cmd('az cosmosdb restorable-database-account show --location {loc} --instance-id {ins_id}').get_output_in_json()
+
+        account_creation_time = restorable_database_account['creationTime']
+        creation_timestamp_datetime = parser.parse(account_creation_time)
+        restore_ts = creation_timestamp_datetime + timedelta(minutes=4)
+        import time
+        time.sleep(240)
+        restore_ts_string = restore_ts.isoformat()
+        self.kwargs.update({
+            'rts': restore_ts_string
+        })
+
+        self.kwargs.update({
+            'rts': restore_ts_string,
+            'loc': 'eastus2',
+            'pna': 'DISABLED'
+        })
+
+        self.cmd('az cosmosdb restore -n {restored_acc} -g {rg} -a {acc} --restore-timestamp {rts} --location {loc} --public-network-access {pna}')
+        restored_account = self.cmd('az cosmosdb show -n {restored_acc} -g {rg}', checks=[
+            self.check('restoreParameters.restoreMode', 'PointInTime')
+        ]).get_output_in_json()
+
+        print(restored_account)
+        print('Finished restoring account ' + restored_account['id'])
+
+        public_network_access = restored_account['publicNetworkAccess']
+        assert public_network_access == 'Disabled'
