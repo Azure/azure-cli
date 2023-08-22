@@ -537,7 +537,10 @@ def parse_service_bindings(cmd, service_bindings_list, resource_group_name, name
 
         if not validate_binding_name(binding_name):
             raise InvalidArgumentValueError("The Binding Name can only contain letters, numbers (0-9), periods ('.'), "
-                                            "and underscores ('_'). The length must not be more than 60 characters.")
+                                            "and underscores ('_'). The length must not be more than 60 characters. "
+                                            "By default, the binding name is the same as the service name you specified "
+                                            "[my-aca-pgaddon], but you can override the default and specify your own "
+                                            "compliant binding name like this --bind my-aca-pgaddon[:my_aca_pgaddon].")
 
         resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceManagementClient)
 

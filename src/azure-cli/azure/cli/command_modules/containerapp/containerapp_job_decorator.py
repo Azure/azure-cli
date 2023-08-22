@@ -409,7 +409,7 @@ class ContainerAppJobCreateDecorator(ContainerAppJobDecorator):
                 set_managed_identity(self.cmd, self.get_argument_resource_group_name(), self.containerappjob_def, user_assigned=[self.get_argument_registry_identity()])
 
     def set_up_create_containerapp_job_yaml(self, name, file_name):
-        if self.get_argument_image() or self.get_argument_managed_env() or self.get_argument_trigger_type() or self.get_argument_replica_timeout() or self.get_argument_replica_retry_limit() or \
+        if self.get_argument_image() or self.get_argument_trigger_type() or self.get_argument_replica_timeout() or self.get_argument_replica_retry_limit() or \
                 self.get_argument_replica_completion_count() or self.get_argument_parallelism() or self.get_argument_cron_expression() or self.get_argument_cpu() or self.get_argument_memory() or self.get_argument_registry_server() or \
                 self.get_argument_registry_user() or self.get_argument_registry_pass() or self.get_argument_secrets() or self.get_argument_env_vars() or \
                 self.get_argument_startup_command() or self.get_argument_args() or self.get_argument_tags():
@@ -465,14 +465,18 @@ class ContainerAppJobCreateDecorator(ContainerAppJobDecorator):
             del self.containerappjob_def["workloadProfileName"]
 
         # Validate managed environment
+        env_id = self.containerappjob_def["properties"]['environmentId']
+        env_info = None
+        if self.get_argument_managed_env():
+            if not self.get_argument_disable_warnings() and env_id is not None and env_id != self.get_argument_managed_env():
+                logger.warning('The environmentId was passed along with --yaml. The value entered with --environment will be ignored, and the configuration defined in the yaml will be used instead')
+            if env_id is None:
+                env_id = self.get_argument_managed_env()
+                safe_set(self.containerappjob_def, "properties", "environmentId", value=env_id)
+
         if not self.containerappjob_def["properties"].get('environmentId'):
             raise RequiredArgumentMissingError(
                 'environmentId is required. This can be retrieved using the `az containerapp env show -g MyResourceGroup -n MyContainerappEnvironment --query id` command. Please see https://aka.ms/azure-container-apps-yaml for a valid containerapps YAML spec.')
-
-        env_id = self.containerappjob_def["properties"]['environmentId']
-        env_name = None
-        env_rg = None
-        env_info = None
 
         if is_valid_resource_id(env_id):
             parsed_managed_env = parse_resource_id(env_id)
