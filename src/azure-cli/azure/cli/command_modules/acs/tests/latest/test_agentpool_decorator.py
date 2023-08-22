@@ -898,15 +898,27 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSAgentPoolContext(
             self.cmd,
+            AKSAgentPoolParamDict({"node_osdisk_size": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_node_osdisk_size(), None)
+        agentpool = self.create_initialized_agentpool_instance(os_disk_size_gb=30)
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.get_node_osdisk_size(), 30)
+
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
             AKSAgentPoolParamDict({"node_osdisk_size": 0}),
             self.models,
             DecoratorMode.CREATE,
             self.agentpool_decorator_mode,
         )
-        self.assertEqual(ctx_1.get_node_osdisk_size(), 0)
-        agentpool = self.create_initialized_agentpool_instance(os_disk_size_gb=10)
-        ctx_1.attach_agentpool(agentpool)
-        self.assertEqual(ctx_1.get_node_osdisk_size(), 10)
+        self.assertEqual(ctx_2.get_node_osdisk_size(), 0)
+        agentpool = self.create_initialized_agentpool_instance(os_disk_size_gb=100)
+        ctx_2.attach_agentpool(agentpool)
+        self.assertEqual(ctx_2.get_node_osdisk_size(), 100)
 
     def common_get_node_osdisk_type(self):
         # default
@@ -1060,15 +1072,27 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSAgentPoolContext(
             self.cmd,
+            AKSAgentPoolParamDict({"max_pods": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_max_pods(), None)
+        agentpool = self.create_initialized_agentpool_instance(max_pods=110)
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.get_max_pods(), 110)
+
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
             AKSAgentPoolParamDict({"max_pods": 0}),
             self.models,
             DecoratorMode.CREATE,
             self.agentpool_decorator_mode,
         )
-        self.assertEqual(ctx_1.get_max_pods(), 0)
-        agentpool = self.create_initialized_agentpool_instance(max_pods=110)
-        ctx_1.attach_agentpool(agentpool)
-        self.assertEqual(ctx_1.get_max_pods(), 110)
+        self.assertEqual(ctx_2.get_max_pods(), 0)
+        agentpool = self.create_initialized_agentpool_instance(max_pods=250)
+        ctx_2.attach_agentpool(agentpool)
+        self.assertEqual(ctx_2.get_max_pods(), 250)
 
     def common_get_mode(self):
         # default
