@@ -146,7 +146,10 @@ class AzCliCommandParser(CLICommandParser):
                 _parser=command_parser)
 
     def validation_error(self, message):
-        az_error = ValidationError(message)
+        # Get command to provide to error help
+        full_command = self.prog + ' ' + self.full_raw_command
+
+        az_error = ValidationError(message, full_command)
         az_error.print_error()
         az_error.send_telemetry()
         self.exit(2)
@@ -160,7 +163,7 @@ class AzCliCommandParser(CLICommandParser):
         recommendations = recommender.provide_recommendations()
 
         # Get command to provide to error help
-        full_command = self.full_raw_command
+        full_command = self.prog + ' ' + self.full_raw_command
 
         az_error = ArgumentUsageError(message, full_command)
         if 'unrecognized arguments' in message:
