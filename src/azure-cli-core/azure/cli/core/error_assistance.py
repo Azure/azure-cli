@@ -2,14 +2,15 @@ import openai
 import json
 import shutil
 import configparser
+import os
 
 from azure.cli.core._config import GLOBAL_CONFIG_PATH
 
 def error_assistance(command=None):      
-        openai.api_key = <api-key>
+        openai.api_key = os.getenv('API_KEY') # Edit to genearalize and keep endpoint secure
         openai.api_version = "2023-07-01-preview"
         openai.api_type = "azure"
-        openai.api_base = <endpoint>
+        openai.api_base = os.getenv('ENDPOINT')
 
         if command==None:
                 return None
@@ -43,7 +44,7 @@ def error_assistance(command=None):
         ]   
 
         response = openai.ChatCompletion.create(
-            deployment_id="openai-interns-model",
+            deployment_id=os.getenv('DEPLOYMENT'),
             messages=messages,
             functions=functions,
             function_call={"name": "error_response"}
@@ -70,6 +71,7 @@ def print_error_assistance(response):
         print("\n")
 
 def validate_command(command_response):
+        # Incorporate syntax validation here
         #if command syntax is correct:
                 return command_response
         #else:
