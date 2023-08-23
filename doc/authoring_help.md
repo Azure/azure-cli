@@ -76,6 +76,8 @@ examples:
 
 # Tips to write effective help for your command
 
+For a complete list of guidelines, see [Azure CLI reference and conceptual content guidelines](reference_doc_guidelines.md).  Here are some additional tips:
+
 - Make sure the doc contains all the details that someone unfamiliar with the API needs to use the command.
 - Examples are worth a thousand words. Provide examples that cover common use cases.
 - Don't use "etc". Sometimes it makes sense to spell out a list completely. Sometimes it works to say "like ..." instead of "..., etc".
