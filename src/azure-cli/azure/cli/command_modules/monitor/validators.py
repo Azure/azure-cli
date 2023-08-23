@@ -20,7 +20,6 @@ def process_autoscale_create_namespace(cmd, namespace):
 
 
 def validate_autoscale_recurrence(namespace):
-    from azure.mgmt.monitor.models import Recurrence, RecurrentSchedule, RecurrenceFrequency
 
     def _validate_weekly_recurrence(namespace):
         # Construct days

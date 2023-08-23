@@ -744,12 +744,12 @@ def validate_autoscale_profile(schedule, start, end, recurrence):
                            "schedules: %s. Unexpected behavior may occur.",
                            day, start, end, ', '.join(profile_conflicts))
 
+
 def build_autoscale_profile_dict(autoscale_settings):
     """ Builds up a logical model of the autoscale weekly schedule. This then has to later be
         translated into objects that work with the Monitor autoscale API. """
     from datetime import time
     import json
-    from azure.mgmt.monitor.models import AutoscaleProfile
 
     def _validate_default_profile(default_profile, profile):
         if profile["capacity"]["default"] != default_profile["capacity"]["default"] or \
@@ -759,8 +759,8 @@ def build_autoscale_profile_dict(autoscale_settings):
             raise CLIError('unable to resolve default profile.')
 
     recurring_profiles = [x for x in autoscale_settings["profiles"] if x.get("recurrence", None)]
-    default_profiles = [x for x in autoscale_settings["profiles"] if not x.get("recurrence", None)
-                        and not x.get("fixed_date", None)]
+    default_profiles = [x for x in autoscale_settings["profiles"] if not x.get("recurrence",
+                                                                               None) and not x.get("fixed_date", None)]
 
     profile_schedule = {
     }
@@ -777,7 +777,8 @@ def build_autoscale_profile_dict(autoscale_settings):
             # portal-created "default" or end time
             json_name = json.loads(profile["name"])
             sched_name = json_name['for']
-            end_time = time(hour=profile["recurrence"]["schedule"]["hours"][0], minute=profile["recurrence"]["schedule"]["minutes"][0])
+            end_time = time(hour=profile["recurrence"]["schedule"]["hours"][0],
+                            minute=profile["recurrence"]["schedule"]["minutes"][0])
 
             if not default_profile:
                 # choose this as default if it is the first
@@ -800,7 +801,8 @@ def build_autoscale_profile_dict(autoscale_settings):
         except ValueError:
             # start time
             sched_name = profile["name"]
-            start_time = time(hour=profile["recurrence"]["schedule"]["hours"][0], minute=profile["recurrence"]["schedule"]["minutes"][0])
+            start_time = time(hour=profile["recurrence"]["schedule"]["hours"][0],
+                              minute=profile["recurrence"]["schedule"]["minutes"][0])
             for day in profile["recurrence"]["schedule"]["days"]:
                 if day not in profile_schedule:
                     profile_schedule[day] = {}
@@ -850,4 +852,3 @@ def validate_autoscale_profile_dict(schedule, start, end, recurrence):
             logger.warning("Proposed schedule '%s %s-%s' has a full or partial overlap with the following existing "
                            "schedules: %s. Unexpected behavior may occur.",
                            day, start, end, ', '.join(profile_conflicts))
-

@@ -126,7 +126,7 @@ def load_command_table(self, _):
 
     with self.command_group('monitor autoscale', autoscale_sdk, custom_command_type=autoscale_custom) as g:
         g.custom_command('create', 'autoscale_create_new', validator=process_autoscale_create_namespace)  # done
-        g.custom_command('update', 'autoscale_update_new', validator=process_autoscale_create_namespace)  # done
+        g.generic_update_command('update', custom_func_name='autoscale_update', custom_func_type=autoscale_custom)
         # g.command('delete', 'delete')
         # g.show_command('show', 'get')
         # g.command('list', 'list_by_resource_group')
@@ -142,7 +142,7 @@ def load_command_table(self, _):
         g.custom_command('list-timezones', 'autoscale_profile_list_timezones')  # no need
 
     with self.command_group('monitor autoscale rule', autoscale_sdk, custom_command_type=autoscale_custom) as g:
-        g.custom_command('create', 'autoscale_rule_create_new') # done
+        g.custom_command('create', 'autoscale_rule_create_new')  # done
         g.custom_command('list', 'autoscale_rule_list')  # done
         g.custom_command('delete', 'autoscale_rule_delete_new')  # done
         g.custom_command('copy', 'autoscale_rule_copy_new')  # done

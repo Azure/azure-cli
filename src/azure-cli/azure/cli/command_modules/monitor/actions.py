@@ -230,10 +230,10 @@ class AlertRemoveAction(argparse._AppendAction):
 
 
 # pylint: disable=protected-access
-class AutoscaleAddAction(argparse._AppendAction):
+class AutoscaleCreateAction(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
-        super(AutoscaleAddAction, self).__call__(parser, namespace, action, option_string)
+        super(AutoscaleCreateAction, self).__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         _type = values[0].lower()
@@ -257,6 +257,28 @@ class AutoscaleAddAction(argparse._AppendAction):
                     "properties": properties
                 }
             }
+        raise InvalidArgumentValueError('{} TYPE KEY [ARGS]'.format(option_string))
+
+
+# pylint: disable=protected-access
+class AutoscaleAddAction(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        action = self.get_action(values, option_string)
+        super(AutoscaleAddAction, self).__call__(parser, namespace, action, option_string)
+
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+        _type = values[0].lower()
+        if _type == 'email':
+            from azure.mgmt.monitor.models import EmailNotification
+            return EmailNotification(custom_emails=values[1:])
+        if _type == 'webhook':
+            from azure.mgmt.monitor.models import WebhookNotification
+            uri = values[1]
+            try:
+                properties = dict(x.split('=', 1) for x in values[2:])
+            except ValueError:
+                raise InvalidArgumentValueError('{} webhook URI [KEY=VALUE ...]'.format(option_string))
+            return WebhookNotification(service_uri=uri, properties=properties)
         raise InvalidArgumentValueError('{} TYPE KEY [ARGS]'.format(option_string))
 
 
