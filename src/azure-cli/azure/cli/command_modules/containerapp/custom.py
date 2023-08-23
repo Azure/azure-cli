@@ -78,7 +78,6 @@ from ._utils import (_validate_subscription_registered,
                      is_registry_msi_system, clean_null_values, _populate_secret_values,
                      safe_set, parse_metadata_flags, parse_auth_flags, set_ip_restrictions, certificate_matches,
                      ensure_workload_profile_supported, _generate_secret_volume_name,
-                     parse_service_bindings, get_linker_client,
                      trigger_workflow, AppType,
                      format_location, certificate_location_matches, generate_randomized_managed_cert_name,
                      check_managed_cert_name_availability, prepare_managed_certificate_envelop)
@@ -286,8 +285,6 @@ def create_containerapp(cmd,
                         dapr_http_max_request_size=None,
                         dapr_log_level=None,
                         dapr_enable_api_logging=False,
-                        service_type=None,
-                        service_bindings=None,
                         revision_suffix=None,
                         startup_command=None,
                         args=None,
@@ -331,8 +328,6 @@ def update_containerapp_logic(cmd,
                               scale_rule_http_concurrency=None,
                               scale_rule_metadata=None,
                               scale_rule_auth=None,
-                              service_bindings=None,
-                              unbind_service_bindings=None,
                               set_env_vars=None,
                               remove_env_vars=None,
                               replace_env_vars=None,
@@ -402,63 +397,6 @@ def update_containerapp_logic(cmd,
     update_map['container'] = image or container_name or set_env_vars is not None or remove_env_vars is not None or replace_env_vars is not None or remove_all_env_vars or cpu or memory or startup_command is not None or args is not None or secret_volume_mount is not None
     update_map['ingress'] = ingress or target_port
     update_map['registry'] = registry_server or registry_user or registry_pass
-
-    linker_client = get_linker_client(cmd)
-    service_connectors_def_list = []
-
-    if service_bindings is not None:
-        service_connectors_def_list, service_bindings_def_list = parse_service_bindings(
-            cmd, service_bindings, resource_group_name, name)
-
-        service_bindings_used_map = {update_item["name"]: False for update_item in service_bindings_def_list}
-
-        safe_set(new_containerapp, "properties", "template", "serviceBinds", value=containerapp_def["properties"]["template"]["serviceBinds"])
-
-        if new_containerapp["properties"]["template"]["serviceBinds"] is None:
-            new_containerapp["properties"]["template"]["serviceBinds"] = []
-
-        for item in new_containerapp["properties"]["template"]["serviceBinds"]:
-            for update_item in service_bindings_def_list:
-                if update_item["name"] in item.values():
-                    item["serviceId"] = update_item["serviceId"]
-                    service_bindings_used_map[update_item["name"]] = True
-
-        for update_item in service_bindings_def_list:
-            if service_bindings_used_map[update_item["name"]] is False:
-                # Check if it doesn't exist in existing service linkers
-                managed_bindings = linker_client.linker.list(resource_uri=containerapp_def["id"])
-                if managed_bindings:
-                    managed_bindings_list = [item.name for item in managed_bindings]
-                    if update_item["name"] in managed_bindings_list:
-                        raise ValidationError("Binding names across managed and dev services should be unique.")
-
-                new_containerapp["properties"]["template"]["serviceBinds"].append(update_item)
-
-        if service_connectors_def_list is not None:
-            for item in service_connectors_def_list:
-                # Check if it doesn't exist in existing service bindings
-                service_bindings_list = []
-                for binds in new_containerapp["properties"]["template"]["serviceBinds"]:
-                    service_bindings_list.append(binds["name"])
-                    if item["linker_name"] in service_bindings_list:
-                        raise ValidationError("Binding names across managed and dev services should be unique.")
-
-    if unbind_service_bindings:
-        new_template = new_containerapp.setdefault("properties", {}).setdefault("template", {})
-        existing_template = containerapp_def["properties"]["template"]
-
-        if not service_bindings:
-            new_template["serviceBinds"] = existing_template.get("serviceBinds", [])
-
-        service_bindings_dict = {}
-        if new_template["serviceBinds"]:
-            service_bindings_dict = {service_binding["name"]: index for index, service_binding in
-                                     enumerate(new_template.get("serviceBinds", []))}
-
-        for item in unbind_service_bindings:
-            if item in service_bindings_dict:
-                new_template["serviceBinds"] = [binding for binding in new_template["serviceBinds"] if
-                                                binding["name"] != item]
 
     if tags:
         _add_or_update_tags(new_containerapp, tags)
@@ -759,24 +697,6 @@ def update_containerapp_logic(cmd,
 
         if not no_wait and "properties" in r and "provisioningState" in r["properties"] and r["properties"]["provisioningState"].lower() == "waiting":
             logger.warning('Containerapp update in progress. Please monitor the update using `az containerapp show -n {} -g {}`'.format(name, resource_group_name))
-
-        # Delete managed bindings
-        if unbind_service_bindings:
-            for item in unbind_service_bindings:
-                while r["properties"]["provisioningState"].lower() == "inprogress":
-                    r = ContainerAppClient.show(cmd, resource_group_name, name)
-                    time.sleep(1)
-                linker_client.linker.begin_delete(resource_uri=r["id"], linker_name=item).result()
-
-        # Update managed bindings
-        if service_connectors_def_list is not None:
-            for item in service_connectors_def_list:
-                while r["properties"]["provisioningState"].lower() == "inprogress":
-                    r = ContainerAppClient.show(cmd, resource_group_name, name)
-                    time.sleep(1)
-                linker_client.linker.begin_create_or_update(resource_uri=r["id"],
-                                                            parameters=item["parameters"],
-                                                            linker_name=item["linker_name"]).result()
 
         return r
     except Exception as e:

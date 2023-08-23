@@ -56,7 +56,7 @@ from ._utils import (_ensure_location_allowed,
                      safe_set, parse_metadata_flags, parse_auth_flags,
                      get_default_workload_profile_name_from_env,
                      ensure_workload_profile_supported, _generate_secret_volume_name,
-                     parse_service_bindings, check_unique_bindings, AppType, get_linker_client,
+                     AppType,
                      safe_get)
 from ._validators import validate_create, validate_revision_suffix
 
@@ -237,12 +237,6 @@ class BaseContainerAppDecorator(BaseResource):
     def get_argument_dapr_enable_api_logging(self):
         return self.get_param("dapr_enable_api_logging")
 
-    def get_argument_service_type(self):
-        return self.get_param("service_type")
-
-    def get_argument_service_bindings(self):
-        return self.get_param("service_bindings")
-
     def get_argument_revision_suffix(self):
         return self.get_param("revision_suffix")
 
@@ -275,12 +269,6 @@ class BaseContainerAppDecorator(BaseResource):
 
     def get_argument_secret_volume_mount(self):
         return self.get_param("secret_volume_mount")
-
-    def get_argument_service_connectors_def_list(self):
-        return self.get_param("service_connectors_def_list")
-
-    def set_argument_service_connectors_def_list(self, service_connectors_def_list):
-        self.set_param("service_connectors_def_list", service_connectors_def_list)
 
     def get_argument_termination_grace_period(self):
         return self.get_param("termination_grace_period")
@@ -393,18 +381,12 @@ class ContainerAppCreateDecorator(BaseContainerAppDecorator):
             dapr_def["logLevel"] = self.get_argument_dapr_log_level()
             dapr_def["enableApiLogging"] = self.get_argument_dapr_enable_api_logging()
 
-        service_def = None
-        if self.get_argument_service_type():
-            service_def = ServiceModel
-            service_def["type"] = self.get_argument_service_type()
-
         config_def = ConfigurationModel
         config_def["secrets"] = secrets_def
         config_def["activeRevisionsMode"] = self.get_argument_revisions_mode()
         config_def["ingress"] = ingress_def
         config_def["registries"] = [registries_def] if registries_def is not None else None
         config_def["dapr"] = dapr_def
-        config_def["service"] = service_def if service_def is not None else None
 
         # Identity actions
         identity_def = ManagedServiceIdentityModel
@@ -453,21 +435,8 @@ class ContainerAppCreateDecorator(BaseContainerAppDecorator):
 
         template_def = TemplateModel
 
-        service_bindings_def_list = None
-        service_connectors_def_list = None
-
-        if self.get_argument_service_bindings() is not None:
-            service_connectors_def_list, service_bindings_def_list = parse_service_bindings(self.cmd, self.get_argument_service_bindings(),
-                                                                                            self.get_argument_resource_group_name(), self.get_argument_name())
-            self.set_argument_service_connectors_def_list(service_connectors_def_list)
-            unique_bindings = check_unique_bindings(self.cmd, service_connectors_def_list, service_bindings_def_list,
-                                                    self.get_argument_resource_group_name(), self.get_argument_name())
-            if not unique_bindings:
-                raise ValidationError("Binding names across managed and dev services should be unique.")
-
         template_def["containers"] = [container_def]
         template_def["scale"] = scale_def
-        template_def["serviceBinds"] = service_bindings_def_list
 
         if self.get_argument_secret_volume_mount() is not None:
             volume_def = VolumeModel
@@ -549,16 +518,6 @@ class ContainerAppCreateDecorator(BaseContainerAppDecorator):
                                                                         "az containerapp ingress enable -n %s -g %s --type external --target-port %s"
                                                                         " --transport auto\n", self.get_argument_name(), self.get_argument_resource_group_name(), target_port)
 
-        if self.get_argument_service_connectors_def_list() is not None:
-            linker_client = get_linker_client(self.cmd)
-
-            for item in self.get_argument_service_connectors_def_list():
-                while r is not None and r["properties"]["provisioningState"].lower() == "inprogress":
-                    r = self.client.show(self.cmd, self.get_argument_resource_group_name(), self.get_argument_name())
-                    time.sleep(1)
-                linker_client.linker.begin_create_or_update(resource_uri=r["id"],
-                                                            parameters=item["parameters"],
-                                                            linker_name=item["linker_name"]).result()
         return r
 
     def set_up_create_containerapp_yaml(self, name, file_name):
