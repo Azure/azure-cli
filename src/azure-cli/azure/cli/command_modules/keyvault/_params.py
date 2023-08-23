@@ -171,6 +171,10 @@ def load_arguments(self, _):
         c.argument('retention_days', validator=validate_retention_days_on_creation,
                    help='Soft delete data retention days. It accepts >=7 and <=90. '
                         'Defaults to 90 for keyvault creation. Required for MHSM creation')
+        c.argument('user_identities', options_list=['--mi-user-assigned'], nargs='*', is_preview=True,
+                   min_api='2023-07-01', resource_type=ResourceType.MGMT_KEYVAULT, operation_group="managed_hsms",
+                   help="[HSM Only]Enable user-assigned managed identities for managed HSM. "
+                        "Accept space-separated list of identity resource IDs.")
 
     with self.argument_context('keyvault create', arg_group='Network Rule') as c:
         c.argument('network_acls', type=validate_file_or_dict,
@@ -184,12 +188,16 @@ def load_arguments(self, _):
         c.argument('vault_name', vault_name_type, options_list=['--name', '-n'])
         c.argument('retention_days', help='Soft delete data retention days. It accepts >=7 and <=90.')
 
-    with self.argument_context('keyvault update-hsm') as c:
+    with self.argument_context('keyvault update-hsm', resource_type=ResourceType.MGMT_KEYVAULT, operation_group="managed_hsms") as c:
         c.argument('name', hsm_name_type)
         c.argument('enable_purge_protection', options_list=['--enable-purge-protection', '-e'])
         c.argument('secondary_locations', nargs='+',
                    help='--secondary-locations extends/contracts an HSM pool to listed regions. The primary location '
                         'where the resource was originally created CANNOT be removed.')
+        c.argument('user_identities', options_list=['--mi-user-assigned'],
+                   nargs='*', min_api='2023-07-01', is_preview=True,
+                   help="Enable user-assigned managed identities for managed HSM. "
+                        "Accept space-separated list of identity resource IDs.")
 
     with self.argument_context('keyvault wait-hsm') as c:
         c.argument('hsm_name', hsm_name_type)
@@ -656,8 +664,11 @@ def load_arguments(self, _):
 
     for command_group in ['backup', 'restore']:
         with self.argument_context('keyvault {} start'.format(command_group)) as c:
-            c.argument('token', options_list=['--storage-container-SAS-token', '-t'], required=True,
+            c.argument('token', options_list=['--storage-container-SAS-token', '-t'],
                        help='The SAS token pointing to an Azure Blob storage container')
+            c.argument('use_managed_identity', arg_type=get_three_state_flag(), is_preview=True,
+                       help='If True, Managed HSM will use the configured user-assigned managed identity to '
+                            'authenticate with Azure Storage. Otherwise, a `sas_token` has to be specified.')
 
     with self.argument_context('keyvault restore start') as c:
         c.argument('folder_to_restore', options_list=['--backup-folder'],

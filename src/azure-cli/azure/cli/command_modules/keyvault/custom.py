@@ -527,6 +527,7 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                         tags=None,
                         no_wait=False,
                         public_network_access=None,
+                        user_identities=None,
                         ):
     if is_azure_stack_profile(cmd) or vault_name:
         return create_vault(cmd=cmd,
@@ -568,6 +569,7 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                               bypass=bypass,
                               default_action=default_action,
                               tags=tags,
+                              user_identities=user_identities,
                               no_wait=no_wait)
         except ValidationError as ex:
             error_msg = str(ex)
@@ -586,6 +588,7 @@ def create_hsm(cmd, client,
                bypass=None,
                default_action=None,
                tags=None,
+               user_identities=None,
                no_wait=False):  # pylint: disable=unused-argument
 
     if not administrators:
@@ -615,6 +618,11 @@ def create_hsm(cmd, client,
                             tags=tags,
                             sku=ManagedHsmSku(name=sku, family='B'),
                             properties=properties)
+
+    if user_identities:
+        ManagedServiceIdentity = cmd.get_models('ManagedServiceIdentity', resource_type=ResourceType.MGMT_KEYVAULT)
+        identities = {i: {} for i in user_identities}
+        parameters.identity = ManagedServiceIdentity(type='UserAssigned', user_assigned_identities=identities)
 
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name=resource_group_name,
@@ -848,7 +856,8 @@ def update_hsm(cmd, instance,
                bypass=None,
                default_action=None,
                secondary_locations=None,
-               public_network_access=None):
+               public_network_access=None,
+               user_identities=None):
     if enable_purge_protection is not None:
         instance.properties.enable_purge_protection = enable_purge_protection
 
@@ -867,6 +876,10 @@ def update_hsm(cmd, instance,
                 instance.properties.network_acls.bypass = bypass
             if default_action:
                 instance.properties.network_acls.default_action = default_action
+    if user_identities:
+        ManagedServiceIdentity = cmd.get_models('ManagedServiceIdentity', resource_type=ResourceType.MGMT_KEYVAULT)
+        identities = {i: {} for i in user_identities}
+        instance.identity = ManagedServiceIdentity(type='UserAssigned', user_assigned_identities=identities)
     return instance
 
 
@@ -2142,23 +2155,25 @@ def storage_account_parameters_check(storage_resource_uri, storage_account_name,
                                            '--storage-account-name & --blob-container-name')
 
 
-def full_backup(cmd, client, token, storage_resource_uri=None, storage_account_name=None, blob_container_name=None,
-                hsm_name=None):  # pylint: disable=unused-argument
+def full_backup(cmd, client, storage_resource_uri=None, storage_account_name=None, blob_container_name=None,
+                token=None, use_managed_identity=None, hsm_name=None):  # pylint: disable=unused-argument
     storage_account_parameters_check(storage_resource_uri, storage_account_name, blob_container_name)
     if not storage_resource_uri:
         storage_resource_uri = construct_storage_uri(
             cmd.cli_ctx.cloud.suffixes.storage_endpoint, storage_account_name, blob_container_name)
-    return client.begin_backup(storage_resource_uri, token)
+    return client.begin_backup(storage_resource_uri, sas_token=token, use_managed_identity=use_managed_identity)
 
 
-def full_restore(cmd, client, token, folder_to_restore, storage_resource_uri=None, storage_account_name=None,
-                 blob_container_name=None, key_name=None, hsm_name=None):  # pylint: disable=unused-argument
+def full_restore(cmd, client, folder_to_restore,
+                 storage_resource_uri=None, storage_account_name=None, blob_container_name=None,
+                 token=None, use_managed_identity=None, key_name=None, hsm_name=None):  # pylint: disable=unused-argument
     storage_account_parameters_check(storage_resource_uri, storage_account_name, blob_container_name)
     if not storage_resource_uri:
         storage_resource_uri = construct_storage_uri(
             cmd.cli_ctx.cloud.suffixes.storage_endpoint, storage_account_name, blob_container_name)
     folder_url = '{}/{}'.format(storage_resource_uri, folder_to_restore)
-    return client.begin_restore(folder_url, token, key_name=key_name)
+    return client.begin_restore(folder_url, sas_token=token, key_name=key_name,
+                                use_managed_identity=use_managed_identity)
 # endregion
 
 
