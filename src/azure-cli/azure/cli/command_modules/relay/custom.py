@@ -13,6 +13,7 @@ from .aaz.latest.relay.wcfrelay.authorization_rule import Create as _WcfrelayAut
 # pylint: disable=too-many-lines
 # pylint: disable=inconsistent-return-statements
 # pylint: disable=unused-variable
+# pylint: disable=protected-access
 
 
 class NamespaceAuthoCreate(_NamespaceAuthoCreate):
