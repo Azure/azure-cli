@@ -8,6 +8,7 @@
 
 from knack.arguments import CLIArgumentType
 from azure.cli.core.commands.parameters import tags_type, get_location_type, get_enum_type, file_type, resource_group_name_type, get_three_state_flag
+from azure.cli.command_modules.mysql.action import AddArgs
 from azure.cli.command_modules.mysql.random.generate import generate_username
 from azure.cli.command_modules.mysql._validators import public_access_validator, maintenance_window_validator, ip_address_validator, \
     firewall_rule_name_validator, validate_identity, validate_byok_identity, validate_identities
@@ -408,7 +409,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
 
     # flexible-server parameter
-    for scope in ['list', 'set', 'show']:
+    for scope in ['list', 'set', 'show', 'set-batch']:
         argument_context_string = 'mysql flexible-server parameter {}'.format(scope)
         with self.argument_context(argument_context_string) as c:
             if scope == "list":
@@ -424,6 +425,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
     with self.argument_context('mysql flexible-server parameter set') as c:
         c.argument('value', options_list=['--value', '-v'], help='Value of the configuration.')
         c.argument('source', options_list=['--source'], help='Source of the configuration.')
+
+    with self.argument_context('mysql flexible-server parameter set-batch') as c:
+        c.argument('configuration_list', action=AddArgs, nargs='*', options_list=['--args'], required=True, help='List of the configuration key-value pair.')
+        c.argument('source', options_list=['--source'], required=False, help='Source of the configuration.')
 
     # firewall-rule
     for scope in ['create', 'delete', 'list', 'show', 'update']:
