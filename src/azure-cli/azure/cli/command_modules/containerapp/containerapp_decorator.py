@@ -33,7 +33,6 @@ from ._models import (
     Dapr as DaprModel,
     ContainerResources as ContainerResourcesModel,
     Scale as ScaleModel,
-    Service as ServiceModel,
     Container as ContainerModel,
     ManagedServiceIdentity as ManagedServiceIdentityModel,
     ScaleRule as ScaleRuleModel,
