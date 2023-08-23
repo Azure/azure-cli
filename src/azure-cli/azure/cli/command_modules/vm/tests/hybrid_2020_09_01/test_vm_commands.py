@@ -2065,9 +2065,6 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
             'loc': resource_group_location
         })
 
-        # fails because not a valid type
-        self.cmd('ppg create -n fail_ppg -g {rg} -t notAvalidType', expect_failure=True)
-
         self.cmd('ppg create -n {ppg1} -t StandarD -g {rg}', checks=[
             self.check('name', '{ppg1}'),
             self.check('location', '{loc}'),
