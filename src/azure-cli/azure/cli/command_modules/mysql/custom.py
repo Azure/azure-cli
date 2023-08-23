@@ -24,7 +24,7 @@ from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flex
     cf_mysql_flexible_servers, cf_mysql_flexible_replica, cf_mysql_flexible_adadmin, cf_mysql_flexible_private_dns_zone_suffix_operations, cf_mysql_servers
 from ._util import resolve_poller, generate_missing_parameters, get_mysql_list_skus_info, generate_password, parse_maintenance_window, \
     replace_memory_optimized_tier, build_identity_and_data_encryption, get_identity_and_data_encryption, get_tenant_id, run_subprocess, \
-    run_subprocess_get_output, fill_action_template, get_git_root_dir, get_location_from_resource_group, GITHUB_ACTION_PATH
+    run_subprocess_get_output, fill_action_template, get_git_root_dir, get_flexible_server_sku_mapping_from_single_server, GITHUB_ACTION_PATH
 from ._network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_private_network, prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from ._validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, mysql_restore_tier_validator, \
     mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, validate_mysql_replica, validate_server_name, validate_georestore_location, \
@@ -463,26 +463,26 @@ def flexible_server_import_create(cmd, client,
                                   yes=False):
     provider = 'Microsoft.DBforMySQL'
 
-    # Generating source_server_id from data_source depending on whether it is a server_name or resource_id
-    if not is_valid_resource_id(data_source):
-        if len(data_source.split('/')) == 1:
-            source_server_id = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=resource_group_name,
-                namespace=provider,
-                type='servers',
-                name=data_source)
-        else:
-            raise ValidationError('The provided data-source {} is invalid.'.format(data_source))
-    else:
-        source_server_id = data_source
-
-    single_server_client = cf_mysql_servers(cli_ctx=cmd.cli_ctx, _=None)
-
     if data_source_type.lower() == 'mysql_single':
-        create_mode = 'Migrate'
-    else:
-        create_mode = 'Create'
+        if mode.lower() == 'offline':
+            # Generating source_server_id from data_source depending on whether it is a server_name or resource_id
+            if not is_valid_resource_id(data_source):
+                if len(data_source.split('/')) == 1:
+                    source_server_id = resource_id(
+                    subscription=get_subscription_id(cmd.cli_ctx),
+                    resource_group=resource_group_name,
+                    namespace=provider,
+                    type='servers',
+                    name=data_source)
+                else:
+                    raise ValidationError('The provided data-source {} is invalid.'.format(data_source))
+            else:
+                source_server_id = data_source
+                
+            single_server_client = cf_mysql_servers(cli_ctx=cmd.cli_ctx, _=None)
+            create_mode = 'Migrate'
+            tier, sku_name, storage_gb, auto_grow, backup_retention, geo_redundant_backup, version, tags, public_access, administrator_login = map_single_server_configuration(
+                single_server_client, tier, sku_name, storage_gb, auto_grow, backup_retention, geo_redundant_backup, version, tags, public_access, administrator_login)
         
     try:
 
@@ -1748,6 +1748,38 @@ def flexible_gtid_reset(client, resource_group_name, server_name, gtid_set, no_w
         gtid_set=gtid_set
     )
     return sdk_no_wait(no_wait, client.begin_reset_gtid, resource_group_name, server_name, parameters)
+
+def map_single_server_configuration(single_server_client, source_server_id, tier, sku_name, location, storage_gb, auto_grow, backup_retention, geo_redundant_backup, version, tags, public_access, administrator_login):
+
+    try:
+        
+        id_parts = parse_resource_id(source_server_id)
+        source_single_server = single_server_client.get(id_parts['resource_group'], id_parts['name'])
+        location = ''.join(source_single_server.location.lower().split())
+        tier, sku_name = get_flexible_server_sku_mapping_from_single_server(source_single_server.sku, tier, sku_name)
+        if not storage_gb:
+            storage_gb = source_single_server.storage_profile.storage_mb / 1024
+
+        if not auto_grow:
+            auto_grow = source_single_server.storage_profile.auto_grow
+
+        if not backup_retention:
+            backup_retention = source_single_server.storage_profile.backup_retention_days
+
+        if not geo_redundant_backup:
+            geo_redundant_backup = source_single_server.storage_profile.geo_redundant_backup
+        
+        if not version:
+            version = source_single_server.version
+            if version.startswith('8.0'):
+                version = '8.0.21'
+
+        if not tags:
+            tags = source_single_server.tags
+
+        if not public_access:
+            public_access = source_single_server.public_network_access
+    except:
 
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance

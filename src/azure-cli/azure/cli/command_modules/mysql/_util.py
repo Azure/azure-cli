@@ -557,3 +557,24 @@ def get_tenant_id():
     profile = Profile()
     sub = profile.get_subscription()
     return sub['tenantId']
+
+def get_flexible_server_sku_mapping_from_single_server(source_single_server_sku, tier, sku_name):
+    single_to_flex_sku_mapping = {"Basic":{1:"Standard_B1ms",2:"Standard_B2ms"},
+                                  "GeneralPurpose":{2:"Standard_D2ds_v4",4:"Standard_D4ds_v4",8:"Standard_D8ds_v4",16:"Standard_D16ds_v4",32:"Standard_D32ds_v4",64:"Standard_D64ds_v4"},
+                                  "MemoryOptimized":{2:"Standard_E2ds_v4",4:"Standard_E4ds_v4",8:"Standard_E8ds_v4",16:"Standard_E16ds_v4",32:"Standard_E32ds_v4"}}
+
+    if not tier:
+        single_server_tier = source_single_server_sku.tier
+        if single_server_tier == 'Basic':
+            tier = 'Burstable'
+        else:
+            tier = single_server_tier
+
+    if not sku_name:
+        if tier == 'Burstable':
+            sku_name = single_to_flex_sku_mapping.get('Basic').get(source_single_server_sku.capacity)
+        else:
+            sku_name = single_to_flex_sku_mapping.get(source_single_server_sku.capacity)
+
+    return tier, sku_name
+
