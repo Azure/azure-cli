@@ -330,7 +330,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('yes', arg_type=yes_arg_type)
         c.argument('data_source_type', arg_type=data_source_type_arg_type)
         c.argument('data_source', arg_type=data_source_arg_type)
-        c.argument('mode', arg_type=mode_arg_type)
+        c.argument('mode', default='Offline', arg_type=mode_arg_type)
 
     with self.argument_context('mysql flexible-server delete') as c:
         c.argument('yes', arg_type=yes_arg_type)
