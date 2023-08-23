@@ -18,7 +18,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
 from azure.cli.core.local_context import ALL
 from azure.mgmt.rdbms import mysql_flexibleservers
-from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError, ValidationError
+from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError, ValidationError, 
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, cf_mysql_flexible_db, \
     cf_mysql_check_resource_availability, cf_mysql_check_resource_availability_without_location, cf_mysql_flexible_config, \
     cf_mysql_flexible_servers, cf_mysql_flexible_replica, cf_mysql_flexible_adadmin, cf_mysql_flexible_private_dns_zone_suffix_operations, cf_mysql_servers
@@ -479,65 +479,12 @@ def flexible_server_import_create(cmd, client,
             else:
                 source_server_id = data_source
                 
-            single_server_client = cf_mysql_servers(cli_ctx=cmd.cli_ctx, _=None)
+            single_server_client = cf_mysql_servers(cli_ctx=cmd.cli_ctx, _ = None)
             create_mode = 'Migrate'
             tier, sku_name, storage_gb, auto_grow, backup_retention, geo_redundant_backup, version, tags, public_access, administrator_login = map_single_server_configuration(
-                single_server_client, tier, sku_name, storage_gb, auto_grow, backup_retention, geo_redundant_backup, version, tags, public_access, administrator_login)
+                single_server_client, source_server_id, tier, sku_name, location, storage_gb, auto_grow, backup_retention, geo_redundant_backup, version, tags, public_access, administrator_login, administrator_login_password)
         
     try:
-
-        id_parts = parse_resource_id(source_server_id)
-        source_single_server = single_server_client.get(id_parts['resource_group'], id_parts['name'])
-        location = ''.join(source_single_server.location.lower().split())
-        list_skus_info = get_mysql_list_skus_info(cmd, location)
-        sku_mapping = {"Basic":{1:"Standard_B1ms",2:"Standard_B2ms"},"GeneralPurpose":{2:"Standard_D2ds_v4",4:"Standard_D4ds_v4",8:"Standard_D8ds_v4",16:"Standard_D16ds_v4",32:"Standard_D32ds_v4",64:"Standard_D64ds_v4"},"MemoryOptimized":{2:"Standard_E2ds_v4",4:"Standard_E4ds_v4",8:"Standard_E8ds_v4",16:"Standard_E16ds_v4",32:"Standard_E32ds_v4"}}
-
-        if not tier:
-            single_server_tier = source_single_server.sku.tier
-            if single_server_tier == 'Basic':
-                tier = 'Burstable'
-            else:
-                tier = single_server_tier
-
-        if not sku_name:
-            if tier == 'Burstable':
-                sku_name = sku_mapping.get('Basic').get(source_single_server.sku.capacity)
-            else:
-                sku_name = sku_mapping.get(tier).get(source_single_server.sku.capacity)
-
-        if not storage_gb:
-            storage_gb = source_single_server.storage_profile.storage_mb / 1024
-
-        if not auto_grow:
-            auto_grow = source_single_server.storage_profile.auto_grow
-
-        if not backup_retention:
-            backup_retention = source_single_server.storage_profile.backup_retention_days
-
-        if not geo_redundant_backup:
-            geo_redundant_backup = source_single_server.storage_profile.geo_redundant_backup
-        
-        if not version:
-            version = source_single_server.version
-            if version.startswith('8.0'):
-                version = '8.0.21'
-
-        if not tags:
-            tags = source_single_server.tags
-
-        if not public_access:
-            public_access = source_single_server.public_network_access
-
-        # if source_single_server.byok_enforcement == 'Enabled':
-        #     if byok_key is None or byok_identity is None:
-        #         raise CLIError('Source Single Server has byok enabled. Please provide byok_key and byok_identity')
-        
-        # if source_single_server.private_endpoint_connections is not None:
-        #     raise CLIError('Source Single Server has private endpoint connection. Please provide vnet and subnet')
-            
-        # if source_single_server.infrastructure_encryption== 'Enabled':
-        #     raise CLIError('Source Single Server has infrastructure encryption enabled. Please provide byok_key and byok_identity')
-
         db_context = DbContext(
             cmd=cmd, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
             cf_availability=cf_mysql_check_resource_availability,
@@ -548,7 +495,7 @@ def flexible_server_import_create(cmd, client,
         # Process parameters
         server_name = server_name.lower()
 
-        # MySQL chnged MemoryOptimized tier to BusinessCritical (only in client tool not in list-skus return)
+        # MySQL changed MemoryOptimized tier to BusinessCritical (only in client tool not in list-skus return)
         if tier == 'BusinessCritical':
             tier = 'MemoryOptimized'
         mysql_arguments_validator(db_context,
@@ -612,10 +559,7 @@ def flexible_server_import_create(cmd, client,
         high_availability = mysql_flexibleservers.models.HighAvailability(mode=high_availability,
                                                                           standby_availability_zone=standby_availability_zone)
         
-        if create_mode == 'Migrate':
-            administrator_login = source_single_server.administrator_login
-            administrator_login_password = None
-        else:
+        if create_mode != 'Migrate':
             administrator_login_password = generate_password(administrator_login_password)
 
         identity, data_encryption = build_identity_and_data_encryption(db_engine='mysql',
@@ -657,16 +601,13 @@ def flexible_server_import_create(cmd, client,
     host = server_result.fully_qualified_domain_name
     subnet_id = network.delegated_subnet_resource_id
 
-    logger.warning('Make a note of your password. If you forget, you would have to reset your password with'
-                   '\'az mysql flexible-server update -n %s -g %s -p <new-password>\'.',
-                   server_name, resource_group_name)
     logger.warning('Try using az \'mysql flexible-server connect\' command to test out connection.')
 
     _update_local_contexts(cmd, server_name, resource_group_name, location, user)
 
     return _form_response(user, sku, loc, server_id, host, version,
-                          administrator_login_password if administrator_login_password is not None else '*****',
-                          _create_mysql_connection_string(host, None, user, administrator_login_password),
+                          None,
+                          _create_mysql_connection_string(host, None, user, None),
                           None, firewall_name, subnet_id)
 
 
@@ -1407,13 +1348,14 @@ def _form_response(username, sku, location, server_id, host, version, password, 
     output = {
         'host': host,
         'username': username,
-        'password': password,
         'skuname': sku,
         'location': location,
         'id': server_id,
         'version': version,
         'connectionString': connection_string
     }
+    if password is not None:
+        output['password'] = password
     if database_name is not None:
         output['databaseName'] = database_name
     if firewall_id is not None:
@@ -1749,14 +1691,21 @@ def flexible_gtid_reset(client, resource_group_name, server_name, gtid_set, no_w
     )
     return sdk_no_wait(no_wait, client.begin_reset_gtid, resource_group_name, server_name, parameters)
 
-def map_single_server_configuration(single_server_client, source_server_id, tier, sku_name, location, storage_gb, auto_grow, backup_retention, geo_redundant_backup, version, tags, public_access, administrator_login):
-
+def map_single_server_configuration(single_server_client, source_server_id, tier, sku_name, location, storage_gb, auto_grow, backup_retention,
+                                     geo_redundant_backup, version, tags, public_access, administrator_login, administrator_login_password):
     try:
-        
         id_parts = parse_resource_id(source_server_id)
         source_single_server = single_server_client.get(id_parts['resource_group'], id_parts['name'])
-        location = ''.join(source_single_server.location.lower().split())
         tier, sku_name = get_flexible_server_sku_mapping_from_single_server(source_single_server.sku, tier, sku_name)
+        if administrator_login or administrator_login_password:
+            logger.warning("Administrator login and password will be ignored and will remain same as source single server. Please update them after migration")
+
+        if not administrator_login:
+            administrator_login = source_single_server.administrator_login
+
+        if not location:
+            location = ''.join(source_single_server.location.lower().split())
+
         if not storage_gb:
             storage_gb = source_single_server.storage_profile.storage_mb / 1024
 
@@ -1771,15 +1720,14 @@ def map_single_server_configuration(single_server_client, source_server_id, tier
         
         if not version:
             version = source_single_server.version
-            if version.startswith('8.0'):
-                version = '8.0.21'
 
         if not tags:
             tags = source_single_server.tags
 
         if not public_access:
             public_access = source_single_server.public_network_access
-    except:
+    except Exception as e:
+        raise ResourceNotFoundError(e)
 
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance
