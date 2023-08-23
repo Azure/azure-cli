@@ -6,6 +6,7 @@
 # pylint: disable=unused-argument, line-too-long
 
 import re
+import math
 from datetime import datetime, timedelta
 from dateutil.tz import tzutc
 from knack.log import get_logger
@@ -18,7 +19,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
 from azure.cli.core.local_context import ALL
 from azure.mgmt.rdbms import mysql_flexibleservers
-from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError, ValidationError, 
+from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError, ValidationError
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, cf_mysql_flexible_db, \
     cf_mysql_check_resource_availability, cf_mysql_check_resource_availability_without_location, cf_mysql_flexible_config, \
     cf_mysql_flexible_servers, cf_mysql_flexible_replica, cf_mysql_flexible_adadmin, cf_mysql_flexible_private_dns_zone_suffix_operations, cf_mysql_servers
@@ -28,7 +29,7 @@ from ._util import resolve_poller, generate_missing_parameters, get_mysql_list_s
 from ._network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_private_network, prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from ._validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, mysql_restore_tier_validator, \
     mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, validate_mysql_replica, validate_server_name, validate_georestore_location, \
-    validate_mysql_tier_update, validate_and_format_restore_point_in_time, validate_public_access_server, mysql_import_storage_validator, mysql_import_version_validator
+    validate_mysql_tier_update, validate_and_format_restore_point_in_time, validate_public_access_server
 
 logger = get_logger(__name__)
 DELEGATION_SERVICE_NAME = "Microsoft.DBforMySQL/flexibleServers"
@@ -481,7 +482,7 @@ def flexible_server_import_create(cmd, client,
                 
             single_server_client = cf_mysql_servers(cli_ctx=cmd.cli_ctx, _ = None)
             create_mode = 'Migrate'
-            tier, sku_name, storage_gb, auto_grow, backup_retention, geo_redundant_backup, version, tags, public_access, administrator_login = map_single_server_configuration(
+            tier, sku_name, location, storage_gb, auto_grow, backup_retention, geo_redundant_backup, version, tags, public_access, administrator_login = map_single_server_configuration(
                 single_server_client, source_server_id, tier, sku_name, location, storage_gb, auto_grow, backup_retention, geo_redundant_backup, version, tags, public_access, administrator_login, administrator_login_password)
         
     try:
@@ -574,6 +575,7 @@ def flexible_server_import_create(cmd, client,
     # Create mysql server
     # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
     server_result = _import_create_server(db_context, cmd, resource_group_name, server_name,
+                                          create_mode=create_mode,
                                           tags=tags,
                                           location=location,
                                           identity=identity,
@@ -1271,7 +1273,7 @@ def _create_server(db_context, cmd, resource_group_name, server_name, tags, loca
         '{} Server Create'.format(logging_name))
 
 
-def _import_create_server(db_context, cmd, resource_group_name, server_name, source_server_id, tags, location, sku, administrator_login, administrator_login_password,
+def _import_create_server(db_context, cmd, resource_group_name, server_name, create_mode, source_server_id, tags, location, sku, administrator_login, administrator_login_password,
                           storage, backup, network, version, high_availability, availability_zone, identity, data_encryption):
     logging_name, server_client = db_context.logging_name, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
@@ -1295,7 +1297,7 @@ def _import_create_server(db_context, cmd, resource_group_name, server_name, sou
         availability_zone=availability_zone,
         data_encryption=data_encryption,
         source_server_resource_id=source_server_id,
-        create_mode="Migrate")
+        create_mode=create_mode)
 
     return resolve_poller(
         server_client.begin_create(resource_group_name, server_name, parameters), cmd.cli_ctx,
@@ -1698,7 +1700,7 @@ def map_single_server_configuration(single_server_client, source_server_id, tier
         source_single_server = single_server_client.get(id_parts['resource_group'], id_parts['name'])
         tier, sku_name = get_flexible_server_sku_mapping_from_single_server(source_single_server.sku, tier, sku_name)
         if administrator_login or administrator_login_password:
-            logger.warning("Administrator login and password will be ignored and will remain same as source single server. Please update them after migration")
+            logger.warning("Administrator login name and password provided are ignored. Please use source single server admin details to connect after migration.")
 
         if not administrator_login:
             administrator_login = source_single_server.administrator_login
@@ -1707,10 +1709,11 @@ def map_single_server_configuration(single_server_client, source_server_id, tier
             location = ''.join(source_single_server.location.lower().split())
 
         if not storage_gb:
-            storage_gb = source_single_server.storage_profile.storage_mb / 1024
+            min_mysql_storage = 20
+            storage_gb = max(min_mysql_storage,  math.ceil(source_single_server.storage_profile.storage_mb / 1024))
 
         if not auto_grow:
-            auto_grow = source_single_server.storage_profile.auto_grow
+            auto_grow = source_single_server.storage_profile.storage_autogrow
 
         if not backup_retention:
             backup_retention = source_single_server.storage_profile.backup_retention_days
@@ -1728,6 +1731,7 @@ def map_single_server_configuration(single_server_client, source_server_id, tier
             public_access = source_single_server.public_network_access
     except Exception as e:
         raise ResourceNotFoundError(e)
+    return tier, sku_name, location, storage_gb, auto_grow, backup_retention, geo_redundant_backup, version, tags, public_access, administrator_login
 
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance
