@@ -24,13 +24,13 @@ def error_assistance(command=None):
         functions = [  
             {
                 "name": "error_response",
-                "description": "Receives an Azure CLI error message and the user's command that triggered the error and provides an explanation as to what the problem is as well as the corrected command with no additional text",
+                "description": "Receives an Azure CLI command that triggered an error and checks for any syntactical errors. Provides an explanation as to what the problem is as well as the corrected command with no additional text.",
                 "parameters": {
                     "type": "object",
                     "properties": {
                         "explanation": {
                             "type": "string",
-                            "description": "The explanation of what the user did wrong in their initial command (i.e. The --name flag is missing before the resource name.)"
+                            "description": "The explanation of what the user did wrong in their initial command syntax(i.e. The --name flag is missing before the resource name.)"
                         },
                         "corrected_command": {
                             "type": "string",
