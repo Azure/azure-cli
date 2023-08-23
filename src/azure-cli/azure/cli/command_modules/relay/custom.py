@@ -70,6 +70,7 @@ class WcfrelayUpdate(_WcfrelayUpdate):
             options=["--status"],
             help="Enumerates the possible values for the status of a messaging entity.",
             enum={"Active": "Active", "Disabled": "Disabled", "ReceiveDisabled": "ReceiveDisabled", "SendDisabled": "SendDisabled"},
+            nullable=True
         )
         return args_schema
 
@@ -83,5 +84,6 @@ class HycoUpdate(_HycoUpdate):
             options=["--status"],
             help="Enumerates the possible values for the status of a messaging entity.",
             enum={"Active": "Active", "Disabled": "Disabled", "ReceiveDisabled": "ReceiveDisabled", "SendDisabled": "SendDisabled"},
+            nullable=True
         )
         return args_schema
