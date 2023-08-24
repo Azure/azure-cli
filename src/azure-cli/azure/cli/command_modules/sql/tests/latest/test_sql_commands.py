@@ -110,7 +110,7 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix=managed_instance_name_prefix, parameter_name='mi', admin_user='admin123',
                  minimalTlsVersion='', user_assigned_identity_id='', identity_type='', pid='', otherParams='',
                  admin_password='SecretPassword123SecretPassword', public=True, tags='', is_geo_secondary=False,
-                 skip_delete=False, vnet_name = 'vnet-mi-tooling'):
+                 skip_delete=False, vnet_name = 'vnet-mi-tooling', v_core = 4):
         super(ManagedInstancePreparer, self).__init__(name_prefix, server_name_max_length)
         self.parameter_name = parameter_name
         self.admin_user = admin_user
@@ -125,6 +125,7 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
         self.otherParams = otherParams
         self.is_geo_secondary = is_geo_secondary
         self.subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(self.subscription_id, self.group, vnet_name, self.subnet_name)
+        self.v_core = v_core
 
 
     def create_resource(self, name, **kwargs):
@@ -5262,9 +5263,8 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
 
 class SqlManagedInstanceStartStopMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
-    def test_sql_mi_startstop_mgmt(self):
-        rg = 'CustomerExperienceTeam_RG'
-        mi = 'clitestmilb5hsyvgolc22pa3zzf2urno3uwskko4us2mbcti2gebgawczstsm'
+    @ManagedInstancePreparer(parameter_name = 'mi', vnet_name='vnet-managed-instance-v2', v_core=8)
+    def test_sql_mi_startstop_mgmt(self, mi, rg):
         self.kwargs.update({
             'rg': rg,
             'mi': mi,
@@ -5288,9 +5288,8 @@ class SqlManagedInstanceStartStopMgmtScenarioTest(ScenarioTest):
             JMESPathCheck('state', 'Ready')])
         
     @AllowLargeResponse()
-    def test_sql_mi_scheduledstartstop_mgmt(self):
-        rg = 'CustomerExperienceTeam_RG'
-        mi = 'clitestmilb5hsyvgolc22pa3zzf2urno3uwskko4us2mbcti2gebgawczstsm'
+    @ManagedInstancePreparer(parameter_name = 'mi', vnet_name='vnet-managed-instance-v2', v_core=8)
+    def test_sql_mi_scheduledstartstop_mgmt(self, mi, rg):
         schedule = "[{'startDay':'Friday','startTime':'10:00 AM','stopDay':'Friday','stopTime':'11:10 AM'}]"
         schedule_item = "{'startDay':'Monday','startTime':'10:00 AM','stopDay':'Monday','stopTime':'11:10 AM'}"
         description = "test description"

@@ -1763,7 +1763,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             "load_balancer_managed_outbound_ip_count"
         )
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
+        if load_balancer_managed_outbound_ip_count is None and self.decorator_mode == DecoratorMode.UPDATE:
             if (
                 self.mc and
                 self.mc.network_profile and
@@ -1788,7 +1788,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         count_ipv6 = self.raw_param.get('load_balancer_managed_outbound_ipv6_count')
 
-        if self.decorator_mode == DecoratorMode.CREATE:
+        if count_ipv6 is None and self.decorator_mode == DecoratorMode.UPDATE:
             if (
                 self.mc and
                 self.mc.network_profile and
@@ -1799,23 +1799,6 @@ class AKSManagedClusterContext(BaseAKSContext):
                 count_ipv6 = (
                     self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count_ipv6
                 )
-        elif self.decorator_mode == DecoratorMode.UPDATE:
-            if (
-                not self.get_load_balancer_outbound_ips() and
-                not self.get_load_balancer_outbound_ip_prefixes() and
-                count_ipv6 is None
-            ):
-                if (
-                    self.mc and
-                    self.mc.network_profile and
-                    self.mc.network_profile.load_balancer_profile and
-                    self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps and
-                    self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count_ipv6 is not None
-                ):
-                    count_ipv6 = (
-                        self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count_ipv6
-                    )
-
         return count_ipv6
 
     def get_load_balancer_outbound_ips(self) -> Union[str, List[ResourceReference], None]:
@@ -1830,7 +1813,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             "load_balancer_outbound_ips"
         )
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
+        if load_balancer_outbound_ips is None and self.decorator_mode == DecoratorMode.UPDATE:
             if (
                 self.mc and
                 self.mc.network_profile and
@@ -1856,7 +1839,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             "load_balancer_outbound_ip_prefixes"
         )
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
+        if load_balancer_outbound_ip_prefixes is None and self.decorator_mode == DecoratorMode.UPDATE:
             if (
                 self.mc and
                 self.mc.network_profile and
@@ -1884,7 +1867,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             "load_balancer_outbound_ports"
         )
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
+        if load_balancer_outbound_ports is None and self.decorator_mode == DecoratorMode.UPDATE:
             if (
                 self.mc and
                 self.mc.network_profile and
@@ -1911,7 +1894,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             "load_balancer_idle_timeout"
         )
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
+        if load_balancer_idle_timeout is None and self.decorator_mode == DecoratorMode.UPDATE:
             if (
                 self.mc and
                 self.mc.network_profile and
@@ -1936,7 +1919,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         # read the original value passed by the command
         nat_gateway_managed_outbound_ip_count = self.raw_param.get("nat_gateway_managed_outbound_ip_count")
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
+        if nat_gateway_managed_outbound_ip_count is None and self.decorator_mode == DecoratorMode.UPDATE:
             if (
                 self.mc and
                 self.mc.network_profile and
@@ -1962,7 +1945,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         # read the original value passed by the command
         nat_gateway_idle_timeout = self.raw_param.get("nat_gateway_idle_timeout")
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
+        if nat_gateway_idle_timeout is None and self.decorator_mode == DecoratorMode.UPDATE:
             if (
                 self.mc and
                 self.mc.network_profile and
@@ -4027,6 +4010,26 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return auto_upgrade_channel
 
+    def get_node_os_upgrade_channel(self) -> Union[str, None]:
+        """Obtain the value of node_os_upgrade_channel.
+        :return: string or None
+        """
+        # read the original value passed by the command
+        node_os_upgrade_channel = self.raw_param.get("node_os_upgrade_channel")
+
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.auto_upgrade_profile and
+                self.mc.auto_upgrade_profile.node_os_upgrade_channel is not None
+            ):
+                node_os_upgrade_channel = self.mc.auto_upgrade_profile.node_os_upgrade_channel
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return node_os_upgrade_channel
+
     def _get_cluster_autoscaler_profile(self, read_only: bool = False) -> Union[Dict[str, str], None]:
         """Internal function to dynamically obtain the value of cluster_autoscaler_profile according to the context.
 
@@ -4869,6 +4872,58 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: bool
         """
         return self._get_disable_azure_monitor_metrics(enable_validation=True)
+
+    def _get_enable_vpa(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of enable_vpa.
+        This function supports the option of enable_vpa. When enabled, if both enable_vpa and enable_vpa are
+        specified, raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        # Read the original value passed by the command.
+        enable_vpa = self.raw_param.get("enable_vpa")
+
+        # This parameter does not need dynamic completion.
+        if enable_validation:
+            if enable_vpa and self._get_disable_vpa(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-vpa and --disable-vpa at the same time."
+                )
+
+        return enable_vpa
+
+    def get_enable_vpa(self) -> bool:
+        """Obtain the value of enable_vpa.
+        This function will verify the parameter by default. If both enable_vpa and disable_vpa are specified, raise
+        a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        return self._get_enable_vpa(enable_validation=True)
+
+    def _get_disable_vpa(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of disable_vpa.
+        This function supports the option of enable_vpa. When enabled, if both enable_vpa and disable_vpa are specified,
+        raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        # Read the original value passed by the command.
+        disable_vpa = self.raw_param.get("disable_vpa")
+
+        # This option is not supported in create mode, hence we do not read the property value from the `mc` object.
+        # This parameter does not need dynamic completion.
+        if enable_validation:
+            if disable_vpa and self._get_enable_vpa(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-vpa and --disable-vpa at the same time."
+                )
+
+        return disable_vpa
+
+    def get_disable_vpa(self) -> bool:
+        """Obtain the value of disable_vpa.
+        This function will verify the parameter by default. If both enable_vpa and disable_vpa are specified, raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        return self._get_disable_vpa(enable_validation=True)
 
 
 class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
@@ -5741,6 +5796,13 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoScalerProfile()
             mc.workload_auto_scaler_profile.keda = self.models.ManagedClusterWorkloadAutoScalerProfileKeda(enabled=True)
 
+        if self.context.get_enable_vpa():
+            if mc.workload_auto_scaler_profile is None:
+                mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoScalerProfile()
+            if mc.workload_auto_scaler_profile.vertical_pod_autoscaler is None:
+                mc.workload_auto_scaler_profile.vertical_pod_autoscaler = self.models.ManagedClusterWorkloadAutoScalerProfileVerticalPodAutoscaler(enabled=True)
+            else:
+                mc.workload_auto_scaler_profile.vertical_pod_autoscaler.enabled = True
         return mc
 
     def set_up_api_server_access_profile(self, mc: ManagedCluster) -> ManagedCluster:
@@ -5847,6 +5909,12 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         if auto_upgrade_channel:
             auto_upgrade_profile = self.models.ManagedClusterAutoUpgradeProfile(upgrade_channel=auto_upgrade_channel)
         mc.auto_upgrade_profile = auto_upgrade_profile
+
+        node_os_upgrade_channel = self.context.get_node_os_upgrade_channel()
+        if node_os_upgrade_channel:
+            if mc.auto_upgrade_profile is None:
+                mc.auto_upgrade_profile = self.models.ManagedClusterAutoUpgradeProfile()
+            mc.auto_upgrade_profile.node_os_upgrade_channel = node_os_upgrade_channel
         return mc
 
     def set_up_auto_scaler_profile(self, mc: ManagedCluster) -> ManagedCluster:
@@ -6007,11 +6075,11 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_http_proxy_config(mc)
         # set up workload autoscaler profile
         mc = self.set_up_workload_auto_scaler_profile(mc)
+
         # setup k8s support plan
         mc = self.set_up_k8s_support_plan(mc)
         # set up azure monitor metrics profile
         mc = self.set_up_azure_monitor_profile(mc)
-
         # DO NOT MOVE: keep this at the bottom, restore defaults
         if not bypass_restore_defaults:
             mc = self._restore_defaults_in_mc(mc)
@@ -6667,6 +6735,13 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             if mc.auto_upgrade_profile is None:
                 mc.auto_upgrade_profile = self.models.ManagedClusterAutoUpgradeProfile()
             mc.auto_upgrade_profile.upgrade_channel = auto_upgrade_channel
+
+        node_os_upgrade_channel = self.context.get_node_os_upgrade_channel()
+        if node_os_upgrade_channel is not None:
+            if mc.auto_upgrade_profile is None:
+                mc.auto_upgrade_profile = self.models.ManagedClusterAutoUpgradeProfile()
+            mc.auto_upgrade_profile.node_os_upgrade_channel = node_os_upgrade_channel
+
         return mc
 
     def update_network_plugin_settings(self, mc: ManagedCluster) -> ManagedCluster:
@@ -6687,6 +6762,11 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             _,
             _
         ) = self.context.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
+
+        network_dataplane = self.context.get_network_dataplane()
+        if network_dataplane:
+            mc.network_profile.network_dataplane = network_dataplane
+
         if pod_cidr:
             mc.network_profile.pod_cidr = pod_cidr
         return mc
@@ -7092,6 +7172,24 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             mc.workload_auto_scaler_profile.keda = self.models.ManagedClusterWorkloadAutoScalerProfileKeda(
                 enabled=False
             )
+
+        if self.context.get_enable_vpa():
+            if mc.workload_auto_scaler_profile is None:
+                mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoScalerProfile()
+            if mc.workload_auto_scaler_profile.vertical_pod_autoscaler is None:
+                mc.workload_auto_scaler_profile.vertical_pod_autoscaler = self.models.ManagedClusterWorkloadAutoScalerProfileVerticalPodAutoscaler()
+
+            # set enabled
+            mc.workload_auto_scaler_profile.vertical_pod_autoscaler.enabled = True
+
+        if self.context.get_disable_vpa():
+            if mc.workload_auto_scaler_profile is None:
+                mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoScalerProfile()
+            if mc.workload_auto_scaler_profile.vertical_pod_autoscaler is None:
+                mc.workload_auto_scaler_profile.vertical_pod_autoscaler = self.models.ManagedClusterWorkloadAutoScalerProfileVerticalPodAutoscaler()
+
+            # set disabled
+            mc.workload_auto_scaler_profile.vertical_pod_autoscaler.enabled = False
 
         return mc
 

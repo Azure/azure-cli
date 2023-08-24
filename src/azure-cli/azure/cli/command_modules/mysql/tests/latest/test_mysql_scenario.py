@@ -966,8 +966,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
-    @ServerPreparer(engine_type='mysql', location=DEFAULT_LOCATION)
+    @ResourceGroupPreparer(location="eastus")
+    @ServerPreparer(engine_type='mysql', location="eastus")
     def test_mysql_flexible_server_proxy_resource(self, resource_group, server):
         self._test_firewall_rule_mgmt('mysql', resource_group, server)
         self._test_parameter_mgmt('mysql', resource_group, server)
@@ -1042,6 +1042,20 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server parameter set --name {} -v {} --source {} -s {} -g {}'.format(database_engine, parameter_name, value, source, server, resource_group),
                  checks=[JMESPathCheck('value', value),
                          JMESPathCheck('source', source)])
+        
+        args = "auto_increment_offset=2 explicit_defaults_for_timestamp=ON ft_query_expansion_limit=18"
+        self.cmd('{} flexible-server parameter set-batch -s {} -g {} --args {}'.format(database_engine, server, resource_group, args),
+                 checks=[JMESPathCheck('status', 'Succeeded')])
+        
+        self.cmd('{} flexible-server parameter show --name auto_increment_offset -g {} -s {}'.format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('currentValue', 2)])
+        
+        self.cmd('{} flexible-server parameter show --name explicit_defaults_for_timestamp -g {} -s {}'.format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('currentValue', 'ON')])
+        
+        self.cmd('{} flexible-server parameter show --name ft_query_expansion_limit -g {} -s {}'.format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('currentValue', 18)])
+
 
     def _test_database_mgmt(self, database_engine, resource_group, server):
 

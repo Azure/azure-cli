@@ -195,6 +195,9 @@ parameters:
   - name: --auto-upgrade-channel
     type: string
     short-summary: Specify the upgrade channel for autoupgrade.
+  - name: --node-os-upgrade-channel
+    type: string
+    short-summary: Manner in which the OS on your nodes is updated. It could be NodeImage, None, SecurityPatch or Unmanaged.
   - name: --enable-cluster-autoscaler
     type: bool
     short-summary: Enable cluster autoscaler, default value is false.
@@ -506,6 +509,9 @@ parameters:
   - name: --nodepool-labels
     type: string
     short-summary: The node labels for all node pool. See https://aka.ms/node-labels for syntax of labels.
+  - name: --enable-vpa
+    type: bool
+    short-summary: Enable vertical pod autoscaler for cluster.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -578,6 +584,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-keda
   - name: Create a kubernetes cluster with the Azure Monitor managed service for Prometheus integration enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-monitor-metrics
+  - name: Create a kubernetes cluster with vertical pod autoscaler enaled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-vpa
 """
 
 helps['aks update'] = """
@@ -614,6 +622,12 @@ parameters:
   - name: --pod-cidr
     type: string
     short-summary: Update the pod CIDR for a cluster. Used when updating a cluster from Azure CNI to Azure CNI Overlay.
+  - name: --network-dataplane
+    type: string
+    short-summary: The network dataplane to use.
+    long-summary: |
+        Network dataplane used in the Kubernetes cluster.
+        Specify "azure" to use the Azure dataplane (default) or "cilium" to enable Cilium dataplane.
   - name: --load-balancer-managed-outbound-ip-count
     type: int
     short-summary: Load balancer managed outbound IP count.
@@ -653,6 +667,9 @@ parameters:
   - name: --auto-upgrade-channel
     type: string
     short-summary: Specify the upgrade channel for autoupgrade.
+  - name: --node-os-upgrade-channel
+    type: string
+    short-summary: Manner in which the OS on your nodes is updated. It could be NodeImage, None, SecurityPatch or Unmanaged.
   - name: --attach-acr
     type: string
     short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
@@ -854,6 +871,12 @@ parameters:
   - name: --nodepool-labels
     type: string
     short-summary: The node labels for all node pool. See https://aka.ms/node-labels for syntax of labels.
+  - name: --enable-vpa
+    type: bool
+    short-summary: Enable vertical pod autoscaler for cluster.
+  - name: --disable-vpa
+    type: bool
+    short-summary: Disable vertical pod autoscaler for cluster.
 
 examples:
   - name: Reconcile the cluster back to its current state.
@@ -908,6 +931,10 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-keda
   - name: Disable KEDA workload autoscaler for an existing kubernetes cluster.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-keda
+  - name: Enable VPA(Vertical Pod Autoscaler) for an existing kubernetes cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCLuster --enable-vpa
+  - name: Disable VPA(Vertical Pod Autoscaler) for an existing kubernetes cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCLuster --disable-vpa
 """
 
 helps['aks delete'] = """

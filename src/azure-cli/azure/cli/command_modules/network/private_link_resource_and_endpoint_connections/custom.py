@@ -41,6 +41,8 @@ def register_providers():
     _register_one_provider('Microsoft.ElasticSan/elasticSans', '2022-12-01-preview', True)
     _register_one_provider('Microsoft.EventGrid/topics', '2020-04-01-preview', True)
     _register_one_provider('Microsoft.EventGrid/domains', '2020-04-01-preview', True)
+    _register_one_provider('Microsoft.EventGrid/partnerNamespaces', '2021-06-01-preview', True)
+    _register_one_provider('Microsoft.EventGrid/namespaces', '2023-06-01-preview', True)
     _register_one_provider("Microsoft.EventHub/namespaces", "2021-06-01-preview", True)
     _register_one_provider('Microsoft.HardwareSecurityModules/cloudHsmClusters', '2022-08-31-preview', True)
     _register_one_provider("Microsoft.HDInsight/clusters", '2018-06-01-preview', True)

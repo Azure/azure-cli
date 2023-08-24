@@ -13,10 +13,9 @@ from azure.cli.command_modules.acs.azuremonitormetrics.deaults import get_defaul
 # All DC* object names should end only in alpha numeric (after `length` trim)
 # DCE remove underscore from cluster name
 def sanitize_name(name, objtype, length):
-    length = length - 1
-    if objtype == DC_TYPE.DCE:
-        name = name.replace("_", "")
     name = name[0:length]
+    if objtype == DC_TYPE.DCE:
+        name = ''.join(char for char in name if char.isalnum() or char == '-')
     lastIndexAlphaNumeric = len(name) - 1
     while ((name[lastIndexAlphaNumeric].isalnum() is False) and lastIndexAlphaNumeric > -1):
         lastIndexAlphaNumeric = lastIndexAlphaNumeric - 1
