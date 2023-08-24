@@ -49,7 +49,6 @@ from ._constants import (MAXIMUM_CONTAINER_APP_NAME_LENGTH, SHORT_POLLING_INTERV
 from ._models import (ContainerAppCustomDomainEnvelope as ContainerAppCustomDomainEnvelopeModel,
                       ManagedCertificateEnvelop as ManagedCertificateEnvelopModel)
 from ._models import OryxMarinerRunImgTagProperty
-from ._managed_service_utils import ManagedRedisUtils, ManagedCosmosDBUtils, ManagedPostgreSQLUtils
 
 
 class AppType(Enum):
@@ -421,50 +420,6 @@ def get_linker_client(cmd):
     return linker_client
 
 
-def process_service(cmd, resource_list, service_name, arg_dict, subscription_id, resource_group_name, name,
-                    binding_name, service_connector_def_list, service_bindings_def_list):
-    # Check if the service exists in the list of dict
-    for service in resource_list:
-        if service["name"] == service_name:
-            if service["type"] == "Microsoft.Cache/Redis":
-                service_connector_def_list.append(
-                    ManagedRedisUtils.build_redis_service_connector_def(subscription_id, resource_group_name,
-                                                                        service_name, arg_dict,
-                                                                        name, binding_name))
-            elif service["type"] == "Microsoft.DocumentDb/databaseAccounts":
-                service_connector_def_list.append(
-                    ManagedCosmosDBUtils.build_cosmosdb_service_connector_def(subscription_id, resource_group_name,
-                                                                              service_name, arg_dict,
-                                                                              name, binding_name))
-            elif service["type"] == "Microsoft.DBforPostgreSQL/flexibleServers":
-                service_connector_def_list.append(
-                    ManagedPostgreSQLUtils.build_postgresql_service_connector_def(subscription_id, resource_group_name,
-                                                                                  service_name, arg_dict,
-                                                                                  name, binding_name))
-            elif service["type"] == "Microsoft.App/containerApps":
-                containerapp_def = ContainerAppClient.show(cmd=cmd, resource_group_name=resource_group_name,
-                                                           name=service_name)
-
-                if not containerapp_def:
-                    raise ResourceNotFoundError(f"The service '{service_name}' does not exist")
-
-                service_type = safe_get(containerapp_def, "properties", "configuration", "service", "type")
-
-                if service_type is None or service_type not in DEV_SERVICE_LIST:
-                    raise ResourceNotFoundError(f"The service '{service_name}' does not exist")
-
-                service_bindings_def_list.append({
-                    "serviceId": containerapp_def["id"],
-                    "name": binding_name
-                })
-
-            else:
-                raise ValidationError("Service not supported")
-            break
-    else:
-        raise ResourceNotFoundError("Service with the given name does not exist")
-
-
 def validate_binding_name(binding_name):
     pattern = r'^(?=.{1,60}$)[a-zA-Z0-9._]+$'
     return bool(re.match(pattern, binding_name))
@@ -507,65 +462,6 @@ def check_unique_bindings(cmd, service_connectors_def_list, service_bindings_def
     else:
         # There are no duplicate elements among the lists or within any of the lists
         return True
-
-
-def parse_service_bindings(cmd, service_bindings_list, resource_group_name, name):
-    # Make it return both managed and dev bindings
-    service_bindings_def_list = []
-    service_connector_def_list = []
-
-    for service_binding_str in service_bindings_list:
-        parts = service_binding_str.split(",")
-        arg_dict = {}
-
-        for part in parts:
-            key_value = part.split("=")
-
-            if len(key_value) == 1:
-                # This means we don't have comma separated args
-                pass
-            else:
-                arg_dict[key_value[0]] = key_value[1]
-
-        service_binding = parts[0].split(':')
-        service_name = service_binding[0]
-
-        if len(service_binding) == 1:
-            binding_name = service_name
-        else:
-            binding_name = service_binding[1]
-
-        if not validate_binding_name(binding_name):
-            raise InvalidArgumentValueError("The Binding Name can only contain letters, numbers (0-9), periods ('.'), "
-                                            "and underscores ('_'). The length must not be more than 60 characters. "
-                                            "By default, the binding name is the same as the service name you specified "
-                                            "[my-aca-pgaddon], but you can override the default and specify your own "
-                                            "compliant binding name like this --bind my-aca-pgaddon[:my_aca_pgaddon].")
-
-        resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceManagementClient)
-
-        if "resourcegroup" in arg_dict:
-            # Search in target rg
-            resources = resource_client.resources.list_by_resource_group(
-                arg_dict["resourcegroup"])
-            resource_group_name = arg_dict["resourcegroup"]
-        else:
-            # Search in current rg
-            resources = resource_client.resources.list_by_resource_group(
-                resource_group_name)
-
-        # Create a list with required items
-        resource_list = []
-        for item in resources:
-            resource_list.append({"name": item.name, "type": item.type, "id": item.id})
-
-        subscription_id = get_subscription_id(cmd.cli_ctx)
-
-        # Will work for both create and update
-        process_service(cmd, resource_list, service_name, arg_dict, subscription_id, resource_group_name,
-                        name, binding_name, service_connector_def_list, service_bindings_def_list)
-
-    return service_connector_def_list, service_bindings_def_list
 
 
 def parse_metadata_flags(metadata_list, metadata_def={}):  # pylint: disable=dangerous-default-value
