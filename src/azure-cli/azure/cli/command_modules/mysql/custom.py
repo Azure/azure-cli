@@ -1715,6 +1715,22 @@ def flexible_gtid_reset(client, resource_group_name, server_name, gtid_set, no_w
     )
     return sdk_no_wait(no_wait, client.begin_reset_gtid, resource_group_name, server_name, parameters)
 
+def flexible_server_export_create(cmd, client,resource_group_name, server_name, backup_name, sas_uri):
+    target_details = {
+        'objectType' : "FullBackupStoreDetails",
+        'sasUriList' : {sas_uri}
+        }
+    backup_settings = {
+        'backupName' : backup_name,
+        'backupFormat' : "Raw"
+        }
+    parameters = mysql_flexibleservers.models.BackupAndExportRequest(
+        target_details = target_details,
+        backup_settings = backup_settings
+    )
+    return resolve_poller(client.begin_create(resource_group_name, server_name, parameters), cmd.cli_ctx,
+        'Create backup')
+
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance
 class DbContext(object):
