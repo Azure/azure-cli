@@ -75,7 +75,6 @@ DEPENDENCIES = [
     'azure-mgmt-cdn==12.0.0',
     'azure-mgmt-cognitiveservices~=13.5.0',
     'azure-mgmt-compute~=30.0.0',
-    'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance==10.1.0',
     'azure-mgmt-containerregistry==10.1.0',
     'azure-mgmt-containerservice~=26.0.0',
