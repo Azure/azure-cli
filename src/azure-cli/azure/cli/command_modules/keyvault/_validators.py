@@ -631,7 +631,7 @@ def set_vault_base_url(ns):
 
 def validate_key_id(entity_type):
     def _validate(ns):
-        from azure.keyvault.key_vault_id import KeyVaultIdentifier
+        from .vendored_sdks.azure_keyvault_t1.key_vault_id import KeyVaultIdentifier
 
         pure_entity_type = entity_type.replace('deleted', '')
         name = getattr(ns, pure_entity_type + '_name', None)
@@ -662,7 +662,7 @@ def validate_key_id(entity_type):
 
 def validate_keyvault_resource_id(entity_type):
     def _validate(ns):
-        from azure.keyvault.key_vault_id import KeyVaultIdentifier
+        from .vendored_sdks.azure_keyvault_t1.key_vault_id import KeyVaultIdentifier
 
         pure_entity_type = entity_type.replace('deleted', '')
         name = getattr(ns, pure_entity_type + '_name', None) or getattr(ns, 'name', None)
@@ -697,7 +697,7 @@ def validate_keyvault_resource_id(entity_type):
 
 
 def validate_sas_definition_id(ns):
-    from azure.keyvault import StorageSasDefinitionId
+    from .vendored_sdks.azure_keyvault_t1 import StorageSasDefinitionId
     acct_name = getattr(ns, 'storage_account_name', None)
     sas_name = getattr(ns, 'sas_definition_name', None)
     vault = getattr(ns, 'vault_base_url', None)
@@ -713,7 +713,7 @@ def validate_sas_definition_id(ns):
 
 
 def validate_storage_account_id(ns):
-    from azure.keyvault import StorageAccountId
+    from .vendored_sdks.azure_keyvault_t1 import StorageAccountId
     acct_name = getattr(ns, 'storage_account_name', None)
     vault = getattr(ns, 'vault_base_url', None)
     identifier = getattr(ns, 'identifier', None)
