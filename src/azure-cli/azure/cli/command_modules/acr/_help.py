@@ -351,7 +351,7 @@ short-summary: Manage network rules for Azure Container Registries.
 helps['acr network-rule add'] = """
 type: command
 short-summary: Add a network rule.
-examples: 
+examples:
   - name: Add a rule to allow access for a specific IP address-range.
     text: >
         az acr network-rule add -n MyRegistry --ip-address 23.45.1.0/24
