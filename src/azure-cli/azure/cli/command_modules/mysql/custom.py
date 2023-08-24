@@ -1722,6 +1722,8 @@ def map_single_server_configuration(single_server_client, source_server_id, tier
 
         if not location:
             location = ''.join(source_single_server.location.lower().split())
+        else:
+            logger.warning("Location provided is ignored. Flexible server will be created in the same location as the source single server.")
 
         if not storage_gb:
             min_mysql_storage = 20
