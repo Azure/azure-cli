@@ -18,7 +18,7 @@ import argparse
 TEMPLATE_FILE_NAME='formula_template.txt'
 CLI_VERSION=os.environ['CLI_VERSION']
 HOMEBREW_UPSTREAM_URL=os.environ['HOMEBREW_UPSTREAM_URL']
-HOMEBREW_FORMULAR_LATEST="https://raw.githubusercontent.com/Homebrew/homebrew-core/master/Formula/azure-cli.rb"
+HOMEBREW_FORMULAR_LATEST="https://raw.githubusercontent.com/Homebrew/homebrew-core/c882489d4cb39ca004387f0c5ef1a767046c68d6/Formula/azure-cli.rb"
 
 
 def main():

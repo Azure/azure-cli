@@ -178,7 +178,7 @@ def _ensure_subnet_service_endpoint(cli_ctx, subnet_id):
                                  ' Use --ignore-missing-endpoint or -i to'
                                  ' skip validation and manually verify service endpoint.')
     # ad-hoc api version 2019-02-01
-    Subnet = import_module("azure.cli.command_modules.appservice.aaz.2019_03_01_hybrid.network.vnet.subnet")
+    Subnet = import_module("azure.cli.command_modules.appservice.aaz.profile_2019_03_01_hybrid.network.vnet.subnet")
     subnet_obj = Subnet.Show(cli_ctx=cli_ctx)(command_args={
         "name": subnet_name,
         "vnet_name": subnet_vnet_name,

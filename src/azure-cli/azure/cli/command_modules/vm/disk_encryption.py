@@ -362,8 +362,9 @@ def show_vm_encryption_status(cmd, resource_group_name, vm_name):
 
 
 def _get_keyvault_key_url(cli_ctx, keyvault_name, key_name):
-    client = create_keyvault_data_plane_client(cli_ctx)
-    result = client.get_key(get_key_vault_base_url(cli_ctx, keyvault_name), key_name, '')
+    vault_base_url = get_key_vault_base_url(cli_ctx, keyvault_name)
+    client = create_keyvault_data_plane_client(cli_ctx, vault_base_url)
+    result = client.get_key(key_name)
     return result.key.kid  # pylint: disable=no-member
 
 
