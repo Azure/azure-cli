@@ -222,7 +222,7 @@ def mysql_import_version_validator(source_single_server_object, target_version):
     allowed_single_server_source_version = ['5.7', '8.0']
     source_single_server_version = source_single_server_object.version
     if source_single_server_version not in allowed_single_server_source_version:
-        raise CLIError('The source single server version is {}. Only 5.7 and 8.0 servers can be migrated.'
+        raise CLIError('Unsupported source server version {}. Only 5.7 and 8.0 servers can be migrated.'
                        .format(source_single_server_version))
     if source_single_server_version == '8.0':
         source_single_server_version = '8.0.21'

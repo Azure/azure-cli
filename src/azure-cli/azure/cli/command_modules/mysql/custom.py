@@ -1716,7 +1716,8 @@ def map_single_server_configuration(single_server_client, source_server_id, tier
         mysql_import_single_server_ready_validator(source_single_server)
 
         if administrator_login or administrator_login_password:
-            logger.warning("Administrator login name and password provided are ignored. Please use source single server admin details to connect after migration.")
+            logger.warning("Changing administrator login name and password is currently not supported for single to flex migrations. "
+                           "Please use source single server administrator login name and password to connect after migration.")
 
         if not administrator_login:
             administrator_login = source_single_server.administrator_login
