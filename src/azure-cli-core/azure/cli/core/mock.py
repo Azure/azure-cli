@@ -24,7 +24,6 @@ class DummyCli(AzCli):
         from knack.completion import ARGCOMPLETE_ENV_NAME
         from knack.util import ensure_dir
 
-        # random_config_dir only takes effects in playback mode
         if random_config_dir:
             config_dir = os.path.join(GLOBAL_CONFIG_DIR, 'dummy_cli_config_dir', random_string())
 
@@ -33,7 +32,8 @@ class DummyCli(AzCli):
                 if os.path.exists(GLOBAL_CONFIG_DIR):
                     ensure_dir(config_dir)
                     import shutil
-                    for file in ['azureProfile.json', 'msal_token_cache.bin', 'clouds.config']:
+                    for file in ['azureProfile.json', 'msal_token_cache.bin', 'clouds.config', 'msal_token_cache.json',
+                                 'service_principal_entries.json']:
                         try:
                             shutil.copy(os.path.join(GLOBAL_CONFIG_DIR, file), config_dir)
                         except FileNotFoundError:
