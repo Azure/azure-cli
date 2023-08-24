@@ -58,6 +58,37 @@ class AroScenarioTests(ScenarioTest):
             ])
 
     @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=28, name_prefix='clitestaro_validate', location='eastus')
+    @AROClusterServicePrincipalPreparer(name_prefix='clitestaro_validate')
+    def test_aro_validate(self, resource_group):
+        from msrestazure.tools import resource_id
+
+        subscription = self.get_subscription_id()
+
+        master_subnet = self.create_random_name('dev_master', 14)
+        worker_subnet = self.create_random_name('dev_worker', 14)
+
+        self.kwargs.update({
+            'name': self.create_random_name('aro', 14),
+            'resource_group': resource_group,
+            'subscription': subscription,
+            'master_subnet': master_subnet,
+            'worker_subnet': worker_subnet,
+            'master_ip_range': '10.{}.{}.0/24'.format(randint(0, 127), randint(0, 255)),
+            'worker_ip_range': '10.{}.{}.0/24'.format(randint(0, 127), randint(0, 255)),
+            'master_subnet_resource': resource_id(subscription=subscription, resource_group=resource_group, namespace='Microsoft.Network', type='virtualNetworks', child_type_1='subnets', name='dev-vnet', child_name_1=master_subnet),
+            'worker_subnet_resource': resource_id(subscription=subscription, resource_group=resource_group, namespace='Microsoft.Network', type='virtualNetworks', child_type_1='subnets', name='dev-vnet', child_name_1=worker_subnet),
+        })
+
+        self.cmd('network vnet create -g {rg} -n dev-vnet --address-prefixes 10.0.0.0/9')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {master_subnet} --address-prefixes {master_ip_range} --service-endpoints Microsoft.ContainerRegistry')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
+
+        with mock.patch('azure.cli.command_modules.aro._rbac._gen_uuid', side_effect=self.create_guid):
+            self.cmd('aro validate -g {rg} -n {name} --client-id {aro_csp} --client-secret {aro_csp_pass} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription}')
+
+    @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=28, name_prefix='clitestaro_listcred', location='eastus')
     @AROClusterServicePrincipalPreparer(name_prefix='clitestaro_listcred')
     def test_aro_list_credentials(self, resource_group):

@@ -118,6 +118,7 @@ def load_command_table(self, _):
                             client_factory=cf_mysql_flexible_config,
                             table_transformer=table_transform_output_parameters) as g:
         g.custom_command('set', 'flexible_parameter_update')
+        g.custom_command('set-batch', 'flexible_parameter_update_batch')
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
 

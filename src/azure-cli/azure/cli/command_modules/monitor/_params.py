@@ -99,7 +99,7 @@ def load_arguments(self, _):
         c.argument('aggregation', arg_type=get_enum_type(t for t in AggregationType if t.name != 'none'), nargs='*')
         c.argument('metrics', nargs='+')
         c.argument('orderby', help='Aggregation to use for sorting results and the direction of the sort. Only one order can be specificed. Examples: sum asc')
-        c.argument('top', help='Max number of records to retrieve. Valid only if --filter used.')
+        c.argument('top', type=int, help='Max number of records to retrieve. Valid only if --filter used.')
         c.argument('filters', options_list='--filter')
         c.argument('metric_namespace', options_list='--namespace')
 
@@ -109,8 +109,9 @@ def load_arguments(self, _):
         c.argument('offset', type=get_period_type(as_timedelta=True))
         c.argument('interval', arg_group='Time', type=get_period_type())
 
-    with self.argument_context('monitor metrics list-namespaces', arg_group='Time') as c:
-        c.argument('start_time', arg_type=get_datetime_type(help='Start time of the query.'))
+    with self.argument_context('monitor metrics list-namespaces') as c:
+        c.argument("resource_uri", help="The identifier of the resource.")
+        c.argument('start_time', arg_type=get_datetime_type(help='Start time of the query.'), arg_group='Time')
     # endregion
 
     # region MetricAlerts
