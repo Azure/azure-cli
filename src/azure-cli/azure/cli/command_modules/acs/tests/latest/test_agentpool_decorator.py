@@ -1089,7 +1089,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
             self.agentpool_decorator_mode,
         )
-        self.assertEqual(ctx_2.get_max_pods(), 0)
+        self.assertEqual(ctx_2.get_max_pods(), None)
         agentpool = self.create_initialized_agentpool_instance(max_pods=250)
         ctx_2.attach_agentpool(agentpool)
         self.assertEqual(ctx_2.get_max_pods(), 250)
