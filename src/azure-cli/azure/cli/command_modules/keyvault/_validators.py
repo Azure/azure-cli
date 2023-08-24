@@ -801,6 +801,16 @@ def process_certificate_policy(cmd, ns):
     if secret_properties:
         content_type = secret_properties.get('content_type')
 
+    if not content_type and hasattr(ns, 'certificate_bytes') and ns.certificate_bytes:
+        from OpenSSL import crypto
+        try:
+            crypto.load_certificate(crypto.FILETYPE_PEM, ns.certificate_bytes)
+            # if we get here, we know it was a PEM file
+            content_type = 'application/x-pem-file'
+        except (ValueError, crypto.Error):
+            # else it should be a pfx file
+            content_type = 'application/x-pkcs12'
+
     x509_certificate_properties = policy.get('x509_certificate_properties')
     if x509_certificate_properties:
         subject = x509_certificate_properties.get('subject')
