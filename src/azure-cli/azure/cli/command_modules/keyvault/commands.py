@@ -335,7 +335,7 @@ def load_command_table(self, _):
         replace('.', '_').replace('-', '_')
 
     if data_api_version != '2016_10_01':
-        with self.command_group('keyvault storage', data_entity.command_type) as g:
+        with self.command_group('keyvault storage', data_entity.command_type, deprecate_info=self.deprecate()) as g:
             g.keyvault_command('add', 'set_storage_account')
             g.keyvault_command('list', 'get_storage_accounts', transform=keep_max_results)
             g.keyvault_command('show', 'get_storage_account')
