@@ -180,7 +180,8 @@ def mysql_storage_validator(storage_gb, sku_info, tier, instance):
 
 def mysql_import_storage_validator(source_storage_mb, user_storage_gb):
     if source_storage_mb > user_storage_gb * 1024:
-        raise CLIError('The target server storage {} GiB is smaller than the source server storage {} GiB.'
+        raise CLIError('The target server storage {} GiB is smaller than the source server storage {} GiB. '
+                       'Storage size of the target server must be larger than the source server.'
                        .format(user_storage_gb, source_storage_mb // 1024))
 
 
