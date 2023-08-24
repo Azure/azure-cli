@@ -256,7 +256,7 @@ class RoleDefinitionScenarioTest(RoleScenarioTestBase):
 class RoleAssignmentScenarioTest(RoleScenarioTestBase):
 
     def __init__(self, *arg, **kwargs):
-        super().__init__(*arg, random_config_dir=True, **kwargs)
+        super().__init__(*arg, **kwargs)
 
     @ResourceGroupPreparer(name_prefix='cli_role_assign')
     @AllowLargeResponse()
@@ -314,14 +314,6 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
                 self.cmd('role assignment list --assignee {upn} --all --include-groups', checks=[
                     self.check("length([])", 2)
                 ])
-
-                # test couple of more general filters
-                result = self.cmd('role assignment list -g {rg} --include-inherited').get_output_in_json()
-                # There are role assignments inherited from subscription, so we can't tell the exact number
-                self.assertTrue(len(result) >= 1)
-
-                result = self.cmd('role assignment list --all').get_output_in_json()
-                self.assertTrue(len(result) >= 1)
 
                 self.cmd('role assignment delete --assignee {group_id} --role {role} -g {rg}')
                 self.cmd('role assignment delete --assignee {upn} --role {role} -g {rg}')
@@ -686,16 +678,28 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
             finally:
                 self.cmd('ad user delete --id {upn}')
 
+
+class RoleAssignmentLiveScenarioTest(LiveScenarioTest):
+    # Only test list commands in live mode to avoid recording tenant information
+
+    @ResourceGroupPreparer(name_prefix='cli_role_assign')
+    def test_role_assignment_list(self, resource_group):
+        # List all role assignments under a subscription
+        self.cmd('role assignment list --all', checks=[self.greater_than("length([])", 0)])
+
+        # List role assignments for a resource group.
+        self.cmd('role assignment list -g {rg}', checks=[self.check("length([])", 0)])
+
+        # There are role assignments inherited from subscription, so we can't tell the exact number.
+        self.cmd('role assignment list -g {rg} --include-inherited', checks=[self.greater_than("length([])", 0)])
+
     @ResourceGroupPreparer(name_prefix='cli_test_assignments_for_coadmins')
-    @AllowLargeResponse()
     def test_role_assignment_for_co_admins(self, resource_group):
 
         result = self.cmd('role assignment list --include-classic-administrator').get_output_in_json()
         self.assertTrue([x for x in result if x['roleDefinitionName'] in ['CoAdministrator', 'AccountAdministrator']])
-        self.cmd('role assignment list -g {}'.format(resource_group), checks=[
-            self.check("length([])", 0)
-        ])
-        result = self.cmd('role assignment list -g {} --include-classic-administrator'.format(resource_group)).get_output_in_json()
+
+        result = self.cmd('role assignment list -g {rg} --include-classic-administrator').get_output_in_json()
         self.assertTrue([x for x in result if x['roleDefinitionName'] in ['CoAdministrator', 'AccountAdministrator']])
 
 
