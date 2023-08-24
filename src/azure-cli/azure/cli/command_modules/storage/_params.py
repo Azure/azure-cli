@@ -490,7 +490,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'in the account may be configured for public access. Note that setting this property to true does '
                    'not enable anonymous access to any data in the account. The additional step of configuring the '
                    'public access setting for a container is required to enable anonymous access.',
-                   validate=validate_allow_blob_public_access)
+                   validator=validate_allow_blob_public_access)
         c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
                         'The default interpretation is TLS 1.0 for this property')
