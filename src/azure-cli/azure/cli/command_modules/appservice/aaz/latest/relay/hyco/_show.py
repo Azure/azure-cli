@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "relay hyco show",
-)
 class Show(AAZCommand):
     """Shows the Relay Service Hybrid Connection Details.
 

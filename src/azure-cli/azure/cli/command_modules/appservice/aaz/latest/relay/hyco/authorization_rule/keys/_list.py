@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "relay hyco authorization-rule keys list",
-)
 class List(AAZCommand):
     """List the keys and connection strings of Authorization Rule for Relay Service Hybrid Connection.
 

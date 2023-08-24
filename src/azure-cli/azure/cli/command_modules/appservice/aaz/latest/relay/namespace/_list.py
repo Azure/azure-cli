@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "relay namespace list",
-)
 class List(AAZCommand):
     """List the Relay Service Namespaces.
 

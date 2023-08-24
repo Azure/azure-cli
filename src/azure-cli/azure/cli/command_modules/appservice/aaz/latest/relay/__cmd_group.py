@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command_group(
-    "relay",
-)
 class __CMDGroup(AAZCommandGroup):
     """Manage Azure Relay Service namespaces, WCF relays, hybrid connections, and rules.
     """

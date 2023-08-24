@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "relay hyco authorization-rule create",
-)
 class Create(AAZCommand):
     """Create Authorization Rule for given Relay Service Hybrid Connection.
 

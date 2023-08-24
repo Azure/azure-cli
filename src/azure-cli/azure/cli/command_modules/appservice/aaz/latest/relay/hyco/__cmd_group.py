@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command_group(
-    "relay hyco",
-)
 class __CMDGroup(AAZCommandGroup):
     """Manage Azure Relay Service Hybrid Connection and Authorization Rule.
     """
