@@ -117,15 +117,6 @@ def create_random_resource_name(prefix='azure', length=15):
     return prefix + ''.join(digits)
 
 
-def get_location_from_resource_group(cmd, resource_group_name, location):
-    if location is None:
-        resource_group_client = resource_client_factory(cmd.cli_ctx).resource_groups
-        resource_group = resource_group_client.get(resource_group_name=resource_group_name)
-        location = resource_group.location
-
-    return location
-
-
 def generate_missing_parameters(cmd, location, resource_group_name, server_name):
     # If resource group is there in local context, check for its existence.
     if resource_group_name is not None:
@@ -558,7 +549,7 @@ def get_tenant_id():
     sub = profile.get_subscription()
     return sub['tenantId']
 
-def get_flexible_server_sku_mapping_from_single_server(source_single_server_sku, tier, sku_name):
+def get_single_to_flex_sku_mapping(source_single_server_sku, tier, sku_name):
     single_to_flex_sku_mapping = {"Basic":{1:"Standard_B1ms",2:"Standard_B2ms"},
                                   "GeneralPurpose":{2:"Standard_D2ds_v4",4:"Standard_D4ds_v4",8:"Standard_D8ds_v4",16:"Standard_D16ds_v4",32:"Standard_D32ds_v4",64:"Standard_D64ds_v4"},
                                   "MemoryOptimized":{2:"Standard_E2ds_v4",4:"Standard_E4ds_v4",8:"Standard_E8ds_v4",16:"Standard_E16ds_v4",32:"Standard_E32ds_v4"}}
