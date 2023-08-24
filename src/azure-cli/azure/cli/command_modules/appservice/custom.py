@@ -35,7 +35,6 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_
 
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
-from azure.mgmt.relay.models import AccessRights
 from azure.mgmt.web.models import KeyInfo
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
