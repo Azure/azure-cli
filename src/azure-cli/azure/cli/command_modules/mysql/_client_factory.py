@@ -36,6 +36,7 @@ def get_mysql_flexible_management_client(cli_ctx, **_):
     # Normal production scenario.
     return get_mgmt_service_client(cli_ctx, MySQLManagementClient)
 
+
 def get_mysql_management_client(cli_ctx, **_):
     from os import getenv
     from azure.mgmt.rdbms.mysql import MySQLManagementClient
@@ -57,7 +58,8 @@ def get_mysql_management_client(cli_ctx, **_):
             base_url=rm_uri_override,
             credential=credentials)
     # Normal production scenario.
-    return get_mgmt_service_client(cli_ctx, MySQLManagementClient) 
+    return get_mgmt_service_client(cli_ctx, MySQLManagementClient)
+
 
 # Meru operations for flexible servers
 def cf_mysql_flexible_servers(cli_ctx, _):
@@ -121,6 +123,7 @@ def private_dns_link_client_factory(cli_ctx, subscription_id=None):
     from azure.mgmt.privatedns import PrivateDnsManagementClient
     return get_mgmt_service_client(cli_ctx, PrivateDnsManagementClient,
                                    subscription_id=subscription_id).virtual_network_links
+
 
 # Operations for single server
 def cf_mysql_servers(cli_ctx, _):

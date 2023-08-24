@@ -549,10 +549,11 @@ def get_tenant_id():
     sub = profile.get_subscription()
     return sub['tenantId']
 
+
 def get_single_to_flex_sku_mapping(source_single_server_sku, tier, sku_name):
-    single_to_flex_sku_mapping = {"Basic":{1:"Standard_B1ms",2:"Standard_B2ms"},
-                                  "GeneralPurpose":{2:"Standard_D2ds_v4",4:"Standard_D4ds_v4",8:"Standard_D8ds_v4",16:"Standard_D16ds_v4",32:"Standard_D32ds_v4",64:"Standard_D64ds_v4"},
-                                  "MemoryOptimized":{2:"Standard_E2ds_v4",4:"Standard_E4ds_v4",8:"Standard_E8ds_v4",16:"Standard_E16ds_v4",32:"Standard_E32ds_v4"}}
+    single_to_flex_sku_mapping = {"Basic": {1: "Standard_B1ms", 2: "Standard_B2ms"},
+                                  "GeneralPurpose": {2: "Standard_D2ds_v4", 4: "Standard_D4ds_v4", 8: "Standard_D8ds_v4", 16: "Standard_D16ds_v4", 32: "Standard_D32ds_v4", 64: "Standard_D64ds_v4"},
+                                  "MemoryOptimized": {2: "Standard_E2ds_v4", 4: "Standard_E4ds_v4", 8: "Standard_E8ds_v4", 16: "Standard_E16ds_v4", 32: "Standard_E32ds_v4"}}
     if not tier:
         single_server_tier = source_single_server_sku.tier
         if single_server_tier == 'Basic':
@@ -565,4 +566,3 @@ def get_single_to_flex_sku_mapping(source_single_server_sku, tier, sku_name):
         else:
             sku_name = single_to_flex_sku_mapping.get(tier).get(source_single_server_sku.capacity)
     return tier, sku_name
-

@@ -151,9 +151,10 @@ def _mysql_import_mode_validator(mode):
 
 def mysql_import_single_server_ready_validator(source_single_server_object):
     if source_single_server_object.user_visible_state != 'Ready':
-        raise CLIError('The source server should be in {} state for migration. Instead it was in {} state. Please start the server and try again.'
+        raise CLIError('The source server should be in {} state for migration. Instead it was in {} state. '
+                       'Please start the server and try again.'
                        .format('Ready', source_single_server_object.user_visible_state))
-    
+
 
 def mysql_retention_validator(backup_retention, sku_info, tier):
     if backup_retention is not None:
