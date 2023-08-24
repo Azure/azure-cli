@@ -127,7 +127,7 @@ def update_formula() -> str:
     text = re.sub('sha256 ".*"', 'sha256 "{}"'.format(upstream_sha), text, 1)
     text = re.sub('.*revision.*\n', '', text, 1)  # remove revision for previous version if exists
 
-    # include pip when creating venv, see https://github.com/Azure/azure-cli/issues/27047
+    # include pip when creating venv, see https://github.com/Homebrew/brew/pull/15792
     # this can be removed after Homebrew merges our PR
     text = re.sub('system_site_packages: false', 'system_site_packages: false, without_pip: false', text, 1)
 
