@@ -12,7 +12,7 @@ def load_command_table(self, _):
         cf_activity_log, cf_action_groups, cf_activity_log_alerts, cf_event_categories,
         cf_metric_alerts, cf_log_analytics_workspace, cf_log_analytics_linked_storage)
     from .transformers import (action_group_list_table)
-    from .validators import (process_autoscale_create_namespace, process_action_group_detail_for_creation)
+    from .validators import (process_autoscale_create_namespace)
 
     from ._exception_handler import exception_handler
 

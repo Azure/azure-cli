@@ -2,8 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
-from azure.cli.core.aaz import has_value, AAZStrArg, AAZListArg
+# pylint: disable=protected-access
+from azure.cli.core.aaz import has_value, AAZStrArg, AAZListArg, AAZCustomListArg
 from azure.cli.core.commands.validators import validate_tags
 from azure.cli.core.azclierror import ValidationError
 from ..aaz.latest.monitor.action_group import Create as _ActionGroupCreate, Update as _ActionGroupUpdate
@@ -29,7 +29,6 @@ def update_action_group_receivers(args):
 
     for receiver_item in args.receiver_actions:
         receiver_item_arr = receiver_item.to_serialized_data()
-        print(receiver_item_arr)
         type_name = receiver_item_arr[0]
         type_properties = receiver_item_arr[1:]
         useCommonAlertSchema = 'usecommonalertschema' in (t_property.lower() for t_property in type_properties)
@@ -141,7 +140,7 @@ class ActionGroupCreate(_ActionGroupCreate):
         args_schema.sms_receivers._registered = False
         args_schema.voice_receivers._registered = False
         args_schema.webhook_receivers._registered = False
-        args_schema.receiver_actions = AAZListArg(
+        args_schema.receiver_actions = AAZCustomListArg(
             options=["--actions"],
             singular_options=["--action", "-a"],
             help="Add receivers to the action group during the creation.",
@@ -152,8 +151,8 @@ class ActionGroupCreate(_ActionGroupCreate):
         return args_schema
 
     def pre_operations(self):
-
         args = self.ctx.args
+        args.enabled = True
         validate_tags(args)
         action_group_name = args.action_group_name.to_serialized_data()
         if not has_value(args.location):
@@ -184,7 +183,7 @@ class ActionGroupUpdate(_ActionGroupUpdate):
         args_schema.sms_receivers._registered = False
         args_schema.voice_receivers._registered = False
         args_schema.webhook_receivers._registered = False
-        args_schema.receiver_actions = AAZListArg(
+        args_schema.receiver_actions = AAZCustomListArg(
             options=["--add-actions"],
             singular_options=["--add-action", "-a"],
             help="Add receivers to the action group.",
@@ -203,29 +202,40 @@ class ActionGroupUpdate(_ActionGroupUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
+        args.enabled = True
         update_action_group_receivers(args)
 
-    def post_instance_delete(self):
+    def pre_instance_update(self, instance):
         args = self.ctx.args
-        instance = self.ctx.vars.instance
-        if not has_value(args.receiver_remove_list):
-            return
-        receiver_remove_list = [t.to_serialized_data() for t in args.receiver_remove_list]
+        receiver_remove_list = set()
+        if has_value(args.receiver_remove_list):
+            receiver_remove_list = set(args.receiver_remove_list)
 
         def filter_receivers(collection):
-            return [receiver for receiver in collection if receiver.name not in receiver_remove_list]
+            return [item for item in collection if item.name.to_serialized_data() not in receiver_remove_list]
 
-        instance.properties.email_receivers = filter_receivers(instance.email_receivers)
-        instance.properties.sms_receivers = filter_receivers(instance.sms_receivers)
-        instance.properties.webhook_receivers = filter_receivers(instance.webhook_receivers)
-        instance.properties.arm_role_receivers = filter_receivers(instance.arm_role_receivers)
-        instance.properties.azure_app_push_receivers = filter_receivers(instance.azure_app_push_receivers)
-        instance.properties.itsm_receivers = filter_receivers(instance.itsm_receivers)
-        instance.properties.automation_runbook_receivers = filter_receivers(instance.automation_runbook_receivers)
-        instance.properties.voice_receivers = filter_receivers(instance.voice_receivers)
-        instance.properties.logic_app_receivers = filter_receivers(instance.logic_app_receivers)
-        instance.properties.azure_function_receivers = filter_receivers(instance.azure_function_receivers)
-        instance.properties.event_hub_receivers = filter_receivers(instance.event_hub_receivers)
+        instance.properties.email_receivers = \
+            filter_receivers(instance.properties.email_receivers) + list(args.email_receivers)
+        instance.properties.sms_receivers = \
+            filter_receivers(instance.properties.sms_receivers) + list(args.sms_receivers)
+        instance.properties.webhook_receivers = \
+            filter_receivers(instance.properties.webhook_receivers) + list(args.webhook_receivers)
+        instance.properties.arm_role_receivers = \
+            filter_receivers(instance.properties.arm_role_receivers) + list(args.arm_role_receivers)
+        instance.properties.azure_app_push_receivers = \
+            filter_receivers(instance.properties.azure_app_push_receivers) + list(args.azure_app_push_receivers)
+        instance.properties.itsm_receivers = \
+            filter_receivers(instance.properties.itsm_receivers) + list(args.itsm_receivers)
+        instance.properties.automation_runbook_receivers = \
+            filter_receivers(instance.properties.automation_runbook_receivers) + list(args.automation_runbook_receivers)
+        instance.properties.voice_receivers = \
+            filter_receivers(instance.properties.voice_receivers) + list(args.voice_receivers)
+        instance.properties.logic_app_receivers = \
+            filter_receivers(instance.properties.logic_app_receivers) + list(args.logic_app_receivers)
+        instance.properties.azure_function_receivers = \
+            filter_receivers(instance.properties.azure_function_receivers) + list(args.azure_function_receivers)
+        instance.properties.event_hub_receivers = \
+            filter_receivers(instance.properties.event_hub_receivers) + list(args.event_hub_receivers)
 
 
 class ActionGroupTestNotificationCreate(_ActionGroupTestNotificationCreate):
@@ -245,7 +255,7 @@ class ActionGroupTestNotificationCreate(_ActionGroupTestNotificationCreate):
         args_schema.sms_receivers._registered = False
         args_schema.voice_receivers._registered = False
         args_schema.webhook_receivers._registered = False
-        args_schema.receiver_actions = AAZListArg(
+        args_schema.receiver_actions = AAZCustomListArg(
             options=["--add-actions"],
             singular_options=["--add-action", "-a"],
             help="Add receivers to the action group.",
