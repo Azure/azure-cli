@@ -149,6 +149,12 @@ def _mysql_import_mode_validator(mode):
         raise InvalidArgumentValueError('Incorrect value for --mode. Allowed values : {}'.format(allowed_values))
 
 
+def mysql_import_single_server_ready_validator(source_single_server_object):
+    if source_single_server_object.user_visible_state != 'Ready':
+        raise CLIError('The source server should be in {} state for migration. Instead it was in {} state. Please start the server and try again.'
+                       .format('Ready', source_single_server_object.user_visible_state))
+    
+
 def mysql_retention_validator(backup_retention, sku_info, tier):
     if backup_retention is not None:
         backup_retention_range = get_mysql_backup_retention(sku_info, tier)
@@ -169,6 +175,12 @@ def mysql_storage_validator(storage_gb, sku_info, tier, instance):
         if not max(min_mysql_storage, storage_sizes[0]) <= storage_gb <= storage_sizes[1]:
             raise CLIError('Incorrect value for --storage-size. Allowed values(in GiB) : Integers ranging {}-{}'
                            .format(max(min_mysql_storage, storage_sizes[0]), storage_sizes[1]))
+
+
+def mysql_import_storage_validator(source_storage_mb, user_storage_gb):
+    if source_storage_mb > user_storage_gb * 1024:
+        raise CLIError('The target server storage {} GiB is smaller than the source server storage {} GiB.'
+                       .format(user_storage_gb, source_storage_mb // 1024))
 
 
 def mysql_georedundant_backup_validator(geo_redundant_backup, geo_paired_regions):
@@ -202,6 +214,20 @@ def _mysql_version_validator(version, sku_info, tier, instance):
         versions = get_mysql_versions(sku_info, tier)
         if version not in versions:
             raise CLIError('Incorrect value for --version. Allowed values : {}'.format(versions))
+
+
+def mysql_import_version_validator(source_single_server_object, target_version):
+    allowed_single_server_source_version = ['5.7', '8.0']
+    source_single_server_version = source_single_server_object.version
+    if source_single_server_version not in allowed_single_server_source_version:
+        raise CLIError('The source single server version is {}. Only 5.7 and 8.0 servers can be migrated.'
+                       .format(source_single_server_version))
+    if source_single_server_version == '8.0':
+        source_single_server_version = '8.0.21'
+    if source_single_server_version != target_version:
+        raise CLIError('The source server version {} is different from the target server version {}. '
+                       'Target server must have the same version as the source server.'
+                       .format(source_single_server_object.version, target_version))
 
 
 def mysql_auto_grow_validator(auto_grow, replication_role, high_availability, instance):

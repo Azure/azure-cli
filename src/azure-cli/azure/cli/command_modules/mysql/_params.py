@@ -257,7 +257,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
     data_source_arg_type = CLIArgumentType(
         options_list=['--data-source'],
         help='Data source for importing to Flexible Server. Based on the data source type provide the data source as mentioned below. '
-             'e.g., mysql_single: The name or resource ID of the azure MySQL single server. '
+             'e.g., mysql_single: The name or resource ID of the Azure MySQL single server. '
     )
 
     mode_arg_type = CLIArgumentType(
