@@ -58,8 +58,8 @@ class KeyVaultAuthBase(AuthBase):
 
     # for backwards compatibility we need to support callbacks which don't accept the scheme
     def _auth_callback_compat(self, server, resource, scope, scheme):
-        args = [i for i in inspect.signature(self._user_callback).parameters if i not in {'args', 'kwargs'}]
-        return self._user_callback(server, resource, scope) if len(args) == 3 \
+        return self._user_callback(server, resource, scope) \
+            if len(inspect.getfullargspec(self._user_callback).args) == 3 \
             else self._user_callback(server, resource, scope, scheme)
 
     def __call__(self, request):
