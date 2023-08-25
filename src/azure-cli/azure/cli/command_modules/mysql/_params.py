@@ -250,7 +250,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
     data_source_type_arg_type = CLIArgumentType(
         options_list=['--data-source-type'],
-        arg_type=get_enum_type(['mysql_single']),
+        arg_type=get_enum_type(['mysql_single', 'azure_blob']),
         help='Data source type. e.g., mysql_single: Azure Database for MySQL Servers. '
     )
 

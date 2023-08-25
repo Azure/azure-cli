@@ -526,7 +526,6 @@ def flexible_server_import_create(cmd, client,
 
     # Process parameters
     server_name = server_name.lower()
-
     # MySQL changed MemoryOptimized tier to BusinessCritical (only in client tool not in list-skus return)
     if tier == 'BusinessCritical':
         tier = 'MemoryOptimized'

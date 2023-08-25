@@ -137,7 +137,7 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
 
 
 def _mysql_import_data_source_type_validator(data_source_type):
-    allowed_values = ['mysql_single']
+    allowed_values = ['mysql_single', 'azure_blob']
     if data_source_type is not None and data_source_type.lower() not in allowed_values:
         raise InvalidArgumentValueError('Incorrect value for --data-source-type. Allowed values : {}'
                                         .format(allowed_values))
