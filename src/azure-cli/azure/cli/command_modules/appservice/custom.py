@@ -4255,7 +4255,8 @@ def add_hc(cmd, name, resource_group_name, namespace, hybrid_connection, slot=No
 
     if not has_default_sender_key:
         rights = ["Send"]
-        args = {"resource_group": hy_co_resource_group, "namespace_name": namespace, "hybrid_connection_name": hybrid_connection, "name": "defaultSender", "rights": rights}
+        args = {"resource_group": hy_co_resource_group, "namespace_name": namespace,
+                "hybrid_connection_name": hybrid_connection, "name": "defaultSender", "rights": rights}
         HycoAuthoCreate(cli_ctx=cmd.cli_ctx)(command_args=args)
     hy_co_keys = HycoAuthoKeysList(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": hy_co_resource_group,
                                                                       "namespace_name": namespace,
@@ -4341,7 +4342,8 @@ def set_hc_key(cmd, plan, resource_group_name, namespace, hybrid_connection, key
 
     if not has_default_sender_key:
         rights = ["Send"]
-        args = {"resource_group": relay_resource_group, "namespace_name": namespace, "hybrid_connection_name": hybrid_connection, "name": "defaultSender", "rights": rights}
+        args = {"resource_group": relay_resource_group, "namespace_name": namespace,
+                "hybrid_connection_name": hybrid_connection, "name": "defaultSender", "rights": rights}
         HycoAuthoCreate(cli_ctx=cmd.cli_ctx)(command_args=args)
 
     hy_co_keys = HycoAuthoKeysList(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": relay_resource_group,
