@@ -374,8 +374,8 @@ jobs:
       docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && sleep 5"
     displayName: 'Bash Script'
 
-- job: BuildExtraDockerImage
-  displayName: Build Extra Docker Image
+- job: BuildAzureDockerImage
+  displayName: Build Azure Docker Image
   dependsOn: BuildRpmPackageMariner
   strategy:
     matrix:
@@ -383,7 +383,7 @@ jobs:
         Azure Linux ${{ arch.name }}:
           pool: ${{ arch.pool }}
           artifactName: docker-azure-${{ arch.value }}
-          dockerfile: Dockerfile.azure
+          dockerfile: azure.dockerfile
           packageArtifactName: rpm-mariner2.0-${{ arch.value }}
   pool:
     name: $(pool)
@@ -415,10 +415,10 @@ jobs:
         TargetPath: $(Build.ArtifactStagingDirectory)
         ArtifactName: $(artifactName)
 
-- job: TestExtraDockerImage
-  displayName: Test Extra Docker Image
+- job: TestAzureDockerImage
+  displayName: Test Azure Docker Image
   dependsOn:
-    - BuildExtraDockerImage
+    - BuildAzureDockerImage
     - ExtractMetadata
   strategy:
     matrix:
