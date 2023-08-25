@@ -760,5 +760,5 @@ type: command
 short-summary: Create an export backup for a given server with specified backup name.
 examples:
   - name: Create a export backup for 'testsvr' with backup name 'testbackup'.
-    text: az mysql flexible-server export create -g testgroup -n testsvr --backup-name testbackup
+    text: az mysql flexible-server export create --% -g testgroup -n testsvr -b testbackup -u destsasuri
 """
