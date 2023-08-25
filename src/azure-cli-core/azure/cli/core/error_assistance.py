@@ -18,7 +18,7 @@ def error_assistance(command=None):
 
     prompt = "Azure CLI Command: '" + command + "'\n This isn't working, why not?"
     messages = [
-        {"role": "system", "content": "You are a helpful assistant that provides concise explanations about the Azure CLI error provided and provides a remedied command."},
+        {"role": "system", "content": "You receive an Azure CLI command that contains a syntax or command structure error. Find out what the error is and correct it, giving back a corrected command Azure CLI command to the user."},
         {"role": "user", "content": prompt}
     ]
 
@@ -47,7 +47,8 @@ def error_assistance(command=None):
         deployment_id=os.getenv('DEPLOYMENT'),
         messages=messages,
         functions=functions,
-        function_call={"name": "error_response"}
+        function_call={"name": "error_response"},
+        temperature=0
     )
 
     return response
