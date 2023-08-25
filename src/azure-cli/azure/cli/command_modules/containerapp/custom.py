@@ -33,7 +33,7 @@ from .containerapp_job_decorator import ContainerAppJobDecorator, ContainerAppJo
 from .containerapp_env_decorator import ContainerAppEnvDecorator, ContainerAppEnvCreateDecorator, ContainerAppEnvUpdateDecorator
 from .containerapp_auth_decorator import ContainerAppAuthDecorator
 from .containerapp_decorator import ContainerAppCreateDecorator, BaseContainerAppDecorator
-from ._client_factory import handle_raw_exception, handle_non_404_exception
+from ._client_factory import handle_raw_exception, handle_non_resource_not_found_exception
 from ._clients import (
     ManagedEnvironmentClient,
     ContainerAppClient,
@@ -3661,7 +3661,7 @@ def get_private_certificates(cmd, name, resource_group_name, certificate_name=No
             r = ManagedEnvironmentClient.show_certificate(cmd, resource_group_name, name, certificate_name)
             return [r] if certificate_matches(r, location, thumbprint) else []
         except Exception as e:
-            handle_non_404_exception(e)
+            handle_non_resource_not_found_exception(e)
             return []
     else:
         try:
@@ -3677,7 +3677,7 @@ def get_managed_certificates(cmd, name, resource_group_name, certificate_name=No
             r = ManagedEnvironmentClient.show_managed_certificate(cmd, resource_group_name, name, certificate_name)
             return [r] if certificate_location_matches(r, location) else []
         except Exception as e:
-            handle_non_404_exception(e)
+            handle_non_resource_not_found_exception(e)
             return []
     else:
         try:
@@ -3983,16 +3983,16 @@ def create_or_update_storage(cmd, storage_name, resource_group_name, name, azure
     storage_envelope["properties"]["azureFile"] = storage_def
 
     try:
-        return StorageClient.create_or_update(cmd, resource_group_name, name, storage_name, storage_envelope, no_wait)
+        return StorageClient.create_or_update(cmd, resource_group_name, name, storage_name, storage_envelope)
     except CLIError as e:
         handle_raw_exception(e)
 
 
-def remove_storage(cmd, storage_name, name, resource_group_name, no_wait=False):
+def remove_storage(cmd, storage_name, name, resource_group_name):
     _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
 
     try:
-        return StorageClient.delete(cmd, resource_group_name, name, storage_name, no_wait)
+        return StorageClient.delete(cmd, resource_group_name, name, storage_name)
     except CLIError as e:
         handle_raw_exception(e)
 

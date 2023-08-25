@@ -42,37 +42,6 @@ class PollingAnimation():
         sys.stderr.write("\r\033[K")
 
 
-def poll(cmd, request_url, poll_if_status):  # pylint: disable=inconsistent-return-statements
-    try:
-        start = time.time()
-        end = time.time() + POLLING_TIMEOUT
-        animation = PollingAnimation()
-
-        animation.tick()
-        r = send_raw_request(cmd.cli_ctx, "GET", request_url)
-
-        while r.status_code in [200, 201] and start < end:
-            time.sleep(POLLING_SECONDS)
-            animation.tick()
-
-            r = send_raw_request(cmd.cli_ctx, "GET", request_url)
-            r2 = r.json()
-
-            if "properties" not in r2 or "provisioningState" not in r2["properties"] or r2["properties"]["provisioningState"].lower() in ["succeeded", "failed", "canceled"]:
-                break
-            start = time.time()
-
-        animation.flush()
-        return r.json()
-    except Exception as e:  # pylint: disable=broad-except
-        animation.flush()
-
-        delete_statuses = ["scheduledfordelete", "cancelled"]
-
-        if poll_if_status not in delete_statuses:  # Catch "not found" errors if polling for delete
-            raise e
-
-
 def poll_status(cmd, request_url):  # pylint: disable=inconsistent-return-statements
     from azure.core.exceptions import HttpResponseError
     from ._utils import safe_get
@@ -1138,7 +1107,7 @@ class GitHubActionClient():
         return r.json()
 
     @classmethod
-    def delete(cls, cmd, resource_group_name, name, headers, no_wait=False):
+    def delete(cls, cmd, resource_group_name, name, headers):
         management_hostname = cmd.cli_ctx.cloud.endpoints.resource_manager
         sub_id = get_subscription_id(cmd.cli_ctx)
         url_fmt = "{}/subscriptions/{}/resourceGroups/{}/providers/Microsoft.App/containerApps/{}/sourcecontrols/current?api-version={}"
@@ -1185,7 +1154,7 @@ class DaprComponentClient():
     api_version = CURRENT_API_VERSION
 
     @classmethod
-    def create_or_update(cls, cmd, resource_group_name, environment_name, name, dapr_component_envelope, no_wait=False):
+    def create_or_update(cls, cmd, resource_group_name, environment_name, name, dapr_component_envelope):
 
         management_hostname = cmd.cli_ctx.cloud.endpoints.resource_manager
         sub_id = get_subscription_id(cmd.cli_ctx)
@@ -1203,7 +1172,7 @@ class DaprComponentClient():
         return r.json()
 
     @classmethod
-    def delete(cls, cmd, resource_group_name, environment_name, name, no_wait=False):
+    def delete(cls, cmd, resource_group_name, environment_name, name):
         management_hostname = cmd.cli_ctx.cloud.endpoints.resource_manager
         sub_id = get_subscription_id(cmd.cli_ctx)
         url_fmt = "{}/subscriptions/{}/resourceGroups/{}/providers/Microsoft.App/managedEnvironments/{}/daprComponents/{}?api-version={}"
@@ -1268,7 +1237,7 @@ class StorageClient():
     api_version = CURRENT_API_VERSION
 
     @classmethod
-    def create_or_update(cls, cmd, resource_group_name, env_name, name, storage_envelope, no_wait=False):
+    def create_or_update(cls, cmd, resource_group_name, env_name, name, storage_envelope):
         management_hostname = cmd.cli_ctx.cloud.endpoints.resource_manager
         sub_id = get_subscription_id(cmd.cli_ctx)
         url_fmt = "{}/subscriptions/{}/resourceGroups/{}/providers/Microsoft.App/managedEnvironments/{}/storages/{}?api-version={}"
@@ -1285,7 +1254,7 @@ class StorageClient():
         return r.json()
 
     @classmethod
-    def delete(cls, cmd, resource_group_name, env_name, name, no_wait=False):
+    def delete(cls, cmd, resource_group_name, env_name, name):
         management_hostname = cmd.cli_ctx.cloud.endpoints.resource_manager
         sub_id = get_subscription_id(cmd.cli_ctx)
         url_fmt = "{}/subscriptions/{}/resourceGroups/{}/providers/Microsoft.App/managedEnvironments/{}/storages/{}?api-version={}"
@@ -1352,8 +1321,7 @@ class AuthClient():
     api_version = CURRENT_API_VERSION
 
     @classmethod
-    def create_or_update(cls, cmd, resource_group_name, container_app_name, auth_config_name, auth_config_envelope,
-                         no_wait=False):
+    def create_or_update(cls, cmd, resource_group_name, container_app_name, auth_config_name, auth_config_envelope):
         management_hostname = cmd.cli_ctx.cloud.endpoints.resource_manager
         sub_id = get_subscription_id(cmd.cli_ctx)
         request_url = f"{management_hostname}subscriptions/{sub_id}/resourceGroups/{resource_group_name}/providers/Microsoft.App/containerApps/{container_app_name}/authConfigs/{auth_config_name}?api-version={cls.api_version}"
@@ -1368,7 +1336,7 @@ class AuthClient():
         return r.json()
 
     @classmethod
-    def delete(cls, cmd, resource_group_name, container_app_name, auth_config_name, no_wait=False):
+    def delete(cls, cmd, resource_group_name, container_app_name, auth_config_name):
         management_hostname = cmd.cli_ctx.cloud.endpoints.resource_manager
         sub_id = get_subscription_id(cmd.cli_ctx)
         request_url = f"{management_hostname}subscriptions/{sub_id}/resourceGroups/{resource_group_name}/providers/Microsoft.App/containerApps/{container_app_name}/authConfigs/{auth_config_name}?api-version={cls.api_version}"

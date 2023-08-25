@@ -22,7 +22,7 @@ from msrest.exceptions import DeserializationError
 
 from .base_resource import BaseResource
 from ._clients import ManagedEnvironmentClient
-from ._client_factory import handle_raw_exception, handle_non_404_exception
+from ._client_factory import handle_raw_exception, handle_non_404_status_code_exception
 
 from ._models import (
     Ingress as IngressModel,
@@ -308,7 +308,7 @@ class ContainerAppCreateDecorator(BaseContainerAppDecorator):
         try:
             managed_env_info = self.get_environment_client().show(cmd=self.cmd, resource_group_name=managed_env_rg, name=managed_env_name)
         except Exception as e:
-            handle_non_404_exception(e)
+            handle_non_404_status_code_exception(e)
 
         if not managed_env_info:
             raise ValidationError("The environment '{}' does not exist. Specify a valid environment".format(self.get_argument_managed_env()))
@@ -599,7 +599,7 @@ class ContainerAppCreateDecorator(BaseContainerAppDecorator):
         try:
             env_info = self.get_environment_client().show(cmd=self.cmd, resource_group_name=env_rg, name=env_name)
         except Exception as e:
-            handle_non_404_exception(e)
+            handle_non_404_status_code_exception(e)
 
         if not env_info:
             raise ValidationError("The environment '{}' in resource group '{}' was not found".format(env_name, env_rg))
