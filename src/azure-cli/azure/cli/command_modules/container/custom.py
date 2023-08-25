@@ -863,19 +863,22 @@ def _stream_logs(client, resource_group_name, name, container_name, restart_poli
     lastOutputLines = 0
     while True:
         log = client.list_logs(resource_group_name, name, container_name)
-        lines = log.content.split('\n')
-        currentOutputLines = len(lines)
+        if log and log.content is not None:
+            lines = log.content.split('\n')
+            currentOutputLines = len(lines)
 
-        # Should only happen when the container restarts.
-        if currentOutputLines < lastOutputLines and restart_policy != 'Never':
-            print("Warning: you're having '--restart-policy={}'; the container '{}' was just restarted; the tail of the current log might be missing. Exiting...".format(restart_policy, container_name))
-            break
+            # Should only happen when the container restarts.
+            if currentOutputLines < lastOutputLines and restart_policy != 'Never':
+                print("Warning: you're having '--restart-policy={}'; the container '{}' was just restarted; the tail of the current log might be missing. Exiting...".format(restart_policy, container_name))
+                break
 
-        _move_console_cursor_up(lastOutputLines)
-        print(log.content)
+            _move_console_cursor_up(lastOutputLines)
+            print(log.content)
 
-        lastOutputLines = currentOutputLines
-        time.sleep(2)
+            lastOutputLines = currentOutputLines
+            time.sleep(2)
+        else:
+            print("Info: No log content retrieved.")
 
 
 def _stream_container_events_and_logs(container_group_client, container_client, resource_group_name, name, container_name):
