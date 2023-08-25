@@ -16,6 +16,7 @@ from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
 from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.command_modules.mysql.random.generate import generate_username
 from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
 from azure.cli.core.local_context import ALL
 from azure.mgmt.rdbms import mysql_flexibleservers
@@ -452,6 +453,7 @@ def flexible_server_create(cmd, client,
 def flexible_server_import_create(cmd, client,
                                   resource_group_name, server_name,
                                   data_source_type, data_source, mode=None,
+                                  data_source_sas_token=None, data_source_backup_dir=None,
                                   location=None, backup_retention=None,
                                   sku_name=None, tier=None,
                                   storage_gb=None, administrator_login=None,
@@ -499,6 +501,21 @@ def flexible_server_import_create(cmd, client,
                                                                                                                         public_access,
                                                                                                                         administrator_login,
                                                                                                                         administrator_login_password)
+    elif data_source_type.lower() == 'azure_blob':
+        create_mode = 'Create'
+        (tier, sku_name, storage_gb, auto_grow, backup_retention,
+         geo_redundant_backup, version, administrator_login) = get_default_flex_configuration(tier,
+                                                                                              sku_name,
+                                                                                              storage_gb,
+                                                                                              auto_grow,
+                                                                                              backup_retention,
+                                                                                              geo_redundant_backup,
+                                                                                              version,
+                                                                                              administrator_login)
+        import_source_properties = mysql_flexibleservers.models.ImportSourceProperties(storage_type=data_source_type,
+                                                                                       sas_token=data_source_sas_token,
+                                                                                       storage_url=data_source,
+                                                                                       data_dir_path=data_source_backup_dir)
 
     db_context = DbContext(
         cmd=cmd, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
@@ -600,7 +617,8 @@ def flexible_server_import_create(cmd, client,
                                           high_availability=high_availability,
                                           availability_zone=zone,
                                           data_encryption=data_encryption,
-                                          source_server_id=source_server_id)
+                                          source_server_id=source_server_id,
+                                          import_source_properties=import_source_properties)
 
     # Adding firewall rule
     if start_ip != -1 and end_ip != -1:
@@ -1285,7 +1303,7 @@ def _create_server(db_context, cmd, resource_group_name, server_name, tags, loca
 
 
 def _import_create_server(db_context, cmd, resource_group_name, server_name, create_mode, source_server_id, tags, location, sku, administrator_login, administrator_login_password,
-                          storage, backup, network, version, high_availability, availability_zone, identity, data_encryption):
+                          storage, backup, network, version, high_availability, availability_zone, identity, data_encryption, import_source_properties):
     logging_name, server_client = db_context.logging_name, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
 
@@ -1308,7 +1326,8 @@ def _import_create_server(db_context, cmd, resource_group_name, server_name, cre
         availability_zone=availability_zone,
         data_encryption=data_encryption,
         source_server_resource_id=source_server_id,
-        create_mode=create_mode)
+        create_mode=create_mode,
+        import_source_properties=import_source_properties)
 
     return resolve_poller(
         server_client.begin_create(resource_group_name, server_name, parameters), cmd.cli_ctx,
@@ -1703,6 +1722,26 @@ def flexible_gtid_reset(client, resource_group_name, server_name, gtid_set, no_w
         gtid_set=gtid_set
     )
     return sdk_no_wait(no_wait, client.begin_reset_gtid, resource_group_name, server_name, parameters)
+
+
+def get_default_flex_configuration(tier, sku_name, storage_gb, version, auto_grow, backup_retention, geo_redundant_backup, administrator_login):
+    if not tier:
+        tier = 'Burstable'
+    if not sku_name:
+        sku_name = 'Standard_B1ms'
+    if not storage_gb:
+        storage_gb = 32
+    if not version:
+        version = '5.7' 
+    if not auto_grow:
+        auto_grow = 'Enabled'
+    if not backup_retention:
+        backup_retention = 7
+    if not geo_redundant_backup:
+        geo_redundant_backup = 'Disabled'
+    if not administrator_login:
+        administrator_login = generate_username()
+    return tier, sku_name, storage_gb, version, auto_grow, backup_retention, geo_redundant_backup, administrator_login
 
 
 def map_single_server_configuration(single_server_client, source_server_id, tier, sku_name, location, storage_gb, auto_grow, backup_retention,
