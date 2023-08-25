@@ -38,9 +38,9 @@ def load_arguments_eh(self, _):
         c.argument('capacity', type=int, help='Capacity for Sku')
         c.argument('is_auto_inflate_enabled', options_list=['--enable-auto-inflate'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether AutoInflate is enabled for eventhub namespace.')
         c.argument('maximum_throughput_units', type=int, help='Upper limit of throughput units when AutoInflate is enabled, vaule should be within 0 to 20 throughput units. ( 0 if AutoInflateEnabled = true)')
-        c.argument('zone_redundant', options_list=['--zone-redundant'], arg_type=get_three_state_flag(), is_preview=True,
+        c.argument('zone_redundant', options_list=['--zone-redundant'], is_preview=True, arg_type=get_three_state_flag(),
                    help='Enabling this property creates a Standard EventHubs Namespace in regions supported availability zones')
-        c.argument('disable_local_auth', options_list=['--disable-local-auth'], arg_type=get_three_state_flag(), is_preview=True,
+        c.argument('disable_local_auth', options_list=['--disable-local-auth'], is_preview=True, arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether SAS authentication is enabled/disabled for the Event Hubs')
         c.argument('mi_system_assigned', arg_group='Managed Identity',
                    arg_type=get_three_state_flag(),
@@ -149,8 +149,8 @@ def load_arguments_eh(self, _):
     for scope in ['eventhubs namespace encryption add', 'eventhubs namespace encryption remove']:
         with self.argument_context(scope, resource_type=ResourceType.MGMT_EVENTHUB) as c:
             c.argument('encryption_config', action=AlertAddEncryption, nargs='+', help='List of KeyVaultProperties objects.')
-            c.argument('require_infrastructure_encryption', options_list=['--infra-encryption'],
-                       arg_type=get_three_state_flag(), is_preview=True,
+            c.argument('require_infrastructure_encryption', options_list=['--infra-encryption'], is_preview=True,
+                       arg_type=get_three_state_flag(),
                        help='A boolean value that indicates whether Infrastructure Encryption (Double Encryption) is enabled/disabled')
 
 # Application Group

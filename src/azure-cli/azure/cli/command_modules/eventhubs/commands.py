@@ -59,8 +59,7 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_network_rule_set_ip_rule')
         g.custom_command('remove', 'remove_network_rule_set_ip_rule')
 
-    with self.command_group('eventhubs namespace network-rule-set virtual-network-rule',
-                            custom_command_type=eh_network_custom,
+    with self.command_group('eventhubs namespace network-rule-set virtual-network-rule', custom_command_type=eh_network_custom,
                             is_preview=True) as g:
         g.custom_command('add', 'add_virtual_network_rule')
         g.custom_command('remove', 'remove_virtual_network_rule')
