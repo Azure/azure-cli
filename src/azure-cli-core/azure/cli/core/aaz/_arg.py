@@ -12,7 +12,7 @@ from knack.experimental import ExperimentalItem
 from knack.util import status_tag_messages
 
 from ._arg_action import AAZSimpleTypeArgAction, AAZObjectArgAction, AAZDictArgAction, AAZFreeFormDictArgAction, \
-    AAZListArgAction, AAZGenericUpdateAction, AAZGenericUpdateForceStringAction
+    AAZListArgAction, AAZGenericUpdateAction, AAZGenericUpdateForceStringAction, AAZRawListArgAction
 from ._base import AAZBaseType, AAZUndefined
 from ._field_type import AAZObjectType, AAZStrType, AAZIntType, AAZBoolType, AAZFloatType, AAZListType, AAZDictType, \
     AAZSimpleType, AAZFreeFormDictType
@@ -417,6 +417,36 @@ class AAZFreeFormDictArg(AAZBaseArg, AAZFreeFormDictType):
     @property
     def _type_in_help(self):
         return "Dict<String, Any>"
+
+
+class AAZRawListArg(AAZCompoundTypeArg, AAZListType):
+
+    def __init__(self, fmt=None, singular_options=None, **kwargs):
+        fmt = fmt or AAZListArgFormat()
+        super().__init__(fmt=fmt, **kwargs)
+        self.singular_options = singular_options
+
+    def to_cmd_arg(self, name, **kwargs):
+        arg = super().to_cmd_arg(name, **kwargs)
+        if self.singular_options:
+            assert arg.options_list
+            arg.options_list.extend(self.singular_options)  # support to parse singular options
+
+        if self._blank != AAZUndefined:
+            arg.nargs = '*'
+        else:
+            arg.nargs = '+'
+        return arg
+
+    def _build_cmd_action(self):
+        class Action(AAZRawListArgAction):
+            _schema = self  # bind action class with current schema
+
+        return Action
+
+    @property
+    def _type_in_help(self):
+        return f"List<{self.Element._type_in_help}>"
 
 
 class AAZListArg(AAZCompoundTypeArg, AAZListType):

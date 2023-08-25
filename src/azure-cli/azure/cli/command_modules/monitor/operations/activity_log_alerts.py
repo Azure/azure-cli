@@ -2,8 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
-from azure.cli.core.aaz import has_value, AAZStrArg, AAZListArg, AAZBoolArg
+# pylint: disable=protected-access
+from azure.cli.core.aaz import has_value, AAZStrArg, AAZListArg, AAZBoolArg, AAZRawListArg
 from azure.cli.core.azclierror import ValidationError
 from ..aaz.latest.monitor.activity_log.alert import Create as _ActivityLogAlertCreate, \
     Update as _ActivityLogAlertUpdate
@@ -20,8 +20,8 @@ def _get_alert_settings_for_alert(cmd, resource_group_name, activity_log_alert_n
     except HttpResponseError as ex:
         if ex.status_code == 404:
             if throw_if_missing:
-                raise ValidationError('Can\'t find activity log alert {} in resource group {}.'.format(activity_log_alert_name,
-                                                                                                resource_group_name))
+                raise ValidationError('Can\'t find activity log alert {} in resource group {}.'.format(
+                    activity_log_alert_name, resource_group_name))
             return None
         raise ValidationError(ex.message)
 
@@ -42,20 +42,11 @@ def _normalize_condition_for_alert(condition_instance):
 
 
 def process_condition_parameter_for_alert(args):
-    try:
-        expression = args.condition.to_serialized_data()
-        if expression is None:
-            return
-    except AttributeError:
+    if not has_value(args.condition):
         return
-
+    expression = args.condition.to_serialized_data()
     error = 'incorrect usage: --condition requires an expression in the form of FIELD=VALUE[ and FIELD=VALUE...]'
-    print(args.condition)
-    if not expression:
-        raise ValidationError(error)
-    conditions = dict(_normalize_condition_for_alert(expression[i]) for i in range(0, len(expression), 1))
-    setattr(args, 'all_of', list(conditions.values()))
-    return
+
     if len(expression) == 1:
         expression = [each.strip() for each in expression[0].split(' ')]
     elif isinstance(expression, list):
@@ -63,7 +54,7 @@ def process_condition_parameter_for_alert(args):
     else:
         raise ValidationError(error)
 
-    if not expression or not len(expression) % 2:
+    if len(expression) == 0 or not len(expression) % 2:
         raise ValidationError(error)
 
     # This is a temporary approach built on the assumption that there is only AND operators. Eventually, a proper
@@ -76,22 +67,21 @@ def process_condition_parameter_for_alert(args):
 
     # Pick the strings at odd position and convert them into condition leaf.
     conditions = dict(_normalize_condition_for_alert(expression[i]) for i in range(0, len(expression), 2))
-    setattr(args, 'all_of', list(conditions.values()))
+    args.all_of = list(conditions.values())
 
 
 def process_webhook_properties(args):
-    if not isinstance(args.webhook_properties_list, list):
-        return
-
     result = {}
+    if not has_value(args.webhook_properties_list):
+        return result
     for each in args.webhook_properties_list:
+
         if has_value(each):
             if '=' in each.to_serialized_data():
                 key, value = each.to_serialized_data().split('=', 1)
             else:
                 key, value = each, ''
             result[key] = value
-
     return result
 
 
@@ -107,8 +97,9 @@ class ActivityLogAlertCreate(_ActivityLogAlertCreate):
         args_schema.disable = AAZBoolArg(
             options=["--disable"],
             help="Disable the activity log alert rule after it is created.",
+            default=False,
         )
-        args_schema.condition = AAZListArg(
+        args_schema.condition = AAZRawListArg(
             options=["--condition", "-c"],
             help="The condition that will cause the alert rule to activate. "
                  "The format is FIELD=VALUE[ and FIELD=VALUE...]",
@@ -122,7 +113,7 @@ class ActivityLogAlertCreate(_ActivityLogAlertCreate):
         )
         args_schema.action_group_id.Element = AAZStrArg()
 
-        args_schema.webhook_properties_list = AAZListArg(
+        args_schema.webhook_properties_list = AAZRawListArg(
             options=['--webhook-properties', '-w'],
             help="Space-separated webhook properties in 'key[=value]' format. "
                  "These properties are associated with the action groups added in this command.",
@@ -133,26 +124,32 @@ class ActivityLogAlertCreate(_ActivityLogAlertCreate):
 
     def pre_operations(self):
         args = self.ctx.args
+        args.location = "Global"
         process_condition_parameter_for_alert(args)
         webhook_properties = process_webhook_properties(args)
         if not has_value(args.scopes):
             from msrestazure.tools import resource_id
             from azure.cli.core.commands.client_factory import get_subscription_id
-            args.scopes = [resource_id(subscription=get_subscription_id(self.cli_ctx),
-                                       resource_group=self.resource_group)]
+            # args.scopes = [resource_id(subscription=get_subscription_id(self.cli_ctx),
+            #                            resource_group=args.resource_group)]
+            # service check
+            args.scopes = [resource_id(subscription=get_subscription_id(self.cli_ctx))]
         if _get_alert_settings_for_alert(self, args.resource_group, args.activity_log_alert_name,
                                          throw_if_missing=False):
             raise ValidationError(
                 'The activity log alert {} already exists in resource group {}.'.format(args.activity_log_alert_name,
                                                                                         args.resource_group))
-        if not has_value(args.all_off):
-            args.all_off = [{
+        if not has_value(args.all_of):
+            args.all_of = [{
                 "field": "category",
                 "equals": "ServiceHealth",
             }]
         # Add action groups
-        action_group_rids = _normalize_names(self.cli_ctx, args.action_group_id.to_serialized_data(),
-                                             args.resource_group, 'microsoft.insights', 'actionGroups')
+        action_group_rids = set()
+        if has_value(args.action_group_id):
+            action_group_rids = _normalize_names_instance(self.cli_ctx, args.action_group_id.to_serialized_data(),
+                                                          args.resource_group.to_serialized_data(),
+                                                          'microsoft.insights', 'actionGroups')
 
         args.action_groups = []
         for i in action_group_rids:
@@ -169,11 +166,10 @@ class ActivityLogAlertUpdate(_ActivityLogAlertUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.enabled._registered = False
-        args_schema.location._registered = False
         args_schema.all_of._registered = False
         args_schema.action_groups._registered = False
-        args_schema.condition = AAZListArg(
+        args_schema.scopes._registered = False
+        args_schema.condition = AAZRawListArg(
             options=["--condition", "-c"],
             help="The condition that will cause the alert rule to activate. "
                  "The format is FIELD=VALUE[ and FIELD=VALUE...]",
@@ -204,7 +200,7 @@ class ActivityLogAlertActionGroupAdd(_ActivityLogAlertUpdate):
         )
         args_schema.action_group_ids.Element = AAZStrArg()
 
-        args_schema.webhook_properties_list = AAZListArg(
+        args_schema.webhook_properties_list = AAZRawListArg(
             options=['--webhook-properties', '-w'],
             help="Space-separated webhook properties in 'key[=value]' format. "
                  "These properties are associated with the action groups added in this command.",
@@ -214,43 +210,53 @@ class ActivityLogAlertActionGroupAdd(_ActivityLogAlertUpdate):
         args_schema.reset = AAZBoolArg(
             options=["--reset"],
             help="Remove all the existing action groups before add new conditions.",
-            default=True
+            default=False
         )
-        args_schema.strict = AAZStrArg(
+        args_schema.strict = AAZBoolArg(
             options=["--strict"],
             help="Fails the command if an action group to be added will change existing webhook properties.",
+            default=False,
         )
         return args_schema
 
-    def pre_instance_create(self):
+    def pre_instance_update(self, instance):
         args = self.ctx.args
-        instance = self.ctx.vars.instance
         webhook_properties = process_webhook_properties(args)
 
         # normalize the action group ids
         rids = _normalize_names(self.cli_ctx, args.action_group_ids.to_serialized_data(), args.resource_group,
                                 'microsoft.insights', 'actionGroups')
-        action_groups = []
+
         if has_value(args.reset) and args.reset:
+            action_groups = []
             for rid in rids:
                 action_groups.append({
-                    "action_group_id": rid,
+                    "actionGroupId": rid,
                     "webhook_properties_raw": webhook_properties
                 })
+            instance.properties.actions.actionGroups = action_groups
         else:
-            action_groups = dict((each.action_group_id, each) for each in instance.properties.actions.action_groups)
-            for rid in rids:
-                if rid in action_groups and webhook_properties != action_groups[rid].webhook_properties \
-                        and args.strict:
-                    raise ValueError(
-                        'Fails to override webhook properties of action group {} in strict mode.'.format(rid))
-
-                action_groups[rid] = {
-                    "action_group_id": rid,
-                    "webhook_properties_raw": webhook_properties
+            action_groups_map = {}
+            for item in instance.properties.actions.actionGroups:
+                ac_id = item.actionGroupId.to_serialized_data()
+                # service returned action group id can be uppercase
+                action_groups_map[ac_id.lower()] = {
+                    "actionGroupId": ac_id,
+                    "webhookProperties": dict(item.webhookProperties)
                 }
-            action_groups = list(action_groups.values())
-        instance.properties.actions.action_groups = action_groups
+
+            for rid in rids:
+                if rid.lower() in action_groups_map.keys() and args.strict:
+                    if webhook_properties != action_groups_map[rid.lower()]["webhookProperties"]:
+                        raise ValueError(
+                            'Fails to override webhook properties of action group {} in strict mode.'.format(rid))
+
+                action_groups_map[rid.lower()] = {
+                    "actionGroupId": rid,
+                    "webhookProperties": webhook_properties
+                }
+            action_groups = list(action_groups_map.values())
+            instance.properties.actions.actionGroups = action_groups
 
 
 class ActivityLogAlertActionGroupRemove(_ActivityLogAlertUpdate):
@@ -258,10 +264,6 @@ class ActivityLogAlertActionGroupRemove(_ActivityLogAlertUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.action_group_index._registered = False
-        args_schema.action_group_id._registered = False
-        args_schema.webhook_properties_raw._registered = False
-
         args_schema.action_group_ids = AAZListArg(
             options=["--action-group", "-a"],
             help="The names or the resource ids of the action groups to be added.",
@@ -269,18 +271,26 @@ class ActivityLogAlertActionGroupRemove(_ActivityLogAlertUpdate):
         args_schema.action_group_ids.Element = AAZStrArg()
         return args_schema
 
-    def pre_instance_create(self):
+    def pre_instance_update(self, instance):
         args = self.ctx.args
-        instance = self.ctx.vars.instance
 
         if len(args.action_group_ids) == 1 and args.action_group_ids[0] == '*':
-            instance.properties.actions.action_groups = []
+            instance.properties.actions.actionGroups = []
         else:
             # normalize the action group ids
             rids = _normalize_names(self.cli_ctx, args.action_group_ids.to_serialized_data(), args.resource_group,
-                                    'microsoft.insights','actionGroups')
-            action_groups = [each for each in instance.properties.actions.action_groups if each.action_group_id not in rids]
-            instance.properties.actions.action_groups = action_groups
+                                    'microsoft.insights', 'actionGroups')
+            action_groups = []
+            for item in instance.properties.actions.actionGroups:
+                ac_id = item.actionGroupId.to_serialized_data()
+                found = False
+                for rid in rids:
+                    if ac_id.lower() == rid.lower():  # service returned action group id can be uppercase
+                        found = True
+                        break
+                if not found:
+                    action_groups.append(item)
+            instance.properties.actions.actionGroups = action_groups
 
 
 class ActivityLogAlertScopeAdd(_ActivityLogAlertUpdate):
@@ -300,10 +310,9 @@ class ActivityLogAlertScopeAdd(_ActivityLogAlertUpdate):
         )
         return args_schema
 
-    def pre_instance_create(self):
+    def pre_instance_update(self, instance):
         args = self.ctx.args
-        instance = self.ctx.vars.instance
-        new_scopes = set() if args.reset else set(instance.properties.scopes)
+        new_scopes = set() if args.reset else set(instance.properties.scopes.to_serialized_data())
         for scope in args.scopes.to_serialized_data():
             new_scopes.add(scope)
 
@@ -322,10 +331,9 @@ class ActivityLogAlertScopeRemove(_ActivityLogAlertUpdate):
         args_schema.description._registered = False
         return args_schema
 
-    def pre_instance_create(self):
+    def pre_instance_update(self, instance):
         args = self.ctx.args
-        instance = self.ctx.vars.instance
-        new_scopes = set(instance.properties.scopes)
+        new_scopes = set(instance.properties.scopes.to_serialized_data())
         for scope in args.scopes.to_serialized_data():
             try:
                 new_scopes.remove(scope)
@@ -519,6 +527,30 @@ def _normalize_condition(condition_instance):
 
 
 def _normalize_names(cli_ctx, resource_names, resource_group, namespace, resource_type):
+    """Normalize a group of resource names. Returns a set of resource ids. Throws if any of the name can't be correctly
+    converted to a resource id."""
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    rids = set()
+    # normalize the action group ids
+    for name in resource_names:
+        if is_valid_resource_id(name):
+            rids.add(name)
+        else:
+            rid = resource_id(subscription=get_subscription_id(cli_ctx),
+                              resource_group=resource_group,
+                              namespace=namespace,
+                              type=resource_type,
+                              name=name)
+            if not is_valid_resource_id(rid):
+                raise ValueError('The resource name {} is not valid.'.format(name))
+            rids.add(rid)
+
+    return rids
+
+
+def _normalize_names_instance(cli_ctx, resource_names, resource_group, namespace, resource_type):
     """Normalize a group of resource names. Returns a set of resource ids. Throws if any of the name can't be correctly
     converted to a resource id."""
     from msrestazure.tools import is_valid_resource_id, resource_id

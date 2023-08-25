@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=protected-access
-from azure.cli.command_modules.monitor._client_factory import cf_metrics
 
 from knack.log import get_logger
 
