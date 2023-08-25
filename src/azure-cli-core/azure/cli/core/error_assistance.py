@@ -5,6 +5,7 @@ import configparser
 import os
 
 from azure.cli.core._config import GLOBAL_CONFIG_PATH
+from azure.cli.core.style import Style, print_styled_text
 
 def error_assistance(command=None):      
     openai.api_key = os.getenv('API_KEY') # Edit to genearalize and keep endpoint secure
@@ -61,10 +62,10 @@ def print_error_assistance(response):
         
     print("\n")
     print_line()
-    print("\x1b[91mIssue: \x1b[0m")
+    print_styled_text([(Style.ERROR, "Issue: ")])
     print(explanation)
     print("\n")
-    print("\x1b[91mCorrected Command: \x1b[0m")
+    print_styled_text([(Style.ERROR, "Corrected Command: ")])
     print(corrected_command)
     print_line()
     print("\n")
@@ -79,9 +80,9 @@ def validate_command(command_response):
 
 def print_line():
     console_width = shutil.get_terminal_size().columns
-    dashed_line = "\x1b[91m-\x1b[0m" * console_width
+    dashed_line = "-" * console_width
 
-    print(dashed_line)
+    print_styled_text([(Style.ERROR, dashed_line)])
         
 def error_enabled():
     enabled = get_config()
