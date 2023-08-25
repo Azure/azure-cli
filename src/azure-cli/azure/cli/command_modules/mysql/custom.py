@@ -467,6 +467,7 @@ def flexible_server_import_create(cmd, client,
                                   yes=False):
     provider = 'Microsoft.DBforMySQL'
 
+    import_source_properties = None
     if data_source_type.lower() == 'mysql_single':
         if mode.lower() == 'offline':
             # Generating source_server_id from data_source depending on whether it is a server_name or resource_id
@@ -585,7 +586,7 @@ def flexible_server_import_create(cmd, client,
     backup = mysql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
                                                  geo_redundant_backup=geo_redundant_backup)
 
-    sku = mysql_flexibleservers.models.Sku(name=sku_name, tier=tier)
+    sku = mysql_flexibleservers.models.MySQLServerSku(name=sku_name, tier=tier)
 
     high_availability = mysql_flexibleservers.models.HighAvailability(mode=high_availability,
                                                                       standby_availability_zone=standby_availability_zone)

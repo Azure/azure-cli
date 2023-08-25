@@ -410,7 +410,7 @@ def validate_server_name(db_context, server_name, type_):
 
     if not server_name:
         return
-
+    print(db_context.location)
     if len(server_name) < 3 or len(server_name) > 63:
         raise ValidationError("Server name must be at least 3 characters and at most 63 characters.")
     try:
