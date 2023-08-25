@@ -63,6 +63,7 @@ from azure.mgmt.sql.models import (
     ServerKey,
     ServerKeyType,
     ServerNetworkAccessFlag,
+    ServiceObjectiveName,
     ServerTrustGroup,
     ServicePrincipal,
     ShortTermRetentionPolicyName,

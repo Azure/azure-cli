@@ -479,9 +479,9 @@ def _configure_db_dw_params(arg_ctx):
 
     arg_ctx.argument('availability_zone',
                      arg_type=database_availability_zone_param_type)
-    
+
     arg_ctx.argument('encryption_protector_auto_rotation',
-                    arg_type=database_encryption_protector_auto_rotation_param_type)
+                     arg_type=database_encryption_protector_auto_rotation_param_type)
 
 
 def _configure_db_dw_create_params(
@@ -633,9 +633,9 @@ def _configure_db_dw_create_params(
 
     arg_ctx.argument('federated_client_id',
                      arg_type=database_federated_client_id_param_type)
-    
+
     arg_ctx.argument('encryption_protector_auto_rotation',
-                    arg_type=database_encryption_protector_auto_rotation_param_type)
+                     arg_type=database_encryption_protector_auto_rotation_param_type)
 
     # *** Step 3: Ignore params that are not applicable (based on engine & create mode) ***
 
