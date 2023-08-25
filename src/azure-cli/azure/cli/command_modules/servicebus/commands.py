@@ -39,7 +39,6 @@ def load_command_table(self, _):
     with self.command_group('servicebus georecovery-alias', custom_command_type=sb_namespace_custom,
                             is_preview=True) as g:
         g.custom_command('set', 'set_georecovery_alias', supports_no_wait=True)
-
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.georecovery_alias._update import Update
     self.command_table['servicebus georecovery-alias update'] = Update(loader=self, deprecate_info=self.deprecate())
 
@@ -65,5 +64,4 @@ def load_command_table(self, _):
         g.custom_command('remove', 'cli_remove_encryption')
 
 # Migration
-    from azure.cli.command_modules.servicebus.aaz.latest.servicebus.migration._update import Update
     self.command_table['servicebus migration update'] = Update(loader=self, deprecate_info=self.deprecate())
