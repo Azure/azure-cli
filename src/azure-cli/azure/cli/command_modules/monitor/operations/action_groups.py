@@ -3,9 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=protected-access
-from azure.cli.core.aaz import has_value, AAZStrArg, AAZListArg, AAZCustomListArg
+from azure.cli.core.aaz import has_value, AAZStrArg, AAZListArg
 from azure.cli.core.commands.validators import validate_tags
 from azure.cli.core.azclierror import ValidationError
+from azure.cli.command_modules.monitor.actions import AAZCustomListArg
 from ..aaz.latest.monitor.action_group import Create as _ActionGroupCreate, Update as _ActionGroupUpdate
 from ..aaz.latest.monitor.action_group.test_notifications import Create as _ActionGroupTestNotificationCreate
 
@@ -146,7 +147,7 @@ class ActionGroupCreate(_ActionGroupCreate):
             help="Add receivers to the action group during the creation.",
             arg_group="Actions",
         )
-        args_schema.receiver_actions.Element = AAZListArg()
+        args_schema.receiver_actions.Element = AAZCustomListArg()
         args_schema.receiver_actions.Element.Element = AAZStrArg()
         return args_schema
 
@@ -209,7 +210,7 @@ class ActionGroupUpdate(_ActionGroupUpdate):
         args = self.ctx.args
         receiver_remove_list = set()
         if has_value(args.receiver_remove_list):
-            receiver_remove_list = set(args.receiver_remove_list)
+            receiver_remove_list = set(args.receiver_remove_list.to_serialized_data())
 
         def filter_receivers(collection):
             return [item for item in collection if item.name.to_serialized_data() not in receiver_remove_list]
