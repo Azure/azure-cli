@@ -246,10 +246,11 @@ class ActivityLogAlertActionGroupAdd(_ActivityLogAlertUpdate):
                 }
 
             for rid in rids:
-                if rid.lower() in action_groups_map.keys() and args.strict:
-                    if webhook_properties != action_groups_map[rid.lower()]["webhookProperties"]:
-                        raise ValueError(
-                            'Fails to override webhook properties of action group {} in strict mode.'.format(rid))
+                if args.strict:
+                    for key, item in action_groups_map.items():
+                        if key.lower() == rid.lower() and webhook_properties != item["webhookProperties"]:
+                            raise ValueError(
+                                'Fails to override webhook properties of action group {} in strict mode.'.format(rid))
 
                 action_groups_map[rid.lower()] = {
                     "actionGroupId": rid,

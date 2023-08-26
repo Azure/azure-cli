@@ -526,7 +526,7 @@ class AAZRawListArgAction(AAZCompoundTypeArgAction):
             element_action = cls._schema.Element._build_cmd_action()
             if not issubclass(element_action, AAZSimpleTypeArgAction):
                 # Separate Elements Expression only supported for simple type element array
-                raise Exception
+                raise AAZInvalidValueError("Element action is not nullable")
 
             # dest_ops
             try:
