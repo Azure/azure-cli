@@ -65,11 +65,10 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_RESOURCE_MANAGEDAPPLICATIONS = ('azure.mgmt.resource.managedapplications', 'ApplicationClient')
     MGMT_MONITOR = ('azure.mgmt.monitor', 'MonitorManagementClient')
     MGMT_MSI = ('azure.mgmt.msi', 'ManagedServiceIdentityClient')
-    DATA_KEYVAULT = ('azure.keyvault', 'KeyVaultClient')
     DATA_KEYVAULT_CERTIFICATES = ('azure.keyvault.certificates', 'CertificateClient')
     DATA_KEYVAULT_KEYS = ('azure.keyvault.keys', 'KeyClient')
     DATA_KEYVAULT_SECRETS = ('azure.keyvault.secrets', 'SecretClient')
-    DATA_PRIVATE_KEYVAULT = ('azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1', 'KeyVaultClient')
+    DATA_KEYVAULT = ('azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1', 'KeyVaultClient')
     DATA_KEYVAULT_ADMINISTRATION_BACKUP = ('azure.keyvault.administration', 'KeyVaultBackupClient')
     DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL = ('azure.keyvault.administration', 'KeyVaultAccessControlClient')
     DATA_KEYVAULT_ADMINISTRATION_SETTING = ('azure.keyvault.administration', 'KeyVaultSettingsClient')
@@ -99,7 +98,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_BOTSERVICE = ('azure.mgmt.botservice', None)
     MGMT_CDN = ('azure.mgmt.cdn', None)
     MGMT_COGNITIVESERVICES = ('azure.mgmt.cognitiveservices', None)
-    MGMT_CONSUMPTION = ('azure.mgmt.consumption', None)
     MGMT_CONTAINERINSTANCE = ('azure.mgmt.containerinstance', None)
     MGMT_COSMOSDB = ('azure.mgmt.cosmosdb', None)
     MGMT_DATALAKE_ANALYTICS = ('azure.cli.command_modules.dla.vendored_sdks.azure_mgmt_datalake_analytics', None)
@@ -111,7 +109,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_POLICYINSIGHTS = ('azure.mgmt.policyinsights', None)
     MGMT_RDBMS = ('azure.mgmt.rdbms', None)
     MGMT_REDIS = ('azure.mgmt.redis', None)
-    MGMT_RELAY = ('azure.mgmt.relay', None)
     MGMT_SEARCH = ('azure.mgmt.search', None)
     MGMT_SERVICEFABRIC = ('azure.mgmt.servicefabric', None)
     MGMT_SIGNALR = ('azure.mgmt.signalr', None)
@@ -210,7 +207,6 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_KEYVAULT_SECRETS: None,
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING: None,
         ResourceType.DATA_KEYVAULT: '7.0',
-        ResourceType.DATA_PRIVATE_KEYVAULT: '7.2',
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP: '7.4',
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL: '7.4',
         ResourceType.DATA_STORAGE: '2018-11-09',

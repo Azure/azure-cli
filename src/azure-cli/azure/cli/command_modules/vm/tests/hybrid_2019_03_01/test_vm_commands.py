@@ -99,18 +99,19 @@ class VMOpenPortTest(ScenarioTest):
 class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_list_ip')
+    @AllowLargeResponse(size_kb=99999)
     def test_vm_show_list_sizes_list_ip_addresses(self, resource_group):
 
         self.kwargs.update({
             'loc': 'centralus',
             'vm': 'vm-with-public-ip',
-            'allocation': 'dynamic',
+            'allocation': 'static',
             'zone': 2
         })
         # Expecting no results at the beginning
         self.cmd('vm list-ip-addresses --resource-group {rg}', checks=self.is_empty())
         self.cmd('vm create --resource-group {rg} --location {loc} -n {vm} --admin-username ubuntu --image Canonical:UbuntuServer:14.04.4-LTS:latest'
-                 ' --admin-password testPassword0 --public-ip-address-allocation {allocation} --authentication-type password --zone {zone}')
+                 ' --admin-password testPassword0 --public-ip-address-allocation {allocation} --authentication-type password --zone {zone} --nsg-rule NONE')
         result = self.cmd('vm show --resource-group {rg} --name {vm} -d', checks=[
             self.check('type(@)', 'object'),
             self.check('name', '{vm}'),
@@ -147,6 +148,7 @@ class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
 
 class VMSizeListScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     def test_vm_size_list(self):
         self.cmd('vm list-sizes --location westus',
                  checks=self.check('type(@)', 'array'))
@@ -394,6 +396,30 @@ class VMCustomImageTest(ScenarioTest):
             self.check("sourceVirtualMachine", None),
             self.check("storageProfile.osDisk.managedDisk.id", '{os_disk_id}')
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_image_mgmt_')
+    def test_vm_custom_image_management(self, resource_group):
+        self.kwargs.update({
+            'vm1':'vm1',
+            'vm2':'vm2',
+            'image1':'myImage1',
+            'image2':'myImage2'
+        })
+
+        vm1 = self.cmd('vm create -g {rg} -n {vm1} --admin-username theuser --image OpenLogic:CentOS:7.5:latest --admin-password testPassword0 --authentication-type password --nsg-rule NONE').get_output_in_json()
+        self.cmd('vm deallocate -g {rg} -n {vm1}')
+        self.cmd('vm generalize -g {rg} -n {vm1}')
+
+        self.cmd('image create -g {rg} -n {image1} --source {vm1}')
+
+        self.cmd('image list -g {rg}', checks=self.check('length(@)', 1))
+        self.cmd('image show -g {rg} -n {image1}',
+                 checks=[
+                     self.check('name', '{image1}'),
+                 ])
+        self.cmd('image update -n {image1} -g {rg} --tags foo=bar', checks=self.check('tags.foo', 'bar'))
+        self.cmd('image delete -n {image1} -g {rg}')
+        self.cmd('image list -g {rg}', checks=self.check('length(@)', 0))
 
 
 class VMImageWithPlanTest(ScenarioTest):
@@ -2514,6 +2540,65 @@ class VMGenericUpdate(ScenarioTest):
             self.check('storageProfile.dataDisks', [])
         ])
 
+
+class VMRedeployTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='test_vm_redeploy_')
+    def test_vm_redeploy(self, resource_group):
+        self.kwargs.update({
+            'vm':'myvm'
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password --nsg-rule NONE')
+        self.cmd('vm redeploy -n {vm} -g {rg}')
+
+
+class VMConvertTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='test_vm_convert_')
+    def test_vm_convert(self, resource_group):
+        self.kwargs.update({
+            'vm': 'myvm'
+        })
+
+        self.cmd(
+            'vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password --nsg-rule NONE')
+        self.cmd('vm unmanaged-disk attach -g {rg} --vm-name {vm} --new --size-gb 1')
+
+        output = self.cmd('vm unmanaged-disk list --vm-name {vm} -g {rg}').get_output_in_json()
+        self.assertFalse(output[0]['managedDisk'])
+        self.assertTrue(output[0]['vhd'])
+
+        self.cmd('vm deallocate -n {vm} -g {rg}')
+        self.cmd('vm convert -n {vm} -g {rg}')
+
+        converted = self.cmd('vm unmanaged-disk list --vm-name {vm} -g {rg}').get_output_in_json()
+        self.assertTrue(converted[0]['managedDisk'])
+        self.assertFalse(converted[0]['vhd'])
+
+
+class VMRestartTest(ScenarioTest):
+    def _check_vm_power_state(self, expected_power_state):
+
+        self.cmd('vm get-instance-view --resource-group {rg} --name {vm}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{vm}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('length(instanceView.statuses)', 2),
+            self.check('instanceView.statuses[0].code', 'ProvisioningState/succeeded'),
+            self.check('instanceView.statuses[1].code', expected_power_state),
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_stop_start')
+    def test_vm_stop_start(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm'
+        })
+        self.cmd(
+            'vm create --resource-group {rg} --name {vm} --admin-username azureuser --admin-password testPassword0 --authentication-type password --image OpenLogic:CentOS:7.5:latest --nsg-rule NONE')
+
+        self.cmd('vm stop --resource-group {rg} --name {vm}')
+        self._check_vm_power_state('PowerState/stopped')
+        self.cmd('vm start --resource-group {rg} --name {vm}')
+        self._check_vm_power_state('PowerState/running')
 
 class TestSnapShotAccess(ScenarioTest):
 

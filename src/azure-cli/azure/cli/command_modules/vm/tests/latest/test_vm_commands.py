@@ -8853,6 +8853,9 @@ class VMAutoUpdateScenarioTest(ScenarioTest):
         self.cmd('vm show -g {rg} -n vm1', checks=[
             self.check('osProfile.linuxConfiguration.patchSettings.patchMode', 'AutomaticByPlatform')
         ])
+        self.cmd('vm assess-patches -g {rg} -n vm1', checks=[
+            self.check('status', 'Succeeded')
+        ])
 
 
 class VMSSPatchModeScenarioTest(ScenarioTest):

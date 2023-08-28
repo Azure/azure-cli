@@ -136,6 +136,7 @@ from .operations.dns import (RecordSetADelete as DNSRecordSetADelete, RecordSetA
                              RecordSetCNAMEDelete as DNSRecordSetCNAMEDelete)
 
 logger = get_logger(__name__)
+RULESET_VERSION = {"0.1": "0.1", "1.0": "1.0", "2.2.9": "2.2.9", "3.0": "3.0", "3.1": "3.1", "3.2": "3.2"}
 
 
 # region Utility methods
@@ -1897,9 +1898,10 @@ class WAFCreate(_WAFCreate):
         )
         args_schema.rule_set_version = AAZStrArg(
             options=["--version"],
-            help="Version of the web application firewall rule set type, 0.1 is used for Microsoft_BotManagerRuleSet",
+            help="Version of the web application firewall rule set type. "
+                 "0.1 and 1.0 are used for Microsoft_BotManagerRuleSet",
             default="3.0",
-            enum={"0.1": "0.1", "2.2.9": "2.2.9", "3.0": "3.0", "3.1": "3.1", "3.2": "3.2"},
+            enum=RULESET_VERSION
         )
         return args_schema
 
@@ -5747,6 +5749,7 @@ class VNetPeeringCreate(_VNetPeeringCreate):
         from azure.cli.core.aaz import AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.sync_remote._registered = False
+        args_schema.remote_vnet._required = True
         args_schema.remote_vnet._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}",
         )
