@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from distutils.version import StrictVersion
+from distutils.version import StrictVersion  # pylint: disable=deprecated-module
 from types import SimpleNamespace
 
 from knack.log import get_logger
@@ -129,10 +129,13 @@ def _get_load_balancer_outbound_ips(load_balancer_outbound_ips, models):
         ResourceReference = models.ResourceReference
     else:
         ResourceReference = models.get("ResourceReference")
-    if load_balancer_outbound_ips:
-        load_balancer_outbound_ip_resources = \
-            [ResourceReference(id=x.strip())
-             for x in load_balancer_outbound_ips.split(',')]
+    if load_balancer_outbound_ips is not None:
+        if isinstance(load_balancer_outbound_ips, str):
+            load_balancer_outbound_ip_resources = \
+                [ResourceReference(id=x.strip())
+                    for x in load_balancer_outbound_ips.split(',')]
+        else:
+            load_balancer_outbound_ip_resources = load_balancer_outbound_ips
     return load_balancer_outbound_ip_resources
 
 

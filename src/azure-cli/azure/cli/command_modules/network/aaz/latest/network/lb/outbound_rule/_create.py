@@ -916,7 +916,7 @@ class _CreateHelper:
         _element.id = AAZStrType()
         _element.name = AAZStrType()
         _element.properties = AAZObjectType(
-            flags={"client_flatten": True},
+            flags={"required": True, "client_flatten": True},
         )
         _element.type = AAZStrType(
             flags={"read_only": True},

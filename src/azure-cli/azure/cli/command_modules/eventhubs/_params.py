@@ -67,7 +67,7 @@ def load_arguments_eh(self, _):
         with self.argument_context(scope) as c:
             c.argument('partition_count', type=int, help='Number of partitions created for the Event Hub. By default, allowed values are 2-32. Lower value of 1 is supported with Kafka enabled namespaces. In presence of a custom quota, the upper limit will match the upper limit of the quota.')
             c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled']), help='Status of Eventhub')
-            c.argument('enable_capture', options_list=['--enable-capture'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether capture is enabled.')
+            c.argument('enable_capture', options_list=['--enable-capture'], arg_group='Capture', arg_type=get_three_state_flag(), help='A boolean value that indicates whether capture is enabled.')
             c.argument('skip_empty_archives', options_list=['--skip-empty-archives'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether to Skip Empty.')
             c.argument('capture_interval', arg_group='Capture', options_list=['--capture-interval'], type=int, help='Allows you to set the frequency with which the capture to Azure Blobs will happen, value should between 60 to 900 seconds')
             c.argument('capture_size_limit', arg_group='Capture', options_list=['--capture-size-limit'], type=int, help='Defines the amount of data built up in your Event Hub before an capture operation, value should be between 10485760 to 524288000 bytes')
@@ -78,6 +78,9 @@ def load_arguments_eh(self, _):
             c.argument('retention_time_in_hours', type=int, arg_group='Retention-Description', options_list=['--retention-time-in-hours', '--retention-time'], help="Number of hours to retain the events for this Event Hub. This value is only used when cleanupPolicy is Delete. If cleanupPolicy is Compaction the returned value of this property is Long.MaxValue")
             c.argument('tombstone_retention_time_in_hours', type=int, arg_group='Retention-Description', options_list=['--tombstone-retention-time-in-hours', '--tombstone-time'], help="Number of hours to retain the tombstone markers of a compacted Event Hub. This value is only used when cleanupPolicy is Compaction. Consumer must complete reading the tombstone marker within this specified amount of time if consumer begins from starting offset to ensure they get a valid snapshot for the specific key described by the tombstone marker within the compacted Event Hub")
             c.argument('cleanup_policy', arg_group='Retention-Description', arg_type=get_enum_type(['Delete', 'Compact']), help="Enumerates the possible values for cleanup policy")
+            c.argument('mi_system_assigned', arg_group='Capture-Destination', arg_type=get_three_state_flag(),
+                       help='Enable System Assigned Identity')
+            c.argument('mi_user_assigned', arg_group='Capture-Destination', help='List of User Assigned Identity ids.')
     with self.argument_context('eventhubs eventhub list') as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
 

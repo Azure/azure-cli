@@ -8,6 +8,7 @@
 
 from knack.arguments import CLIArgumentType
 from azure.cli.core.commands.parameters import tags_type, get_location_type, get_enum_type, file_type, resource_group_name_type, get_three_state_flag
+from azure.cli.command_modules.mysql.action import AddArgs
 from azure.cli.command_modules.mysql.random.generate import generate_username
 from azure.cli.command_modules.mysql._validators import public_access_validator, maintenance_window_validator, ip_address_validator, \
     firewall_rule_name_validator, validate_identity, validate_byok_identity, validate_identities
@@ -344,6 +345,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
         c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
         c.argument('zone', arg_type=zone_arg_type)
+        c.argument('tags', tags_type)
         c.argument('yes', arg_type=yes_arg_type)
         c.argument('sku_name', arg_type=sku_name_arg_type)
         c.argument('tier', arg_type=tier_arg_type)
@@ -363,6 +365,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
         c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
         c.argument('zone', arg_type=zone_arg_type)
+        c.argument('tags', tags_type)
         c.argument('yes', arg_type=yes_arg_type)
         c.argument('sku_name', arg_type=sku_name_arg_type)
         c.argument('tier', arg_type=tier_arg_type)
@@ -406,7 +409,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
 
     # flexible-server parameter
-    for scope in ['list', 'set', 'show']:
+    for scope in ['list', 'set', 'show', 'set-batch']:
         argument_context_string = 'mysql flexible-server parameter {}'.format(scope)
         with self.argument_context(argument_context_string) as c:
             if scope == "list":
@@ -422,6 +425,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
     with self.argument_context('mysql flexible-server parameter set') as c:
         c.argument('value', options_list=['--value', '-v'], help='Value of the configuration.')
         c.argument('source', options_list=['--source'], help='Source of the configuration.')
+
+    with self.argument_context('mysql flexible-server parameter set-batch') as c:
+        c.argument('configuration_list', action=AddArgs, nargs='*', options_list=['--args'], required=True, help='List of the configuration key-value pair.')
+        c.argument('source', options_list=['--source'], required=False, help='Source of the configuration.')
 
     # firewall-rule
     for scope in ['create', 'delete', 'list', 'show', 'update']:
@@ -476,6 +483,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('source_server', arg_type=source_server_arg_type)
         c.argument('replica_name', options_list=['--replica-name'], help='The name of the server to restore to.')
         c.argument('zone', arg_type=zone_arg_type)
+        c.argument('tags', tags_type)
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('vnet', arg_type=vnet_arg_type)
         c.argument('subnet', arg_type=subnet_arg_type)

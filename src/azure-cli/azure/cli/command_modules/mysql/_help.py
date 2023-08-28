@@ -193,10 +193,13 @@ type: command
 short-summary: Create a new import workflow for flexible server.
 long-summary: >
     Migrate a MySQL single server to flexible server with custom or default configuration. For more information for network configuration, see
+
     - Configure public access
     https://docs.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-firewall-cli
+
     - Configure private access
     https://docs.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-virtual-network-cli
+
 examples:
   - name: >
       Trigger a Import from single server to flexible server
@@ -497,6 +500,14 @@ examples:
     text: az mysql flexible-server parameter set --resource-group testGroup --server-name testserver --name parameterName --value parameterValue
   - name: Set a parameter value to its default.
     text: az mysql flexible-server parameter set --resource-group testGroup --server-name testserver --name parameterName
+"""
+
+helps['mysql flexible-server parameter set-batch'] = """
+type: command
+short-summary: Batch update parameters of a flexible server.
+examples:
+  - name: Batch set parameters.
+    text: az mysql flexible-server parameter set-batch --resource-group testGroup --server-name testserver --source "user-override" --args key1="value1" key2="value2"
 """
 
 helps['mysql flexible-server parameter show'] = """

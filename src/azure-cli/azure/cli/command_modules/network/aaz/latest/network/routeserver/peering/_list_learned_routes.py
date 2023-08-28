@@ -49,11 +49,13 @@ class ListLearnedRoutes(AAZCommand):
             options=["-n", "--name"],
             help="The name of the Route Server Peering.",
             required=True,
+            id_part="child_name_1",
         )
         _args_schema.routeserver = AAZStrArg(
             options=["--routeserver"],
             help="The name of the Route Server.",
             required=True,
+            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -211,6 +213,10 @@ class ListLearnedRoutes(AAZCommand):
             )
 
             return cls._schema_on_200
+
+
+class _ListLearnedRoutesHelper:
+    """Helper class for ListLearnedRoutes"""
 
 
 __all__ = ["ListLearnedRoutes"]

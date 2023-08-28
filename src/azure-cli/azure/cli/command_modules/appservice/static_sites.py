@@ -520,7 +520,7 @@ def delete_staticsite(cmd, name, resource_group_name=None, no_wait=False):
 
 def _parse_pair(pair, delimiter):
     if delimiter not in pair:
-        InvalidArgumentValueError("invalid format of pair {0}".format(pair))
+        raise InvalidArgumentValueError("invalid format of pair {0}".format(pair))
 
     index = pair.index(delimiter)
     return pair[:index], pair[1 + index:]

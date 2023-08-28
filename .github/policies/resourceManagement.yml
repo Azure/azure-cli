@@ -1,0 +1,5624 @@
+id: 
+name: GitOps.PullRequestIssueManagement
+description: GitOps.PullRequestIssueManagement primitive
+owner: 
+resource: repository
+disabled: false
+where: 
+configuration:
+  resourceManagementConfiguration:
+    scheduledSearches:
+    - description: Close stale issues
+      frequencies:
+      - daily:
+          time: 1:0
+      filters:
+      - isIssue
+      - isOpen
+      - hasLabel:
+          label: needs-author-feedback
+      - hasLabel:
+          label: no-recent-activity
+      - noActivitySince:
+          days: 14
+      actions:
+      - closeIssue
+    - description: Add no recent activity label to issues
+      frequencies:
+      - hourly:
+          hour: 6
+      filters:
+      - isIssue
+      - isOpen
+      - hasLabel:
+          label: needs-author-feedback
+      - noActivitySince:
+          days: 7
+      - isNotLabeledWith:
+          label: no-recent-activity
+      actions:
+      - addLabel:
+          label: no-recent-activity
+      - addReply:
+          reply: Hi, we're sending this friendly reminder because we haven't heard back from you in a while. We need more information about this issue to help address it. Please be sure to give us your input within the next **7 days**. If we don't hear back from you within **14 days** of this comment the issue will be automatically closed. Thank you!
+    - description: '[Resolve Workflow] Close Addressed Issues'
+      frequencies:
+      - hourly:
+          hour: 6
+      filters:
+      - isIssue
+      - isOpen
+      - hasLabel:
+          label: issue-addressed
+      - noActivitySince:
+          days: 7
+      actions:
+      - addReply:
+          reply: Hi @${issueAuthor}, since you haven’t asked that we “`/unresolve`” the issue, we’ll close this out. If you believe further discussion is needed, please add a comment “`/unresolve`” to reopen the issue.
+      - closeIssue
+    eventResponderTasks:
+    - if:
+      - payloadType: Issue_Comment
+      - isAction:
+          action: Created
+      - isActivitySender:
+          issueAuthor: True
+      - hasLabel:
+          label: needs-author-feedback
+      - isOpen
+      then:
+      - addLabel:
+          label: needs-team-attention
+      - removeLabel:
+          label: needs-author-feedback
+      description: Replace needs author feedback label with needs attention label when the author comments on an issue
+    - if:
+      - payloadType: Issues
+      - not:
+          isAction:
+            action: Closed
+      - hasLabel:
+          label: no-recent-activity
+      then:
+      - removeLabel:
+          label: no-recent-activity
+      description: Remove no recent activity label from issues
+    - if:
+      - payloadType: Issue_Comment
+      - hasLabel:
+          label: no-recent-activity
+      then:
+      - removeLabel:
+          label: no-recent-activity
+      description: Remove no recent activity label when an issue is commented on
+    - if:
+      - payloadType: Issues
+      - labelAdded:
+          label: issue-addressed
+      then:
+      - addReply:
+          reply: Hi @${issueAuthor}.  Thank you for opening this issue and giving us the opportunity to assist.  We believe that this has been addressed.  If you feel that further discussion is needed, please add a comment with the text “`/unresolve`” to remove the “issue-addressed” label and continue the conversation.
+      - removeLabel:
+          label: needs-triage
+      - removeLabel:
+          label: needs-team-triage
+      - removeLabel:
+          label: needs-team-attention
+      - removeLabel:
+          label: needs-author-feedback
+      - removeLabel:
+          label: no-recent-activity
+      description: '[Resolve Workflow] Issue Addressed Label Applied'
+    - if:
+      - payloadType: Issue_Comment
+      - hasLabel:
+          label: issue-addressed
+      - commentContains:
+          pattern: /unresolve
+          isRegex: False
+      - or:
+        - isActivitySender:
+            issueAuthor: True
+        - activitySenderHasPermission:
+            permission: Admin
+        - activitySenderHasPermission:
+            permission: Write
+      then:
+      - reopenIssue
+      - removeLabel:
+          label: issue-addressed
+      - addLabel:
+          label: needs-team-attention
+      description: '[Resolve Workflow] Unresolve Command by Author'
+    - if:
+      - payloadType: Issue_Comment
+      - hasLabel:
+          label: issue-addressed
+      - commentContains:
+          pattern: /unresolve
+          isRegex: False
+      - and:
+        - not:
+            isActivitySender:
+              issueAuthor: True
+        - not:
+            activitySenderHasPermission:
+              permission: Admin
+        - not:
+            activitySenderHasPermission:
+              permission: Write
+      then:
+      - addReply:
+          reply: Hi ${contextualAuthor}, only the original author of the issue can ask that it be unresolved.  Please open a new issue with your scenario and details if you would like to discuss this topic with the team.
+      description: '[Resolve Workflow] Unresolve Command Without Permissions'
+    - if:
+      - payloadType: Issues
+      - isOpen
+      - hasLabel:
+          label: issue-addressed
+      - or:
+        - labelAdded:
+            label: needs-team-attention
+        - labelAdded:
+            label: needs-author-feedback
+        - labelAdded:
+            label: Service Attention
+        - labelAdded:
+            label: needs-triage
+        - labelAdded:
+            label: needs-team-triage
+      then:
+      - removeLabel:
+          label: issue-addressed
+      description: '[Resolve Workflow] Unresolve on WIP Labels'
+    - if:
+      - payloadType: Issues
+      - isOpen
+      - hasLabel:
+          label: customer-reported
+      - labelRemoved:
+          label: Service Attention
+      then:
+      - addLabel:
+          label: needs-team-triage
+      description: Add label after "Service Attention" is removed
+    - if:
+      - or:
+        - payloadType: Issues
+      - isAction:
+          action: Labeled
+      then:
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: AKS
+        then:
+        - mentionUsers:
+            mentionees:
+            - Azure/aks-pm
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Alerts Management
+        then:
+        - mentionUsers:
+            mentionees:
+            - liadtal
+            - yairgil
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ARM
+        then:
+        - mentionUsers:
+            mentionees:
+            - josephkwchan
+            - jennyhunter-msft
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ARM - Templates
+        then:
+        - mentionUsers:
+            mentionees:
+            - Azure/deployments-owners
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ARM - Tags
+        then:
+        - mentionUsers:
+            mentionees:
+            - rthorn17
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ARM - Core
+        then:
+        - mentionUsers:
+            mentionees:
+            - josephkwchan
+            - jennyhunter-msft
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ARM - Managed Applications
+        then:
+        - mentionUsers:
+            mentionees:
+            - MSEvanhi
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ARM - Service Catalog
+        then:
+        - mentionUsers:
+            mentionees:
+            - MSEvanhi
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ARM - RBAC
+        then:
+        - mentionUsers:
+            mentionees:
+            - LizMS
+            - cbrooksmsft
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Advisor
+        then:
+        - mentionUsers:
+            mentionees:
+            - mojayara
+            - Prasanna-Padmanabhan
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Analysis Services
+        then:
+        - mentionUsers:
+            mentionees:
+            - athipp
+            - taiwu
+            - minghan
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: API Management
+        then:
+        - mentionUsers:
+            mentionees:
+            - adrianhall
+            - KedarJoshi
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Application Insights
+        then:
+        - mentionUsers:
+            mentionees:
+            - azmonapplicationinsights
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: App Services
+        then:
+        - mentionUsers:
+            mentionees:
+            - antcp
+            - AzureAppServiceCLI
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: App Configuration
+        then:
+        - mentionUsers:
+            mentionees:
+            - albertofori
+            - avanigupta
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ARO
+        then:
+        - mentionUsers:
+            mentionees:
+            - mjudeikis
+            - jim-minter
+            - julienstroheker
+            - amanohar
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Attestation
+        then:
+        - mentionUsers:
+            mentionees:
+            - anilba06
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Authorization
+        then:
+        - mentionUsers:
+            mentionees:
+            - darshanhs90
+            - AshishGargMicrosoft
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Automation
+        then:
+        - mentionUsers:
+            mentionees:
+            - jaspkaur28
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: AVS
+        then:
+        - mentionUsers:
+            mentionees:
+            - divka78
+            - amitchat
+            - aishu
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Azure Stack
+        then:
+        - mentionUsers:
+            mentionees:
+            - sijuman
+            - sarathys
+            - bganapa
+            - rakku-ms
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Batch
+        then:
+        - mentionUsers:
+            mentionees:
+            - cRui861
+            - paterasMSFT
+            - gingi
+            - dpwatrous
+            - mksuni
+            - bgklein
+            - mscurrell
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: BatchAI
+        then:
+        - mentionUsers:
+            mentionees:
+            - matthchr
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Billing
+        then:
+        - mentionUsers:
+            mentionees:
+            - cabbpt
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Blueprint
+        then:
+        - mentionUsers:
+            mentionees:
+            - alex-frankel
+            - filizt
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Bot Service
+        then:
+        - mentionUsers:
+            mentionees:
+            - sgellock
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cloud Shell
+        then:
+        - mentionUsers:
+            mentionees:
+            - maertendMSFT
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cognitive - Text Analytics
+        then:
+        - mentionUsers:
+            mentionees:
+            - assafi
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cognitive - Form Recognizer
+        then:
+        - mentionUsers:
+            mentionees:
+            - ctstone
+            - anrothMSFT
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cognitive - Anomaly Detector
+        then:
+        - mentionUsers:
+            mentionees:
+            - yingqunpku
+            - bowgong
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cognitive - Custom Vision
+        then:
+        - mentionUsers:
+            mentionees:
+            - areddish
+            - tburns10
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cognitive - Computer Vision
+        then:
+        - mentionUsers:
+            mentionees:
+            - ryogok
+            - TFR258
+            - tburns10
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cognitive - Face
+        then:
+        - mentionUsers:
+            mentionees:
+            - JinyuID
+            - dipidoo
+            - SteveMSFT
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cognitive - QnA Maker
+        then:
+        - mentionUsers:
+            mentionees:
+            - bingisbestest
+            - nerajput1607
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cognitive - Translator
+        then:
+        - mentionUsers:
+            mentionees:
+            - swmachan
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cognitive - Speech
+        then:
+        - mentionUsers:
+            mentionees:
+            - robch
+            - oscholz
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cognitive - LUIS
+        then:
+        - mentionUsers:
+            mentionees:
+            - cahann
+            - kayousef
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cognitive - Content Moderator
+        then:
+        - mentionUsers:
+            mentionees:
+            - swiftarrow11
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cognitive - Personalizer
+        then:
+        - mentionUsers:
+            mentionees:
+            - dwaijam
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cognitive - Immersive Reader
+        then:
+        - mentionUsers:
+            mentionees:
+            - metanMSFT
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cognitive - Ink Recognizer
+        then:
+        - mentionUsers:
+            mentionees:
+            - olduroja
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cognitive - Bing
+        then:
+        - mentionUsers:
+            mentionees:
+            - jaggerbodas-ms
+            - arwong
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cognitive - Mgmt
+        then:
+        - mentionUsers:
+            mentionees:
+            - yangyuan
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Commerce
+        then:
+        - mentionUsers:
+            mentionees:
+            - ms-premp
+            - qiaozha
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Compute
+        then:
+        - mentionUsers:
+            mentionees:
+            - Drewm3
+            - TravisCragg-MSFT
+            - nikhilpatel909
+            - sandeepraichura
+            - hilaryw29
+            - GabstaMSFT
+            - ramankumarlive
+            - ushnaarshadkhan
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Compute - Extensions
+        then:
+        - mentionUsers:
+            mentionees:
+            - TravisCragg-MSFT
+            - GabstaMSFT
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Compute - Images
+        then:
+        - mentionUsers:
+            mentionees:
+            - TravisCragg-MSFT
+            - nikhilpatel909
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Compute - Managed Disks
+        then:
+        - mentionUsers:
+            mentionees:
+            - TravisCragg-MSFT
+            - ramankumarlive
+            - ushnaarshadkhan
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Compute - RDFE
+        then:
+        - mentionUsers:
+            mentionees:
+            - Drewm3
+            - TravisCragg-MSFT
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Compute - VM
+        then:
+        - mentionUsers:
+            mentionees:
+            - Drewm3
+            - TravisCragg-MSFT
+            - nikhilpatel909
+            - sandeepraichura
+            - hilaryw29
+            - GabstaMSFT
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Compute - VMSS
+        then:
+        - mentionUsers:
+            mentionees:
+            - TravisCragg-MSFT
+            - hilaryw29
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Connected Kubernetes
+        then:
+        - mentionUsers:
+            mentionees:
+            - akashkeshari
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Container Instances
+        then:
+        - mentionUsers:
+            mentionees:
+            - macolso
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Container Registry
+        then:
+        - mentionUsers:
+            mentionees:
+            - toddysm
+            - luisdlp
+            - northtyphoon
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Container Service
+        then:
+        - mentionUsers:
+            mentionees:
+            - qike-ms
+            - jwilder
+            - thomas1206
+            - seanmck
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cosmos
+        then:
+        - mentionUsers:
+            mentionees:
+            - pjohari-ms
+            - MehaKaushik
+            - zfoster
+            - kushagraThapar
+            - simorenoh
+            - simplynaveen20
+            - abinav2307
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Customer Insights
+        then:
+        - mentionUsers:
+            mentionees:
+            - shefymk
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Custom Providers
+        then:
+        - mentionUsers:
+            mentionees:
+            - manoharp
+            - MSEvanhi
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: CycleCloud
+        then:
+        - mentionUsers:
+            mentionees:
+            - adriankjohnson
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Data Bricks
+        then:
+        - mentionUsers:
+            mentionees:
+            - arindamc
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: DataBox
+        then:
+        - mentionUsers:
+            mentionees:
+            - tmvishwajit
+            - matdickson
+            - manuaery
+            - madhurinms
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: DataBox Edge
+        then:
+        - mentionUsers:
+            mentionees:
+            - a-t-mason
+            - ganzee
+            - manuaery
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Data Catalog
+        then:
+        - mentionUsers:
+            mentionees:
+            - ingave
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Data Factory
+        then:
+        - mentionUsers:
+            mentionees:
+            - Jingshu923
+            - zhangyd2015
+            - Frey-Wang
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Data Lake
+        then:
+        - mentionUsers:
+            mentionees:
+            - sumantmehtams
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Data Lake Storage Gen1
+        then:
+        - mentionUsers:
+            mentionees:
+            - sumantmehtams
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Data Lake Storage Gen2
+        then:
+        - mentionUsers:
+            mentionees:
+            - sumantmehtams
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Data Lake Analytics
+        then:
+        - mentionUsers:
+            mentionees:
+            - idear1203
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Data Lake Store
+        then:
+        - mentionUsers:
+            mentionees:
+            - sumantmehtams
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Data Migration
+        then:
+        - mentionUsers:
+            mentionees:
+            - radjaram
+            - kavitham10
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Data Share
+        then:
+        - mentionUsers:
+            mentionees:
+            - raedJarrar
+            - jifems
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: DevOps
+        then:
+        - mentionUsers:
+            mentionees:
+            - v-anvashist
+            - V-hmusukula
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Dev Spaces
+        then:
+        - mentionUsers:
+            mentionees:
+            - yuzorMa
+            - johnsta
+            - greenie-msft
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Devtestlab
+        then:
+        - mentionUsers:
+            mentionees:
+            - Tanmayeekamath
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Device Provisioning Service
+        then:
+        - mentionUsers:
+            mentionees:
+            - nberdy
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Digital Twins
+        then:
+        - mentionUsers:
+            mentionees:
+            - sourabhguha
+            - inesk-vt
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Event Grid
+        then:
+        - mentionUsers:
+            mentionees:
+            - jfggdl
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Event Hubs
+        then:
+        - mentionUsers:
+            mentionees:
+            - Saglodha
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Functions
+        then:
+        - mentionUsers:
+            mentionees:
+            - amamounelsayed
+            - kaibocai
+            - shreyas-gopalakrishna
+            - kamperiadis
+            - apawast
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Graph.Microsoft
+        then:
+        - mentionUsers:
+            mentionees:
+            - dkershaw10
+            - baywet
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Guest Configuration
+        then:
+        - mentionUsers:
+            mentionees:
+            - mgreenegit
+            - vivlingaiah
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: HDInsight
+        then:
+        - mentionUsers:
+            mentionees:
+            - aim-for-better
+            - idear1203
+            - deshriva
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: HPC Cache
+        then:
+        - mentionUsers:
+            mentionees:
+            - romahamu
+            - omzevall
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Import Export
+        then:
+        - mentionUsers:
+            mentionees:
+            - madhurinms
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: KeyVault
+        then:
+        - mentionUsers:
+            mentionees:
+            - RandalliLama
+            - schaabs
+            - jlichwa
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Kubernetes Configuration
+        then:
+        - mentionUsers:
+            mentionees:
+            - NarayanThiru
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Azure Data Explorer
+        then:
+        - mentionUsers:
+            mentionees:
+            - ilayrn
+            - orhasban
+            - zoharHenMicrosoft
+            - sagivf
+            - Aviv-Yaniv
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Lab Services
+        then:
+        - mentionUsers:
+            mentionees:
+            - Tanmayeekamath
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Logic App
+        then:
+        - mentionUsers:
+            mentionees:
+            - Azure/azure-logicapps-team
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: LOUIS
+        then:
+        - mentionUsers:
+            mentionees:
+            - minamnmik
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Machine Learning
+        then:
+        - mentionUsers:
+            mentionees:
+            - azureml-github
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Machine Learning Compute
+        then:
+        - mentionUsers:
+            mentionees:
+            - azureml-github
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Machine Learning Experimentation
+        then:
+        - mentionUsers:
+            mentionees:
+            - aashishb
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Managed Services
+        then:
+        - mentionUsers:
+            mentionees:
+            - Lighthouse-Azure
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: MariaDB
+        then:
+        - mentionUsers:
+            mentionees:
+            - ambhatna
+            - savjani
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Marketplace Ordering
+        then:
+        - mentionUsers:
+            mentionees:
+            - prbansa
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Media Services
+        then:
+        - mentionUsers:
+            mentionees:
+            - akucer
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Migrate
+        then:
+        - mentionUsers:
+            mentionees:
+            - shijojoy
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Mobile Engagement
+        then:
+        - mentionUsers:
+            mentionees:
+            - kpiteira
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Monitor
+        then:
+        - mentionUsers:
+            mentionees:
+            - SameergMS
+            - dadunl
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Monitor - Autoscale
+        then:
+        - mentionUsers:
+            mentionees:
+            - AzMonEssential
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Monitor - ActivityLogs
+        then:
+        - mentionUsers:
+            mentionees:
+            - AzMonEssential
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Monitor - Metrics
+        then:
+        - mentionUsers:
+            mentionees:
+            - AzMonEssential
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Monitor - Diagnostic Settings
+        then:
+        - mentionUsers:
+            mentionees:
+            - AzMonEssential
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Monitor - Alerts
+        then:
+        - mentionUsers:
+            mentionees:
+            - AzmonAlerts
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Monitor - ActionGroups
+        then:
+        - mentionUsers:
+            mentionees:
+            - AzmonActionG
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Monitor - LogAnalytics
+        then:
+        - mentionUsers:
+            mentionees:
+            - AzmonLogA
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Monitor - ApplicationInsights
+        then:
+        - mentionUsers:
+            mentionees:
+            - azmonapplicationinsights
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: MySQL
+        then:
+        - mentionUsers:
+            mentionees:
+            - ambhatna
+            - savjani
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Network
+        then:
+        - mentionUsers:
+            mentionees:
+            - aznetsuppgithub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Network - Application Gateway
+        then:
+        - mentionUsers:
+            mentionees:
+            - appgwsuppgithub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Network - CDN
+        then:
+        - mentionUsers:
+            mentionees:
+            - t-bzhan
+            - gxue
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Network - DDOS Protection
+        then:
+        - mentionUsers:
+            mentionees:
+            - ddossuppgithub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Network - ExpressRoute
+        then:
+        - mentionUsers:
+            mentionees:
+            - exrsuppgithub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Network - Firewall
+        then:
+        - mentionUsers:
+            mentionees:
+            - fwsuppgithub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Network - Front Door
+        then:
+        - mentionUsers:
+            mentionees:
+            - cdnfdsuppgithub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Network - Load Balancer
+        then:
+        - mentionUsers:
+            mentionees:
+            - slbsupportgithub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Network - Virtual Network NAT
+        then:
+        - mentionUsers:
+            mentionees:
+            - vnetsuppgithub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Network - Network Watcher
+        then:
+        - mentionUsers:
+            mentionees:
+            - netwatchsuppgithub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Network - DNS
+        then:
+        - mentionUsers:
+            mentionees:
+            - dnssuppgithub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Network - Traffic Manager
+        then:
+        - mentionUsers:
+            mentionees:
+            - tmsuppgithub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Network - VPN Gateway
+        then:
+        - mentionUsers:
+            mentionees:
+            - vpngwsuppgithub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Notification Hub
+        then:
+        - mentionUsers:
+            mentionees:
+            - tjsomasundaram
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Operational Insights
+        then:
+        - mentionUsers:
+            mentionees:
+            - AzmonLogA
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Policy
+        then:
+        - mentionUsers:
+            mentionees:
+            - aperezcloud
+            - kenieva
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Policy Insights
+        then:
+        - mentionUsers:
+            mentionees:
+            - kenieva
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: PostgreSQL
+        then:
+        - mentionUsers:
+            mentionees:
+            - sunilagarwal
+            - lfittl-msft
+            - sr-msft
+            - niklarin
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Recovery Services Backup
+        then:
+        - mentionUsers:
+            mentionees:
+            - pvrk
+            - adityabalaji-msft
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Recovery Services Site-Recovery
+        then:
+        - mentionUsers:
+            mentionees:
+            - Sharmistha-Rai
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Redis Cache
+        then:
+        - mentionUsers:
+            mentionees:
+            - yegu-ms
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Relay
+        then:
+        - mentionUsers:
+            mentionees:
+            - jfggdl
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Reservations
+        then:
+        - mentionUsers:
+            mentionees:
+            - Rkapso
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Resource Authorization
+        then:
+        - mentionUsers:
+            mentionees:
+            - darshanhs90
+            - AshishGargMicrosoft
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Resource Graph
+        then:
+        - mentionUsers:
+            mentionees:
+            - chiragg4u
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Resource Health
+        then:
+        - mentionUsers:
+            mentionees:
+            - stephbaron
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Scheduler
+        then:
+        - mentionUsers:
+            mentionees:
+            - derek1ee
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Search
+        then:
+        - mentionUsers:
+            mentionees:
+            - brjohnstmsft
+            - bleroy
+            - tjacobhi
+            - markheff
+            - miwelsh
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Security
+        then:
+        - mentionUsers:
+            mentionees:
+            - chlahav
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Service Bus
+        then:
+        - mentionUsers:
+            mentionees:
+            - Saglodha
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Service Fabric
+        then:
+        - mentionUsers:
+            mentionees:
+            - QingChenmsft
+            - vaishnavk
+            - juhacket
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Schema Registry
+        then:
+        - mentionUsers:
+            mentionees:
+            - arerlend
+            - alzimmermsft
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: SignalR
+        then:
+        - mentionUsers:
+            mentionees:
+            - sffamily
+            - chenkennt
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: SQL
+        then:
+        - mentionUsers:
+            mentionees:
+            - azureSQLGitHub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: SQL - VM
+        then:
+        - mentionUsers:
+            mentionees:
+            - azureSQLGitHub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: SQL - Backup & Restore
+        then:
+        - mentionUsers:
+            mentionees:
+            - azureSQLGitHub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: SQL - Data Security
+        then:
+        - mentionUsers:
+            mentionees:
+            - azureSQLGitHub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: SQL - Elastic Jobs
+        then:
+        - mentionUsers:
+            mentionees:
+            - azureSQLGitHub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: SQL - Managed Instance
+        then:
+        - mentionUsers:
+            mentionees:
+            - azureSQLGitHub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: SQL - Replication & Failover
+        then:
+        - mentionUsers:
+            mentionees:
+            - azureSQLGitHub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Storage
+        then:
+        - mentionUsers:
+            mentionees:
+            - xgithubtriage
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Storsimple
+        then:
+        - mentionUsers:
+            mentionees:
+            - anoobbacker
+            - ganzee
+            - manuaery
+            - patelkunal
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Stream Analytics
+        then:
+        - mentionUsers:
+            mentionees:
+            - atpham256
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Subscription
+        then:
+        - mentionUsers:
+            mentionees:
+            - anuragdalmia
+            - shilpigautam
+            - ramaganesan-rg
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Support
+        then:
+        - mentionUsers:
+            mentionees:
+            - shahbj79
+            - mit2nil
+            - aygoya
+            - ganganarayanan
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Synapse
+        then:
+        - mentionUsers:
+            mentionees:
+            - wonner
+            - kevinzz6
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Tables
+        then:
+        - mentionUsers:
+            mentionees:
+            - klaaslanghout
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: TimeseriesInsights
+        then:
+        - mentionUsers:
+            mentionees:
+            - Shipra1Mishra
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: vFXT
+        then:
+        - mentionUsers:
+            mentionees:
+            - zhusijia26
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Web Apps
+        then:
+        - mentionUsers:
+            mentionees:
+            - AzureAppServiceCLI
+            - antcp
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Network - Virtual Network
+        then:
+        - mentionUsers:
+            mentionees:
+            - vnetsuppgithub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Network - Virtual WAN
+        then:
+        - mentionUsers:
+            mentionees:
+            - vwansuppgithub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Network - Network Virtual Appliance
+        then:
+        - mentionUsers:
+            mentionees:
+            - nvasuppgithub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Network - Bastion
+        then:
+        - mentionUsers:
+            mentionees:
+            - bastionsuppgithub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: IoT/CLI
+        then:
+        - mentionUsers:
+            mentionees:
+            - Azure/azure-iot-cli-triage
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Azure.Spring - Cosmos
+        then:
+        - mentionUsers:
+            mentionees:
+            - kushagraThapur
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Network - Private Link
+        then:
+        - mentionUsers:
+            mentionees:
+            - privlinksuppgithub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Azure arc enabled servers
+        then:
+        - mentionUsers:
+            mentionees:
+            - rpsqrd
+            - edyoung
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: SecurityInsights
+        then:
+        - mentionUsers:
+            mentionees:
+            - amirkeren
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Azure Data Explorer
+        then:
+        - mentionUsers:
+            mentionees:
+            - Ilayrn
+            - orhasban
+            - zoharHenMicrosoft
+            - sagivf
+            - Aviv-Yaniv
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Communication
+        then:
+        - mentionUsers:
+            mentionees:
+            - acsdevx-msft
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cost Management and Consumption
+        then:
+        - mentionUsers:
+            mentionees:
+            - ccmaxpcrew
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: ML-AutoML
+        - hasLabel:
+            label: Service Attention
+        then:
+        - mentionUsers:
+            mentionees:
+            - Aniththa
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ML-Hyperdrive
+        then:
+        - mentionUsers:
+            mentionees:
+            - Aniththa
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ML-Compute
+        then:
+        - mentionUsers:
+            mentionees:
+            - nishankgu
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ML-Core UI
+        then:
+        - mentionUsers:
+            mentionees:
+            - abeomor
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ML-Data4ML
+        then:
+        - mentionUsers:
+            mentionees:
+            - SturgeonMi
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ML-Designer
+        then:
+        - mentionUsers:
+            mentionees:
+            - alainli0928
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ML-Data Labeling
+        then:
+        - mentionUsers:
+            mentionees:
+            - kvijaykannan
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ML-Inference
+        then:
+        - mentionUsers:
+            mentionees:
+            - shivanissambare
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ML-MLOps
+        then:
+        - mentionUsers:
+            mentionees:
+            - lostmygithubaccount
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: ML-Pipelines
+        - hasLabel:
+            label: Service Attention
+        then:
+        - mentionUsers:
+            mentionees:
+            - shbijlan
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: ML-Responsible AI
+        - hasLabel:
+            label: Service Attention
+        then:
+        - mentionUsers:
+            mentionees:
+            - minthigpen
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: ML-Reinforcement Learning
+        - hasLabel:
+            label: Service Attention
+        then:
+        - mentionUsers:
+            mentionees:
+            - keijik
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: ML-Training
+        - hasLabel:
+            label: Service Attention
+        then:
+        - mentionUsers:
+            mentionees:
+            - lostmygithubaccount
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: ML-Workspace Management
+        - hasLabel:
+            label: Service Attention
+        then:
+        - mentionUsers:
+            mentionees:
+            - rastala
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Spring Cloud
+        - hasLabel:
+            label: Service Attention
+        then:
+        - mentionUsers:
+            mentionees:
+            - ShichaoQiu
+            - yuwzho
+            - yucwan
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cost Management-Budget
+        then:
+        - mentionUsers:
+            mentionees:
+            - ccmaxpcrew
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Consumption-Budget
+        then:
+        - mentionUsers:
+            mentionees:
+            - ccmaxpcrew
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cost Management-Query
+        then:
+        - mentionUsers:
+            mentionees:
+            - ccmixpdevs
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Consumption-Query
+        then:
+        - mentionUsers:
+            mentionees:
+            - ccmixpdevs
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cost Management-Billing
+        then:
+        - mentionUsers:
+            mentionees:
+            - ccmbpxpcrew
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Consumption-Billing
+        then:
+        - mentionUsers:
+            mentionees:
+            - ccmbpxpcrew
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cost Management-UsageDetailsAndExport
+        then:
+        - mentionUsers:
+            mentionees:
+            - TiagoCrewGitHubIssues
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Consumption-UsageDetailsandExport
+        then:
+        - mentionUsers:
+            mentionees:
+            - TiagoCrewGitHubIssues
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Consumption- RIandShowBack
+        then:
+        - mentionUsers:
+            mentionees:
+            - ccmshowbackdevs
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Serial Console
+        then:
+        - mentionUsers:
+            mentionees:
+            - microsoft/azserialconsole
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Monitor - Exporter
+        - hasLabel:
+            label: Service Attention
+        then:
+        - mentionUsers:
+            mentionees:
+            - cijothomas
+            - reyang
+            - rajkumar-rangaraj
+            - TimothyMothra
+            - vishweshbankwar
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cost Management-RIandShowBack
+        then:
+        - mentionUsers:
+            mentionees:
+            - ccmshowbackdevs
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ContainerApp
+        then:
+        - mentionUsers:
+            mentionees:
+            - calvinsID
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      description: Triage issues to the service team
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - and:
+        - not:
+            activitySenderHasPermission:
+              permission: Write
+        - not:
+            activitySenderHasAssociation:
+              association: Member
+        - not:
+            activitySenderHasAssociation:
+              association: Collaborator
+        - not:
+            activitySenderHasPermission:
+              permission: Admin
+      then:
+      - addLabel:
+          label: customer-reported
+      - addReply:
+          reply: Thank you for your contribution ${issueAuthor}! We will review the pull request and get back to you soon.
+      description: 'Add customer-reported label to PRs from customers '
+    - if:
+      - payloadType: Issues
+      - isAction:
+          action: Opened
+      - and:
+        - not:
+            activitySenderHasPermission:
+              permission: Write
+        - not:
+            activitySenderHasAssociation:
+              association: Member
+        - not:
+            activitySenderHasAssociation:
+              association: Collaborator
+        - not:
+            activitySenderHasPermission:
+              permission: Admin
+      then:
+      - addLabel:
+          label: customer-reported
+      description: Add customer-reported label to issues coming from non-collaborators
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: '[Aa]z network dns'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z network dns'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Network - DNS
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Service Attention
+      description: '[Network DNS] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: '[Aa]z network'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z network'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      - and:
+        - not:
+            titleContains:
+              pattern: az network dns
+              isRegex: True
+        - not:
+            bodyContains:
+              pattern: az network dns
+              isRegex: True
+      then:
+      - addLabel:
+          label: Network
+      - assignTo:
+          users:
+          - necusjz
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Azure CLI Team
+      - addLabel:
+          label: question
+      description: '[Network] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - isOpen
+      - labelAdded:
+          label: CXP Attention
+      - not:
+          hasLabel:
+            label: Service Attention
+      then:
+      - addReply:
+          reply: Thank you for your feedback.  This has been routed to the support team for assistance.
+      description: '[CXP Pilot] CXP Attention Responder'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: '[Aa]z \b(vm|vmss|image|disk|snapshot|disk-encryption-set|disk-access|sig|ppg|capacity|restore-point)\b'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z \b(vm|vmss|image|disk|snapshot|disk-encryption-set|disk-access|sig|ppg|capacity|restore-point)\b'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Compute
+      - assignTo:
+          users:
+          - zhoxing-ms
+          - yanzhudd
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Azure CLI Team
+      - addLabel:
+          label: question
+      description: '[Compute] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: '[Aa]z storage'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z storage'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Storage
+      - assignTo:
+          users:
+          - evelyn-ys
+      - assignTo:
+          users:
+          - calvinhzy
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Azure CLI Team
+      - addLabel:
+          label: question
+      description: '[Storage] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '\b(network|Network|NETWORK|bastion|Bastion|BASTION)\b'
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: yonzhan
+      - requestReview:
+          reviewer: jsntcy
+      - requestReview:
+          reviewer: kairu-ms
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: AllyW
+      - requestReview:
+          reviewer: necusjz
+      - assignTo:
+          users:
+          - necusjz
+      - addLabel:
+          label: Network
+      description: '[Network Monitor Bastion] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '[Aa]z \b(vm|vmss|image|disk|snapshot|disk-encryption-set|disk-access|sig|ppg|capacity|restore-point)\b'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z \b(vm|vmss|image|disk|snapshot|disk-encryption-set|disk-access|sig|ppg|capacity|restore-point)\b'
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: yonzhan
+      - requestReview:
+          reviewer: zhoxing-ms
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: yanzhudd
+      - assignTo:
+          users:
+          - zhoxing-ms
+          - yanzhudd
+      - addLabel:
+          label: Compute
+      description: '[Compute] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '\b([Ss][Tt][Oo][Rr][Aa][Gg][Ee])\b'
+            isRegex: True
+        - bodyContains:
+            pattern: az storage
+            isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: evelyn-ys
+      - requestReview:
+          reviewer: calvinhzy
+      - requestReview:
+          reviewer: yonzhan
+      - assignTo:
+          users:
+          - evelyn-ys
+      - addLabel:
+          label: Storage
+      description: '[Storage] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: '[Aa]z \b(aks|acs|openshift)\b'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z \b(aks|acs|openshift)\b'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: AKS
+      - addLabel:
+          label: CXP Attention
+      - addLabel:
+          label: Auto-Assign
+      description: '[AKS] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: '[Aa]z \b(logicapp)\b'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z \b(logicapp)\b'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Logic App
+      - assignTo:
+          users:
+          - archidda
+      - addLabel:
+          label: Auto-Assign
+      description: '[logicapp] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: '[Aa]z webapp'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z webapp'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Web Apps
+      - addLabel:
+          label: CXP Attention
+      - addLabel:
+          label: Auto-Assign
+      description: '[webapp] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: '\b([Ii][Oo][Tt])\b'
+            isRegex: True
+        - bodyContains:
+            pattern: '\b([Ii][Oo][Tt])\b'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: IoT
+      - addLabel:
+          label: CXP Attention
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: IoT/CLI
+      description: '[iot] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: '[Aa]z spring-cloud'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z spring-cloud'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - addLabel:
+          label: Spring-Cloud
+      description: '[spring-cloud] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az keyvault
+            isRegex: True
+        - bodyContains:
+            pattern: az keyvault
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: KeyVault
+      - assignTo:
+          users:
+          - evelyn-ys
+      - addLabel:
+          label: Azure CLI Team
+      - addLabel:
+          label: question
+      description: '[keyvault] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: '[Aa]z [Mm]onitor'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z [Mm]onitor'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Monitor
+      - assignTo:
+          users:
+          - AllyW
+      - addLabel:
+          label: Azure CLI Team
+      - addLabel:
+          label: question
+      description: '[monitor] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '[Aa]z [Mm]onitor'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z [Mm]onitor'
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: yonzhan
+      - requestReview:
+          reviewer: AllyW
+      - requestReview:
+          reviewer: kairu-ms
+      - requestReview:
+          reviewer: necusjz
+      - assignTo:
+          users:
+          - AllyW
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Monitor
+      description: '[Monitor] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az role
+            isRegex: False
+        - bodyContains:
+            pattern: az role
+            isRegex: False
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: RBAC
+      - assignTo:
+          users:
+          - jiasli
+      - addLabel:
+          label: Azure CLI Team
+      - addLabel:
+          label: question
+      description: '[role] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: '[Aa]z \b(account|group|resource|provider|feature|tag|deployment|policy|lock|managedapp|resourcemanagement)\b'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z \b(account|group|resource|provider|feature|tag|deployment|policy|lock|managedapp|resourcemanagement)\b'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: ARM
+      - assignTo:
+          users:
+          - zhoxing-ms
+      - addLabel:
+          label: Azure CLI Team
+      - addLabel:
+          label: question
+      description: '[arm] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: '[Aa]z \b(ts|bicep|private-link)\b'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z \b(ts|bicep|private-link)\b'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: ARM
+      - addLabel:
+          label: CXP Attention
+      description: '[arm-cxp] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az sql
+            isRegex: True
+        - bodyContains:
+            pattern: az sql
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - addLabel:
+          label: SQL
+      description: '[sql] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az acr
+            isRegex: True
+        - bodyContains:
+            pattern: az acr
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - addLabel:
+          label: Container Registry
+      description: '[acr] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az login
+            isRegex: True
+        - bodyContains:
+            pattern: az login
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Account
+      - assignTo:
+          users:
+          - jiasli
+      - addLabel:
+          label: Azure CLI Team
+      - addLabel:
+          label: question
+      description: '[account] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az \b(container)\b
+            isRegex: True
+        - bodyContains:
+            pattern: az \b(container)\b
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Container Instances
+      - addLabel:
+          label: CXP Attention
+      description: '[container] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: az \b(container)\b
+            isRegex: True
+        - bodyContains:
+            pattern: az \b(container)\b
+            isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: zhoxing-ms
+      - requestReview:
+          reviewer: yanzhudd
+      - assignTo:
+          users:
+          - zhoxing-ms
+      description: '[container] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az functionapp
+            isRegex: True
+        - bodyContains:
+            pattern: az functionapp
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - assignTo:
+          users:
+          - amamounelsayed
+      - assignTo:
+          users:
+          - kaibocai
+      - assignTo:
+          users:
+          - shreyas-gopalakrishna
+      - assignTo:
+          users:
+          - kamperiadis
+      - assignTo:
+          users:
+          - apawast
+      - addLabel:
+          label: Functions
+      - addLabel:
+          label: CXP Attention
+      description: '[functionapp] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: az functionapp
+            isRegex: True
+        - bodyContains:
+            pattern: az functionapp
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: yonzhan
+      - addLabel:
+          label: Auto-Assign
+      - assignTo:
+          users:
+          - zhoxing-ms
+      - addLabel:
+          label: Functions
+      - requestReview:
+          reviewer: zhoxing-ms
+      description: '[functionapp] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az apim
+            isRegex: True
+        - bodyContains:
+            pattern: az apim
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - addLabel:
+          label: API Management
+      description: '[apim] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: 'az \b(devops|repos)\b'
+            isRegex: True
+        - bodyContains:
+            pattern: 'az \b(devops|repos)\b'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - addLabel:
+          label: DevOps
+      description: '[devops] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az \b(ad)\b
+            isRegex: True
+        - bodyContains:
+            pattern: az \b(ad)\b
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Graph
+      - assignTo:
+          users:
+          - jiasli
+      - addLabel:
+          label: Azure CLI Team
+      - addLabel:
+          label: question
+      description: '[graph] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - isAction:
+            action: Opened
+      - or:
+        - titleContains:
+            pattern: az interactive
+            isRegex: False
+        - bodyContains:
+            pattern: az interactive
+            isRegex: False
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Interactive
+      - assignTo:
+          users:
+          - jiasli
+      - addLabel:
+          label: Azure CLI Team
+      - addLabel:
+          label: question
+      description: '[interactive] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - isAction:
+            action: Opened
+      - or:
+        - titleContains:
+            pattern: az upgrade
+            isRegex: False
+        - bodyContains:
+            pattern: az upgrade
+            isRegex: False
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Upgrade
+      - assignTo:
+          users:
+          - jiasli
+      - addLabel:
+          label: Azure CLI Team
+      - addLabel:
+          label: question
+      description: '[upgrade] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - isAction:
+            action: Opened
+      - or:
+        - titleContains:
+            pattern: az servicebus
+            isRegex: True
+        - bodyContains:
+            pattern: az servicebus
+            isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Service Bus
+      - addLabel:
+          label: CXP Attention
+      description: '[servicebus] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - isAction:
+            action: Opened
+      - or:
+        - titleContains:
+            pattern: az ml
+            isRegex: True
+        - bodyContains:
+            pattern: az ml
+            isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - addLabel:
+          label: Machine Learning
+      description: '[machine learning] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - isAction:
+            action: Opened
+      - or:
+        - titleContains:
+            pattern: az lab
+            isRegex: False
+        - bodyContains:
+            pattern: az lab
+            isRegex: False
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - addLabel:
+          label: Devtestlab
+      description: '[devtestlab] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - isAction:
+            action: Opened
+      - or:
+        - titleContains:
+            pattern: az config
+            isRegex: False
+        - bodyContains:
+            pattern: az config
+            isRegex: False
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Configure
+      - assignTo:
+          users:
+          - jiasli
+      - addLabel:
+          label: Azure CLI Team
+      - addLabel:
+          label: question
+      description: '[config] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - isAction:
+            action: Opened
+      - or:
+        - titleContains:
+            pattern: az rest
+            isRegex: False
+        - bodyContains:
+            pattern: az rest
+            isRegex: False
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - assignTo:
+          users:
+          - jiasli
+      description: '[rest] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - isAction:
+            action: Opened
+      - or:
+        - titleContains:
+            pattern: az netappfiles
+            isRegex: True
+        - bodyContains:
+            pattern: az netappfiles
+            isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - addLabel:
+          label: NetAppFiles
+      description: '[netappfiles] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - isAction:
+            action: Opened
+      - or:
+        - titleContains:
+            pattern: az cosmosdb
+            isRegex: True
+        - bodyContains:
+            pattern: az cosmosdb
+            isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - addLabel:
+          label: Cosmos
+      description: '[cosmosdb] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - isAction:
+            action: Opened
+      - or:
+        - titleContains:
+            pattern: az staticwebapp
+            isRegex: True
+        - bodyContains:
+            pattern: az staticwebapp
+            isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - assignTo:
+          users:
+          - sulabh-msft
+      - assignTo:
+          users:
+          - vivekjilla
+      - assignTo:
+          users:
+          - joslinmicrosoft
+      - assignTo:
+          users:
+          - mkarmark
+      - addLabel:
+          label: staticwebapp
+      description: '[staticwebapp] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '[Aa]z \b(account|group|resource|provider|feature|tag|deployment|ts|policy|lock|managedapp|bicep|resourcemanagement|private-link)\b'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z \b(account|group|resource|provider|feature|tag|deployment|ts|policy|lock|managedapp|bicep|resourcemanagement|private-link)\b'
+            isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: zhoxing-ms
+      - requestReview:
+          reviewer: yonzhan
+      - assignTo:
+          users:
+          - zhoxing-ms
+      - addLabel:
+          label: ARM
+      description: '[arm] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: az login
+            isRegex: False
+        - bodyContains:
+            pattern: az login
+            isRegex: False
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: jiasli
+      - requestReview:
+          reviewer: yonzhan
+      - assignTo:
+          users:
+          - jiasli
+      - addLabel:
+          label: Account
+      description: '[account] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '\b(keyvault|Keyvault|KEYVAULT)\b'
+            isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: evelyn-ys
+      - requestReview:
+          reviewer: yonzhan
+      - assignTo:
+          users:
+          - evelyn-ys
+      - addLabel:
+          label: KeyVault
+      description: '[keyvault] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '\b(aks|Aks|AKS|acs|Acs|ACS|openshift|Openshift|OPENSHIFT)\b'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z \b(aks|acs|openshift)\b'
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: zhoxing-ms
+      - requestReview:
+          reviewer: yanzhudd
+      - assignTo:
+          users:
+          - zhoxing-ms
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: yonzhan
+      - requestReview:
+          reviewer: FumingZhang
+      - addLabel:
+          label: AKS
+      description: '[aks] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '\b(role|Role|ROLE)\b'
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: jiasli
+      - requestReview:
+          reviewer: yonzhan
+      - addLabel:
+          label: Auto-Assign
+      - assignTo:
+          users:
+          - jiasli
+      - addLabel:
+          label: RBAC
+      description: '[role] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '\b(packaging|Packaging|PACKAGING)\b'
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: jiasli
+      - requestReview:
+          reviewer: wangzelin007
+      - requestReview:
+          reviewer: yonzhan
+      - requestReview:
+          reviewer: bebound
+      - addLabel:
+          label: Auto-Assign
+      - assignTo:
+          users:
+          - bebound
+      - addLabel:
+          label: Packaging
+      description: '[Packaging] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - isAction:
+            action: Opened
+      - or:
+        - titleContains:
+            pattern: az eventgrid
+            isRegex: True
+        - bodyContains:
+            pattern: az eventgrid
+            isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - addLabel:
+          label: Event Grid
+      description: '[eventgrid] auto assign labels and users based on issue description. '
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '\b([Ii][Oo][Tt])\b'
+            isRegex: True
+        - bodyContains:
+            pattern: '\b([Ii][Oo][Tt])\b'
+            isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: zhoxing-ms
+      - requestReview:
+          reviewer: yanzhudd
+      - requestReview:
+          reviewer: yonzhan
+      - assignTo:
+          users:
+          - zhoxing-ms
+      - addLabel:
+          label: IoT
+      - addLabel:
+          label: IoT/CLI
+      description: '[iot] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - isAction:
+            action: Opened
+      - or:
+        - titleContains:
+            pattern: az automation
+            isRegex: False
+        - bodyContains:
+            pattern: az automation
+            isRegex: False
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - addLabel:
+          label: Automation
+      description: '[automation] auto assign labels and users based on issue description. '
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: az appconfig
+            isRegex: True
+        - bodyContains:
+            pattern: az appconfig
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: yanzhudd
+      - requestReview:
+          reviewer: zhoxing-ms
+      - requestReview:
+          reviewer: yonzhan
+      - assignTo:
+          users:
+          - zhoxing-ms
+      - requestReview:
+          reviewer: jsntcy
+      - requestReview:
+          reviewer: avanigupta
+      - addLabel:
+          label: App Configuration
+      - addLabel:
+          label: Auto-Assign
+      description: '[appconfig] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - titleContains:
+          pattern: '\b(acr|Acr|ACR)\b'
+          isRegex: True
+      then:
+      - requestReview:
+          reviewer: wangzelin007
+      - requestReview:
+          reviewer: zhoxing-ms
+      - requestReview:
+          reviewer: yonzhan
+      - assignTo:
+          users:
+          - zhoxing-ms
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Container Registry
+      description: '[acr] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - titleContains:
+          pattern: '\b(servicebus|Servicebus|SERVICEBUS|ServiceBus|serviceBus)\b'
+          isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Service Bus
+      - requestReview:
+          reviewer: evelyn-ys
+      - requestReview:
+          reviewer: calvinhzy
+      - requestReview:
+          reviewer: yonzhan
+      - assignTo:
+          users:
+          - evelyn-ys
+      description: '[servicebus] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - titleContains:
+          pattern: '\b(ci|Ci|CI)\b'
+          isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CI
+      - requestReview:
+          reviewer: wangzelin007
+      - requestReview:
+          reviewer: yonzhan
+      - requestReview:
+          reviewer: jiasli
+      - requestReview:
+          reviewer: kairu-ms
+      - requestReview:
+          reviewer: jsntcy
+      - requestReview:
+          reviewer: bebound
+      - assignTo:
+          users:
+          - wangzelin007
+      description: '[ci] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - titleContains:
+          pattern: '\b(core|Core|CORE)\b'
+          isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Core
+      - requestReview:
+          reviewer: jiasli
+      - requestReview:
+          reviewer: yonzhan
+      - assignTo:
+          users:
+          - jiasli
+      description: '[core] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '\b(rdbms|Rdbms|RDBMS)\b'
+            isRegex: True
+        - titleContains:
+            pattern: '[Aa]z mysql'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z mysql'
+            isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: evelyn-ys
+      - requestReview:
+          reviewer: yonzhan
+      - requestReview:
+          reviewer: calvinhzy
+      - requestReview:
+          reviewer: yonzhan
+      - assignTo:
+          users:
+          - evelyn-ys
+      description: '[rdbms] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - titleContains:
+          pattern: '\b(sql|Sql|SQL)\b'
+          isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: SQL
+      - requestReview:
+          reviewer: evelyn-ys
+      - requestReview:
+          reviewer: yonzhan
+      - requestReview:
+          reviewer: calvinhzy
+      - assignTo:
+          users:
+          - evelyn-ys
+      description: '[sql] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '\b(botservice|Botservice|BOTSERVICE|botService|BotService)\b'
+            isRegex: True
+        - titleContains:
+            pattern: '[bB]ot [sS]ervice'
+            isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: kairu-ms
+      - requestReview:
+          reviewer: yonzhan
+      - requestReview:
+          reviewer: jsntcy
+      - assignTo:
+          users:
+          - kairu-ms
+      description: '[botservice] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - titleContains:
+          pattern: '\b(aladdin|Aladdin|ALADDIN)\b'
+          isRegex: True
+      then:
+      - requestReview:
+          reviewer: kairu-ms
+      - requestReview:
+          reviewer: jsntcy
+      - requestReview:
+          reviewer: yonzhan
+      - assignTo:
+          users:
+          - kairu-ms
+      - addLabel:
+          label: Auto-Assign
+      description: '[aladdin] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - isAction:
+            action: Opened
+      - or:
+        - titleContains:
+            pattern: az cdn
+            isRegex: True
+        - bodyContains:
+            pattern: az cdn
+            isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Network
+      - addLabel:
+          label: Network - CDN
+      - addLabel:
+          label: CXP Attention
+      description: '[cdn] auto assign labels and users based on issue description. '
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '[Cc][Oo][Ss][Mm][Oo][Ss][Dd][Bb]'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Cc][Oo][Ss][Mm][Oo][Ss][Dd][Bb]'
+            isRegex: True
+      then:
+      - addLabel:
+          label: Cosmos
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: evelyn-ys
+      - requestReview:
+          reviewer: calvinhzy
+      - requestReview:
+          reviewer: yonzhan
+      - assignTo:
+          users:
+          - evelyn-ys
+      description: '[cosmosdb] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - isAction:
+            action: Opened
+      - or:
+        - titleContains:
+            pattern: az redis
+            isRegex: True
+        - bodyContains:
+            pattern: az redis
+            isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - addLabel:
+          label: Redis Cache
+      description: '[redis] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '\b([Rr][Ee][Dd][Ii][Ss])\b'
+            isRegex: True
+        - bodyContains:
+            pattern: '\b([Rr][Ee][Dd][Ii][Ss])\b'
+            isRegex: True
+      then:
+      - addLabel:
+          label: Redis Cache
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: evelyn-ys
+      - requestReview:
+          reviewer: jsntcy
+      - requestReview:
+          reviewer: yonzhan
+      - assignTo:
+          users:
+          - evelyn-ys
+      - requestReview:
+          reviewer: zhoxing-ms
+      - requestReview:
+          reviewer: kairu-ms
+      description: '[redis] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - isAction:
+            action: Opened
+      - or:
+        - titleContains:
+            pattern: az sf
+            isRegex: True
+        - bodyContains:
+            pattern: az sf
+            isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - addLabel:
+          label: Service Fabric
+      description: '[Service Fabric] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '\b([Ss]ervice ?[Ff]abric)\b'
+            isRegex: True
+        - bodyContains:
+            pattern: '\b([Ss]ervice ?[Ff]abric)\b'
+            isRegex: True
+      then:
+      - addLabel:
+          label: Service Fabric
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: zhoxing-ms
+      - requestReview:
+          reviewer: ' jsntcy'
+      - requestReview:
+          reviewer: yonzhan
+      - assignTo:
+          users:
+          - zhoxing-ms
+      description: '[Service Fabric] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - isAction:
+            action: Opened
+      - or:
+        - titleContains:
+            pattern: az ssh
+            isRegex: True
+        - bodyContains:
+            pattern: az ssh
+            isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: VM SSH
+      - addLabel:
+          label: CXP Attention
+      - addLabel:
+          label: SSH
+      description: '[ssh] auto assign labels and users based on issue description. '
+    - if:
+      - payloadType: Issues
+      - or:
+        - isAction:
+            action: Opened
+      - or:
+        - titleContains:
+            pattern: az postgres
+            isRegex: True
+        - bodyContains:
+            pattern: az postgres
+            isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - addLabel:
+          label: PostgreSQL
+      description: '[postgres] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - isAction:
+            action: Opened
+      - or:
+        - titleContains:
+            pattern: az synapse
+            isRegex: True
+        - bodyContains:
+            pattern: az synapse
+            isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - addLabel:
+          label: Synapse
+      description: '[synapse] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '[Aa]z eventhubs'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z eventhubs'
+            isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Event Hubs
+      - requestReview:
+          reviewer: evelyn-ys
+      - requestReview:
+          reviewer: calvinhzy
+      - assignTo:
+          users:
+          - evelyn-ys
+      - requestReview:
+          reviewer: yonzhan
+      description: '[EventHub] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az portal
+            isRegex: True
+        - bodyContains:
+            pattern: az portal
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Portal
+      - assignTo:
+          users:
+          - jsntcy
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Azure CLI Team
+      - addLabel:
+          label: question
+      description: '[portal] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '\b([Pp][Oo][Rr][Tt][Aa][Ll])\b'
+            isRegex: True
+        - bodyContains:
+            pattern: '\b([Pp][Oo][Rr][Tt][Aa][Ll])\b'
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: yonzhan
+      - requestReview:
+          reviewer: jsntcy
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: wangzelin007
+      - assignTo:
+          users:
+          - jsntcy
+      - addLabel:
+          label: Portal
+      description: '[portal] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: 'az webapp'
+            isRegex: True
+        - bodyContains:
+            pattern: 'az webapp'
+            isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: jsntcy
+      - requestReview:
+          reviewer: zhoxing-ms
+      - requestReview:
+          reviewer: yanzhudd
+      - assignTo:
+          users:
+          - zhoxing-ms
+      - requestReview:
+          reviewer: yonzhan
+      - addLabel:
+          label: Web Apps
+      - requestReview:
+          reviewer: wangzelin007
+      description: '[webapp] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: az \b(ad)\b
+            isRegex: True
+        - bodyContains:
+            pattern: az \b(ad)\b
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: yonzhan
+      - requestReview:
+          reviewer: jiasli
+      - addLabel:
+          label: Auto-Assign
+      - assignTo:
+          users:
+          - jiasli
+      - addLabel:
+          label: Graph
+      - requestReview:
+          reviewer: evelyn-ys
+      - requestReview:
+          reviewer: calvinhzy
+      description: '[graph] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: '\b([Ii][Nn][Ss][Tt][Aa][Ll][Ll])\b'
+            isRegex: True
+        - bodyContains:
+            pattern: '\b([Ii][Nn][Ss][Tt][Aa][Ll][Ll])\b'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Installation
+      - assignTo:
+          users:
+          - jiasli
+      description: '[install] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '\b([Ii][Nn][Ss][Tt][Aa][Ll][Ll])\b'
+            isRegex: True
+        - bodyContains:
+            pattern: '\b([Ii][Nn][Ss][Tt][Aa][Ll][Ll])\b'
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: yonzhan
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: wangzelin007
+      - assignTo:
+          users:
+          - jiasli
+      - addLabel:
+          label: Installation
+      - requestReview:
+          reviewer: jiasli
+      - requestReview:
+          reviewer: jsntcy
+      - requestReview:
+          reviewer: jiasli
+      description: '[install] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - isAction:
+            action: Opened
+      - or:
+        - titleContains:
+            pattern: az pipelines
+            isRegex: True
+        - bodyContains:
+            pattern: az pipelines
+            isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - addLabel:
+          label: Pipelines
+      - addLabel:
+          label: DevOps
+      description: '[pipelines] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '\b([Aa][Pp][Ii] ?[Mm]([Aa][Nn][Aa][Gg][Ee][Mm][Ee][Nn][Tt])?)\b'
+            isRegex: True
+        - bodyContains:
+            pattern: '\b([Aa][Pp][Ii] ?[Mm]([Aa][Nn][Aa][Gg][Ee][Mm][Ee][Nn][Tt])?)\b'
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: yonzhan
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: yanzhudd
+      - assignTo:
+          users:
+          - zhoxing-ms
+      - addLabel:
+          label: API Management
+      - requestReview:
+          reviewer: zhoxing-ms
+      description: '[apim] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: '[Aa]z identity'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z identity'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Managed Identity
+      - assignTo:
+          users:
+          - zhoxing-ms
+      - addLabel:
+          label: Azure CLI Team
+      - addLabel:
+          label: question
+      description: '[managed identity] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '[Aa]z identity'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z identity'
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: yonzhan
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: wangzelin007
+      - assignTo:
+          users:
+          - zhoxing-ms
+      - addLabel:
+          label: Managed Identity
+      - requestReview:
+          reviewer: zhoxing-ms
+      description: '[managed identity] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: '[Aa]zure [Aa]ctive [Dd]irectory'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]zure [Aa]ctive [Dd]irectory'
+            isRegex: True
+        - titleContains:
+            pattern: '\b(AAD)\b'
+            isRegex: True
+        - bodyContains:
+            pattern: '\b(AAD)\b'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: AAD
+      - assignTo:
+          users:
+          - jiasli
+      description: '[AAD] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '[Aa]zure [Aa]ctive [Dd]irectory'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]zure [Aa]ctive [Dd]irectory'
+            isRegex: True
+        - titleContains:
+            pattern: '\b(AAD)\b'
+            isRegex: True
+        - bodyContains:
+            pattern: '\b(AAD)\b'
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: yonzhan
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: wangzelin007
+      - assignTo:
+          users:
+          - jiasli
+      - addLabel:
+          label: AAD
+      - requestReview:
+          reviewer: jiasli
+      description: '[AAD] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az network bastion
+            isRegex: True
+        - bodyContains:
+            pattern: az network bastion
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - addLabel:
+          label: Network - Bastion
+      description: '[network bastion] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '\b([Ee]vent ?[Gg]rid)\b'
+            isRegex: True
+        - bodyContains:
+            pattern: '\b([Ee]vent ?[Gg]rid)\b'
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: yonzhan
+      - addLabel:
+          label: Auto-Assign
+      - assignTo:
+          users:
+          - evelyn-ys
+      - addLabel:
+          label: Event Grid
+      - requestReview:
+          reviewer: calvinhzy
+      - requestReview:
+          reviewer: evelyn-ys
+      description: '[eventgrid] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az desktopvirtualization
+            isRegex: True
+        - bodyContains:
+            pattern: az desktopvirtualization
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Desktop Virtualization
+      - assignTo:
+          users:
+          - wangzelin007
+      description: '[desktopvirtualization] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '[Dd]esktop[Vv]irtualization'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Dd]esktop[Vv]irtualization'
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: yonzhan
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: wangzelin007
+      - assignTo:
+          users:
+          - wangzelin007
+      - addLabel:
+          label: Desktop Virtualization
+      - requestReview:
+          reviewer: jsntcy
+      - requestReview:
+          reviewer: kairu-ms
+      description: '[desktopvirtualization] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az backup
+            isRegex: True
+        - bodyContains:
+            pattern: az backup
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Recovery Services Backup
+      - addLabel:
+          label: CXP Attention
+      description: '[Backup] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '\b([Bb]ackup)\b'
+            isRegex: True
+        - bodyContains:
+            pattern: '\b([Bb]ackup)\b'
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: yonzhan
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: wangzelin007
+      - assignTo:
+          users:
+          - zhoxing-ms
+      - addLabel:
+          label: Backup
+      - requestReview:
+          reviewer: jsntcy
+      - requestReview:
+          reviewer: zhoxing-ms
+      description: '[backup] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az containerapp
+            isRegex: True
+        - bodyContains:
+            pattern: az containerapp
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: ContainerApp
+      - addLabel:
+          label: CXP Attention
+      description: '[container app] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '\b([Cc]ontainer ?[Aa]pps?)\b'
+            isRegex: True
+        - bodyContains:
+            pattern: '\b([Cc]ontainer ?[Aa]pps?)\b'
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: yonzhan
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: wangzelin007
+      - requestReview:
+          reviewer: yanzhudd
+      - assignTo:
+          users:
+          - zhoxing-ms
+      - addLabel:
+          label: ContainerApp
+      - requestReview:
+          reviewer: zhoxing-ms
+      - requestReview:
+          reviewer: jsntcy
+      - requestReview:
+          reviewer: ruslany
+      - requestReview:
+          reviewer: sanchitmehta
+      - requestReview:
+          reviewer: ebencarek
+      - requestReview:
+          reviewer: JennyLawrance
+      - requestReview:
+          reviewer: howang-ms
+      - requestReview:
+          reviewer: vinisoto
+      - requestReview:
+          reviewer: chinadragon0515
+      - requestReview:
+          reviewer: vturecek
+      - requestReview:
+          reviewer: torosent
+      - requestReview:
+          reviewer: pagariyaalok
+      - requestReview:
+          reviewer: Juliehzl
+      - requestReview:
+          reviewer: jijohn14
+      - requestReview:
+          reviewer: Greedygre
+      description: '[container app] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az batch
+            isRegex: True
+        - bodyContains:
+            pattern: az batch
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Batch
+      - addLabel:
+          label: CXP Attention
+      description: '[batch] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '\b([Bb][Aa][Tt][Cc][Hh])\b '
+            isRegex: True
+        - bodyContains:
+            pattern: '\b([Bb][Aa][Tt][Cc][Hh])\b '
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: yonzhan
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: wangzelin007
+      - assignTo:
+          users:
+          - zhoxing-ms
+      - addLabel:
+          label: Batch
+      - requestReview:
+          reviewer: jsntcy
+      - requestReview:
+          reviewer: zhoxing-ms
+      description: '[batch] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '\b([Nn][Ee][Tt][Aa][Pp][Pp][Ff][Ii][Ll][Ee][Ss]?)\b'
+            isRegex: True
+        - bodyContains:
+            pattern: '\b([Nn][Ee][Tt][Aa][Pp][Pp][Ff][Ii][Ll][Ee][Ss]?)\b'
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: yonzhan
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: kairu-ms
+      - assignTo:
+          users:
+          - kairu-ms
+      - addLabel:
+          label: NetAppFiles
+      - requestReview:
+          reviewer: jiasli
+      - requestReview:
+          reviewer: ' jsntcy'
+      description: '[netappfiles] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az sql vm
+            isRegex: True
+        - bodyContains:
+            pattern: az sql vm
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: SQL - VM
+      - addLabel:
+          label: CXP Attention
+      description: '[SqlVirtualMachine] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '\b([Ss]ql[Vv](irtual)?[Mm](achine)?)\b'
+            isRegex: True
+        - bodyContains:
+            pattern: '\b([Ss]ql[Vv](irtual)?[Mm](achine)?)\b'
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: yonzhan
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: evelyn-ys
+      - assignTo:
+          users:
+          - evelyn-ys
+      - addLabel:
+          label: SQL - VM
+      - requestReview:
+          reviewer: calvinhzy
+      description: '[SqlVirtualMachine] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: '[Aa]z afd'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z afd'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Network - Front Door
+      - addLabel:
+          label: CXP Attention
+      description: '[Azure Front Door] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '[Aa]z [Dd]ataprotection'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z [Dd]ataprotection'
+            isRegex: True
+        - titleContains:
+            pattern: '[Aa]z afd'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z afd'
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: yonzhan
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: kairu-ms
+      - assignTo:
+          users:
+          - necusjz
+      - addLabel:
+          label: Network - Front Door
+      - requestReview:
+          reviewer: wangzelin007
+      - requestReview:
+          reviewer: jsntcy
+      - requestReview:
+          reviewer: necusjz
+      description: '[Azure Front Door] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '\b([Cc][Dd][Nn])\b'
+            isRegex: True
+        - bodyContains:
+            pattern: '\b([Cc][Dd][Nn])\b'
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: yonzhan
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: kairu-ms
+      - assignTo:
+          users:
+          - necusjz
+      - addLabel:
+          label: Network - CDN
+      - requestReview:
+          reviewer: jsntcy
+      - requestReview:
+          reviewer: necusjz
+      - addLabel:
+          label: Network
+      description: '[cdn] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: '[Aa]z ams'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z ams'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Media Services
+      - addLabel:
+          label: CXP Attention
+      description: '[ams] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '[Aa]z ams'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z ams'
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: yonzhan
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: kairu-ms
+      - assignTo:
+          users:
+          - kairu-ms
+      - addLabel:
+          label: Media Services
+      - requestReview:
+          reviewer: jiasli
+      - requestReview:
+          reviewer: jsntcy
+      description: '[ams] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: '[Aa]z eventhubs'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z eventhubs'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Event Hubs
+      - addLabel:
+          label: CXP Attention
+      description: '[eventhub] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: '[Aa]z cognitiveservices'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z cognitiveservices'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Cognitive Services
+      - addLabel:
+          label: CXP Attention
+      description: '[Cognitive Services] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '[Aa]z cognitiveservices'
+            isRegex: True
+        - titleContains:
+            pattern: '[Cognitive Services]'
+            isRegex: False
+        - bodyContains:
+            pattern: '[Aa]z cognitiveservices'
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: yonzhan
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: kairu-ms
+      - assignTo:
+          users:
+          - kairu-ms
+      - addLabel:
+          label: Cognitive Services
+      - requestReview:
+          reviewer: wangzelin007
+      - requestReview:
+          reviewer: jsntcy
+      - requestReview:
+          reviewer: jiasli
+      description: '[Cognitive Services] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az appconfig
+            isRegex: True
+        - bodyContains:
+            pattern: az appconfig
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: App Configuration
+      - addLabel:
+          label: CXP Attention
+      description: '[appconfig] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '\b([Ss][Yy][Nn][Aa][Pp][Ss][Ee])\b'
+            isRegex: True
+        - bodyContains:
+            pattern: '\b([Ss][Yy][Nn][Aa][Pp][Ss][Ee])\b'
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: yonzhan
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: jsntcy
+      - assignTo:
+          users:
+          - jsntcy
+      - addLabel:
+          label: Synapse
+      - requestReview:
+          reviewer: evelyn-ys
+      description: '[synapse] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: '[Aa]z mysql'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z mysql'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: MySQL
+      - addLabel:
+          label: CXP Attention
+      description: '[mysql] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: '[Aa]z logic'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z logic'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Logic App
+      - addLabel:
+          label: CXP Attention
+      description: '[logic app] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '[Aa]z logic'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z logic'
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: yonzhan
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: jsntcy
+      - assignTo:
+          users:
+          - jsntcy
+      - addLabel:
+          label: Logic App
+      - requestReview:
+          reviewer: wangzelin007
+      description: '[logic app] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '\b(rdbms|Rdbms|RDBMS)\b'
+            isRegex: True
+        - bodyContains:
+            pattern: '\b(rdbms|Rdbms|RDBMS)\b'
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: yonzhan
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: evelyn-ys
+      - assignTo:
+          users:
+          - evelyn-ys
+      - requestReview:
+          reviewer: calvinhzy
+      description: '[rdbms] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az datafactory
+            isRegex: True
+        - bodyContains:
+            pattern: az datafactory
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Data Factory
+      - assignTo:
+          users:
+          - evelyn-ys
+      description: '[Data Factory] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: az datafactory
+            isRegex: True
+        - bodyContains:
+            pattern: az datafactory
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: yonzhan
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: evelyn-ys
+      - assignTo:
+          users:
+          - evelyn-ys
+      - addLabel:
+          label: Data Factory
+      - requestReview:
+          reviewer: calvinhzy
+      description: '[Data Factory] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: '[Aa]z arcdata'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z arcdata'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: arcdata
+      - addLabel:
+          label: CXP Attention
+      description: '[acrdata] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: '[Rr]eservations?'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Rr]eservations?'
+            isRegex: True
+      then:
+      - requestReview:
+          reviewer: yonzhan
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: kairu-ms
+      - assignTo:
+          users:
+          - kairu-ms
+      - addLabel:
+          label: Reservations
+      description: '[Reservations] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az backup restore
+            isRegex: True
+        - bodyContains:
+            pattern: az backup restore
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Recovery Services Backup
+      - addLabel:
+          label: CXP Attention
+      description: '[backup restore] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az bot
+            isRegex: True
+        - bodyContains:
+            pattern: az bot
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Bot Services
+      - addLabel:
+          label: CXP Attention
+      description: '[botservice] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az advisor
+            isRegex: True
+        - bodyContains:
+            pattern: az advisor
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Advisor
+      - addLabel:
+          label: CXP Attention
+      description: '[Advisor] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: az appservice ase
+            isRegex: False
+        - bodyContains:
+            pattern: az appservice ase
+            isRegex: False
+      then:
+      - addLabel:
+          label: app-service-ase
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - assignTo:
+          users:
+          - madsd
+      description: '[appservice-ase] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: az webapp auth
+            isRegex: False
+        - bodyContains:
+            pattern: az webapp auth
+            isRegex: False
+      then:
+      - addLabel:
+          label: app-service-authentication
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - assignTo:
+          users:
+          - Hamster-Huey
+      description: '[appservice-authentication] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: (az webapp config backup|az webapp config snapshot)
+            isRegex: True
+        - bodyContains:
+            pattern: (az webapp config backup|az webapp config snapshot)
+            isRegex: True
+      then:
+      - addLabel:
+          label: app-service-backup-restore
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - assignTo:
+          users:
+          - gsethdev
+      description: '[appservice-backup-restore] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: (az appservice domain|az webapp config ssl)
+            isRegex: True
+        - bodyContains:
+            pattern: (az appservice domain|az webapp config ssl)
+            isRegex: True
+      then:
+      - addLabel:
+          label: app-service-certs-domains
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - assignTo:
+          users:
+          - yutanglin16
+      description: '[appservice-certs-domains] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: az webapp deploy
+            isRegex: False
+        - bodyContains:
+            pattern: az webapp deploy
+            isRegex: False
+      then:
+      - addLabel:
+          label: app-service-deployment
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - assignTo:
+          users:
+          - btardif
+      description: '[appservice-deployment]'
+    - if:
+      - payloadType: Issues
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: (az appservice list-locations|az appservice plan|az webapp browse|az webapp config|az webapp connection|az webapp cors|az webapp create|az webapp delete|az webapp deleted|az webapp identity|az webapp list|az webapp list-instances|az webapp list-runtimes|az webapp restart|az webapp scale|az webapp show|az webapp start|az webapp stop|az webapp up|az webapp update|az webapp webjob)
+            isRegex: True
+        - bodyContains:
+            pattern: (az appservice list-locations|az appservice plan|az webapp browse|az webapp config|az webapp connection|az webapp cors|az webapp create|az webapp delete|az webapp deleted|az webapp identity|az webapp list|az webapp list-instances|az webapp list-runtimes|az webapp restart|az webapp scale|az webapp show|az webapp start|az webapp stop|az webapp up|az webapp update|az webapp webjob)
+            isRegex: True
+      then:
+      - addLabel:
+          label: app-service-general
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - assignTo:
+          users:
+          - seligj95
+      description: '[appservice-general]'
+    - if:
+      - payloadType: Issues
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: az appservice kube
+            isRegex: False
+        - bodyContains:
+            pattern: az appservice kube
+            isRegex: False
+      then:
+      - addLabel:
+          label: app-service-kube
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - assignTo:
+          users:
+          - apwestgarth
+      description: '[appservice-kube]'
+    - if:
+      - payloadType: Issues
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: (az webapp log|az webapp scan)
+            isRegex: True
+        - bodyContains:
+            pattern: (az webapp log|az webapp scan)
+            isRegex: True
+      then:
+      - addLabel:
+          label: app-service-logging-monitoring
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - assignTo:
+          users:
+          - yutanglin16
+      description: '[appservice-logging-monitoring]'
+    - if:
+      - payloadType: Issues
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: (az appservice vnet-integration|az webapp config access-restriction|az webapp vnet-integration)
+            isRegex: True
+        - bodyContains:
+            pattern: (az appservice vnet-integration|az webapp config access-restriction|az webapp vnet-integration)
+            isRegex: True
+      then:
+      - addLabel:
+          label: app-service-networking
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - assignTo:
+          users:
+          - madsd
+      description: '[appservice-networking (madsd)]'
+    - if:
+      - payloadType: Issues
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: (az appservice hybrid-connection|az webapp config hostname|az webapp create-remote-connection|az webapp hybrid-connection|az webapp ssh|az webapp traffic-routing)
+            isRegex: True
+        - bodyContains:
+            pattern: (az appservice hybrid-connection|az webapp config hostname|az webapp create-remote-connection|az webapp hybrid-connection|az webapp ssh|az webapp traffic-routing)
+            isRegex: True
+      then:
+      - addLabel:
+          label: app-service-networking
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: CXP Attention
+      - assignTo:
+          users:
+          - madsd
+      description: '[appservice-networking (seligj95)]'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az artifacts
+            isRegex: True
+        - bodyContains:
+            pattern: az artifacts
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Artifacts
+      - addLabel:
+          label: CXP Attention
+      description: '[Artifacts] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az k8s-configuration
+            isRegex: True
+        - bodyContains:
+            pattern: az k8s-configuration
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Kubernetes Configuration
+      - addLabel:
+          label: CXP Attention
+      description: '[Kubernetes Configuration] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: az eventhubs
+            isRegex: True
+        - bodyContains:
+            pattern: az eventhubs
+            isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - requestReview:
+          reviewer: evelyn-ys
+      - requestReview:
+          reviewer: yonzhan
+      - assignTo:
+          users:
+          - evelyn-ys
+      - addLabel:
+          label: Event Hubs
+      description: '[EventHub] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az reservations
+            isRegex: True
+        - bodyContains:
+            pattern: az reservations
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Reservations
+      - addLabel:
+          label: CXP Attention
+      description: '[Reservations] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az stack
+            isRegex: True
+        - bodyContains:
+            pattern: az stack
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: ARM
+      - addLabel:
+          label: CXP Attention
+      description: '[ARM-stack] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az aro
+            isRegex: True
+        - bodyContains:
+            pattern: az aro
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: ARO
+      - addLabel:
+          label: CXP Attention
+      description: '[ARO] auto assign labels and users based on issue description.'
+onFailure: 
+onSuccess: 

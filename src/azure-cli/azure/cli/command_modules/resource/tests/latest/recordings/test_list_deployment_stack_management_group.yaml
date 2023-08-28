@@ -1,0 +1,527 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack mg create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --management-group-id --location --template-file --deny-settings-mode
+        --parameters --yes
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-list-deployment-stack-subscription000001?api-version=2022-08-01-preview
+  response:
+    body:
+      string: '{"error":{"code":"ResourceNotFound","message":"The resource ''cli-test-list-deployment-stack-subscription000001''
+        was not found. For more details please go to https://aka.ms/ARMResourceNotFoundFix"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '197'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jul 2023 21:17:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: '{"location": "westus2", "tags": {}, "properties": {"template": {"$schema":
+      "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {"foo": {"type": "string", "defaultValue":
+      "foo", "metadata": {"description": "description"}}, "bar": {"type": "string",
+      "defaultValue": "bar", "metadata": {"description": "description"}}}, "functions":
+      [], "variables": {}, "resources": [], "outputs": {"foo": {"type": "string",
+      "value": "[parameters(''foo'')]"}, "bar": {"type": "string", "value": "[parameters(''bar'')]"}}},
+      "parameters": {"foo": {"value": "abc"}, "bar": {"value": "xyz"}}, "actionOnUnmanage":
+      {"resources": "detach", "resourceGroups": "detach"}, "deploymentScope": "/subscriptions/00000000-0000-0000-0000-000000000000",
+      "denySettings": {"mode": "None", "applyToChildScopes": false}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack mg create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '850'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name --management-group-id --location --template-file --deny-settings-mode
+        --parameters --yes
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-list-deployment-stack-subscription000001?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"westus2\",\r\n  \"tags\": {},\r\n  \"properties\":
+        {\r\n    \"actionOnUnmanage\": {\r\n      \"resources\": \"detach\",\r\n      \"resourceGroups\":
+        \"detach\",\r\n      \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentScope\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000\",\r\n    \"denySettings\":
+        {\r\n      \"mode\": \"none\",\r\n      \"applyToChildScopes\": false\r\n
+        \   },\r\n    \"parameters\": {\r\n      \"foo\": {\r\n        \"value\":
+        \"abc\",\r\n        \"type\": \"string\"\r\n      },\r\n      \"bar\": {\r\n
+        \       \"value\": \"xyz\",\r\n        \"type\": \"string\"\r\n      }\r\n
+        \   },\r\n    \"resources\": [],\r\n    \"provisioningState\": \"initializing\",\r\n
+        \   \"detachedResources\": [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\":
+        []\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-07-17T21:17:26.760594Z\",\r\n
+        \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-07-17T21:17:26.760594Z\"\r\n  },\r\n
+        \ \"id\": \"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-list-deployment-stack-subscription000001\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-list-deployment-stack-subscription000001\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/94b0f5f4-dc57-4f74-95f9-060145e4dacc?api-version=2022-08-01-preview&t=2023-07-17T21%3a17%3a27&c=MIIHADCCBeigAwIBAgITHgKrh_MjOPKlJyI3cQAAAquH8zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMwNTAzMjMwMjI3WhcNMjQwNDI3MjMwMjI3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL0aEGiuaphgSuY5uOV2Vq0_eRkHBJqscdw27iqFhwraH1zb3mBkoUFiny-rrTyBBP3_bOrcZ_lLcbY9xgIxpT7zmZxRd3CjCOnqhX_Mu2c6G-yLOTEOcf9UT7H4fxtBr440gcpLopYy7mt3ypUGOaPFP-EO7qaBh0SCIeb-x5DPqdjLf2_f9i_vLuGfQWpz9jEsyWeFg3i00s5m52FdCkGVTyxr2XITKuv7ETVYww5ZP2jkCAvfFbjir_v66K6JNRThXGIG93Pn4f15mQRm3DNai4_a_ifWA1lGYuGRKzNakLghySxYnnAFUWzp1KryweBqfWL3hFrmnG8GAi_S4ukCAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBT-pF8vtDMyjw9lrgG37vafInn-qzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAI29kw4VOKOtMxg3qjOuEecung4Kg3KdF9GhZku1Bou1YlnJ0nHSypiq8m_JCm6IV0an3uP_TIcby1BfAaWGq7Ie3v6NWkMQoTE482bQxpak1Z4eIAYrJ0XcMalFjc3ArXgS2G0zV-xBNYjXUZ3ir6D1JPm4ocXJ5QTgZVGkw0xSTlwEDW-nnNkZzMqeGAKtAbEIwQpqfym3LgDK5uQyAYnE2pyDP0AwYWdrb-QAWkxfNfgQgzVgt9pOXvotmhLHmnUt0XRaQQlYkTCi25p1YIQ5nN9_uvRJ17N8E9sF0oRLO5QtIeearVpLaGTS4DAiPmUXMjS25OxMdLMu2E-JNq0&s=p1jou0S6MI1PTyGatpPoBAVdI8ysSQEdRDU_z7fai-rBksU6_gNifJH0E9x6B1hGGpzWI8nTlG-TatB4-J_lHFAOILNbIbcTQjkfqZpydNf4TDusoz_yQH3vPccYtFPqMoH0CXkyUfNvRiGbZeWpW6lyV8kL7jC9Nx-qEWvOkYfjkEF0Kc7r2YsPbaSszlA4q-GE-O4TT5LpsO5Y1aFbGqLf_6BmkWZoZ8n7ppvfAgtFMNV5-88m6QFBbIazUeSyubIB-KL4H_jL-EG0ynPlzGEroEAUwLmnzqGaDQLsVyMP4v6DKMqmdAnyfQOPZmbRwl8FWUKUdq1ylgB8VXfLWA&h=IfTahzZwZlBmgdO1pPDSdtMCh4jOHmZvHXTPwcnKqs8
+      cache-control:
+      - no-cache
+      content-length:
+      - '1289'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jul 2023 21:17:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack mg create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --management-group-id --location --template-file --deny-settings-mode
+        --parameters --yes
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/94b0f5f4-dc57-4f74-95f9-060145e4dacc?api-version=2022-08-01-preview&t=2023-07-17T21%3A17%3A27&c=MIIHADCCBeigAwIBAgITHgKrh_MjOPKlJyI3cQAAAquH8zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMwNTAzMjMwMjI3WhcNMjQwNDI3MjMwMjI3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL0aEGiuaphgSuY5uOV2Vq0_eRkHBJqscdw27iqFhwraH1zb3mBkoUFiny-rrTyBBP3_bOrcZ_lLcbY9xgIxpT7zmZxRd3CjCOnqhX_Mu2c6G-yLOTEOcf9UT7H4fxtBr440gcpLopYy7mt3ypUGOaPFP-EO7qaBh0SCIeb-x5DPqdjLf2_f9i_vLuGfQWpz9jEsyWeFg3i00s5m52FdCkGVTyxr2XITKuv7ETVYww5ZP2jkCAvfFbjir_v66K6JNRThXGIG93Pn4f15mQRm3DNai4_a_ifWA1lGYuGRKzNakLghySxYnnAFUWzp1KryweBqfWL3hFrmnG8GAi_S4ukCAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBT-pF8vtDMyjw9lrgG37vafInn-qzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAI29kw4VOKOtMxg3qjOuEecung4Kg3KdF9GhZku1Bou1YlnJ0nHSypiq8m_JCm6IV0an3uP_TIcby1BfAaWGq7Ie3v6NWkMQoTE482bQxpak1Z4eIAYrJ0XcMalFjc3ArXgS2G0zV-xBNYjXUZ3ir6D1JPm4ocXJ5QTgZVGkw0xSTlwEDW-nnNkZzMqeGAKtAbEIwQpqfym3LgDK5uQyAYnE2pyDP0AwYWdrb-QAWkxfNfgQgzVgt9pOXvotmhLHmnUt0XRaQQlYkTCi25p1YIQ5nN9_uvRJ17N8E9sF0oRLO5QtIeearVpLaGTS4DAiPmUXMjS25OxMdLMu2E-JNq0&s=p1jou0S6MI1PTyGatpPoBAVdI8ysSQEdRDU_z7fai-rBksU6_gNifJH0E9x6B1hGGpzWI8nTlG-TatB4-J_lHFAOILNbIbcTQjkfqZpydNf4TDusoz_yQH3vPccYtFPqMoH0CXkyUfNvRiGbZeWpW6lyV8kL7jC9Nx-qEWvOkYfjkEF0Kc7r2YsPbaSszlA4q-GE-O4TT5LpsO5Y1aFbGqLf_6BmkWZoZ8n7ppvfAgtFMNV5-88m6QFBbIazUeSyubIB-KL4H_jL-EG0ynPlzGEroEAUwLmnzqGaDQLsVyMP4v6DKMqmdAnyfQOPZmbRwl8FWUKUdq1ylgB8VXfLWA&h=IfTahzZwZlBmgdO1pPDSdtMCh4jOHmZvHXTPwcnKqs8
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/94b0f5f4-dc57-4f74-95f9-060145e4dacc\",\r\n
+        \ \"name\": \"94b0f5f4-dc57-4f74-95f9-060145e4dacc\",\r\n  \"status\": \"initializing\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '212'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jul 2023 21:17:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack mg create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --management-group-id --location --template-file --deny-settings-mode
+        --parameters --yes
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/94b0f5f4-dc57-4f74-95f9-060145e4dacc?api-version=2022-08-01-preview&t=2023-07-17T21%3A17%3A27&c=MIIHADCCBeigAwIBAgITHgKrh_MjOPKlJyI3cQAAAquH8zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMwNTAzMjMwMjI3WhcNMjQwNDI3MjMwMjI3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL0aEGiuaphgSuY5uOV2Vq0_eRkHBJqscdw27iqFhwraH1zb3mBkoUFiny-rrTyBBP3_bOrcZ_lLcbY9xgIxpT7zmZxRd3CjCOnqhX_Mu2c6G-yLOTEOcf9UT7H4fxtBr440gcpLopYy7mt3ypUGOaPFP-EO7qaBh0SCIeb-x5DPqdjLf2_f9i_vLuGfQWpz9jEsyWeFg3i00s5m52FdCkGVTyxr2XITKuv7ETVYww5ZP2jkCAvfFbjir_v66K6JNRThXGIG93Pn4f15mQRm3DNai4_a_ifWA1lGYuGRKzNakLghySxYnnAFUWzp1KryweBqfWL3hFrmnG8GAi_S4ukCAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBT-pF8vtDMyjw9lrgG37vafInn-qzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAI29kw4VOKOtMxg3qjOuEecung4Kg3KdF9GhZku1Bou1YlnJ0nHSypiq8m_JCm6IV0an3uP_TIcby1BfAaWGq7Ie3v6NWkMQoTE482bQxpak1Z4eIAYrJ0XcMalFjc3ArXgS2G0zV-xBNYjXUZ3ir6D1JPm4ocXJ5QTgZVGkw0xSTlwEDW-nnNkZzMqeGAKtAbEIwQpqfym3LgDK5uQyAYnE2pyDP0AwYWdrb-QAWkxfNfgQgzVgt9pOXvotmhLHmnUt0XRaQQlYkTCi25p1YIQ5nN9_uvRJ17N8E9sF0oRLO5QtIeearVpLaGTS4DAiPmUXMjS25OxMdLMu2E-JNq0&s=p1jou0S6MI1PTyGatpPoBAVdI8ysSQEdRDU_z7fai-rBksU6_gNifJH0E9x6B1hGGpzWI8nTlG-TatB4-J_lHFAOILNbIbcTQjkfqZpydNf4TDusoz_yQH3vPccYtFPqMoH0CXkyUfNvRiGbZeWpW6lyV8kL7jC9Nx-qEWvOkYfjkEF0Kc7r2YsPbaSszlA4q-GE-O4TT5LpsO5Y1aFbGqLf_6BmkWZoZ8n7ppvfAgtFMNV5-88m6QFBbIazUeSyubIB-KL4H_jL-EG0ynPlzGEroEAUwLmnzqGaDQLsVyMP4v6DKMqmdAnyfQOPZmbRwl8FWUKUdq1ylgB8VXfLWA&h=IfTahzZwZlBmgdO1pPDSdtMCh4jOHmZvHXTPwcnKqs8
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/94b0f5f4-dc57-4f74-95f9-060145e4dacc\",\r\n
+        \ \"name\": \"94b0f5f4-dc57-4f74-95f9-060145e4dacc\",\r\n  \"status\": \"succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '209'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jul 2023 21:17:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack mg create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --management-group-id --location --template-file --deny-settings-mode
+        --parameters --yes
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-list-deployment-stack-subscription000001?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"westus2\",\r\n  \"tags\": {},\r\n  \"properties\":
+        {\r\n    \"actionOnUnmanage\": {\r\n      \"resources\": \"detach\",\r\n      \"resourceGroups\":
+        \"detach\",\r\n      \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-list-deployment-stack-subscri-2023-07-17-21-17-27-9e350\",\r\n
+        \   \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000\",\r\n
+        \   \"duration\": \"PT6.4915508S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"outputs\":
+        {\r\n      \"foo\": {\r\n        \"type\": \"String\",\r\n        \"value\":
+        \"abc\"\r\n      },\r\n      \"bar\": {\r\n        \"type\": \"String\",\r\n
+        \       \"value\": \"xyz\"\r\n      }\r\n    },\r\n    \"parameters\": {\r\n
+        \     \"foo\": {\r\n        \"value\": \"abc\",\r\n        \"type\": \"string\"\r\n
+        \     },\r\n      \"bar\": {\r\n        \"value\": \"xyz\",\r\n        \"type\":
+        \"string\"\r\n      }\r\n    },\r\n    \"resources\": [],\r\n    \"provisioningState\":
+        \"succeeded\",\r\n    \"detachedResources\": [],\r\n    \"deletedResources\":
+        [],\r\n    \"failedResources\": []\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"harshpatel@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
+        \"2023-07-17T21:17:26.760594Z\",\r\n    \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2023-07-17T21:17:26.760594Z\"\r\n
+        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-list-deployment-stack-subscription000001\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-list-deployment-stack-subscription000001\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1681'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jul 2023 21:17:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack mg list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --management-group-id
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks?api-version=2022-08-01-preview
+  response:
+    body:
+      string: '{"value":[{"location":"eastus","tags":{"key1":"value1","key2":"value2"},"properties":{"actionOnUnmanage":{"resources":"detach","resourceGroups":"detach","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/DanteMGStack-2023-02-21-23-46-21-32225","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","description":"A
+        Stack","duration":"PT7.2905581S","denySettings":{"mode":"none","applyToChildScopes":false},"parameters":{"specVersionName":{"value":"StacksSpecVersionMG765"},"specName":{"value":"StacksSpecNameMG765"},"specModName":{"value":"stacksSpecMGtestmod"},"location":{"value":"westus"},"modName":{"value":"stacksMGtestmod"},"subId":{"value":"92722693-40f1-44fe-8c39-9cf6b6353750"},"rgName":{"value":"StacksTestMG765"}},"resources":[],"provisioningState":"failed","detachedResources":[],"deletedResources":[],"failedResources":[],"error":{"code":"DeploymentStackUpdateFailed","message":"One
+        or more stages of the deploymentStack failed. Correlation id: ''2bd36238-e4fc-4617-b2df-e9bac372eadc''","details":[{"code":"DeploymentFailed","message":"At
+        least one resource deployment operation failed. Please list deployment operations
+        for details. Please see https://aka.ms/arm-deployment-operations for usage
+        details.","details":[{"code":"InvalidDeploymentLocation","message":"Invalid
+        deployment location ''eastus''. The deployment ''STACKSMGTESTMOD'' already
+        exists in location ''westus2''."}]}]}},"systemData":{"createdBy":"danted@microsoft.com","createdByType":"User","createdAt":"2023-02-21T23:46:21.0585659Z","lastModifiedBy":"danted@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-02-21T23:46:21.0585659Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/DanteMGStack","type":"Microsoft.Resources/deploymentStacks","name":"DanteMGStack"},{"location":"eastus","properties":{"actionOnUnmanage":{"resources":"detach","resourceGroups":"detach","managementGroups":"detach"},"deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT9.5512353S","denySettings":{"mode":"none","applyToChildScopes":false},"parameters":{"secretName":{"value":"GEN-UNIQUE","type":"string"},"secretValue":{"value":"","type":"secureString"},"keyVaultName":{"value":"DATestGokul","type":"string"},"objectId":{"value":"GEN-AZUREAD-OBJECTID","type":"string"}},"resources":[],"provisioningState":"failed","detachedResources":[],"deletedResources":[],"failedResources":[],"error":{"code":"DeploymentStackDeploymentFailed","message":"One
+        or more resources could not be deployed. Correlation id: ''036af2ca-5d67-4caa-8118-0b6e7f4213d8''.","details":[{"code":"InvalidTemplate","message":"Deployment
+        template validation failed: ''The template resource ''location'' at line ''21''
+        and column ''21'' is not valid: The template function ''RESOURCEGROUP'' is
+        not expected at this location. Please see https://aka.ms/arm-functions for
+        usage details.. Please see https://aka.ms/arm-functions for usage details.''.","details":[],"additionalInfo":[{"type":"TemplateViolation","info":{"lineNumber":21,"linePosition":21,"path":"properties.template.parameters.location"}}]}]}},"systemData":{"createdBy":"gopremra@microsoft.com","createdByType":"User","createdAt":"2023-07-12T22:12:48.4006343Z","lastModifiedBy":"gopremra@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-07-12T22:16:42.0280451Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/mgstack","type":"Microsoft.Resources/deploymentStacks","name":"mgstack"},{"location":"westus2","properties":{"actionOnUnmanage":{"resources":"detach","resourceGroups":"detach","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/check1-2022-11-21-23-05-34-f9fa8","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT6.5182892S","denySettings":{"mode":"none","applyToChildScopes":false},"parameters":{},"resources":[],"provisioningState":"failed","detachedResources":[],"deletedResources":[],"failedResources":[{"error":{"code":"ResourceNotFound","message":"The
+        Resource ''Providers.Test/statefulResources/hpStateful6'' under resource group
+        ''<null>'' was not found. For more details please go to https://aka.ms/ARMResourceNotFoundFix"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Providers.Test/StatefulResources/hpStateful6"},{"error":{"code":"ResourceNotFound","message":"The
+        Resource ''Providers.Test/statefulResources/hpStateful7'' under resource group
+        ''<null>'' was not found. For more details please go to https://aka.ms/ARMResourceNotFoundFix"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Providers.Test/StatefulResources/hpStateful7"}],"error":{"code":"DeploymentStackUpdateFailed","message":"One
+        or more stages of the deploymentStack failed. See snapshot ''/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/check1/snapshots/2022-11-21-23-05-34-f9fa8''
+        for more details. Correlation id: ''d4238c07-ab1e-4413-8c66-8ea611873ffc''","details":[{"code":"DeploymentFailed","message":"At
+        least one resource deployment operation failed. Please list deployment operations
+        for details. Please see https://aka.ms/DeployOperations for usage details.","details":[{"code":"ResourceNotFound","message":"The
+        Resource ''Providers.Test/statefulResources/hpStateful6'' under resource group
+        ''<null>'' was not found. For more details please go to https://aka.ms/ARMResourceNotFoundFix"},{"code":"ResourceNotFound","message":"The
+        Resource ''Providers.Test/statefulResources/hpStateful7'' under resource group
+        ''<null>'' was not found. For more details please go to https://aka.ms/ARMResourceNotFoundFix"}]}]}},"systemData":{"createdBy":"harshpatel@microsoft.com","createdByType":"User","createdAt":"2022-11-21T21:07:18.8377395Z","lastModifiedBy":"harshpatel@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-11-21T23:05:34.2831077Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/check1","type":"Microsoft.Resources/deploymentStacks","name":"check1"},{"location":"westus","properties":{"actionOnUnmanage":{"resources":"detach","resourceGroups":"detach","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/ps7554-2023-02-10-00-46-55-2d933","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT44.3878253S","denySettings":{"mode":"none","applyToChildScopes":false},"parameters":{"rgName":{"value":"StacksTestMG765"},"specModName":{"value":"stacksSpecMGtestmod"},"location":{"value":"westus"},"specName":{"value":"StacksSpecNameMG765"},"specVersionName":{"value":"StacksSpecVersionMG765"},"modName":{"value":"stacksMGtestmod"},"subId":{"value":"92722693-40f1-44fe-8c39-9cf6b6353750"}},"resources":[{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765"},{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765/providers/Microsoft.Resources/templateSpecs/StacksSpecNameMG765"},{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765/providers/Microsoft.Resources/templateSpecs/StacksSpecNameMG765/versions/StacksSpecVersionMG765"}],"provisioningState":"succeeded","detachedResources":[],"deletedResources":[],"failedResources":[]},"systemData":{"createdBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","createdByType":"Application","createdAt":"2023-02-10T00:46:54.6659494Z","lastModifiedBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","lastModifiedByType":"Application","lastModifiedAt":"2023-02-10T00:46:54.6659494Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/ps7554","type":"Microsoft.Resources/deploymentStacks","name":"ps7554"},{"location":"westus","properties":{"actionOnUnmanage":{"resources":"detach","resourceGroups":"detach","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/ps8060-2023-02-10-00-58-18-44820","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT46.3195826S","denySettings":{"mode":"none","applyToChildScopes":false},"parameters":{"modName":{"value":"stacksMGtestmod"},"specModName":{"value":"stacksSpecMGtestmod"},"specName":{"value":"StacksSpecNameMG765"},"location":{"value":"westus"},"subId":{"value":"92722693-40f1-44fe-8c39-9cf6b6353750"},"specVersionName":{"value":"StacksSpecVersionMG765"},"rgName":{"value":"StacksTestMG765"}},"resources":[{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765"},{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765/providers/Microsoft.Resources/templateSpecs/StacksSpecNameMG765"},{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765/providers/Microsoft.Resources/templateSpecs/StacksSpecNameMG765/versions/StacksSpecVersionMG765"}],"provisioningState":"succeeded","detachedResources":[],"deletedResources":[],"failedResources":[]},"systemData":{"createdBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","createdByType":"Application","createdAt":"2023-02-10T00:58:17.3527077Z","lastModifiedBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","lastModifiedByType":"Application","lastModifiedAt":"2023-02-10T00:58:17.3527077Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/ps8060","type":"Microsoft.Resources/deploymentStacks","name":"ps8060"},{"location":"westus2","properties":{"actionOnUnmanage":{"resources":"detach","resourceGroups":"detach","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/ps430-2023-02-11-00-44-36-29be1","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT41.9230887S","denySettings":{"mode":"none","applyToChildScopes":false},"parameters":{"rgName":{"value":"StacksTestMG765"},"specModName":{"value":"stacksSpecMGtestmod"},"specName":{"value":"StacksSpecNameMG765"},"subId":{"value":"4ce8c9fe-cadc-47d6-9c76-335812fd59df"},"modName":{"value":"stacksMGtestmod"},"location":{"value":"westus"},"specVersionName":{"value":"StacksSpecVersionMG765"}},"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ps9787/providers/Microsoft.Resources/templateSpecs/ps6987/versions/v1"},"resources":[{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765"},{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765/providers/Microsoft.Resources/templateSpecs/StacksSpecNameMG765"},{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765/providers/Microsoft.Resources/templateSpecs/StacksSpecNameMG765/versions/StacksSpecVersionMG765"}],"provisioningState":"succeeded","detachedResources":[],"deletedResources":[],"failedResources":[]},"systemData":{"createdBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","createdByType":"Application","createdAt":"2023-02-11T00:43:50.4962555Z","lastModifiedBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","lastModifiedByType":"Application","lastModifiedAt":"2023-02-11T00:44:36.5948715Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/ps430","type":"Microsoft.Resources/deploymentStacks","name":"ps430"},{"location":"westus2","properties":{"actionOnUnmanage":{"resources":"detach","resourceGroups":"detach","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/ps2857-2023-02-11-00-56-30-20947","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT49.9248467S","denySettings":{"mode":"none","applyToChildScopes":false},"parameters":{"subId":{"value":"4ce8c9fe-cadc-47d6-9c76-335812fd59df"},"rgName":{"value":"StacksTestMG765"},"modName":{"value":"stacksMGtestmod"},"specVersionName":{"value":"StacksSpecVersionMG765"},"location":{"value":"westus"},"specName":{"value":"StacksSpecNameMG765"},"specModName":{"value":"stacksSpecMGtestmod"}},"resources":[{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765"},{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765/providers/Microsoft.Resources/templateSpecs/StacksSpecNameMG765"},{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765/providers/Microsoft.Resources/templateSpecs/StacksSpecNameMG765/versions/StacksSpecVersionMG765"}],"provisioningState":"succeeded","detachedResources":[],"deletedResources":[],"failedResources":[]},"systemData":{"createdBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","createdByType":"Application","createdAt":"2023-02-11T00:56:22.1397217Z","lastModifiedBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","lastModifiedByType":"Application","lastModifiedAt":"2023-02-11T00:56:22.1397217Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/ps2857","type":"Microsoft.Resources/deploymentStacks","name":"ps2857"},{"location":"westus2","properties":{"actionOnUnmanage":{"resources":"detach","resourceGroups":"detach","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/ps5058-2023-02-11-01-02-46-fd8a2","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT41.9318387S","denySettings":{"mode":"none","applyToChildScopes":false},"parameters":{"specModName":{"value":"stacksSpecMGtestmod"},"rgName":{"value":"StacksTestMG765"},"specName":{"value":"StacksSpecNameMG765"},"modName":{"value":"stacksMGtestmod"},"specVersionName":{"value":"StacksSpecVersionMG765"},"subId":{"value":"4ce8c9fe-cadc-47d6-9c76-335812fd59df"},"location":{"value":"westus"}},"resources":[{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765"},{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765/providers/Microsoft.Resources/templateSpecs/StacksSpecNameMG765"},{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765/providers/Microsoft.Resources/templateSpecs/StacksSpecNameMG765/versions/StacksSpecVersionMG765"}],"provisioningState":"succeeded","detachedResources":[],"deletedResources":[],"failedResources":[]},"systemData":{"createdBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","createdByType":"Application","createdAt":"2023-02-11T01:02:46.2208027Z","lastModifiedBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","lastModifiedByType":"Application","lastModifiedAt":"2023-02-11T01:02:46.2208027Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/ps5058","type":"Microsoft.Resources/deploymentStacks","name":"ps5058"},{"location":"westus2","properties":{"actionOnUnmanage":{"resources":"detach","resourceGroups":"detach","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/ps311-2023-02-11-01-17-03-14892","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT46.0358215S","denySettings":{"mode":"none","applyToChildScopes":false},"parameters":{"specName":{"value":"StacksSpecNameMG765"},"modName":{"value":"stacksMGtestmod"},"location":{"value":"westus"},"specModName":{"value":"stacksSpecMGtestmod"},"rgName":{"value":"StacksTestMG765"},"subId":{"value":"4ce8c9fe-cadc-47d6-9c76-335812fd59df"},"specVersionName":{"value":"StacksSpecVersionMG765"}},"resources":[{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765"},{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765/providers/Microsoft.Resources/templateSpecs/StacksSpecNameMG765"},{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765/providers/Microsoft.Resources/templateSpecs/StacksSpecNameMG765/versions/StacksSpecVersionMG765"}],"provisioningState":"succeeded","detachedResources":[],"deletedResources":[],"failedResources":[]},"systemData":{"createdBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","createdByType":"Application","createdAt":"2023-02-11T01:17:02.9514384Z","lastModifiedBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","lastModifiedByType":"Application","lastModifiedAt":"2023-02-11T01:17:02.9514384Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/ps311","type":"Microsoft.Resources/deploymentStacks","name":"ps311"},{"location":"westus2","properties":{"actionOnUnmanage":{"resources":"detach","resourceGroups":"detach","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/ps9917-2023-02-11-01-23-45-20b9e","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT44.571406S","denySettings":{"mode":"none","applyToChildScopes":false},"parameters":{"modName":{"value":"stacksMGtestmod"},"location":{"value":"westus"},"specModName":{"value":"stacksSpecMGtestmod"},"specName":{"value":"StacksSpecNameMG765"},"specVersionName":{"value":"StacksSpecVersionMG765"},"rgName":{"value":"StacksTestMG765"},"subId":{"value":"4ce8c9fe-cadc-47d6-9c76-335812fd59df"}},"resources":[{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765"},{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765/providers/Microsoft.Resources/templateSpecs/StacksSpecNameMG765"},{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765/providers/Microsoft.Resources/templateSpecs/StacksSpecNameMG765/versions/StacksSpecVersionMG765"}],"provisioningState":"succeeded","detachedResources":[],"deletedResources":[],"failedResources":[]},"systemData":{"createdBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","createdByType":"Application","createdAt":"2023-02-11T01:23:45.4993152Z","lastModifiedBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","lastModifiedByType":"Application","lastModifiedAt":"2023-02-11T01:23:45.4993152Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/ps9917","type":"Microsoft.Resources/deploymentStacks","name":"ps9917"},{"location":"westus2","properties":{"actionOnUnmanage":{"resources":"delete","resourceGroups":"delete","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-subsc-2023-04-13-16-12-57-dcebe","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT6.9594651S","denySettings":{"mode":"none","applyToChildScopes":false},"outputs":{},"parameters":{"name":{"value":"cli-test-resource-twovzzf73dlo67jlorugh4c7dx5jw6xylflgoqwn7n"}},"resources":[{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twovzzf73dlo67jlorugh4c7dx5jw6xylflgoqwn7n"}],"provisioningState":"succeeded","detachedResources":[],"deletedResources":[],"failedResources":[]},"systemData":{"createdBy":"harshpatel@microsoft.com","createdByType":"User","createdAt":"2023-04-13T16:12:56.631925Z","lastModifiedBy":"harshpatel@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-04-13T16:12:56.631925Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscriptionmgbizh3wglkkj3r","type":"Microsoft.Resources/deploymentStacks","name":"cli-test-delete-deployment-stack-subscriptionmgbizh3wglkkj3r"},{"location":"westus2","properties":{"actionOnUnmanage":{"resources":"detach","resourceGroups":"detach","managementGroups":"detach"},"deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT1.8155571S","denySettings":{"mode":"none","applyToChildScopes":false},"parameters":{"location":{"value":"westus2"},"kind":{"value":"StorageV2"}},"resources":[],"provisioningState":"failed","detachedResources":[],"deletedResources":[],"failedResources":[],"error":{"code":"DeploymentStackDeploymentFailed","message":"One
+        or more resources could not be deployed. Correlation id: ''de4ec6d0-eb3a-4614-bca2-b7c8a37afdc1''.","details":[{"code":"InvalidTemplate","message":"Deployment
+        template validation failed: ''The template variable ''storageAccountName''
+        is not valid: The template function ''RESOURCEGROUP'' is not expected at this
+        location. Please see https://aka.ms/arm-functions for usage details.. Please
+        see https://aka.ms/arm-functions for usage details.''.","details":[],"additionalInfo":[{"type":"TemplateViolation","info":{"lineNumber":23,"linePosition":86,"path":"properties.template.variables.storageAccountName"}}]}]}},"systemData":{"createdBy":"harshpatel@microsoft.com","createdByType":"User","createdAt":"2023-04-14T14:38:05.2880933Z","lastModifiedBy":"harshpatel@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-04-17T21:16:53.5114483Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/biceptest","type":"Microsoft.Resources/deploymentStacks","name":"biceptest"},{"location":"westus2","properties":{"actionOnUnmanage":{"resources":"detach","resourceGroups":"detach","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/ps4239-2023-04-19-22-18-26-0d9dd","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT42.8741178S","denySettings":{"mode":"none","applyToChildScopes":false},"parameters":{"specVersionName":{"value":"StacksSpecVersionMG765"},"specModName":{"value":"stacksSpecMGtestmod"},"rgName":{"value":"StacksTestMG765"},"specName":{"value":"StacksSpecNameMG765"},"location":{"value":"westus"},"subId":{"value":"4ce8c9fe-cadc-47d6-9c76-335812fd59df"},"modName":{"value":"stacksMGtestmod"}},"resources":[{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765"},{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765/providers/Microsoft.Resources/templateSpecs/StacksSpecNameMG765"},{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765/providers/Microsoft.Resources/templateSpecs/StacksSpecNameMG765/versions/StacksSpecVersionMG765"}],"provisioningState":"succeeded","detachedResources":[],"deletedResources":[],"failedResources":[]},"systemData":{"createdBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","createdByType":"Application","createdAt":"2023-04-19T22:18:25.9841361Z","lastModifiedBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","lastModifiedByType":"Application","lastModifiedAt":"2023-04-19T22:18:25.9841361Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/ps4239","type":"Microsoft.Resources/deploymentStacks","name":"ps4239"},{"location":"westus2","properties":{"actionOnUnmanage":{"resources":"detach","resourceGroups":"detach","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/ps734-2023-04-20-00-53-58-f08d0","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT42.2143801S","denySettings":{"mode":"none","applyToChildScopes":false},"parameters":{"subId":{"value":"4ce8c9fe-cadc-47d6-9c76-335812fd59df"},"specVersionName":{"value":"StacksSpecVersionMG765"},"specModName":{"value":"stacksSpecMGtestmod"},"rgName":{"value":"StacksTestMG765"},"specName":{"value":"StacksSpecNameMG765"},"location":{"value":"westus"},"modName":{"value":"stacksMGtestmod"}},"resources":[{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765"},{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765/providers/Microsoft.Resources/templateSpecs/StacksSpecNameMG765"},{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765/providers/Microsoft.Resources/templateSpecs/StacksSpecNameMG765/versions/StacksSpecVersionMG765"}],"provisioningState":"succeeded","detachedResources":[],"deletedResources":[],"failedResources":[]},"systemData":{"createdBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","createdByType":"Application","createdAt":"2023-04-20T00:53:57.7601681Z","lastModifiedBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","lastModifiedByType":"Application","lastModifiedAt":"2023-04-20T00:53:57.7601681Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/ps734","type":"Microsoft.Resources/deploymentStacks","name":"ps734"},{"location":"westus2","properties":{"actionOnUnmanage":{"resources":"detach","resourceGroups":"detach","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/ps8767-2023-04-20-00-57-58-e4470","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT41.4936943S","denySettings":{"mode":"none","applyToChildScopes":false},"parameters":{"specVersionName":{"value":"StacksSpecVersionMG765"},"subId":{"value":"4ce8c9fe-cadc-47d6-9c76-335812fd59df"},"specName":{"value":"StacksSpecNameMG765"},"rgName":{"value":"StacksTestMG765"},"location":{"value":"westus"},"specModName":{"value":"stacksSpecMGtestmod"},"modName":{"value":"stacksMGtestmod"}},"resources":[{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765"},{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765/providers/Microsoft.Resources/templateSpecs/StacksSpecNameMG765"},{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765/providers/Microsoft.Resources/templateSpecs/StacksSpecNameMG765/versions/StacksSpecVersionMG765"}],"provisioningState":"succeeded","detachedResources":[],"deletedResources":[],"failedResources":[]},"systemData":{"createdBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","createdByType":"Application","createdAt":"2023-04-20T00:57:58.321946Z","lastModifiedBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","lastModifiedByType":"Application","lastModifiedAt":"2023-04-20T00:57:58.321946Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/ps8767","type":"Microsoft.Resources/deploymentStacks","name":"ps8767"},{"location":"westus2","properties":{"actionOnUnmanage":{"resources":"detach","resourceGroups":"detach","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/ps9098-2023-04-20-17-21-37-0ec92","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT45.6777926S","denySettings":{"mode":"none","applyToChildScopes":false},"parameters":{"specModName":{"value":"stacksSpecMGtestmod"},"specName":{"value":"StacksSpecNameMG765"},"location":{"value":"westus"},"modName":{"value":"stacksMGtestmod"},"specVersionName":{"value":"StacksSpecVersionMG765"},"subId":{"value":"4ce8c9fe-cadc-47d6-9c76-335812fd59df"},"rgName":{"value":"StacksTestMG765"}},"resources":[{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765"},{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765/providers/Microsoft.Resources/templateSpecs/StacksSpecNameMG765"},{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765/providers/Microsoft.Resources/templateSpecs/StacksSpecNameMG765/versions/StacksSpecVersionMG765"}],"provisioningState":"succeeded","detachedResources":[],"deletedResources":[],"failedResources":[]},"systemData":{"createdBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","createdByType":"Application","createdAt":"2023-04-20T17:21:37.0007219Z","lastModifiedBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","lastModifiedByType":"Application","lastModifiedAt":"2023-04-20T17:21:37.0007219Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/ps9098","type":"Microsoft.Resources/deploymentStacks","name":"ps9098"},{"location":"westus2","properties":{"actionOnUnmanage":{"resources":"detach","resourceGroups":"detach","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/ps9191-2023-04-20-17-25-47-b864e","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT42.6990512S","denySettings":{"mode":"none","applyToChildScopes":false},"parameters":{"location":{"value":"westus"},"specVersionName":{"value":"StacksSpecVersionMG765"},"specName":{"value":"StacksSpecNameMG765"},"modName":{"value":"stacksMGtestmod"},"subId":{"value":"4ce8c9fe-cadc-47d6-9c76-335812fd59df"},"specModName":{"value":"stacksSpecMGtestmod"},"rgName":{"value":"StacksTestMG765"}},"resources":[{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765"},{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765/providers/Microsoft.Resources/templateSpecs/StacksSpecNameMG765"},{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestMG765/providers/Microsoft.Resources/templateSpecs/StacksSpecNameMG765/versions/StacksSpecVersionMG765"}],"provisioningState":"succeeded","detachedResources":[],"deletedResources":[],"failedResources":[]},"systemData":{"createdBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","createdByType":"Application","createdAt":"2023-04-20T17:25:47.3175068Z","lastModifiedBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","lastModifiedByType":"Application","lastModifiedAt":"2023-04-20T17:25:47.3175068Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/ps9191","type":"Microsoft.Resources/deploymentStacks","name":"ps9191"},{"location":"westus2","properties":{"actionOnUnmanage":{"resources":"delete","resourceGroups":"delete","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/ps2329-2023-04-20-22-04-20-eae6d","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT8M48.3494601S","denySettings":{"mode":"none","applyToChildScopes":false},"outputs":{},"parameters":{},"resources":[{"status":"deleteFailed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/LocationRestriction"}],"provisioningState":"failed","detachedResources":[],"deletedResources":[],"failedResources":[{"error":{"code":"DeletionFailed","message":"Resource
+        could not be deleted. Resource is still present in stack."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/LocationRestriction"}],"error":{"code":"DeploymentStackDeleteResourcesFailed","message":"One
+        or more resources could not be deleted. Correlation id: ''fd961e9e-42da-461d-9594-58064eb29bd0''.","details":[{"code":"DeploymentStackDeleteResourcesFailed","message":"An
+        unknown error occurred while trying to purge resources. These resources are
+        still present in the stack but can be deleted manually."}]}},"systemData":{"createdBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","createdByType":"Application","createdAt":"2023-04-20T22:03:25.1969567Z","lastModifiedBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","lastModifiedByType":"Application","lastModifiedAt":"2023-04-20T22:04:20.1726226Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/ps2329","type":"Microsoft.Resources/deploymentStacks","name":"ps2329"},{"location":"westus2","properties":{"actionOnUnmanage":{"resources":"delete","resourceGroups":"delete","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/ps3893-2023-04-20-22-18-11-2804a","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT8M1.8427441S","denySettings":{"mode":"none","applyToChildScopes":false},"parameters":{"policyDefinitionName":{"value":"LocationRestriction"},"subId":{"value":"4ce8c9fe-cadc-47d6-9c76-335812fd59df"},"moduleName":{"value":"stacksMGtestmod"}},"resources":[{"status":"deleteFailed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/LocationRestriction"}],"provisioningState":"failed","detachedResources":[],"deletedResources":[],"failedResources":[{"error":{"code":"DeletionFailed","message":"Resource
+        could not be deleted. Resource is still present in stack."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/LocationRestriction"}],"error":{"code":"DeploymentStackDeleteResourcesFailed","message":"One
+        or more resources could not be deleted. Correlation id: ''c5da1cbc-b230-4a82-9790-cd2d0045211e''.","details":[{"code":"DeploymentStackDeleteResourcesFailed","message":"An
+        unknown error occurred while trying to purge resources. These resources are
+        still present in the stack but can be deleted manually."}]}},"systemData":{"createdBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","createdByType":"Application","createdAt":"2023-04-20T22:18:10.5611319Z","lastModifiedBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","lastModifiedByType":"Application","lastModifiedAt":"2023-04-20T22:18:10.5611319Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/ps3893","type":"Microsoft.Resources/deploymentStacks","name":"ps3893"},{"location":"westus2","properties":{"actionOnUnmanage":{"resources":"delete","resourceGroups":"delete","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/ps2587-2023-04-20-22-28-00-32858","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT8M1.1416177S","denySettings":{"mode":"none","applyToChildScopes":false},"parameters":{"policyDefinitionName":{"value":"LocationRestriction"},"subId":{"value":"4ce8c9fe-cadc-47d6-9c76-335812fd59df"},"moduleName":{"value":"stacksMGtestmod"}},"resources":[{"status":"deleteFailed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/LocationRestriction"}],"provisioningState":"failed","detachedResources":[],"deletedResources":[],"failedResources":[{"error":{"code":"DeletionFailed","message":"Resource
+        could not be deleted. Resource is still present in stack."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/LocationRestriction"}],"error":{"code":"DeploymentStackDeleteResourcesFailed","message":"One
+        or more resources could not be deleted. Correlation id: ''09f132d3-142e-49a4-8109-7353e7dc4130''.","details":[{"code":"DeploymentStackDeleteResourcesFailed","message":"An
+        unknown error occurred while trying to purge resources. These resources are
+        still present in the stack but can be deleted manually."}]}},"systemData":{"createdBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","createdByType":"Application","createdAt":"2023-04-20T22:27:59.861228Z","lastModifiedBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","lastModifiedByType":"Application","lastModifiedAt":"2023-04-20T22:27:59.861228Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/ps2587","type":"Microsoft.Resources/deploymentStacks","name":"ps2587"},{"location":"westus2","properties":{"actionOnUnmanage":{"resources":"delete","resourceGroups":"detach","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/ps5301-2023-04-20-22-36-44-fcf88","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT8M2.0146889S","denySettings":{"mode":"none","applyToChildScopes":false},"parameters":{"policyDefinitionName":{"value":"LocationRestriction"},"subId":{"value":"4ce8c9fe-cadc-47d6-9c76-335812fd59df"},"moduleName":{"value":"stacksMGtestmod"}},"resources":[{"status":"deleteFailed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/LocationRestriction"}],"provisioningState":"failed","detachedResources":[],"deletedResources":[],"failedResources":[{"error":{"code":"DeletionFailed","message":"Resource
+        could not be deleted. Resource is still present in stack."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/LocationRestriction"}],"error":{"code":"DeploymentStackDeleteResourcesFailed","message":"One
+        or more resources could not be deleted. Correlation id: ''e442a5dd-f1b5-438d-9beb-e787edda33fb''.","details":[{"code":"DeploymentStackDeleteResourcesFailed","message":"An
+        unknown error occurred while trying to purge resources. These resources are
+        still present in the stack but can be deleted manually."}]}},"systemData":{"createdBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","createdByType":"Application","createdAt":"2023-04-20T22:36:43.7038974Z","lastModifiedBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","lastModifiedByType":"Application","lastModifiedAt":"2023-04-20T22:36:43.7038974Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/ps5301","type":"Microsoft.Resources/deploymentStacks","name":"ps5301"},{"location":"westus2","properties":{"actionOnUnmanage":{"resources":"delete","resourceGroups":"delete","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/ps329-2023-04-20-22-54-30-ef4ac","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","description":"A
+        Stack","duration":"PT7M59.8773956S","denySettings":{"mode":"none","applyToChildScopes":false},"parameters":{"policyDefinitionName":{"value":"LocationRestriction"},"subId":{"value":"4ce8c9fe-cadc-47d6-9c76-335812fd59df"},"moduleName":{"value":"stacksMGtestmod"}},"resources":[{"status":"deleteFailed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/LocationRestriction"}],"provisioningState":"failed","detachedResources":[],"deletedResources":[],"failedResources":[{"error":{"code":"DeletionFailed","message":"Resource
+        could not be deleted. Resource is still present in stack."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/LocationRestriction"}],"error":{"code":"DeploymentStackDeleteResourcesFailed","message":"One
+        or more resources could not be deleted. Correlation id: ''de435a3b-8edf-4114-9ef5-63486cd4fd69''.","details":[{"code":"DeploymentStackDeleteResourcesFailed","message":"An
+        unknown error occurred while trying to purge resources. These resources are
+        still present in the stack but can be deleted manually."}]}},"systemData":{"createdBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","createdByType":"Application","createdAt":"2023-04-20T22:54:13.1565683Z","lastModifiedBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","lastModifiedByType":"Application","lastModifiedAt":"2023-04-20T22:54:29.9164578Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/ps329","type":"Microsoft.Resources/deploymentStacks","name":"ps329"},{"location":"westus2","properties":{"actionOnUnmanage":{"resources":"delete","resourceGroups":"delete","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/ps6377-2023-04-20-23-03-27-a468f","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","description":"A
+        Stack","duration":"PT7M55.3268055S","denySettings":{"mode":"none","applyToChildScopes":false},"parameters":{"policyDefinitionName":{"value":"LocationRestriction"},"subId":{"value":"4ce8c9fe-cadc-47d6-9c76-335812fd59df"},"moduleName":{"value":"stacksMGtestmod"}},"resources":[{"status":"deleteFailed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/LocationRestriction"}],"provisioningState":"failed","detachedResources":[],"deletedResources":[],"failedResources":[{"error":{"code":"DeletionFailed","message":"Resource
+        could not be deleted. Resource is still present in stack."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/LocationRestriction"}],"error":{"code":"DeploymentStackDeleteResourcesFailed","message":"One
+        or more resources could not be deleted. Correlation id: ''8e27b4c7-2270-4747-ab6a-3273ed7ea0c5''.","details":[{"code":"DeploymentStackDeleteResourcesFailed","message":"An
+        unknown error occurred while trying to purge resources. These resources are
+        still present in the stack but can be deleted manually."}]}},"systemData":{"createdBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","createdByType":"Application","createdAt":"2023-04-20T23:02:46.687032Z","lastModifiedBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","lastModifiedByType":"Application","lastModifiedAt":"2023-04-20T23:03:27.5461358Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/ps6377","type":"Microsoft.Resources/deploymentStacks","name":"ps6377"},{"location":"westus2","properties":{"actionOnUnmanage":{"resources":"delete","resourceGroups":"delete","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/ps4460-2023-04-20-23-12-14-b1e7a","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT7M55.781099S","denySettings":{"mode":"denyDelete","applyToChildScopes":true,"excludedActions":[]},"parameters":{"policyDefinitionName":{"value":"LocationRestriction"},"subId":{"value":"4ce8c9fe-cadc-47d6-9c76-335812fd59df"},"moduleName":{"value":"stacksMGtestmod"}},"resources":[{"status":"deleteFailed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/LocationRestriction"}],"provisioningState":"failed","detachedResources":[],"deletedResources":[],"failedResources":[{"error":{"code":"DeletionFailed","message":"Resource
+        could not be deleted. Resource is still present in stack."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/LocationRestriction"}],"error":{"code":"DeploymentStackDeleteResourcesFailed","message":"One
+        or more resources could not be deleted. Correlation id: ''f909b2a6-7a33-4d79-b91e-7f365e8ee304''.","details":[{"code":"DeploymentStackDeleteResourcesFailed","message":"An
+        unknown error occurred while trying to purge resources. These resources are
+        still present in the stack but can be deleted manually."}]}},"systemData":{"createdBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","createdByType":"Application","createdAt":"2023-04-20T23:11:38.5439285Z","lastModifiedBy":"546094f3-32fa-493c-824c-bd9575b0d2fe","lastModifiedByType":"Application","lastModifiedAt":"2023-04-20T23:12:13.8755826Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/ps4460","type":"Microsoft.Resources/deploymentStacks","name":"ps4460"},{"location":"westus2","properties":{"actionOnUnmanage":{"resources":"delete","resourceGroups":"detach","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-create-deployment-stack-subsc-2023-05-11-18-03-40-565c0","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT4.9154578S","denySettings":{"mode":"none","applyToChildScopes":false},"outputs":{},"parameters":{"name":{"value":"cli-test-resource-threeta7s3tuximmn5ctc73qmukfyys67nlvs6vk36"}},"resources":[{"status":"managed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-threeta7s3tuximmn5ctc73qmukfyys67nlvs6vk36"}],"provisioningState":"succeeded","detachedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twof3knevszqcbd7ynvsysjwdkkddbeanz7edjllcw"}],"deletedResources":[],"failedResources":[]},"systemData":{"createdBy":"harshpatel@microsoft.com","createdByType":"User","createdAt":"2023-05-11T18:03:00.2732876Z","lastModifiedBy":"harshpatel@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-05-11T18:03:39.9690655Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-subscriptiongnitrbtgftogiyp","type":"Microsoft.Resources/deploymentStacks","name":"cli-test-create-deployment-stack-subscriptiongnitrbtgftogiyp"},{"location":"westus2","tags":{},"properties":{"actionOnUnmanage":{"resources":"detach","resourceGroups":"detach","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli20_2-2023-06-02-20-30-36-824f5","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT5.2093689S","denySettings":{"mode":"denyWriteAndDelete","applyToChildScopes":false,"excludedPrincipals":[],"excludedActions":["Microsoft.Authorization/locks/delete","Microsoft.Authorization/locks/delete"]},"outputs":{"foo":{"type":"String","value":"foo"},"bar":{"type":"String","value":"bar"}},"parameters":{},"resources":[],"provisioningState":"succeeded","detachedResources":[],"deletedResources":[],"failedResources":[]},"systemData":{"createdBy":"harshpatel@microsoft.com","createdByType":"User","createdAt":"2023-06-02T20:29:57.2658696Z","lastModifiedBy":"harshpatel@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-06-02T20:30:36.7922753Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli20_2","type":"Microsoft.Resources/deploymentStacks","name":"cli20_2"},{"location":"westus2","tags":{},"properties":{"actionOnUnmanage":{"resources":"detach","resourceGroups":"detach","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/hp_newStack-2023-07-12-02-05-51-d88f3","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT5.4362964S","denySettings":{"mode":"denyWriteAndDelete","applyToChildScopes":true,"excludedPrincipals":["3602fbdc-4558-4a64-966c-2629723a3189","c718e29c-087a-497d-bbd8-2100b67d102a","2d79a9af-9d95-4170-89e0-efab097c7daf"],"excludedActions":["pa1","pa2"]},"outputs":{"foo":{"type":"String","value":"foo"},"bar":{"type":"String","value":"bar"}},"parameters":{},"resources":[],"provisioningState":"succeeded","detachedResources":[],"deletedResources":[],"failedResources":[]},"systemData":{"createdBy":"harshpatel@microsoft.com","createdByType":"User","createdAt":"2023-06-14T23:31:02.7018636Z","lastModifiedBy":"harshpatel@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-07-12T02:05:51.3081285Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/hp_newStack","type":"Microsoft.Resources/deploymentStacks","name":"hp_newStack"},{"location":"westus","tags":{},"properties":{"actionOnUnmanage":{"resources":"delete","resourceGroups":"delete","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/apMgStackt2-2023-06-29-11-57-17-65c51","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT9M46.797453S","denySettings":{"mode":"none","applyToChildScopes":false,"excludedPrincipals":[]},"parameters":{},"resources":[{"status":"deleteFailed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ang-rg1"},{"status":"deleteFailed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ang-rg1/providers/Microsoft.Storage/storageAccounts/stackstore1tqvjfmg5ob6pw"},{"status":"deleteFailed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ang-rg1/providers/Microsoft.Storage/storageAccounts/stackstore2tqvjfmg5ob6pw"},{"status":"deleteFailed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ang-rg2"},{"status":"deleteFailed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ang-rg2/providers/Microsoft.Storage/storageAccounts/stackstore12hvx3lvgfvd6y"},{"status":"deleteFailed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ang-rg2/providers/Microsoft.Storage/storageAccounts/stackstore22hvx3lvgfvd6y"}],"provisioningState":"failed","detachedResources":[],"deletedResources":[],"failedResources":[{"error":{"code":"DeletionFailed","message":"Resource
+        could not be deleted. Resource is still present in stack."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ang-rg1"},{"error":{"code":"DeletionFailed","message":"Resource
+        could not be deleted. Resource is still present in stack."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ang-rg1/providers/Microsoft.Storage/storageAccounts/stackstore1tqvjfmg5ob6pw"},{"error":{"code":"DeletionFailed","message":"Resource
+        could not be deleted. Resource is still present in stack."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ang-rg1/providers/Microsoft.Storage/storageAccounts/stackstore2tqvjfmg5ob6pw"},{"error":{"code":"DeletionFailed","message":"Resource
+        could not be deleted. Resource is still present in stack."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ang-rg2"},{"error":{"code":"DeletionFailed","message":"Resource
+        could not be deleted. Resource is still present in stack."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ang-rg2/providers/Microsoft.Storage/storageAccounts/stackstore12hvx3lvgfvd6y"},{"error":{"code":"DeletionFailed","message":"Resource
+        could not be deleted. Resource is still present in stack."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ang-rg2/providers/Microsoft.Storage/storageAccounts/stackstore22hvx3lvgfvd6y"}],"error":{"code":"DeploymentStackDeleteResourcesFailed","message":"One
+        or more resources could not be deleted. Correlation id: ''13e385d1-be33-4e8d-bf0e-fe6e5ee5d05e''.","details":[{"code":"DeploymentStackDeleteResourcesFailed","message":"An
+        unknown error occurred while trying to purge resources. These resources are
+        still present in the stack but can be deleted manually."}]}},"systemData":{"createdBy":"angperez@microsoft.com","createdByType":"User","createdAt":"2023-06-29T11:57:16.5136608Z","lastModifiedBy":"angperez@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-06-29T11:57:16.5136608Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/apMgStackt2","type":"Microsoft.Resources/deploymentStacks","name":"apMgStackt2"},{"location":"westus","properties":{"actionOnUnmanage":{"resources":"delete","resourceGroups":"delete","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/TestMGStack-2023-07-12-20-53-00-d5e66","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT7M43.1222576S","denySettings":{"mode":"denyDelete","applyToChildScopes":false},"parameters":{},"resources":[{"status":"deleteFailed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dantedtestrg242"},{"status":"deleteFailed","denyStatus":"none","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dantedtestrg242/providers/Microsoft.Storage/storageAccounts/dantedstoragetest234"}],"provisioningState":"failed","detachedResources":[],"deletedResources":[],"failedResources":[{"error":{"code":"DeletionFailed","message":"Resource
+        could not be deleted. Resource is still present in stack."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dantedtestrg242"},{"error":{"code":"DeletionFailed","message":"Resource
+        could not be deleted. Resource is still present in stack."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dantedtestrg242/providers/Microsoft.Storage/storageAccounts/dantedstoragetest234"}],"error":{"code":"DeploymentStackDeleteResourcesFailed","message":"One
+        or more resources could not be deleted. Correlation id: ''83e5c27d-c901-4da7-8362-2d0abbd32e25''.","details":[{"code":"DeploymentStackDeleteResourcesFailed","message":"An
+        unknown error occurred while trying to purge resources. These resources are
+        still present in the stack but can be deleted manually."}]}},"systemData":{"createdBy":"danted@microsoft.com","createdByType":"User","createdAt":"2023-07-12T20:43:16.9716791Z","lastModifiedBy":"danted@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-07-12T20:53:00.0864196Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/TestMGStack","type":"Microsoft.Resources/deploymentStacks","name":"TestMGStack"},{"location":"westus","tags":{},"properties":{"actionOnUnmanage":{"resources":"detach","resourceGroups":"detach","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/TestMGStack2-2023-07-13-17-52-52-8658a","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT6.3580113S","denySettings":{"mode":"none","applyToChildScopes":false},"parameters":{},"resources":[],"provisioningState":"succeeded","detachedResources":[],"deletedResources":[],"failedResources":[]},"systemData":{"createdBy":"danted@microsoft.com","createdByType":"User","createdAt":"2023-07-12T20:56:25.5143136Z","lastModifiedBy":"danted@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-07-13T17:52:52.637127Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/TestMGStack2","type":"Microsoft.Resources/deploymentStacks","name":"TestMGStack2"},{"location":"westus2","tags":{},"properties":{"actionOnUnmanage":{"resources":"detach","resourceGroups":"detach","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-list-deployment-stack-subscri-2023-07-17-21-17-27-9e350","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT6.4915508S","denySettings":{"mode":"none","applyToChildScopes":false},"outputs":{"foo":{"type":"String","value":"abc"},"bar":{"type":"String","value":"xyz"}},"parameters":{"foo":{"value":"abc","type":"string"},"bar":{"value":"xyz","type":"string"}},"resources":[],"provisioningState":"succeeded","detachedResources":[],"deletedResources":[],"failedResources":[]},"systemData":{"createdBy":"harshpatel@microsoft.com","createdByType":"User","createdAt":"2023-07-17T21:17:26.760594Z","lastModifiedBy":"harshpatel@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-07-17T21:17:26.760594Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-list-deployment-stack-subscription000001","type":"Microsoft.Resources/deploymentStacks","name":"cli-test-list-deployment-stack-subscription000001"},{"location":"westcentralus","properties":{"actionOnUnmanage":{"resources":"detach","resourceGroups":"detach","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/rjwTestPS-2022-11-09-01-59-45-a8807","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT8.228413S","denySettings":{"mode":"none","applyToChildScopes":false},"parameters":{},"resources":[],"provisioningState":"failed","detachedResources":[],"deletedResources":[],"failedResources":[{"error":{"code":"ResourceNotFound","message":"The
+        Resource ''Providers.Test/statefulResources/statefulResource'' under resource
+        group ''<null>'' was not found. For more details please go to https://aka.ms/ARMResourceNotFoundFix"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Providers.Test/StatefulResources/statefulResource"}],"error":{"code":"DeploymentStackUpdateFailed","message":"One
+        or more stages of the deploymentStack failed. See snapshot ''/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/rjwTestPS/snapshots/2022-11-09-01-59-45-a8807''
+        for more details. Correlation id: ''028204d8-171e-4889-bcb5-02fed445019a''","details":[{"code":"DeploymentFailed","message":"At
+        least one resource deployment operation failed. Please list deployment operations
+        for details. Please see https://aka.ms/DeployOperations for usage details.","details":[{"code":"ResourceNotFound","message":"The
+        Resource ''Providers.Test/statefulResources/statefulResource'' under resource
+        group ''<null>'' was not found. For more details please go to https://aka.ms/ARMResourceNotFoundFix"}]}]}},"systemData":{"createdBy":"rwilke@microsoft.com","createdByType":"User","createdAt":"2022-11-09T01:59:45.4267409Z","lastModifiedBy":"rwilke@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-11-09T01:59:45.4267409Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/rjwTestPS","type":"Microsoft.Resources/deploymentStacks","name":"rjwTestPS"},{"location":"westcentralus","properties":{"actionOnUnmanage":{"resources":"detach","resourceGroups":"detach","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/rjwTestPS2-2022-11-09-22-38-20-3fbb7","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT8.643175S","denySettings":{"mode":"none","applyToChildScopes":false},"parameters":{},"resources":[],"provisioningState":"failed","detachedResources":[],"deletedResources":[],"failedResources":[{"error":{"code":"ResourceNotFound","message":"The
+        Resource ''Providers.Test/statefulResources/statefulResource'' under resource
+        group ''<null>'' was not found. For more details please go to https://aka.ms/ARMResourceNotFoundFix"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Providers.Test/StatefulResources/statefulResource"}],"error":{"code":"DeploymentStackUpdateFailed","message":"One
+        or more stages of the deploymentStack failed. See snapshot ''/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/rjwTestPS2/snapshots/2022-11-09-22-38-20-3fbb7''
+        for more details. Correlation id: ''84483f0e-5cb0-45fb-9c2d-bb33f8dec5b0''","details":[{"code":"DeploymentFailed","message":"At
+        least one resource deployment operation failed. Please list deployment operations
+        for details. Please see https://aka.ms/DeployOperations for usage details.","details":[{"code":"ResourceNotFound","message":"The
+        Resource ''Providers.Test/statefulResources/statefulResource'' under resource
+        group ''<null>'' was not found. For more details please go to https://aka.ms/ARMResourceNotFoundFix"}]}]}},"systemData":{"createdBy":"rwilke@microsoft.com","createdByType":"User","createdAt":"2022-11-09T22:38:20.0185961Z","lastModifiedBy":"rwilke@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-11-09T22:38:20.0185961Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/rjwTestPS2","type":"Microsoft.Resources/deploymentStacks","name":"rjwTestPS2"},{"location":"westcentralus","properties":{"actionOnUnmanage":{"resources":"delete","resourceGroups":"detach","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mgStack-UnitTest-wcus-230622T124104-2023-06-22-19-41-32-9e53d","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT5.7715379S","denySettings":{"mode":"none","applyToChildScopes":false},"outputs":{"deploymentStackName":{"type":"String","value":"mgStack-UnitTest-wcus-230622T124104"}},"resources":[],"provisioningState":"succeeded","detachedResources":[],"deletedResources":[],"failedResources":[]},"systemData":{"createdBy":"rwilke@microsoft.com","createdByType":"User","createdAt":"2023-06-22T19:41:32.3200978Z","lastModifiedBy":"rwilke@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-06-22T19:41:32.3200978Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/mgStack-UnitTest-wcus-230622T124104","type":"Microsoft.Resources/deploymentStacks","name":"mgStack-UnitTest-wcus-230622T124104"},{"location":"westcentralus","properties":{"actionOnUnmanage":{"resources":"delete","resourceGroups":"detach","managementGroups":"detach"},"deploymentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mgStack-UnitTest-wcus-230622T165234-2023-06-22-23-53-44-1d3bb","deploymentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","duration":"PT7.726221S","denySettings":{"mode":"none","applyToChildScopes":false},"outputs":{"deploymentStackName":{"type":"String","value":"mgStack-UnitTest-wcus-230622T165234"}},"resources":[],"provisioningState":"succeeded","detachedResources":[],"deletedResources":[],"failedResources":[]},"systemData":{"createdBy":"rwilke@microsoft.com","createdByType":"User","createdAt":"2023-06-22T23:53:44.1484293Z","lastModifiedBy":"rwilke@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-06-22T23:53:44.1484293Z"},"id":"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/mgStack-UnitTest-wcus-230622T165234","type":"Microsoft.Resources/deploymentStacks","name":"mgStack-UnitTest-wcus-230622T165234"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '65088'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jul 2023 21:17:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - 922e0345-4155-4847-83da-dfcade7a0935
+      - 1f7a547b-b789-4118-9aae-11365acb83e6
+      - 1d07090d-cdbc-4f4d-92bc-1cfc3f3508b2
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack mg delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --management-group-id --yes
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-list-deployment-stack-subscription000001?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"westus2\",\r\n  \"tags\": {},\r\n  \"properties\":
+        {\r\n    \"actionOnUnmanage\": {\r\n      \"resources\": \"detach\",\r\n      \"resourceGroups\":
+        \"detach\",\r\n      \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-list-deployment-stack-subscri-2023-07-17-21-17-27-9e350\",\r\n
+        \   \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000\",\r\n
+        \   \"duration\": \"PT6.4915508S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"outputs\":
+        {\r\n      \"foo\": {\r\n        \"type\": \"String\",\r\n        \"value\":
+        \"abc\"\r\n      },\r\n      \"bar\": {\r\n        \"type\": \"String\",\r\n
+        \       \"value\": \"xyz\"\r\n      }\r\n    },\r\n    \"parameters\": {\r\n
+        \     \"foo\": {\r\n        \"value\": \"abc\",\r\n        \"type\": \"string\"\r\n
+        \     },\r\n      \"bar\": {\r\n        \"value\": \"xyz\",\r\n        \"type\":
+        \"string\"\r\n      }\r\n    },\r\n    \"resources\": [],\r\n    \"provisioningState\":
+        \"succeeded\",\r\n    \"detachedResources\": [],\r\n    \"deletedResources\":
+        [],\r\n    \"failedResources\": []\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"harshpatel@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
+        \"2023-07-17T21:17:26.760594Z\",\r\n    \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2023-07-17T21:17:26.760594Z\"\r\n
+        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-list-deployment-stack-subscription000001\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-list-deployment-stack-subscription000001\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1681'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jul 2023 21:18:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack mg delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name --management-group-id --yes
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+    method: DELETE
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-list-deployment-stack-subscription000001?unmanageAction.Resources=detach&unmanageAction.ResourceGroups=detach&api-version=2022-08-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 17 Jul 2023 21:18:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+version: 1

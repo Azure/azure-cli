@@ -141,6 +141,31 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @BatchAccountPreparer()
+    def test_batch_pool_enableAcceleratedNetworking_cmd(
+            self,
+            resource_group,
+            batch_account_name):
+        endpoint = self.get_account_endpoint(
+            batch_account_name,
+            resource_group).replace("https://", "")
+        key = self.get_account_key(
+            batch_account_name,
+            resource_group)
+
+        self.kwargs.update({
+            'p_id': 'xplatCreatedPool',
+            'acc_n': batch_account_name,
+            'acc_k': key,
+            'acc_u': endpoint
+        })
+        self.batch_cmd('batch pool create --id {p_id} --image "MicrosoftWindowsServer:WindowsServer:2016-datacenter-smalldisk"  --target-dedicated-nodes 2 --vm-size "standard_d2_v2" --node-agent-sku-id "batch.node.windows amd64" --accelerated-networking true')
+
+        self.assertTrue(self.batch_cmd('batch pool show --pool-id {p_id}').get_output_in_json()['networkConfiguration']['enableAcceleratedNetworking'])
+
+        self.batch_cmd('batch pool delete --pool-id {p_id} --yes')
+
+    @ResourceGroupPreparer()
+    @BatchAccountPreparer()
     def test_batch_job_list_cmd(
             self,
             resource_group,
@@ -200,8 +225,10 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                            self.check('id', 'aaa'),
                            self.check('commandLine', 'ping 127.0.0.1 -n 30')])
 
-        if self.is_live or self.in_recording:
-            time.sleep(10)
+        task_result = self.batch_cmd('batch job task-counts show --job-id {j_id}').get_output_in_json()
+        if self.is_live or self.in_recording or task_result["taskCounts"]["active"] == 0:
+            time.sleep(10) 
+
         task_result = self.batch_cmd('batch job task-counts show --job-id {j_id}').get_output_in_json()
 
         self.assertEqual(task_result["taskCounts"]["completed"], 0)

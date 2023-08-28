@@ -305,12 +305,12 @@ def show_protectable_item(cmd, client, resource_group_name, vault_name, name, se
 
 
 def show_protectable_instance(cmd, client, resource_group_name, vault_name, server_name, protectable_item_type,
-                              workload_type, container_name=None, subscription_id=None,
+                              workload_type, container_name=None, subscription_id=None, instance_name=None,
                               backup_management_type="AzureWorkload"):
     items = list_protectable_items_in_subscription(cmd, client, resource_group_name, vault_name, workload_type,
                                                    backup_management_type, container_name,
                                                    subscription_id=subscription_id)
-    return custom_wl.show_protectable_instance(items, server_name, protectable_item_type)
+    return custom_wl.show_protectable_instance(items, server_name, protectable_item_type, instance_name=instance_name)
 
 
 def initialize_protectable_items(client, resource_group_name, vault_name, container_name, workload_type):
@@ -448,7 +448,7 @@ def enable_for_azurefileshare(cmd, client, resource_group_name, vault_name, poli
 
 def restore_azurefileshare(cmd, client, resource_group_name, vault_name, rp_name, container_name, item_name,
                            restore_mode, resolve_conflict, target_storage_account=None, target_file_share=None,
-                           target_folder=None):
+                           target_folder=None, target_resource_group_name=None):
     backup_management_type = "AzureStorage"
     workload_type = "AzureFileShare"
     items_client = backup_protected_items_cf(cmd.cli_ctx)
@@ -462,12 +462,13 @@ def restore_azurefileshare(cmd, client, resource_group_name, vault_name, rp_name
     return custom_afs.restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name, item, restore_mode,
                                              resolve_conflict, "FullShareRestore",
                                              target_storage_account_name=target_storage_account,
-                                             target_file_share_name=target_file_share, target_folder=target_folder)
+                                             target_file_share_name=target_file_share, target_folder=target_folder,
+                                             target_resource_group_name=target_resource_group_name)
 
 
 def restore_azurefiles(cmd, client, resource_group_name, vault_name, rp_name, container_name, item_name, restore_mode,
                        resolve_conflict, target_storage_account=None, target_file_share=None, target_folder=None,
-                       source_file_type=None, source_file_path=None,):
+                       source_file_type=None, source_file_path=None):
     backup_management_type = "AzureStorage"
     workload_type = "AzureFileShare"
     items_client = backup_protected_items_cf(cmd.cli_ctx)
@@ -521,7 +522,7 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
                          rp_name=None, target_item_name=None, log_point_in_time=None, target_server_type=None,
                          target_server_name=None, workload_type=None, backup_management_type="AzureWorkload",
                          from_full_rp_name=None, filepath=None, target_container_name=None, target_resource_group=None,
-                         target_vault_name=None, target_subscription_id=None):
+                         target_vault_name=None, target_subscription_id=None, target_instance_name=None):
     target_subscription = get_subscription_id(cmd.cli_ctx)
     if target_subscription_id is not None:
         vault_csr_state = custom.get_vault_csr_state(vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name))
@@ -542,7 +543,8 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
                                                            subscription_id=target_subscription).backup_protectable_items
         target_item = show_protectable_instance(
             cmd, protectable_items_client, target_resource_group, target_vault_name,
-            target_server_name, target_server_type, workload_type, target_container_name, target_subscription)
+            target_server_name, target_server_type, workload_type, target_container_name,
+            target_subscription, target_instance_name, "AzureWorkload")
 
     target_container = None
     if target_container_name is not None:

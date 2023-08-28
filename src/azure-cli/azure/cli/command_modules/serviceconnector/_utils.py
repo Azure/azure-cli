@@ -442,3 +442,45 @@ def _install_extension(cmd, extension_name):
     except Exception:  # nopa pylint: disable=broad-except
         return False
     return True
+
+
+def springboot_migration_warning(require_update=False, check_version=False, both_version=False):
+    warning_message = "It is recommended to use Spring Cloud Azure version 4.0 and above. \
+The configurations in the format of \"azure.cosmos.*\" from Spring Cloud Azure 3.x will no longer be supported after 1st July, 2024. \
+Please refer to https://microsoft.github.io/spring-cloud-azure/current/reference/html/appendix.html\
+#configuration-spring-cloud-azure-starter-data-cosmos for more details."
+
+    update_message = "\nPlease update your connection to include the configurations for the newer version."
+
+    check_version_message = "\nManaged identity and service principal are only supported \
+in Spring Cloud Azure version 4.0 and above. Please check your Spring Cloud Azure version. \
+Learn more at https://spring.io/projects/spring-cloud-azure#overview"
+    both_version_message = "\nTwo sets of configuration properties will be configured \
+according to Spring Cloud Azure version 3.x and 4.x. \
+Learn more at https://spring.io/projects/spring-cloud-azure#overview"
+
+    if require_update:
+        warning_message += update_message
+    if check_version:
+        warning_message += check_version_message
+    if both_version:
+        warning_message += both_version_message
+
+    return warning_message
+
+
+def decorate_springboot_cosmossql_config(configs):
+    is_springboot_cosmossql = False
+    require_update = True
+
+    for config in configs.configurations:
+        if config.name.startswith("azure.cosmos."):
+            is_springboot_cosmossql = True
+            config.note = "This configuration property is used in Spring Cloud Azure version 3.x and below."
+        elif config.name.startswith("spring.cloud.azure.cosmos."):
+            is_springboot_cosmossql = True
+            require_update = False
+            config.note = "This configuration property is used in Spring Cloud Azure version 4.0 and above."
+
+    if is_springboot_cosmossql:
+        logger.warning(springboot_migration_warning(require_update=require_update))

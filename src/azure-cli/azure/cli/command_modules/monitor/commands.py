@@ -8,14 +8,11 @@ from azure.cli.core.commands import CliCommandType
 # pylint: disable=line-too-long, too-many-locals, too-many-statements
 def load_command_table(self, _):
     from ._client_factory import (
-        cf_alert_rules, cf_metric_def, cf_autoscale,
+        cf_alert_rules, cf_autoscale,
         cf_activity_log, cf_action_groups, cf_activity_log_alerts, cf_event_categories,
-        cf_metric_alerts, cf_metric_ns, cf_log_analytics_workspace,
-        cf_private_link_resources, cf_private_link_scoped_resources,
-        cf_private_link_scopes, cf_private_endpoint_connections, cf_log_analytics_linked_storage)
+        cf_metric_alerts, cf_log_analytics_workspace, cf_log_analytics_linked_storage)
     from .transformers import (action_group_list_table)
     from .validators import (process_autoscale_create_namespace,
-                             validate_private_endpoint_connection_id,
                              process_action_group_detail_for_creation)
     from ._exception_handler import exception_handler
 
@@ -75,48 +72,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.monitor.operations#MetricAlertsOperations.{}',
         client_factory=cf_metric_alerts,
         operation_group='metric_alerts',
-        exception_handler=exception_handler)
-
-    metric_definitions_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations#MetricDefinitionsOperations.{}',
-        client_factory=cf_metric_def,
-        operation_group='metric_definitions',
-        exception_handler=exception_handler)
-
-    metric_namespaces_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations#MetricNamespacesOperations.{}',
-        client_factory=cf_metric_ns,
-        operation_group='metric_namespaces',
-        exception_handler=exception_handler
-    )
-
-    private_link_resources_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations#PrivateLinkResourcesOperations.{}',
-        client_factory=cf_private_link_resources,
-        operation_group='private_link_resources',
-        exception_handler=exception_handler)
-
-    private_link_scoped_resources_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations#PrivateLinkScopedResourcesOperations.{}',
-        client_factory=cf_private_link_scoped_resources,
-        operation_group='private_link_scoped_resources',
-        exception_handler=exception_handler)
-
-    private_link_scopes_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations#PrivateLinkScopesOperations.{}',
-        client_factory=cf_private_link_scopes,
-        operation_group='private_link_scopes',
-        exception_handler=exception_handler)
-
-    private_endpoint_connections_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations#PrivateEndpointConnectionsOperations.{}',
-        client_factory=cf_private_endpoint_connections,
-        operation_group='private_endpoint_connections',
-        exception_handler=exception_handler)
-
-    private_link_scope_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.monitor.operations.private_link_scope#{}',
-        client_factory=cf_private_link_scopes,
         exception_handler=exception_handler)
 
     log_analytics_workspace_custom = CliCommandType(
@@ -198,10 +153,8 @@ def load_command_table(self, _):
     with self.command_group('monitor metrics') as g:
         from .transformers import metrics_table, metrics_definitions_table, metrics_namespaces_table
         g.command('list', 'list_metrics', command_type=monitor_custom, table_transformer=metrics_table)
-        g.command('list-definitions', 'list', command_type=metric_definitions_sdk,
-                  table_transformer=metrics_definitions_table)
-        g.command('list-namespaces', 'list', is_preview=True, command_type=metric_namespaces_sdk,
-                  table_transformer=metrics_namespaces_table)
+        g.custom_command('list-definitions', 'list_definations', command_type=monitor_custom, table_transformer=metrics_definitions_table)
+        g.command('list-namespaces', 'list_namespaces', is_preview=True, command_type=monitor_custom, table_transformer=metrics_namespaces_table)
 
     with self.command_group('monitor metrics alert', metric_alert_sdk, custom_command_type=alert_custom,
                             client_factory=cf_metric_alerts) as g:
@@ -257,41 +210,9 @@ def load_command_table(self, _):
     with self.command_group('monitor', metric_alert_sdk, custom_command_type=monitor_general_custom) as g:
         g.custom_command('clone', 'clone_existed_settings', is_preview=True)
 
-    with self.command_group('monitor private-link-scope', private_link_scopes_sdk,
-                            custom_command_type=private_link_scope_custom, is_preview=True) as g:
-        g.custom_show_command('show', 'show_private_link_scope')
-        g.custom_command('list', 'list_private_link_scope')
-        g.custom_command('create', 'create_private_link_scope')
-        g.custom_command('update', 'update_private_link_scope')
-        g.custom_command('delete', 'delete_private_link_scope', confirmation=True)
-
-    with self.command_group('monitor private-link-scope scoped-resource', private_link_scoped_resources_sdk,
-                            custom_command_type=private_link_scope_custom, is_preview=True) as g:
-        g.custom_show_command('show', 'show_private_link_scope_resource',
-                              client_factory=cf_private_link_scoped_resources)
-        g.custom_command('list', 'list_private_link_scope_resource', client_factory=cf_private_link_scoped_resources)
-        g.custom_command('create', 'create_private_link_scope_resource',
-                         client_factory=cf_private_link_scoped_resources)
-        g.custom_command('delete', 'delete_private_link_scope_resource',
-                         client_factory=cf_private_link_scoped_resources, confirmation=True)
-
-    with self.command_group('monitor private-link-scope private-link-resource', private_link_resources_sdk,
-                            custom_command_type=private_link_scope_custom, is_preview=True) as g:
-        g.custom_show_command('show', 'show_private_link_resource', client_factory=cf_private_link_resources)
-        from azure.cli.core.commands.transform import gen_dict_to_list_transform
-        g.custom_command('list', 'list_private_link_resource', client_factory=cf_private_link_resources,
-                         transform=gen_dict_to_list_transform(key="value"))
-
-    with self.command_group('monitor private-link-scope private-endpoint-connection', private_endpoint_connections_sdk,
-                            custom_command_type=private_link_scope_custom, is_preview=True) as g:
-        g.custom_show_command('show', 'show_private_endpoint_connection',
-                              client_factory=cf_private_endpoint_connections,
-                              validator=validate_private_endpoint_connection_id)
-        g.custom_command('list', 'list_private_endpoint_connection', client_factory=cf_private_endpoint_connections)
-        g.custom_command('approve', 'approve_private_endpoint_connection',
-                         client_factory=cf_private_endpoint_connections,
-                         validator=validate_private_endpoint_connection_id)
-        g.custom_command('reject', 'reject_private_endpoint_connection', client_factory=cf_private_endpoint_connections,
-                         validator=validate_private_endpoint_connection_id)
-        g.custom_command('delete', 'delete_private_endpoint_connection', client_factory=cf_private_endpoint_connections,
-                         validator=validate_private_endpoint_connection_id, confirmation=True)
+    from .operations.private_link_scope import PrivateLinkScopeCreate, ConnectionDelete, ConnectionShow, ConnectionApprove, ConnectionReject
+    self.command_table["monitor private-link-scope create"] = PrivateLinkScopeCreate(loader=self)
+    self.command_table["monitor private-link-scope private-endpoint-connection delete"] = ConnectionDelete(loader=self)
+    self.command_table["monitor private-link-scope private-endpoint-connection show"] = ConnectionShow(loader=self)
+    self.command_table["monitor private-link-scope private-endpoint-connection approve"] = ConnectionApprove(loader=self)
+    self.command_table["monitor private-link-scope private-endpoint-connection reject"] = ConnectionReject(loader=self)

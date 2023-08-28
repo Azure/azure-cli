@@ -272,6 +272,7 @@ def load_volumes_command_groups(self, netappfiles_volumes_sdk):
         g.wait_command('wait')
 
     with self.command_group('netappfiles volume replication', netappfiles_volumes_sdk) as g:
+        from .validators import validate_resync_quotarule
         g.custom_command('approve', 'authorize_replication',
                          client_factory=volumes_mgmt_client_factory,
                          supports_no_wait=True,
@@ -282,7 +283,7 @@ def load_volumes_command_groups(self, netappfiles_volumes_sdk):
                          supports_no_wait=True,
                          doc_string_source='azure.mgmt.netapp.models#Volume',
                          exception_handler=netappfiles_exception_handler)
-        g.command('resume', 'begin_resync_replication', supports_no_wait=True)
+        g.command('resume', 'begin_resync_replication', supports_no_wait=True, validator=validate_resync_quotarule)
         g.command('remove', 'begin_delete_replication', supports_no_wait=True)
         g.command('status', 'replication_status')
         g.command('re-initialize', 'begin_re_initialize_replication', supports_no_wait=True)

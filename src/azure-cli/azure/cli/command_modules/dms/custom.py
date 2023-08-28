@@ -318,8 +318,7 @@ def get_file_or_parse_json(value, value_type):
     except Exception as e:
         raise CLIError("The supplied input for '{type}' is not a valid file path or a valid json object. {ex}'"
                        .format(type=value_type, ex=e))
-    else:
-        return json_parse
+    return json_parse
 
 
 def create_connection(connection_info_json, prompt_prefix, typeOfInfo):

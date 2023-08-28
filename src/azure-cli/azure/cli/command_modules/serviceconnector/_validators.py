@@ -16,6 +16,7 @@ from msrestazure.tools import (
     parse_resource_id,
     is_valid_resource_id
 )
+from azure.cli.core import telemetry
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import (
     ValidationError,
@@ -340,20 +341,27 @@ def intelligent_experience(cmd, namespace, missing_args):
     return cmd_arg_values
 
 
-def validate_source_resource_id(namespace):
+def validate_source_resource_id(cmd, namespace):
     '''Validate resource id of a source resource
     '''
     if getattr(namespace, 'source_id', None):
         if not is_valid_resource_id(namespace.source_id):
-            raise InvalidArgumentValueError('Resource id is invalid: {}'.format(namespace.source_id))
-        matched = False
-        for resource in SOURCE_RESOURCES.values():
-            matched = re.match(get_resource_regex(resource), namespace.source_id)
-            if matched:
-                namespace.source_id = matched.group()
-                return True
-        if not matched:
-            raise InvalidArgumentValueError('Unsupported source resource id: {}'.format(namespace.source_id))
+            e = InvalidArgumentValueError('Resource id is invalid: {}'.format(namespace.source_id))
+            telemetry.set_exception(e, 'source-id-invalid')
+            raise e
+
+        source = get_source_resource_name(cmd)
+        pattern = SOURCE_RESOURCES.get(source)
+        matched = re.match(get_resource_regex(pattern),
+                           namespace.source_id, re.IGNORECASE)
+        if matched:
+            namespace.source_id = matched.group()
+            return True
+        e = InvalidArgumentValueError(
+            'Unsupported source resource id: {}. '
+            'Source id pattern should be: {}'.format(namespace.source_id, pattern))
+        telemetry.set_exception(e, 'source-id-unsupported')
+        raise e
 
     return False
 
@@ -371,25 +379,32 @@ def validate_connection_id(namespace):
                 namespace.connection_name = matched.group(2)
                 return True
         if not matched:
-            raise InvalidArgumentValueError('Connection id is invalid: {}'.format(namespace.indentifier))
+            e = InvalidArgumentValueError('Connection id is invalid: {}'.format(namespace.indentifier))
+            telemetry.set_exception(e, 'connection-id-invalid')
+            raise e
 
     return False
 
 
-def validate_target_resource_id(namespace):
+def validate_target_resource_id(cmd, namespace):
     '''Validate resource id of a target resource
     '''
     if getattr(namespace, 'target_id', None):
         if not is_valid_resource_id(namespace.target_id):
-            raise InvalidArgumentValueError('Resource id is invalid: {}'.format(namespace.target_id))
-        matched = False
-        for resource in TARGET_RESOURCES.values():
-            matched = re.match(get_resource_regex(resource), namespace.target_id, re.IGNORECASE)
-            if matched:
-                namespace.target_id = matched.group()
-                return True
-        if not matched:
-            raise InvalidArgumentValueError('Unsupported target resource id is invalid: {}'.format(namespace.target_id))
+            e = InvalidArgumentValueError('Resource id is invalid: {}'.format(namespace.target_id))
+            telemetry.set_exception(e, 'target-id-invalid')
+            raise e
+
+        target = get_target_resource_name(cmd)
+        pattern = TARGET_RESOURCES.get(target)
+        matched = re.match(get_resource_regex(pattern), namespace.target_id, re.IGNORECASE)
+        if matched:
+            namespace.target_id = matched.group()
+            return True
+        e = InvalidArgumentValueError('Target resource id is invalid: {}. '
+                                      'Target id pattern should be: {}'.format(namespace.target_id, pattern))
+        telemetry.set_exception(e, 'target-id-unsupported')
+        raise e
 
     return False
 
@@ -538,7 +553,7 @@ def validate_list_params(cmd, namespace):
     '''Get missing args of list command
     '''
     missing_args = dict()
-    if not validate_source_resource_id(namespace):
+    if not validate_source_resource_id(cmd, namespace):
         missing_args.update(get_missing_source_args(cmd))
     return missing_args
 
@@ -547,10 +562,10 @@ def validate_create_params(cmd, namespace):
     '''Get missing args of create command
     '''
     missing_args = dict()
-    if not validate_source_resource_id(namespace):
+    if not validate_source_resource_id(cmd, namespace):
         missing_args.update(get_missing_source_args(cmd))
     missing_args.update(get_missing_source_create_args(cmd, namespace))
-    if not validate_target_resource_id(namespace):
+    if not validate_target_resource_id(cmd, namespace):
         missing_args.update(get_missing_target_args(cmd))
     missing_args.update(get_missing_auth_args(cmd, namespace))
     return missing_args
@@ -561,7 +576,7 @@ def validate_local_create_params(cmd, namespace):
     '''
     missing_args = dict()
 
-    if not validate_target_resource_id(namespace):
+    if not validate_target_resource_id(cmd, namespace):
         missing_args.update(get_missing_target_args(cmd))
     missing_args.update(get_missing_auth_args(cmd, namespace))
     return missing_args
@@ -571,7 +586,7 @@ def validate_addon_params(cmd, namespace):
     '''Get missing args of add command with '--new'
     '''
     missing_args = dict()
-    if not validate_source_resource_id(namespace):
+    if not validate_source_resource_id(cmd, namespace):
         missing_args.update(get_missing_source_args(cmd))
     return missing_args
 
@@ -607,8 +622,10 @@ def validate_default_params(cmd, namespace):
 
 def validate_connection_name(name):
     if not re.match(r'^[A-Za-z0-9\._]+$', name):
-        raise InvalidArgumentValueError("Resource name can only contain letters (A-Z, a-z), "
-                                        "numbers (0-9), periods ('.'), and underscores ('_')")
+        e = InvalidArgumentValueError("Resource name can only contain letters (A-Z, a-z), "
+                                      "numbers (0-9), periods ('.'), and underscores ('_')")
+        telemetry.set_exception('connection-name-invalid')
+        raise e
     return True
 
 

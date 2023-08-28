@@ -13,7 +13,8 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_postgres_flexible_location_capabilities,
     cf_postgres_flexible_backups,
     cf_postgres_flexible_replica,
-    cf_postgres_flexible_adadmin)
+    cf_postgres_flexible_adadmin,
+    cf_postgres_flexible_migrations)
 
 from ._transformers import (
     table_transform_output,
@@ -70,6 +71,11 @@ def load_flexibleserver_command_table(self, _):
         client_factory=cf_postgres_flexible_adadmin
     )
 
+    postgres_flexible_migrations_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#MigrationsOperations.{}',
+        client_factory=cf_postgres_flexible_migrations
+    )
+
     # MERU COMMANDS
     flexible_server_custom_common = CliCommandType(
         operations_tmpl='azure.cli.command_modules.rdbms.flexible_server_custom_common#{}')
@@ -83,6 +89,7 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('create', 'flexible_server_create', table_transformer=table_transform_output)
         g.custom_command('restore', 'flexible_server_restore', supports_no_wait=True)
         g.custom_command('geo-restore', 'flexible_server_georestore', supports_no_wait=True)
+        g.custom_command('revive-dropped', 'flexible_server_revivedropped', supports_no_wait=True)
         g.command('start', 'begin_start', supports_no_wait=True)
         g.custom_command('stop', 'flexible_server_stop', custom_command_type=flexible_server_custom_common, supports_no_wait=True)
         g.custom_command('delete', 'flexible_server_delete')
@@ -111,15 +118,14 @@ def load_flexibleserver_command_table(self, _):
                                  custom_func_name='flexible_firewall_rule_update_custom_func',
                                  custom_func_type=flexible_server_custom_common)
 
-    with self.command_group('postgres flexible-server migration', postgres_flexible_firewall_rule_sdk,
+    with self.command_group('postgres flexible-server migration', postgres_flexible_migrations_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
-                            client_factory=cf_postgres_flexible_firewall_rules,
-                            is_experimental=True) as g:
-        g.custom_command('create', 'migration_create_func', custom_command_type=flexible_server_custom_common)
-        g.custom_show_command('show', 'migration_show_func', custom_command_type=flexible_server_custom_common)
-        g.custom_command('list', 'migration_list_func', custom_command_type=flexible_server_custom_common)
-        g.custom_command('update', 'migration_update_func', custom_command_type=flexible_server_custom_common)
-        g.custom_command('check-name-availability', 'migration_check_name_availability', custom_command_type=flexible_server_custom_common)
+                            client_factory=cf_postgres_flexible_migrations) as g:
+        g.custom_command('create', 'migration_create_func', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_show_command('show', 'migration_show_func', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('list', 'migration_list_func', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('update', 'migration_update_func', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('check-name-availability', 'migration_check_name_availability', custom_command_type=flexible_servers_custom_postgres)
 
     with self.command_group('postgres flexible-server parameter', postgres_flexible_config_sdk,
                             custom_command_type=flexible_servers_custom_postgres,

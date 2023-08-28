@@ -1041,6 +1041,12 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         self.cmd('keyvault key decrypt -n {key} --vault-name {kv} -a RSA-OAEP --value "{encryption_result2}" --data-type base64',
                  checks=self.check('result', '{base64_value}'))
 
+        # sign/verify
+        self.kwargs['digest'] = '12345678901234567890123456789012'
+        self.kwargs['sign_result'] = self.cmd('keyvault key sign -n {key} --vault-name {kv} -a RS256 --digest {digest}').get_output_in_json()['signature']
+        self.cmd('keyvault key verify -n {key} --vault-name {kv} -a RS256 --digest {digest} --signature "{sign_result}"',
+                 checks=self.check('isValid', True))
+
         # list keys
         self.cmd('keyvault key list --vault-name {kv}',
                  checks=[
@@ -1182,7 +1188,7 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         key_perms = keyvault['properties']['accessPolicies'][0]['permissions']['keys']
         key_perms.extend(['rotate'])
         self.kwargs['key_perms'] = ' '.join(key_perms)
-        self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} --key-permissions {key_perms}')
+        self.cmd('keyvault set-policy -n {kv} -g {rg} --object-id {obj_id} --key-permissions {key_perms}')
 
         # create a key
         key = self.cmd('keyvault key create --vault-name {kv} -n {key} -p software',
@@ -2102,11 +2108,13 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
         policy_path = os.path.join(TEST_DIR, 'policy.json')
         policy2_path = os.path.join(TEST_DIR, 'policy2.json')
         policy3_path = os.path.join(TEST_DIR, 'policy3.json')
+        policy4_path = os.path.join(TEST_DIR, 'policy4.json')
         cert_secret_path = os.path.join(TEST_DIR, 'cert_secret.der')
         self.kwargs.update({
             'policy_path': policy_path,
             'policy2_path': policy2_path,
             'policy3_path': policy3_path,
+            'policy4_path': policy4_path,
             'cert_secret_path': cert_secret_path
         })
 
@@ -2135,6 +2143,12 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
                      self.check('name', 'cert2'),
                      self.check('policy.secretProperties.contentType',
                                 policy['secretProperties']['contentType'])
+                 ])
+        # test cert import using policy without content-type specified
+        self.cmd('keyvault certificate import --vault-name {kv} --file "{cert_secret_path}" -n cert2 -p @"{policy4_path}"',
+                 checks=[
+                     self.check('name', 'cert2'),
+                     self.check('policy.secretProperties.contentType', 'application/x-pkcs12')
                  ])
         self.cmd('keyvault certificate delete --vault-name {kv} -n cert2')
         if os.path.exists(cert_secret_path):
@@ -2208,7 +2222,7 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
         ])
 
         # backup and then delete certificate
-        self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} '
+        self.cmd('keyvault set-policy -n {kv} -g {rg} --object-id {obj_id} '
                  '--certificate-permissions backup delete get restore list purge')
 
         bak_file = 'backup.cert'

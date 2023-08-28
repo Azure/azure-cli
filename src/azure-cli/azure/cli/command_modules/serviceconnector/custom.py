@@ -19,6 +19,7 @@ from ._resource_config import (
     SUPPORTED_AUTH_TYPE,
     SUPPORTED_CLIENT_TYPE,
     TARGET_RESOURCES,
+    AUTH_TYPE,
     RESOURCE
 )
 from ._validators import (
@@ -35,7 +36,9 @@ from ._utils import (
     get_cloud_conn_auth_info,
     get_local_conn_auth_info,
     _get_azext_module,
-    _get_or_add_extension
+    _get_or_add_extension,
+    springboot_migration_warning,
+    decorate_springboot_cosmossql_config
 )
 from ._credential_free import is_passwordless_command
 # pylint: disable=unused-argument,unsubscriptable-object,unsupported-membership-test,too-many-statements,too-many-locals
@@ -175,9 +178,13 @@ def connection_list_configuration(client,
                                   spring=None, app=None, deployment='default'):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
-    return auto_register(client.list_configurations,
-                         resource_uri=source_id,
-                         linker_name=connection_name)
+    configurations = auto_register(client.list_configurations,
+                                   resource_uri=source_id,
+                                   linker_name=connection_name)
+
+    decorate_springboot_cosmossql_config(configurations)
+
+    return configurations
 
 
 def local_connection_generate_configuration(cmd, client,
@@ -459,6 +466,15 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
         new_auth_info = enable_mi_for_db_linker(
             cmd, source_id, target_id, auth_info, client_type, connection_name)
         parameters['auth_info'] = new_auth_info or parameters['auth_info']
+
+    # migration warning for Spring Azure Cloud
+    if client_type == CLIENT_TYPE.SpringBoot.value and target_type == RESOURCE.CosmosSql:
+        isSecretType = (auth_info['auth_type'] == AUTH_TYPE.SecretAuto.value or
+                        auth_info['auth_type'] == AUTH_TYPE.Secret.value)
+        logger.warning(springboot_migration_warning(require_update=False,
+                                                    check_version=(not isSecretType),
+                                                    both_version=isSecretType))
+
     return auto_register(sdk_no_wait, no_wait,
                          client.begin_create_or_update,
                          resource_uri=source_id,
@@ -683,6 +699,14 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
         parameters['v_net_solution'] = None
     elif private_endpoint is False and linker.get('vNetSolution').get('type') == 'privateLink':
         parameters['v_net_solution'] = None
+
+    # migration warning for Spring Azure Cloud
+    if client_type == CLIENT_TYPE.SpringBoot.value and target_type == RESOURCE.CosmosSql:
+        isSecretType = (auth_info['auth_type'] == AUTH_TYPE.SecretAuto.value or
+                        auth_info['auth_type'] == AUTH_TYPE.Secret.value)
+        logger.warning(springboot_migration_warning(require_update=False,
+                                                    check_version=(not isSecretType),
+                                                    both_version=isSecretType))
 
     return auto_register(sdk_no_wait, no_wait,
                          client.begin_create_or_update,

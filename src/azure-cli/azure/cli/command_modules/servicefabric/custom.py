@@ -1392,7 +1392,7 @@ def _get_thumbprint_from_secret_identifier(cli_ctx, vault, secret_identifier):
         x509 = crypto.load_certificate(crypto.FILETYPE_PEM, cert_bytes)
 
     if not x509:
-        raise Exception('invalid certificate')
+        raise Exception('invalid certificate')  # pylint: disable=broad-exception-raised
 
     thumbprint = x509.digest("sha1").decode("utf-8").replace(':', '')
     return thumbprint

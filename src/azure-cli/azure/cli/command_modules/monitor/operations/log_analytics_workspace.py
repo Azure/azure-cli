@@ -191,8 +191,8 @@ def create_log_analytics_workspace_table(cmd, resource_group_name, workspace_nam
                                          description=None, no_wait=False):
     if retention_in_days and total_retention_in_days:
         if total_retention_in_days < retention_in_days:
-            InvalidArgumentValueError('InvalidArgumentValueError: The specified value of --retention-time'
-                                      ' should be less than --total-retention-time')
+            raise InvalidArgumentValueError('InvalidArgumentValueError: The specified value of --retention-time'
+                                            ' should be less than --total-retention-time')
     columns_list = None
     if columns:
         columns_list = []

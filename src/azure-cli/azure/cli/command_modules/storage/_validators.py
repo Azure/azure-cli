@@ -2013,7 +2013,7 @@ def _add_sas_for_url(cmd, url, account_name, account_key, sas_token, service, re
             logger.info("Cannot generate sas token. %s", ex)
             sas_token = None
     if sas_token:
-        return'{}?{}'.format(url, sas_token)
+        return '{}?{}'.format(url, sas_token)
     return url
 
 
@@ -2167,12 +2167,6 @@ def validate_policy(namespace):
     if namespace.id is not None:
         logger.warning("\nPlease do not specify --expiry and --permissions if they are already specified in your "
                        "policy.")
-
-
-def validate_allow_blob_public_access():
-    logger.warning("The public access to all blobs or containers in the storage account will be "
-                   "disallowed by default in the future, which means default value for --allow-blob-public-access "
-                   "is still null but will be equivalent to false.")
 
 
 def validate_immutability_arguments(namespace):

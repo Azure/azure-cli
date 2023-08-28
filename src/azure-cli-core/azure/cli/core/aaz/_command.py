@@ -17,13 +17,15 @@ from knack.preview import PreviewItem
 
 from azure.cli.core.azclierror import CLIInternalError
 from ._arg import AAZArgumentsSchema, AAZBoolArg, \
-    AAZGenericUpdateAddArg, AAZGenericUpdateSetArg, AAZGenericUpdateRemoveArg, AAZGenericUpdateForceStringArg
+    AAZGenericUpdateAddArg, AAZGenericUpdateSetArg, AAZGenericUpdateRemoveArg, AAZGenericUpdateForceStringArg, \
+    AAZPaginationTokenArg, AAZPaginationLimitArg
 from ._base import AAZUndefined, AAZBaseValue
 from ._field_type import AAZObjectType
 from ._paging import AAZPaged
 from ._poller import AAZLROPoller
 from ._command_ctx import AAZCommandCtx
 from .exceptions import AAZUnknownFieldError, AAZUnregisteredArg
+from .utils import get_aaz_profile_module_name
 
 
 logger = get_logger(__name__)
@@ -61,6 +63,7 @@ class AAZCommand(CLICommand):
     AZ_HELP = None
     AZ_SUPPORT_NO_WAIT = False
     AZ_SUPPORT_GENERIC_UPDATE = False
+    AZ_SUPPORT_PAGINATION = False
 
     AZ_CONFIRMATION = None
     AZ_PREVIEW_INFO = None
@@ -90,6 +93,9 @@ class AAZCommand(CLICommand):
             schema.generic_update_set = AAZGenericUpdateSetArg()
             schema.generic_update_remove = AAZGenericUpdateRemoveArg()
             schema.generic_update_force_string = AAZGenericUpdateForceStringArg()
+        if cls.AZ_SUPPORT_PAGINATION:
+            schema.pagination_token = AAZPaginationTokenArg()
+            schema.pagination_limit = AAZPaginationLimitArg()
         return schema
 
     def __init__(self, loader=None, cli_ctx=None, callbacks=None, **kwargs):
@@ -243,7 +249,17 @@ class AAZCommand(CLICommand):
             self.ctx.next_link = next_link
             executor()
 
-        return AAZPaged(executor=executor_wrapper, extract_result=extract_result)
+        if self.AZ_SUPPORT_PAGINATION:
+            args = self.ctx.args
+            token = args.pagination_token.to_serialized_data()
+            limit = args.pagination_limit.to_serialized_data()
+
+            return AAZPaged(
+                executor=executor_wrapper, extract_result=extract_result, cli_ctx=self.cli_ctx,
+                token=token, limit=limit
+            )
+
+        return AAZPaged(executor=executor_wrapper, extract_result=extract_result, cli_ctx=self.cli_ctx)
 
 
 class AAZWaitCommand(AAZCommand):
@@ -393,7 +409,7 @@ def load_aaz_command_table(loader, aaz_pkg_name, args):
 def _get_profile_pkg(aaz_module_name, cloud):
     """ load the profile package of aaz module according to the cloud profile.
     """
-    profile_module_name = cloud.profile.lower().replace('-', '_')
+    profile_module_name = get_aaz_profile_module_name(cloud.profile)
     try:
         return importlib.import_module(f'{aaz_module_name}.{profile_module_name}')
     except ModuleNotFoundError:

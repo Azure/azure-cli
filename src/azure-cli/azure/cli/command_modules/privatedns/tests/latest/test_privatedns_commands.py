@@ -430,9 +430,8 @@ class PrivateDnsZonesTests(BaseScenarioTests):
             self.check('tags.{}'.format(tagKey), tagVal),
             self.check('provisioningState', 'Succeeded')
         ])
-        self.cmd('az network private-dns zone update -g {rg} -n {zone} --tags ""', checks=[
+        self.cmd('az network private-dns zone update -g {rg} -n {zone} --tags null', checks=[
             self.check('name', '{zone}'),
-            self.check('tags', '{{}}'),
             self.check('provisioningState', 'Succeeded')
         ])
 
@@ -462,7 +461,7 @@ class PrivateDnsZonesTests(BaseScenarioTests):
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_GetZone_ZoneNotExists_ExpectError(self, resource_group):
         GeneratePrivateZoneName(self)
-        with self.assertRaisesRegex(SystemExit, '3'):
+        with self.assertRaisesRegex(ResourceNotFoundError, 'ResourceNotFound'):
             self.cmd('az network private-dns zone show -g {rg} -n {zone}')
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
@@ -617,9 +616,8 @@ class PrivateDnsLinksTests(BaseScenarioTests):
             self.check('tags.{}'.format(tagKey), tagVal),
             self.check('provisioningState', 'Succeeded')
         ])
-        self.cmd('az network private-dns link vnet update -g {rg} -n {link} -z {zone} --tags ""', checks=[
+        self.cmd('az network private-dns link vnet update -g {rg} -n {link} -z {zone} --tags null', checks=[
             self.check('name', '{link}'),
-            self.check('tags', '{{}}'),
             self.check('provisioningState', 'Succeeded')
         ])
 
@@ -627,14 +625,14 @@ class PrivateDnsLinksTests(BaseScenarioTests):
     def test_GetLink_ZoneNotExists_ExpectError(self, resource_group):
         GeneratePrivateZoneName(self)
         GenerateVirtualNetworkLinkName(self)
-        with self.assertRaisesRegex(SystemExit, '3'):
+        with self.assertRaises(ResourceNotFoundError):
             self.cmd('az network private-dns link vnet show -g {rg} -n {link} -z {zone}')
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_GetLink_LinkNotExists_ExpectError(self, resource_group):
         self._Create_PrivateZone()
         GenerateVirtualNetworkLinkName(self)
-        with self.assertRaisesRegex(SystemExit, '3'):
+        with self.assertRaises(ResourceNotFoundError):
             self.cmd('az network private-dns link vnet show -g {rg} -n {link} -z {zone}')
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
@@ -779,9 +777,8 @@ class PrivateDnsRecordSetsTests(BaseScenarioTests):
             self.check('name', '{recordset}'),
             self.check('metadata.{}'.format(tagKey), tagVal)
         ])
-        self.cmd('az network private-dns record-set a update -g {rg} -n {recordset} -z {zone} --metadata ""', checks=[
-            self.check('name', '{recordset}'),
-            self.check('metadata', '{{}}')
+        self.cmd('az network private-dns record-set a update -g {rg} -n {recordset} -z {zone} --metadata null', checks=[
+            self.check('name', '{recordset}')
         ])
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')

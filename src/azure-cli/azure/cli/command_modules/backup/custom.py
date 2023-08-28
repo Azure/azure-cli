@@ -48,13 +48,25 @@ import azure.cli.command_modules.backup.custom_help as cust_help
 logger = get_logger(__name__)
 
 # Mapping of workload type
-secondary_region_map = {"eastasia": "southeastasia",
+secondary_region_map = {"ussecwest": "usseceast",
+                        "usseceast": "ussecwest",
+                        "usnateast": "usnatwest",
+                        "usnatwest": "usnateast",
+                        "swedencentral": "swedensouth",
+                        "swedensouth": "swedencentral",
+                        "norwaywest": "norwayeast",
+                        "norwayeast": "norwaywest",
+                        "germanynorth": "germanywestcentral",
+                        "germanywestcentral": "germanynorth",
+                        "westus3": "eastus",
+                        "eastasia": "southeastasia",
                         "southeastasia": "eastasia",
                         "australiaeast": "australiasoutheast",
                         "australiasoutheast": "australiaeast",
                         "australiacentral": "australiacentral2",
                         "australiacentral2": "australiacentral",
                         "brazilsouth": "southcentralus",
+                        "brazilsoutheast": "brazilsouth",
                         "canadacentral": "canadaeast",
                         "canadaeast": "canadacentral",
                         "chinanorth": "chinaeast",
@@ -69,8 +81,6 @@ secondary_region_map = {"eastasia": "southeastasia",
                         "francesouth": "francecentral",
                         "germanycentral": "germanynortheast",
                         "germanynortheast": "germanycentral",
-                        "germanywestcentral": "germanynorth",
-                        "germanynorth": "germanywestcentral",
                         "centralindia": "southindia",
                         "southindia": "centralindia",
                         "westindia": "southindia",
@@ -101,7 +111,10 @@ secondary_region_map = {"eastasia": "southeastasia",
                         "usgovarizona": "usgovtexas",
                         "usgovtexas": "usgovarizona",
                         "usgoviowa": "usgovvirginia",
-                        "usgovvirginia": "usgovtexas"}
+                        "usgovvirginia": "usgovtexas",
+                        "malaysiasouth": "japanwest",
+                        "jioindiacentral": "jioindiawest",
+                        "jioindiawest": "jioindiacentral"}
 
 fabric_name = "Azure"
 default_policy_name = "DefaultPolicy"
@@ -643,6 +656,12 @@ def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, p
     vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
     policy = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
 
+    logger.warning('Ignite (November) 2023 onwards Virtual Machine deployments using PS and CLI will default to '
+                   'security type Trusted Launch. Please ensure Policy Name used with "az backup '
+                   'protection enable-for-vm" command is of type Enhanced Policy for Trusted Launch VMs. Non-Trusted '
+                   'Launch Virtual Machines will not be impacted by this change. To know more about default change '
+                   'and Trusted Launch, please visit https://aka.ms/TLaD.')
+
     # throw error if policy has more than 1000 protected VMs.
     if policy.properties.protected_items_count >= 1000:
         raise CLIError("Cannot configure backup for more than 1000 VMs per policy")
@@ -929,7 +948,7 @@ def move_recovery_points(cmd, resource_group_name, vault_name, item_name, rp_nam
     container_uri = cust_help.get_protection_container_uri_from_id(item_name.id)
     item_uri = cust_help.get_protected_item_uri_from_id(item_name.id)
 
-    if source_tier not in common.tier_type_map.keys():
+    if source_tier not in common.tier_type_map:
         raise InvalidArgumentValueError('This source tier-type is not accepted by move command at present.')
 
     parameters = MoveRPAcrossTiersRequest(source_tier_type=common.tier_type_map[source_tier],
@@ -988,9 +1007,9 @@ def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
                                     mi_user_assigned, restore_mode):
 
     if disk_encryption_set_id is not None:
-        if not(encryption.properties.encryption_at_rest_type == "CustomerManaged" and
-               recovery_point.properties.is_managed_virtual_machine and
-               not recovery_point.properties.is_source_vm_encrypted):
+        if not (encryption.properties.encryption_at_rest_type == "CustomerManaged" and
+                recovery_point.properties.is_managed_virtual_machine and
+                not recovery_point.properties.is_source_vm_encrypted):
             raise InvalidArgumentValueError("disk_encryption_set_id can't be specified")
 
     identity_info = None
