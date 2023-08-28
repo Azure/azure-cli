@@ -20,6 +20,7 @@ from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.core.azclierror import CommandNotFoundError
 from azure.cli.core.azclierror import ValidationError
+from azure.cli.core.error_assistance import error_enabled
 
 from knack.log import get_logger
 from knack.parser import CLICommandParser
@@ -149,6 +150,9 @@ class AzCliCommandParser(CLICommandParser):
         # Get command to provide to error help
         full_command = self.prog + ' ' + self.full_raw_command
 
+        if error_enabled():
+            print("Generating error assistance. This may take a few seconds.")
+
         az_error = ValidationError(message, full_command)
         az_error.print_error()
         az_error.send_telemetry()
@@ -164,6 +168,9 @@ class AzCliCommandParser(CLICommandParser):
 
         # Get command to provide to error help
         full_command = self.prog + ' ' + self.full_raw_command
+
+        if error_enabled():
+            print("Generating error assistance. This may take a few seconds.")
 
         az_error = ArgumentUsageError(message, full_command)
         if 'unrecognized arguments' in message:
@@ -301,6 +308,9 @@ class AzCliCommandParser(CLICommandParser):
 
             # Get command to provide to error help
             full_command = self.prog + ' ' + self.full_raw_command
+
+            if error_enabled():
+                print("Generating error assistance. This may take a few seconds.")
 
             command_name_inferred = self.prog
             use_dynamic_install = 'no'
