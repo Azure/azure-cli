@@ -18,7 +18,7 @@ class Show(AAZCommand):
     """Get an autoscale setting
 
     :example: Show autoscale setting details.
-        az monitor autoscale show --name MyAutoscaleSettings --resource-group MyResourceGroup
+        az monitor autoscale show --name {MyAutoscaleSettings} --resource-group {MyResourceGroup}
     """
 
     _aaz_info = {

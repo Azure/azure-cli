@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "monitor autoscale create",
-)
 class Create(AAZCommand):
     """Create an autoscale setting.
 
@@ -28,7 +25,7 @@ class Create(AAZCommand):
         az monitor autoscale create -g {myrg} --resource {resource-id} --count 4
 
     :example: Create new autoscale settings.
-        az monitor autoscale create --count 3 --max-count 5 --min-count 2 --name MyAutoscaleSettings --resource myScaleSet --resource-group MyResourceGroup --resource-type Microsoft.Compute/virtualMachineScaleSets
+        az monitor autoscale create --count 3 --max-count 5 --min-count 2 --name {MyAutoscaleSettings} --resource {myScaleSet} --resource-group {MyResourceGroup} --resource-type Microsoft.Compute/virtualMachineScaleSets
     """
 
     _aaz_info = {

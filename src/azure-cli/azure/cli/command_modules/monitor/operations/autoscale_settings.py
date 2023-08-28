@@ -377,7 +377,6 @@ class AutoScaleProfileDelete(_AutoScaleUpdate):
     def pre_instance_update(self, instance):
         args = self.ctx.args
         profile_name = args.profile_name.to_serialized_data()
-        instance = self.ctx.vars.instance
         default_profile, _ = build_autoscale_profile_from_instance(instance)
 
         def _should_retain_profile(profile):
@@ -555,7 +554,6 @@ class AutoScaleRuleCopy(_AutoScaleUpdate):
         source_profile_name = args.source_profile.to_serialized_data()
         dest_profile_name = args.dest_profile.to_serialized_data()
         index = args.index.to_serialized_data()
-        instance = self.ctx.vars.instance
 
         src_profile = _identify_profile(instance.properties.profiles, source_profile_name)
         dst_profile = _identify_profile(instance.properties.profiles, dest_profile_name)
