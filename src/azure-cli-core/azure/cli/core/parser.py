@@ -20,7 +20,6 @@ from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.core.azclierror import CommandNotFoundError
 from azure.cli.core.azclierror import ValidationError
-from azure.cli.core.error_assistance import error_assistance
 
 from knack.log import get_logger
 from knack.parser import CLICommandParser
@@ -72,6 +71,7 @@ class AzCliCommandParser(CLICommandParser):
         self._suggestion_msg = []
         self.subparser_map = {}
         self.specified_arguments = []
+        self.full_raw_command = None
         super(AzCliCommandParser, self).__init__(cli_ctx, cli_help=cli_help, **kwargs)
 
     def load_command_table(self, command_loader):
@@ -348,3 +348,4 @@ class AzCliCommandParser(CLICommandParser):
             az_error.send_telemetry()
 
             self.exit(2)
+            
