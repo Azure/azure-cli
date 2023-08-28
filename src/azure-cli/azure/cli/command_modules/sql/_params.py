@@ -251,7 +251,7 @@ database_federated_client_id_param_type = CLIArgumentType(
     help='The federated client id for the SQL Database. It is used for cross tenant CMK scenario.')
 
 database_encryption_protector_auto_rotation_param_type = CLIArgumentType(
-    options_list=['--encryption-protector-auto-rotation'],
+    options_list=['--encryption-protector-auto-rotation', '--epauto'],
     help='Specifies the database encryption protector key auto rotation flag. Can be either true, false or null.',
     required=False,
     arg_type=get_three_state_flag())
