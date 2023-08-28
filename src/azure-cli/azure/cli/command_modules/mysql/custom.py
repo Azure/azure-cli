@@ -821,7 +821,6 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
             logging_name='MySQL', command_group='mysql', server_client=client, location=source_server_object.location)
 
         validate_server_name(db_context, server_name, provider + '/flexibleServers')
-        validate_georestore_location(db_context, location)
 
         identity, data_encryption = get_identity_and_data_encryption(source_server_object)
 
@@ -1155,6 +1154,35 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
     )
 
     return client.begin_update(resource_group_name, server_name, configuration_name, parameters)
+
+
+def flexible_parameter_update_batch(client, server_name, resource_group_name, source, configuration_list):
+    configurations = []
+    if not configuration_list:
+        raise CLIError('No configuration parameters were found to update.')
+    for (name, value) in (configuration_list[0].items()):
+        if name is None:
+            raise CLIError('Error format: configuration name cannot be empty.')
+        if source is None and value is None:
+            try:
+                parameter = client.get(resource_group_name, server_name, name)
+                value = parameter.default_value  # reset value to default
+                source = "system-default"
+            except CloudError as e:
+                raise CLIError('Unable to get default parameter value: {}.'.format(str(e)))
+        elif source is None:
+            source = "user-override"
+        configurations.append(mysql_flexibleservers.models.ConfigurationForBatchUpdate(
+            name=name,
+            value=value,
+            source=source
+        ))
+
+    parameters = mysql_flexibleservers.models.ConfigurationListForBatchUpdate(
+        value=configurations
+    )
+
+    return client.begin_batch_update(resource_group_name, server_name, parameters)
 
 
 # Replica commands
