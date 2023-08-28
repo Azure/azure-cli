@@ -26,7 +26,7 @@ from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flex
     cf_mysql_flexible_servers, cf_mysql_flexible_replica, cf_mysql_flexible_adadmin, cf_mysql_flexible_private_dns_zone_suffix_operations, cf_mysql_servers
 from ._util import resolve_poller, generate_missing_parameters, get_mysql_list_skus_info, generate_password, parse_maintenance_window, \
     replace_memory_optimized_tier, build_identity_and_data_encryption, get_identity_and_data_encryption, get_tenant_id, run_subprocess, \
-    run_subprocess_get_output, fill_action_template, get_git_root_dir, get_single_to_flex_sku_mapping, GITHUB_ACTION_PATH
+    run_subprocess_get_output, fill_action_template, get_git_root_dir, get_single_to_flex_sku_mapping, get_location_from_resource_group, GITHUB_ACTION_PATH
 from ._network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_private_network, prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from ._validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, mysql_restore_tier_validator, \
     mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, validate_mysql_replica, validate_server_name, validate_georestore_location, \
@@ -489,36 +489,37 @@ def flexible_server_import_create(cmd, client,
             create_mode = 'Migrate'
             # Mapping the single server configuration to flexible server configuration
             (tier, sku_name, location, storage_gb, auto_grow, backup_retention,
-             geo_redundant_backup, version, tags, public_access, administrator_login) = map_single_server_configuration(single_server_client,
-                                                                                                                        source_server_id,
-                                                                                                                        tier,
-                                                                                                                        sku_name,
-                                                                                                                        location,
-                                                                                                                        storage_gb,
-                                                                                                                        auto_grow,
-                                                                                                                        backup_retention,
-                                                                                                                        geo_redundant_backup,
-                                                                                                                        version,
-                                                                                                                        tags,
-                                                                                                                        public_access,
-                                                                                                                        administrator_login,
-                                                                                                                        administrator_login_password)
+             geo_redundant_backup, version, tags, public_access, administrator_login) = map_single_server_configuration(single_server_client=single_server_client,
+                                                                                                                        source_server_id=source_server_id,
+                                                                                                                        tier=tier,
+                                                                                                                        sku_name=sku_name,
+                                                                                                                        location=location,
+                                                                                                                        storage_gb=storage_gb,
+                                                                                                                        auto_grow=auto_grow,
+                                                                                                                        backup_retention=backup_retention,
+                                                                                                                        geo_redundant_backup=geo_redundant_backup,
+                                                                                                                        version=version,
+                                                                                                                        tags=tags,
+                                                                                                                        public_access=public_access,
+                                                                                                                        administrator_login=administrator_login,
+                                                                                                                        administrator_login_password=administrator_login_password)
     elif data_source_type.lower() == 'azure_blob':
         create_mode = 'Create'
         (tier, sku_name, storage_gb, auto_grow, backup_retention,
-         geo_redundant_backup, version, administrator_login) = get_default_flex_configuration(tier,
-                                                                                              sku_name,
-                                                                                              storage_gb,
-                                                                                              auto_grow,
-                                                                                              backup_retention,
-                                                                                              geo_redundant_backup,
-                                                                                              version,
-                                                                                              administrator_login)
-        import_source_properties = mysql_flexibleservers.models.ImportSourceProperties(storage_type=data_source_type,
-                                                                                       sas_token=data_source_sas_token,
-                                                                                       storage_url=data_source,
-                                                                                       data_dir_path=data_source_backup_dir)
-    location = 'eastus2euap'
+         geo_redundant_backup, version, administrator_login) = get_default_flex_configuration(tier=tier,
+                                                                                              sku_name=sku_name,
+                                                                                              storage_gb=storage_gb,
+                                                                                              auto_grow=auto_grow,
+                                                                                              backup_retention=backup_retention,
+                                                                                              geo_redundant_backup=geo_redundant_backup,
+                                                                                              version=version,
+                                                                                              administrator_login=administrator_login)
+        import_source_properties = mysql_flexibleservers.models.ImportSourceProperties(source_storage_type=mysql_flexibleservers.models.ImportSourceStorageType.AZURE_BLOB,
+                                                                                       source_storage_sas_token=data_source_sas_token,
+                                                                                       source_storage_uri=data_source,
+                                                                                       source_data_dir_path=data_source_backup_dir)
+        if not location:
+            location = get_location_from_resource_group(cmd, resource_group_name, location)
     db_context = DbContext(
         cmd=cmd, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
         cf_availability=cf_mysql_check_resource_availability,
@@ -587,12 +588,12 @@ def flexible_server_import_create(cmd, client,
     backup = mysql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
                                                  geo_redundant_backup=geo_redundant_backup)
 
-    sku = mysql_flexibleservers.models.Sku(name=sku_name, tier=tier)
+    sku = mysql_flexibleservers.models.MySQLServerSku(name=sku_name, tier=tier)
 
     high_availability = mysql_flexibleservers.models.HighAvailability(mode=high_availability,
                                                                       standby_availability_zone=standby_availability_zone)
 
-    if create_mode != 'Migrate':
+    if create_mode == 'Create':
         administrator_login_password = generate_password(administrator_login_password)
 
     identity, data_encryption = build_identity_and_data_encryption(db_engine='mysql',
@@ -638,8 +639,8 @@ def flexible_server_import_create(cmd, client,
     _update_local_contexts(cmd, server_name, resource_group_name, location, user)
 
     return _form_response(user, sku, loc, server_id, host, version,
-                          None,
-                          _create_mysql_connection_string(host, None, user, None),
+                          administrator_login_password,
+                          _create_mysql_connection_string(host, None, user, administrator_login_password),
                           None, firewall_name, subnet_id)
 
 
@@ -1725,7 +1726,7 @@ def flexible_gtid_reset(client, resource_group_name, server_name, gtid_set, no_w
     return sdk_no_wait(no_wait, client.begin_reset_gtid, resource_group_name, server_name, parameters)
 
 
-def get_default_flex_configuration(tier, sku_name, storage_gb, version, auto_grow, backup_retention, geo_redundant_backup, administrator_login):
+def get_default_flex_configuration(tier, sku_name, storage_gb, auto_grow, backup_retention, geo_redundant_backup, version, administrator_login):
     if not tier:
         tier = 'Burstable'
     if not sku_name:
@@ -1756,6 +1757,8 @@ def map_single_server_configuration(single_server_client, source_server_id, tier
         mysql_import_single_server_ready_validator(source_single_server)
 
         if administrator_login or administrator_login_password:
+            administrator_login = None
+            administrator_login_password = None
             logger.warning("Changing administrator login name and password is currently not supported for single to flex migrations. "
                            "Please use source single server administrator login name and password to connect after migration.")
 

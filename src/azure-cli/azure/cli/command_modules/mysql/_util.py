@@ -117,6 +117,15 @@ def create_random_resource_name(prefix='azure', length=15):
     return prefix + ''.join(digits)
 
 
+def get_location_from_resource_group(cmd, resource_group_name, location):
+    if location is None:
+        resource_group_client = resource_client_factory(cmd.cli_ctx).resource_groups
+        resource_group = resource_group_client.get(resource_group_name=resource_group_name)
+        location = resource_group.location
+
+    return location
+
+
 def generate_missing_parameters(cmd, location, resource_group_name, server_name):
     # If resource group is there in local context, check for its existence.
     if resource_group_name is not None:
