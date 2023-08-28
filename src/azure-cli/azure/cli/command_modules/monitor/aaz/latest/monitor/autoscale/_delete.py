@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "monitor autoscale delete",
 )
 class Delete(AAZCommand):
-    """Delete and autoscale setting
+    """Delete an autoscale setting
     """
 
     _aaz_info = {

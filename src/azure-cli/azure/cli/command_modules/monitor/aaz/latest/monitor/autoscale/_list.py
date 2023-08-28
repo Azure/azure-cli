@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "monitor autoscale list",
 )
 class List(AAZCommand):
-    """Lists the autoscale settings for a resource group.
+    """Lists the autoscale settings for a resource group
     """
 
     _aaz_info = {
