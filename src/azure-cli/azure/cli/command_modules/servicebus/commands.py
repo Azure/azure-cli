@@ -65,4 +65,5 @@ def load_command_table(self, _):
         g.custom_command('remove', 'cli_remove_encryption')
 
 # Migration Region
+    from azure.cli.command_modules.servicebus.aaz.latest.servicebus.migration._update import Update
     self.command_table['servicebus migration update'] = Update(loader=self, deprecate_info=self.deprecate())
