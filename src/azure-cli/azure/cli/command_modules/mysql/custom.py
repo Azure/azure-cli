@@ -467,6 +467,7 @@ def flexible_server_import_create(cmd, client,
                                   yes=False):
     provider = 'Microsoft.DBforMySQL'
 
+    source_server_id = None
     import_source_properties = None
     if data_source_type.lower() == 'mysql_single':
         if mode.lower() == 'offline':
@@ -517,7 +518,7 @@ def flexible_server_import_create(cmd, client,
                                                                                        sas_token=data_source_sas_token,
                                                                                        storage_url=data_source,
                                                                                        data_dir_path=data_source_backup_dir)
-
+    location = 'eastus2euap'
     db_context = DbContext(
         cmd=cmd, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
         cf_availability=cf_mysql_check_resource_availability,
@@ -1741,7 +1742,7 @@ def get_default_flex_configuration(tier, sku_name, storage_gb, version, auto_gro
         geo_redundant_backup = 'Disabled'
     if not administrator_login:
         administrator_login = generate_username()
-    return tier, sku_name, storage_gb, version, auto_grow, backup_retention, geo_redundant_backup, administrator_login
+    return tier, sku_name, storage_gb, auto_grow, backup_retention, geo_redundant_backup, version, administrator_login
 
 
 def map_single_server_configuration(single_server_client, source_server_id, tier, sku_name, location, storage_gb, auto_grow, backup_retention,
