@@ -8,10 +8,14 @@ from azure.cli.core._config import GLOBAL_CONFIG_PATH
 from azure.cli.core.style import Style, print_styled_text
 
 def error_assistance(command=None):      
-    openai.api_key = os.getenv('API_KEY') # Edit to genearalize and keep endpoint secure
+    openai.api_key = os.getenv('AZURE_OPENAI_API_KEY') # Edit to genearalize and keep endpoint secure
     openai.api_version = "2023-07-01-preview"
     openai.api_type = "azure"
     openai.api_base = os.getenv('ENDPOINT')
+
+    if openai.api_key == None or openai.api_key == '':
+        print("Azure OpenAI API Key for error assistance is not set.")
+        return None    
 
     if command==None:
         return None
@@ -43,13 +47,18 @@ def error_assistance(command=None):
         }
     ]   
 
-    response = openai.ChatCompletion.create(
-        deployment_id=os.getenv('DEPLOYMENT'),
-        messages=messages,
-        functions=functions,
-        function_call={"name": "error_response"},
-        temperature=0
-    )
+    try:
+        response = openai.ChatCompletion.create(
+            deployment_id=os.getenv('DEPLOYMENT'),
+            messages=messages,
+            functions=functions,
+            function_call={"name": "error_response"},
+            temperature=0
+        )
+    
+    except openai.cerror.OpenAIError as exception:
+        print("An error occurred calling Azure OpenAI: ", exception)
+        return None
 
     return response
 
