@@ -297,6 +297,13 @@ def get_auth_if_no_valid_key_vault_connection(source_name, source_id, key_vault_
                             'key vault reference connection: %s', connection.get('id'))
                         return
 
+        elif source_name == RESOURCE.ContainerApp: # Use system identity by default
+            for connection in key_vault_connections:
+                if connection.get('authInfo').get('authType') == auth_type:
+                    logger.warning(
+                        'key vault reference connection: %s', connection.get('id'))
+                    return
+
         # any connection with csi enabled is a valid connection
         elif source_name == RESOURCE.KubernetesCluster:
             for connection in key_vault_connections:
