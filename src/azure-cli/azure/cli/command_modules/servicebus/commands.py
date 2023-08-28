@@ -6,7 +6,7 @@
 # pylint: disable=line-too-long
 # pylint: disable=too-many-statements
 # pylint: disable=too-many-locals
-# pylint: disable=unused-import
+# pylint: disable=all
 
 from azure.cli.core.commands import CliCommandType
 
