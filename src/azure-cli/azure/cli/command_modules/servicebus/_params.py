@@ -30,7 +30,7 @@ def load_arguments_sb(self, _):
         c.argument('tags', arg_type=tags_type)
         c.argument('sku', arg_type=get_enum_type(SkuName), help='Namespace SKU.')
         c.argument('tier', arg_type=get_enum_type(SkuName), help='The billing tier of this particular SKU.')
-        c.argument('disable_local_auth', options_list=['--disable-local-auth'], is_preview=True, arg_type=get_three_state_flag(),
+        c.argument('disable_local_auth', options_list=['--disable-local-auth'], arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether SAS authentication is enabled/disabled for the Service Bus')
         c.argument('capacity', type=int, choices=[1, 2, 4, 8, 16], help='Number of message units. This property is only applicable to namespaces of Premium SKU', validator=validate_premiumsku_capacity)
         c.argument('mi_system_assigned', arg_group='Managed Identity', arg_type=get_three_state_flag(),
@@ -40,7 +40,7 @@ def load_arguments_sb(self, _):
                    help='List of KeyVaultProperties objects.')
         c.argument('minimum_tls_version', options_list=['--minimum-tls-version', '--min-tls'], arg_type=get_enum_type(TlsVersion),
                    help='The minimum TLS version for the cluster to support, e.g. 1.2')
-        c.argument('require_infrastructure_encryption', options_list=['--infra-encryption'], is_preview=True,
+        c.argument('require_infrastructure_encryption', options_list=['--infra-encryption'],
                    arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether Infrastructure Encryption (Double Encryption)')
         c.argument('public_network_access', options_list=['--public-network-access', '--public-network'],
@@ -51,7 +51,7 @@ def load_arguments_sb(self, _):
 
     with self.argument_context('servicebus namespace create') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
-        c.argument('zone_redundant', options_list=['--zone-redundant'], is_preview=True, arg_type=get_three_state_flag(),
+        c.argument('zone_redundant', options_list=['--zone-redundant'], arg_type=get_three_state_flag(),
                    help='Enabling this property creates a ServiceBus Zone Redundant Namespace in regions supported availability zones')
 
 # Region Subscription Rules
@@ -148,6 +148,6 @@ def load_arguments_sb(self, _):
     for scope in ['servicebus namespace encryption add', 'servicebus namespace encryption remove']:
         with self.argument_context(scope, resource_type=ResourceType.MGMT_SERVICEBUS) as c:
             c.argument('encryption_config', action=AlertAddEncryption, nargs='+', help='List of KeyVaultProperties objects.')
-            c.argument('require_infrastructure_encryption', options_list=['--infra-encryption'], is_preview=True,
+            c.argument('require_infrastructure_encryption', options_list=['--infra-encryption'],
                        arg_type=get_three_state_flag(),
                        help='A boolean value that indicates whether Infrastructure Encryption (Double Encryption)')
