@@ -41,8 +41,8 @@ def load_command_table(self, _):
                             is_preview=True) as g:
         g.custom_command('set', 'set_georecovery_alias', supports_no_wait=True)
 
-    from azure.cli.command_modules.servicebus.aaz.latest.servicebus.georecovery_alias._update import Update
-    self.command_table['servicebus georecovery-alias update'] = Update(loader=self, deprecate_info=self.deprecate())
+    from azure.cli.command_modules.servicebus.aaz.latest.servicebus.georecovery_alias._update import Update as georeccovery_alias_update
+    self.command_table['servicebus georecovery-alias update'] = georeccovery_alias_update(loader=self, deprecate_info=self.deprecate())
 
 # NetwrokRuleSet Region
     with self.command_group('servicebus namespace network-rule-set ip-rule', custom_command_type=sb_network_custom,
@@ -66,5 +66,5 @@ def load_command_table(self, _):
         g.custom_command('remove', 'cli_remove_encryption')
 
 # Migration Region
-    from azure.cli.command_modules.servicebus.aaz.latest.servicebus.migration._update import Update
-    self.command_table['servicebus migration update'] = Update(loader=self, deprecate_info=self.deprecate())
+    from azure.cli.command_modules.servicebus.aaz.latest.servicebus.migration._update import Update as migration_update
+    self.command_table['servicebus migration update'] = migration_update(loader=self, deprecate_info=self.deprecate())
