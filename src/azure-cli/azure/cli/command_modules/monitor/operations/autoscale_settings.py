@@ -6,8 +6,7 @@
 import json
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.azclierror import ValidationError
-from azure.cli.core.aaz import has_value, AAZListArg, AAZStrArg, AAZIntArg, AAZDateTimeArg
+from azure.cli.core.aaz import has_value, AAZListArg, AAZStrArg
 from azure.cli.command_modules.monitor._autoscale_util import build_autoscale_profile_from_instance
 from ..aaz.latest.monitor.autoscale import Create as _AutoScaleCreate, Update as _AutoScaleUpdate, \
     Show as _AutoScaleShow, List as _AutoScaleList
