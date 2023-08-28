@@ -580,9 +580,7 @@ def build_autoscale_profile_from_instance(autoscale_settings):
 
     # find the default profile and ensure that if there are multiple, they are consistent
     default_profile = default_profiles[0] if default_profiles else None
-    print(default_profile.capacity.default.to_serialized_data())
-    print(default_profile.capacity.minimum.to_serialized_data())
-    print(default_profile.capacity.maximum.to_serialized_data())
+
     for p in default_profiles:
         _validate_default_profile(default_profile, p)
 

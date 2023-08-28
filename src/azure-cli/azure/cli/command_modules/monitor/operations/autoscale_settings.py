@@ -33,6 +33,7 @@ class AutoScaleShow(_AutoScaleShow):
 
     def _output(self, *args, **kwargs):
         from azure.cli.core.aaz import AAZUndefined
+        # When the name field conflicts, the name in inner layer is ignored and the outer layer is applied
         if has_value(self.ctx.vars.instance.properties.name):
             self.ctx.vars.instance.properties.name = AAZUndefined
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -43,6 +44,7 @@ class AutoScaleUpdate(_AutoScaleUpdate):
 
     def _output(self, *args, **kwargs):
         from azure.cli.core.aaz import AAZUndefined
+        # When the name field conflicts, the name in inner layer is ignored and the outer layer is applied
         if has_value(self.ctx.vars.instance.properties.name):
             self.ctx.vars.instance.properties.name = AAZUndefined
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -334,139 +336,6 @@ def autoscale_profile_create(cmd, autoscale_name, resource_group_name, profile_n
     return profile
 
 
-def validate_timezone(args):
-    from azure.cli.command_modules.monitor._autoscale_util import AUTOSCALE_TIMEZONES
-    value = args.timezone.to_serialized_data()
-    zone = next((x['name'] for x in AUTOSCALE_TIMEZONES if x['name'].lower() == value.lower()), None)
-    if not zone:
-        raise ValidationError(
-            "Invalid time zone: '{}'. Run 'az monitor autoscale profile list-timezones' for values.".format(value))
-    args.timezone = zone
-
-
-def validate_recurrence(args):
-    def _validate_weekly_recurrence(args):
-        # Construct days
-        valid_days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-        days = []
-        for partial in args.recurrence[1:]:
-            if len(partial) < 2:
-                raise ValidationError('specifying fewer than 2 characters for day is ambiguous.')
-            try:
-                match = next(x for x in valid_days if x.lower().startswith(partial.to_serialized_data().lower()))
-            except StopIteration:
-                raise ValidationError("No match for day '{}'.".format(partial))
-            days.append(match)
-            valid_days.remove(match)
-
-        # validate, but don't process start and end time
-        recurrence_obj = {
-            "frequency": "Week",
-            "schedule": {
-                "time_zone": args.timezone,
-                "days": days,
-                "hours": [],  # will be filled in during custom command
-                "minutes": []  # will be filled in during custom command
-            }
-        }
-        return recurrence_obj
-
-    valid_recurrence = {
-        'week': {
-            'usage': '-r week [DAY DAY ...]',
-            'validator': _validate_weekly_recurrence
-        }
-    }
-    if has_value(args.recurrence):
-        raw_values = args.recurrence.to_serialized_data()
-        try:
-            delimiter = raw_values[0].lower()
-            usage = valid_recurrence[delimiter]['usage']
-            try:
-                args.recurrence_obj = valid_recurrence[delimiter]['validator'](args)
-            except ValidationError as ex:
-                raise ValidationError('{} invalid usage: {}'.format(ex, usage))
-        except KeyError:
-            raise ValidationError('invalid usage: -r {{{}}} [ARG ARG ...]'.format(','.join(valid_recurrence)))
-
-
-class AutoScaleProfileCreate(_AutoScaleUpdate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.profile_name = AAZStrArg(
-            options=["--profile-name", "--name", "-n"],
-            help='Name of the autoscale profile.',
-            required=True,
-        )
-        args_schema.copy_rules = AAZStrArg(
-            options=["--copy-rules"],
-            help='Name of an existing schedule from which to copy the scaling rules for the new schedule.',
-        )
-        args_schema.count = AAZIntArg(
-            options=["--count"],
-            help='The numer of instances to use. If used with --min/max-count, the default number of instances to use.',
-            required=True,
-            arg_group="Instance Limit",
-        )
-        args_schema.min_count = AAZIntArg(
-            options=["--min-count"],
-            help='The minimum number of instances.',
-            arg_group="Instance Limit",
-        )
-        args_schema.max_count = AAZIntArg(
-            options=["--max-count"],
-            help='The maximum number of instances.',
-            arg_group="Instance Limit",
-        )
-
-        args_schema.timezone = AAZStrArg(
-            options=["--timezone"],
-            help="Timezone name. Values from: az monitor autoscale profile list-timezones.",
-            required=True,
-            arg_group='Schedule',
-        )
-
-        args_schema.start = AAZDateTimeArg(
-            options=["--start"],
-            help="When the autoscale profile begins. Format depends on the type of profile."
-                 "Fixed:  --start yyyy-mm-dd [hh:mm:ss] "
-                 "Weekly: [--start hh:mm].",
-            arg_group="Schedule",
-        )
-
-        args_schema.end = AAZDateTimeArg(
-            options=["--end"],
-            help="When the autoscale profile ends. Format depends on the type of profile. "
-                 "Fixed: --end yyyy-mm-dd [hh:mm:ss] "
-                 "Weekly: [--end hh:mm].",
-            arg_group="Schedule",
-        )
-
-        args_schema.recurrence = AAZListArg(
-            options=["--recurrence", "-r"],
-            help="When the profile recurs. If omitted, a fixed (non-recurring) profile is created. "
-                 "Usage: --recurrence {week} [ARG ARG ...] "
-                 "Weekly: --recurrence week Sat Sun.",
-            arg_group="Schedule",
-        )
-        #
-        # with self.argument_context('monitor autoscale profile', arg_group='Schedule') as c:
-        #     c.argument('timezone', type=timezone_name_type)
-        #     c.argument('start', arg_type=get_datetime_type(help='Start time.', timezone=False))
-        #     c.argument('end', arg_type=get_datetime_type(help='End time.', timezone=False))
-        #     c.argument('recurrence', options_list=['--recurrence', '-r'], nargs='+',
-        #                validator=validate_autoscale_recurrence)
-
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        validate_timezone(args)
-        validate_recurrence(args)
-
-
 def autoscale_profile_list(cmd, autoscale_name, resource_group_name):
     autoscale_settings = AutoScaleShow(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
@@ -617,8 +486,8 @@ def autoscale_rule_create(cmd, autoscale_name, resource_group_name, condition,
     updated_rets = AutoScaleUpdate(cli_ctx=cmd.cli_ctx)(command_args=autoscale_settings)
     updated_profile = _identify_profile_cg(updated_rets["profiles"], profile_name)
     # determine if there are unbalanced rules
-    scale_out_rule_count = len([x for x in profile["rules"] if x["scale_action"]["direction"] == "Increase"])
-    scale_in_rule_count = len([x for x in profile["rules"] if x["scale_action"]["direction"] == "Decrease"])
+    scale_out_rule_count = len([x for x in updated_profile["rules"] if x["scaleAction"]["direction"] == "Increase"])
+    scale_in_rule_count = len([x for x in updated_profile["rules"] if x["scaleAction"]["direction"] == "Decrease"])
     if scale_out_rule_count and not scale_in_rule_count:
         logger.warning("Profile '%s' has rules to scale out but none to scale in. "
                        "Recommend creating at least 1 scale in rule.", profile_name)
