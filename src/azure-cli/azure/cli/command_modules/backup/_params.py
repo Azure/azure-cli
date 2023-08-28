@@ -380,6 +380,9 @@ def load_arguments(self, _):
         c.argument('target_file_share', options_list=['--target-file-share'], help='Destination file share to which content will be restored')
         c.argument('target_folder', options_list=['--target-folder'], help='Destination folder to which content will be restored. To restore content to root , leave the folder name empty')
         c.argument('target_storage_account', options_list=['--target-storage-account'], help='Destination storage account to which content will be restored')
+        c.argument('target_resource_group_name',
+                   options_list=['--target-resource-group-name', '--target-rg-name'],
+                   help='Resource group of the destination storage account to which the content will be restored, needed if it is different from the vault resource group')
 
     with self.argument_context('backup restore restore-azurefiles') as c:
         c.argument('resolve_conflict', resolve_conflict_type)
