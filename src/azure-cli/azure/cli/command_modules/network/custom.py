@@ -5749,6 +5749,7 @@ class VNetPeeringCreate(_VNetPeeringCreate):
         from azure.cli.core.aaz import AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.sync_remote._registered = False
+        args_schema.remote_vnet._required = True
         args_schema.remote_vnet._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}",
         )
