@@ -55,6 +55,7 @@ class ListVmResizeOptions(AAZCommand):
             help="The name of the Virtual Machine. You can configure the default using `az configure --defaults vm=<name>`",
             required=True,
             id_part="name",
+            configured_default="vm",
         )
         return cls._args_schema
 
