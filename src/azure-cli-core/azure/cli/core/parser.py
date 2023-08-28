@@ -348,4 +348,3 @@ class AzCliCommandParser(CLICommandParser):
             az_error.send_telemetry()
 
             self.exit(2)
-            
