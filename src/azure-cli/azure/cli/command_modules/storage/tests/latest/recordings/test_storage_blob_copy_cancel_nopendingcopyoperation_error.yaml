@@ -15,13 +15,12 @@ interactions:
       ParameterSetName:
       - -n -g --query -o
       User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (PIP) azsdk-python-azure-mgmt-storage/0.1.0 Python/3.9.6 (Windows-10-10.0.19045-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2022-09-01&$expand=kerb
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2023-01-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"creationTime":"2022-11-18T06:30:37.3984059Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-11-18T06:30:37.3984059Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2023-07-06T03:36:19.3759108Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2023-07-06T03:36:19.3759108Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
@@ -30,7 +29,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 18 Nov 2022 06:30:57 GMT
+      - Thu, 06 Jul 2023 03:36:41 GMT
       expires:
       - '-1'
       pragma:
@@ -46,7 +45,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11999'
+      - '11989'
     status:
       code: 200
       message: OK
@@ -66,12 +65,11 @@ interactions:
       ParameterSetName:
       - -n --account-name --account-key
       User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-storage-blob/12.12.0 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.6 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 18 Nov 2022 06:30:58 GMT
+      - Thu, 06 Jul 2023 03:36:42 GMT
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/cont000003?restype=container
   response:
@@ -81,15 +79,15 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 18 Nov 2022 06:30:58 GMT
+      - Thu, 06 Jul 2023 03:36:43 GMT
       etag:
-      - '"0x8DAC92E74C9A6E7"'
+      - '"0x8DB7DD238032F0C"'
       last-modified:
-      - Fri, 18 Nov 2022 06:30:59 GMT
+      - Thu, 06 Jul 2023 03:36:43 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     status:
       code: 201
       message: Created
@@ -113,14 +111,13 @@ interactions:
       ParameterSetName:
       - -c -n -f --account-name --account-key
       User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-storage-blob/12.12.0 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.6 (Windows-10-10.0.19045-SP0)
       x-ms-blob-type:
       - BlockBlob
       x-ms-date:
-      - Fri, 18 Nov 2022 06:30:59 GMT
+      - Thu, 06 Jul 2023 03:36:44 GMT
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/cont000003/blob000004
   response:
@@ -132,11 +129,11 @@ interactions:
       content-md5:
       - DzQ7CTESaiDxM9Z8KwGKOw==
       date:
-      - Fri, 18 Nov 2022 06:30:59 GMT
+      - Thu, 06 Jul 2023 03:36:44 GMT
       etag:
-      - '"0x8DAC92E7505D561"'
+      - '"0x8DB7DD238A801BB"'
       last-modified:
-      - Fri, 18 Nov 2022 06:30:59 GMT
+      - Thu, 06 Jul 2023 03:36:45 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-content-crc64:
@@ -144,7 +141,7 @@ interactions:
       x-ms-request-server-encrypted:
       - 'true'
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     status:
       code: 201
       message: Created
@@ -164,33 +161,32 @@ interactions:
       ParameterSetName:
       - -c -b --copy-id --account-name --account-key
       User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-storage-blob/12.12.0 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.6 (Windows-10-10.0.19045-SP0)
       x-ms-copy-action:
       - abort
       x-ms-date:
-      - Fri, 18 Nov 2022 06:30:59 GMT
+      - Thu, 06 Jul 2023 03:36:45 GMT
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/cont000003/blob000004?comp=copy&copyid=abcdabcd-abcd-abcd-abcd-abcdabcdabcd
   response:
     body:
       string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>NoPendingCopyOperation</Code><Message>There
-        is currently no pending copy operation.\nRequestId:c1826f35-701e-0058-0317-fbe6ee000000\nTime:2022-11-18T06:30:59.9694104Z</Message></Error>"
+        is currently no pending copy operation.\nRequestId:0744f9e8-101e-0020-7fbb-af7353000000\nTime:2023-07-06T03:36:46.3623599Z</Message></Error>"
     headers:
       content-length:
       - '234'
       content-type:
       - application/xml
       date:
-      - Fri, 18 Nov 2022 06:30:59 GMT
+      - Thu, 06 Jul 2023 03:36:45 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-error-code:
       - NoPendingCopyOperation
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     status:
       code: 409
       message: There is currently no pending copy operation.

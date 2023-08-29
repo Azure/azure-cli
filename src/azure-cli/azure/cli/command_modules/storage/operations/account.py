@@ -73,7 +73,8 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            allow_cross_tenant_replication=None, default_share_permission=None,
                            enable_nfs_v3=None, subnet=None, vnet_name=None, action='Allow', enable_alw=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
-                           allow_protected_append_writes=None, public_network_access=None, dns_endpoint_type=None):
+                           allow_protected_append_writes=None, public_network_access=None, dns_endpoint_type=None,
+                           default_dual_stack_endpoints=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -282,6 +283,14 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     if dns_endpoint_type is not None:
         params.dns_endpoint_type = dns_endpoint_type
 
+    if default_dual_stack_endpoints is not None:
+        DualStackEndpointPreference = cmd.get_models('DualStackEndpointPreference')
+        params.dual_stack_endpoint_preference = DualStackEndpointPreference(
+            default_dual_stack_endpoints=default_dual_stack_endpoints,
+            publish_ipv4_endpoint=default_dual_stack_endpoints,
+            publish_ipv6_endpoint=default_dual_stack_endpoints
+        )
+
     return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
 
 
@@ -375,7 +384,8 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            sas_expiration_period=None, key_expiration_period_in_days=None,
                            allow_cross_tenant_replication=None, default_share_permission=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
-                           allow_protected_append_writes=None, public_network_access=None):
+                           allow_protected_append_writes=None, public_network_access=None,
+                           default_dual_stack_endpoints=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet')
@@ -626,6 +636,14 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     if enable_local_user is not None:
         params.is_local_user_enabled = enable_local_user
 
+    if default_dual_stack_endpoints is not None:
+        DualStackEndpointPreference = cmd.get_models('DualStackEndpointPreference')
+        params.dual_stack_endpoint_preference = DualStackEndpointPreference(
+            default_dual_stack_endpoints=default_dual_stack_endpoints,
+            publish_ipv4_endpoint=default_dual_stack_endpoints,
+            publish_ipv6_endpoint=default_dual_stack_endpoints
+        )
+
     return params
 
 
@@ -638,11 +656,12 @@ def list_network_rules(client, resource_group_name, account_name):
 
 
 def add_network_rule(cmd, client, resource_group_name, account_name, action='Allow', subnet=None,
-                     vnet_name=None, ip_address=None, tenant_id=None, resource_id=None):  # pylint: disable=unused-argument
+                     vnet_name=None, ip_address=None, ipv6_address=None, tenant_id=None, resource_id=None):  # pylint: disable=unused-argument
     sa = client.get_properties(resource_group_name, account_name)
     rules = sa.network_rule_set
-    if not subnet and not ip_address:
+    if not subnet and not ip_address and not ipv6_address:
         logger.warning('No subnet or ip address supplied.')
+
     if subnet:
         from msrestazure.tools import is_valid_resource_id
         if not is_valid_resource_id(subnet):
@@ -653,6 +672,7 @@ def add_network_rule(cmd, client, resource_group_name, account_name, action='All
         rules.virtual_network_rules = [r for r in rules.virtual_network_rules
                                        if r.virtual_network_resource_id.lower() != subnet.lower()]
         rules.virtual_network_rules.append(VirtualNetworkRule(virtual_network_resource_id=subnet, action=action))
+
     if ip_address:
         IpRule = cmd.get_models('IPRule')
         if not rules.ip_rules:
@@ -663,12 +683,30 @@ def add_network_rule(cmd, client, resource_group_name, account_name, action='All
                 existing_ip_network = ip_network(x.ip_address_or_range)
                 new_ip_network = ip_network(ip)
                 if new_ip_network.overlaps(existing_ip_network):
-                    logger.warning("IP/CIDR %s overlaps with %s, which exists already. Not adding duplicates.",
+                    logger.warning("IPv4/CIDR %s overlaps with %s, which exists already. Not adding duplicates.",
                                    ip, x.ip_address_or_range)
                     to_modify = False
                     break
             if to_modify:
                 rules.ip_rules.append(IpRule(ip_address_or_range=ip, action=action))
+
+    if ipv6_address:
+        IpRule = cmd.get_models('IPRule')
+        if not rules.ipv6_rules:
+            rules.ipv6_rules = []
+        for ip in ipv6_address:
+            to_modify = True
+            for x in rules.ipv6_rules:
+                existing_ip_network = ip_network(x.ip_address_or_range)
+                new_ip_network = ip_network(ip)
+                if new_ip_network.overlaps(existing_ip_network):
+                    logger.warning("IPv6/CIDR %s overlaps with %s, which exists already. Not adding duplicates.",
+                                   ip, x.ip_address_or_range)
+                    to_modify = False
+                    break
+            if to_modify:
+                rules.ipv6_rules.append(IpRule(ip_address_or_range=ip, action=action))
+
     if resource_id:
         ResourceAccessRule = cmd.get_models('ResourceAccessRule')
         if not rules.resource_access_rules:
@@ -682,7 +720,7 @@ def add_network_rule(cmd, client, resource_group_name, account_name, action='All
     return client.update(resource_group_name, account_name, params)
 
 
-def remove_network_rule(cmd, client, resource_group_name, account_name, ip_address=None, subnet=None,
+def remove_network_rule(cmd, client, resource_group_name, account_name, ip_address=None, ipv6_address=None, subnet=None,
                         vnet_name=None, tenant_id=None, resource_id=None):  # pylint: disable=unused-argument
     sa = client.get_properties(resource_group_name, account_name)
     rules = sa.network_rule_set
@@ -693,6 +731,11 @@ def remove_network_rule(cmd, client, resource_group_name, account_name, ip_addre
         to_remove = [ip_network(x) for x in ip_address]
         rules.ip_rules = list(filter(lambda x: all(ip_network(x.ip_address_or_range) != i for i in to_remove),
                                      rules.ip_rules))
+
+    if ipv6_address:
+        to_remove = [ip_network(x) for x in ipv6_address]
+        rules.ipv6_rules = list(filter(lambda x: all(ip_network(x.ip_address_or_range) != i for i in to_remove),
+                                     rules.ipv6_rules))
 
     if resource_id:
         rules.resource_access_rules = [x for x in rules.resource_access_rules if
