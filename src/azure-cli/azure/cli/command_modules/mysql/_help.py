@@ -755,10 +755,15 @@ examples:
     text: az mysql flexible-server gtid reset -g testgroup -s testsvr --gtid-set 3E11FA47-71CA-11E1-9E33-C80AA9429562:23
 """
 
+helps['mysql flexible-server export'] = """
+type: group
+short-summary: Manage export backup on a server.
+"""
+
 helps['mysql flexible-server export create'] = """
 type: command
 short-summary: Create an export backup for a given server with specified backup name.
 examples:
   - name: Create a export backup for 'testsvr' with backup name 'testbackup'.
-    text: az mysql flexible-server export create --% -g testgroup -n testsvr -b testbackup -u destsasuri
+    text: az mysql flexible-server export create -g testgroup -n testsvr -b testbackup -u destsasuri
 """

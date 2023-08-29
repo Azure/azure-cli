@@ -13,7 +13,7 @@ from dateutil.tz import tzutc
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk.base import execute
 from azure.cli.testsdk.scenario_tests.const import ENV_LIVE_TEST
-from azure.cli.testsdk.preparers import AbstractPreparer, SingleValueReplacer
+from azure.cli.testsdk.preparers import AbstractPreparer, SingleValueReplacer, StorageAccountPreparer
 from azure.core.exceptions import HttpResponseError
 from ..._client_factory import cf_mysql_flexible_private_dns_zone_suffix_operations
 from ..._network import prepare_private_dns_zone
@@ -2205,19 +2205,15 @@ class MySQLExportTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     @ServerPreparer(engine_type='mysql', location=DEFAULT_LOCATION)
+    @StorageAccountPreparer(location=DEFAULT_LOCATION)
 
-    def test_mysql_export(self, resource_group, server):
-        self._test_flexible_server_export_create_mgmt('mysql', resource_group, server)
+    def test_mysql_export(self, resource_group, server, storage_account):
+        self._test_flexible_server_export_create_mgmt('mysql', resource_group, server, storage_account)
 
-    def _test_flexible_server_export_create_mgmt(self, database_engine, resource_group, server):     
-        account_name = self.create_random_name(STORAGE_ACCOUNT_PREFIX, STORAGE_ACCOUNT_NAME_MAX_LENGTH)
-        container_name = "mycontainer"
+    def _test_flexible_server_export_create_mgmt(self, database_engine, resource_group, server, storage_account):     
         backup_name = "testexport"
-        location = DEFAULT_LOCATION
 
-        #create storgae account that will be used for export
-        self.cmd('storage account create --name {} --resource-group {} -l {} --sku Standard_LRS --output none'.format(account_name, resource_group, location))
-        target_account_info = self.get_account_info(resource_group, account_name)
+        target_account_info = self.get_account_info(resource_group, storage_account)
 
         # Create the blob container
         container = self.create_container(target_account_info)
@@ -2226,7 +2222,7 @@ class MySQLExportTest(ScenarioTest):
 
         self.kwargs.update({
             'expiry': expiry,
-            'account': account_name,
+            'account': storage_account,
             'container': container
         })
 
@@ -2237,17 +2233,15 @@ class MySQLExportTest(ScenarioTest):
         sas_uri = self.cmd('storage container generate-sas -n {container} --https-only --permissions racwdxyltfmei '
                        '--connection-string {con_str} --expiry {expiry} -otsv').output.strip()
 
-        sas_uri = "https://" + account_name + ".blob.core.windows.net/" + container + "?" + sas_uri
-        print(sas_uri)
+        sas_uri = "https://" + storage_account + ".blob.core.windows.net/" + container + "?" + sas_uri
 
         update_response=self.cmd('{} flexible-server export create -n {} -g {} -b {} -u {}'.format(database_engine, server, resource_group, backup_name, sas_uri)).get_output_in_json()
-        print(update_response)
 
         #Test to check if export is succeeded
         self.assertEqual(update_response['status'], 'Succeeded')
 
         #Delete storage account
-        self.cmd('storage account delete --name {} --resource-group {} --yes --output none'.format(account_name, resource_group))
+        self.cmd('storage account delete --name {} --resource-group {} --yes --output none'.format(storage_account, resource_group))
 
         # deletion of single server created
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server), checks=NoneCheck())
