@@ -31,7 +31,11 @@ def error_assistance(command=None):
     messages = [
         {"role": "system", "content": "You receive an Azure CLI command that contains \
          a syntax or command structure error. Find out what the error is and correct it, \
-         giving back a corrected command Azure CLI command to the user."},
+         giving back a corrected command Azure CLI command to the user. \n \
+         Example with all the parameters missing: \n \
+         Azure CLI Command: storage account create \n \
+         Response:The resource group, name, and any other necessary parameters are missing. \n \
+         storage account create --resource-group <myResourceGroup> --name <Name>"},
         {"role": "user", "content": prompt}
     ]
 
