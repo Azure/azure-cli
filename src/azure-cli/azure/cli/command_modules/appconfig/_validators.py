@@ -227,7 +227,7 @@ def validate_identity(namespace):
 
 def validate_secret_identifier(namespace):
     """ Validate the format of keyvault reference secret identifier """
-    from azure.keyvault.key_vault_id import KeyVaultIdentifier
+    from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1.key_vault_id import KeyVaultIdentifier
 
     identifier = getattr(namespace, 'secret_identifier', None)
     try:
@@ -354,3 +354,17 @@ def validate_snapshot_filters(namespace):
                 raise InvalidArgumentValueError("Parameter must be an escaped JSON object. {} is not a valid JSON object.".format(filter_param))
 
         namespace.filters = filter_parameters
+
+
+def validate_snapshot_export(namespace):
+    if namespace.snapshot:
+        if any([namespace.key, namespace.label, namespace.skip_features, namespace.skip_keyvault]):
+            raise MutuallyExclusiveArgumentError("'--snapshot' cannot be specified with '--key',  '--label', '--skip-keyvault' or '--skip-features' arguments.")
+
+
+def validate_snapshot_import(namespace):
+    if namespace.src_snapshot:
+        if namespace.source != 'appconfig':
+            raise InvalidArgumentValueError("--src-snapshot is only applicable when importing from a configuration store.")
+        if any([namespace.src_key, namespace.src_label, namespace.skip_features]):
+            raise MutuallyExclusiveArgumentError("'--src-snapshot' cannot be specified with '--src-key', '--src-label', or '--skip-features' arguments.")

@@ -105,9 +105,9 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
         return False
 
 
-def create_keyvault_data_plane_client(cli_ctx):
-    from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
-    return keyvault_data_plane_factory(cli_ctx)
+def create_keyvault_data_plane_client(cli_ctx, vault_base_url):
+    from azure.cli.command_modules.keyvault._client_factory import data_plane_azure_keyvault_certificate_client
+    return data_plane_azure_keyvault_certificate_client(cli_ctx, {"vault_base_url": vault_base_url})
 
 
 def get_key_vault_base_url(cli_ctx, vault_name):
@@ -451,6 +451,18 @@ def is_valid_image_version_id(image_version_id):
     return False
 
 
+def is_valid_vm_image_id(image_image_id):
+    if not image_image_id:
+        return False
+
+    image_version_id_pattern = re.compile(r'^/subscriptions/[^/]*/resourceGroups/[^/]*/providers/Microsoft.Compute/'
+                                          r'images/.*$', re.IGNORECASE)
+    if image_version_id_pattern.match(image_image_id):
+        return True
+
+    return False
+
+
 def parse_gallery_image_id(image_reference):
     from azure.cli.core.azclierror import InvalidArgumentValueError
 
@@ -485,6 +497,20 @@ def parse_shared_gallery_image_id(image_reference):
 
     # Return the gallery unique name and gallery image name parsed from shared gallery image id
     return image_info.group(1), image_info.group(2)
+
+
+def parse_vm_image_id(image_id):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+
+    image_info = re.search(r'^/subscriptions/([^/]*)/resourceGroups/([^/]*)/providers/Microsoft.Compute/'
+                           r'images/(.*$)', image_id, re.IGNORECASE)
+    if not image_info or len(image_info.groups()) < 2:
+        raise InvalidArgumentValueError(
+            'The gallery image id is invalid. The valid format should be "/subscriptions/{sub_id}'
+            '/resourceGroups/{rg}/providers/Microsoft.Compute/images/{image_name}"')
+
+    # Return the gallery subscription id, resource group name and image name.
+    return image_info.group(1), image_info.group(2), image_info.group(3)
 
 
 def is_compute_gallery_image_id(image_reference):
@@ -612,5 +638,6 @@ def display_region_recommendation(cmd, namespace):
 
 
 def import_aaz_by_profile(profile, module_name):
-    profile_module_name = profile.lower().replace('-', '_')
+    from azure.cli.core.aaz.utils import get_aaz_profile_module_name
+    profile_module_name = get_aaz_profile_module_name(profile_name=profile)
     return importlib.import_module(f"azure.cli.command_modules.vm.aaz.{profile_module_name}.{module_name}")

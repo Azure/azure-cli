@@ -18,7 +18,7 @@ import argparse
 TEMPLATE_FILE_NAME='formula_template.txt'
 CLI_VERSION=os.environ['CLI_VERSION']
 HOMEBREW_UPSTREAM_URL=os.environ['HOMEBREW_UPSTREAM_URL']
-HOMEBREW_FORMULAR_LATEST="https://raw.githubusercontent.com/Homebrew/homebrew-core/master/Formula/azure-cli.rb"
+HOMEBREW_FORMULAR_LATEST="https://raw.githubusercontent.com/Homebrew/homebrew-core/c882489d4cb39ca004387f0c5ef1a767046c68d6/Formula/azure-cli.rb"
 
 
 def main():
@@ -126,6 +126,11 @@ def update_formula() -> str:
     upstream_sha = compute_sha256(HOMEBREW_UPSTREAM_URL)
     text = re.sub('sha256 ".*"', 'sha256 "{}"'.format(upstream_sha), text, 1)
     text = re.sub('.*revision.*\n', '', text, 1)  # remove revision for previous version if exists
+
+    # include pip when creating venv, see https://github.com/Homebrew/brew/pull/15792
+    # this can be removed after Homebrew merges our PR
+    text = re.sub('system_site_packages: false', 'system_site_packages: false, without_pip: false', text, 1)
+
     pack = None
     packs_to_remove = set()
     lines = text.split('\n')

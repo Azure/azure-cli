@@ -22,7 +22,7 @@ from azure.cli.command_modules.keyvault.security_domain.security_domain import D
 from azure.cli.command_modules.keyvault.security_domain.shared_secret import SharedSecret
 from azure.cli.command_modules.keyvault.security_domain.sp800_108 import KDF
 from azure.cli.command_modules.keyvault.security_domain.utils import Utils
-from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError,\
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, \
     MutuallyExclusiveArgumentError
 from azure.cli.core.profiles import ResourceType, AZURE_API_PROFILES, SDKProfile
 from azure.cli.core.util import sdk_no_wait
@@ -2360,8 +2360,7 @@ def _security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys, pa
 
 def _security_domain_upload_blob(cmd, client, hsm_name, restore_blob_value, identifier=None,
                                  vault_base_url=None, no_wait=False):
-    SecurityDomainObject = cmd.get_models('SecurityDomainObject',
-                                          resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
+    from .vendored_sdks.azure_keyvault_t1.v7_2.models import SecurityDomainObject
     security_domain = SecurityDomainObject(value=restore_blob_value)
     retval = client.upload(vault_base_url=hsm_name or vault_base_url, security_domain=security_domain)
     if no_wait:
@@ -2408,9 +2407,7 @@ def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_d
     if os.path.exists(security_domain_file):
         raise CLIError("File named '{}' already exists.".format(security_domain_file))
 
-    CertificateSet = cmd.get_models('CertificateSet', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
-    SecurityDomainJsonWebKey = cmd.get_models('SecurityDomainJsonWebKey',
-                                              resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
+    from .vendored_sdks.azure_keyvault_t1.v7_2.models import CertificateSet, SecurityDomainJsonWebKey
 
     for path in sd_wrapping_keys:
         if os.path.isdir(path):

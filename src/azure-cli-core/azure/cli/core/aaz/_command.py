@@ -25,6 +25,7 @@ from ._paging import AAZPaged
 from ._poller import AAZLROPoller
 from ._command_ctx import AAZCommandCtx
 from .exceptions import AAZUnknownFieldError, AAZUnregisteredArg
+from .utils import get_aaz_profile_module_name
 
 
 logger = get_logger(__name__)
@@ -408,7 +409,7 @@ def load_aaz_command_table(loader, aaz_pkg_name, args):
 def _get_profile_pkg(aaz_module_name, cloud):
     """ load the profile package of aaz module according to the cloud profile.
     """
-    profile_module_name = cloud.profile.lower().replace('-', '_')
+    profile_module_name = get_aaz_profile_module_name(cloud.profile)
     try:
         return importlib.import_module(f'{aaz_module_name}.{profile_module_name}')
     except ModuleNotFoundError:
