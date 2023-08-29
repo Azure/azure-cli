@@ -3979,14 +3979,16 @@ class VMSSUpdateTests(ScenarioTest):
         with self.assertRaisesRegex(HttpResponseError, 'UEFI settings are not supported for VMs and VM Scale Sets using Generation 1 Image\.'):
             self.cmd('vmss update -g {rg} -n {vmss} --security-type TrustedLaunch')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_security_type_', location='westus')
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_security_type_', location='NorthEurope')
     def test_vmss_update_security_type(self):
         self.kwargs.update({
             'vmss2': self.create_random_name('vmss', 10),
             'img2': 'microsoftwindowsserver:windowsserver:2019-datacenter-zhcn:latest',
             'img2_sku_gen2': '2022-datacenter-azure-edition',
             'vmss3': self.create_random_name('vmss', 10),
-            'img3': 'OpenLogic:CentOS:8_5-gen2:latest'
+            'img3': 'OpenLogic:CentOS:8_5-gen2:latest',
+            'vmss4': self.create_random_name('vmss', 10),
+            'img4': 'MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest',
         })
         self.cmd('vmss create -n {vmss2} -g {rg} --image {img2} --admin-username vmtest --admin-password Test123456789#')
         self.cmd('vmss update -g {rg} -n {vmss2} --set virtualMachineProfile.storageProfile.imageReference.sku={img2_sku_gen2} --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm true', checks=[
@@ -3997,13 +3999,26 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True),
         ])
 
-        self.cmd('vmss create -n {vmss3} -g {rg} --image {img3} --admin-username vmtest')
+        self.cmd('vmss create -n {vmss3} -g {rg} --image {img3} --admin-username vmtest --generate-ssh-keys', checks=[
+            self.check('vmss.virtualMachineProfile.securityProfile', None),
+        ])
         self.cmd('vmss update -g {rg} -n {vmss3} --security-type TrustedLaunch', checks=[
             self.check('virtualMachineProfile.storageProfile.imageReference.offer', 'CentOS'),
             self.check('virtualMachineProfile.securityProfile.securityType', 'TrustedLaunch'),
             self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', False),
             self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True),
         ])
+        self.cmd('vmss update -g {rg} -n {vmss3} --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm false', checks=[
+            self.check('virtualMachineProfile.securityProfile.securityType', 'TrustedLaunch'),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', False),
+        ])
+
+        self.cmd('vmss create -n {vmss4} -g {rg} --image {img4} --admin-username vmtest --admin-password Test123456789# --vm-sku Standard_DC2as_v5 --security-type ConfidentialVM --enable-vtpm true --enable-secure-boot true --os-disk-security-encryption-type VMGuestStateOnly', checks=[
+            self.check('vmss.virtualMachineProfile.securityProfile.securityType', 'ConfidentialVM'),
+        ])
+        with self.assertRaisesRegex(InvalidArgumentValueError, r'vmss.* is already configured with ConfidentialVM\..*'):
+            self.cmd('vmss update -g {rg} -n {vmss4} --security-type TrustedLaunch')
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_vm_sku_', location='westus2')
