@@ -548,6 +548,11 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
     with self.argument_context('mysql flexible-server backup list') as c:
         c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
 
+    # export
+    with self.argument_context('mysql flexible-server export create') as c:
+        c.argument('backup_name', options_list=['--backup-name', '-b'], help='The name of the new export backup.')
+        c.argument('sas_uri', options_list=['--sas-uri', '-u'], help='SAS URI for destination container.')
+
     # identity
     with self.argument_context('mysql flexible-server identity') as c:
         c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)

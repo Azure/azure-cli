@@ -1829,6 +1829,22 @@ def map_single_server_configuration(single_server_client, source_server_id, tier
     return tier, sku_name, location, storage_gb, auto_grow, backup_retention, geo_redundant_backup, version, tags, public_access, administrator_login
 
 
+def flexible_server_export_create(cmd, client, resource_group_name, server_name, backup_name, sas_uri):
+    target_details = {
+        'objectType': "FullBackupStoreDetails",
+        'sasUriList': {sas_uri}
+    }
+    backup_settings = {
+        'backupName': backup_name,
+        'backupFormat': "Raw"
+    }
+    parameters = mysql_flexibleservers.models.BackupAndExportRequest(
+        target_details=target_details,
+        backup_settings=backup_settings
+    )
+    return resolve_poller(client.begin_create(resource_group_name, server_name, parameters), cmd.cli_ctx, 'Create backup')
+
+
 # pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance
 class DbContext(object):
     def __init__(self, cmd=None, azure_sdk=None, logging_name=None, cf_firewall=None, cf_db=None,
