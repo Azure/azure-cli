@@ -555,7 +555,7 @@ class TestFormatBicepFile(unittest.TestCase):
         format_bicep_file(cmd, file_path, stdout=stdout)
 
         # Assert.
-        mock_bicep_version_greater_than_or_equal_to.assert_called_once_with("0.12.1")
+        mock_bicep_version_greater_than_or_equal_to.assert_called_once_with(cmd.cli_ctx, "0.12.1")
         mock_run_bicep_command.assert_called_once_with(cmd.cli_ctx, ["format", file_path, "--stdout"])        
         
 if __name__ == '__main__':
