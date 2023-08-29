@@ -94,6 +94,8 @@ logger = get_logger(__name__)
 
 # These properties should be under the "properties" attribute. Move the properties under "properties" attribute
 def process_loaded_yaml(yaml_containerapp):
+    if type(yaml_containerapp) != dict:  # pylint: disable=unidiomatic-typecheck
+        raise ValidationError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-yaml for a valid containerapps YAML spec.')
     if not yaml_containerapp.get('properties'):
         yaml_containerapp['properties'] = {}
 
@@ -161,9 +163,6 @@ def create_deserializer():
 
 def update_containerapp_yaml(cmd, name, resource_group_name, file_name, from_revision=None, no_wait=False):
     yaml_containerapp = process_loaded_yaml(load_yaml_file(file_name))
-    # check if the type is dict
-    if not isinstance(yaml_containerapp, dict):
-        raise ValidationError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-yaml for a valid containerapps YAML spec.')
 
     if not yaml_containerapp.get('name'):
         yaml_containerapp['name'] = name

@@ -42,6 +42,8 @@ def create_deserializer(models):
 
 
 def process_loaded_yaml(yaml_containerapp):
+    if type(yaml_containerapp) != dict:  # pylint: disable=unidiomatic-typecheck
+        raise ValidationError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-yaml for a valid containerapps YAML spec.')
     if not yaml_containerapp.get('properties'):
         yaml_containerapp['properties'] = {}
 

@@ -528,10 +528,6 @@ class ContainerAppCreateDecorator(BaseContainerAppDecorator):
                 'Additional flags were passed along with --yaml. These flags will be ignored, and the configuration defined in the yaml will be used instead')
 
         yaml_containerapp = process_loaded_yaml(load_yaml_file(file_name))
-        # check if the type is dict
-        if not isinstance(yaml_containerapp, dict):
-            raise ValidationError(
-                'Invalid YAML provided. Please see https://aka.ms/azure-container-apps-yaml for a valid containerapps YAML spec.')
 
         if not yaml_containerapp.get('name'):
             yaml_containerapp['name'] = name
