@@ -616,9 +616,8 @@ class PrivateDnsLinksTests(BaseScenarioTests):
             self.check('tags.{}'.format(tagKey), tagVal),
             self.check('provisioningState', 'Succeeded')
         ])
-        self.cmd('az network private-dns link vnet update -g {rg} -n {link} -z {zone} --tags ""', checks=[
+        self.cmd('az network private-dns link vnet update -g {rg} -n {link} -z {zone} --tags null', checks=[
             self.check('name', '{link}'),
-            self.check('tags', '{{}}'),
             self.check('provisioningState', 'Succeeded')
         ])
 
@@ -778,9 +777,8 @@ class PrivateDnsRecordSetsTests(BaseScenarioTests):
             self.check('name', '{recordset}'),
             self.check('metadata.{}'.format(tagKey), tagVal)
         ])
-        self.cmd('az network private-dns record-set a update -g {rg} -n {recordset} -z {zone} --metadata ""', checks=[
-            self.check('name', '{recordset}'),
-            self.check('metadata', '{{}}')
+        self.cmd('az network private-dns record-set a update -g {rg} -n {recordset} -z {zone} --metadata null', checks=[
+            self.check('name', '{recordset}')
         ])
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')

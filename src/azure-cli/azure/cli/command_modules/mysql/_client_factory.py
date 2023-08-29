@@ -70,6 +70,10 @@ def cf_mysql_flexible_backups(cli_ctx, _):
     return get_mysql_flexible_management_client(cli_ctx).backups
 
 
+def cf_mysql_flexible_export(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).backup_and_export
+
+
 def cf_mysql_flexible_adadmin(cli_ctx, _):
     return get_mysql_flexible_management_client(cli_ctx).azure_ad_administrators
 

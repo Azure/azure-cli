@@ -502,6 +502,14 @@ examples:
     text: az mysql flexible-server parameter set --resource-group testGroup --server-name testserver --name parameterName
 """
 
+helps['mysql flexible-server parameter set-batch'] = """
+type: command
+short-summary: Batch update parameters of a flexible server.
+examples:
+  - name: Batch set parameters.
+    text: az mysql flexible-server parameter set-batch --resource-group testGroup --server-name testserver --source "user-override" --args key1="value1" key2="value2"
+"""
+
 helps['mysql flexible-server parameter show'] = """
 type: command
 short-summary: Get the parameter for a flexible server."
@@ -745,4 +753,17 @@ short-summary: Resets GTID on a server.
 examples:
   - name: Resets GTID '3E11FA47-71CA-11E1-9E33-C80AA9429562:23' on server 'testsvr'.
     text: az mysql flexible-server gtid reset -g testgroup -s testsvr --gtid-set 3E11FA47-71CA-11E1-9E33-C80AA9429562:23
+"""
+
+helps['mysql flexible-server export'] = """
+type: group
+short-summary: Manage export backup on a server.
+"""
+
+helps['mysql flexible-server export create'] = """
+type: command
+short-summary: Create an export backup for a given server with specified backup name.
+examples:
+  - name: Create a export backup for 'testsvr' with backup name 'testbackup'.
+    text: az mysql flexible-server export create -g testgroup -n testsvr -b testbackup -u destsasuri
 """

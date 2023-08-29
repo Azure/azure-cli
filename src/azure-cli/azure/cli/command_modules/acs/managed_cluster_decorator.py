@@ -1759,25 +1759,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: int or None
         """
         # read the original value passed by the command
-        load_balancer_managed_outbound_ip_count = self.raw_param.get(
-            "load_balancer_managed_outbound_ip_count"
-        )
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.network_profile and
-                self.mc.network_profile.load_balancer_profile and
-                self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps and
-                self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count is not None
-            ):
-                load_balancer_managed_outbound_ip_count = (
-                    self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count
-                )
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return load_balancer_managed_outbound_ip_count
+        return self.raw_param.get("load_balancer_managed_outbound_ip_count")
 
     def get_load_balancer_managed_outbound_ipv6_count(self) -> Union[int, None]:
         """Obtain the expected count of IPv6 managed outbound IPs.
@@ -1786,37 +1768,7 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         :return: int or None
         """
-        count_ipv6 = self.raw_param.get('load_balancer_managed_outbound_ipv6_count')
-
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.network_profile and
-                self.mc.network_profile.load_balancer_profile and
-                self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps and
-                self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count_ipv6 is not None
-            ):
-                count_ipv6 = (
-                    self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count_ipv6
-                )
-        elif self.decorator_mode == DecoratorMode.UPDATE:
-            if (
-                not self.get_load_balancer_outbound_ips() and
-                not self.get_load_balancer_outbound_ip_prefixes() and
-                count_ipv6 is None
-            ):
-                if (
-                    self.mc and
-                    self.mc.network_profile and
-                    self.mc.network_profile.load_balancer_profile and
-                    self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps and
-                    self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count_ipv6 is not None
-                ):
-                    count_ipv6 = (
-                        self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count_ipv6
-                    )
-
-        return count_ipv6
+        return self.raw_param.get('load_balancer_managed_outbound_ipv6_count')
 
     def get_load_balancer_outbound_ips(self) -> Union[str, List[ResourceReference], None]:
         """Obtain the value of load_balancer_outbound_ips.
@@ -1826,25 +1778,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: string, list of ResourceReference, or None
         """
         # read the original value passed by the command
-        load_balancer_outbound_ips = self.raw_param.get(
-            "load_balancer_outbound_ips"
-        )
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.network_profile and
-                self.mc.network_profile.load_balancer_profile and
-                self.mc.network_profile.load_balancer_profile.outbound_i_ps and
-                self.mc.network_profile.load_balancer_profile.outbound_i_ps.public_i_ps is not None
-            ):
-                load_balancer_outbound_ips = (
-                    self.mc.network_profile.load_balancer_profile.outbound_i_ps.public_i_ps
-                )
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return load_balancer_outbound_ips
+        return self.raw_param.get("load_balancer_outbound_ips")
 
     def get_load_balancer_outbound_ip_prefixes(self) -> Union[str, List[ResourceReference], None]:
         """Obtain the value of load_balancer_outbound_ip_prefixes.
@@ -1852,25 +1786,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: string, list of ResourceReference, or None
         """
         # read the original value passed by the command
-        load_balancer_outbound_ip_prefixes = self.raw_param.get(
-            "load_balancer_outbound_ip_prefixes"
-        )
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.network_profile and
-                self.mc.network_profile.load_balancer_profile and
-                self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes and
-                self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes.public_ip_prefixes is not None
-            ):
-                load_balancer_outbound_ip_prefixes = (
-                    self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes.public_ip_prefixes
-                )
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return load_balancer_outbound_ip_prefixes
+        return self.raw_param.get("load_balancer_outbound_ip_prefixes")
 
     def get_load_balancer_outbound_ports(self) -> Union[int, None]:
         """Obtain the value of load_balancer_outbound_ports.
@@ -1880,24 +1796,9 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: int or None
         """
         # read the original value passed by the command
-        load_balancer_outbound_ports = self.raw_param.get(
+        return self.raw_param.get(
             "load_balancer_outbound_ports"
         )
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.network_profile and
-                self.mc.network_profile.load_balancer_profile and
-                self.mc.network_profile.load_balancer_profile.allocated_outbound_ports is not None
-            ):
-                load_balancer_outbound_ports = (
-                    self.mc.network_profile.load_balancer_profile.allocated_outbound_ports
-                )
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return load_balancer_outbound_ports
 
     def get_load_balancer_idle_timeout(self) -> Union[int, None]:
         """Obtain the value of load_balancer_idle_timeout.
@@ -1907,24 +1808,9 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: int or None
         """
         # read the original value passed by the command
-        load_balancer_idle_timeout = self.raw_param.get(
+        return self.raw_param.get(
             "load_balancer_idle_timeout"
         )
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.network_profile and
-                self.mc.network_profile.load_balancer_profile and
-                self.mc.network_profile.load_balancer_profile.idle_timeout_in_minutes is not None
-            ):
-                load_balancer_idle_timeout = (
-                    self.mc.network_profile.load_balancer_profile.idle_timeout_in_minutes
-                )
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return load_balancer_idle_timeout
 
     def get_nat_gateway_managed_outbound_ip_count(self) -> Union[int, None]:
         """Obtain the value of nat_gateway_managed_outbound_ip_count.
@@ -1936,7 +1822,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         # read the original value passed by the command
         nat_gateway_managed_outbound_ip_count = self.raw_param.get("nat_gateway_managed_outbound_ip_count")
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
+        if nat_gateway_managed_outbound_ip_count is None and self.decorator_mode == DecoratorMode.UPDATE:
             if (
                 self.mc and
                 self.mc.network_profile and
@@ -1962,7 +1848,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         # read the original value passed by the command
         nat_gateway_idle_timeout = self.raw_param.get("nat_gateway_idle_timeout")
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
+        if nat_gateway_idle_timeout is None and self.decorator_mode == DecoratorMode.UPDATE:
             if (
                 self.mc and
                 self.mc.network_profile and
@@ -2121,17 +2007,16 @@ class AKSManagedClusterContext(BaseAKSContext):
                                 "userDefinedRouting doesn't support customizing \
                                 a standard load balancer with IP addresses"
                             )
-                    else:
-                        if (
-                            self.get_load_balancer_managed_outbound_ip_count() or
-                            self.get_load_balancer_managed_outbound_ipv6_count() or
-                            self.get_load_balancer_outbound_ips() or
-                            self.get_load_balancer_outbound_ip_prefixes()
-                        ):
-                            raise MutuallyExclusiveArgumentError(
-                                "userDefinedRouting doesn't support customizing \
-                                a standard load balancer with IP addresses"
-                            )
+                    if (
+                        self.get_load_balancer_managed_outbound_ip_count() or
+                        self.get_load_balancer_managed_outbound_ipv6_count() or
+                        self.get_load_balancer_outbound_ips() or
+                        self.get_load_balancer_outbound_ip_prefixes()
+                    ):
+                        raise MutuallyExclusiveArgumentError(
+                            "userDefinedRouting doesn't support customizing \
+                            a standard load balancer with IP addresses"
+                        )
 
         return outbound_type
 
@@ -4027,6 +3912,26 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return auto_upgrade_channel
 
+    def get_node_os_upgrade_channel(self) -> Union[str, None]:
+        """Obtain the value of node_os_upgrade_channel.
+        :return: string or None
+        """
+        # read the original value passed by the command
+        node_os_upgrade_channel = self.raw_param.get("node_os_upgrade_channel")
+
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.auto_upgrade_profile and
+                self.mc.auto_upgrade_profile.node_os_upgrade_channel is not None
+            ):
+                node_os_upgrade_channel = self.mc.auto_upgrade_profile.node_os_upgrade_channel
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return node_os_upgrade_channel
+
     def _get_cluster_autoscaler_profile(self, read_only: bool = False) -> Union[Dict[str, str], None]:
         """Internal function to dynamically obtain the value of cluster_autoscaler_profile according to the context.
 
@@ -5906,6 +5811,12 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         if auto_upgrade_channel:
             auto_upgrade_profile = self.models.ManagedClusterAutoUpgradeProfile(upgrade_channel=auto_upgrade_channel)
         mc.auto_upgrade_profile = auto_upgrade_profile
+
+        node_os_upgrade_channel = self.context.get_node_os_upgrade_channel()
+        if node_os_upgrade_channel:
+            if mc.auto_upgrade_profile is None:
+                mc.auto_upgrade_profile = self.models.ManagedClusterAutoUpgradeProfile()
+            mc.auto_upgrade_profile.node_os_upgrade_channel = node_os_upgrade_channel
         return mc
 
     def set_up_auto_scaler_profile(self, mc: ManagedCluster) -> ManagedCluster:
@@ -6553,22 +6464,16 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         if outbound_type and outbound_type != CONST_OUTBOUND_TYPE_LOAD_BALANCER:
             mc.network_profile.load_balancer_profile = None
         else:
-            load_balancer_managed_outbound_ip_count = self.context.get_load_balancer_managed_outbound_ip_count()
-            load_balancer_managed_outbound_ipv6_count = self.context.get_load_balancer_managed_outbound_ipv6_count()
-            load_balancer_outbound_ips = self.context.get_load_balancer_outbound_ips()
-            load_balancer_outbound_ip_prefixes = self.context.get_load_balancer_outbound_ip_prefixes()
-            load_balancer_outbound_ports = self.context.get_load_balancer_outbound_ports()
-            load_balancer_idle_timeout = self.context.get_load_balancer_idle_timeout()
             # In the internal function "_update_load_balancer_profile", it will check whether the provided parameters
             # have been assigned, and if there are any, the corresponding profile will be modified; otherwise, it will
             # remain unchanged.
             mc.network_profile.load_balancer_profile = _update_load_balancer_profile(
-                managed_outbound_ip_count=load_balancer_managed_outbound_ip_count,
-                managed_outbound_ipv6_count=load_balancer_managed_outbound_ipv6_count,
-                outbound_ips=load_balancer_outbound_ips,
-                outbound_ip_prefixes=load_balancer_outbound_ip_prefixes,
-                outbound_ports=load_balancer_outbound_ports,
-                idle_timeout=load_balancer_idle_timeout,
+                managed_outbound_ip_count=self.context.get_load_balancer_managed_outbound_ip_count(),
+                managed_outbound_ipv6_count=self.context.get_load_balancer_managed_outbound_ipv6_count(),
+                outbound_ips=self.context.get_load_balancer_outbound_ips(),
+                outbound_ip_prefixes=self.context.get_load_balancer_outbound_ip_prefixes(),
+                outbound_ports=self.context.get_load_balancer_outbound_ports(),
+                idle_timeout=self.context.get_load_balancer_idle_timeout(),
                 profile=mc.network_profile.load_balancer_profile,
                 models=self.models.load_balancer_models)
         return mc
@@ -6726,6 +6631,13 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             if mc.auto_upgrade_profile is None:
                 mc.auto_upgrade_profile = self.models.ManagedClusterAutoUpgradeProfile()
             mc.auto_upgrade_profile.upgrade_channel = auto_upgrade_channel
+
+        node_os_upgrade_channel = self.context.get_node_os_upgrade_channel()
+        if node_os_upgrade_channel is not None:
+            if mc.auto_upgrade_profile is None:
+                mc.auto_upgrade_profile = self.models.ManagedClusterAutoUpgradeProfile()
+            mc.auto_upgrade_profile.node_os_upgrade_channel = node_os_upgrade_channel
+
         return mc
 
     def update_network_plugin_settings(self, mc: ManagedCluster) -> ManagedCluster:

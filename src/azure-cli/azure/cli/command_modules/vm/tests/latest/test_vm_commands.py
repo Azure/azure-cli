@@ -820,12 +820,17 @@ class TestSnapShotAccess(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_snapshot_access_')
     def test_snapshot_access(self, resource_group):
         self.kwargs.update({
-            'snapshot':'snapshot'
+            'snapshot': 'snapshot'
         })
         
         self.cmd('snapshot create -n {snapshot} -g {rg} --size-gb 1', checks=self.check('diskState', 'Unattached'))
         self.cmd('snapshot grant-access --duration-in-seconds 600 -n {snapshot} -g {rg}')
         self.cmd('snapshot show -n {snapshot} -g {rg}', checks=self.check('diskState', 'ActiveSAS'))
+        self.cmd('snapshot list -g {rg}',
+                 checks=[
+                     self.check('length(@)', '1'),
+                     self.check('[0].diskState', 'ActiveSAS'),
+                 ])
         self.cmd('snapshot revoke-access -n {snapshot} -g {rg}')
         self.cmd('snapshot show -n {snapshot} -g {rg}', checks=self.check('diskState', 'Unattached'))
 
@@ -3380,7 +3385,8 @@ class VMSSCreateAndModify(ScenarioTest):
         self.kwargs.update({
             'vmss': 'vmss1',
             'count': 5,
-            'new_count': 4
+            'new_count': 4,
+            'vmss2': self.create_random_name('vmss', 10)
         })
 
         self.cmd('vmss create --admin-password testPassword0 --name {vmss} -g {rg} --admin-username myadmin --image Win2012R2Datacenter --instance-count {count}')
@@ -3406,6 +3412,8 @@ class VMSSCreateAndModify(ScenarioTest):
             self.check('name', '{vmss}'),
             self.check('resourceGroup', '{rg}')
         ])
+
+        self.cmd('vmss get-os-upgrade-history --resource-group {rg} --name {vmss}', checks=self.is_empty())
         result = self.cmd('vmss list-instances --resource-group {rg} --name {vmss} --query "[].instanceId"').get_output_in_json()
         self.kwargs['instance_ids'] = result[3] + ' ' + result[4]
         self.cmd('vmss update-instances --resource-group {rg} --name {vmss} --instance-ids {instance_ids}')
@@ -3436,6 +3444,24 @@ class VMSSCreateAndModify(ScenarioTest):
         self.cmd('vmss deallocate --resource-group {rg} --name {vmss}')
         self.cmd('vmss delete --resource-group {rg} --name {vmss}')
         self.cmd('vmss list --resource-group {rg}', checks=self.is_empty())
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_hibernate_')
+    def test_vmss_hibernate(self, resource_group):
+        self.kwargs.update({
+            'vmss1': self.create_random_name('vmss1', 10),
+            'vmss2': self.create_random_name('vmss2', 10),
+        })
+        self.cmd('vmss create -g {rg} -n {vmss1} --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --enable-hibernation true --orchestration-mode Flexible --admin-username vmtest --admin-password Test123456789#', checks=[
+            self.check('vmss.additionalCapabilities.hibernationEnabled', True),
+        ])
+        self.cmd('vmss deallocate -g {rg} -n {vmss1} --hibernate true')
+
+        self.cmd('vmss create -g {rg} -n {vmss2} --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --enable-hibernation true --orchestration-mode Flexible --admin-username vmtest --admin-password Test123456789#', checks=[
+            self.check('vmss.additionalCapabilities.hibernationEnabled', True),
+        ])
+        result = self.cmd('vmss list-instances -g {rg} -n {vmss2}')
+        self.kwargs['vms_id'] = result.get_output_in_json()[0]['instanceId']
+        self.cmd('vmss deallocate -g {rg} -n {vmss2} --instance-id {vms_id} --hibernate true')
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_scale_in_policy_')
     def test_vmss_scale_in_policy(self, resource_group):
@@ -3498,6 +3524,9 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].lun', 0),
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].diskSizeGb', 1)
         ])
+        result = self.cmd('vmss list -g {rg} -otable')
+        table_output = set(result.output.splitlines()[2].split())
+        self.assertTrue({self.kwargs['vmss']}.issubset(table_output))
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_with_policy_setting')
     def test_vmss_create_with_policy_setting(self, resource_group):
@@ -3858,7 +3887,8 @@ class VMSSUpdateTests(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_')
     def test_vmss_update(self, resource_group):
         self.kwargs.update({
-            'vmss': 'winvmss'
+            'vmss': 'winvmss',
+            'vmss2': self.create_random_name('vmss', 10)
         })
 
         self.cmd('vmss create -g {rg} -n {vmss} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --instance-count 1')
@@ -3894,6 +3924,14 @@ class VMSSUpdateTests(ScenarioTest):
         # test that cannot try to update protection policy on VMSS itself
         self.cmd('vmss update -g {rg} -n {vmss} --protect-from-scale-in True --protect-from-scale-set-actions True', expect_failure=True)
 
+        self.cmd('vmss create -g {rg} -n {vmss2} --image Canonical:UbuntuServer:18.04-LTS:latest --orchestration-mode Flexible --admin-username vmtest')
+        self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
+            self.check('additionalCapabilities.hibernationEnabled', None),
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss2} --enable-hibernation True', checks=[
+            self.check('additionalCapabilities.hibernationEnabled', True),
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_policy_')
     def test_vmss_update_policy(self, resource_group):
 
@@ -3917,12 +3955,12 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('upgradePolicy.rollingUpgradePolicy.prioritizeUnhealthyInstances', True)
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_image_')
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_image_', location='westus')
     def test_vmss_update_image(self):
         self.kwargs.update({
             'vm': 'vm1',
             'img': 'img1',
-            'vmss': 'vmss1'
+            'vmss': 'vmss1',
         })
         self.cmd('vm create -g {rg} -n {vm} --image OpenLogic:CentOS:7.5:latest --admin-username clitest1 --generate-ssh-key --nsg-rule None --admin-username vmtest')
         self.cmd('vm run-command invoke -g {rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes" --no-wait')
@@ -3937,6 +3975,50 @@ class VMSSUpdateTests(ScenarioTest):
         self.cmd('vmss update -g {rg} -n {vmss} --set tags.foo=bar', checks=[
             self.check('tags.foo', 'bar')
         ])
+        from azure.core.exceptions import HttpResponseError
+        with self.assertRaisesRegex(HttpResponseError, 'UEFI settings are not supported for VMs and VM Scale Sets using Generation 1 Image\.'):
+            self.cmd('vmss update -g {rg} -n {vmss} --security-type TrustedLaunch')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_security_type_', location='NorthEurope')
+    def test_vmss_update_security_type(self):
+        self.kwargs.update({
+            'vmss2': self.create_random_name('vmss', 10),
+            'img2': 'microsoftwindowsserver:windowsserver:2019-datacenter-zhcn:latest',
+            'img2_sku_gen2': '2022-datacenter-azure-edition',
+            'vmss3': self.create_random_name('vmss', 10),
+            'img3': 'OpenLogic:CentOS:8_5-gen2:latest',
+            'vmss4': self.create_random_name('vmss', 10),
+            'img4': 'MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest',
+        })
+        self.cmd('vmss create -n {vmss2} -g {rg} --image {img2} --admin-username vmtest --admin-password Test123456789#')
+        self.cmd('vmss update -g {rg} -n {vmss2} --set virtualMachineProfile.storageProfile.imageReference.sku={img2_sku_gen2} --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm true', checks=[
+            self.check('virtualMachineProfile.storageProfile.imageReference.offer', 'windowsserver'),
+            self.check('virtualMachineProfile.storageProfile.imageReference.sku', '{img2_sku_gen2}'),
+            self.check('virtualMachineProfile.securityProfile.securityType', 'TrustedLaunch'),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True),
+        ])
+
+        self.cmd('vmss create -n {vmss3} -g {rg} --image {img3} --admin-username vmtest --generate-ssh-keys', checks=[
+            self.check('vmss.virtualMachineProfile.securityProfile', None),
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss3} --security-type TrustedLaunch', checks=[
+            self.check('virtualMachineProfile.storageProfile.imageReference.offer', 'CentOS'),
+            self.check('virtualMachineProfile.securityProfile.securityType', 'TrustedLaunch'),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', False),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True),
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss3} --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm false', checks=[
+            self.check('virtualMachineProfile.securityProfile.securityType', 'TrustedLaunch'),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', False),
+        ])
+
+        self.cmd('vmss create -n {vmss4} -g {rg} --image {img4} --admin-username vmtest --admin-password Test123456789# --vm-sku Standard_DC2as_v5 --security-type ConfidentialVM --enable-vtpm true --enable-secure-boot true --os-disk-security-encryption-type VMGuestStateOnly', checks=[
+            self.check('vmss.virtualMachineProfile.securityProfile.securityType', 'ConfidentialVM'),
+        ])
+        with self.assertRaisesRegex(InvalidArgumentValueError, r'vmss.* is already configured with ConfidentialVM\..*'):
+            self.cmd('vmss update -g {rg} -n {vmss4} --security-type TrustedLaunch')
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_vm_sku_', location='westus2')
@@ -5926,6 +6008,7 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}')
         time.sleep(60)  # service end latency
         self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
+        time.sleep(60)
         self.cmd('sig delete -g {rg} --gallery-name {gallery}')
 
     @ResourceGroupPreparer(location='CentralUSEUAP')
@@ -8785,6 +8868,9 @@ class VMAutoUpdateScenarioTest(ScenarioTest):
         self.cmd('vm create -g {rg} -n vm1 --image Canonical:UbuntuServer:18.04-LTS:latest --enable-agent --patch-mode AutomaticByPlatform --generate-ssh-keys --nsg-rule NONE --admin-username vmtest')
         self.cmd('vm show -g {rg} -n vm1', checks=[
             self.check('osProfile.linuxConfiguration.patchSettings.patchMode', 'AutomaticByPlatform')
+        ])
+        self.cmd('vm assess-patches -g {rg} -n vm1', checks=[
+            self.check('status', 'Succeeded')
         ])
 
 

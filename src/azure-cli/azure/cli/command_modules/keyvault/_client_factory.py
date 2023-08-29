@@ -23,6 +23,7 @@ class Clients(str, Enum):
     mhsm_private_endpoint_connections = 'mhsm_private_endpoint_connections'
     mhsm_private_link_resources = 'mhsm_private_link_resources'
     mhsm_regions = 'mhsm_regions'
+    private_7_2 = 'private_7_2'
 
 
 OPERATIONS_NAME = {
@@ -39,8 +40,6 @@ KEYVAULT_TEMPLATE_STRINGS = {
     ResourceType.MGMT_KEYVAULT:
         'azure.mgmt.keyvault{api_version}.{module_name}#{class_name}{obj_name}',
     ResourceType.DATA_KEYVAULT:
-        'azure.keyvault{api_version}.key_vault_client#{class_name}{obj_name}',
-    ResourceType.DATA_PRIVATE_KEYVAULT:
         'azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1{api_version}.'
         'key_vault_client#{class_name}{obj_name}',
     ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP:
@@ -110,9 +109,9 @@ def get_client_factory(resource_type, client_name=''):
     if is_mgmt_plane(resource_type):
         return keyvault_mgmt_client_factory(resource_type, client_name)
     if resource_type == ResourceType.DATA_KEYVAULT:
+        if client_name == Clients.private_7_2:
+            return keyvault_private_data_plane_factory_v7_2_preview
         return keyvault_data_plane_factory
-    if resource_type == ResourceType.DATA_PRIVATE_KEYVAULT:
-        return keyvault_private_data_plane_factory_v7_2_preview
     if resource_type == ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP:
         return data_plane_azure_keyvault_administration_backup_client
     if resource_type == ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL:
@@ -169,7 +168,8 @@ def keyvault_mgmt_client_factory(resource_type, client_name):
 
 
 def keyvault_data_plane_factory(cli_ctx, *_):
-    from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
+    from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1 import (
+        KeyVaultAuthentication, KeyVaultClient)
     from azure.cli.core.util import should_disable_connection_verify
 
     version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
@@ -197,13 +197,11 @@ def keyvault_private_data_plane_factory_v7_2_preview(cli_ctx, _):
         KeyVaultAuthentication, KeyVaultClient)
     from azure.cli.core.util import should_disable_connection_verify
 
-    version = str(get_api_version(cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT))
-
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
         return Profile(cli_ctx=cli_ctx).get_raw_token(resource=resource,
                                                       subscription=cli_ctx.data.get('subscription_id'))[0]
 
-    client = KeyVaultClient(KeyVaultAuthentication(get_token), api_version=version)
+    client = KeyVaultClient(KeyVaultAuthentication(get_token), api_version='7.2')
 
     # HACK, work around the fact that KeyVault library does't take confiuration object on constructor
     # which could be used to turn off the verifiaction. Remove this once we migrate to new data plane library

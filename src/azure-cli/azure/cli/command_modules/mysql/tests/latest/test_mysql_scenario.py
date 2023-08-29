@@ -6,14 +6,14 @@ import os
 import time
 import uuid
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from time import sleep
 from dateutil import parser
 from dateutil.tz import tzutc
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk.base import execute
 from azure.cli.testsdk.scenario_tests.const import ENV_LIVE_TEST
-from azure.cli.testsdk.preparers import AbstractPreparer, SingleValueReplacer
+from azure.cli.testsdk.preparers import AbstractPreparer, SingleValueReplacer, StorageAccountPreparer
 from azure.core.exceptions import HttpResponseError
 from ..._client_factory import cf_mysql_flexible_private_dns_zone_suffix_operations
 from ..._network import prepare_private_dns_zone
@@ -38,6 +38,8 @@ DEFAULT_PAIRED_LOCATION = "centraluseuap"
 DEFAULT_GENERAL_PURPOSE_SKU = "Standard_D2s_v3"
 DEFAULT_MEMORY_OPTIMIZED_SKU = "Standard_E2s_v3"
 RESOURCE_RANDOM_NAME = "clirecording"
+STORAGE_ACCOUNT_PREFIX = "storageaccount"
+STORAGE_ACCOUNT_NAME_MAX_LENGTH = 20
 
 class ServerPreparer(AbstractPreparer, SingleValueReplacer):
 
@@ -966,8 +968,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
-    @ServerPreparer(engine_type='mysql', location=DEFAULT_LOCATION)
+    @ResourceGroupPreparer(location="eastus")
+    @ServerPreparer(engine_type='mysql', location="eastus")
     def test_mysql_flexible_server_proxy_resource(self, resource_group, server):
         self._test_firewall_rule_mgmt('mysql', resource_group, server)
         self._test_parameter_mgmt('mysql', resource_group, server)
@@ -1042,6 +1044,20 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server parameter set --name {} -v {} --source {} -s {} -g {}'.format(database_engine, parameter_name, value, source, server, resource_group),
                  checks=[JMESPathCheck('value', value),
                          JMESPathCheck('source', source)])
+        
+        args = "auto_increment_offset=2 explicit_defaults_for_timestamp=ON ft_query_expansion_limit=18"
+        self.cmd('{} flexible-server parameter set-batch -s {} -g {} --args {}'.format(database_engine, server, resource_group, args),
+                 checks=[JMESPathCheck('status', 'Succeeded')])
+        
+        self.cmd('{} flexible-server parameter show --name auto_increment_offset -g {} -s {}'.format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('currentValue', 2)])
+        
+        self.cmd('{} flexible-server parameter show --name explicit_defaults_for_timestamp -g {} -s {}'.format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('currentValue', 'ON')])
+        
+        self.cmd('{} flexible-server parameter show --name ft_query_expansion_limit -g {} -s {}'.format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('currentValue', 18)])
+
 
     def _test_database_mgmt(self, database_engine, resource_group, server):
 
@@ -2155,3 +2171,78 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
         # delete everything
         for server_name in [replica[0], replica[1], server]:
             self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
+
+class MySQLExportTest(ScenarioTest):
+    profile = None
+
+    def get_current_profile(self):
+        if not self.profile:
+            self.profile = self.cmd('cloud show --query profile -otsv').output
+        return self.profile
+
+    def get_account_key(self, group, name):
+        if self.get_current_profile() == '2017-03-09-profile':
+            template = 'storage account keys list -n {} -g {} --query "key1" -otsv'
+        else:
+            template = 'storage account keys list -n {} -g {} --query "[0].value" -otsv'
+
+        return self.cmd(template.format(name, group)).output
+
+    def get_account_info(self, group, name):
+        """Returns the storage account name and key in a tuple"""
+        return name, self.get_account_key(group, name)
+    
+    def storage_cmd(self, cmd, account_info, *args):
+        cmd = cmd.format(*args)
+        cmd = '{} --account-name {} --account-key {}'.format(cmd, *account_info)
+        return self.cmd(cmd)
+    
+    def create_container(self, account_info, prefix='cont', length=24):
+        container_name = self.create_random_name(prefix=prefix, length=length)
+        self.storage_cmd('storage container create -n {}', account_info, container_name)
+        return container_name
+
+    @live_only()
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location="eastus")
+    @ServerPreparer(engine_type='mysql', location="eastus")
+    @StorageAccountPreparer(location="eastus")
+
+    def test_mysql_export(self, resource_group, server, storage_account):
+        self._test_flexible_server_export_create_mgmt('mysql', resource_group, server, storage_account)
+
+    def _test_flexible_server_export_create_mgmt(self, database_engine, resource_group, server, storage_account):     
+        backup_name = "testexport"
+
+        target_account_info = self.get_account_info(resource_group, storage_account)
+
+        # Create the blob container
+        container = self.create_container(target_account_info)
+
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+
+        self.kwargs.update({
+            'expiry': expiry,
+            'account': storage_account,
+            'container': container
+        })
+
+        connection_str = self.cmd('storage account show-connection-string -n {account}  --query connectionString '
+                                  '-otsv').output.strip()
+        self.kwargs['con_str'] = connection_str
+        # test sas-token for a container
+        sas_uri = self.cmd('storage container generate-sas -n {container} --https-only --permissions racwdxyltfmei '
+                       '--connection-string {con_str} --expiry {expiry} -otsv').output.strip()
+
+        sas_uri = "https://" + storage_account + ".blob.core.windows.net/" + container + "?" + sas_uri
+
+        update_response=self.cmd('{} flexible-server export create -n {} -g {} -b {} -u {}'.format(database_engine, server, resource_group, backup_name, sas_uri)).get_output_in_json()
+
+        #Test to check if export is succeeded
+        self.assertEqual(update_response['status'], 'Succeeded')
+
+        #Delete storage account
+        self.cmd('storage account delete --name {} --resource-group {} --yes --output none'.format(storage_account, resource_group))
+
+        # deletion of single server created
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server), checks=NoneCheck())

@@ -246,7 +246,7 @@ def identity_show(client, resource_group_name, account_name):
 
 def deployment_begin_create_or_update(
         client, resource_group_name, account_name, deployment_name,
-        model_format, model_name, model_version,
+        model_format, model_name, model_version, model_source=None,
         sku_name=None, sku_capacity=None,
         scale_settings_scale_type=None, scale_settings_capacity=None):
     """
@@ -258,6 +258,8 @@ def deployment_begin_create_or_update(
     dpy.properties.model.format = model_format
     dpy.properties.model.name = model_name
     dpy.properties.model.version = model_version
+    if model_source is not None:
+        dpy.properties.model.source = model_source
     if sku_name is not None:
         dpy.sku = Sku(name=sku_name)
         dpy.sku.capacity = sku_capacity
