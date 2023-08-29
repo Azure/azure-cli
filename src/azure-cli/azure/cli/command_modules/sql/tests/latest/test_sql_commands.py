@@ -899,7 +899,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
         server = "pstestsvr"
         resource_group = "pstest"
         database_name_one = "cliautomationdb042"
-        database_name_two = "cliautomationdb05"
+        database_name_two = "cliautomationdb051"
         encryption_protector = "https://pstestkv.vault.azure.net/keys/testkey4/6638b3667e384aefa31364f94d230361"
         encryption_protector2 = "https://pstestkv.vault.azure.net/keys/testkey5/fd021f84a0d94d43b8ef33154bcab86f"
         umi = "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi"
