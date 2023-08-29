@@ -167,8 +167,19 @@ AZURE_API_PROFILES = {
             'gallery_image_versions': '2022-03-03',
             'gallery_applications': '2021-07-01',
             'gallery_application_versions': '2022-01-03',
+            'gallery_sharing_profile': '2022-03-03',
+            'shared_gallery_images': '2022-03-03',
+            'shared_gallery_image_versions': '2022-03-03',
+            'community_galleries': '2022-03-03',
+            'community_gallery_images': '2022-03-03',
+            'community_gallery_image_versions': '2022-01-03',
+            'capacity_reservation_groups': '2023-03-01',
+            'capacity_reservations': '2023-03-01',
+            'restore_points': '2023-03-01',
+            'restore_point_collections': '2023-03-01',
             'shared_galleries': '2022-01-03',
             'virtual_machine_scale_sets': '2023-03-01',
+            'virtual_machine_scale_set_vms': '2023-03-01',
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
@@ -425,6 +436,9 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_STORAGE_QUEUE: '2015-04-05'
     }
 }
+
+
+AZURE_SDK_WITH_API_VERSION_VALIDATION = [ResourceType.MGMT_COMPUTE]
 
 
 # We should avoid using ad hoc API versions,

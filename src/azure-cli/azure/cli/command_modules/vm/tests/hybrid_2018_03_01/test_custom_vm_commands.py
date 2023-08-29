@@ -28,13 +28,9 @@ from azure.cli.core.profiles import get_sdk, ResourceType
 from azure.cli.core.mock import DummyCli
 
 
-NetworkProfile, StorageProfile, DataDisk, OSDisk, OperatingSystemTypes, InstanceViewStatus, \
-    VirtualMachineExtensionInstanceView, VirtualMachineExtension, ImageReference, DiskCreateOptionTypes, \
-    CachingTypes = get_sdk(DummyCli(), ResourceType.MGMT_COMPUTE, 'NetworkProfile', 'StorageProfile', 'DataDisk', 'OSDisk',
-                           'OperatingSystemTypes', 'InstanceViewStatus', 'VirtualMachineExtensionInstanceView',
-                           'VirtualMachineExtension', 'ImageReference', 'DiskCreateOptionTypes',
-                           'CachingTypes',
-                           mod='models', operation_group='virtual_machines')  # FIXME split into loading by RT
+from azure.mgmt.compute.models import (NetworkProfile, StorageProfile, DataDisk, OSDisk, OperatingSystemTypes,
+                                       InstanceViewStatus, VirtualMachineExtensionInstanceView,
+                                       VirtualMachineExtension, DiskCreateOptionTypes, CachingTypes)
 
 
 def _get_test_cmd():
@@ -223,8 +219,7 @@ class TestVmCustom(unittest.TestCase):
         get_vmss_instance_view(cmd, 'rg1', 'vmss1', '*')
         # assert
         vm_client.virtual_machine_scale_set_vms.list.assert_called_once_with(
-            resource_group_name='rg1', virtual_machine_scale_set_name='vmss1',
-            select='instanceView', expand='instanceView')
+            'rg1', 'vmss1', select='instanceView', expand='instanceView')
 
     # pylint: disable=line-too-long
     @mock.patch('azure.cli.command_modules.vm.disk_encryption._compute_client_factory', autospec=True)
