@@ -379,7 +379,6 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
                            customized_keys=None,
                            **kwargs,
                            ):
-
     if not source_id:
         raise RequiredArgumentMissingError(err_msg.format('--source-id'))
     if not new_addon and not target_id:
@@ -418,7 +417,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
     if key_vault_id:
         client = set_user_token_header(client, cmd.cli_ctx)
         from ._utils import create_key_vault_reference_connection_if_not_exist
-        create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
+        create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id, scope)
     elif auth_info['auth_type'] == 'secret' and 'secret_info' in auth_info \
             and auth_info['secret_info']['secret_type'] == 'keyVaultSecretReference':
         raise ValidationError('--vault-id must be provided to use secret-name')
@@ -681,7 +680,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
     if key_vault_id:
         client = set_user_token_header(client, cmd.cli_ctx)
         from ._utils import create_key_vault_reference_connection_if_not_exist
-        create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
+        create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id, scope)
     elif auth_info['auth_type'] == 'secret' and 'secret_info' in auth_info \
             and auth_info['secret_info']['secret_type'] == 'keyVaultSecretReference':
         raise ValidationError('--vault-id must be provided to use secret-name')

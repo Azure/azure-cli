@@ -199,7 +199,8 @@ def auto_register(func, *args, **kwargs):
         raise ex
 
 
-def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id):
+def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id, 
+                                                       scope=None): # Resource.ContainerApp
     from ._validators import get_source_resource_name
 
     logger.warning('get valid key vault reference connection')
@@ -229,6 +230,8 @@ def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, k
             "id": key_vault_id
         },
         'auth_info': auth_info,
+        # Container App container name
+        'scope': scope,
         # Key Vault Configuration are same across all client types
         'client_type': CLIENT_TYPE.Dotnet,
     }
