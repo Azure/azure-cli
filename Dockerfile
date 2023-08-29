@@ -61,7 +61,6 @@ RUN ./scripts/install_full.sh && python ./scripts/trim_sdk.py \
         | xargs -r apk info --installed \
         | sort -u \
     )" \
- && echo rundeps $runDeps \
  && apk add --virtual .rundeps $runDeps
 
 WORKDIR /
