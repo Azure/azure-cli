@@ -96,9 +96,6 @@ class ContainerAppEnvDecorator(BaseResource):
     def get_argument_certificate_password(self):
         return self.get_param("certificate_password")
 
-    def get_argument_enable_workload_profiles(self):
-        return self.get_param("enable_workload_profiles")
-
     def get_argument_mtls_enabled(self):
         return self.get_param("mtls_enabled")
 
@@ -167,8 +164,7 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
         self.managed_env_def["tags"] = self.get_argument_tags()
         self.managed_env_def["properties"]["zoneRedundant"] = self.get_argument_zone_redundant()
 
-        if self.get_argument_enable_workload_profiles() is True:
-            self.managed_env_def["properties"]["workloadProfiles"] = get_default_workload_profiles(self.cmd, self.get_argument_location())
+        self.managed_env_def["properties"]["workloadProfiles"] = get_default_workload_profiles(self.cmd, self.get_argument_location())
 
         # Custom domains
         if self.get_argument_hostname():

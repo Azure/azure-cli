@@ -820,7 +820,6 @@ def create_managed_environment(cmd,
                                hostname=None,
                                certificate_file=None,
                                certificate_password=None,
-                               enable_workload_profiles=False,
                                mtls_enabled=None,
                                no_wait=False):
     raw_parameters = locals()
