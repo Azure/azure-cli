@@ -507,6 +507,14 @@ examples:
     text: az mysql flexible-server parameter set --resource-group testGroup --server-name testserver --name parameterName
 """
 
+helps['mysql flexible-server parameter set-batch'] = """
+type: command
+short-summary: Batch update parameters of a flexible server.
+examples:
+  - name: Batch set parameters.
+    text: az mysql flexible-server parameter set-batch --resource-group testGroup --server-name testserver --source "user-override" --args key1="value1" key2="value2"
+"""
+
 helps['mysql flexible-server parameter show'] = """
 type: command
 short-summary: Get the parameter for a flexible server."
