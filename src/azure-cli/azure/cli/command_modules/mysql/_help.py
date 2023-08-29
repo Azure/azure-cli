@@ -216,6 +216,14 @@ examples:
           --sku-name Standard_B1ms --tier Burstable --public-access 0.0.0.0 \\
           --storage-size 32 --tags "key=value" --version 5.7 --high-availability ZoneRedundant \\
           --zone 1 --standby-zone 3 --storage-auto-grow Enabled --iops 500
+  - name: >
+      Trigger a Import from Azure Blob for external migration
+    text: >
+        az mysql flexible-server import create --data-source-type "azure_blob" \\
+          --data-source test-single-server --resource-group test-rg \\
+          --name testserver --version 5.7 --data-source-backup-dir "data" \\
+          --sku-name Standard_D2s_v3 --tier GeneralPurpose --public-access 0.0.0.0 \\
+          --% --data-source-sas-token "sp=r&st=2023-07-20T10:30:07Z&se=2023-07-20T18:30:07Z..."
 """
 
 helps['mysql flexible-server show'] = """
