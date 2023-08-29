@@ -62,6 +62,7 @@ class AzCompletionFinder(argcomplete.CompletionFinder):
                                                                                        last_wordbreak_pos)
 
 
+# pylint: disable=too-many-instance-attributes
 class AzCliCommandParser(CLICommandParser):
     """ArgumentParser implementation specialized for the Azure CLI utility."""
 
