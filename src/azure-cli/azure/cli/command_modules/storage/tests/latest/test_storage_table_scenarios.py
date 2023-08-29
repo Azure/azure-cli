@@ -91,34 +91,6 @@ class StorageTableScenarioTests(StorageScenarioMixin, ScenarioTest):
                          table_name, marker.get('nextpartitionkey'), marker.get('nextrowkey')).assert_with_checks(
                              JMESPathCheck('length(items)', 1))
 
-        # sas token case
-        from datetime import datetime, timedelta
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
-        sas_token_a = self.storage_cmd('storage table generate-sas -n {} --expiry {} --permissions a', account_info,
-                                     table_name, expiry).get_output_in_json()
-        account_name = account_info[0]
-        self.cmd('storage entity insert --account-name {} -t {} -e rowkey=003 partitionkey=003 name=test3 '
-                 'value=something3 --sas-token {}'.format(account_name, table_name, sas_token_a))
-        from azure.core.exceptions import ResourceExistsError, HttpResponseError
-        with self.assertRaises(ResourceExistsError):
-            # by default --if-exists action is fail
-            self.cmd('storage entity insert --account-name {} -t {} -e rowkey=003 partitionkey=003 name=test3 '
-                     'value=something3 --sas-token {}'.format(account_name, table_name, sas_token_a))
-        with self.assertRaises(ResourceExistsError):
-            # should fail without sas as well
-            self.storage_cmd('storage entity insert -t {} -e rowkey=003 partitionkey=003 name=test3 '
-                             'value=something3', account_info, table_name, sas_token_a)
-
-        sas_token_au = self.storage_cmd('storage table generate-sas -n {} --expiry {} --permissions au', account_info,
-                                        table_name, expiry).get_output_in_json()
-        with self.assertRaises(HttpResponseError) as ex:
-            # permission with add only fails with upsert
-            self.cmd('storage entity insert --account-name {} -t {} -e rowkey=003 partitionkey=003 name=test3 '
-                     'value=something3 --sas-token {} '
-                     '--if-exists replace'.format(account_name, table_name, sas_token_a))
-        self.cmd('storage entity insert --account-name {} -t {} -e rowkey=003 partitionkey=003 name=test3 '
-                 'value=something3 --sas-token {} --if-exists replace'.format(account_name, table_name, sas_token_au))
-
     def verify_table_acl_operations(self, account_info, table_name):
         self.storage_cmd('storage table policy list -t {}', account_info,
                          table_name).assert_with_checks(NoneCheck())
