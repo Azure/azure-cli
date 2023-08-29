@@ -464,8 +464,6 @@ def flexible_server_import_create(cmd, client,
                                   byok_identity=None, backup_byok_identity=None, byok_key=None, backup_byok_key=None,
                                   yes=False):
     provider = 'Microsoft.DBforMySQL'
-    # Generate missing parameters
-    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name, server_name)
     if data_source_type.lower() == 'mysql_single':
         if mode.lower() == 'offline':
             # Generating source_server_id from data_source depending on whether it is a server_name or resource_id
@@ -500,7 +498,6 @@ def flexible_server_import_create(cmd, client,
                                                                                                                         public_access=public_access,
                                                                                                                         administrator_login=administrator_login,
                                                                                                                         administrator_login_password=administrator_login_password)
-
     db_context = DbContext(
         cmd=cmd, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
         cf_availability=cf_mysql_check_resource_availability,
@@ -1752,6 +1749,9 @@ def map_single_server_configuration(single_server_client, source_server_id, tier
 
         if not administrator_login:
             administrator_login = source_single_server.administrator_login
+
+        if not location:
+            location = ''.join(source_single_server.location.lower().split())
 
         if not storage_gb:
             min_mysql_storage = 20
