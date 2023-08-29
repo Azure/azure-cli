@@ -119,6 +119,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
     vnet_arg_type = CLIArgumentType(
         options_list=['--vnet'],
         help='Name or ID of a new or existing virtual network. '
+             'This parameter only applies if you are creating cross region replica server with private access. '
+             'For in-region read replica with private access, source server settings are carried over and this parameter is ignored. '
              'If you want to use a vnet from different resource group or subscription, '
              'please provide a resource ID. The name must be between 2 to 64 characters. '
              'The name must begin with a letter or number, end with a letter, number or underscore, '
@@ -134,6 +136,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
     subnet_arg_type = CLIArgumentType(
         options_list=['--subnet'],
         help='Name or resource ID of a new or existing subnet. '
+             'This parameter only applies if you are creating cross region replica server with private access. '
+             'For in-region read replica with private access, source server settings are carried over and this parameter is ignored. '
              'If you want to use a subnet from different resource group or subscription, please provide resource ID instead of name. '
              'Please note that the subnet will be delegated to flexibleServers. '
              'After delegation, this subnet cannot be used for any other type of Azure resources.'
@@ -183,7 +187,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
     private_dns_zone_arguments_arg_type = CLIArgumentType(
         options_list=['--private-dns-zone'],
-        help='This parameter only applies for a server with private access. '
+        help='This parameter only applies if you are creating cross region replica server with private access. '
+             'For in-region read replica with private access, source server settings are carried over and this parameter is ignored. '
              'The name or id of new or existing private dns zone. '
              'You can use the private dns zone from same resource group, different resource group, or different subscription. '
              'If you want to use a zone from different resource group or subscription, please provide resource Id. '
@@ -528,6 +533,11 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
     with self.argument_context('mysql flexible-server backup list') as c:
         c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
+
+    # export
+    with self.argument_context('mysql flexible-server export create') as c:
+        c.argument('backup_name', options_list=['--backup-name', '-b'], help='The name of the new export backup.')
+        c.argument('sas_uri', options_list=['--sas-uri', '-u'], help='SAS URI for destination container.')
 
     # identity
     with self.argument_context('mysql flexible-server identity') as c:
