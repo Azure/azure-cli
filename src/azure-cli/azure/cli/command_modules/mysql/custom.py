@@ -617,7 +617,7 @@ def flexible_server_import_create(cmd, client,
     _update_local_contexts(cmd, server_name, resource_group_name, location, user)
 
     return _form_response(user, sku, loc, server_id, host, version,
-                          administrator_login_password,
+                          administrator_login_password if administrator_login_password is not None else '*****',
                           _create_mysql_connection_string(host, None, user, administrator_login_password),
                           None, firewall_name, subnet_id)
 
