@@ -464,7 +464,8 @@ def flexible_server_import_create(cmd, client,
                                   byok_identity=None, backup_byok_identity=None, byok_key=None, backup_byok_key=None,
                                   yes=False):
     provider = 'Microsoft.DBforMySQL'
-
+    # Generate missing parameters
+    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name, server_name)
     if data_source_type.lower() == 'mysql_single':
         if mode.lower() == 'offline':
             # Generating source_server_id from data_source depending on whether it is a server_name or resource_id
@@ -485,20 +486,20 @@ def flexible_server_import_create(cmd, client,
             create_mode = 'Migrate'
             # Mapping the single server configuration to flexible server configuration
             (tier, sku_name, location, storage_gb, auto_grow, backup_retention,
-             geo_redundant_backup, version, tags, public_access, administrator_login) = map_single_server_configuration(single_server_client,
-                                                                                                                        source_server_id,
-                                                                                                                        tier,
-                                                                                                                        sku_name,
-                                                                                                                        location,
-                                                                                                                        storage_gb,
-                                                                                                                        auto_grow,
-                                                                                                                        backup_retention,
-                                                                                                                        geo_redundant_backup,
-                                                                                                                        version,
-                                                                                                                        tags,
-                                                                                                                        public_access,
-                                                                                                                        administrator_login,
-                                                                                                                        administrator_login_password)
+             geo_redundant_backup, version, tags, public_access, administrator_login) = map_single_server_configuration(single_server_client=single_server_client,
+                                                                                                                        source_server_id=source_server_id,
+                                                                                                                        tier=tier,
+                                                                                                                        sku_name=sku_name,
+                                                                                                                        location=location,
+                                                                                                                        storage_gb=storage_gb,
+                                                                                                                        auto_grow=auto_grow,
+                                                                                                                        backup_retention=backup_retention,
+                                                                                                                        geo_redundant_backup=geo_redundant_backup,
+                                                                                                                        version=version,
+                                                                                                                        tags=tags,
+                                                                                                                        public_access=public_access,
+                                                                                                                        administrator_login=administrator_login,
+                                                                                                                        administrator_login_password=administrator_login_password)
 
     db_context = DbContext(
         cmd=cmd, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
@@ -574,7 +575,7 @@ def flexible_server_import_create(cmd, client,
     high_availability = mysql_flexibleservers.models.HighAvailability(mode=high_availability,
                                                                       standby_availability_zone=standby_availability_zone)
 
-    if create_mode != 'Migrate':
+    if create_mode == 'Create':
         administrator_login_password = generate_password(administrator_login_password)
 
     identity, data_encryption = build_identity_and_data_encryption(db_engine='mysql',
@@ -619,8 +620,8 @@ def flexible_server_import_create(cmd, client,
     _update_local_contexts(cmd, server_name, resource_group_name, location, user)
 
     return _form_response(user, sku, loc, server_id, host, version,
-                          None,
-                          _create_mysql_connection_string(host, None, user, None),
+                          administrator_login_password,
+                          _create_mysql_connection_string(host, None, user, administrator_login_password),
                           None, firewall_name, subnet_id)
 
 
@@ -1744,16 +1745,13 @@ def map_single_server_configuration(single_server_client, source_server_id, tier
         mysql_import_single_server_ready_validator(source_single_server)
 
         if administrator_login or administrator_login_password:
+            administrator_login = None
+            administrator_login_password = None
             logger.warning("Changing administrator login name and password is currently not supported for single to flex migrations. "
                            "Please use source single server administrator login name and password to connect after migration.")
 
         if not administrator_login:
             administrator_login = source_single_server.administrator_login
-
-        source_single_server_location = ''.join(source_single_server.location.lower().split())
-        if location is not None and location.lower() != source_single_server_location:
-            logger.warning("Location provided is ignored. Flexible server will be created in the same location as the source single server.")
-        location = source_single_server_location
 
         if not storage_gb:
             min_mysql_storage = 20
