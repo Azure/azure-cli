@@ -634,6 +634,9 @@ def flexible_server_import_create(cmd, client,
     host = server_result.fully_qualified_domain_name
     subnet_id = network.delegated_subnet_resource_id
 
+    logger.warning('Make a note of your password. If you forget, you would have to reset your password with'
+                   '\'az mysql flexible-server update -n %s -g %s -p <new-password>\'.',
+                   server_name, resource_group_name)
     logger.warning('Try using az \'mysql flexible-server connect\' command to test out connection.')
 
     _update_local_contexts(cmd, server_name, resource_group_name, location, user)
