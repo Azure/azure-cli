@@ -147,6 +147,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].nodeLabels.label2', 'value2'),
             self.check('agentPoolProfiles[0].tags.tag1', 'tv1'),
             self.check('agentPoolProfiles[0].tags.tag2', 'tv2'),
+            self.check('agentPoolProfiles[0].maxPods', 110),
+            self.check('agentPoolProfiles[0].osDiskSizeGb', 128),
         ])
 
         # list
@@ -589,7 +591,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists('nodeResourceGroup'),
             self.check('provisioningState', 'Succeeded'),
             self.check('tags.key1', 'value1'),
-            self.check('servicePrincipalProfile.clientId', sp_name)
+            self.check('servicePrincipalProfile.clientId', sp_name),
+            self.check('agentPoolProfiles[0].maxPods', 100),
         ])
 
         # list
@@ -2720,6 +2723,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('agentPoolProfiles[0].osDiskType', 'Ephemeral'),
+            self.check('agentPoolProfiles[0].osDiskSizeGb', 60),
         ])
 
     @AllowLargeResponse()
