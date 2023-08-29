@@ -1734,7 +1734,7 @@ def get_default_flex_configuration(tier, sku_name, storage_gb, auto_grow, backup
     if not storage_gb:
         storage_gb = 32
     if not version:
-        version = '5.7' 
+        version = '5.7'
     if not auto_grow:
         auto_grow = 'Enabled'
     if not backup_retention:
