@@ -405,7 +405,7 @@ class TestFunctionappMocked(unittest.TestCase):
         },
         {
             'name': 'ENABLE_ORYX_BUILD',
-            'value': 'true'
+            'value': 'false'
         }
     ])
     def test_add_remote_build_app_settings_remove_unnecessary_app_settings(self,
