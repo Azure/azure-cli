@@ -18,7 +18,7 @@ Release History
 
 * `az apponfig kv import`: Add new parameter `--import-mode` to specify whether to overwrite already existing key-values or ignore matching keys (#26098)
 * `az appconfig kv export`: Add new parameter `--snapshot` to support exporting all key values from a snapshot of the source configuration (#27043)
-* `az appconfig kv import`: Add a new parameter `--src-snapshot` to support importing all key values from a snapshot of the source configuration (#27043)
+* `az appconfig kv import`: Add new parameter `--src-snapshot` to support importing all key values from a snapshot of the source configuration (#27043)
 
 **App Service**
 
