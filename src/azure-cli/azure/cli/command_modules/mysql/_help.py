@@ -185,7 +185,7 @@ examples:
 
 helps['mysql flexible-server import'] = """
 type: group
-short-summary: Manage import workflows for MySQL Flexible Servers
+short-summary: Manage import workflows for MySQL Flexible Servers.
 """
 
 helps['mysql flexible-server import create'] = """
