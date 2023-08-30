@@ -90,14 +90,12 @@ Release History
 
 **Storage**
 
-* [BREAKING CHANGE] `az storage account create`: Server change default value for `--allow-blob-public-access` and `--allow-cross-tenant-replication` to False for security concerns (#27048)
 * `az storage file upload-batch`: Allow uploading files in parallel to improve performance (#26940)
-* `az storage account create/update`: Revert `--allow-cross-tenant-replication` and `--allow-blob-public-access` to default value of true (#27250)
-* Fix #27202 `az storage entity insert`: Fix case when using sas token with only `add` permission (#27280)
+* Fix #27202: `az storage entity insert`: Fix case when using sas token with only `add` permission (#27280)
 
 **Upgrade**
 
-* `az upgrade`: Change MSI URL based on the installed CLI architecture (#27104)
+* `az upgrade`: Support upgrading with 64-bit MSI (#27104)
 
 2.51.0
 ++++++
