@@ -290,28 +290,50 @@ class ActionGroupUpdate(_ActionGroupUpdate):
         def filter_receivers(collection):
             return [item for item in collection if item.name.to_serialized_data() not in receiver_remove_list]
 
-        instance.properties.email_receivers = \
-            filter_receivers(instance.properties.email_receivers) + list(args.email_receivers)
-        instance.properties.sms_receivers = \
-            filter_receivers(instance.properties.sms_receivers) + list(args.sms_receivers)
-        instance.properties.webhook_receivers = \
-            filter_receivers(instance.properties.webhook_receivers) + list(args.webhook_receivers)
-        instance.properties.arm_role_receivers = \
-            filter_receivers(instance.properties.arm_role_receivers) + list(args.arm_role_receivers)
-        instance.properties.azure_app_push_receivers = \
-            filter_receivers(instance.properties.azure_app_push_receivers) + list(args.azure_app_push_receivers)
-        instance.properties.itsm_receivers = \
-            filter_receivers(instance.properties.itsm_receivers) + list(args.itsm_receivers)
+        instance.properties.email_receivers = filter_receivers(instance.properties.email_receivers)
+        instance.properties.email_receivers.extend(args.email_receivers)
+        args.email_receivers = instance.properties.email_receivers
+
+        instance.properties.sms_receivers = filter_receivers(instance.properties.sms_receivers)
+        instance.properties.sms_receivers.extend(args.sms_receivers)
+        args.sms_receivers = instance.properties.sms_receivers
+
+        instance.properties.webhook_receivers = filter_receivers(instance.properties.webhook_receivers)
+        instance.properties.webhook_receivers.extend(args.webhook_receivers)
+        args.webhook_receivers = instance.properties.webhook_receivers
+
+        instance.properties.arm_role_receivers = filter_receivers(instance.properties.arm_role_receivers)
+        instance.properties.arm_role_receivers.extend(args.arm_role_receivers)
+        args.arm_role_receivers = instance.properties.arm_role_receivers
+
+        instance.properties.azure_app_push_receivers = filter_receivers(instance.properties.azure_app_push_receivers)
+        instance.properties.azure_app_push_receivers.extend(args.azure_app_push_receivers)
+        args.azure_app_push_receivers = instance.properties.azure_app_push_receivers
+
+        instance.properties.itsm_receivers = filter_receivers(instance.properties.itsm_receivers)
+        instance.properties.itsm_receivers.extend(args.itsm_receivers)
+        args.itsm_receivers = instance.properties.itsm_receivers
+
         instance.properties.automation_runbook_receivers = \
-            filter_receivers(instance.properties.automation_runbook_receivers) + list(args.automation_runbook_receivers)
-        instance.properties.voice_receivers = \
-            filter_receivers(instance.properties.voice_receivers) + list(args.voice_receivers)
-        instance.properties.logic_app_receivers = \
-            filter_receivers(instance.properties.logic_app_receivers) + list(args.logic_app_receivers)
-        instance.properties.azure_function_receivers = \
-            filter_receivers(instance.properties.azure_function_receivers) + list(args.azure_function_receivers)
-        instance.properties.event_hub_receivers = \
-            filter_receivers(instance.properties.event_hub_receivers) + list(args.event_hub_receivers)
+            filter_receivers(instance.properties.automation_runbook_receivers)
+        instance.properties.automation_runbook_receivers.extend(args.automation_runbook_receivers)
+        args.automation_runbook_receivers = instance.properties.automation_runbook_receivers
+
+        instance.properties.voice_receivers = filter_receivers(instance.properties.voice_receivers)
+        instance.properties.voice_receivers.extend(args.voice_receivers)
+        args.voice_receivers = instance.properties.voice_receivers
+
+        instance.properties.logic_app_receivers = filter_receivers(instance.properties.logic_app_receivers)
+        instance.properties.logic_app_receivers.extend(args.logic_app_receivers)
+        args.logic_app_receivers = instance.properties.logic_app_receivers
+
+        instance.properties.azure_function_receivers = filter_receivers(instance.properties.azure_function_receivers)
+        instance.properties.azure_function_receivers.extend(args.azure_function_receivers)
+        args.azure_function_receivers = instance.properties.azure_function_receivers
+
+        instance.properties.event_hub_receivers = filter_receivers(instance.properties.event_hub_receivers)
+        instance.properties.event_hub_receivers.extend(args.event_hub_receivers)
+        args.event_hub_receivers = instance.properties.event_hub_receivers
 
 
 class ActionGroupTestNotificationCreate(_ActionGroupTestNotificationCreate):

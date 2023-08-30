@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "monitor action-group show",
 )
 class Show(AAZCommand):
-    """Get an action group.
+    """Show the details of an action group.
 
     :example: Show the details of an action group (commonly used with --output and --query).
         az monitor action-group show --name MyActionGroup --resource-group MyResourceGroup

@@ -15,7 +15,9 @@ from azure.cli.core.aaz import *
     "monitor action-group enable-receiver",
 )
 class EnableReceiver(AAZCommand):
-    """Enable a receiver in an action group. This changes the receiver's status from Disabled to Enabled. This operation is only supported for Email or SMS receivers.
+    """Enable a receiver in an action group.
+
+    This changes the receiver's status from Disabled to Enabled. This operation is only supported for Email or SMS receivers.
     """
 
     _aaz_info = {

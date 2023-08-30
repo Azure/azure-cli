@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "monitor action-group update",
 )
 class Update(AAZCommand):
-    """Update a new action group or update an existing one.
+    """Update an action group.
 
     :example: Update an action group
         az monitor action-group update --name MyActionGroup --resource-group MyResourceGroup --set retentionPolicy.days=365 --subscription MySubscription
@@ -58,7 +58,7 @@ class Update(AAZCommand):
         )
         _args_schema.group_short_name = AAZStrArg(
             options=["--short-name", "--group-short-name"],
-            help="Update the group short name of the action group.",
+            help="The short name of the action group. This will be used in SMS messages.",
             fmt=AAZStrArgFormat(
                 max_length=12,
             ),

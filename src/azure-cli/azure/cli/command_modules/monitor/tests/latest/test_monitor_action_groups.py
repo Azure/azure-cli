@@ -65,8 +65,8 @@ class TestActionGroupScenarios(ScenarioTest):
                          JMESPathCheck('length(azureFunctionReceivers)', 1),
                          JMESPathCheck('length(eventHubReceivers)', 1)])
 
-        self.cmd('monitor action-group update -n {} -g {} -ojson -r alice_web'
-                 .format(action_group_name, resource_group), checks=[JMESPathCheck('length(emailReceivers)', 1),
+        self.cmd('monitor action-group update -n {} -g {} -ojson -r alice_web -a email alice_1 alice1@example.com usecommonalertsChema'
+                 .format(action_group_name, resource_group), checks=[JMESPathCheck('length(emailReceivers)', 2),
                                                                      # JMESPathCheck('length(smsReceivers)', 1),
                                                                      JMESPathCheck('length(webhookReceivers)', 0)])
 
