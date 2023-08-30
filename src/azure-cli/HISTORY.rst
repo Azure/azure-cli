@@ -36,7 +36,6 @@ Release History
 
 **ARO**
 
-* `az aro` (all commands): Update to v20230401 API (#27212)
 * `az aro create`: Add new `--outbound-type` parameter, allowing users to select "Loadbalancer" (default) or "UserDefinedRouting" (#27212)
 * `az aro create`: Perform pre-flight validation of prerequisite permissions before creation (#27212)
 * `az aro validate`: New command to perform explicit validation of prerequisite permissions (#27212)
