@@ -12,12 +12,12 @@ Release History
 * `az aks update`: Add new parameter `--network-dataplane` to specify the network dataplane used in the Kubernetes cluster (#27060)
 * `az aks create/update`: Add new parameter `--node-os-upgrade-channel` to specify which OS on your nodes is updated (#27167)
 * `az aks update`: Retain value in network profile in mc object only when decorator is in update mode (#27050)
-* `az aks update`: Outbound ip/ outbound ipprefix and managed outbound ip should be mutually exclusive (#27271)
+* `az aks update`: Outbound ip/outbound ipprefix and managed outbound ip should be mutually exclusive (#27271)
 
 **App Config**
 
 * `az apponfig kv import`: Add new parameter `--import-mode` to specify whether to overwrite already existing key-values or ignore matching keys (#26098)
-* `az appconfig kv export`: Add a new parameter `--snapshot` to support exporting all key values from a snapshot of the source configuration (#27043)
+* `az appconfig kv export`: Add new parameter `--snapshot` to support exporting all key values from a snapshot of the source configuration (#27043)
 * `az appconfig kv import`: Add a new parameter `--src-snapshot` to support importing all key values from a snapshot of the source configuration (#27043)
 
 **App Service**
