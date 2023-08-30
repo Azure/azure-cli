@@ -222,23 +222,36 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         location = 'westus2'
         ss_storage_size = 51200
         ss_version = '5.7'
-        self.cmd('{} server create -g {} -n {} -l {} --storage-size {} --version {}'.format(database_engine, resource_group, ss_server_name, location, ss_storage_size, ss_version))
+        source_sku_name = 'GP_Gen5_4'
+        source_public_network_access = 'Disabled'
+        source_backup_retention_days = 10 
+        source_geo_redundant_backup = 'Enabled'
+        source_admin_login = 'mysqluser'
+        source_auto_grow = 'Enabled'
+
+        self.cmd('{} server create -g {} -n {} -l {} --storage-size {} --version {} --sku-name {} \
+                  --public-network-access {} --backup-retention {} --geo-redundant-backup {} --auto-grow {} -u {}'
+                 .format(database_engine, resource_group, ss_server_name, location,
+                         ss_storage_size, ss_version, source_sku_name, source_public_network_access,
+                         source_backup_retention_days, source_geo_redundant_backup, source_auto_grow, source_admin_login))
 
         # flexible server details
-        storage_size = 128
+        storage_size_gb = 50
         version = '5.7'
-        sku_name = 'Standard_B1ms'
-        tier = 'Burstable'
+        sku_name = 'Standard_D4ds_v4'
+        tier = 'GeneralPurpose'
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         data_source_type = 'mysql_single'
         data_source = ss_server_name
-        mode = 'offline'
+        mode = 'Offline'
+        target_public_network_access = 'Disabled'
+        target_backup_retention_days = 10 
+        target_geo_redundant_backup = 'Enabled'
+        target_admin_login = 'mysqluser'
+        target_auto_grow = 'Enabled'
 
-        self.cmd('{} flexible-server import create -g {} -n {} --sku-name {} --tier {} \
-                  --storage-size {} -u {} --version {} --tags keys=3 \
-                  --public-access None --location {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
-                                                                                                              resource_group, server_name, sku_name, tier, storage_size,
-                                                                                                              'dbadmin', version, location, data_source_type, data_source, mode))
+        self.cmd('{} flexible-server import create -g {} -n {} --data-source-type {} --data-source {} --mode {}'
+                 .format(database_engine, resource_group, server_name, data_source_type, data_source, mode))
 
         basic_info = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name)).get_output_in_json()
         self.assertEqual(basic_info['name'], server_name)
@@ -247,57 +260,52 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.assertEqual(basic_info['sku']['name'], sku_name)
         self.assertEqual(basic_info['sku']['tier'], tier)
         self.assertEqual(basic_info['version'], version)
-        self.assertEqual(basic_info['storage']['storageSizeGb'], storage_size)
+        self.assertEqual(basic_info['storage']['storageSizeGb'], storage_size_gb)
+        self.assertEqual(basic_info['network']['publicNetworkAccess'], target_public_network_access)
+        self.assertEqual(basic_info['storage']['autoGrow'], target_auto_grow)
+        self.assertEqual(basic_info['backup']['backupRetentionDays'], target_backup_retention_days)
+        self.assertEqual(basic_info['backup']['geoRedundantBackup'], target_geo_redundant_backup)
+        self.assertEqual(basic_info['administratorLogin'], target_admin_login)
 
         # deletion of flexible server created
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name), checks=NoneCheck())
 
         # size for flex server is less than single server
-        invalid_storage_szie = 64
-        self.cmd('{} flexible-server import create -g {} -n {} --sku-name {} --tier {} \
-                  --storage-size {} -u {} --version {} --tags keys=3 \
-                  --public-access None --location {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
-                                                                                                              resource_group, server_name, sku_name, tier, invalid_storage_szie,
-                                                                                                              'dbadmin', version, location, data_source_type, data_source, mode),
-                                                                                                              expect_failure=True)
+        invalid_storage_size_gb = 20
+        self.cmd('{} flexible-server import create -g {} -n {} --storage-size {} \
+                 --data-source-type {} --data-source {} --mode {}'.format(database_engine, resource_group, server_name, invalid_storage_size_gb,
+                                                                          data_source_type, data_source, mode),
+                                                                          expect_failure=True)
 
         # version for flex server given is different from single server version
         invalid_version = '8.0.21'
-        self.cmd('{} flexible-server import create -g {} -n {} --sku-name {} --tier {} \
-            --storage-size {} -u {} --version {} --tags keys=3 \
-            --public-access None --location {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
-                                                                                                        resource_group, server_name, sku_name, tier, storage_size,
-                                                                                                        'dbadmin', invalid_version, location, data_source_type, data_source, mode),
-                                                                                                        expect_failure=True)
+        self.cmd('{} flexible-server import create -g {} -n {} --version {} \
+                 --data-source-type {} --data-source {} --mode {}'.format(database_engine, resource_group, server_name,
+                                                                          invalid_version, data_source_type, data_source, mode),
+                                                                          expect_failure=True)
 
         # resource group passed does not exist
         invalid_resource_group = self.create_random_name('rg', 10)
-        self.cmd('{} flexible-server import create -g {} -n {} --sku-name {} --tier {} \
-            --storage-size {} -u {} --version {} --tags keys=3 \
-            --public-access None --location {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
-                                                                                                        invalid_resource_group, server_name, sku_name, tier, storage_size,
-                                                                                                        'dbadmin', version, location, data_source_type, data_source, mode),
-                                                                                                        expect_failure=True)
+        self.cmd('{} flexible-server import create -g {} -n {} --data-source-type {} \
+                  --data-source {} --mode {}'.format(database_engine, invalid_resource_group, server_name, data_source_type,
+                                                     data_source, mode),
+                                                     expect_failure=True)
 
         # single server name passed does not exist in the resource group passed
         invalid_data_source_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        self.cmd('{} flexible-server import create -g {} -n {} --sku-name {} --tier {} \
-            --storage-size {} -u {} --version {} --tags keys=3 \
-            --public-access None --location {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
-                                                                                                        resource_group, server_name, sku_name, tier, storage_size,
-                                                                                                        'dbadmin', version, location, data_source_type, invalid_data_source_name, mode),
-                                                                                                        expect_failure=True)
+        self.cmd('{} flexible-server import create -g {} -n {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
+                                                                                                                        resource_group, server_name,
+                                                                                                                        data_source_type, invalid_data_source_name, mode),
+                                                                                                                        expect_failure=True)
 
         # single server resource id passed is invalid or does not exist
         invalid_data_source_resource_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforMySQL/servers/{}'.format(
             self.get_subscription_id(), invalid_resource_group, invalid_data_source_name
         )
-        self.cmd('{} flexible-server import create -g {} -n {} --sku-name {} --tier {} \
-            --storage-size {} -u {} --version {} --tags keys=3 \
-            --public-access None --location {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
-                                                                                                        resource_group, server_name, sku_name, tier, storage_size,
-                                                                                                        'dbadmin', version, location, data_source_type, invalid_data_source_resource_id, mode),
-                                                                                                        expect_failure=True)
+        self.cmd('{} flexible-server import create -g {} -n {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
+                                                                                                                        resource_group, server_name, data_source_type,
+                                                                                                                        invalid_data_source_resource_id, mode),
+                                                                                                                        expect_failure=True)
 
         # deletion of single server created
         self.cmd('{} server delete -g {} -n {} --yes'.format(database_engine, resource_group, ss_server_name), checks=NoneCheck())

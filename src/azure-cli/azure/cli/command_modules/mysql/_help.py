@@ -194,10 +194,16 @@ short-summary: Create a new import workflow for flexible server.
 long-summary: >
     Migrate a MySQL single server to flexible server with custom or default configuration. For more information for network configuration, see
 
+    - Migrate Azure Database for MySQL - Single Server to Flexible Server using Azure MySQL Import CLI
+
+    https://learn.microsoft.com/en-us/azure/mysql/migrate/migrate-single-flexible-mysql-import-cli
+
     - Configure public access
+
     https://docs.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-firewall-cli
 
     - Configure private access
+
     https://docs.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-virtual-network-cli
 
 examples:
@@ -207,7 +213,6 @@ examples:
         az mysql flexible-server import create --data-source-type mysql_single \\
           --data-source test-single-server --resource-group test-rg \\
           --location northeurope --name testserver \\
-          --admin-user username --admin-password password \\
           --sku-name Standard_B1ms --tier Burstable --public-access 0.0.0.0 \\
           --storage-size 32 --tags "key=value" --version 5.7 --high-availability ZoneRedundant \\
           --zone 1 --standby-zone 3 --storage-auto-grow Enabled --iops 500
