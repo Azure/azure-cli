@@ -4991,6 +4991,66 @@ class BicepScenarioTest(ScenarioTest):
             self.greater_than('length(@)', 0)
         ])
 
+class BicepDecompileParamsTest(ScenarioTest):
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
+    def test_bicep_decompile_params_file(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'test-params.json').replace('\\', '\\\\')
+        params_path = os.path.join(curr_dir, 'test-params.bicepparam').replace('\\', '\\\\')
+        self.kwargs.update({
+            'tf': tf,
+            'params_path': params_path,
+        })
+
+        self.cmd('az bicep decompile-params --file {tf}')
+
+        if os.path.exists(params_path):
+            os.remove(params_path)
+
+class BicepBuildParamsTest(ScenarioTest):
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
+    def test_bicep_build_params_file(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'sample_params.bicepparam').replace('\\', '\\\\')
+        params_path = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
+        self.kwargs.update({
+            'tf': tf,
+            'params_path': params_path,
+        })
+
+        self.cmd('az bicep build-params --file {tf}')
+
+        if os.path.exists(params_path):
+            os.remove(params_path)
+
+    def test_bicep_build_params_file_outfile(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'sample_params.bicepparam').replace('\\', '\\\\')
+        params_path = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
+        self.kwargs.update({
+            'tf': tf,
+            'params_path': params_path,
+        })
+
+        self.cmd('az bicep build-params --file {tf} --outfile {params_path}')
+
+        if os.path.exists(params_path):
+            os.remove(params_path)
+
 # Because don't want to record bicep cli binary
 class BicepBuildTest(LiveScenarioTest):
 
@@ -5023,7 +5083,6 @@ class BicepBuildTest(LiveScenarioTest):
             os.remove(decompile_path)
 
 class BicepGenerateParamsTest(LiveScenarioTest):
-
     def setup(self):
         super().setup()
         self.cmd('az bicep uninstall')
@@ -5031,6 +5090,34 @@ class BicepGenerateParamsTest(LiveScenarioTest):
     def tearDown(self):
         super().tearDown()
         self.cmd('az bicep uninstall')
+
+    def test_bicep_generate_params_output_format_only(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+        params_path = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
+        self.kwargs.update({
+            'tf': tf,
+            'params_path': params_path,
+        })
+
+        self.cmd('az bicep generate-params -f {tf} --outfile {params_path} --output-format json')
+
+        if os.path.exists(params_path):
+            os.remove(params_path)
+
+    def test_bicep_generate_params_include_params_only(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+        params_path = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
+        self.kwargs.update({
+            'tf': tf,
+            'params_path': params_path,
+        })
+
+        self.cmd('az bicep generate-params -f {tf} --outfile {params_path} --include-params all')
+
+        if os.path.exists(params_path):
+            os.remove(params_path)
 
     def test_bicep_generate_params(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
