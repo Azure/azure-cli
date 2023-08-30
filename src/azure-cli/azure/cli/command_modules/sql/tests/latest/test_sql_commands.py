@@ -1568,12 +1568,13 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
 
         self.cmd('sql db copy -g {} --server {} --name {} '
                  '--dest-name {} --dest-resource-group {} --dest-server {} '
-                 '-i --encryption-protector {} --user-assigned-identity-id {}'
+                 '-i --encryption-protector {} --user-assigned-identity-id {} --epauto True'
                  .format(resource_group_1, server1, database_name, database_copy_name,
                          resource_group_2, server2, encryption_protector, umi),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group_2),
-                     JMESPathCheck('encryptionProtector', encryption_protector)
+                     JMESPathCheck('encryptionProtector', encryption_protector),
+                     JMESPathCheck('encryptionProtectorAutoRotation', True)
                  ])
 
 
@@ -2884,7 +2885,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
                                  resource_group_2, resource_group_location_2,
                                  server_name_1, server_name_2, server_name_3):
 
-        database_name = "cliautomationdb01"
+        database_name = "cliautomationdb011"
         target_database_name = "cliautomationdb02"
         hs_database_name = "cliautomationhs03"
         hs_target_database_name = "cliautomationnr04"
@@ -6839,7 +6840,7 @@ class SqlLedgerDigestUploadsScenarioTest(ScenarioTest):
                         .format(resource_group, storage_account)).get_output_in_json()
 
     @ResourceGroupPreparer()
-    @SqlServerPreparer(location='westcentralus')
+    @SqlServerPreparer(location='eastus')
     def test_sql_ledger(self, resource_group, server):
         db_name = self.create_random_name("sqlledgerdb", 20)
         endpoint = "https://test.confidential-ledger.azure.com"
