@@ -4991,7 +4991,7 @@ class BicepScenarioTest(ScenarioTest):
             self.greater_than('length(@)', 0)
         ])
 
-class BicepDecompileParamsTest(ScenarioTest):
+class BicepDecompileParamsTest(LiveScenarioTest):
     def setup(self):
         super().setup()
         self.cmd('az bicep uninstall')
@@ -5014,7 +5014,7 @@ class BicepDecompileParamsTest(ScenarioTest):
         if os.path.exists(params_path):
             os.remove(params_path)
 
-class BicepBuildParamsTest(ScenarioTest):
+class BicepBuildParamsTest(LiveScenarioTest):
     def setup(self):
         super().setup()
         self.cmd('az bicep uninstall')
