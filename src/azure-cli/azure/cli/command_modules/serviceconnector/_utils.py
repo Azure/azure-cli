@@ -199,8 +199,8 @@ def auto_register(func, *args, **kwargs):
         raise ex
 
 
-def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id, 
-                                                       scope=None): # Resource.ContainerApp
+def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id,
+                                                       scope=None):  # Resource.ContainerApp
     from ._validators import get_source_resource_name
 
     logger.warning('get valid key vault reference connection')
@@ -249,84 +249,88 @@ def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, k
 
 
 def get_auth_if_no_valid_key_vault_connection(source_name, source_id, key_vault_connections):
-    auth_type = 'systemAssignedIdentity'
-    client_id = None
-    subscription_id = None
-
     if key_vault_connections:
-        from msrestazure.tools import (
-            is_valid_resource_id
-        )
-
-        # https://docs.microsoft.com/azure/app-service/app-service-key-vault-references
         if source_name == RESOURCE.WebApp:
-            try:
-                webapp = run_cli_cmd(
-                    'az rest -u {}?api-version=2020-09-01 -o json'.format(source_id))
-                reference_identity = webapp.get(
-                    'properties').get('keyVaultReferenceIdentity')
-            except Exception as e:
-                raise ValidationError('{}. Unable to get "properties.keyVaultReferenceIdentity" from {}.'
-                                      'Please check your source id is correct.'.format(e, source_id))
+            return get_auth_if_no_valid_key_vault_connection_for_webapp(source_id, key_vault_connections)
 
-            if is_valid_resource_id(reference_identity):  # User Identity
-                auth_type = 'userAssignedIdentity'
-                segments = parse_resource_id(reference_identity)
-                subscription_id = segments.get('subscription')
-                try:
-                    identity = webapp.get('identity').get(
-                        'userAssignedIdentities').get(reference_identity)
-                    client_id = identity.get('clientId')
-                except Exception:  # pylint: disable=broad-except
-                    try:
-                        identity = run_cli_cmd(
-                            'az identity show --ids {} -o json'.format(reference_identity))
-                        client_id = identity.get('clientId')
-                    except Exception:  # pylint: disable=broad-except
-                        pass
-                if not subscription_id or not client_id:
-                    raise ValidationError('Unable to get subscriptionId or clientId'
-                                          'of the keyVaultReferenceIdentity {}'.format(reference_identity))
-                for connection in key_vault_connections:
-                    auth_info = connection.get('authInfo')
-                    if auth_info.get('clientId') == client_id and auth_info.get('subscriptionId') == subscription_id:
-                        logger.warning(
-                            'key vault reference connection: %s', connection.get('id'))
-                        return
-            else:  # System Identity
-                for connection in key_vault_connections:
-                    if connection.get('authInfo').get('authType') == auth_type:
-                        logger.warning(
-                            'key vault reference connection: %s', connection.get('id'))
-                        return
-
-        elif source_name == RESOURCE.ContainerApp: # Use system identity by default
-            for connection in key_vault_connections:
-                if connection.get('authInfo').get('authType') == auth_type:
-                    logger.warning(
-                        'key vault reference connection: %s', connection.get('id'))
-                    return
+        if source_name == RESOURCE.ContainerApp:
+            return get_auth_if_no_valid_key_vault_connection_for_containerapp(key_vault_connections)
 
         # any connection with csi enabled is a valid connection
-        elif source_name == RESOURCE.KubernetesCluster:
+        if source_name == RESOURCE.KubernetesCluster:
             for connection in key_vault_connections:
                 if connection.get('target_service', dict()).get(
                         'resource_properties', dict()).get('connect_as_kubernetes_csi_driver'):
                     return
             return {'authType': 'userAssignedIdentity'}
 
-        else:
-            logger.warning('key vault reference connection: %s',
-                           key_vault_connections[0].get('id'))
-            return
+        # other source types
+        logger.warning('key vault reference connection: %s',
+                       key_vault_connections[0].get('id'))
+        return
 
-    auth_info = {
-        'authType': auth_type
-    }
-    if client_id and subscription_id:
-        auth_info['clientId'] = client_id
-        auth_info['subscriptionId'] = subscription_id
-    return auth_info
+    return {'authType': 'systemAssignedIdentity'}
+
+
+# https://docs.microsoft.com/azure/app-service/app-service-key-vault-references
+def get_auth_if_no_valid_key_vault_connection_for_webapp(source_id, key_vault_connections):
+    from msrestazure.tools import (
+        is_valid_resource_id
+    )
+
+    try:
+        webapp = run_cli_cmd(
+            'az rest -u {}?api-version=2020-09-01 -o json'.format(source_id))
+        reference_identity = webapp.get(
+            'properties').get('keyVaultReferenceIdentity')
+    except Exception as e:
+        raise ValidationError('{}. Unable to get "properties.keyVaultReferenceIdentity" from {}.'
+                              'Please check your source id is correct.'.format(e, source_id))
+
+    if is_valid_resource_id(reference_identity):  # User Identity
+        auth_type = 'userAssignedIdentity'
+        segments = parse_resource_id(reference_identity)
+        subscription_id = segments.get('subscription')
+        try:
+            identity = webapp.get('identity').get(
+                'userAssignedIdentities').get(reference_identity)
+            client_id = identity.get('clientId')
+        except Exception:  # pylint: disable=broad-except
+            try:
+                identity = run_cli_cmd(
+                    'az identity show --ids {} -o json'.format(reference_identity))
+                client_id = identity.get('clientId')
+            except Exception:  # pylint: disable=broad-except
+                pass
+        if not subscription_id or not client_id:
+            raise ValidationError('Unable to get subscriptionId or clientId'
+                                  'of the keyVaultReferenceIdentity {}'.format(reference_identity))
+        for connection in key_vault_connections:
+            auth_info = connection.get('authInfo')
+            if auth_info.get('clientId') == client_id and auth_info.get('subscriptionId') == subscription_id:
+                logger.warning(
+                    'key vault reference connection: %s', connection.get('id'))
+                return
+        return {'authType': auth_type, 'clientId': client_id, 'subscriptionId': subscription_id}
+
+    # System Identity
+    auth_type = 'systemAssignedIdentity'
+    for connection in key_vault_connections:
+        if connection.get('authInfo').get('authType') == auth_type:
+            logger.warning(
+                'key vault reference connection: %s', connection.get('id'))
+            return
+    return {'authType': auth_type}
+
+
+def get_auth_if_no_valid_key_vault_connection_for_containerapp(key_vault_connections):
+    auth_type = 'systemAssignedIdentity'  # Use system identity by default
+    for connection in key_vault_connections:
+        if connection.get('authInfo').get('authType') == auth_type:
+            logger.warning(
+                'key vault reference connection: %s', connection.get('id'))
+            return
+    return {'authType': auth_type}
 
 
 def is_packaged_installed(package_name):

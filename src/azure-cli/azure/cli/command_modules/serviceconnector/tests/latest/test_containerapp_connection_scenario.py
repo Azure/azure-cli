@@ -18,7 +18,7 @@ from azure.cli.command_modules.serviceconnector._resource_config import (
 from ._test_utils import CredentialReplacer
 
 
-@unittest.skip('Need containerapp extension installed')
+# @unittest.skip('Need containerapp extension installed')
 class ContainerAppConnectionScenarioTest(ScenarioTest):
     default_container_name = 'simple-hello-world-container'
 
@@ -164,5 +164,45 @@ class ContainerAppConnectionScenarioTest(ScenarioTest):
         # show connection
         self.cmd('containerapp connection show --id {}'.format(connection_id))
 
+        # delete connection
+        self.cmd('containerapp connection delete --id {} --yes'.format(connection_id))
+
+    # @record_only()
+    def test_containerapp_postgres_flexible_e2e_secretstore(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'app': 'servicelinker-containerapp',
+            'server': 'servicelinker-flexiblepostgresql',
+            'database': 'postgres',
+            'vault': 'servicelinker-kv-ref'
+        })
+
+        # prepare password
+        user = 'servicelinker'
+        password = self.cmd('keyvault secret show --vault-name cupertino-kv-test -n TestDbPassword').get_output_in_json().get('value')
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.ContainerApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.PostgresFlexible).format(**self.kwargs)
+        keyvault_id = TARGET_RESOURCES.get(RESOURCE.KeyVault).format(**self.kwargs)
+
+        # create connection
+        self.cmd('containerapp connection create postgres-flexible --connection {} --source-id {} --target-id {} '
+                 '--secret name={} secret={} --client-type dotnet -c {} --vault-id {}'.format(name, source_id, target_id, user, password, self.default_container_name, keyvault_id))
+
+        # list connection
+        connections = self.cmd(
+            'containerapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'secret'),
+                self.check('[0].clientType', 'dotnet')
+            ]
+        ).get_output_in_json()
+
+        connection_id = connections[0].get('id')
         # delete connection
         self.cmd('containerapp connection delete --id {} --yes'.format(connection_id))
