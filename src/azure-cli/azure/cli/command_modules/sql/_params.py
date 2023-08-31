@@ -308,6 +308,12 @@ allow_data_loss_param_type = CLIArgumentType(
     help='Complete the failover even if doing so may result in data loss. '
     'This will allow the failover to proceed even if a primary database is unavailable.')
 
+try_planned_before_forced_failover_param_type = CLIArgumentType(
+    options_list=['--try-planned-before-forced-failover', '--tpbff'],
+    help='Performs a planned failover as the first step, and if it fails for any reason, '
+    'then initiates a forced failover with potential data loss. '
+    'This will allow the failover to proceed even if a primary database is unavailable.')
+
 secondary_type_param_type = CLIArgumentType(
     help='Intended usage of the secondary instance in the Failover Group. '
     'Standby indicates that the secondary instance will be used as a passive replica for disaster recovery only.')
@@ -1620,6 +1626,8 @@ def load_arguments(self, _):
                    help='List of databases to remove from Failover Group')
         c.argument('allow_data_loss',
                    arg_type=allow_data_loss_param_type)
+        c.argument('try_planned_before_forced_failover',
+                   arg_type=try_planned_before_forced_failover_param_type)
 
     ###############################################
     #             sql instance pool               #
