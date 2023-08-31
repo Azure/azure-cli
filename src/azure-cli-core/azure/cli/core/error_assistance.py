@@ -110,6 +110,7 @@ def validate_command(command_response):
 def print_line():
     console_width = shutil.get_terminal_size().columns
     dashed_line = "-" * console_width
+
     print_styled_text([(Style.ERROR, dashed_line)])
 
 
