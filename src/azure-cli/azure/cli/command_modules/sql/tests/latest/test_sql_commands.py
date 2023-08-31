@@ -6371,14 +6371,14 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('length(databases)', 1)
                  ])
 
-        # Failover Failover Group
+        # Failover failover group from secondary server and then fail back
         self._test_failover_group_failover(s1, s2, failover_group_name, self.FailoverType.planned)
 
         self._test_failover_group_failover(s1, s2, failover_group_name, self.FailoverType.forced)
 
         self._test_failover_group_failover(s1, s2, failover_group_name, self.FailoverType.hybrid)
 
-        # Failover Failover Group from primary server(No-op)
+        # Failover failover group from primary server (No-op)
         self._test_failover_group_failover_from_primary(s1, s2, failover_group_name, self.FailoverType.planned)
 
         self._test_failover_group_failover_from_primary(s1, s2, failover_group_name, self.FailoverType.forced)
