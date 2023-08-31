@@ -898,8 +898,8 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
     def test_sql_per_db_cmk(self):
         server = "pstestsvr"
         resource_group = "pstest"
-        database_name_one = "cliautomationdb04"
-        database_name_two = "cliautomationdb05"
+        database_name_one = "cliautomationdb042"
+        database_name_two = "cliautomationdb051"
         encryption_protector = "https://pstestkv.vault.azure.net/keys/testkey4/6638b3667e384aefa31364f94d230361"
         encryption_protector2 = "https://pstestkv.vault.azure.net/keys/testkey5/fd021f84a0d94d43b8ef33154bcab86f"
         umi = "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi"
@@ -908,31 +908,33 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
 
         # az sql db create -g pstest -ai --server pstestsvr --name clidbwithcmk --encryption-protector "https://pstestkv.vault.azure.net/keys/testkey/f62d937858464f329ab4a8c2dc7e0fa4"  
         # --user-assigned-identity-id "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi" --yes
-        self.cmd('sql db create -g {} --server {} --name {} -i --encryption-protector {} --user-assigned-identity-id {} --yes'
-                 .format(resource_group, server, database_name_one, encryption_protector, umi),
+        self.cmd('sql db create -g {} --server {} --name {} -i --encryption-protector {} --user-assigned-identity-id {} --encryption-protector-auto-rotation True --yes'
+                 .format(resource_group, server, database_name_two, encryption_protector, umi),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', database_name_one)])
+                     JMESPathCheck('name', database_name_two)])
 
         self.cmd('sql db show -g {} -s {} --name {}'
-                 .format(resource_group, server, database_name_one),
+                 .format(resource_group, server, database_name_two),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', database_name_one),
-                     JMESPathCheck('encryptionProtector', encryption_protector)])
+                     JMESPathCheck('name', database_name_two),
+                     JMESPathCheck('encryptionProtector', encryption_protector),
+                     JMESPathCheck('encryptionProtectorAutoRotation', True)])
 
-        self.cmd('sql db update -g {} --server {} --name {} -i --encryption-protector {}'
-                 .format(resource_group, server, database_name_one, encryption_protector2),
+        self.cmd('sql db update -g {} --server {} --name {} -i --encryption-protector {} --epauto False'
+                 .format(resource_group, server, database_name_two, encryption_protector2),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', database_name_one)])
+                     JMESPathCheck('name', database_name_two)])
 
         self.cmd('sql db show -g {} -s {} --name {}'
-                 .format(resource_group, server, database_name_one),
+                 .format(resource_group, server, database_name_two),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', database_name_one),
-                     JMESPathCheck('encryptionProtector', encryption_protector2)])
+                     JMESPathCheck('name', database_name_two),
+                     JMESPathCheck('encryptionProtector', encryption_protector2),
+                     JMESPathCheck('encryptionProtectorAutoRotation', False)])
 
     @ResourceGroupPreparer(location='eastus2euap')
     @SqlServerPreparer(location='eastus2euap')
@@ -1298,7 +1300,7 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
 
 
 class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
-    @record_only()
+    @live_only() # Adding the live_only label after discussing with test owner rebeccaxu as the test was initially recorded on existing fixed resources.
     @AllowLargeResponse()
     # using fixed resources because of long time preperation for geo-redundant backup
     # need to change resources for others who want to rerecord this test
@@ -1566,12 +1568,13 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
 
         self.cmd('sql db copy -g {} --server {} --name {} '
                  '--dest-name {} --dest-resource-group {} --dest-server {} '
-                 '-i --encryption-protector {} --user-assigned-identity-id {}'
+                 '-i --encryption-protector {} --user-assigned-identity-id {} --epauto True'
                  .format(resource_group_1, server1, database_name, database_copy_name,
                          resource_group_2, server2, encryption_protector, umi),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group_2),
-                     JMESPathCheck('encryptionProtector', encryption_protector)
+                     JMESPathCheck('encryptionProtector', encryption_protector),
+                     JMESPathCheck('encryptionProtectorAutoRotation', True)
                  ])
 
 
@@ -1904,7 +1907,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                                                   JMESPathCheck('resourceGroup', resource_group),
                                                   JMESPathCheck('name', log_analytics_workspace_name),
                                                   JMESPathCheck('provisioningState',
-                                                                'Succeeded')]).get_output_in_json()['id']
+                                                                'Creating')]).get_output_in_json()['id']
 
         # update audit policy - enable log analytics target
         self.cmd('sql db audit-policy update -g {} -s {} -n {} --state {}'
@@ -2882,7 +2885,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
                                  resource_group_2, resource_group_location_2,
                                  server_name_1, server_name_2, server_name_3):
 
-        database_name = "cliautomationdb01"
+        database_name = "cliautomationdb011"
         target_database_name = "cliautomationdb02"
         hs_database_name = "cliautomationhs03"
         hs_target_database_name = "cliautomationnr04"
@@ -3088,6 +3091,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='eastus2')
     @SqlServerPreparer(location='eastus2')
     @AllowLargeResponse()
+    @live_only() # skipping due to this error: (ProvisioningDisabled) The service level objective 'S3M1200' does not support the min capacity '10.0'. End user is also able to repro the issue.
     def test_sql_elastic_pools_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb02"
         pool_name2 = "cliautomationpool02"
@@ -6837,7 +6841,7 @@ class SqlLedgerDigestUploadsScenarioTest(ScenarioTest):
                         .format(resource_group, storage_account)).get_output_in_json()
 
     @ResourceGroupPreparer()
-    @SqlServerPreparer(location='westcentralus')
+    @SqlServerPreparer(location='eastus')
     def test_sql_ledger(self, resource_group, server):
         db_name = self.create_random_name("sqlledgerdb", 20)
         endpoint = "https://test.confidential-ledger.azure.com"
