@@ -529,7 +529,7 @@ def show_policy(client, resource_group_name, vault_name, name):
 
 
 def list_deleted_protection_containers(client, resource_group_name, vault_name):
-    return client.get(vault_name, resource_group_name)
+    return client.list(resource_group_name, vault_name)
 
 
 def update_resource_guard_mapping(cmd, client, resource_group_name, vault_name, resource_guard_id, tenant_id=None):
