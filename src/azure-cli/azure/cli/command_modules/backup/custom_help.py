@@ -25,6 +25,7 @@ from azure.cli.command_modules.backup._client_factory import (
     backup_crr_job_details_cf, crr_operation_status_cf, resource_guard_proxies_cf, resource_guard_proxy_cf)
 from azure.cli.core.azclierror import ResourceNotFoundError, ValidationError, InvalidArgumentValueError
 
+import azure.cli.command_modules.backup._params as params
 
 logger = get_logger(__name__)
 
@@ -568,3 +569,15 @@ def validate_update_policy_request(existing_policy, new_policy):
     new_backup_management_type = new_policy.properties.backup_management_type
     if existing_backup_management_type != new_backup_management_type:
         raise CLIError("BackupManagementType cannot be different than the existing type.")
+
+
+def transform_softdelete_parameters(parameter):
+    if parameter in params.allowed_softdelete_options:
+        if parameter == "Enable" or parameter == "Disable":
+            return parameter + "d"
+        else:
+            return parameter
+    else:
+        error_message = "Please provide a valid soft-delete state. Allowed values: "
+        error_message += ', '.join(state for state in params.allowed_softdelete_options)
+        raise CLIError(error_message)

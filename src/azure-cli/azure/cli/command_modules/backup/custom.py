@@ -438,8 +438,9 @@ def show_encryption(client, resource_group_name, vault_name):
 def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_storage_redundancy=None,
                           soft_delete_feature_state=None, cross_region_restore_flag=None,
                           hybrid_backup_security_features=None, tenant_id=None,
-                          classic_alerts=None, azure_monitor_alerts_for_job_failures=None):
-    if soft_delete_feature_state or hybrid_backup_security_features:
+                          classic_alerts=None, azure_monitor_alerts_for_job_failures=None,
+                          retention_duration_in_days=None):
+    if soft_delete_feature_state or hybrid_backup_security_features or retention_duration_in_days:
         logger.warning("""
         --backup-storage-redundancy, --cross-region-restore-flag, --classic-alerts and
         --azure-monitor-alerts-for-job-failures parameters will be ignored if provided.
@@ -450,9 +451,11 @@ def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_s
                                                           aux_tenants=[tenant_id]).backup_resource_vault_configs
         vault_config_response = vault_config_client.get(vault_name, resource_group_name)
         soft_delete_feature_state = vault_config_response.properties.soft_delete_feature_state if (
-            soft_delete_feature_state is None) else soft_delete_feature_state + "d"
+            soft_delete_feature_state is None) else cust_help.transform_softdelete_parameters(soft_delete_feature_state)
         hybrid_backup_security_features = vault_config_response.properties.enhanced_security_state if (
             hybrid_backup_security_features is None) else hybrid_backup_security_features + "d"
+        retention_duration_in_days = vault_config_response.properties.soft_delete_retention_period_in_days if (
+            retention_duration_in_days is None) else retention_duration_in_days
         resource_guard_operation_requests = None
         if cust_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name, vault_name, "disableSoftDelete"):
             if soft_delete_feature_state.lower() == "disabled" or hybrid_backup_security_features.lower() == "disabled":
@@ -460,7 +463,8 @@ def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_s
                     cmd.cli_ctx, resource_group_name, vault_name, "disableSoftDelete")]
         vault_config = BackupResourceVaultConfig(soft_delete_feature_state=soft_delete_feature_state,
                                                  enhanced_security_state=hybrid_backup_security_features,
-                                                 resource_guard_operation_requests=resource_guard_operation_requests)
+                                                 resource_guard_operation_requests=resource_guard_operation_requests,
+                                                 soft_delete_retention_period_in_days=retention_duration_in_days)
         vault_config_resource = BackupResourceVaultConfigResource(properties=vault_config)
         return vault_config_client.update(vault_name, resource_group_name, vault_config_resource)
 
@@ -522,6 +526,10 @@ def get_default_policy_for_vm(client, resource_group_name, vault_name):
 
 def show_policy(client, resource_group_name, vault_name, name):
     return client.get(vault_name, resource_group_name, name)
+
+
+def list_deleted_protection_containers(client, resource_group_name, vault_name):
+    return client.get(vault_name, resource_group_name)
 
 
 def update_resource_guard_mapping(cmd, client, resource_group_name, vault_name, resource_guard_id, tenant_id=None):
