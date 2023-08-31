@@ -499,7 +499,7 @@ class MainCommandsLoader(CLICommandsLoader):
             command_loaders = self.cmd_to_loader_map.get(command, None)
 
         if command_loaders:
-            for loader in command_loaders:
+            for loader in sorted(command_loaders, key=lambda x:x.__class__.__name__):
 
                 # register global args
                 with loader.argument_context('') as c:
