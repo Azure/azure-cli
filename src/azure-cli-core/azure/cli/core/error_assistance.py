@@ -119,7 +119,14 @@ def error_enabled():
 
 def get_config():
     config = configparser.ConfigParser()
-    config.read(GLOBAL_CONFIG_PATH)
+
+    try:
+        config.read(GLOBAL_CONFIG_PATH, encoding='utf-8')
+
+    except configparser.Error as exception:
+        print(f"Error reading config file: {exception}")
+        return False
+
     return str_to_bool(config.get('core', 'error_assistance', fallback=False)) \
         or str_to_bool(config.get('interactive', 'error_assistance', fallback=False))
 
