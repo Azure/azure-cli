@@ -691,6 +691,7 @@ def aks_update(
     enable_windows_gmsa=False,
     gmsa_dns_server=None,
     gmsa_root_domain_name=None,
+    disable_windows_gmsa=False,
     attach_acr=None,
     detach_acr=None,
     enable_defender=False,
