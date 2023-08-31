@@ -450,12 +450,23 @@ def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_s
             vault_config_client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
                                                           aux_tenants=[tenant_id]).backup_resource_vault_configs
         vault_config_response = vault_config_client.get(vault_name, resource_group_name)
+        
+        # Manual input validation - can be removed once the error messages are fixed (ETA October 2023)
+        soft_delete_feature_state_previous = vault_config_response.properties.soft_delete_feature_state
+        if soft_delete_feature_state_previous.lower() == "alwayson" and soft_delete_feature_state is not None:
+            logger.warning("Vault's current Soft Delete State is AlwaysOn. This cannot be modified.")
+            soft_delete_feature_state = None
+        if retention_duration_in_days < 14 or retention_duration_in_days > 180:
+            logger.warning("Retention duration must be between 14 and 180 days. Not modifying this field.")
+            retention_duration_in_days = None
+
         soft_delete_feature_state = vault_config_response.properties.soft_delete_feature_state if (
-            soft_delete_feature_state is None) else cust_help.transform_softdelete_parameters(soft_delete_feature_state)
-        hybrid_backup_security_features = vault_config_response.properties.enhanced_security_state if (
-            hybrid_backup_security_features is None) else hybrid_backup_security_features + "d"
+            soft_delete_feature_state is None) \
+        else cust_help.transform_softdelete_parameters(soft_delete_feature_state)
         retention_duration_in_days = vault_config_response.properties.soft_delete_retention_period_in_days if (
             retention_duration_in_days is None) else retention_duration_in_days
+        hybrid_backup_security_features = vault_config_response.properties.enhanced_security_state if (
+            hybrid_backup_security_features is None) else hybrid_backup_security_features + "d"
         resource_guard_operation_requests = None
         if cust_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name, vault_name, "disableSoftDelete"):
             if soft_delete_feature_state.lower() == "disabled" or hybrid_backup_security_features.lower() == "disabled":
