@@ -6169,7 +6169,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
         forced = "Forced"
         hybrid = "Hybrid"
 
-    def _get_failover_parameter(self, type = FailoverType.planned):
+    def _get_failover_type_parameter(self, type = FailoverType.planned):
         if type == self.FailoverType.forced:
             return "--allow-data-loss"
         elif type == self.FailoverType.hybrid:
@@ -6180,11 +6180,11 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
 
     def _test_failover_group_failover(self, primary_server,
                                        secondary_server, failover_group, failover_type):
-        failover_parameter = self._get_failover_parameter(failover_type)
+        failover_type_parameter = self._get_failover_type_parameter(failover_type)
 
         # Failover Failover Group
         self.cmd('sql failover-group set-primary -g {} -s {} -n {} {}'
-                 .format(secondary_server.group, secondary_server.name, failover_group, failover_parameter))
+                 .format(secondary_server.group, secondary_server.name, failover_group, failover_type_parameter))
 
         # The failover operation is completed when new primary is promoted to primary role
         # But there is a async part to make old primary a new secondary
@@ -6207,7 +6207,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
 
         # Fail back to original server
         self.cmd('sql failover-group set-primary -g {} -s {} -n {} {}'
-                 .format(primary_server.group, primary_server.name, failover_group, failover_parameter))
+                 .format(primary_server.group, primary_server.name, failover_group, failover_type_parameter))
 
         # The failover operation is completed when new primary is promoted to primary role
         # But there is a async part to make old primary a new secondary
@@ -6230,11 +6230,11 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
 
     def _test_failover_group_failover_from_primary(self, primary_server,
                                                    secondary_server, failover_group, failover_type):
-        failover_parameter = self._get_failover_parameter(failover_type)
+        failover_type_parameter = self._get_failover_type_parameter(failover_type)
 
         # Do no-op failover to the same server
         self.cmd('sql failover-group set-primary -g {} -s {} -n {} {}'
-                 .format(primary_server.group, primary_server.name, failover_group, failover_parameter))
+                 .format(primary_server.group, primary_server.name, failover_group, failover_type_parameter))
 
         # Check the roles of failover groups to confirm failover didn't happen
         self.cmd('sql failover-group show -g {} -s {} -n {}'
