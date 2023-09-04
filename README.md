@@ -134,6 +134,16 @@ To provide feedback from the command line, try the `az feedback` command.
 
 ## Developer installation
 
+### Line Endings
+
+This repository enforces LF line endings for all files via .gitattributes. Windows developers who use an editor that
+cannot deal with LF can configure their local git to apply CRLF on checkout (and remove on commit, so that they are
+never propagated outwith their machines):
+
+```
+git config --global core.autocrlf true
+```
+
 ### Docker
 
 We maintain a Docker image preconfigured with the Azure CLI.
