@@ -503,8 +503,20 @@ class LogAnalyticsWorkspacePreparer(NoTrafficRecordingPreparer, SingleValueRepla
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
         template = ('az monitor log-analytics workspace create -l {} -g {} -n {}')
-        self.live_only_execute(self.cli_ctx, template.format(self.location, group, name))
-        return {self.parameter_name: name}
+        try:
+            customer_id = self.live_only_execute(self.cli_ctx, template.format(self.location, group, name)).get_output_in_json()["customerId"]
+        except AttributeError:  # live only execute returns None if playing from record
+            customer_id = None
+
+        get_share_key_template = ('az monitor log-analytics workspace get-shared-keys -g {} -n {}')
+        try:
+            log_shared_key = self.live_only_execute(self.cli_ctx, get_share_key_template.format(group, name)).get_output_in_json()["primarySharedKey"]
+        except AttributeError:  # live only execute returns None if playing from record
+            log_shared_key = None
+
+        return {self.parameter_name: name,
+                self.parameter_name + '_customer_id': (customer_id or 'veryFakedCustomerId=='),
+                self.parameter_name + '_shared_key': (log_shared_key or 'veryFakedPrivateSharedKey==')}
 
     def remove_resource(self, name, **kwargs):
         if not self.skip_delete:
