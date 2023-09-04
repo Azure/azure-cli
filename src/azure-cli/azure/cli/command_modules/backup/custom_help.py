@@ -574,10 +574,17 @@ def validate_update_policy_request(existing_policy, new_policy):
 def transform_softdelete_parameters(parameter):
     if parameter in params.allowed_softdelete_options:
         if parameter == "Enable" or parameter == "Disable":
-            return parameter + "d"
+            return transform_enable_parameters(parameter)
         else:
             return parameter
     else:
         error_message = "Please provide a valid soft-delete state. Allowed values: "
         error_message += ', '.join(state for state in params.allowed_softdelete_options)
         raise CLIError(error_message)
+
+
+def transform_enable_parameters(parameter):
+    if parameter == "Enable" or parameter == "Disable":
+        return parameter + 'd'
+    else:
+        raise CLIError("Please provide a valid parameter. Allowed values: Enable, Disable.")

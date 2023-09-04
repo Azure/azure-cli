@@ -104,6 +104,8 @@ def load_arguments(self, _):
         c.argument('azure_monitor_alerts_for_job_failures', options_list=['--job-failure-alerts'], arg_type=get_enum_type(['Enable', 'Disable']), help='Use this property to specify whether built-in Azure Monitor alerts should be received for every job failure.')
         c.argument('immutability_state', arg_type=get_enum_type(['Disabled', 'Locked', 'Unlocked']), help='Use this parameter to configure immutability settings for the vault. By default, immutability is "Disabled" for the vault. "Unlocked" means that immutability is enabled for the vault and can be reversed. "Locked" means that immutability is enabled for the vault and cannot be reversed.')
         c.argument('cross_subscription_restore_state', arg_type=get_enum_type(['Enable', 'Disable', 'PermanentlyDisable']), help='Use this parameter to configure cross subscription restore settings for the vault. By default, the property is "Enabled" for the vault.')
+        c.argument('soft_delete_state', options_list=['--soft-delete-state', '--soft-delete-feature-state'], arg_type=get_enum_type(allowed_softdelete_options), help='Set soft-delete feature state for a Recovery Services Vault.')
+        c.argument('soft_delete_retention_period_in_days', type=int, options_list=['--soft-delete-duration'], help='Set soft-delete retention duration time in days for a Recovery Services Vault.')
 
     with self.argument_context('backup vault backup-properties set') as c:
         c.argument('backup_storage_redundancy', arg_type=get_enum_type(['GeoRedundant', 'LocallyRedundant', 'ZoneRedundant']), help='Set backup storage properties for a Recovery Services vault.')

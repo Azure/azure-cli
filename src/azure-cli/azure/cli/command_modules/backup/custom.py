@@ -17,7 +17,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuName, PatchVault, IdentityData, \
     CmkKeyVaultProperties, CmkKekIdentity, VaultPropertiesEncryption, UserIdentity, MonitoringSettings, \
     AzureMonitorAlertSettings, ClassicAlertSettings, SecuritySettings, ImmutabilitySettings, RestoreSettings, \
-    CrossSubscriptionRestoreSettings
+    CrossSubscriptionRestoreSettings, SoftDeleteSettings
 from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemResource, \
     AzureIaaSComputeVMProtectedItem, AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, \
     BackupRequestResource, IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, \
@@ -127,8 +127,70 @@ password_length = 15
 
 def create_vault(client, vault_name, resource_group_name, location, tags=None,
                  public_network_access=None, immutability_state=None, cross_subscription_restore_state=None,
+                 soft_delete_state=None, soft_delete_retention_period_in_days=None,
                  classic_alerts='Enable', azure_monitor_alerts_for_job_failures='Enable'):
     vault_sku = Sku(name=SkuName.standard)
+
+    monitoring_settings = MonitoringSettings(
+        azure_monitor_alert_settings=AzureMonitorAlertSettings(
+            alerts_for_all_job_failures=cust_help.transform_enable_parameters(azure_monitor_alerts_for_job_failures)
+        ),
+        classic_alert_settings=ClassicAlertSettings(
+            alerts_for_critical_operations=cust_help.transform_enable_parameters(classic_alerts)
+        )
+    )
+
+    vault_properties = VaultProperties(
+        monitoring_settings=monitoring_settings,
+        public_network_access=_get_vault_public_network_access(client, resource_group_name, vault_name, public_network_access),
+        security_settings=_get_vault_security_settings(immutability_state, soft_delete_state, soft_delete_retention_period_in_days),
+        restore_settings=_get_vault_restore_settings(cross_subscription_restore_state)
+    )
+    vault = Vault(location=location, sku=vault_sku, properties=vault_properties, tags=tags)
+    return client.begin_create_or_update(resource_group_name, vault_name, vault)
+
+
+def _get_vault_security_settings(immutability_state, soft_delete_state, soft_delete_retention_period_in_days):
+    security_settings = None
+    print("Modifying vault security settings - Immutability, SD state, SD duration = ", immutability_state, soft_delete_state, soft_delete_retention_period_in_days)
+
+    if immutability_state is not None or soft_delete_state is not None or soft_delete_retention_period_in_days is not None:
+        immutability_settings=None
+        soft_delete_settings=None
+
+        if immutability_state is not None:
+            immutability_settings = ImmutabilitySettings(state=immutability_state)
+            print("Immutability settings has been set to", immutability_settings)
+
+        # Object(**kwargs) object creation is used to ensure we do not accidentally reset a previously set property
+        if soft_delete_state is not None or soft_delete_retention_period_in_days is not None:
+            soft_delete_settings = {}
+            if soft_delete_state is not None:
+                soft_delete_settings["soft_delete_state"] = cust_help.transform_softdelete_parameters(soft_delete_state)
+            if soft_delete_retention_period_in_days is not None:
+                soft_delete_settings["soft_delete_retention_period_in_days"] = soft_delete_retention_period_in_days
+            print("Soft delete settings has been set to", soft_delete_settings)
+
+        security_settings = SecuritySettings(
+            immutability_settings=None if immutability_settings is None else immutability_settings,
+            soft_delete_settings=None if soft_delete_settings is None else soft_delete_settings
+        )
+        print("finally, security settings has been set to", security_settings)
+    return security_settings
+
+
+def _get_vault_restore_settings(cross_subscription_restore_state):
+    restore_settings = None
+    if cross_subscription_restore_state is not None:
+        restore_settings = RestoreSettings(
+            cross_subscription_restore_settings=CrossSubscriptionRestoreSettings(
+                cross_subscription_restore_state=cust_help.transform_enable_parameters(cross_subscription_restore_state)
+            )
+        )
+    return restore_settings
+
+
+def _get_vault_public_network_access(client, resource_group_name, vault_name, public_network_access):
     if public_network_access is None:
         # get the existing value of public_network_access so the request is made correctly
         try:
@@ -139,26 +201,9 @@ def create_vault(client, vault_name, resource_group_name, location, tags=None,
             #   contact support? Such as: if public_network_access in [list], <action>, else <warn user>.
             public_network_access = existing_vault_public_network_access[:-1]
         except CoreResourceNotFoundError:
+            # This runs for a create - if there is no vault, default value is Enable
             public_network_access = 'Enable'
-
-    vault_properties = VaultProperties(
-        monitoring_settings=MonitoringSettings(
-            azure_monitor_alert_settings=AzureMonitorAlertSettings(
-                alerts_for_all_job_failures=azure_monitor_alerts_for_job_failures + 'd'),
-            classic_alert_settings=ClassicAlertSettings(alerts_for_critical_operations=classic_alerts + 'd')),
-        public_network_access=public_network_access + 'd',
-        security_settings=None if immutability_state is None else SecuritySettings(
-            immutability_settings=ImmutabilitySettings(
-                state=immutability_state
-            )
-        ),
-        restore_settings=None if cross_subscription_restore_state is None else RestoreSettings(
-            cross_subscription_restore_settings=CrossSubscriptionRestoreSettings(
-                cross_subscription_restore_state=cross_subscription_restore_state + 'd'
-            )
-        ))
-    vault = Vault(location=location, sku=vault_sku, properties=vault_properties, tags=tags)
-    return client.begin_create_or_update(resource_group_name, vault_name, vault)
+    return cust_help.transform_enable_parameters(public_network_access)
 
 
 def _force_delete_vault(cmd, vault_name, resource_group_name):
