@@ -12,8 +12,7 @@ Atomic commands can be generated from rest api by using aaz-dev tool.
 from ._arg import AAZArgumentsSchema, AAZArgEnum, AAZStrArg, AAZIntArg, AAZObjectArg, AAZDictArg, \
     AAZFreeFormDictArg, AAZFloatArg, AAZBaseArg, AAZBoolArg, AAZListArg, AAZResourceGroupNameArg, \
     AAZResourceLocationArg, AAZResourceIdArg, AAZSubscriptionIdArg, AAZUuidArg, AAZDateArg, AAZTimeArg, \
-    AAZDateTimeArg, AAZDurationArg, AAZFileArg, AAZPasswordArg, AAZPaginationTokenArg, AAZPaginationLimitArg, \
-    AAZRawListArg
+    AAZDateTimeArg, AAZDurationArg, AAZFileArg, AAZPasswordArg, AAZPaginationTokenArg, AAZPaginationLimitArg
 from ._arg_fmt import AAZStrArgFormat, AAZIntArgFormat, AAZFloatArgFormat, AAZBoolArgFormat, AAZObjectArgFormat, \
     AAZDictArgFormat, AAZFreeFormDictArgFormat, AAZListArgFormat, AAZResourceLocationArgFormat, \
     AAZResourceIdArgFormat, AAZSubscriptionIdArgFormat, AAZUuidFormat, AAZDateFormat, AAZTimeFormat, \

@@ -3,7 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=protected-access
-from azure.cli.core.aaz import has_value, AAZStrArg, AAZListArg, AAZBoolArg, AAZRawListArg
+from azure.cli.core.aaz import has_value, AAZStrArg, AAZListArg, AAZBoolArg
+from azure.cli.command_modules.monitor.actions import AAZCustomListArg
 from azure.cli.core.azclierror import ValidationError
 from ..aaz.latest.monitor.activity_log.alert import Create as _ActivityLogAlertCreate, \
     Update as _ActivityLogAlertUpdate
@@ -99,7 +100,7 @@ class ActivityLogAlertCreate(_ActivityLogAlertCreate):
             help="Disable the activity log alert rule after it is created.",
             default=False,
         )
-        args_schema.condition = AAZRawListArg(
+        args_schema.condition = AAZCustomListArg(
             options=["--condition", "-c"],
             help="The condition that will cause the alert rule to activate. "
                  "The format is FIELD=VALUE[ and FIELD=VALUE...]",
@@ -113,7 +114,7 @@ class ActivityLogAlertCreate(_ActivityLogAlertCreate):
         )
         args_schema.action_group_id.Element = AAZStrArg()
 
-        args_schema.webhook_properties_list = AAZRawListArg(
+        args_schema.webhook_properties_list = AAZCustomListArg(
             options=['--webhook-properties', '-w'],
             help="Space-separated webhook properties in 'key[=value]' format. "
                  "These properties are associated with the action groups added in this command.",
@@ -169,7 +170,7 @@ class ActivityLogAlertUpdate(_ActivityLogAlertUpdate):
         args_schema.all_of._registered = False
         args_schema.action_groups._registered = False
         args_schema.scopes._registered = False
-        args_schema.condition = AAZRawListArg(
+        args_schema.condition = AAZCustomListArg(
             options=["--condition", "-c"],
             help="The condition that will cause the alert rule to activate. "
                  "The format is FIELD=VALUE[ and FIELD=VALUE...]",
@@ -200,7 +201,7 @@ class ActivityLogAlertActionGroupAdd(_ActivityLogAlertUpdate):
         )
         args_schema.action_group_ids.Element = AAZStrArg()
 
-        args_schema.webhook_properties_list = AAZRawListArg(
+        args_schema.webhook_properties_list = AAZCustomListArg(
             options=['--webhook-properties', '-w'],
             help="Space-separated webhook properties in 'key[=value]' format. "
                  "These properties are associated with the action groups added in this command.",
