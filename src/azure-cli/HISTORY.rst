@@ -1574,7 +1574,7 @@ Release History
 
 **App Service**
 
-* `az webapp ssh`: Backport #25141 to 2.38.0 (#26836)
+* `az webapp ssh`: Backport #25141 to 2.38 (#26836)
 
 2.38.0
 ++++++
