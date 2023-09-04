@@ -674,6 +674,7 @@ def aks_update(
     api_server_authorized_ip_ranges=None,
     enable_public_fqdn=False,
     disable_public_fqdn=False,
+    private_dns_zone=None,
     enable_managed_identity=False,
     assign_identity=None,
     assign_kubelet_identity=None,
