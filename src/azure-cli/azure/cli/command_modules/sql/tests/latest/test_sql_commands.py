@@ -6162,6 +6162,93 @@ class SqlManagedInstanceAzureADOnlyAuthenticationsScenarioTest(ScenarioTest):
 
 
 class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
+    from enum import Enum
+
+    class FailoverType(Enum):
+        planned = "Planned"
+        forced = "Forced"
+        hybrid = "Hybrid"
+
+    def _get_failover_type_parameter(self, type = FailoverType.planned):
+        if type == self.FailoverType.forced:
+            return "--allow-data-loss"
+        elif type == self.FailoverType.hybrid:
+            return "--try-planned-before-forced-failover"
+        else:
+            # Treat as planned failover
+            return ""
+
+    def _test_failover_group_failover(self, primary_server,
+                                       secondary_server, failover_group, failover_type):
+        failover_type_parameter = self._get_failover_type_parameter(failover_type)
+
+        # Failover Failover Group
+        self.cmd('sql failover-group set-primary -g {} -s {} -n {} {}'
+                 .format(secondary_server.group, secondary_server.name, failover_group, failover_type_parameter))
+
+        # The failover operation is completed when new primary is promoted to primary role
+        # But there is a async part to make old primary a new secondary
+        # And we have to wait for this to complete if we are recording the test
+        if self.in_recording:
+            time.sleep(60)
+
+        # Check the roles of failover groups to confirm failover happened
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                 .format(secondary_server.group, secondary_server.name, failover_group),
+                 checks=[
+                     JMESPathCheck('replicationRole', 'Primary')
+                 ])
+
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                 .format(primary_server.group, primary_server.name, failover_group),
+                 checks=[
+                     JMESPathCheck('replicationRole', 'Secondary')
+                 ])
+
+        # Fail back to original server
+        self.cmd('sql failover-group set-primary -g {} -s {} -n {} {}'
+                 .format(primary_server.group, primary_server.name, failover_group, failover_type_parameter))
+
+        # The failover operation is completed when new primary is promoted to primary role
+        # But there is a async part to make old primary a new secondary
+        # And we have to wait for this to complete if we are recording the test
+        if self.in_recording:
+            time.sleep(60)
+
+        # Check the roles of failover groups to confirm failover happened
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                 .format(secondary_server.group, secondary_server.name, failover_group),
+                 checks=[
+                     JMESPathCheck('replicationRole', 'Secondary')
+                 ])
+
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                 .format(primary_server.group, primary_server.name, failover_group),
+                 checks=[
+                     JMESPathCheck('replicationRole', 'Primary')
+                 ])
+
+    def _test_failover_group_failover_from_primary(self, primary_server,
+                                                   secondary_server, failover_group, failover_type):
+        failover_type_parameter = self._get_failover_type_parameter(failover_type)
+
+        # Do no-op failover to the same server
+        self.cmd('sql failover-group set-primary -g {} -s {} -n {} {}'
+                 .format(primary_server.group, primary_server.name, failover_group, failover_type_parameter))
+
+        # Check the roles of failover groups to confirm failover didn't happen
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                 .format(secondary_server.group, secondary_server.name, failover_group),
+                 checks=[
+                     JMESPathCheck('replicationRole', 'Secondary')
+                 ])
+
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                 .format(primary_server.group, primary_server.name, failover_group),
+                 checks=[
+                     JMESPathCheck('replicationRole', 'Primary')
+                 ])
+
     # create 2 servers in the same resource group, and 1 server in a different resource group
     @ResourceGroupPreparer(parameter_name="resource_group_1",
                            parameter_name_for_location="resource_group_location_1")
@@ -6284,68 +6371,19 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('length(databases)', 1)
                  ])
 
-        # Failover Failover Group
-        self.cmd('sql failover-group set-primary -g {} -s {} -n {}'
-                 .format(s2.group, s2.name, failover_group_name))
+        # Failover failover group from secondary server and then fail back
+        self._test_failover_group_failover(s1, s2, failover_group_name, self.FailoverType.planned)
 
-        # The failover operation is completed when new primary is promoted to primary role
-        # But there is a async part to make old primary a new secondary
-        # And we have to wait for this to complete if we are recording the test
-        if self.in_recording:
-            time.sleep(60)
+        self._test_failover_group_failover(s1, s2, failover_group_name, self.FailoverType.forced)
 
-        # Check the roles of failover groups to confirm failover happened
-        self.cmd('sql failover-group show -g {} -s {} -n {}'
-                 .format(s2.group, s2.name, failover_group_name),
-                 checks=[
-                     JMESPathCheck('replicationRole', 'Primary')
-                 ])
+        self._test_failover_group_failover(s1, s2, failover_group_name, self.FailoverType.hybrid)
 
-        self.cmd('sql failover-group show -g {} -s {} -n {}'
-                 .format(s1.group, s1.name, failover_group_name),
-                 checks=[
-                     JMESPathCheck('replicationRole', 'Secondary')
-                 ])
+        # Failover failover group from primary server (No-op)
+        self._test_failover_group_failover_from_primary(s1, s2, failover_group_name, self.FailoverType.planned)
 
-        # Fail back to original server
-        self.cmd('sql failover-group set-primary -g {} -s {} -n {}'
-                 .format(s1.group, s1.name, failover_group_name))
+        self._test_failover_group_failover_from_primary(s1, s2, failover_group_name, self.FailoverType.forced)
 
-        # The failover operation is completed when new primary is promoted to primary role
-        # But there is a async part to make old primary a new secondary
-        # And we have to wait for this to complete if we are recording the test
-        if self.in_recording:
-            time.sleep(60)
-
-        # Check the roles of failover groups to confirm failover happened
-        self.cmd('sql failover-group show -g {} -s {} -n {}'
-                 .format(s2.group, s2.name, failover_group_name),
-                 checks=[
-                     JMESPathCheck('replicationRole', 'Secondary')
-                 ])
-
-        self.cmd('sql failover-group show -g {} -s {} -n {}'
-                 .format(s1.group, s1.name, failover_group_name),
-                 checks=[
-                     JMESPathCheck('replicationRole', 'Primary')
-                 ])
-
-        # Do no-op failover to the same server
-        self.cmd('sql failover-group set-primary -g {} -s {} -n {}'
-                 .format(s1.group, s1.name, failover_group_name))
-
-        # Check the roles of failover groups to confirm failover didn't happen
-        self.cmd('sql failover-group show -g {} -s {} -n {}'
-                 .format(s2.group, s2.name, failover_group_name),
-                 checks=[
-                     JMESPathCheck('replicationRole', 'Secondary')
-                 ])
-
-        self.cmd('sql failover-group show -g {} -s {} -n {}'
-                 .format(s1.group, s1.name, failover_group_name),
-                 checks=[
-                     JMESPathCheck('replicationRole', 'Primary')
-                 ])
+        self._test_failover_group_failover_from_primary(s1, s2, failover_group_name, self.FailoverType.hybrid)
 
         # Remove database from failover group
         self.cmd('sql failover-group update -g {} -s {} -n {} --remove-db {}'
@@ -6379,7 +6417,6 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('length(@)', 0)
                  ])
-
 
 class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
     @ManagedInstancePreparer()

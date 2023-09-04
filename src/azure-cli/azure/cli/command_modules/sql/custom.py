@@ -6354,7 +6354,8 @@ def failover_group_failover(
         resource_group_name,
         server_name,
         failover_group_name,
-        allow_data_loss=False):
+        allow_data_loss=False,
+        try_planned_before_forced_failover=False):
     '''
     Failover a failover group.
     '''
@@ -6368,7 +6369,9 @@ def failover_group_failover(
         return
 
     # Choose which failover method to use
-    if allow_data_loss:
+    if try_planned_before_forced_failover:
+        failover_func = client.begin_try_planned_before_forced_failover
+    elif allow_data_loss:
         failover_func = client.begin_force_failover_allow_data_loss
     else:
         failover_func = client.begin_failover
