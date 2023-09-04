@@ -160,13 +160,17 @@ def load_volume_arguments(self, account_name_type, pool_name_type, volume_name_t
         c.argument('nfsv41', help="Indication that NFSv4.1 protocol is allowed", arg_type=get_three_state_flag())
 
     with self.argument_context('netappfiles volume backup') as c:
-        c.argument('backup_name', options_list=['--backup-name', '-b'], id_part='child_name_3')
+        c.argument('backup_name', options_list=['--backup-name', '-b'], help='The name of the backup', id_part='child_name_3')
         c.argument('use_existing_snapshot', arg_type=get_three_state_flag())
+        c.argument('file_paths', nargs="+")
 
     with self.argument_context('netappfiles volume backup list') as c:
         c.argument('account_name', id_part=None)
         c.argument('pool_name', pool_name_type, id_part=None)
         c.argument('backup_name', options_list=['--backup-name', '-b'], id_part=None)
+
+    with self.argument_context('netappfiles volume get-groupid-list-for-ldapuser') as c:
+        c.argument('username', options_list=['--username', '-u'],help='username is required to fetch the group to which user is part of')
 
 
 def load_snapshot_arguments(self, account_name_type, pool_name_type, volume_name_type):
