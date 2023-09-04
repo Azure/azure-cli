@@ -11,7 +11,7 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 
 from azure.cli.command_modules.monitor.actions import (
     AlertAddAction, AlertRemoveAction, ConditionAction, AutoscaleAddAction, AutoscaleRemoveAction,
-    AutoscaleScaleAction, AutoscaleConditionAction, get_period_type,
+    AutoscaleScaleAction, AutoscaleConditionAction, get_period_type, AutoscaleCreateAction,
     timezone_offset_type, timezone_name_type, MetricAlertConditionAction, MetricAlertAddAction)
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
 from azure.cli.command_modules.monitor.validators import (
@@ -196,8 +196,10 @@ def load_arguments(self, _):
         c.argument('rule_name', arg_type=autoscale_rule_name_type)
         c.argument('enabled', arg_type=get_three_state_flag(), help='Autoscale settings enabled status.')
 
+    with self.argument_context('monitor autoscale create', arg_group='Notification') as c:
+        c.argument('actions', options_list=['--action', '-a'], action=AutoscaleCreateAction, nargs='+')
+
     with self.argument_context('monitor autoscale', arg_group='Notification') as c:
-        c.argument('actions', options_list=['--action', '-a'], action=AutoscaleAddAction, nargs='+')
         c.argument('add_actions', options_list=['--add-action', '-a'], action=AutoscaleAddAction, nargs='+')
         c.argument('remove_actions', options_list=['--remove-action', '-r'], action=AutoscaleRemoveAction, nargs='+')
         c.argument('email_administrator', arg_type=get_three_state_flag(), help='Send email to subscription administrator on scaling.')
