@@ -452,3 +452,6 @@ def load_arguments(self, _):
     for command in ['delete', 'update']:
         with self.argument_context('backup vault resource-guard-mapping ' + command) as c:
             c.argument('tenant_id', help='ID of the tenant where the Resource Guard exists in Cross-Tenant scenarios.')
+
+    with self.argument_context('backup vault soft-deleted-containers') as c:
+        c.argument('backup_management_type', backup_management_type)

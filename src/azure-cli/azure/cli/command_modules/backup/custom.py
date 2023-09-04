@@ -8,7 +8,6 @@ import os
 from datetime import datetime, timedelta, timezone
 # pylint: disable=too-many-lines
 from knack.log import get_logger
-
 from azure.mgmt.core.tools import is_valid_resource_id
 
 from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
@@ -456,9 +455,10 @@ def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_s
         if soft_delete_feature_state_previous.lower() == "alwayson" and soft_delete_feature_state is not None:
             logger.warning("Vault's current Soft Delete State is AlwaysOn. This cannot be modified.")
             soft_delete_feature_state = None
-        if retention_duration_in_days < 14 or retention_duration_in_days > 180:
-            logger.warning("Retention duration must be between 14 and 180 days. Not modifying this field.")
-            retention_duration_in_days = None
+        if retention_duration_in_days is not None:
+            if retention_duration_in_days < 14 or retention_duration_in_days > 180:
+                logger.warning("Retention duration must be between 14 and 180 days. Not modifying this field.")
+                retention_duration_in_days = None
 
         soft_delete_feature_state = vault_config_response.properties.soft_delete_feature_state if (
             soft_delete_feature_state is None) \
@@ -539,8 +539,10 @@ def show_policy(client, resource_group_name, vault_name, name):
     return client.get(vault_name, resource_group_name, name)
 
 
-def list_deleted_protection_containers(client, resource_group_name, vault_name):
-    return client.list(resource_group_name, vault_name)
+def list_deleted_protection_containers(client, resource_group_name, vault_name, backup_management_type):
+    # backup_management_type should be made an optional field after the swagger is fixed
+    filter = "backupManagementType eq '{}'".format(backup_management_type)
+    return client.list(resource_group_name, vault_name, filter)
 
 
 def update_resource_guard_mapping(cmd, client, resource_group_name, vault_name, resource_guard_id, tenant_id=None):
