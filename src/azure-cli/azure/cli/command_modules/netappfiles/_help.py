@@ -1331,7 +1331,7 @@ examples:
 
 helps['netappfiles volume get-groupid-list-for-ldapuser'] = """
 type: command
-short-summary: Get Group Id List for LDAP User.
+short-summary:  
 long-summary: Returns the list of group Ids for a specific LDAP User.
 parameters:
   - name: --account-name -a
@@ -1343,9 +1343,9 @@ parameters:
   - name: --username -u
     short-summary: username is required to fetch the group to which user is part of.
 examples:
-  - name: Get Group Id List for LDAP User myyser.
+  - name: Get Group Id List for LDAP User myuser.
     text: >
-        az netappfiles volume revert -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --username myuser
+        az netappfiles volume get-groupid-list-for-ldapuser -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --username myuser
 """
 
 helps['netappfiles volume quota-rule wait'] = """

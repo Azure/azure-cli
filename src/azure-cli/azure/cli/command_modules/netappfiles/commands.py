@@ -128,21 +128,21 @@ def load_accounts_command_groups(self, netappfiles_accounts_sdk):
                          exception_handler=netappfiles_exception_handler)
         g.custom_command('update', 'patch_account_custom',
                          client_factory=accounts_mgmt_client_factory,
-                         supports_no_wait=True,                                                                  
+                         supports_no_wait=True,
                          doc_string_source='azure.mgmt.netapp.models#NetAppAccountPatch',
                          exception_handler=netappfiles_exception_handler)
         g.command('renew-credentials', 'begin_renew_credentials', supports_no_wait=True, is_preview=True)
         g.wait_command('wait')
 
     with self.command_group('netappfiles account ad', netappfiles_accounts_sdk) as g:
-        g.custom_command('add','add_active_directory_custom',
+        g.custom_command('add', 'add_active_directory_custom',
                          client_factory=accounts_mgmt_client_factory,
                          supports_no_wait=True,
                          doc_string_source='azure.mgmt.netapp.models#NetAppAccountPatch',
                          exception_handler=netappfiles_exception_handler)
         g.custom_command('update', 'update_active_directory_custom',
                          client_factory=accounts_mgmt_client_factory,
-                         supports_no_wait=True,                                                                  
+                         supports_no_wait=True,
                          doc_string_source='azure.mgmt.netapp.models#NetAppAccountPatch',
                          exception_handler=netappfiles_exception_handler)
         g.custom_command('list', 'list_active_directories',
@@ -222,8 +222,8 @@ def load_volumes_command_groups(self, netappfiles_volumes_sdk):
                          doc_string_source='azure.mgmt.netapp.models#Volume',
                          exception_handler=netappfiles_exception_handler)
         g.custom_command('update', 'patch_volume',
-                         client_factory=volumes_mgmt_client_factory,                         
-                         supports_no_wait=True,                         
+                         client_factory=volumes_mgmt_client_factory,
+                         supports_no_wait=True,
                          doc_string_source='azure.mgmt.netapp.models#VolumePatch',
                          exception_handler=netappfiles_exception_handler)
         g.custom_command('revert', 'volume_revert',
@@ -250,13 +250,13 @@ def load_volumes_command_groups(self, netappfiles_volumes_sdk):
                          client_factory=volumes_mgmt_client_factory,
                          supports_no_wait=True,
                          doc_string_source='azure.mgmt.netapp.models#GetGroupIdListForLDAPUserRequest',
-                         exception_handler=netappfiles_exception_handler)        
+                         exception_handler=netappfiles_exception_handler)
         g.wait_command('wait')
 
     with self.command_group('netappfiles volume export-policy', netappfiles_volumes_sdk) as g:
-        g.custom_command('add','add_export_policy_rule_custom',
-                         client_factory=volumes_mgmt_client_factory,                         
-                         supports_no_wait=True,                         
+        g.custom_command('add', 'add_export_policy_rule_custom',
+                         client_factory=volumes_mgmt_client_factory,
+                         supports_no_wait=True,
                          doc_string_source='azure.mgmt.netapp.models#VolumePatch',
                          exception_handler=netappfiles_exception_handler)
         g.custom_command('list', 'list_export_policy_rules',
@@ -344,11 +344,11 @@ def load_snapshots_policies_command_groups(self, netappfiles_snapshot_policies_s
         g.command('list', 'list')
         g.command('volumes', 'list_volumes')
         g.command('delete', 'begin_delete', supports_no_wait=True)
-        g.custom_command('update','patch_snapshot_policy',
-                          client_factory=snapshot_policies_mgmt_client_factory,
-                          supports_no_wait=True,
-                          doc_string_source='azure.mgmt.netapp.models#SnapshotPolicyPatch',
-                          exception_handler=netappfiles_exception_handler)
+        g.custom_command('update', 'patch_snapshot_policy',
+                         client_factory=snapshot_policies_mgmt_client_factory,
+                         supports_no_wait=True,
+                         doc_string_source='azure.mgmt.netapp.models#SnapshotPolicyPatch',
+                         exception_handler=netappfiles_exception_handler)
         g.custom_command('create', 'create_snapshot_policy',
                          client_factory=snapshot_policies_mgmt_client_factory,
                          doc_string_source='azure.mgmt.netapp.models#SnapshotPolicy',

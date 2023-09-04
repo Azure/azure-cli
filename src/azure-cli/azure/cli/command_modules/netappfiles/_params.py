@@ -170,7 +170,7 @@ def load_volume_arguments(self, account_name_type, pool_name_type, volume_name_t
         c.argument('backup_name', options_list=['--backup-name', '-b'], id_part=None)
 
     with self.argument_context('netappfiles volume get-groupid-list-for-ldapuser') as c:
-        c.argument('username', options_list=['--username', '-u'],help='username is required to fetch the group to which user is part of')
+        c.argument('username', options_list=['--username', '-u'], help='username is required to fetch the group to which user is part of')
 
 
 def load_snapshot_arguments(self, account_name_type, pool_name_type, volume_name_type):
