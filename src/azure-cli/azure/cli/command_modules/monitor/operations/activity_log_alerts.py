@@ -255,8 +255,8 @@ class ActivityLogAlertActionGroupAdd(_ActivityLogAlertUpdate):
             help="Space-separated webhook properties in 'key[=value]' format. "
                  "These properties are associated with the action groups added in this command." + '''
           For any webhook receiver in these action group, these data are appended to the webhook
-          payload. To attach different webhook properties to different action groups, add the 
-          action groups in separate update-action commands.     
+          payload. To attach different webhook properties to different action groups, add the
+          action groups in separate update-action commands.
           '''
         )
         args_schema.webhook_properties_list.Element = AAZStrArg()
