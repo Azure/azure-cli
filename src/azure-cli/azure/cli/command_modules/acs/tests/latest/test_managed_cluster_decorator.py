@@ -3586,6 +3586,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             AKSManagedClusterParamDict(
                 {
                     "disable_public_fqdn": True,
+                    "private_dns_zone": "none",
                 }
             ),
             self.models,
@@ -3593,7 +3594,6 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         )
         api_server_access_profile_4 = self.models.ManagedClusterAPIServerAccessProfile(
             enable_private_cluster=True,
-            private_dns_zone=CONST_PRIVATE_DNS_ZONE_NONE,
         )
         mc_4 = self.models.ManagedCluster(
             location="test_location",
