@@ -24,7 +24,7 @@ class List(AAZCommand):
         az monitor activity-log list --correlation-id b5eac9d2-e829-4c9a-9efb-586d19417c5f
 
     :example: List events within the past hour based on resource group.
-        az monitor activity-log list -g {ResourceGroup} --offset 1h
+        az monitor activity-log list -g ResourceGroup --offset 1h
     """
 
     _aaz_info = {

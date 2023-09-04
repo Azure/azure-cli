@@ -15,7 +15,9 @@ from azure.cli.core.aaz import *
     "monitor activity-log list-categories",
 )
 class ListCategories(AAZCommand):
-    """List the list of available event categories supported in the Activity Logs Service.<br>The current list includes the following: Administrative, Security, ServiceHealth, Alert, Recommendation, Policy.
+    """List the list of available event categories supported in the Activity Logs Service.
+
+    The current list includes the following: Administrative, Security, ServiceHealth, Alert, Recommendation, Policy.
     """
 
     _aaz_info = {

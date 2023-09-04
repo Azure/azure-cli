@@ -18,10 +18,10 @@ class Update(AAZCommand):
     """Update a new activity log alert or update an existing one.
 
     :example: Update the condition
-        az monitor activity-log alert update -n {AlertName} -g {ResourceGroup} \ --condition category=ServiceHealth and level=Error
+        az monitor activity-log alert update -n AlertName -g ResourceGroup \ --condition category=ServiceHealth and level=Error
 
     :example: Disable an alert rule.
-        az monitor activity-log alert update -n {AlertName} -g {ResourceGroup} --enable false
+        az monitor activity-log alert update -n AlertName -g ResourceGroup --enable false
 
     :example: Update the details of this activity log alert rule.
         az monitor activity-log alert update --enabled true --name MyActivityLogAlerts --resource- group MyResourceGroup --subscription MySubscription
@@ -84,8 +84,8 @@ class Update(AAZCommand):
             nullable=True,
         )
         _args_schema.scopes = AAZListArg(
-            options=["-s", "--scope", "--scopes"],
-            help="A list of resourceIds that will be used as prefixes. The alert will only apply to activityLogs with resourceIds that fall under one of these prefixes. This list must include at least one item.",
+            options=["--scopes"],
+            help={"short-summary": "A list of resourceIds that will be used as prefixes.", "long-summary": "The alert will only apply to activityLogs with resourceIds that fall under one of these prefixes. This list must include at least one item."},
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],

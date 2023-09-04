@@ -194,7 +194,7 @@ class TestMonitorActivityLogAlert(ScenarioTest):
                          JMESPathCheck('length(scopes)', 1),
                          JMESPathCheck('length(condition.allOf)', 1),
                          JMESPathCheck('length(actions.actionGroups)', 0),
-                         # JMESPathCheck('scopes[0]', scope),  # default scope is this rg id, this changed, default is subid
+                         JMESPathCheck('scopes[0]', scope),  # default scope is this rg id, this changed, default is subid
                          JMESPathCheck('condition.allOf[0].equals', 'ServiceHealth'),
                          JMESPathCheck('condition.allOf[0].field', 'category')]).get_output_in_json()
 

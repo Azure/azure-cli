@@ -15,19 +15,21 @@ from azure.cli.core.aaz import *
     "monitor activity-log alert create",
 )
 class Create(AAZCommand):
-    """Create a new activity log alert or update an existing one.
+    """Create a default activity log alert rule.
+
+    This command will create a default activity log with one condition which compares if the activities logs 'category' field equals to 'ServiceHealth'. The newly created activity log alert does not have any action groups attached to it.
 
     :example: Create an alert rule with default settings.
-        az monitor activity-log alert create -n {AlertName} -g {ResourceGroup}
+        az monitor activity-log alert create -n AlertName -g ResourceGroup
 
     :example: Create an alert rule with condition about error level service health log.
-        az monitor activity-log alert create -n {AlertName} -g {ResourceGroup} \ --condition category=ServiceHealth and level=Error
+        az monitor activity-log alert create -n AlertName -g ResourceGroup \ --condition category=ServiceHealth and level=Error
 
     :example: Create an alert rule with an action group and specify webhook properties.
-        az monitor activity-log alert create -n {AlertName} -g {ResourceGroup} \ -a /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.insights/acti onGroups/{ActionGroup} \ -w usage=test owner=jane
+        az monitor activity-log alert create -n AlertName -g ResourceGroup \ -a /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.insights/acti onGroups/{ActionGroup} \ -w usage=test owner=jane
 
     :example: Create an alert rule which is initially disabled.
-        az monitor activity-log alert create -n {AlertName} -g {ResourceGroup} --disable
+        az monitor activity-log alert create -n AlertName -g ResourceGroup --disable
     """
 
     _aaz_info = {
@@ -86,8 +88,8 @@ class Create(AAZCommand):
             default=True,
         )
         _args_schema.scopes = AAZListArg(
-            options=["-s", "--scope", "--scopes"],
-            help="A list of resourceIds that will be used as prefixes. The alert will only apply to activityLogs with resourceIds that fall under one of these prefixes. This list must include at least one item.",
+            options=["--scopes"],
+            help={"short-summary": "A list of resourceIds that will be used as prefixes.", "long-summary": "The alert will only apply to activityLogs with resourceIds that fall under one of these prefixes. This list must include at least one item."},
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
