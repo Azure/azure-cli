@@ -1331,7 +1331,7 @@ examples:
 
 helps['netappfiles volume get-groupid-list-for-ldapuser'] = """
 type: command
-short-summary:  
+short-summary:
 long-summary: Returns the list of group Ids for a specific LDAP User.
 parameters:
   - name: --account-name -a
