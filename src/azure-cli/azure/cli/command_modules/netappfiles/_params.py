@@ -29,7 +29,7 @@ def load_arguments(self, _):
     with self.argument_context('netappfiles account') as c:
         c.argument('account_name', account_name_type, options_list=['--name', '--account-name', '-n', '-a'])
 
-    with self.argument_context('netappfiles account', arg_group='Encryption') as c:
+    with self.argument_context('netappfiles account', arg_group='CMK Encryption') as c:
         c.argument('key_source', arg_type=get_enum_type(EncryptionKeySource), options_list=['--key-source'], help='The encryption keySource (provider).', is_preview=True)
         c.argument('key_vault_uri', options_list=['--key-vault-uri', '-v'], help='The Uri of KeyVault.', is_preview=True)
         c.argument('key_name', options_list=['--key-name'], help='The name of KeyVault key.', is_preview=True)
@@ -106,6 +106,8 @@ def load_volume_arguments(self, account_name_type, pool_name_type, volume_name_t
         c.argument('has_root_access', help="Vol Has root access to volume", arg_type=get_three_state_flag())
         c.argument('snapshot_dir_visible', arg_type=get_three_state_flag())
         c.argument('security_style', arg_type=get_enum_type(SecurityStyle), help='The security style of volume, default unix, defaults to ntfs for dual protocol or CIFS protocol')
+        c.argument('encryption_key_source', arg_group='CMK Encryption', arg_type=get_enum_type(EncryptionKeySource))
+        c.argument('kv_private_endpoint_id', arg_group='CMK Encryption')
 
     with self.argument_context('netappfiles volume create') as c:
         c.argument('zones', nargs="+")

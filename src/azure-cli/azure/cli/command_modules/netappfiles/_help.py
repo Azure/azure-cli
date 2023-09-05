@@ -667,7 +667,7 @@ parameters:
   - name: --smb-continuously-avl
     short-summary: Enables continuously available share property for smb volume. Only applicable for SMB volume. Default value is False
   - name: --encryption-key-source
-    short-summary: Encryption Key Source
+    short-summary: Source of key used to encrypt data in volume. Applicable if NetApp account has encryption.keySource = ''Microsoft.KeyVault''.
   - name: --allowed-clients
     short-summary: Client ingress specification as comma separated string with IPv4 CIDRs, IPv4 host addresses and host names
   - name: --cifs
