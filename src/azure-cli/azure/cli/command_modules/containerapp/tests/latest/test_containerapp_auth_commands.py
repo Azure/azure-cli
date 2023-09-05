@@ -18,7 +18,7 @@ from .utils import create_containerapp_env
 class ContainerAppAuthTest(ScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=TEST_LOCATION)
-    @LogAnalyticsWorkspacePreparer(location="eastus")
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
     def test_containerapp_auth_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
         env = self.create_random_name(prefix='containerapp-env', length=24)
@@ -99,7 +99,7 @@ class ContainerAppAuthTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=TEST_LOCATION)
-    @LogAnalyticsWorkspacePreparer(location="eastus")
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
     def test_containerapp_auth_facebook_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
         env = self.create_random_name(prefix='containerapp-env', length=24)
@@ -138,7 +138,7 @@ class ContainerAppAuthTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=TEST_LOCATION)
-    @LogAnalyticsWorkspacePreparer(location="eastus")
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
     def test_containerapp_auth_github_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
         env = self.create_random_name(prefix='containerapp-env', length=24)
@@ -235,7 +235,7 @@ class ContainerAppAuthTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=TEST_LOCATION)
-    @LogAnalyticsWorkspacePreparer(location="eastus")
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
     def test_containerapp_auth_openid_connect_e2e(self, resource_group):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
         env = self.create_random_name(prefix='containerapp-env', length=24)

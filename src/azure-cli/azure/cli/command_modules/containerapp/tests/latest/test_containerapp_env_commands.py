@@ -22,7 +22,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 class ContainerappEnvScenarioTest(ScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")
-    @LogAnalyticsWorkspacePreparer(location="eastus")
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
     def test_containerapp_env_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
@@ -55,7 +55,7 @@ class ContainerappEnvScenarioTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="australiaeast")
-    @LogAnalyticsWorkspacePreparer(location="eastus")
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
     def test_containerapp_env_logs_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
@@ -131,7 +131,7 @@ class ContainerappEnvScenarioTest(ScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")
     @live_only()  # encounters 'CannotOverwriteExistingCassetteException' only when run from recording (passes when run live)
-    @LogAnalyticsWorkspacePreparer(location="eastus")
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
     def test_containerapp_env_dapr_components(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
@@ -195,7 +195,7 @@ class ContainerappEnvScenarioTest(ScenarioTest):
     @AllowLargeResponse(8192)
     @live_only()  # encounters 'CannotOverwriteExistingCassetteException' only when run from recording (passes when run live)
     @ResourceGroupPreparer(location="northeurope")
-    @LogAnalyticsWorkspacePreparer(location="eastus")
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
     def test_containerapp_env_certificate_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
@@ -308,7 +308,7 @@ class ContainerappEnvScenarioTest(ScenarioTest):
     @AllowLargeResponse(8192)
     @live_only()  # encounters 'CannotOverwriteExistingCassetteException' only when run from recording (passes when run live)
     @ResourceGroupPreparer(location="westeurope")
-    @LogAnalyticsWorkspacePreparer(location="eastus")
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
     def test_containerapp_env_custom_domains(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
@@ -351,7 +351,7 @@ class ContainerappEnvScenarioTest(ScenarioTest):
     @AllowLargeResponse(8192)
     @live_only()  # encounters 'CannotOverwriteExistingCassetteException' only when run from recording (passes when run live)
     @ResourceGroupPreparer(location="westeurope")
-    @LogAnalyticsWorkspacePreparer(location="eastus")
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
     def test_containerapp_env_update_custom_domains(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
@@ -401,7 +401,7 @@ class ContainerappEnvScenarioTest(ScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")
     @live_only()  # passes live but hits CannotOverwriteExistingCassetteException when run from recording
-    @LogAnalyticsWorkspacePreparer(location="eastus")
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
     def test_containerapp_env_internal_only_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
@@ -427,7 +427,7 @@ class ContainerappEnvScenarioTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")
-    @LogAnalyticsWorkspacePreparer(location="eastus")
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
     def test_containerapp_env_mtls(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 

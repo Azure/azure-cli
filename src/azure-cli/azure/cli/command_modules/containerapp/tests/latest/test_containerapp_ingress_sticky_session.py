@@ -21,7 +21,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 class ContainerAppIngressStickySessionsTest(ScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northcentralus")
-    @LogAnalyticsWorkspacePreparer(location="eastus")
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
     @live_only()  # encounters 'CannotOverwriteExistingCassetteException' only when run from recording (passes when run live)
     def test_containerapp_ingress_sticky_sessions_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         import requests

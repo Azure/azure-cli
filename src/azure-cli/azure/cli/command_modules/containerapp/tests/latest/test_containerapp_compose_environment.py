@@ -22,7 +22,7 @@ from .utils import create_containerapp_env
 class ContainerappComposePreviewEnvironmentSettingsScenarioTest(ContainerappComposePreviewScenarioTest):
     @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_test_containerapp_preview', location='eastus')
-    @LogAnalyticsWorkspacePreparer(location="eastus")
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
     def test_containerapp_compose_create_with_environment(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
@@ -67,7 +67,7 @@ services:
 class ContainerappComposePreviewEnvironmentSettingsExpectedExceptionScenarioTest(ContainerappComposePreviewScenarioTest):  # pylint: disable=line-too-long
     @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_test_containerapp_preview', location='eastus')
-    @LogAnalyticsWorkspacePreparer(location="eastus")
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
     def test_containerapp_compose_create_with_environment_prompt(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 

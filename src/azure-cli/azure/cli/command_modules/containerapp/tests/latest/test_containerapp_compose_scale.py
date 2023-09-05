@@ -22,7 +22,7 @@ from .utils import create_containerapp_env
 class ContainerappComposePreviewReplicasScenarioTest(ContainerappComposePreviewScenarioTest):
     @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_test_containerapp_preview', location='eastus')
-    @LogAnalyticsWorkspacePreparer(location="eastus")
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
     def test_containerapp_compose_create_with_replicas_global_scale(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
@@ -61,7 +61,7 @@ services:
 
     @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_test_containerapp_preview', location='eastus')
-    @LogAnalyticsWorkspacePreparer(location="eastus")
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
     def test_containerapp_compose_create_with_replicas_replicated_mode(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 

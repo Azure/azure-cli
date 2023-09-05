@@ -27,7 +27,7 @@ from azure.cli.command_modules.containerapp.tests.latest.common import (
 class ContainerAppMountAzureFileTest(ScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=TEST_LOCATION)
-    @LogAnalyticsWorkspacePreparer(location="eastus")
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
     def test_container_app_mount_azurefile_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
