@@ -28,26 +28,31 @@ def create_metric_alert(cmd, resource_group_name, rule_name, scopes, condition, 
     # generate metadata for the conditions
     is_dynamic_threshold_criterion = False
     all_of = []
+    single_all_of = []
     for i, cond in enumerate(condition):
         if "dynamic" in cond:
             is_dynamic_threshold_criterion = True
             item = cond["dynamic"]
             item["name"] = f"cond{i}"
-            item["dynamic_threshold_criterion"] = {
+            props = {
                 "alert_sensitivity": item.pop("alert_sensitivity", None),
                 "failing_periods": item.pop("failing_periods", None),
                 "operator": item.pop("operator", None),
                 "ignore_data_before": str(item.pop("ignore_data_before", None))
             }
-            all_of.append(item)
+
+            all_of.append({**item, **{"dynamic_threshold_criterion": props}})
+            single_all_of.append({**item, **props})
         else:
             item = cond["static"]
             item["name"] = f"cond{i}"
-            item["static_threshold_criterion"] = {
+            props = {
                 "operator": item.pop("operator", None),
                 "threshold": item.pop("threshold", None)
             }
-            all_of.append(item)
+
+            all_of.append({**item, **{"static_threshold_criterion": props}})
+            single_all_of.append({**item, **props})
 
     criteria = None
     resource_type, scope_type = _parse_resource_and_scope_type(scopes)
@@ -58,7 +63,7 @@ def create_metric_alert(cmd, resource_group_name, rule_name, scopes, condition, 
     else:
         if len(scopes) == 1:
             if not is_dynamic_threshold_criterion:
-                criteria = {"microsoft_azure_monitor_single_resource_multiple_metric_criteria": {"all_of": all_of}}
+                criteria = {"microsoft_azure_monitor_single_resource_multiple_metric_criteria": {"all_of": single_all_of}}
             else:
                 criteria = {"microsoft_azure_monitor_multiple_resource_multiple_metric_criteria": {"all_of": all_of}}
         else:
