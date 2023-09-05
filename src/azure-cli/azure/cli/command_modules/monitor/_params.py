@@ -11,7 +11,7 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 
 from azure.cli.command_modules.monitor.actions import (
     AlertAddAction, AlertRemoveAction, ConditionAction, AutoscaleAddAction, AutoscaleRemoveAction,
-    AutoscaleScaleAction, AutoscaleConditionAction, get_period_type,
+    AutoscaleScaleAction, AutoscaleConditionAction, get_period_type, AutoscaleCreateAction,
     timezone_offset_type, timezone_name_type, MetricAlertConditionAction, MetricAlertAddAction)
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
 from azure.cli.command_modules.monitor.validators import (
@@ -99,7 +99,7 @@ def load_arguments(self, _):
         c.argument('aggregation', arg_type=get_enum_type(t for t in AggregationType if t.name != 'none'), nargs='*')
         c.argument('metrics', nargs='+')
         c.argument('orderby', help='Aggregation to use for sorting results and the direction of the sort. Only one order can be specificed. Examples: sum asc')
-        c.argument('top', help='Max number of records to retrieve. Valid only if --filter used.')
+        c.argument('top', type=int, help='Max number of records to retrieve. Valid only if --filter used.')
         c.argument('filters', options_list='--filter')
         c.argument('metric_namespace', options_list='--namespace')
 
@@ -109,8 +109,9 @@ def load_arguments(self, _):
         c.argument('offset', type=get_period_type(as_timedelta=True))
         c.argument('interval', arg_group='Time', type=get_period_type())
 
-    with self.argument_context('monitor metrics list-namespaces', arg_group='Time') as c:
-        c.argument('start_time', arg_type=get_datetime_type(help='Start time of the query.'))
+    with self.argument_context('monitor metrics list-namespaces') as c:
+        c.argument("resource_uri", help="The identifier of the resource.")
+        c.argument('start_time', arg_type=get_datetime_type(help='Start time of the query.'), arg_group='Time')
     # endregion
 
     # region MetricAlerts
@@ -195,8 +196,10 @@ def load_arguments(self, _):
         c.argument('rule_name', arg_type=autoscale_rule_name_type)
         c.argument('enabled', arg_type=get_three_state_flag(), help='Autoscale settings enabled status.')
 
+    with self.argument_context('monitor autoscale create', arg_group='Notification') as c:
+        c.argument('actions', options_list=['--action', '-a'], action=AutoscaleCreateAction, nargs='+')
+
     with self.argument_context('monitor autoscale', arg_group='Notification') as c:
-        c.argument('actions', options_list=['--action', '-a'], action=AutoscaleAddAction, nargs='+')
         c.argument('add_actions', options_list=['--add-action', '-a'], action=AutoscaleAddAction, nargs='+')
         c.argument('remove_actions', options_list=['--remove-action', '-r'], action=AutoscaleRemoveAction, nargs='+')
         c.argument('email_administrator', arg_type=get_three_state_flag(), help='Send email to subscription administrator on scaling.')
@@ -293,28 +296,6 @@ def load_arguments(self, _):
     with self.argument_context('monitor action-group') as c:
         c.argument('action_group_name', options_list=['--name', '-n'], id_part='name')
         c.argument('location', get_location_type(self.cli_ctx), validator=None)
-
-    with self.argument_context('monitor action-group create') as c:
-        from .actions import ActionGroupReceiverParameterAction
-        c.extra('receivers', options_list=['--action', '-a'], nargs='+', arg_group='Actions', action=ActionGroupReceiverParameterAction)
-        c.extra('short_name')
-        c.extra('tags')
-        c.extra('location', get_location_type(self.cli_ctx))
-        c.ignore('action_group')
-
-    with self.argument_context('monitor action-group update', arg_group='Actions') as c:
-        c.extra('add_receivers', options_list=['--add-action', '-a'], nargs='+', action=ActionGroupReceiverParameterAction)
-        c.extra('remove_receivers', options_list=['--remove-action', '-r'], nargs='+')
-        c.ignore('action_group')
-
-    with self.argument_context('monitor action-group enable-receiver') as c:
-        c.argument('receiver_name', options_list=['--name', '-n'], help='The name of the receiver to resubscribe.')
-        c.argument('action_group_name', options_list=['--action-group'], help='The name of the action group.')
-
-    with self.argument_context('monitor action-group test-notifications create') as c:
-        c.argument('add_receivers', options_list=['--add-action', '-a'], nargs='+', action=ActionGroupReceiverParameterAction)
-        c.argument('alert_type', type=str, help='The name of the supported alert type.')
-        c.argument('action_group_name', options_list=['--action-group'], help='The name of the action group.')
     # endregion
 
     # region ActivityLog Alerts

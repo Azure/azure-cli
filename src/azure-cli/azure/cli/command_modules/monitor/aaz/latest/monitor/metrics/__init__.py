@@ -9,3 +9,6 @@
 # flake8: noqa
 
 from .__cmd_group import *
+from ._list import *
+from ._list_definitions import *
+from ._list_namespaces import *

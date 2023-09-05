@@ -227,7 +227,7 @@ def validate_identity(namespace):
 
 def validate_secret_identifier(namespace):
     """ Validate the format of keyvault reference secret identifier """
-    from azure.keyvault.key_vault_id import KeyVaultIdentifier
+    from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1.key_vault_id import KeyVaultIdentifier
 
     identifier = getattr(namespace, 'secret_identifier', None)
     try:
