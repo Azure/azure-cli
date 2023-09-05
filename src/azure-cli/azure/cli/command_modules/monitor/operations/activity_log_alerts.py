@@ -389,7 +389,7 @@ class ActivityLogAlertScopeAdd(_ActivityLogAlertUpdate):
         args_schema.reset = AAZBoolArg(
             options=["--reset"],
             help="Remove all the existing action groups before add new conditions.",
-            default=True
+            default=False
         )
         return args_schema
 
@@ -399,7 +399,7 @@ class ActivityLogAlertScopeAdd(_ActivityLogAlertUpdate):
         for scope in args.scope_ui.to_serialized_data():
             new_scopes.add(scope)
 
-        instance.properties.scopes = list(new_scopes)
+        args.scopes = list(new_scopes)
 
 
 @register_command("monitor activity-log alert scope remove")
@@ -432,8 +432,7 @@ class ActivityLogAlertScopeRemove(_ActivityLogAlertUpdate):
                 new_scopes.remove(scope)
             except KeyError:
                 pass
-
-        instance.properties.scopes = list(new_scopes)
+        args.scopes = list(new_scopes)
 
 
 def _normalize_names(cli_ctx, resource_names, resource_group, namespace, resource_type):
