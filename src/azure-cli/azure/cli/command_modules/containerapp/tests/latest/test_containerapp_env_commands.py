@@ -214,11 +214,11 @@ class ContainerappEnvScenarioTest(ScenarioTest):
         ])
 
         # test that non pfx or pem files are not supported
-        txt_file = os.path.join(TEST_DIR, 'cert.txt')
+        txt_file = os.path.join(TEST_DIR, 'data', 'cert.txt')
         self.cmd('containerapp env certificate upload -g {} -n {} --certificate-file "{}"'.format(resource_group, env_name, txt_file), expect_failure=True)
 
         # test pfx file with password
-        pfx_file = os.path.join(TEST_DIR, 'cert.pfx')
+        pfx_file = os.path.join(TEST_DIR, 'data', 'cert.pfx')
         testpassword = 'test12'
         cert = self.cmd('containerapp env certificate upload -g {} -n {} --certificate-file "{}" --password {}'.format(resource_group, env_name, pfx_file, testpassword), checks=[
             JMESPathCheck('type', "Microsoft.App/managedEnvironments/certificates"),
@@ -265,7 +265,7 @@ class ContainerappEnvScenarioTest(ScenarioTest):
         app = self.cmd('containerapp create -g {} -n {} --environment {} --ingress external --target-port 80'.format(resource_group, ca_name, env_name)).get_output_in_json()
         
         # create an App service domain and update its DNS records
-        contacts = os.path.join(TEST_DIR, 'domain-contact.json')
+        contacts = os.path.join(TEST_DIR, 'data', 'domain-contact.json')
         zone_name = "{}.com".format(ca_name)
         subdomain_1 = "devtest"
         txt_name_1 = "asuid.{}".format(subdomain_1)
@@ -323,7 +323,7 @@ class ContainerappEnvScenarioTest(ScenarioTest):
             containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env_name)).get_output_in_json()
 
         # create an App service domain and update its txt records
-        contacts = os.path.join(TEST_DIR, 'domain-contact.json')
+        contacts = os.path.join(TEST_DIR, 'data', 'domain-contact.json')
         zone_name = "{}.com".format(env_name)
         subdomain_1 = "devtest"
         subdomain_2 = "clitest"
@@ -337,7 +337,7 @@ class ContainerappEnvScenarioTest(ScenarioTest):
         self.cmd('network dns record-set txt add-record -g {} -z {} -n {} -v {}'.format(resource_group, zone_name, txt_name_2, verification_id)).get_output_in_json()
 
         # upload cert, add hostname & binding
-        pfx_file = os.path.join(TEST_DIR, 'cert.pfx')
+        pfx_file = os.path.join(TEST_DIR, 'data', 'cert.pfx')
         testpassword = 'test12'
 
         self.cmd('containerapp env create -g {} -n {} --logs-workspace-id {} --logs-workspace-key {} --dns-suffix {} --certificate-file "{}" --certificate-password {}'.format(resource_group, env_name, laworkspace_customer_id, laworkspace_shared_key, hostname_1, pfx_file, testpassword))
@@ -366,7 +366,7 @@ class ContainerappEnvScenarioTest(ScenarioTest):
             containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env_name)).get_output_in_json()
 
         # create an App service domain and update its txt records
-        contacts = os.path.join(TEST_DIR, 'domain-contact.json')
+        contacts = os.path.join(TEST_DIR, 'data', 'domain-contact.json')
         zone_name = "{}.com".format(env_name)
         subdomain_1 = "devtest"
         subdomain_2 = "clitest"
@@ -380,7 +380,7 @@ class ContainerappEnvScenarioTest(ScenarioTest):
         self.cmd('network dns record-set txt add-record -g {} -z {} -n {} -v {}'.format(resource_group, zone_name, txt_name_2, verification_id)).get_output_in_json()
 
         # upload cert, add hostname & binding
-        pfx_file = os.path.join(TEST_DIR, 'cert.pfx')
+        pfx_file = os.path.join(TEST_DIR, 'data', 'cert.pfx')
         testpassword = 'test12'
 
         self.cmd('containerapp env update -g {} -n {} --dns-suffix {} --certificate-file "{}" --certificate-password {}'.format(resource_group, env_name, hostname_1, pfx_file, testpassword))
