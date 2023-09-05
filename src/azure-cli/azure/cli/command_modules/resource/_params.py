@@ -253,7 +253,7 @@ def load_arguments(self, _):
         c.argument('enforcement_mode', options_list=['--enforcement-mode', '-e'], help='Enforcement mode of the policy assignment, e.g. Default, DoNotEnforce. Please visit https://aka.ms/azure-policyAssignment-enforcement-mode for more information.', arg_type=get_enum_type(EnforcementMode))
 
     with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
-        c.argument('name', options_list=['--name', '-n'], help='Name of the new policy assignment. A unique name will be generated if this parameter is not provided.')
+        c.argument('name', options_list=['--name', '-n'], help='Name of the new policy assignment.')
 
     with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), help='The location of the policy assignment. Only required when utilizing managed identity.')
