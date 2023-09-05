@@ -616,9 +616,8 @@ class PrivateDnsLinksTests(BaseScenarioTests):
             self.check('tags.{}'.format(tagKey), tagVal),
             self.check('provisioningState', 'Succeeded')
         ])
-        self.cmd('az network private-dns link vnet update -g {rg} -n {link} -z {zone} --tags ""', checks=[
+        self.cmd('az network private-dns link vnet update -g {rg} -n {link} -z {zone} --tags null', checks=[
             self.check('name', '{link}'),
-            self.check('tags', '{{}}'),
             self.check('provisioningState', 'Succeeded')
         ])
 

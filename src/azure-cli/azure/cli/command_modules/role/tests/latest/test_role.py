@@ -255,9 +255,6 @@ class RoleDefinitionScenarioTest(RoleScenarioTestBase):
 
 class RoleAssignmentScenarioTest(RoleScenarioTestBase):
 
-    def __init__(self, *arg, **kwargs):
-        super().__init__(*arg, random_config_dir=True, **kwargs)
-
     @ResourceGroupPreparer(name_prefix='cli_role_assign')
     @AllowLargeResponse()
     def test_role_assignment_scenario(self, resource_group):
@@ -314,14 +311,6 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
                 self.cmd('role assignment list --assignee {upn} --all --include-groups', checks=[
                     self.check("length([])", 2)
                 ])
-
-                # test couple of more general filters
-                result = self.cmd('role assignment list -g {rg} --include-inherited').get_output_in_json()
-                # There are role assignments inherited from subscription, so we can't tell the exact number
-                self.assertTrue(len(result) >= 1)
-
-                result = self.cmd('role assignment list --all').get_output_in_json()
-                self.assertTrue(len(result) >= 1)
 
                 self.cmd('role assignment delete --assignee {group_id} --role {role} -g {rg}')
                 self.cmd('role assignment delete --assignee {upn} --role {role} -g {rg}')
@@ -545,48 +534,6 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
             finally:
                 self.cmd('ad user delete --id {upn}')
 
-    @ResourceGroupPreparer(name_prefix='cli_role_assign')
-    @AllowLargeResponse()
-    def test_role_assignment_handle_conflicted_assignments(self, resource_group):
-        if self.run_under_service_principal():
-            return  # this test delete users which are beyond a SP's capacity, so quit...
-
-        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
-            user = self.create_random_name('testuser', 15)
-            self.kwargs.update({
-                'upn': user + TEST_TENANT_DOMAIN,
-                'nsg': 'nsg1'
-            })
-
-            self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
-            time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
-
-            base_dir = os.path.abspath(os.curdir)
-
-            try:
-                temp_dir = os.path.realpath(self.create_temp_dir())
-                os.chdir(temp_dir)
-                self.cmd('configure --default group={rg} --scope local')
-                local_defaults_config = self.cmd('configure --list-defaults --scope local').get_output_in_json()
-
-                self.assertGreaterEqual(len(local_defaults_config), 1)
-                actual = set([(x['name'], x['source'], x['value']) for x in local_defaults_config if x['name'] == 'group'])
-                # If global config_dir is ~/.azure/dummy_cli_config_dir/0azXbKR9OdJuZPFS/,
-                # local config file is  ./0azXbKR9OdJuZPFS/config
-                expected = set([('group', os.path.join(temp_dir, os.path.basename(self.cli_ctx.config.config_dir), 'config'), self.kwargs['rg'])])
-                self.assertEqual(actual, expected)
-
-                # test role assignments on a resource group
-                rg_id = self.cmd('group show -n {rg}').get_output_in_json()['id']
-                self.cmd('role assignment create --assignee {upn} --role reader --scope ' + rg_id)
-                self.cmd('role assignment list --assignee {upn} --role reader --scope ' + rg_id, checks=self.check('length([])', 1))
-                self.cmd('role assignment delete --assignee {upn} --role reader --scope ' + rg_id)
-                self.cmd('role assignment list --assignee {upn} --role reader --scope ' + rg_id, checks=self.check('length([])', 0))
-            finally:
-                self.cmd('configure --default group="" --scope local')
-                os.chdir(base_dir)
-                self.cmd('ad user delete --id {upn}')
-
     def test_role_assignment_empty_string_args(self):
         expected_msg = "{} can't be an empty string"
         with self.assertRaisesRegex(CLIError, expected_msg.format("--assignee")):
@@ -686,16 +633,76 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
             finally:
                 self.cmd('ad user delete --id {upn}')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_assignments_for_coadmins')
+
+class RoleAssignmentWithConfigScenarioTest(RoleScenarioTestBase):
+
+    def __init__(self, *arg, **kwargs):
+        super().__init__(*arg, random_config_dir=True, **kwargs)
+
+    @ResourceGroupPreparer(name_prefix='cli_role_assign')
     @AllowLargeResponse()
+    def test_role_assignment_handle_conflicted_assignments(self, resource_group):
+        if self.run_under_service_principal():
+            return  # this test delete users which are beyond a SP's capacity, so quit...
+
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            user = self.create_random_name('testuser', 15)
+            self.kwargs.update({
+                'upn': user + TEST_TENANT_DOMAIN,
+                'nsg': 'nsg1'
+            })
+
+            self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
+            time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
+
+            base_dir = os.path.abspath(os.curdir)
+
+            try:
+                temp_dir = os.path.realpath(self.create_temp_dir())
+                os.chdir(temp_dir)
+                self.cmd('configure --default group={rg} --scope local')
+                local_defaults_config = self.cmd('configure --list-defaults --scope local').get_output_in_json()
+
+                self.assertGreaterEqual(len(local_defaults_config), 1)
+                actual = set([(x['name'], x['source'], x['value']) for x in local_defaults_config if x['name'] == 'group'])
+                # If global config_dir is ~/.azure/dummy_cli_config_dir/0azXbKR9OdJuZPFS/,
+                # local config file is  ./0azXbKR9OdJuZPFS/config
+                expected = set([('group', os.path.join(temp_dir, os.path.basename(self.cli_ctx.config.config_dir), 'config'), self.kwargs['rg'])])
+                self.assertEqual(actual, expected)
+
+                # test role assignments on a resource group
+                rg_id = self.cmd('group show -n {rg}').get_output_in_json()['id']
+                self.cmd('role assignment create --assignee {upn} --role reader --scope ' + rg_id)
+                self.cmd('role assignment list --assignee {upn} --role reader --scope ' + rg_id, checks=self.check('length([])', 1))
+                self.cmd('role assignment delete --assignee {upn} --role reader --scope ' + rg_id)
+                self.cmd('role assignment list --assignee {upn} --role reader --scope ' + rg_id, checks=self.check('length([])', 0))
+            finally:
+                self.cmd('configure --default group="" --scope local')
+                os.chdir(base_dir)
+                self.cmd('ad user delete --id {upn}')
+
+
+class RoleAssignmentLiveScenarioTest(LiveScenarioTest):
+    # Only test list commands in live mode to avoid recording tenant information
+
+    @ResourceGroupPreparer(name_prefix='cli_role_assign')
+    def test_role_assignment_list(self, resource_group):
+        # List all role assignments under a subscription
+        self.cmd('role assignment list --all', checks=[self.greater_than("length([])", 0)])
+
+        # List role assignments for a resource group.
+        self.cmd('role assignment list -g {rg}', checks=[self.check("length([])", 0)])
+
+        # There are role assignments inherited from subscription, so we can't tell the exact number.
+        self.cmd('role assignment list -g {rg} --include-inherited', checks=[self.greater_than("length([])", 0)])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_assignments_for_coadmins')
     def test_role_assignment_for_co_admins(self, resource_group):
 
         result = self.cmd('role assignment list --include-classic-administrator').get_output_in_json()
         self.assertTrue([x for x in result if x['roleDefinitionName'] in ['CoAdministrator', 'AccountAdministrator']])
-        self.cmd('role assignment list -g {}'.format(resource_group), checks=[
-            self.check("length([])", 0)
-        ])
-        result = self.cmd('role assignment list -g {} --include-classic-administrator'.format(resource_group)).get_output_in_json()
+
+        result = self.cmd('role assignment list -g {rg} --include-classic-administrator').get_output_in_json()
         self.assertTrue([x for x in result if x['roleDefinitionName'] in ['CoAdministrator', 'AccountAdministrator']])
 
 

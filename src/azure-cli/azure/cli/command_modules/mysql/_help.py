@@ -194,10 +194,16 @@ short-summary: Create a new import workflow for flexible server.
 long-summary: >
     Migrate a MySQL single server to flexible server with custom or default configuration. For more information for network configuration, see
 
+    - Migrate Azure Database for MySQL - Single Server to Flexible Server using Azure MySQL Import CLI
+
+    https://learn.microsoft.com/en-us/azure/mysql/migrate/migrate-single-flexible-mysql-import-cli
+
     - Configure public access
+
     https://docs.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-firewall-cli
 
     - Configure private access
+
     https://docs.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-virtual-network-cli
 
 examples:
@@ -207,7 +213,6 @@ examples:
         az mysql flexible-server import create --data-source-type mysql_single \\
           --data-source test-single-server --resource-group test-rg \\
           --location northeurope --name testserver \\
-          --admin-user username --admin-password password \\
           --sku-name Standard_B1ms --tier Burstable --public-access 0.0.0.0 \\
           --storage-size 32 --tags "key=value" --version 5.7 --high-availability ZoneRedundant \\
           --zone 1 --standby-zone 3 --storage-auto-grow Enabled --iops 500
@@ -502,6 +507,14 @@ examples:
     text: az mysql flexible-server parameter set --resource-group testGroup --server-name testserver --name parameterName
 """
 
+helps['mysql flexible-server parameter set-batch'] = """
+type: command
+short-summary: Batch update parameters of a flexible server.
+examples:
+  - name: Batch set parameters.
+    text: az mysql flexible-server parameter set-batch --resource-group testGroup --server-name testserver --source "user-override" --args key1="value1" key2="value2"
+"""
+
 helps['mysql flexible-server parameter show'] = """
 type: command
 short-summary: Get the parameter for a flexible server."
@@ -745,4 +758,17 @@ short-summary: Resets GTID on a server.
 examples:
   - name: Resets GTID '3E11FA47-71CA-11E1-9E33-C80AA9429562:23' on server 'testsvr'.
     text: az mysql flexible-server gtid reset -g testgroup -s testsvr --gtid-set 3E11FA47-71CA-11E1-9E33-C80AA9429562:23
+"""
+
+helps['mysql flexible-server export'] = """
+type: group
+short-summary: Manage export backup on a server.
+"""
+
+helps['mysql flexible-server export create'] = """
+type: command
+short-summary: Create an export backup for a given server with specified backup name.
+examples:
+  - name: Create a export backup for 'testsvr' with backup name 'testbackup'.
+    text: az mysql flexible-server export create -g testgroup -n testsvr -b testbackup -u destsasuri
 """

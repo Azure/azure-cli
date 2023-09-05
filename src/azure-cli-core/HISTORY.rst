@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.52.0
+++++++
+* `aaz`: Support `configured_default` for `AAZBaseArg` (#27205)
+
 2.51.0
 ++++++
 * `aaz`: Add `--max-items` and `--next-token` for pagination (#26710)

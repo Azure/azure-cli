@@ -20,7 +20,6 @@ def process_autoscale_create_namespace(cmd, namespace):
 
 
 def validate_autoscale_recurrence(namespace):
-    from azure.mgmt.monitor.models import Recurrence, RecurrentSchedule, RecurrenceFrequency
 
     def _validate_weekly_recurrence(namespace):
         # Construct days
@@ -37,15 +36,15 @@ def validate_autoscale_recurrence(namespace):
             valid_days.remove(match)
 
         # validate, but don't process start and end time
-        recurrence_obj = Recurrence(
-            frequency=RecurrenceFrequency.week,
-            schedule=RecurrentSchedule(
-                time_zone=namespace.timezone,
-                days=days,
-                hours=[],  # will be filled in during custom command
-                minutes=[]  # will be filled in during custom command
-            )
-        )
+        recurrence_obj = {
+            "frequency": "Week",
+            "schedule": {
+                "time_zone": namespace.timezone,
+                "days": days,
+                "hours": [],  # will be filled in during custom command
+                "minutes": []  # will be filled in during custom command
+            }
+        }
         return recurrence_obj
 
     valid_recurrence = {
@@ -381,20 +380,6 @@ def get_action_group_id_validator(dest):
             action_group_ids.append(group.lower())
         setattr(namespace, dest, action_group_ids)
     return validate_action_group_ids
-
-
-def validate_private_endpoint_connection_id(namespace):
-    if namespace.connection_id:
-        from azure.cli.core.util import parse_proxy_resource_id
-        result = parse_proxy_resource_id(namespace.connection_id)
-        namespace.resource_group_name = result['resource_group']
-        namespace.scope_name = result['name']
-        namespace.private_endpoint_connection_name = result['child_name_1']
-
-    if not all([namespace.scope_name, namespace.resource_group_name, namespace.private_endpoint_connection_name]):
-        raise CLIError('incorrect usage. Please provide [--id ID] or [--name NAME --scope-name NAME -g NAME]')
-
-    del namespace.connection_id
 
 
 def validate_storage_accounts_name_or_id(cmd, namespace):

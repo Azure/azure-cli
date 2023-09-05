@@ -3,12 +3,22 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=protected-access, too-few-public-methods
+import copy
 import argparse
 
 from azure.cli.command_modules.monitor.util import (
     get_aggregation_map, get_operator_map, get_autoscale_scale_direction_map)
 
 from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.aaz._arg import AAZCompoundTypeArg, AAZListType
+from azure.cli.core.aaz._arg_fmt import AAZListArgFormat
+from azure.cli.core.aaz._base import AAZUndefined, AAZBlankArgValue
+from azure.cli.core.aaz._arg_action import AAZCompoundTypeArgAction, AAZArgActionOperations, \
+    _ELEMENT_APPEND_KEY, AAZSimpleTypeArgAction
+from azure.cli.core.aaz._help import AAZShowHelp
+from azure.cli.core.aaz.exceptions import AAZInvalidValueError
+from azure.cli.core.aaz._prompt import AAZPromptInput
 
 
 def timezone_name_type(value):
@@ -220,6 +230,37 @@ class AlertRemoveAction(argparse._AppendAction):
 
 
 # pylint: disable=protected-access
+class AutoscaleCreateAction(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        action = self.get_action(values, option_string)
+        super(AutoscaleCreateAction, self).__call__(parser, namespace, action, option_string)
+
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+        _type = values[0].lower()
+        if _type == 'email':
+            return {
+                "key": "email",
+                "value": {
+                    "custom_emails": values[1:]
+                }
+            }
+        if _type == 'webhook':
+            uri = values[1]
+            try:
+                properties = dict(x.split('=', 1) for x in values[2:])
+            except ValueError:
+                raise InvalidArgumentValueError('{} webhook URI [KEY=VALUE ...]'.format(option_string))
+            return {
+                "key": "webhook",
+                "value": {
+                    "service_uri": uri,
+                    "properties": properties
+                }
+            }
+        raise InvalidArgumentValueError('{} TYPE KEY [ARGS]'.format(option_string))
+
+
+# pylint: disable=protected-access
 class AutoscaleAddAction(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
@@ -426,3 +467,123 @@ class ActionGroupReceiverParameterAction(MultiObjectsDeserializeAction):
         except IndexError:
             raise InvalidArgumentValueError('--action {}'.format(syntax[type_name]))
         return receiver
+
+
+class AAZActionGroupReceiverArgAction(AAZCompoundTypeArgAction):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        if not isinstance(getattr(namespace, self.dest), AAZArgActionOperations):
+            # overwrite existing namespace value which is not an instance of AAZArgActionOperations.
+            # especially the default value of argument.
+            setattr(namespace, self.dest, AAZArgActionOperations())
+        dest_ops = getattr(namespace, self.dest)
+        try:
+            if self._schema.singular_options and option_string in self._schema.singular_options:
+                # if singular option is used then parsed values by element action
+                action = self._schema.Element._build_cmd_action()
+                action.setup_operations(dest_ops, values, prefix_keys=[_ELEMENT_APPEND_KEY])
+            else:
+                self.setup_operations(dest_ops, values)
+        except (ValueError, KeyError) as ex:
+            raise InvalidArgumentValueError(f"Failed to parse '{option_string}' argument: {ex}") from ex
+        except AAZShowHelp as aaz_help:
+            aaz_help.keys = (option_string, *aaz_help.keys)
+            self.show_aaz_help(parser, aaz_help)
+
+    @classmethod
+    def setup_operations(cls, dest_ops, values, prefix_keys=None):
+        if prefix_keys is None:
+            prefix_keys = []
+        if values is None or values == []:
+            if cls._schema._blank == AAZUndefined:
+                raise AAZInvalidValueError("argument cannot be blank")
+            assert not isinstance(cls._schema._blank, AAZPromptInput), "Prompt input is not supported in List args."
+            dest_ops.add(copy.deepcopy(cls._schema._blank), *prefix_keys)
+        else:
+            assert isinstance(values, list)
+            ops = []
+
+            # This part of logic is to support Separate Elements Expression which is widely used in current command,
+            # such as:
+            #       --args val1 val2 val3.
+            # The standard expression of it should be:
+            #       --args [val1,val2,val3]
+
+            element_action = cls._schema.Element._build_cmd_action()
+            if not issubclass(element_action, AAZSimpleTypeArgAction):
+                # Separate Elements Expression only supported for simple type element array
+                raise AAZInvalidValueError("Element action is not nullable")
+
+            # dest_ops
+            try:
+                element_ops = AAZArgActionOperations()
+                for value in values:
+                    element_action.setup_operations(element_ops, value, prefix_keys=[_ELEMENT_APPEND_KEY])
+            except AAZShowHelp as aaz_help:
+                aaz_help.schema = cls._schema
+                aaz_help.keys = (0, *aaz_help.keys)
+                raise aaz_help
+
+            elements = []
+            for _, data in element_ops._ops:
+                elements.append(data)
+            ops = [([], elements)]
+
+        for key_parts, data in ops:
+            dest_ops.add(data, *prefix_keys, *key_parts)
+
+    @classmethod
+    def format_data(cls, data):
+        if data == AAZBlankArgValue:
+            if cls._schema._blank == AAZUndefined:
+                raise AAZInvalidValueError("argument value cannot be blank")
+            assert not isinstance(cls._schema._blank, AAZPromptInput), "Prompt input is not supported in List args."
+            data = copy.deepcopy(cls._schema._blank)
+
+        if data is None:
+            if cls._schema._nullable:
+                return data
+            raise AAZInvalidValueError("field is not nullable")
+
+        if isinstance(data, list):
+            result = []
+            action = cls._schema.Element._build_cmd_action()
+            for idx, value in enumerate(data):
+                try:
+                    result.append(action.format_data(value))
+                except AAZInvalidValueError as ex:
+                    raise AAZInvalidValueError(f"Invalid at [{idx}] : {ex}") from ex
+            return result
+
+        raise AAZInvalidValueError(f"list type value expected, got '{data}'({type(data)})")
+
+
+class AAZCustomListArg(AAZCompoundTypeArg, AAZListType):
+    # refer to ActionGroupReceiverParameterAction
+
+    def __init__(self, fmt=None, singular_options=None, **kwargs):
+        fmt = fmt or AAZListArgFormat()
+        super().__init__(fmt=fmt, **kwargs)
+        self.singular_options = singular_options
+
+    def to_cmd_arg(self, name, **kwargs):
+        arg = super().to_cmd_arg(name, **kwargs)
+        if self.singular_options:
+            assert arg.options_list
+            arg.options_list.extend(self.singular_options)  # support to parse singular options
+
+        if self._blank != AAZUndefined:
+            arg.nargs = '*'
+        else:
+            arg.nargs = '+'
+        return arg
+
+    def _build_cmd_action(self):
+        class Action(AAZActionGroupReceiverArgAction):
+            _schema = self  # bind action class with current schema
+
+        return Action
+
+    @property
+    def _type_in_help(self):
+        return f"List<{self.Element._type_in_help}>"
