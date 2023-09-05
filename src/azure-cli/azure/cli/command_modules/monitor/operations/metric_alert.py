@@ -6,6 +6,7 @@
 import re
 import antlr4
 
+from azure.cli.command_modules.monitor.actions import AAZCustomListArg
 from azure.cli.command_modules.monitor.grammar.metric_alert import MetricAlertConditionLexer, \
     MetricAlertConditionParser, MetricAlertConditionValidator
 from azure.cli.core.aaz import has_value
@@ -30,11 +31,23 @@ def create_metric_alert(cmd, resource_group_name, rule_name, scopes, condition, 
     for i, cond in enumerate(condition):
         if "dynamic" in cond:
             is_dynamic_threshold_criterion = True
-            cond["dynamic"]["name"] = f"cond{i}"
-            all_of.append(cond["dynamic"])
+            item = cond["dynamic"]
+            item["name"] = f"cond{i}"
+            item["dynamic_threshold_criterion"] = {
+                "alert_sensitivity": item.pop("alert_sensitivity", None),
+                "failing_periods": item.pop("failing_periods", None),
+                "operator": item.pop("operator", None),
+                "ignore_data_before": str(item.pop("ignore_data_before", None))
+            }
+            all_of.append(item)
         else:
-            cond["static"]["name"] = f"cond{i}"
-            all_of.append(cond["static"])
+            item = cond["static"]
+            item["name"] = f"cond{i}"
+            item["static_threshold_criterion"] = {
+                "operator": item.pop("operator", None),
+                "threshold": item.pop("threshold", None)
+            }
+            all_of.append(item)
 
     criteria = None
     resource_type, scope_type = _parse_resource_and_scope_type(scopes)
@@ -174,15 +187,16 @@ class MetricsAlertUpdate(_MetricsAlertUpdate):
             help="Time over which to aggregate metrics in `##h##m##s` format.",
             nullable=True
         )
-        args_schema.add_actions = AAZListArg(
-            options=["--add-actions", "--add-action"],
-            # singular_options=["--add-action"],
+        args_schema.add_actions = AAZCustomListArg(
+            options=["--add-actions"],
+            singular_options=["--add-action"],
             arg_group="Action",
             help="Add an action group and optional webhook properties to fire when the alert is triggered.\n\n"
-                 "Usage: --add-action ACTION_GROUP_NAME_OR_ID [KEY=VAL [KEY=VAL ...]]\n"
-                 # "Multiple action groups can be specified by using more than one `--add-action` argument."
+                 "Usage: --add-action ACTION_GROUP_NAME_OR_ID [KEY=VAL [KEY=VAL ...]]\n\n"
+                 "Multiple action groups can be specified by using more than one `--add-action` argument."
         )
-        args_schema.add_actions.Element = AAZStrArg()
+        args_schema.add_actions.Element = AAZListArg()
+        args_schema.add_actions.Element.Element = AAZStrArg()
         args_schema.remove_actions = AAZListArg(
             options=["--remove-actions"],
             arg_group="Action",
@@ -194,19 +208,27 @@ class MetricsAlertUpdate(_MetricsAlertUpdate):
                          "/actionGroups/{}"
             )
         )
-        args_schema.add_conditions = AAZListArg(
-            options=["--add-conditions", "--add-condition"],
-            # singular_options=["--add-condition"],
+        args_schema.add_conditions = AAZCustomListArg(
+            options=["--add-conditions"],
+            singular_options=["--add-condition"],
             arg_group="Condition",
             help="Add a condition which triggers the rule.\n\n"
                  "Usage: --add-condition {avg,min,max,total,count} [NAMESPACE.]METRIC\n"
                  "[{=,!=,>,>=,<,<=} THRESHOLD]\n"
                  "[{<,>,><} dynamic SENSITIVITY VIOLATIONS of EVALUATIONS [since DATETIME]]\n"
                  "[where DIMENSION {includes,excludes} VALUE [or VALUE ...]\n"
-                 "[and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]\n"
-                 # "Multiple action groups can be specified by using more than one `--add-condition` argument."
+                 "[and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]\n\n"
+                 "Sensitivity can be 'low', 'medium', 'high'.\n\n"
+                 "Violations can be the number of violations to trigger an alert. It should be smaller or equal to evaluation.\n\n"
+                 "Evaluations can be the number of evaluation periods for dynamic threshold.\n\n"
+                 "Datetime can be the date from which to start learning the metric historical data and calculate the dynamic thresholds (in ISO8601 format).\n\n"
+                 "Dimensions can be queried by adding the 'where' keyword and multiple dimensions can be queried by combining them with the 'and' keyword.\n\n"
+                 "Values for METRIC, DIMENSION and appropriate THRESHOLD values can be obtained from `az monitor metrics list-definitions` command.\n\n"
+                 "Due to server limitation, when an alert rule contains multiple criterias, the use of dimensions is limited to one value per dimension within each criterion.\n\n"
+                 "Multiple conditions can be specified by using more than one `--add-condition` argument."
         )
-        args_schema.add_conditions.Element = AAZStrArg()
+        args_schema.add_conditions.Element = AAZListArg()
+        args_schema.add_conditions.Element.Element = AAZStrArg()
         args_schema.remove_conditions = AAZListArg(
             options=["--remove-conditions"],
             arg_group="Condition",
@@ -240,7 +262,7 @@ class MetricsAlertUpdate(_MetricsAlertUpdate):
         if has_value(args.add_actions):
             self.add_actions = []
             for add_action in args.add_actions:
-                values = add_action.to_serialized_data().split()
+                values = add_action.to_serialized_data()[0].split()
                 action_group_id = complete_action_group_id(values[0])
                 try:
                     webhook_property_candidates = dict(x.split('=', 1) for x in values[1:]) if len(values) > 1 else None
@@ -267,7 +289,7 @@ class MetricsAlertUpdate(_MetricsAlertUpdate):
 
             self.add_conditions = []
             for add_condition in args.add_conditions:
-                string_val = add_condition.to_serialized_data()
+                string_val = add_condition.to_serialized_data()[0]
                 lexer = MetricAlertConditionLexer(antlr4.InputStream(string_val))
                 stream = antlr4.CommonTokenStream(lexer)
                 parser = MetricAlertConditionParser(stream)
@@ -343,7 +365,6 @@ class MetricsAlertUpdate(_MetricsAlertUpdate):
         if has_value(args.add_conditions):
             for cond in self.add_conditions:
                 cond["name"] = get_next_name()
-
                 instance.properties.criteria.all_of.append(cond)
 
 

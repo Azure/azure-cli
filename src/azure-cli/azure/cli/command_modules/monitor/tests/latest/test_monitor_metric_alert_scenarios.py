@@ -405,15 +405,15 @@ class MonitorTests(ScenarioTest):
                 self.check('description', 'High CPU'),
                 self.check('severity', 2),
                 self.check('autoMitigate', None),
-                self.check('windowSize', '0:05:00'),
-                self.check('evaluationFrequency', '0:01:00'),
+                self.check('windowSize', 'PT5M'),
+                self.check('evaluationFrequency', 'PT1M'),
                 self.check('length(scopes)', 2),
                 self.check('criteria.allOf[0].alertSensitivity', 'Low'),
                 self.check('criteria.allOf[0].criterionType', 'DynamicThresholdCriterion'),
                 self.check('criteria.allOf[0].failingPeriods.minFailingPeriodsToAlert', 2.0),
                 self.check('criteria.allOf[0].failingPeriods.numberOfEvaluationPeriods', 4.0),
                 self.check('criteria.allOf[0].operator', 'GreaterThan'),
-                self.check('criteria.allOf[0].ignoreDataBefore', '2020-11-01T16:00:00+00:00')
+                self.check('criteria.allOf[0].ignoreDataBefore', '2020-11-01T16:00:00.000Z')
             ])
 
         self.cmd(
@@ -422,8 +422,8 @@ class MonitorTests(ScenarioTest):
                 self.check('description', 'High Or Low CPU'),
                 self.check('severity', 3),
                 self.check('autoMitigate', True),
-                self.check('windowSize', '0:15:00'),
-                self.check('evaluationFrequency', '0:05:00'),
+                self.check('windowSize', 'PT15M'),
+                self.check('evaluationFrequency', 'PT5M'),
                 self.check('length(criteria.allOf)', 1),
                 self.check('length(scopes)', 2),
                 self.check('criteria.allOf[0].alertSensitivity', 'Medium'),
@@ -431,7 +431,7 @@ class MonitorTests(ScenarioTest):
                 self.check('criteria.allOf[0].failingPeriods.minFailingPeriodsToAlert', 1.0),
                 self.check('criteria.allOf[0].failingPeriods.numberOfEvaluationPeriods', 6.0),
                 self.check('criteria.allOf[0].operator', 'GreaterOrLessThan'),
-                self.check('criteria.allOf[0].ignoreDataBefore', '2020-10-01T10:23:00+00:00')
+                self.check('criteria.allOf[0].ignoreDataBefore', '2020-10-01T10:23:00.000Z')
             ])
 
         self.cmd('monitor metrics alert list -g {rg}',
