@@ -171,20 +171,17 @@ def load_command_table(self, _):
         g.command('list-namespaces', 'list', is_preview=True, command_type=metric_namespaces_sdk,
                   table_transformer=metrics_namespaces_table)
 
-    with self.command_group('monitor metrics alert', metric_alert_sdk, custom_command_type=alert_custom,
-                            client_factory=cf_metric_alerts) as g:
-        g.custom_command('create', 'create_metric_alert')
-        g.command('delete', 'delete')
-        g.custom_command('list', 'list_metric_alerts', custom_command_type=alert_custom)
-        g.show_command('show', 'get')
-        g.generic_update_command('update', custom_func_name='update_metric_alert', custom_func_type=alert_custom)
+    with self.command_group("monitor metrics alert") as g:
+        from .operations.metric_alert import MetricsAlertUpdate
+        self.command_table["monitor metrics alert update"] = MetricsAlertUpdate(loader=self)
+        g.custom_command("create", "create_metric_alert", custom_command_type=alert_custom)
 
-    with self.command_group('monitor metrics alert dimension', metric_alert_sdk, custom_command_type=alert_custom) as g:
+    with self.command_group('monitor metrics alert dimension') as g:
         from .validators import validate_metrics_alert_dimension
         g.custom_command('create', 'create_metric_alert_dimension', custom_command_type=alert_custom,
                          validator=validate_metrics_alert_dimension, is_preview=True)
 
-    with self.command_group('monitor metrics alert condition', metric_alert_sdk, custom_command_type=alert_custom) as g:
+    with self.command_group('monitor metrics alert condition') as g:
         from .validators import validate_metrics_alert_condition
         g.custom_command('create', 'create_metric_alert_condition', custom_command_type=alert_custom,
                          validator=validate_metrics_alert_condition, is_preview=True)

@@ -2,48 +2,61 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=too-many-locals
+# pylint: disable=too-many-locals, line-too-long, protected-access
+import re
+import antlr4
 
+from azure.cli.command_modules.monitor.grammar.metric_alert import MetricAlertConditionLexer, \
+    MetricAlertConditionParser, MetricAlertConditionValidator
+from azure.cli.core.aaz import has_value
+from azure.cli.core.azclierror import InvalidArgumentValueError
+from datetime import timedelta
 from knack.log import get_logger
+from msrestazure.tools import is_valid_resource_id, resource_id
+
+from ..aaz.latest.monitor.metrics.alert import Update as _MetricsAlertUpdate
 
 logger = get_logger(__name__)
 
 _metric_alert_dimension_prefix = '_where_'
 
 
-def create_metric_alert(client, resource_group_name, rule_name, scopes, condition, disabled=False, description=None,
+def create_metric_alert(cmd, resource_group_name, rule_name, scopes, condition, disabled=False, description=None,
                         tags=None, actions=None, severity=2, window_size='5m', evaluation_frequency='1m',
                         auto_mitigate=None, target_resource_type=None, target_resource_region=None):
-    from azure.mgmt.monitor.models import (MetricAlertResource,
-                                           MetricAlertSingleResourceMultipleMetricCriteria,
-                                           MetricAlertMultipleResourceMultipleMetricCriteria,
-                                           DynamicMetricCriteria)
-    from azure.cli.core import CLIError
-    # generate names for the conditions
+    # generate metadata for the conditions
+    is_dynamic_threshold_criterion = False
+    all_of = []
     for i, cond in enumerate(condition):
-        cond.name = 'cond{}'.format(i)
+        if "dynamic" in cond:
+            is_dynamic_threshold_criterion = True
+            cond["dynamic"]["name"] = f"cond{i}"
+            all_of.append(cond["dynamic"])
+        else:
+            cond["static"]["name"] = f"cond{i}"
+            all_of.append(cond["static"])
+
     criteria = None
     resource_type, scope_type = _parse_resource_and_scope_type(scopes)
     if scope_type in ['resource_group', 'subscription']:
         if target_resource_type is None or target_resource_region is None:
-            raise CLIError('--target-resource-type and --target-resource-region must be provided.')
-        criteria = MetricAlertMultipleResourceMultipleMetricCriteria(all_of=condition)
+            raise InvalidArgumentValueError('--target-resource-type and --target-resource-region must be provided.')
+        criteria = {"microsoft_azure_monitor_multiple_resource_multiple_metric_criteria": {"all_of": all_of}}
     else:
         if len(scopes) == 1:
-            is_dynamic_threshold_criterion = False
-            for v in condition:
-                if isinstance(v, DynamicMetricCriteria):
-                    is_dynamic_threshold_criterion = True
             if not is_dynamic_threshold_criterion:
-                criteria = MetricAlertSingleResourceMultipleMetricCriteria(all_of=condition)
+                criteria = {"microsoft_azure_monitor_single_resource_multiple_metric_criteria": {"all_of": all_of}}
             else:
-                criteria = MetricAlertMultipleResourceMultipleMetricCriteria(all_of=condition)
+                criteria = {"microsoft_azure_monitor_multiple_resource_multiple_metric_criteria": {"all_of": all_of}}
         else:
-            criteria = MetricAlertMultipleResourceMultipleMetricCriteria(all_of=condition)
+            criteria = {"microsoft_azure_monitor_multiple_resource_multiple_metric_criteria": {"all_of": all_of}}
             target_resource_type = resource_type
             target_resource_region = target_resource_region if target_resource_region else 'global'
 
-    kwargs = {
+    from ..aaz.latest.monitor.metrics.alert import Create
+    return Create(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'name': rule_name,
         'description': description,
         'severity': severity,
         'enabled': not disabled,
@@ -57,8 +70,7 @@ def create_metric_alert(client, resource_group_name, rule_name, scopes, conditio
         'tags': tags,
         'location': 'global',
         'auto_mitigate': auto_mitigate
-    }
-    return client.create_or_update(resource_group_name, rule_name, MetricAlertResource(**kwargs))
+    })
 
 
 def update_metric_alert(instance, scopes=None, description=None, enabled=None, tags=None,
@@ -87,7 +99,7 @@ def update_metric_alert(instance, scopes=None, description=None, enabled=None, t
 
     # process action additions
     if add_actions is not None:
-        add_action_ids = {x.action_group_id.lower() for x in add_actions}
+        add_action_ids = {x["action_group_id"].lower() for x in add_actions}
         instance.actions = [x for x in instance.actions if x.action_group_id.lower() not in add_action_ids]
         instance.actions.extend(add_actions)
 
@@ -112,6 +124,227 @@ def update_metric_alert(instance, scopes=None, description=None, enabled=None, t
             instance.criteria.all_of.append(condition)
 
     return instance
+
+
+def get_period_type(value, as_timedelta=False):
+    def _get_substring(indices):
+        if indices == tuple([-1, -1]):
+            return ''
+        return value[indices[0]: indices[1]]
+
+    regex = r'(p)?(\d+y)?(\d+m)?(\d+d)?(t)?(\d+h)?(\d+m)?(\d+s)?'
+    match = re.match(regex, value.lower())
+    match_len = match.span(0)
+    if match_len != tuple([0, len(value)]):
+        raise ValueError('PERIOD should be of the form "##h##m##s" or ISO8601')
+    # simply return value if a valid ISO8601 string is supplied
+    if match.span(1) != tuple([-1, -1]) and match.span(5) != tuple([-1, -1]):
+        return value
+
+    # if shorthand is used, only support days, minutes, hours, seconds
+    # ensure M is interpretted as minutes
+    days = _get_substring(match.span(4))
+    hours = _get_substring(match.span(6))
+    minutes = _get_substring(match.span(7)) or _get_substring(match.span(3))
+    seconds = _get_substring(match.span(8))
+
+    if as_timedelta:
+        return timedelta(
+            days=int(days[:-1]) if days else 0,
+            hours=int(hours[:-1]) if hours else 0,
+            minutes=int(minutes[:-1]) if minutes else 0,
+            seconds=int(seconds[:-1]) if seconds else 0
+        )
+
+    return 'P{}T{}{}{}'.format(days, minutes, hours, seconds).upper()
+
+
+class MetricsAlertUpdate(_MetricsAlertUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.evaluation_frequency = AAZStrArg(
+            options=["--evaluation-frequency"],
+            help="Frequency with which to evaluate the rule in `##h##m##s` format.",
+            nullable=True
+        )
+        args_schema.window_size = AAZStrArg(
+            options=["--window-size"],
+            help="Time over which to aggregate metrics in `##h##m##s` format.",
+            nullable=True
+        )
+        args_schema.add_actions = AAZListArg(
+            options=["--add-actions", "--add-action"],
+            # singular_options=["--add-action"],
+            arg_group="Action",
+            help="Add an action group and optional webhook properties to fire when the alert is triggered.\n\n"
+                 "Usage: --add-action ACTION_GROUP_NAME_OR_ID [KEY=VAL [KEY=VAL ...]]\n"
+                 # "Multiple action groups can be specified by using more than one `--add-action` argument."
+        )
+        args_schema.add_actions.Element = AAZStrArg()
+        args_schema.remove_actions = AAZListArg(
+            options=["--remove-actions"],
+            arg_group="Action",
+            help="Space-separated list of action group names to remove."
+        )
+        args_schema.remove_actions.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Insights"
+                         "/actionGroups/{}"
+            )
+        )
+        args_schema.add_conditions = AAZListArg(
+            options=["--add-conditions", "--add-condition"],
+            # singular_options=["--add-condition"],
+            arg_group="Condition",
+            help="Add a condition which triggers the rule.\n\n"
+                 "Usage: --add-condition {avg,min,max,total,count} [NAMESPACE.]METRIC\n"
+                 "[{=,!=,>,>=,<,<=} THRESHOLD]\n"
+                 "[{<,>,><} dynamic SENSITIVITY VIOLATIONS of EVALUATIONS [since DATETIME]]\n"
+                 "[where DIMENSION {includes,excludes} VALUE [or VALUE ...]\n"
+                 "[and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]\n"
+                 # "Multiple action groups can be specified by using more than one `--add-condition` argument."
+        )
+        args_schema.add_conditions.Element = AAZStrArg()
+        args_schema.remove_conditions = AAZListArg(
+            options=["--remove-conditions"],
+            arg_group="Condition",
+            help="Space-separated list of condition names to remove."
+        )
+        args_schema.remove_conditions.Element = AAZStrArg()
+        args_schema.evaluation_frequency_iso._registered = False
+        args_schema.window_size_iso._registered = False
+
+        return args_schema
+
+    def pre_operations(self):
+        def complete_action_group_id(name):
+            if is_valid_resource_id(name):
+                return name
+
+            return resource_id(
+                subscription=self.ctx.subscription_id,
+                resource_group=self.ctx.args.resource_group,
+                namespace="Microsoft.Insights",
+                type="actionGroups",
+                name=name
+            )
+
+        args = self.ctx.args
+        if has_value(args.evaluation_frequency):
+            args.evaluation_frequency_iso = get_period_type(args.evaluation_frequency.to_serialized_data())
+        if has_value(args.window_size):
+            args.window_size_iso = get_period_type(args.window_size.to_serialized_data())
+
+        if has_value(args.add_actions):
+            self.add_actions = []
+            for add_action in args.add_actions:
+                values = add_action.to_serialized_data().split()
+                action_group_id = complete_action_group_id(values[0])
+                try:
+                    webhook_property_candidates = dict(x.split('=', 1) for x in values[1:]) if len(values) > 1 else None
+                except ValueError:
+                    err_msg = "Value of --add-action is invalid. Please refer to --help to get insight of correct format."
+                    raise InvalidArgumentValueError(err_msg)
+
+                action = {
+                    "action_group_id": action_group_id,
+                    "web_hook_properties": webhook_property_candidates
+                }
+                action["odatatype"] = "Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models." \
+                                      "Microsoft.AppInsights.Nexus.DataContracts.Resources.ScheduledQueryRules.Action"
+
+                self.add_actions.append(action)
+
+        if has_value(args.add_conditions):
+            err_msg = 'usage error: --condition {avg,min,max,total,count} [NAMESPACE.]METRIC\n' \
+                      '                         [{=,!=,>,>=,<,<=} THRESHOLD]\n' \
+                      '                         [{<,>,><} dynamic SENSITIVITY VIOLATION of EVALUATION [since DATETIME]]\n' \
+                      '                         [where DIMENSION {includes,excludes} VALUE [or VALUE ...]\n' \
+                      '                         [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]\n' \
+                      '                         [with skipmetricvalidation]'
+
+            self.add_conditions = []
+            for add_condition in args.add_conditions:
+                string_val = add_condition.to_serialized_data()
+                lexer = MetricAlertConditionLexer(antlr4.InputStream(string_val))
+                stream = antlr4.CommonTokenStream(lexer)
+                parser = MetricAlertConditionParser(stream)
+                tree = parser.expression()
+
+                try:
+                    validator = MetricAlertConditionValidator()
+                    walker = antlr4.ParseTreeWalker()
+                    walker.walk(validator, tree)
+                    metric_condition = validator.result()
+                    if "static" in metric_condition:
+                        # static metric criteria
+                        for item in ['time_aggregation', 'metric_name', 'operator', 'threshold']:
+                            if item not in metric_condition["static"]:
+                                raise InvalidArgumentValueError(err_msg)
+                    elif "dynamic" in metric_condition:
+                        # dynamic metric criteria
+                        for item in ['time_aggregation', 'metric_name', 'operator', 'alert_sensitivity',
+                                     'failing_periods']:
+                            if item not in metric_condition["dynamic"]:
+                                raise InvalidArgumentValueError(err_msg)
+                    else:
+                        raise NotImplementedError()
+                except (AttributeError, TypeError, KeyError):
+                    raise InvalidArgumentValueError(err_msg)
+
+                self.add_conditions.append(metric_condition)
+
+    def pre_instance_update(self, instance):
+        def get_next_name():
+            idx = 0
+            while True:
+                possible_name = f"cond{idx}"
+                match = next((cond for cond in instance.properties.criteria.all_of if cond.name == possible_name), None)
+                if match:
+                    idx += 1
+                    continue
+
+                return possible_name
+
+        args = self.ctx.args
+        if has_value(args.remove_actions):
+            to_be_removed = set(map(lambda x: x.to_serialized_data().lower(), args.remove_actions))
+
+            new_actions = []
+            for action in instance.properties.actions:
+                if action.action_group_id.to_serialized_data().lower() not in to_be_removed:
+                    new_actions.append(action)
+
+            instance.properties.actions = new_actions
+
+        if has_value(args.add_actions):
+            to_be_added = set(map(lambda x: x["action_group_id"].lower(), self.add_actions))
+
+            new_actions = []
+            for action in instance.properties.actions:
+                if action.action_group_id.to_serialized_data().lower() not in to_be_added:
+                    new_actions.append(action)
+            new_actions.extend(self.add_actions)
+
+            instance.properties.actions = new_actions
+
+        if has_value(args.remove_conditions):
+            to_be_removed = set(map(lambda x: x.to_serialized_data().lower(), args.remove_conditions))
+
+            new_conditions = []
+            for cond in instance.properties.criteria.all_of:
+                if cond.name.to_serialized_data().lower() not in to_be_removed:
+                    new_conditions.append(cond)
+
+            instance.properties.criteria.all_of = new_conditions
+
+        if has_value(args.add_conditions):
+            for cond in self.add_conditions:
+                cond["name"] = get_next_name()
+
+                instance.properties.criteria.all_of.append(cond)
 
 
 def create_metric_alert_dimension(dimension_name, value_list, operator=None):
@@ -150,12 +383,6 @@ def create_metric_alert_condition(condition_type, aggregation, metric_name, oper
     return condition.strip()
 
 
-def list_metric_alerts(client, resource_group_name=None):
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list_by_subscription()
-
-
 def _parse_actions(actions):
     """ Actions come in as a combined list. This method separates the webhook actions into a
         separate collection and combines any number of email actions into a single email collection
@@ -189,7 +416,6 @@ def _parse_action_removals(actions):
 
 def _parse_resource_and_scope_type(scopes):
     from azure.mgmt.core.tools import parse_resource_id
-    from azure.cli.core.azclierror import InvalidArgumentValueError
 
     if not scopes:
         raise InvalidArgumentValueError('scopes cannot be null.')

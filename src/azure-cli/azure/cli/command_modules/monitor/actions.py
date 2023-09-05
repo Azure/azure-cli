@@ -96,7 +96,6 @@ class MetricAlertConditionAction(argparse._AppendAction):
 
         from azure.cli.command_modules.monitor.grammar.metric_alert import (
             MetricAlertConditionLexer, MetricAlertConditionParser, MetricAlertConditionValidator)
-        from azure.mgmt.monitor.models import MetricCriteria, DynamicMetricCriteria
 
         usage = 'usage error: --condition {avg,min,max,total,count} [NAMESPACE.]METRIC\n' \
                 '                         [{=,!=,>,>=,<,<=} THRESHOLD]\n' \
@@ -117,15 +116,15 @@ class MetricAlertConditionAction(argparse._AppendAction):
             walker = antlr4.ParseTreeWalker()
             walker.walk(validator, tree)
             metric_condition = validator.result()
-            if isinstance(metric_condition, MetricCriteria):
+            if "static" in metric_condition:
                 # static metric criteria
                 for item in ['time_aggregation', 'metric_name', 'operator', 'threshold']:
-                    if not getattr(metric_condition, item, None):
+                    if item not in metric_condition["static"]:
                         raise InvalidArgumentValueError(usage)
-            elif isinstance(metric_condition, DynamicMetricCriteria):
+            elif "dynamic" in metric_condition:
                 # dynamic metric criteria
                 for item in ['time_aggregation', 'metric_name', 'operator', 'alert_sensitivity', 'failing_periods']:
-                    if not getattr(metric_condition, item, None):
+                    if item not in metric_condition["dynamic"]:
                         raise InvalidArgumentValueError(usage)
             else:
                 raise NotImplementedError()
@@ -147,12 +146,11 @@ class MetricAlertAddAction(argparse._AppendAction):
             )
             raise InvalidArgumentValueError(err_msg)
 
-        from azure.mgmt.monitor.models import MetricAlertAction
-        action = MetricAlertAction(
-            action_group_id=action_group_id,
-            web_hook_properties=webhook_property_candidates
-        )
-        action.odatatype = 'Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models.Microsoft.AppInsights.Nexus.' \
+        action = {
+            "action_group_id": action_group_id,
+            "web_hook_properties": webhook_property_candidates
+        }
+        action["odatatype"] = 'Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models.Microsoft.AppInsights.Nexus.' \
                            'DataContracts.Resources.ScheduledQueryRules.Action'
         super(MetricAlertAddAction, self).__call__(parser, namespace, action, option_string)
 
