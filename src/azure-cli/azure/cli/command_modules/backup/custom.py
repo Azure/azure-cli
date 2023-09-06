@@ -131,6 +131,17 @@ def create_vault(client, vault_name, resource_group_name, location, tags=None,
                  classic_alerts='Enable', azure_monitor_alerts_for_job_failures='Enable'):
     vault_sku = Sku(name=SkuName.standard)
 
+    vault_properties = VaultProperties(
+        monitoring_settings=_get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures, classic_alerts),
+        public_network_access=_get_vault_public_network_access(client, resource_group_name, vault_name, public_network_access),
+        security_settings=_get_vault_security_settings(client, resource_group_name, vault_name, immutability_state, soft_delete_state, soft_delete_retention_period_in_days),
+        restore_settings=_get_vault_restore_settings(cross_subscription_restore_state)
+    )
+    vault = Vault(location=location, sku=vault_sku, properties=vault_properties, tags=tags)
+    return client.begin_create_or_update(resource_group_name, vault_name, vault)
+
+
+def _get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures, classic_alerts):
     monitoring_settings = MonitoringSettings(
         azure_monitor_alert_settings=AzureMonitorAlertSettings(
             alerts_for_all_job_failures=cust_help.transform_enable_parameters(azure_monitor_alerts_for_job_failures)
@@ -139,20 +150,11 @@ def create_vault(client, vault_name, resource_group_name, location, tags=None,
             alerts_for_critical_operations=cust_help.transform_enable_parameters(classic_alerts)
         )
     )
-
-    vault_properties = VaultProperties(
-        monitoring_settings=monitoring_settings,
-        public_network_access=_get_vault_public_network_access(client, resource_group_name, vault_name, public_network_access),
-        security_settings=_get_vault_security_settings(immutability_state, soft_delete_state, soft_delete_retention_period_in_days),
-        restore_settings=_get_vault_restore_settings(cross_subscription_restore_state)
-    )
-    vault = Vault(location=location, sku=vault_sku, properties=vault_properties, tags=tags)
-    return client.begin_create_or_update(resource_group_name, vault_name, vault)
+    return monitoring_settings
 
 
-def _get_vault_security_settings(immutability_state, soft_delete_state, soft_delete_retention_period_in_days):
+def _get_vault_security_settings(client, resource_group_name, vault_name, immutability_state, soft_delete_state, soft_delete_retention_period_in_days):
     security_settings = None
-    print("Modifying vault security settings - Immutability, SD state, SD duration = ", immutability_state, soft_delete_state, soft_delete_retention_period_in_days)
 
     if immutability_state is not None or soft_delete_state is not None or soft_delete_retention_period_in_days is not None:
         immutability_settings=None
@@ -162,20 +164,33 @@ def _get_vault_security_settings(immutability_state, soft_delete_state, soft_del
             immutability_settings = ImmutabilitySettings(state=immutability_state)
             print("Immutability settings has been set to", immutability_settings)
 
-        # Object(**kwargs) object creation is used to ensure we do not accidentally reset a previously set property
         if soft_delete_state is not None or soft_delete_retention_period_in_days is not None:
-            soft_delete_settings = {}
-            if soft_delete_state is not None:
-                soft_delete_settings["soft_delete_state"] = cust_help.transform_softdelete_parameters(soft_delete_state)
-            if soft_delete_retention_period_in_days is not None:
-                soft_delete_settings["soft_delete_retention_period_in_days"] = soft_delete_retention_period_in_days
-            print("Soft delete settings has been set to", soft_delete_settings)
+            # Both soft delete state and retention period need to be passed, so we need to fetch the existing values
+            # if not provided in the input. If the vault does not exist, the default values are Enabled/14 days
+            if soft_delete_state is None:
+                try:
+                    existing_vault_if_any = client.get(resource_group_name, vault_name)
+                    existing_soft_delete_state = existing_vault_if_any.properties.security_settings.soft_delete_settings.soft_delete_state
+                    soft_delete_state = cust_help.transform_enable_parameters(existing_soft_delete_state)
+                except CoreResourceNotFoundError:
+                    soft_delete_state = "Enable"
+            if soft_delete_retention_period_in_days is None:
+                try:
+                    existing_vault_if_any = client.get(resource_group_name, vault_name)
+                    existing_soft_delete_retention_period_in_days = existing_vault_if_any.properties.security_settings.soft_delete_settings.soft_delete_retention_period_in_days
+                    soft_delete_retention_period_in_days = existing_soft_delete_retention_period_in_days
+                except CoreResourceNotFoundError:
+                    soft_delete_retention_period_in_days = 14
+
+            soft_delete_settings = SoftDeleteSettings(
+                soft_delete_state=cust_help.transform_softdelete_parameters(soft_delete_state),
+                soft_delete_retention_period_in_days=soft_delete_retention_period_in_days
+            )
 
         security_settings = SecuritySettings(
             immutability_settings=None if immutability_settings is None else immutability_settings,
             soft_delete_settings=None if soft_delete_settings is None else soft_delete_settings
         )
-        print("finally, security settings has been set to", security_settings)
     return security_settings
 
 
@@ -196,10 +211,7 @@ def _get_vault_public_network_access(client, resource_group_name, vault_name, pu
         try:
             existing_vault_if_any = client.get(resource_group_name, vault_name)
             existing_vault_public_network_access = existing_vault_if_any.properties.public_network_access
-            # TODO add better validation for existing_vault_public_network_access? It might be invalid.
-            #   Maybe have a list of possible values and iterate through, and if not add a warning to
-            #   contact support? Such as: if public_network_access in [list], <action>, else <warn user>.
-            public_network_access = existing_vault_public_network_access[:-1]
+            public_network_access = cust_help.transform_enable_parameters(existing_vault_public_network_access)
         except CoreResourceNotFoundError:
             # This runs for a create - if there is no vault, default value is Enable
             public_network_access = 'Enable'
