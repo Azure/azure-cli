@@ -13,6 +13,7 @@ from azure.cli.core.aaz import has_value
 from azure.cli.core.azclierror import InvalidArgumentValueError
 from datetime import timedelta
 from knack.log import get_logger
+from msrest.serialization import Serializer
 from msrestazure.tools import is_valid_resource_id, resource_id
 
 from ..aaz.latest.monitor.metrics.alert import Update as _MetricsAlertUpdate
@@ -38,7 +39,7 @@ def create_metric_alert(cmd, resource_group_name, rule_name, scopes, condition, 
                 "alert_sensitivity": item.pop("alert_sensitivity", None),
                 "failing_periods": item.pop("failing_periods", None),
                 "operator": item.pop("operator", None),
-                "ignore_data_before": str(item.pop("ignore_data_before", None))
+                "ignore_data_before": Serializer.serialize_iso(dt) if (dt:= item.pop("ignore_data_before", None)) else None
             }
 
             all_of.append({**item, **{"dynamic_threshold_criterion": props}})
@@ -200,7 +201,7 @@ class MetricsAlertUpdate(_MetricsAlertUpdate):
                  "Usage: --add-action ACTION_GROUP_NAME_OR_ID [KEY=VAL [KEY=VAL ...]]\n\n"
                  "Multiple action groups can be specified by using more than one `--add-action` argument."
         )
-        args_schema.add_actions.Element = AAZListArg()
+        args_schema.add_actions.Element = AAZCustomListArg()
         args_schema.add_actions.Element.Element = AAZStrArg()
         args_schema.remove_actions = AAZListArg(
             options=["--remove-actions"],
@@ -369,8 +370,19 @@ class MetricsAlertUpdate(_MetricsAlertUpdate):
 
         if has_value(args.add_conditions):
             for cond in self.add_conditions:
-                cond["name"] = get_next_name()
-                instance.properties.criteria.all_of.append(cond)
+                if "dynamic" in cond:
+                    item = cond["dynamic"]
+                    item["name"] = get_next_name()
+                    item["criterion_type"] = "DynamicThresholdCriterion"
+                    item["ignore_data_before"] = Serializer.serialize_iso(dt) if (dt := item.pop("ignore_data_before", None)) else None
+
+                    instance.properties.criteria.all_of.append(item)
+                else:
+                    item = cond["static"]
+                    item["name"] = get_next_name()
+                    item["criterion_type"] = "StaticThresholdCriterion"
+
+                    instance.properties.criteria.all_of.append(item)
 
 
 def create_metric_alert_dimension(dimension_name, value_list, operator=None):
