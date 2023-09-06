@@ -90,7 +90,7 @@ class MonitorMetricAlertActionTest(unittest.TestCase):
         MetricAlertConditionAction('--condition', 'condition').__call__(None, ns, value.split(), '--condition')
 
     def check_condition(self, ns, time_aggregation, metric_namespace, metric_name, operator, threshold, skip_metric_validation):
-        prop = ns.condition[0]["static"]
+        prop = ns.condition[0]["static"] if "static" in ns.condition[0] else ns.condition[0]["dynamic"]
         self.assertEqual(prop.get("time_aggregation", None), time_aggregation)
         self.assertEqual(prop.get("metric_name", None), metric_name)
         self.assertEqual(prop.get("operator", None), operator)
@@ -99,7 +99,7 @@ class MonitorMetricAlertActionTest(unittest.TestCase):
         self.assertEqual(prop.get("skip_metric_validation", None), skip_metric_validation)
 
     def check_dimension(self, ns, index, name, operator, values):
-        dim = ns.condition[0]["static"]["dimensions"][index]
+        dim = ns.condition[0]["static"]["dimensions"][index] if "static" in ns.condition[0] else ns.condition[0]["dynamic"]["dimensions"][index]
         self.assertEqual(dim.get("name", None), name)
         self.assertEqual(dim.get("operator", None), operator)
         self.assertEqual(dim.get("values", None), values)

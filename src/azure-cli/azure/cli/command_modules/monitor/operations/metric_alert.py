@@ -92,59 +92,6 @@ def create_metric_alert(cmd, resource_group_name, rule_name, scopes, condition, 
     })
 
 
-def update_metric_alert(instance, scopes=None, description=None, enabled=None, tags=None,
-                        severity=None, window_size=None, evaluation_frequency=None, auto_mitigate=None,
-                        add_actions=None, remove_actions=None, add_conditions=None, remove_conditions=None):
-    if scopes is not None:
-        instance.scopes = scopes
-    if description is not None:
-        instance.description = description
-    if enabled is not None:
-        instance.enabled = enabled
-    if tags is not None:
-        instance.tags = tags
-    if severity is not None:
-        instance.severity = severity
-    if window_size is not None:
-        instance.window_size = window_size
-    if evaluation_frequency is not None:
-        instance.evaluation_frequency = evaluation_frequency
-    if auto_mitigate is not None:
-        instance.auto_mitigate = auto_mitigate
-
-    # process action removals
-    if remove_actions is not None:
-        instance.actions = [x for x in instance.actions if x.action_group_id.lower() not in remove_actions]
-
-    # process action additions
-    if add_actions is not None:
-        add_action_ids = {x["action_group_id"].lower() for x in add_actions}
-        instance.actions = [x for x in instance.actions if x.action_group_id.lower() not in add_action_ids]
-        instance.actions.extend(add_actions)
-
-    # process condition removals
-    if remove_conditions is not None:
-        instance.criteria.all_of = [x for x in instance.criteria.all_of if x.name not in remove_conditions]
-
-    def _get_next_name():
-        i = 0
-        while True:
-            possible_name = 'cond{}'.format(i)
-            match = next((x for x in instance.criteria.all_of if x.name == possible_name), None)
-            if match:
-                i = i + 1
-                continue
-            return possible_name
-
-    # process condition additions
-    if add_conditions is not None:
-        for condition in add_conditions:
-            condition.name = _get_next_name()
-            instance.criteria.all_of.append(condition)
-
-    return instance
-
-
 def get_period_type(value, as_timedelta=False):
     def _get_substring(indices):
         if indices == tuple([-1, -1]):
