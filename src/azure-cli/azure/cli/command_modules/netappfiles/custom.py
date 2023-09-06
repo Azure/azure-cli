@@ -118,7 +118,7 @@ def patch_account(instance, tags=None, encryption=None, key_source=None, key_vau
 
 # Custom method for account update, active_directory is amended with subgroup commands. Ensure it returns the GET response  (the updated resource)
 def patch_account_custom(cmd, client, resource_group_name, account_name, tags=None, encryption=None, key_source=None, key_vault_uri=None,
-                         key_name=None, key_vault_resource_id=None, user_assigned_identity=None, identity_type=None, no_wait=False):
+                         key_name=None, key_vault_resource_id=None, user_assigned_identity=None, identity_type=None):
     if encryption is not None and key_source is None:
         key_source = encryption
     if key_source is not None and key_source == EncryptionKeySource.MICROSOFT_KEY_VAULT:
@@ -138,7 +138,7 @@ def patch_account_custom(cmd, client, resource_group_name, account_name, tags=No
     # Poll the lro then do a final get, to get around issue where operation result was not full resource
     poller = client.begin_update(resource_group_name=resource_group_name, account_name=account_name, body=body)
     LongRunningOperation(cmd.cli_ctx)(poller)
-    return sdk_no_wait(no_wait, client.get, resource_group_name, account_name)
+    return client.get(resource_group_name, account_name)
 
 
 def add_active_directory_custom(cmd, client, resource_group_name, account_name, username, password, domain, dns,
@@ -146,7 +146,7 @@ def add_active_directory_custom(cmd, client, resource_group_name, account_name, 
                                 server_root_ca_cert=None, backup_operators=None, aes_encryption=None, ldap_signing=None,
                                 security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None,
                                 administrators=None, encrypt_dc_conn=None, user_dn=None, group_dn=None, group_filter=None,
-                                preferred_servers_for_ldap_client=None, no_wait=False):
+                                preferred_servers_for_ldap_client=None):
     ldap_search_scope = LdapSearchScopeOpt(user_dn=user_dn,
                                            group_dn=group_dn,
                                            group_membership_filter=group_filter)
@@ -166,7 +166,7 @@ def add_active_directory_custom(cmd, client, resource_group_name, account_name, 
     # Poll the lro then do a final get, to get around issue where operation result was not full resource
     poller = client.begin_update(resource_group_name=resource_group_name, account_name=account_name, body=body)
     LongRunningOperation(cmd.cli_ctx)(poller)
-    return sdk_no_wait(no_wait, client.get, resource_group_name, account_name)
+    return client.get(resource_group_name, account_name)
 
 
 # pylint: disable=too-many-locals, disable=too-many-statements
@@ -211,7 +211,7 @@ def update_active_directory_custom(cmd, client, resource_group_name, account_nam
                                    domain, dns, smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None,
                                    server_root_ca_cert=None, backup_operators=None, aes_encryption=None, ldap_signing=None,
                                    security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None, site=None,
-                                   administrators=None, encrypt_dc_conn=None, user_dn=None, group_dn=None, group_filter=None, no_wait=False):
+                                   administrators=None, encrypt_dc_conn=None, user_dn=None, group_dn=None, group_filter=None):
 
     account = client.get(resource_group_name=resource_group_name, account_name=account_name)
     ad_list = account.active_directories
@@ -239,7 +239,7 @@ def update_active_directory_custom(cmd, client, resource_group_name, account_nam
     body = NetAppAccountPatch(active_directories=ad_list)
     poller = client.begin_update(resource_group_name=resource_group_name, account_name=account_name, body=body)
     LongRunningOperation(cmd.cli_ctx)(poller)
-    return sdk_no_wait(no_wait, client.get, resource_group_name, account_name)
+    return client.get(resource_group_name, account_name)
 
 
 # list all active directories
@@ -301,7 +301,7 @@ def patch_pool(instance, size=None, qos_type=None, tags=None, cool_access=None):
     return body
 
 
-def patch_pool_custom(cmd, client, resource_group_name, account_name, pool_name, tags=None, size=None, qos_type=None, cool_access=None, no_wait=False):
+def patch_pool_custom(cmd, client, resource_group_name, account_name, pool_name, tags=None, size=None, qos_type=None, cool_access=None):
     # patch operation to update the record
     if size is not None:
         size = int(size) * tib_scale
@@ -313,7 +313,7 @@ def patch_pool_custom(cmd, client, resource_group_name, account_name, pool_name,
                                  body=body)
     LongRunningOperation(cmd.cli_ctx)(poller)
     logger.debug("ANF Log: GET updated Response: ")
-    return sdk_no_wait(no_wait, client.get, resource_group_name, account_name, pool_name)
+    return client.get(resource_group_name, account_name, pool_name)
 
 
 # ---- VOLUME ----
@@ -453,7 +453,7 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
 def patch_volume(cmd, client, account_name, pool_name, volume_name, resource_group_name, usage_threshold=None, service_level=None, tags=None, backup_enabled=None,
                  backup_policy_id=None, policy_enforced=None, throughput_mibps=None, snapshot_policy_id=None,
                  is_def_quota_enabled=None, default_user_quota=None, default_group_quota=None, unix_permissions=None,
-                 cool_access=None, coolness_period=None, snapshot_dir_visible=None, no_wait=False):
+                 cool_access=None, coolness_period=None, snapshot_dir_visible=None):
     data_protection = None
     backup = None
     snapshot = None
@@ -490,7 +490,7 @@ def patch_volume(cmd, client, account_name, pool_name, volume_name, resource_gro
                                  body=params)
     LongRunningOperation(cmd.cli_ctx)(poller)
     logger.debug("ANF Log: GET updated Response: ")
-    return sdk_no_wait(no_wait, client.get, resource_group_name, account_name, pool_name, volume_name=volume_name)
+    return client.get(resource_group_name, account_name, pool_name, volume_name=volume_name)
 
 
 # -- volume revert
@@ -573,7 +573,7 @@ def add_export_policy_rule(instance, allowed_clients, unix_read_only, unix_read_
 def add_export_policy_rule_custom(cmd, client, account_name, pool_name, volume_name, resource_group_name, allowed_clients, unix_read_only, unix_read_write, cifs, nfsv3, nfsv41,
                                   rule_index=None, kerberos5_r=None, kerberos5_rw=None, kerberos5i_r=None, kerberos5i_rw=None,
                                   kerberos5p_r=None, kerberos5p_rw=None, has_root_access=None,
-                                  chown_mode=None, no_wait=False):
+                                  chown_mode=None):
     volGetResponse = client.get(resource_group_name=resource_group_name, account_name=account_name, pool_name=pool_name, volume_name=volume_name)
     logger.debug("ANF LOG: get volume before updating export policy")
     logger.debug(volGetResponse.export_policy.rules)
@@ -612,7 +612,7 @@ def add_export_policy_rule_custom(cmd, client, account_name, pool_name, volume_n
                                  body=params)
     LongRunningOperation(cmd.cli_ctx)(poller)
     # export_policy=client.get(resource_group_name, account_name, pool_name, volume_name).export_policy
-    return sdk_no_wait(no_wait, client.get, resource_group_name, account_name, pool_name, volume_name)
+    return client.get(resource_group_name, account_name, pool_name, volume_name)
 
 
 # list all rules
@@ -647,12 +647,12 @@ def remove_export_policy_rule(instance, rule_index):
 
 # ---- SNAPSHOTS ----
 def create_snapshot(cmd, client, resource_group_name, account_name, pool_name, volume_name, snapshot_name,
-                    location=None, no_wait=False):
+                    location=None):
     location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
     body = Snapshot(location=location)
     poller = client.begin_create(resource_group_name, account_name, pool_name, volume_name, snapshot_name, body)
     LongRunningOperation(cmd.cli_ctx)(poller)
-    return sdk_no_wait(no_wait, client.get, resource_group_name, account_name, pool_name, volume_name, snapshot_name)
+    return client.get(resource_group_name, account_name, pool_name, volume_name, snapshot_name)
 
 
 def snapshot_restore_files(client, resource_group_name, account_name, pool_name, volume_name, snapshot_name, file_paths,
@@ -690,7 +690,7 @@ def patch_snapshot_policy(cmd, client, resource_group_name, account_name, snapsh
                           daily_snapshots=None, daily_minute=None, daily_hour=None,
                           weekly_snapshots=None, weekly_minute=None, weekly_hour=None, weekly_day=None,
                           monthly_snapshots=None, monthly_minute=None, monthly_hour=None, monthly_days=None,
-                          enabled=False, tags=None, no_wait=False):
+                          enabled=False, tags=None):
     body = SnapshotPolicyPatch(
         hourly_schedule=HourlySchedule(snapshots_to_keep=hourly_snapshots, minute=hourly_minute),
         daily_schedule=DailySchedule(snapshots_to_keep=daily_snapshots, minute=daily_minute, hour=daily_hour),
@@ -703,7 +703,7 @@ def patch_snapshot_policy(cmd, client, resource_group_name, account_name, snapsh
     # Poll the lro then do a final get, to get around issue where operation result was not full resource
     poller = client.begin_update(resource_group_name=resource_group_name, account_name=account_name, snapshot_policy_name=snapshot_policy_name, body=body)
     LongRunningOperation(cmd.cli_ctx)(poller)
-    return sdk_no_wait(no_wait, client.get, resource_group_name, account_name, snapshot_policy_name)
+    return client.get(resource_group_name, account_name, snapshot_policy_name)
 
 
 # ---- VOLUME BACKUPS ----
