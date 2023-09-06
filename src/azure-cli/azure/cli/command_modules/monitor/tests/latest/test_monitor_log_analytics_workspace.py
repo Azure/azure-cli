@@ -617,3 +617,42 @@ class TestLogProfileScenarios(ScenarioTest):
             self.cmd('monitor log-analytics workspace table restore create -n {table2_name} -g {rg} --workspace-name {ws_name} --restore-source-table {table_name} --start-restore-time "2023-08-11 05:29:18" --end-restore-time "2023-08-17 05:29:18"')
 
         self.cmd('monitor log-analytics workspace table delete -g {rg} -n {table_name} --workspace-name {ws_name} -y')
+
+
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_table_name_valid', location='WestEurope')
+    @AllowLargeResponse()
+    def test_monitor_log_analytics_workspace_table_name_validation(self, resource_group):
+
+        self.kwargs.update({
+            'ws_name':self.create_random_name('ws-', 10),
+            'table_name': self.create_random_name('TB', 10) + '_CL',
+            'table1_name': self.create_random_name('TB', 10),
+            'table2_name': self.create_random_name('TB', 10)
+        })
+
+        self.cmd('monitor log-analytics workspace create -g {rg} -n {ws_name}')
+        self.cmd('monitor log-analytics workspace table create -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 45 --total-retention-time 70 --plan Analytics --columns col1=guid TimeGenerated=datetime', checks=[
+            self.check('name', '{table_name}'),
+            self.check('retentionInDays', 45),
+            self.check('totalRetentionInDays', 70),
+            self.check('schema.columns[0].name', 'col1'),
+            self.check('schema.columns[0].type', 'guid'),
+            self.check('schema.columns[1].name', 'TimeGenerated'),
+            self.check('schema.columns[1].type', 'datetime'),
+        ])
+
+        self.cmd('monitor log-analytics workspace table show -g {rg} -n {table_name} --workspace-name {ws_name}', checks=[
+            self.check('name', '{table_name}')
+        ])
+        from knack.util import CLIError
+        with self.assertRaisesRegex(CLIError, "usage: The table name needs to end with _RST"):
+            self.cmd('monitor log-analytics workspace table restore create -n {table2_name} -g {rg} --workspace-name {ws_name} --restore-source-table {table_name} --start-restore-time "2023-08-11 05:29:18" --end-restore-time "2023-08-17 05:29:18"')
+
+        self.cmd('monitor log-analytics workspace table delete -g {rg} -n {table_name} --workspace-name {ws_name} -y')
+
+        with self.assertRaisesRegex(CLIError, "usage: The table name needs to end with _SRCH"):
+            self.cmd('monitor log-analytics workspace table search-job create -n {table1_name} -g {rg} --workspace-name {ws_name} --retention-time 50 --total-retention-time 80 --start-search-time "2023-08-21 05:29:18" --end-search-time "2023-09-12 05:29:18" --search-query "Heartbeat" --limit 1')
+
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaisesRegex(InvalidArgumentValueError, "usage: The table name needs to end with _SRCH"):
+            self.cmd('monitor log-analytics workspace table search-job cancel -n {table1_name} -g {rg} --workspace-name {ws_name}')

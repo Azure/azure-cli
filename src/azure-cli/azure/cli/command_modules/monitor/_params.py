@@ -15,6 +15,7 @@ from azure.cli.command_modules.monitor.actions import (
     timezone_offset_type, timezone_name_type, MetricAlertConditionAction, MetricAlertAddAction)
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
 from azure.cli.command_modules.monitor.validators import (
+    validate_loganalytics_workspace_search_table_name, validate_loganalytics_workspace_restore_table_name,
     validate_autoscale_recurrence, validate_autoscale_timegrain, get_action_group_validator,
     get_action_group_id_validator, validate_metric_dimension, validate_storage_accounts_name_or_id)
 from azure.cli.command_modules.monitor.actions import get_date_midnight_type
@@ -340,12 +341,16 @@ def load_arguments(self, _):
         c.argument('description', help='Schema description.')
 
     with self.argument_context('monitor log-analytics workspace table search-job create') as c:
+        c.argument('table_name', name_arg_type, help='Name of the table. The table name needs to end with _SRCH',
+                   validator=validate_loganalytics_workspace_search_table_name)
         c.argument('search_query', options_list=['--search-query'], help='Search job query.')
         c.argument('limit', type=int, help='Limit the search job to return up to specified number of rows.')
         c.argument('start_search_time', arg_type=get_datetime_type(help='Datetime format.'))
         c.argument('end_search_time', arg_type=get_datetime_type(help='Datetime format.'))
 
     with self.argument_context('monitor log-analytics workspace table restore create') as c:
+        c.argument('table_name', name_arg_type, help='Name of the table. The table name needs to end with _RST',
+                   validator=validate_loganalytics_workspace_restore_table_name)
         c.argument('start_restore_time', arg_type=get_date_midnight_type(help='Datetime format.'))
         c.argument('end_restore_time', arg_type=get_date_midnight_type(help='Datetime format.'))
         c.argument('restore_source_table', help='The table to restore data from.')

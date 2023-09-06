@@ -177,6 +177,9 @@ def load_command_table(self, _):
     with self.command_group('monitor log-analytics workspace table search-job',
                             custom_command_type=log_analytics_workspace_custom, is_preview=True) as g:
         g.custom_command('create', 'create_log_analytics_workspace_table_search_job', supports_no_wait=True)
+        from .operations.log_analytics_workspace import WorkspaceTableSearchJobCancel
+        self.command_table['monitor log-analytics workspace table search-job cancel'] = \
+            WorkspaceTableSearchJobCancel(loader=self)
 
     with self.command_group('monitor log-analytics workspace table restore',
                             custom_command_type=log_analytics_workspace_custom, is_preview=True) as g:

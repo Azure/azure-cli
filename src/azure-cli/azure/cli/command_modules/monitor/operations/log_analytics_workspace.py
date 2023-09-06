@@ -11,6 +11,8 @@ from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspac
 from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.table import \
     Create as _WorkspaceTableCreate, \
     Update as _WorkspaceTableUpdate
+from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.table.search_job \
+    import Cancel as _WorkspaceTableSearchJobCancel
 
 from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, RequiredArgumentMissingError
 from azure.cli.core.commands.transform import _parse_id
@@ -183,6 +185,14 @@ class WorkspaceTableUpdate(_WorkspaceTableUpdate):
             minimum=4,
         )
         return args_schema
+
+
+class WorkspaceTableSearchJobCancel(_WorkspaceTableSearchJobCancel):
+    def pre_operations(self):
+        args = self.ctx.args
+        table_name = args.table_name.to_serialized_data()
+        if table_name and not table_name.endswith("_SRCH"):
+            raise InvalidArgumentValueError('usage: The table name needs to end with _SRCH')
 
 
 # pylint:disable=too-many-locals
