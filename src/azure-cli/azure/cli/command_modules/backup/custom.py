@@ -497,10 +497,11 @@ def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_s
                           classic_alerts=None, azure_monitor_alerts_for_job_failures=None,
                           retention_duration_in_days=None):
     if soft_delete_feature_state or hybrid_backup_security_features or retention_duration_in_days:
-        logger.warning("""
-        --backup-storage-redundancy, --cross-region-restore-flag, --classic-alerts and
-        --azure-monitor-alerts-for-job-failures parameters will be ignored if provided.
-        """)
+        logger.warning('--backup-storage-redundancy, --cross-region-restore-flag, --classic-alerts and '
+                       '--azure-monitor-alerts-for-job-failures parameters will be ignored if provided.')
+        if soft_delete_feature_state or retention_duration_in_days:
+            logger.warning("Modifying the soft delete properties of a vault via this command will soon be deprecated. "
+                           "Please use the 'az backup vault create' command to modify soft delete settings.")
         vault_config_client = backup_resource_vault_config_cf(cmd.cli_ctx)
         if tenant_id is not None:
             vault_config_client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
@@ -537,9 +538,8 @@ def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_s
         return vault_config_client.update(vault_name, resource_group_name, vault_config_resource)
 
     if backup_storage_redundancy or cross_region_restore_flag:
-        logger.warning("""
-        --classic-alerts and --azure-monitor-alerts-for-job-failures parameters will be ignored if provided.
-        """)
+        logger.warning(
+            '--classic-alerts and --azure-monitor-alerts-for-job-failures parameters will be ignored if provided.')
         backup_config_response = client.get(vault_name, resource_group_name)
         prev_crr_flag = backup_config_response.properties.cross_region_restore_flag
         if backup_storage_redundancy is None:
