@@ -160,8 +160,8 @@ class MetricAlertAddAction(argparse._AppendAction):
             "action_group_id": action_group_id,
             "web_hook_properties": webhook_property_candidates
         }
-        action["odatatype"] = 'Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models.Microsoft.AppInsights.Nexus.' \
-                           'DataContracts.Resources.ScheduledQueryRules.Action'
+        action["odatatype"] = 'Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models.Microsoft.' \
+                           'AppInsights.Nexus.DataContracts.Resources.ScheduledQueryRules.Action'
         super(MetricAlertAddAction, self).__call__(parser, namespace, action, option_string)
 
 

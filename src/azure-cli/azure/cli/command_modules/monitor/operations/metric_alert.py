@@ -39,7 +39,7 @@ def create_metric_alert(cmd, resource_group_name, rule_name, scopes, condition, 
                 "alert_sensitivity": item.pop("alert_sensitivity", None),
                 "failing_periods": item.pop("failing_periods", None),
                 "operator": item.pop("operator", None),
-                "ignore_data_before": Serializer.serialize_iso(dt) if (dt:= item.pop("ignore_data_before", None)) else None
+                "ignore_data_before": Serializer.serialize_iso(dt) if (dt := item.pop("ignore_data_before", None)) else None
             }
 
             all_of.append({**item, **{"dynamic_threshold_criterion": props}})
