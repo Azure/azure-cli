@@ -901,6 +901,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("properties.isScheduledForDeferredDelete", True)
         ])
 
+        self.cmd('backup vault soft-deleted-containers --backup-management-type AzureIaasVM -g {rg} -n {vault}', checks=[
+            self.check("length(@)", 1),
+            self.check("[0].properties.friendlyName", "{vm}")
+        ])
+
         self.cmd('backup protection undelete -g {rg} -v {vault} -c {vm} -i {vm} --workload-type VM --backup-management-type AzureIaasVM ', checks=[
             self.check("properties.entityFriendlyName", '{vm}'),
             self.check("properties.operation", "Undelete"),
