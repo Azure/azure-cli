@@ -3705,10 +3705,18 @@ def get_vmss(cmd, resource_group_name, name, instance_id=None, include_user_data
 def _check_vmss_hyper_v_generation(cli_ctx, vmss):
     hyper_v_generation = get_hyper_v_generation_from_vmss(
         cli_ctx, vmss.virtual_machine_profile.storage_profile.image_reference, vmss.location)
-    if hyper_v_generation == "V1":
+    security_profile = vmss.virtual_machine_profile.security_profile
+    security_type = security_profile.security_type if security_profile else None
+
+    if hyper_v_generation == "V1" or (hyper_v_generation == "V2" and security_type is None):
         logger.warning("Trusted Launch security type is supported on Hyper-V Generation 2 OS Images. "
                        "To know more please visit "
                        "https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch")
+    elif hyper_v_generation == "V2" and security_type == "ConfidentialVM":
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        raise InvalidArgumentValueError("{} is already configured with {}. "
+                                        "Security Configuration cannot be updated from ConfidentialVM to "
+                                        "TrustedLaunch.".format(vmss.name, security_type))
 
 
 def get_vmss_modified(cmd, resource_group_name, name, instance_id=None, security_type=None):
@@ -4049,10 +4057,11 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         else:
             vmss.virtual_machine_profile.billing_profile.max_price = max_price
 
-    if security_type is not None:
+    if security_type is not None or enable_secure_boot is not None or enable_vtpm is not None:
         security_profile = vmss.virtual_machine_profile.security_profile
-        vmss_security_type = security_profile.security_type if security_profile else None
-        if vmss_security_type != security_type:
+        prev_security_type = security_profile.security_type if security_profile else None
+        # At present, `SecurityType` only has option `TrustedLaunch`
+        if security_type is not None and prev_security_type != security_type:
             vmss.virtual_machine_profile.security_profile = {
                 'securityType': security_type,
                 'uefiSettings': {
@@ -4060,11 +4069,11 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                     'vTpmEnabled': enable_vtpm if enable_vtpm is not None else True
                 }
             }
-    elif enable_secure_boot is not None or enable_vtpm is not None:
-        vmss.virtual_machine_profile.security_profile = {'uefiSettings': {
-            'secureBootEnabled': enable_secure_boot,
-            'vTpmEnabled': enable_vtpm
-        }}
+        else:
+            vmss.virtual_machine_profile.security_profile = {'uefiSettings': {
+                'secureBootEnabled': enable_secure_boot,
+                'vTpmEnabled': enable_vtpm
+            }}
 
     if regular_priority_count is not None or regular_priority_percentage is not None:
         if vmss.orchestration_mode != 'Flexible':
@@ -4944,16 +4953,9 @@ def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
 # region proximity placement groups
 def create_proximity_placement_group(cmd, client, proximity_placement_group_name, resource_group_name,
                                      ppg_type=None, location=None, tags=None, zone=None, intent_vm_sizes=None):
-    from knack.arguments import CaseInsensitiveList
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-
-    ProximityPlacementGroup, PPGType = cmd.get_models('ProximityPlacementGroup', 'ProximityPlacementGroupType')
-    choices = CaseInsensitiveList([x.value for x in PPGType])
-
-    if ppg_type and ppg_type not in choices:
-        logger.info("Valid choices: %s", str(choices))
-        raise CLIError("Usage error: invalid value for --type/-t")
+    ProximityPlacementGroup = cmd.get_models('ProximityPlacementGroup')
 
     ppg_params = ProximityPlacementGroup(name=proximity_placement_group_name, proximity_placement_group_type=ppg_type,
                                          location=location, tags=(tags or {}), zones=zone)
@@ -4967,11 +4969,13 @@ def create_proximity_placement_group(cmd, client, proximity_placement_group_name
                                    proximity_placement_group_name=proximity_placement_group_name, parameters=ppg_params)
 
 
-def update_ppg(cmd, instance, intent_vm_sizes=None):
+def update_ppg(cmd, instance, intent_vm_sizes=None, ppg_type=None):
     if intent_vm_sizes:
         Intent = cmd.get_models('ProximityPlacementGroupPropertiesIntent')
         intent = Intent(vm_sizes=intent_vm_sizes)
         instance.intent = intent
+    if ppg_type:
+        instance.proximity_placement_group_type = ppg_type
     return instance
 
 

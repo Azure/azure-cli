@@ -2787,6 +2787,18 @@ examples:
     text: az bicep build --file {bicep_file} --no-restore
 """
 
+helps['bicep build-params'] = """
+type: command
+short-summary: Build .bicepparam file.
+examples:
+  - name: Build a .bicepparam file.
+    text: az bicep build-params --file {bicepparam_file}
+  - name: Build a .bicepparam file and print all output to stdout.
+    text: az bicep build-params --file {bicepparam_file} --stdout
+  - name: Build a .bicepparam file and save the result to the specified file.
+    text: az bicep build-params --file {bicepparam_file} --outfile {out_file}
+"""
+
 helps['bicep format'] = """
 type: command
 short-summary: Format a Bicep file.
@@ -2815,6 +2827,22 @@ examples:
     text: az bicep decompile --file {json_template_file}
   - name: Decompile an ARM template file and overwrite existing Bicep file.
     text: az bicep decompile --file {json_template_file} --force
+"""
+
+helps['bicep decompile-params'] = """
+type: command
+short-summary: Decompile a parameters .json file to .bicepparam.
+examples:
+  - name: Attempts to decompile a parameters .json file to .bicepparam.
+    text: az bicep decompile-params --file {json_template_file}
+  - name: Attempts to decompile a parameters .json file to .bicepparam using the bicep file given.
+    text: az bicep decompile-params --file {json_template_file} --bicep-file {bicep_file}
+  - name: Attempts to decompile a parameters .json file to .bicepparam and print all output to stdout.
+    text: az bicep decompile-params --file {json_template_file} --stdout
+  - name: Attempts to decompile a parameters .json file to .bicepparam and print all output to stdout and save the result to the specified directory.
+    text: az bicep decompile-params --file {json_template_file} --outdir {out_dir}
+  - name: Attempts to decompile a parameters .json file to .bicepparam and print all output to stdout and save the result to the specified file.
+    text: az bicep decompile-params --file {json_template_file} --outfile {out_file}
 """
 
 helps['bicep publish'] = """
@@ -3070,6 +3098,8 @@ examples:
     text: az bicep generate-params --file {bicep_file} --outfile {out_file}
   - name: Generate parameters file for a Bicep file without restoring external modules.
     text: az bicep generate-params --file {bicep_file} --no-restore
+  - name: Generate parameters file for a Bicep file with specified output format. Valid values are ( json | bicepparam ).
+    text: az bicep generate-params --file {bicep_file} --output-format {output_format} --include-params {include_params}
 """
 
 helps['resourcemanagement'] = """
