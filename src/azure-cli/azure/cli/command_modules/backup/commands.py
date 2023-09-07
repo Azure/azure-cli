@@ -9,7 +9,7 @@ from azure.cli.command_modules.backup._client_factory import vaults_cf, backup_p
     job_details_cf, job_cancellations_cf, recovery_points_cf, restores_cf, backup_storage_configs_non_crr_cf, \
     item_level_recovery_connections_cf, backup_protected_items_cf, backup_protectable_items_cf, \
     protection_containers_cf, protection_intent_cf, backup_resource_encryption_config_cf, resource_guard_proxy_cf, \
-    deleted_protection_containers_cf # pylint: disable=unused-variable
+    deleted_protection_containers_cf  # pylint: disable=unused-variable
 from azure.cli.command_modules.backup._exception_handler import backup_exception_handler
 from azure.cli.command_modules.backup._format import (
     transform_container_list, transform_policy_list, transform_item_list, transform_job_list,
