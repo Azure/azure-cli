@@ -34,10 +34,13 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=t
             self.resource_group = self._get_resource_group(**kwargs)
             self.location = self._get_resource_group_location(**kwargs)
             cmd = 'az backup vault create -n {} -g {} --location {}'.format(name, self.resource_group, self.location)
-            execute(self.cli_ctx, cmd)
+            # TODO: once the soft delete feature move is enabled across the board, use the following lines instead 
             if not self.soft_delete:
-                cmd = 'az backup vault backup-properties set -n {} -g {} --soft-delete-feature-state Disable'.format(name, self.resource_group)
-                execute(self.cli_ctx, cmd)
+                cmd += ' --soft-delete-state Disable'
+            execute(self.cli_ctx, cmd)
+            # if not self.soft_delete:
+            #     cmd = 'az backup vault backup-properties set -n {} -g {} --soft-delete-feature-state Disable'.format(name, self.resource_group)
+            #     execute(self.cli_ctx, cmd)
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}
 
