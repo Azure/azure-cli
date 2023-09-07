@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=too-many-locals, line-too-long, protected-access
+# pylint: disable=too-many-locals, line-too-long, protected-access, too-many-nested-blocks
 import re
 import antlr4
 
@@ -126,6 +126,11 @@ def get_period_type(value, as_timedelta=False):
 
 
 class MetricsAlertUpdate(_MetricsAlertUpdate):
+    def __init__(self, loader=None, cli_ctx=None, callbacks=None, **kwargs):
+        super().__init__(loader, cli_ctx, callbacks, **kwargs)
+        self.add_actions = []
+        self.add_conditions = []
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
