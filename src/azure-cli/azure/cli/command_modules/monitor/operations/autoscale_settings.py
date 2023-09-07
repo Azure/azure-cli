@@ -6,11 +6,13 @@
 import json
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.aaz import has_value, AAZListArg, AAZStrArg
+from azure.cli.core.aaz import has_value, AAZListArg, AAZStrArg, AAZIntArg, AAZBoolArg
+from azure.cli.command_modules.monitor.actions import AAZCustomListArg
 from azure.cli.command_modules.monitor._autoscale_util import build_autoscale_profile_from_instance
 from ..aaz.latest.monitor.autoscale import Create as _AutoScaleCreate, Update as _AutoScaleUpdate, \
     Show as _AutoScaleShow, List as _AutoScaleList
 from azure.cli.command_modules.network.custom import _convert_to_snake_case
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 logger = get_logger(__name__)
 
@@ -39,7 +41,169 @@ class AutoScaleShow(_AutoScaleShow):
         return result
 
 
+def update_add_actions(args):
+    add_actions = []
+    for add_action_item in args.add_actions:
+        add_action_item_arr = add_action_item.to_serialized_data()
+        _type = add_action_item_arr[0].lower()
+        if _type == "email":
+            add_actions.append({
+                "key": "email",
+                "value": {
+                    "custom_emails": add_action_item_arr[1:]
+                }
+            })
+        if _type == "webhook":
+            uri = add_action_item_arr[1]
+            try:
+                properties = dict(x.split('=', 1) for x in add_action_item_arr[2:])
+            except ValueError:
+                raise InvalidArgumentValueError('webhook URI [KEY=VALUE ...]')
+            add_actions.append({
+                "key": "webhook",
+                "value": {
+                    "serviceUri": uri,
+                    "properties": properties
+                }
+            })
+        raise InvalidArgumentValueError('TYPE KEY [ARGS]')
+    return add_actions
+
+
+def update_remove_actions(args):
+    remove_actions = []
+    for remove_action_item in args.remove_actions:
+        values = remove_action_item.to_serialized_data()
+        _type = values[0].lower()
+        if _type not in ['email', 'webhook']:
+            raise InvalidArgumentValueError('TYPE KEY [KEY ...]')
+        remove_actions.append(values[1:])
+    return remove_actions
+
+
 class AutoScaleUpdate(_AutoScaleUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.count = AAZIntArg(
+            options=["--count"],
+            help='The numer of instances to use. If used with --min/max-count, the default number of instances to use.',
+            arg_group="Instance Limit",
+        )
+        args_schema.min_count = AAZIntArg(
+            options=["--min-count"],
+            help='The minimum number of instances.',
+            arg_group="Instance Limit",
+        )
+        args_schema.max_count = AAZIntArg(
+            options=["--max-count"],
+            help='The maximum number of instances.',
+            arg_group="Instance Limit",
+        )
+        args_schema.add_actions = AAZCustomListArg(
+            options=["--add-actions"],
+            singular_options=['--add-action', '-a'],
+            help="Add an action to fire when a scaling event occurs." + '''
+        Usage:   --add-action TYPE KEY [ARG ...]
+        Email:   --add-action email bob@contoso.com ann@contoso.com
+        Webhook: --add-action webhook https://www.contoso.com/alert apiKey=value
+        Webhook: --add-action webhook https://www.contoso.com/alert?apiKey=value
+        Multiple actions can be specified by using more than one `--add-action` argument.
+        ''',
+            arg_group="Notification",
+        )
+        args_schema.add_actions.Element = AAZCustomListArg()
+        args_schema.add_actions.Element.Element = AAZStrArg()
+
+        args_schema.remove_actions = AAZCustomListArg(
+            options=['--remove-action', '-r'],
+            help="Remove one or more actions." + '''
+        Usage:   --remove-action TYPE KEY [KEY ...]
+        Email:   --remove-action email bob@contoso.com ann@contoso.com
+        Webhook: --remove-action webhook https://contoso.com/alert https://alerts.contoso.com.
+        ''',
+            arg_group="Notification",
+        )
+        args_schema.remove_actions.Element = AAZCustomListArg()
+        args_schema.remove_actions.Element.Element = AAZStrArg()
+
+        args_schema.email_administrator = AAZBoolArg(
+            options=["--email-administrator"],
+            help='Send email to subscription administrator on scaling.',
+            arg_group="Notification",
+        )
+        args_schema.email_coadministrators = AAZBoolArg(
+            options=["--email-coadministrators"],
+            help='Send email to subscription co-administrators on scaling.',
+            arg_group="Notification",
+        )
+
+        return args_schema
+
+    def pre_instance_update(self, instance):
+        args = self.ctx.args
+        add_actions = update_add_actions(args)
+        remove_actions = update_remove_actions(args)
+        if has_value(args.count) or has_value(args.min_count) or has_value(args.max_count):
+            default_profile, _ = build_autoscale_profile_from_instance(instance)
+            curr_count = default_profile.capacity.default
+            curr_min = default_profile.capacity.minimum
+            curr_max = default_profile.capacity.maximum
+            is_fixed_count = curr_count == curr_min and curr_count == curr_max
+
+            # check for special case where count is used to indicate fixed value and only
+            # count is updated
+            if has_value(args.count) and is_fixed_count and not has_value(args.min_count) and not has_value(args.max_count):
+                min_count = args.count.to_serialized_data()
+                max_count = args.count.to_serialized_data()
+
+            count = curr_count if not has_value(args.count) else args.count.to_serialized_data()
+            min_count = curr_min if not has_value(args.min_count) else args.min_count.to_serialized_data()
+            max_count = curr_max if not has_value(args.max_count) else args.max_count.to_serialized_data()
+
+            # There may be multiple "default" profiles. All need to updated.
+            for profile in instance.properties.profiles:
+                if profile.fixed_date:
+                    continue
+                if profile.recurrence:
+                    try:
+                        # portal denotes the "default" pairs by using a JSON string for their name
+                        # so if it can be decoded, we know this is a default profile
+                        json.loads(profile.name)
+                    except ValueError:
+                        continue
+                profile.capacity.default = count
+                profile.capacity.minimum = min_count
+                profile.capacity.maximum = max_count
+
+        if not instance.properties.notifications:
+            return
+        notification = next(x for x in instance.properties.notifications if x.operation.to_serialized_data().lower() == 'scale')
+
+        # process removals
+        if len(remove_actions) > 0:
+            removed_emails, removed_webhooks = _parse_action_removals(remove_actions)
+            notification.email.customEmails = \
+                [x for x in notification.email.customEmails if x not in removed_emails]
+            notification.webhooks = \
+                [x for x in notification.webhooks if x.serviceUri not in removed_webhooks]
+
+        # process additions
+        for action in add_actions:
+            if action["key"] == "email":
+                for email in action["value"]["custom_emails"]:
+                    notification.email.customEmails.append(email)
+            elif action["key"] == "webhook":
+                notification.webhooks.append(action["value"])  # please check snake case key here
+        if has_value(args.email_administrator):
+            notification.email.send_to_subscription_administrator = args.email_administrator.to_serialized_data()
+        if has_value(args.email_coadministrators):
+            notification.email.send_to_subscription_co_administrators = args.email_coadministrators.to_serialized_data()
+
+        if has_value(args.scale_look_ahead_time) and not has_value(args.scale_mode) \
+                and instance.properties.predictiveAutoscalePolicy is None:
+            raise InvalidArgumentValueError('scale-mode is required for setting scale-look-ahead-time.')
 
     def _output(self, *args, **kwargs):
         from azure.cli.core.aaz import AAZUndefined
