@@ -175,6 +175,10 @@ examples:
   - name: Create an ANF account
     text: >
         az netappfiles account create -g mygroup --name myname -l location --tags testtag1=mytag1 testtag3=mytagg
+
+  - name: Create an ANF account enabling CMK encryption
+    text: >
+        az netappfiles account create -g mygroup --name myname -l location --key-source Microsoft.KeyVault --key-name cmkKey --key-vault-uri https://mykvuri.vault.azure.net/ --keyvault-resource-id myKeyVaultResourceId --identity-type UserAssigned --user-assigned-identity myIdenityResourceId
 """
 
 helps['netappfiles account delete'] = """
@@ -667,7 +671,7 @@ parameters:
   - name: --smb-continuously-avl
     short-summary: Enables continuously available share property for smb volume. Only applicable for SMB volume. Default value is False
   - name: --encryption-key-source
-    short-summary: Encryption Key Source
+    short-summary: Source of key used to encrypt data in volume. Applicable if NetApp account has encryption.keySource = 'Microsoft.KeyVault'.
   - name: --allowed-clients
     short-summary: Client ingress specification as comma separated string with IPv4 CIDRs, IPv4 host addresses and host names
   - name: --cifs
@@ -715,6 +719,10 @@ examples:
   - name: Create an ANF volume with zones (Availability Zone) specified
     text: >
         az netappfiles volume create -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname -l westus2 --service-level premium --usage-threshold 100 --file-path "unique-file-path" --vnet myvnet --subnet mysubnet --protocol-types NFSv3 --zones zone1
+
+  - name: Create an ANF volume with CMK Encryption
+    text: >
+        az netappfiles volume create -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname -l westus2 --service-level premium --usage-threshold 100 --file-path "unique-file-path" --vnet myvnet --subnet mysubnet --protocol-types NFSv3 --network-features Standard --protocol-types NFSv4.1 --rule-index 1 --allowed-clients '10.7.0.0/24' --kerberos-enabled false --policy-enforced true --encryption-key-source  Microsoft.KeyVault --kv-private-endpoint-id myPrivateEndpointId
 """
 
 helps['netappfiles volume delete'] = """
@@ -1039,6 +1047,8 @@ parameters:
     short-summary: If enabled (true) the pool can contain cool Access enabled volumes
   - name: --coolness-period
     short-summary: Specifies the number of days after which data that is not accessed by clients will be tiered.
+  - name: --snapshot-dir-visible
+    short-summary: If enabled (true) the volume will contain a read-only .snapshot directory which provides access to each of the volume's snapshots (default to true).
 examples:
   - name: Update an ANF volume
     text: >
@@ -1200,6 +1210,30 @@ examples:
         az netappfiles volume backup restore-status -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
 """
 
+helps['netappfiles volume backup restore-files'] = """
+type: command
+short-summary: Restore the specified files from the specified backup to the active filesystem.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --name --volume-name -n -v
+    short-summary: The name of the ANF volume
+  - name: --backup-name -b
+    short-summary: The name of the ANF backup
+  - name: --file-paths
+    short-summary: Required. A space separated string of filed to be restored
+  - name: --destination-path
+    short-summary: Destination folder where the files will be restored
+  - name: --destination-volume-id
+    short-summary: Resource Id of the destination volume on which the files need to be restored
+examples:
+  - name: Restore files from backup
+    text: >
+        az netappfiles volume backup restore-files -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname --backup-name mybackupname --file-paths myfilepaths --destination-path mydestinationpath --destination-volume-id volumeresourceid
+"""
+
 helps['netappfiles volume backup update'] = """
 type: command
 short-summary: Update the specified ANF backup with the values provided.
@@ -1301,6 +1335,25 @@ examples:
   - name: Get all ANF Volume Quota Rule for specified Volume
     text: >
         az netappfiles volume quota-rule list -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname
+"""
+
+helps['netappfiles volume get-groupid-list-for-ldapuser'] = """
+type: command
+short-summary:
+long-summary: Returns the list of group Ids for a specific LDAP User.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --name --volume-name -n -v
+    short-summary: The name of the ANF volume
+  - name: --username -u
+    short-summary: username is required to fetch the group to which user is part of.
+examples:
+  - name: Get Group Id List for LDAP User myuser.
+    text: >
+        az netappfiles volume get-groupid-list-for-ldapuser -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --username myuser
 """
 
 helps['netappfiles volume quota-rule wait'] = """

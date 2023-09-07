@@ -729,6 +729,11 @@ parameters:
   - name: --disable-public-fqdn
     type: bool
     short-summary: Disable public fqdn feature for private cluster.
+  - name: --private-dns-zone
+    type: string
+    short-summary: The private dns zone mode for private cluster.
+    long-summary: |-
+        Only allow changing private dns zone from byo/system mode to none for private cluster. Others are denied.
   - name: --disable-local-accounts
     type: bool
     short-summary: If set to true, getting static credential will be disabled for this cluster.
