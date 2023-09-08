@@ -238,29 +238,42 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             self.models,
             DecoratorMode.CREATE,
         )
-        ctx._AKSManagedClusterContext__validate_gmsa_options(False, None, None, False)
-        ctx._AKSManagedClusterContext__validate_gmsa_options(True, None, None, True)
+        ctx._AKSManagedClusterContext__validate_gmsa_options(False, False, None, None, False)
+        ctx._AKSManagedClusterContext__validate_gmsa_options(True, False, None, None, True)
+        ctx._AKSManagedClusterContext__validate_gmsa_options(False, True, None, None, False)
 
         # fail on yes & prompt_y_n not specified
         with patch(
             "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n",
             return_value=False,
         ), self.assertRaises(DecoratorEarlyExitException):
-            ctx._AKSManagedClusterContext__validate_gmsa_options(True, None, None, False)
+            ctx._AKSManagedClusterContext__validate_gmsa_options(True, False, None, None, False)
 
         # fail on gmsa_root_domain_name not specified
         with self.assertRaises(RequiredArgumentMissingError):
-            ctx._AKSManagedClusterContext__validate_gmsa_options(True, "test_gmsa_dns_server", None, False)
+            ctx._AKSManagedClusterContext__validate_gmsa_options(True, False, "test_gmsa_dns_server", None, False)
 
         # fail on enable_windows_gmsa not specified
         with self.assertRaises(RequiredArgumentMissingError):
-            ctx._AKSManagedClusterContext__validate_gmsa_options(False, None, "test_gmsa_root_domain_name", False)
+            ctx._AKSManagedClusterContext__validate_gmsa_options(False, False, None, "test_gmsa_root_domain_name", False)
 
         # fail on enable_windows_gmsa not specified
         with self.assertRaises(RequiredArgumentMissingError):
             ctx._AKSManagedClusterContext__validate_gmsa_options(
-                False, "test_gmsa_dns_server", "test_gmsa_root_domain_name", False
+                False, False, "test_gmsa_dns_server", "test_gmsa_root_domain_name", False
             )
+
+        # fail on disable_windows_gmsa specified
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx._AKSManagedClusterContext__validate_gmsa_options(True, True, None, None, False)
+
+        # fail on disable_windows_gmsa specified but gmsa_dns_server specified
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx._AKSManagedClusterContext__validate_gmsa_options(False, True, "test_gmsa_dns_server", None, False)
+
+        # fail on disable_windows_gmsa specified but gmsa_root_domain_name specified
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx._AKSManagedClusterContext__validate_gmsa_options(False, True, None, "test_gmsa_root_domain_name", False)
 
     def test_get_subscription_id(self):
         ctx_1 = AKSManagedClusterContext(self.cmd, AKSManagedClusterParamDict({}), self.models, DecoratorMode.CREATE)
@@ -720,6 +733,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                     "enable_windows_gmsa": False,
                     "gmsa_dns_server": None,
                     "gmsa_root_domain_name": None,
+                    "disable_windows_gmsa": False,
                 }
             ),
             self.models,
@@ -750,6 +764,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                     "enable_windows_gmsa": True,
                     "gmsa_dns_server": "test_gmsa_dns_server",
                     "gmsa_root_domain_name": "test_gmsa_root_domain_name",
+                    "disable_windows_gmsa": True,
                 }
             ),
             self.models,
@@ -769,6 +784,28 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # fail on inconsistent state
         with self.assertRaises(CLIInternalError):
             ctx_2.get_gmsa_dns_server_and_root_domain_name()
+
+    def test_get_disable_windows_gmsa(self):
+        # default
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "disable_windows_gmsa": False,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_1.get_disable_windows_gmsa(), False)
+
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_disable_windows_gmsa(), False)
 
     def test_get_service_principal_and_client_secret(
         self,
@@ -3586,6 +3623,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             AKSManagedClusterParamDict(
                 {
                     "disable_public_fqdn": True,
+                    "private_dns_zone": "none",
                 }
             ),
             self.models,
@@ -3593,7 +3631,6 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         )
         api_server_access_profile_4 = self.models.ManagedClusterAPIServerAccessProfile(
             enable_private_cluster=True,
-            private_dns_zone=CONST_PRIVATE_DNS_ZONE_NONE,
         )
         mc_4 = self.models.ManagedCluster(
             location="test_location",

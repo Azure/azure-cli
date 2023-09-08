@@ -1359,11 +1359,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('source_sas')
         c.argument('source_container')
         c.argument('source_share')
-
-        c.extra('tier', tier_type)
+        c.extra('rehydrate_priority', rehydrate_priority_type, arg_group=None)
+        c.extra('tier', tier_type, arg_group=None)
         c.extra('destination_blob_type', arg_type=get_enum_type(['Detect', 'BlockBlob', 'PageBlob', 'AppendBlob']),
                 help='Defines the type of blob at the destination. '
-                     'Value of "Detect" determines the type based on source blob type.')
+                     'Value of "Detect" determines the type based on source blob type.', arg_group=None)
 
     with self.argument_context('storage blob incremental-copy start') as c:
         from azure.cli.command_modules.storage._validators import process_blob_source_uri
