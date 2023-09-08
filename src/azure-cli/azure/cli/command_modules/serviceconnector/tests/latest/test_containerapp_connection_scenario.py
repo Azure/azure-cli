@@ -18,7 +18,7 @@ from azure.cli.command_modules.serviceconnector._resource_config import (
 from ._test_utils import CredentialReplacer
 
 
-# @unittest.skip('Need containerapp extension installed')
+@unittest.skip('Need containerapp extension installed')
 class ContainerAppConnectionScenarioTest(ScenarioTest):
     default_container_name = 'simple-hello-world-container'
 
@@ -171,9 +171,9 @@ class ContainerAppConnectionScenarioTest(ScenarioTest):
     def test_containerapp_postgres_flexible_e2e_secretstore(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
-            'source_resource_group': 'servicelinker-test-linux-group',
+            'source_resource_group': 'tanyi',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'app': 'servicelinker-containerapp',
+            'app': 'wctestaca',
             'server': 'servicelinker-flexiblepostgresql',
             'database': 'postgres',
             'vault': 'servicelinker-kv-ref'
@@ -197,12 +197,14 @@ class ContainerAppConnectionScenarioTest(ScenarioTest):
         connections = self.cmd(
             'containerapp connection list --source-id {}'.format(source_id),
             checks = [
-                self.check('length(@)', 1),
-                self.check('[0].authInfo.authType', 'secret'),
-                self.check('[0].clientType', 'dotnet')
+                self.check('length(@)', 2),
+                self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
+                self.check('[1].authInfo.authType', 'secret'),
+                self.check('[1].clientType', 'dotnet')
             ]
         ).get_output_in_json()
 
-        connection_id = connections[0].get('id')
-        # delete connection
-        self.cmd('containerapp connection delete --id {} --yes'.format(connection_id))
+        # delete connections
+        for connection in connections:
+            connection_id = connection.get('id')
+            self.cmd('containerapp connection delete --id {} --yes'.format(connection_id))
