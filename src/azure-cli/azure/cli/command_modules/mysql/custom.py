@@ -524,6 +524,7 @@ def flexible_server_import_create(cmd, client,
                                                                                        data_dir_path=data_source_backup_dir)
     # Generate missing parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name, server_name)
+
     db_context = DbContext(
         cmd=cmd, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
         cf_availability=cf_mysql_check_resource_availability,
