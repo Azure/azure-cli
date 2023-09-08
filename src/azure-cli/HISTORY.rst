@@ -1572,6 +1572,8 @@ Release History
 2.38.1
 ++++++
 
+This version is only available on CentOS 7 and RHEL 7.
+
 **App Service**
 
 * `az webapp ssh`: Backport #25141 to 2.38 (#26836)
