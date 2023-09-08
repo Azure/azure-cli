@@ -69,9 +69,9 @@ class Update(AAZCommand):
             options=["--enabled"],
             help="Whether the metric alert rule is enabled.",
         )
-        _args_schema.evaluation_frequency_iso = AAZDurationArg(
-            options=["--evaluation-frequency-iso"],
-            help="how often the metric alert is evaluated represented in ISO 8601 duration format.",
+        _args_schema.evaluation_frequency = AAZDurationArg(
+            options=["--evaluation-frequency"],
+            help="Frequency with which to evaluate the rule in `##h##m##s` format.",
         )
         _args_schema.scopes = AAZListArg(
             options=["--scopes"],
@@ -81,9 +81,9 @@ class Update(AAZCommand):
             options=["--severity"],
             help="Severity of the alert from 0 (critical) to 4 (verbose).",
         )
-        _args_schema.window_size_iso = AAZDurationArg(
-            options=["--window-size-iso"],
-            help="the period of time (in ISO 8601 duration format) that is used to monitor alert activity based on the threshold.",
+        _args_schema.window_size = AAZDurationArg(
+            options=["--window-size"],
+            help="Time over which to aggregate metrics in `##h##m##s` format.",
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
@@ -368,10 +368,10 @@ class Update(AAZCommand):
                 properties.set_prop("autoMitigate", AAZBoolType, ".auto_mitigate")
                 properties.set_prop("description", AAZStrType, ".description")
                 properties.set_prop("enabled", AAZBoolType, ".enabled", typ_kwargs={"flags": {"required": True}})
-                properties.set_prop("evaluationFrequency", AAZStrType, ".evaluation_frequency_iso", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("evaluationFrequency", AAZStrType, ".evaluation_frequency", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("scopes", AAZListType, ".scopes", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("severity", AAZIntType, ".severity", typ_kwargs={"flags": {"required": True}})
-                properties.set_prop("windowSize", AAZStrType, ".window_size_iso", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("windowSize", AAZStrType, ".window_size", typ_kwargs={"flags": {"required": True}})
 
             scopes = _builder.get(".properties.scopes")
             if scopes is not None:
