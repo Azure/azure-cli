@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-locals, line-too-long, protected-access, too-many-nested-blocks
-import re
 import antlr4
 
 from azure.cli.command_modules.monitor.actions import AAZCustomListArg
@@ -11,7 +10,6 @@ from azure.cli.command_modules.monitor.grammar.metric_alert import MetricAlertCo
     MetricAlertConditionParser, MetricAlertConditionValidator
 from azure.cli.core.aaz import has_value
 from azure.cli.core.azclierror import InvalidArgumentValueError
-from datetime import timedelta
 from knack.log import get_logger
 from msrest.serialization import Serializer
 from msrestazure.tools import is_valid_resource_id, resource_id
