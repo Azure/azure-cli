@@ -368,6 +368,7 @@ def load_arguments(self, _):
         c.argument('enable_windows_gmsa', action='store_true')
         c.argument('gmsa_dns_server')
         c.argument('gmsa_root_domain_name')
+        c.argument('disable_windows_gmsa', action='store_true')
         c.argument('attach_acr', acr_arg_type, validator=validate_acr)
         c.argument('detach_acr', acr_arg_type, validator=validate_acr)
         c.argument('disable_defender', action='store_true', validator=validate_defender_disable_and_enable_parameters)
