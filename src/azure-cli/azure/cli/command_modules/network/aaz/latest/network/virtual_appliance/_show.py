@@ -128,7 +128,7 @@ class Show(AAZCommand):
                     "$expand", self.ctx.args.expand,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2021-08-01",
+                    "api-version", "2022-11-01",
                     required=True,
                 ),
             }
