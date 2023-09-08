@@ -515,9 +515,13 @@ def flexible_server_import_create(cmd, client,
                                                                                               version=version,
                                                                                               administrator_login=administrator_login)
         import_source_properties = mysql_flexibleservers.models.ImportSourceProperties(source_storage_type=mysql_flexibleservers.models.ImportSourceStorageType.AZURE_BLOB,
+                                                                                       storage_type=mysql_flexibleservers.models.ImportSourceStorageType.AZURE_BLOB,
                                                                                        source_storage_sas_token=data_source_sas_token,
+                                                                                       sas_token=data_source_sas_token,
                                                                                        source_storage_uri=data_source,
-                                                                                       source_data_dir_path=data_source_backup_dir)
+                                                                                       storage_url=data_source,
+                                                                                       source_data_dir_path=data_source_backup_dir,
+                                                                                       data_dir_path=data_source_backup_dir)
     # Generate missing parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name, server_name)
     db_context = DbContext(
