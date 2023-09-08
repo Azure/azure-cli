@@ -5377,7 +5377,7 @@ class NetworkSubnetScenarioTests(ScenarioTest):
                  checks=self.check('addressPrefix', '123.0.0.0/24'))
 
         # Test we can get rid of the nsg.
-        self.cmd('network vnet subnet update --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefix {subnet_prefix2} --network-security-group \"\"',
+        self.cmd('network vnet subnet update --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefix {subnet_prefix2} --network-security-group null',
                  checks=self.check('networkSecurityGroup', None))
 
         self.cmd('network vnet delete --resource-group {rg} --name {vnet}')
@@ -5406,9 +5406,9 @@ class NetworkSubnetScenarioTests(ScenarioTest):
         self.cmd('network nat gateway create --resource-group {rg} --location {location} --public-ip-prefixes {ip_prefix} --name {nat} --public-ip-addresses {ip_addr} --idle-timeout {idle_timeout} --zone {zone}')
         self.cmd('network vnet create --resource-group {rg} --name {vnet} --address-prefix {vnet_prefix}')
 
-        self.cmd('network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefixes {subnet_prefix} --nat-gateway {nat}',
+        self.cmd('network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefixes {subnet_prefix} --nat-gateway {nat} --default-outbound-access false',
                  checks=self.check('ends_with(@.natGateway.id, `/{nat}`)', True))
-        self.cmd('network vnet subnet update --resource-group {rg} --vnet-name {vnet} --name {subnet} --nat-gateway \"\"',
+        self.cmd('network vnet subnet update --resource-group {rg} --vnet-name {vnet} --name {subnet} --nat-gateway null',
                  checks=self.check('natGateway', None))
 
 
@@ -5422,9 +5422,9 @@ class NetworkSubnetScenarioTests(ScenarioTest):
         self.assertGreaterEqual(len(result), 2)
 
         self.cmd('network vnet create -g {rg} -n {vnet}')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.1.0/24 --service-endpoints Microsoft.Storage',
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.1.0/24 --service-endpoints Microsoft.Storage --default-outbound-access false',
                  checks=self.check('serviceEndpoints[0].service', 'Microsoft.Storage'))
-        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints ""',
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints None',
                  checks=self.check('serviceEndpoints', None))
 
     @ResourceGroupPreparer(name_prefix='cli_subnet_delegation')
@@ -5460,7 +5460,8 @@ class NetworkSubnetScenarioTests(ScenarioTest):
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} '
                  '--address-prefixes 10.0.1.0/24 '
                  '--name {subnet1} '
-                 '--disable-private-endpoint-network-policies true', checks=[
+                 '--disable-private-endpoint-network-policies true '
+                 '--default-outbound-access false', checks=[
                      self.check('addressPrefix', '10.0.1.0/24'),
                      self.check('privateEndpointNetworkPolicies', 'Disabled'),
                      self.check('privateLinkServiceNetworkPolicies', 'Enabled')
@@ -5469,7 +5470,8 @@ class NetworkSubnetScenarioTests(ScenarioTest):
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} '
                  '--address-prefixes 10.0.2.0/24 '
                  '--name {subnet2} '
-                 '--disable-private-link-service-network-policies true', checks=[
+                 '--disable-private-link-service-network-policies true '
+                 '--default-outbound-access false', checks=[
                      self.check('addressPrefix', '10.0.2.0/24'),
                      self.check('privateEndpointNetworkPolicies', 'Disabled'),
                      self.check('privateLinkServiceNetworkPolicies', 'Disabled')
@@ -5479,7 +5481,8 @@ class NetworkSubnetScenarioTests(ScenarioTest):
                  '--address-prefixes 10.0.3.0/24 '
                  '--name {subnet3} '
                  '--disable-private-endpoint-network-policies true '
-                 '--disable-private-link-service-network-policies true', checks=[
+                 '--disable-private-link-service-network-policies true '
+                 '--default-outbound-access false', checks=[
                      self.check('addressPrefix', '10.0.3.0/24'),
                      self.check('privateEndpointNetworkPolicies', 'Disabled'),
                      self.check('privateLinkServiceNetworkPolicies', 'Disabled')
@@ -6517,7 +6520,7 @@ class NetworkExtendedLocation(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} '
                  '--disable-private-link-service-network-policies')
         self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} '
-                 '--address-prefixes 10.0.2.0/24')
+                 '--address-prefixes 10.0.2.0/24 --default-outbound-access false')
         self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} '
                  '--disable-private-endpoint-network-policies')
 

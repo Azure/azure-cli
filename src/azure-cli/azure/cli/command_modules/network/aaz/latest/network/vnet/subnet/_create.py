@@ -70,7 +70,7 @@ class Create(AAZCommand):
             help="Space-separated list of address prefixes in CIDR format.",
         )
         _args_schema.default_outbound_access = AAZBoolArg(
-            options=["--default-outbound-access"],
+            options=["--default-outbound", "--default-outbound-access"],
             help="Set this property to false to disable default outbound connectivity for all VMs in the subnet. This property can only be set at the time of subnet creation and cannot be updated for an existing subnet.",
             default=True,
         )
