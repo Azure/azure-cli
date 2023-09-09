@@ -57,4 +57,7 @@ class AmsSpTests(ScenarioTest):
                     self.check('AccountName', '{amsname}')
                 ])
             finally:
-                self.cmd('ad app delete --id {appId}')
+                try:
+                    self.cmd('ad app delete --id {appId}')
+                except:
+                    pass

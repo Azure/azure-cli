@@ -179,8 +179,10 @@ def load_arguments(self, _):
                    help='Role of the service principal.')
         c.argument('skip_assignment', arg_type=get_three_state_flag(),
                    deprecate_info=c.deprecate(target='--skip-assignment', hide=True), help='No-op.')
-        c.argument('show_auth_for_sdk', options_list='--sdk-auth', deprecate_info=c.deprecate(target='--sdk-auth'),
-                   help='output result in compatible with Azure SDK auth file', arg_type=get_three_state_flag())
+        c.argument('show_auth_in_json', options_list=['--sdk-auth', '--json-auth'],
+                   deprecate_info=c.deprecate(target='--sdk-auth'),
+                   help='Output service principal credential along with cloud endpoints in JSON format. ',
+                   arg_type=get_three_state_flag())
 
     with self.argument_context('ad sp owner list') as c:
         c.argument('identifier', options_list=['--id'], help='service principal name, or object id or the service principal')

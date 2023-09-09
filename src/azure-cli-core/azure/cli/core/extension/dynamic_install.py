@@ -121,7 +121,14 @@ def try_install_extension(parser, args):
 
 
 def _get_extension_use_dynamic_install_config(cli_ctx):
-    default_value = 'yes_prompt'
+    from knack.prompting import verify_is_a_tty, NoTTYException
+    try:
+        verify_is_a_tty()
+        # prompt when it's in tty
+        default_value = 'yes_prompt'
+    except NoTTYException:
+        # without prompt when it's not in tty
+        default_value = 'yes_without_prompt'
     use_dynamic_install = cli_ctx.config.get(
         'extension', 'use_dynamic_install', default_value).lower() if cli_ctx else default_value
     if use_dynamic_install not in ['no', 'yes_prompt', 'yes_without_prompt']:

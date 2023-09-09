@@ -625,6 +625,8 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None, 
                 filename = ns.get('file_name')
                 account_kwargs["share_name"] = share
                 account_kwargs["snapshot"] = ns.get('snapshot')
+                if ns.get('enable_file_backup_request_intent', None):
+                    account_kwargs["enable_file_backup_request_intent"] = ns.get("enable_file_backup_request_intent")
                 if is_storagev2(prefix):
                     client = cf_share_client(cmd.cli_ctx, account_kwargs).\
                         get_directory_client(directory_path=directory).\
@@ -2011,7 +2013,7 @@ def _add_sas_for_url(cmd, url, account_name, account_key, sas_token, service, re
             logger.info("Cannot generate sas token. %s", ex)
             sas_token = None
     if sas_token:
-        return'{}?{}'.format(url, sas_token)
+        return '{}?{}'.format(url, sas_token)
     return url
 
 

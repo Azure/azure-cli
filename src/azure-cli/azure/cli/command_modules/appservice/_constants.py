@@ -16,6 +16,7 @@ WINDOWS_OS_NAME = "windows"
 STATIC_RUNTIME_NAME = "static"  # not an official supported runtime but used for CLI logic
 LINUX_SKU_DEFAULT = "P1V2"
 FUNCTIONS_VERSIONS = ['2', '3', '4']
+LOGICAPPS_NODE_RUNTIME_VERSIONS = ['~14', '~16', '~18']
 FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX = r"^.*\|(.*)$"
 FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX = r"^~(.*)$"
 FUNCTIONS_NO_V2_REGIONS = {
@@ -95,4 +96,5 @@ WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
     'powershell': 'FunctionApp/windows-powershell-functionapp-on-azure.yml',
 }
 
-DEFAULT_CENTAURI_IMAGE = 'azurefunctionstest.azurecr.io/azure-functions/dotnet7-quickstart-demo:1.0'
+DEFAULT_CENTAURI_IMAGE = 'mcr.microsoft.com/azure-functions/dotnet7-quickstart-demo:1.0'
+ACR_IMAGE_SUFFIX = ".azurecr.io"

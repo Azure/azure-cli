@@ -4,6 +4,9 @@ aks create:
       appgw_watch_namespace:
           rule_exclusions:
           - option_length_too_long
+      enable_workload_identity:
+          rule_exclusions:
+          - option_length_too_long
       enable_sgxquotehelper:
           rule_exclusions:
           - option_length_too_long
@@ -21,7 +24,28 @@ aks create:
           - option_length_too_long
       image_cleaner_interval_hours:
           rule_exclusions:
-          - option_length_too_long    
+          - option_length_too_long
+      azure_monitor_workspace_resource_id:
+        rule_exclusions:
+        - option_length_too_long
+      disable_azure_monitor_metrics:
+        rule_exclusions:
+        - option_length_too_long
+      enable_azure_monitor_metrics:
+        rule_exclusions:
+        - option_length_too_long
+      ksm_metric_annotations_allow_list:
+        rule_exclusions:
+        - option_length_too_long
+      ksm_metric_labels_allow_list:
+        rule_exclusions:
+        - option_length_too_long
+      enable_windows_recording_rules:
+        rule_exclusions:
+        - option_length_too_long
+      node_os_upgrade_channel:
+        rule_exclusions:
+        - option_length_too_long
 
 aks enable-addons:
   parameters:
@@ -39,6 +63,12 @@ aks update:
       disable_secret_rotation:
           rule_exclusions:
           - option_length_too_long
+      enable_workload_identity:
+          rule_exclusions:
+          - option_length_too_long
+      disable_workload_identity:
+          rule_exclusions:
+          - option_length_too_long
       load_balancer_managed_outbound_ipv6_count:
           rule_exclusions:
           - option_length_too_long
@@ -50,7 +80,7 @@ aks update:
           - option_length_too_long
       assign_kubelet_identity:
           rule_exclusions:
-          - option_length_too_long    
+          - option_length_too_long
       enable_snapshot_controller:
           rule_exclusions:
           - option_length_too_long
@@ -59,5 +89,26 @@ aks update:
           - option_length_too_long
       image_cleaner_interval_hours:
           rule_exclusions:
-          - option_length_too_long    
+          - option_length_too_long
+      azure_monitor_workspace_resource_id:
+        rule_exclusions:
+        - option_length_too_long
+      disable_azure_monitor_metrics:
+        rule_exclusions:
+        - option_length_too_long
+      enable_azure_monitor_metrics:
+        rule_exclusions:
+        - option_length_too_long
+      ksm_metric_annotations_allow_list:
+        rule_exclusions:
+        - option_length_too_long
+      ksm_metric_labels_allow_list:
+        rule_exclusions:
+        - option_length_too_long
+      enable_windows_recording_rules:
+          rule_exclusions:
+          - option_length_too_long
+      node_os_upgrade_channel:
+        rule_exclusions:
+        - option_length_too_long
 ...

@@ -238,29 +238,42 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             self.models,
             DecoratorMode.CREATE,
         )
-        ctx._AKSManagedClusterContext__validate_gmsa_options(False, None, None, False)
-        ctx._AKSManagedClusterContext__validate_gmsa_options(True, None, None, True)
+        ctx._AKSManagedClusterContext__validate_gmsa_options(False, False, None, None, False)
+        ctx._AKSManagedClusterContext__validate_gmsa_options(True, False, None, None, True)
+        ctx._AKSManagedClusterContext__validate_gmsa_options(False, True, None, None, False)
 
         # fail on yes & prompt_y_n not specified
         with patch(
             "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n",
             return_value=False,
         ), self.assertRaises(DecoratorEarlyExitException):
-            ctx._AKSManagedClusterContext__validate_gmsa_options(True, None, None, False)
+            ctx._AKSManagedClusterContext__validate_gmsa_options(True, False, None, None, False)
 
         # fail on gmsa_root_domain_name not specified
         with self.assertRaises(RequiredArgumentMissingError):
-            ctx._AKSManagedClusterContext__validate_gmsa_options(True, "test_gmsa_dns_server", None, False)
+            ctx._AKSManagedClusterContext__validate_gmsa_options(True, False, "test_gmsa_dns_server", None, False)
 
         # fail on enable_windows_gmsa not specified
         with self.assertRaises(RequiredArgumentMissingError):
-            ctx._AKSManagedClusterContext__validate_gmsa_options(False, None, "test_gmsa_root_domain_name", False)
+            ctx._AKSManagedClusterContext__validate_gmsa_options(False, False, None, "test_gmsa_root_domain_name", False)
 
         # fail on enable_windows_gmsa not specified
         with self.assertRaises(RequiredArgumentMissingError):
             ctx._AKSManagedClusterContext__validate_gmsa_options(
-                False, "test_gmsa_dns_server", "test_gmsa_root_domain_name", False
+                False, False, "test_gmsa_dns_server", "test_gmsa_root_domain_name", False
             )
+
+        # fail on disable_windows_gmsa specified
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx._AKSManagedClusterContext__validate_gmsa_options(True, True, None, None, False)
+
+        # fail on disable_windows_gmsa specified but gmsa_dns_server specified
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx._AKSManagedClusterContext__validate_gmsa_options(False, True, "test_gmsa_dns_server", None, False)
+
+        # fail on disable_windows_gmsa specified but gmsa_root_domain_name specified
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx._AKSManagedClusterContext__validate_gmsa_options(False, True, None, "test_gmsa_root_domain_name", False)
 
     def test_get_subscription_id(self):
         ctx_1 = AKSManagedClusterContext(self.cmd, AKSManagedClusterParamDict({}), self.models, DecoratorMode.CREATE)
@@ -720,6 +733,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                     "enable_windows_gmsa": False,
                     "gmsa_dns_server": None,
                     "gmsa_root_domain_name": None,
+                    "disable_windows_gmsa": False,
                 }
             ),
             self.models,
@@ -750,6 +764,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                     "enable_windows_gmsa": True,
                     "gmsa_dns_server": "test_gmsa_dns_server",
                     "gmsa_root_domain_name": "test_gmsa_root_domain_name",
+                    "disable_windows_gmsa": True,
                 }
             ),
             self.models,
@@ -769,6 +784,28 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # fail on inconsistent state
         with self.assertRaises(CLIInternalError):
             ctx_2.get_gmsa_dns_server_and_root_domain_name()
+
+    def test_get_disable_windows_gmsa(self):
+        # default
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "disable_windows_gmsa": False,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_1.get_disable_windows_gmsa(), False)
+
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_disable_windows_gmsa(), False)
 
     def test_get_service_principal_and_client_secret(
         self,
@@ -1233,10 +1270,6 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_load_balancer_sku(), CONST_LOAD_BALANCER_SKU_STANDARD)
-        network_profile = self.models.ContainerServiceNetworkProfile(load_balancer_sku="test_mc_load_balancer_SKU")
-        mc = self.models.ManagedCluster(location="test_location", network_profile=network_profile)
-        ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_load_balancer_sku(), "test_mc_load_balancer_sku")
 
         # custom value
         ctx_2 = AKSManagedClusterContext(
@@ -1301,15 +1334,17 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_load_balancer_managed_outbound_ip_count(), None)
-        load_balancer_profile = self.models.load_balancer_models.ManagedClusterLoadBalancerProfile(
-            managed_outbound_i_ps=self.models.load_balancer_models.ManagedClusterLoadBalancerProfileManagedOutboundIPs(
-                count=10
-            )
+        ctx_1_notnull = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "load_balancer_managed_outbound_ip_count": 10,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
         )
-        network_profile = self.models.ContainerServiceNetworkProfile(load_balancer_profile=load_balancer_profile)
-        mc = self.models.ManagedCluster(location="test_location", network_profile=network_profile)
-        ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_load_balancer_managed_outbound_ip_count(), 10)
+        self.assertEqual(ctx_1_notnull.get_load_balancer_managed_outbound_ip_count(), 10)
 
         # custom value
         ctx_2 = AKSManagedClusterContext(
@@ -1332,6 +1367,52 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         ctx_2.attach_mc(mc)
         self.assertEqual(ctx_2.get_load_balancer_managed_outbound_ip_count(), None)
 
+    def test_get_load_balancer_managed_outbound_ipv6_count(self):
+        # default
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "load_balancer_managed_outbound_ipv6_count": None,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_load_balancer_managed_outbound_ipv6_count(), None)
+        ctx_1_notnull = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "load_balancer_managed_outbound_ipv6_count": 10,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1_notnull.get_load_balancer_managed_outbound_ipv6_count(), 10)
+
+        # custom value
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "load_balancer_managed_outbound_ipv6_count": None,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        load_balancer_profile_2 = self.models.load_balancer_models.ManagedClusterLoadBalancerProfile(
+            managed_outbound_i_ps=self.models.load_balancer_models.ManagedClusterLoadBalancerProfileManagedOutboundIPs(
+                count=10
+            )
+        )
+        network_profile_2 = self.models.ContainerServiceNetworkProfile(load_balancer_profile=load_balancer_profile_2)
+        mc = self.models.ManagedCluster(location="test_location", network_profile=network_profile_2)
+        ctx_2.attach_mc(mc)
+        self.assertEqual(ctx_2.get_load_balancer_managed_outbound_ipv6_count(), None)
+
     def test_get_load_balancer_outbound_ips(self):
         # default
         ctx_1 = AKSManagedClusterContext(
@@ -1345,19 +1426,6 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_load_balancer_outbound_ips(), None)
-        load_balancer_profile = self.models.load_balancer_models.ManagedClusterLoadBalancerProfile(
-            outbound_i_ps=self.models.load_balancer_models.ManagedClusterLoadBalancerProfileOutboundIPs(
-                public_i_ps=[self.models.load_balancer_models.ResourceReference(id="test_public_ip")]
-            )
-        )
-        network_profile = self.models.ContainerServiceNetworkProfile(load_balancer_profile=load_balancer_profile)
-        mc = self.models.ManagedCluster(location="test_location", network_profile=network_profile)
-        ctx_1.attach_mc(mc)
-        self.assertEqual(
-            ctx_1.get_load_balancer_outbound_ips(),
-            [self.models.load_balancer_models.ResourceReference(id="test_public_ip")],
-        )
-
         # custom value
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
@@ -1392,19 +1460,17 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_load_balancer_outbound_ip_prefixes(), None)
-        load_balancer_profile = self.models.load_balancer_models.ManagedClusterLoadBalancerProfile(
-            outbound_ip_prefixes=self.models.load_balancer_models.ManagedClusterLoadBalancerProfileOutboundIPPrefixes(
-                public_ip_prefixes=[self.models.load_balancer_models.ResourceReference(id="test_public_ip_prefix")]
-            )
+        ctx_1_notnull = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "load_balancer_outbound_ip_prefixes": "fakeids",
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
         )
-        network_profile = self.models.ContainerServiceNetworkProfile(load_balancer_profile=load_balancer_profile)
-        mc = self.models.ManagedCluster(location="test_location", network_profile=network_profile)
-        ctx_1.attach_mc(mc)
-        self.assertEqual(
-            ctx_1.get_load_balancer_outbound_ip_prefixes(),
-            [self.models.load_balancer_models.ResourceReference(id="test_public_ip_prefix")],
-        )
-
+        self.assertEqual(ctx_1_notnull.get_load_balancer_outbound_ip_prefixes(), "fakeids")
         # custom value
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
@@ -1440,12 +1506,16 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_load_balancer_outbound_ports(), None)
-        load_balancer_profile = self.models.load_balancer_models.ManagedClusterLoadBalancerProfile(
-            allocated_outbound_ports=10
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "load_balancer_outbound_ports": 10,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
         )
-        network_profile = self.models.ContainerServiceNetworkProfile(load_balancer_profile=load_balancer_profile)
-        mc = self.models.ManagedCluster(location="test_location", network_profile=network_profile)
-        ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_load_balancer_outbound_ports(), 10)
 
         # custom value
@@ -1481,14 +1551,19 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_load_balancer_idle_timeout(), None)
-        load_balancer_profile = self.models.load_balancer_models.ManagedClusterLoadBalancerProfile(
-            idle_timeout_in_minutes=10
-        )
-        network_profile = self.models.ContainerServiceNetworkProfile(load_balancer_profile=load_balancer_profile)
-        mc = self.models.ManagedCluster(location="test_location", network_profile=network_profile)
-        ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_load_balancer_idle_timeout(), 10)
 
+        ctx_1_notnull = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "load_balancer_idle_timeout": 10,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1_notnull.get_load_balancer_idle_timeout(), 10)
+        
         # custom value
         ctx_2 = AKSManagedClusterContext(
             self.cmd,
@@ -1508,6 +1583,26 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         mc = self.models.ManagedCluster(location="test_location", network_profile=network_profile_2)
         ctx_2.attach_mc(mc)
         self.assertEqual(ctx_2.get_load_balancer_idle_timeout(), None)
+        
+                # custom value
+        ctx_2_notnull = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "load_balancer_idle_timeout": 20,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_2_notnull.get_load_balancer_idle_timeout(), 20)
+        load_balancer_profile_2 = self.models.load_balancer_models.ManagedClusterLoadBalancerProfile(
+            idle_timeout_in_minutes=10
+        )
+        network_profile_2 = self.models.ContainerServiceNetworkProfile(load_balancer_profile=load_balancer_profile_2)
+        mc = self.models.ManagedCluster(location="test_location", network_profile=network_profile_2)
+        ctx_2_notnull.attach_mc(mc)
+        self.assertEqual(ctx_2_notnull.get_load_balancer_idle_timeout(), 20)
 
     def test_get_nat_gateway_managed_outbound_ip_count(self):
         # default
@@ -1518,6 +1613,22 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_nat_gateway_managed_outbound_ip_count(), None)
+        
+                # default
+        ctx_1_notnull = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"nat_gateway_managed_outbound_ip_count": 2}),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1_notnull.get_nat_gateway_managed_outbound_ip_count(), 2)
+        
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"nat_gateway_managed_outbound_ip_count": None}),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
         nat_gateway_profile = self.models.nat_gateway_models.ManagedClusterNATGatewayProfile(
             managed_outbound_ip_profile=self.models.nat_gateway_models.ManagedClusterManagedOutboundIPProfile(count=10)
         )
@@ -1526,9 +1637,26 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             location="test_location",
             network_profile=network_profile,
         )
-        ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_nat_gateway_managed_outbound_ip_count(), 10)
-
+        ctx_2.attach_mc(mc)
+        self.assertEqual(ctx_2.get_nat_gateway_managed_outbound_ip_count(), 10)
+        
+        ctx_2_notnull = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"nat_gateway_managed_outbound_ip_count": 15}),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        nat_gateway_profile = self.models.nat_gateway_models.ManagedClusterNATGatewayProfile(
+            managed_outbound_ip_profile=self.models.nat_gateway_models.ManagedClusterManagedOutboundIPProfile(count=10)
+        )
+        network_profile = self.models.ContainerServiceNetworkProfile(nat_gateway_profile=nat_gateway_profile)
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=network_profile,
+        )
+        ctx_2_notnull.attach_mc(mc)
+        self.assertEqual(ctx_2_notnull.get_nat_gateway_managed_outbound_ip_count(), 15)
+        
     def test_get_nat_gateway_idle_timeout(self):
         # default
         ctx_1 = AKSManagedClusterContext(
@@ -1538,6 +1666,12 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_1.get_nat_gateway_idle_timeout(), None)
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"nat_gateway_idle_timeout": None}),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
         nat_gateway_profile = self.models.nat_gateway_models.ManagedClusterNATGatewayProfile(
             idle_timeout_in_minutes=20,
         )
@@ -1546,8 +1680,8 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             location="test_location",
             network_profile=network_profile,
         )
-        ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_nat_gateway_idle_timeout(), 20)
+        ctx_2.attach_mc(mc)
+        self.assertEqual(ctx_2.get_nat_gateway_idle_timeout(), 20)
 
     def test_get_outbound_type(self):
         # default
@@ -1559,7 +1693,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                 }
             ),
             self.models,
-            DecoratorMode.CREATE,
+            DecoratorMode.UPDATE,
         )
         self.assertEqual(ctx_1._get_outbound_type(read_only=True), None)
         self.assertEqual(ctx_1.get_outbound_type(), "loadBalancer")
@@ -1737,7 +1871,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_3.get_network_plugin_mode(), "overlay")
-    
+
     def test_get_network_plugin(self):
         # default
         ctx_1 = AKSManagedClusterContext(
@@ -1783,8 +1917,45 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             self.models,
             DecoratorMode.CREATE,
         )
-        # overwrite warning
-        self.assertEqual(ctx_3.get_network_plugin(), "azure")
+
+        with self.assertRaises(InvalidArgumentValueError):
+            self.assertEqual(ctx_3.get_network_plugin(), "azure")
+
+    def test_mc_get_network_dataplane(self):
+        # Default, not set.
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_network_dataplane(), None)
+
+        # Set to cilium.
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "network_dataplane": "cilium",
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_2.get_network_dataplane(), "cilium")
+
+        # Set to azure.
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "network_dataplane": "azure",
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_3.get_network_dataplane(), "azure")
 
     def test_get_pod_cidrs(self):
         # default
@@ -1902,7 +2073,6 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                     "pod_cidr": None,
                     "service_cidr": None,
                     "dns_service_ip": None,
-                    "docker_bridge_address": None,
                     "network_policy": None,
                 }
             ),
@@ -1917,7 +2087,6 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             pod_cidr="test_pod_cidr",
             service_cidr="test_service_cidr",
             dns_service_ip="test_dns_service_ip",
-            docker_bridge_cidr="test_docker_bridge_address",
             network_policy="test_network_policy",
         )
         mc = self.models.ManagedCluster(location="test_location", network_profile=network_profile_1)
@@ -1928,7 +2097,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                 "test_pod_cidr",
                 "test_service_cidr",
                 "test_dns_service_ip",
-                "test_docker_bridge_address",
+                None,
                 "test_network_policy",
             ),
         )
@@ -1955,7 +2124,6 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                 {
                     "service_cidr": "test_service_cidr",
                     "dns_service_ip": "test_dns_service_ip",
-                    "docker_bridge_address": "test_docker_bridge_address",
                     "network_policy": "test_network_policy",
                 }
             ),
@@ -2138,7 +2306,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # fail on aci_subnet_name/vnet_subnet_id not specified
         with self.assertRaises(RequiredArgumentMissingError):
             ctx_6.get_enable_addons()
-    
+
     def test_get_http_proxy_config(self):
         # default
         ctx_1 = AKSManagedClusterContext(
@@ -2278,7 +2446,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         addon_profiles_1 = {
             CONST_MONITORING_ADDON_NAME: self.models.ManagedClusterAddonProfile(
                 enabled=True,
-                config={CONST_MONITORING_USING_AAD_MSI_AUTH: "True"},
+                config={CONST_MONITORING_USING_AAD_MSI_AUTH: "true"},
             )
         }
         mc = self.models.ManagedCluster(location="test_location", addon_profiles=addon_profiles_1)
@@ -3455,6 +3623,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             AKSManagedClusterParamDict(
                 {
                     "disable_public_fqdn": True,
+                    "private_dns_zone": "none",
                 }
             ),
             self.models,
@@ -3462,7 +3631,6 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         )
         api_server_access_profile_4 = self.models.ManagedClusterAPIServerAccessProfile(
             enable_private_cluster=True,
-            private_dns_zone=CONST_PRIVATE_DNS_ZONE_NONE,
         )
         mc_4 = self.models.ManagedCluster(
             location="test_location",
@@ -4132,6 +4300,138 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             ),
         )
         self.assertEqual(defender_config_4, ground_truth_defender_config_4)
+
+    def test_get_workload_identity_profile__create_no_set(self):
+        ctx = AKSManagedClusterContext(
+            self.cmd, AKSManagedClusterParamDict({}), self.models, decorator_mode=DecoratorMode.CREATE
+        )
+        self.assertIsNone(ctx.get_workload_identity_profile())
+
+    def test_get_workload_identity_profile__create_enable_without_oidc_issuer(self):
+        ctx = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_workload_identity": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx.get_workload_identity_profile()
+
+    def test_get_workload_identity_profile__create_enable_with_oidc_issuer(self):
+        ctx = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_oidc_issuer": True,
+                    "enable_workload_identity": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        profile = ctx.get_workload_identity_profile()
+        self.assertTrue(profile.enabled)
+
+    def test_get_workload_identity_profile__update_not_set(self):
+        ctx = AKSManagedClusterContext(
+            self.cmd, AKSManagedClusterParamDict({}), self.models, decorator_mode=DecoratorMode.UPDATE
+        )
+        ctx.attach_mc(self.models.ManagedCluster(location="test_location"))
+        self.assertIsNone(ctx.get_workload_identity_profile())
+
+    def test_get_workload_identity_profile__update_with_enable_and_disable(self):
+        ctx = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_workload_identity": True,
+                    "disable_workload_identity": True,
+                }
+            ),
+            self.models, decorator_mode=DecoratorMode.UPDATE
+        )
+        ctx.attach_mc(self.models.ManagedCluster(location="test_location"))
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx.get_workload_identity_profile()
+
+    def test_get_workload_identity_profile__update_with_enable_without_oidc_issuer(self):
+        ctx = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_workload_identity": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        ctx.attach_mc(self.models.ManagedCluster(location="test_location"))
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx.get_workload_identity_profile()
+
+    def test_get_workload_identity_profile__update_with_enable(self):
+        for previous_enablement_status in [
+            None,  # preivous not set
+            True,  # previous set to enabled=true
+            False,  # previous set to enabled=false
+        ]:
+            ctx = AKSManagedClusterContext(
+                self.cmd,
+                AKSManagedClusterParamDict(
+                    {
+                        "enable_workload_identity": True,
+                    }
+                ),
+                self.models,
+                decorator_mode=DecoratorMode.UPDATE,
+            )
+            mc = self.models.ManagedCluster(location="test_location")
+            mc.oidc_issuer_profile = self.models.ManagedClusterOIDCIssuerProfile(enabled=True)
+            if previous_enablement_status is None:
+                mc.security_profile = None
+            else:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile(
+                    workload_identity=self.models.ManagedClusterSecurityProfileWorkloadIdentity(
+                        enabled=previous_enablement_status
+                    )
+                )
+            ctx.attach_mc(mc)
+            profile = ctx.get_workload_identity_profile()
+            self.assertTrue(profile.enabled)
+
+    def test_get_workload_identity_profile__update_with_disable(self):
+        for previous_enablement_status in [
+            None,  # preivous not set
+            True,  # previous set to enabled=true
+            False,  # previous set to enabled=false
+        ]:
+            ctx = AKSManagedClusterContext(
+                self.cmd,
+                AKSManagedClusterParamDict(
+                    {
+                        "disable_workload_identity": True,
+                    }
+                ),
+                self.models,
+                decorator_mode=DecoratorMode.UPDATE,
+            )
+            mc = self.models.ManagedCluster(location="test_location")
+            mc.oidc_issuer_profile = self.models.ManagedClusterOIDCIssuerProfile(enabled=True)
+            if previous_enablement_status is None:
+                mc.security_profile = None
+            else:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile(
+                    workload_identity=self.models.ManagedClusterSecurityProfileWorkloadIdentity(
+                        enabled=previous_enablement_status
+                    )
+                )
+            ctx.attach_mc(mc)
+            profile = ctx.get_workload_identity_profile()
+            self.assertFalse(profile.enabled)
 
     def test_get_enable_azure_keyvault_kms(self):
         ctx_0 = AKSManagedClusterContext(
@@ -5612,7 +5912,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 "pod_cidr": None,
                 "service_cidr": None,
                 "dns_service_ip": None,
-                "docker_bridge_cidr": None,
                 "network_policy": None,
             },
             ResourceType.MGMT_CONTAINERSERVICE,
@@ -5630,7 +5929,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             pod_cidr="10.244.0.0/16",  # default value in SDK
             service_cidr="10.0.0.0/16",  # default value in SDK
             dns_service_ip="10.0.0.10",  # default value in SDK
-            docker_bridge_cidr="172.17.0.1/16",  # default value in SDK
             load_balancer_sku="standard",
             outbound_type="loadBalancer",
         )
@@ -5644,7 +5942,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             {
                 "load_balancer_sku": None,
                 "load_balancer_managed_outbound_ip_count": 3,
-                "load_balancer_outbound_ips": "test_ip_1,test_ip_2",
+                "load_balancer_outbound_ips": None,
                 "load_balancer_outbound_ip_prefixes": None,
                 "load_balancer_outbound_ports": 5,
                 "load_balancer_idle_timeout": None,
@@ -5653,10 +5951,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 "pod_cidr": "10.246.0.0/16",
                 "service_cidr": None,
                 "dns_service_ip": None,
-                "docker_bridge_cidr": None,
                 "network_policy": None,
-                "nat_gateway_managed_outbound_ip_count": 10,
-                "nat_gateway_idle_timeout": 20,
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -5668,28 +5963,17 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             managed_outbound_i_ps=self.models.load_balancer_models.ManagedClusterLoadBalancerProfileManagedOutboundIPs(
                 count=3
             ),
-            outbound_i_ps=self.models.load_balancer_models.ManagedClusterLoadBalancerProfileOutboundIPs(
-                public_i_ps=[
-                    self.models.load_balancer_models.ResourceReference(id="test_ip_1"),
-                    self.models.load_balancer_models.ResourceReference(id="test_ip_2"),
-                ]
-            ),
             allocated_outbound_ports=5,
         )
-        nat_gateway_profile_2 = self.models.nat_gateway_models.ManagedClusterNATGatewayProfile(
-            managed_outbound_ip_profile=self.models.nat_gateway_models.ManagedClusterManagedOutboundIPProfile(count=10),
-            idle_timeout_in_minutes=20,
-        )
+
         network_profile_2 = self.models.ContainerServiceNetworkProfile(
             network_plugin="kubenet",
             pod_cidr="10.246.0.0/16",
             service_cidr=None,  # overwritten to None
             dns_service_ip=None,  # overwritten to None
-            docker_bridge_cidr=None,  # overwritten to None
             load_balancer_sku="standard",
             outbound_type="loadBalancer",
             load_balancer_profile=load_balancer_profile_2,
-            nat_gateway_profile=nat_gateway_profile_2,
         )
         ground_truth_mc_2 = self.models.ManagedCluster(location="test_location", network_profile=network_profile_2)
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
@@ -5700,7 +5984,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             self.client,
             {
                 "load_balancer_sku": "basic",
-                "load_balancer_managed_outbound_ip_count": 5,
+                "load_balancer_managed_outbound_ip_count": None,
                 "load_balancer_outbound_ips": None,
                 "load_balancer_outbound_ip_prefixes": "test_ip_prefix_1,test_ip_prefix_2",
                 "load_balancer_outbound_ports": None,
@@ -5710,7 +5994,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 "pod_cidr": None,
                 "service_cidr": None,
                 "dns_service_ip": None,
-                "docker_bridge_cidr": None,
                 "network_policy": None,
                 "nat_gateway_managed_outbound_ip_count": None,
                 "nat_gateway_idle_timeout": None,
@@ -5726,7 +6009,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             pod_cidr="10.244.0.0/16",  # default value in SDK
             service_cidr="10.0.0.0/16",  # default value in SDK
             dns_service_ip="10.0.0.10",  # default value in SDK
-            docker_bridge_cidr="172.17.0.1/16",  # default value in SDK
             load_balancer_sku="basic",
             outbound_type="loadBalancer",
             load_balancer_profile=None,  # profile dropped when lb sku is basic
@@ -5743,7 +6025,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 "load_balancer_sku": None,
                 "load_balancer_managed_outbound_ip_count": 3,
                 "load_balancer_managed_outbound_ipv6_count": 3,
-                "load_balancer_outbound_ips": "test_ip_1,test_ip_2",
+                "load_balancer_outbound_ips": None,
                 "load_balancer_outbound_ip_prefixes": None,
                 "load_balancer_outbound_ports": 5,
                 "load_balancer_idle_timeout": None,
@@ -5755,7 +6037,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 "service_cidrs": "192.168.0.0/16,2001:abcd::/84",
                 "ip_families": "ipv4,ipv6",
                 "dns_service_ip": None,
-                "docker_bridge_cidr": None,
                 "network_policy": None,
             },
             ResourceType.MGMT_CONTAINERSERVICE,
@@ -5769,12 +6050,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 count=3,
                 count_ipv6=3,
             ),
-            outbound_i_ps=self.models.load_balancer_models.ManagedClusterLoadBalancerProfileOutboundIPs(
-                public_i_ps=[
-                    self.models.load_balancer_models.ResourceReference(id="test_ip_1"),
-                    self.models.load_balancer_models.ResourceReference(id="test_ip_2"),
-                ]
-            ),
             allocated_outbound_ports=5,
         )
 
@@ -5786,7 +6061,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             pod_cidr=None, # overwritten to None
             service_cidr=None,  # overwritten to None
             dns_service_ip=None,  # overwritten to None
-            docker_bridge_cidr=None,  # overwritten to None
             load_balancer_sku="standard",
             outbound_type="loadBalancer",
             load_balancer_profile=load_balancer_profile_1,
@@ -5858,7 +6132,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 enabled=True,
                 config={
                     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: "/test_workspace_resource_id",
-                    CONST_MONITORING_USING_AAD_MSI_AUTH: "False",
+                    CONST_MONITORING_USING_AAD_MSI_AUTH: "false",
                 },
             )
             self.assertEqual(monitoring_addon_profile, ground_truth_monitoring_addon_profile)
@@ -6133,7 +6407,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 enabled=True,
                 config={
                     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: "/test_workspace_resource_id",
-                    CONST_MONITORING_USING_AAD_MSI_AUTH: "False",
+                    CONST_MONITORING_USING_AAD_MSI_AUTH: "false",
                 },
             ),
             CONST_VIRTUAL_NODE_ADDON_NAME
@@ -6849,6 +7123,36 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
+    def test_set_up_workload_identity_profile__default_value(self):
+        dec = AKSManagedClusterCreateDecorator(self.cmd, self.client, {}, ResourceType.MGMT_CONTAINERSERVICE)
+        mc = self.models.ManagedCluster(location="test_location")
+        dec.context.attach_mc(mc)
+        updated_mc = dec.set_up_workload_identity_profile(mc)
+        self.assertIsNone(updated_mc.security_profile)
+
+    def test_set_up_workload_identity_profile__default_value_with_security_profile(self):
+        dec = AKSManagedClusterCreateDecorator(self.cmd, self.client, {}, ResourceType.MGMT_CONTAINERSERVICE)
+        mc = self.models.ManagedCluster(location="test_location")
+        mc.security_profile = self.models.ManagedClusterSecurityProfile()
+        dec.context.attach_mc(mc)
+        updated_mc = dec.set_up_workload_identity_profile(mc)
+        self.assertIsNone(updated_mc.security_profile.workload_identity)
+
+    def test_set_up_workload_identity_profile__enabled(self):
+        dec = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_oidc_issuer": True,
+                "enable_workload_identity": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc = self.models.ManagedCluster(location="test_location")
+        dec.context.attach_mc(mc)
+        updated_mc = dec.set_up_workload_identity_profile(mc)
+        self.assertTrue(updated_mc.security_profile.workload_identity.enabled)
+
     def test_construct_mc_profile_default(self):
         import inspect
 
@@ -6911,7 +7215,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             enable_auto_scaling=False,
             count=3,
             node_taints=[],
-            os_disk_size_gb=0,
             upgrade_settings=upgrade_settings_1,
             type=CONST_VIRTUAL_MACHINE_SCALE_SETS,
             enable_encryption_at_host=False,
@@ -7028,7 +7331,12 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSManagedClusterCreateDecorator(
             self.cmd,
             self.client,
-            {"resource_group_name": "test_rg_name", "name": "test_name", "enable_msi_auth_for_monitoring": True},
+            {
+                "resource_group_name": "test_rg_name",
+                "name": "test_name",
+                "enable_msi_auth_for_monitoring": True,
+                "enable_addons": "monitoring"
+            },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
         monitoring_addon_profile_2 = self.models.ManagedClusterAddonProfile(
@@ -7179,7 +7487,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             return_value=mc_1,
         ):
             self.assertEqual(dec_1.create_mc(mc_1), mc_1)
-    
+
     def test_set_up_http_proxy_config(self):
         dec_1 = AKSManagedClusterCreateDecorator(
             self.cmd,
@@ -7845,7 +8153,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.client,
             {
                 "load_balancer_sku": None,
-                "load_balancer_managed_outbound_ip_count": 10,
+                "load_balancer_managed_outbound_ip_count": None,
                 "load_balancer_outbound_ips": None,
                 "load_balancer_outbound_ip_prefixes": "test_ip_prefix_1,test_ip_prefix_2",
                 "load_balancer_outbound_ports": 20,
@@ -7854,9 +8162,6 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             ResourceType.MGMT_CONTAINERSERVICE,
         )
         load_balancer_profile_3 = self.models.load_balancer_models.ManagedClusterLoadBalancerProfile(
-            managed_outbound_i_ps=self.models.load_balancer_models.ManagedClusterLoadBalancerProfileManagedOutboundIPs(
-                count=3
-            ),
             outbound_i_ps=self.models.load_balancer_models.ManagedClusterLoadBalancerProfileOutboundIPs(
                 public_i_ps=[
                     self.models.load_balancer_models.ResourceReference(id="test_ip_1"),
@@ -7876,10 +8181,6 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         dec_mc_3 = dec_3.update_load_balancer_profile(mc_3)
 
         ground_truth_load_balancer_profile_3 = self.models.load_balancer_models.ManagedClusterLoadBalancerProfile(
-            managed_outbound_i_ps=self.models.load_balancer_models.ManagedClusterLoadBalancerProfileManagedOutboundIPs(
-                count=10
-            ),
-            outbound_i_ps=None,
             outbound_ip_prefixes=self.models.load_balancer_models.ManagedClusterLoadBalancerProfileOutboundIPPrefixes(
                 public_ip_prefixes=[
                     self.models.load_balancer_models.ResourceReference(id="test_ip_prefix_1"),
@@ -7896,6 +8197,8 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             location="test_location",
             network_profile=ground_truth_network_profile_3,
         )
+        print(dec_mc_3.network_profile.load_balancer_profile)
+        print(ground_truth_mc_3.network_profile.load_balancer_profile)
         self.assertEqual(dec_mc_3, ground_truth_mc_3)
 
     def test_update_nat_gateway_profile(self):
@@ -7917,6 +8220,8 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             location="test_location",
             network_profile=self.models.ContainerServiceNetworkProfile(
                 nat_gateway_profile=self.models.nat_gateway_models.ManagedClusterNATGatewayProfile(),
+                load_balancer_sku="standard",
+                outbound_type="managedNATGateway",
             ),
         )
         dec_1.context.attach_mc(mc_1)
@@ -7926,6 +8231,8 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             location="test_location",
             network_profile=self.models.ContainerServiceNetworkProfile(
                 nat_gateway_profile=self.models.nat_gateway_models.ManagedClusterNATGatewayProfile(),
+                load_balancer_sku="standard",
+                outbound_type="managedNATGateway",
             ),
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
@@ -7964,7 +8271,9 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
                         count=10
                     ),
                     idle_timeout_in_minutes=20,
-                )
+                ),
+                load_balancer_sku="standard",
+                outbound_type="managedNATGateway"
             ),
         )
         dec_3.context.attach_mc(mc_3)
@@ -7978,11 +8287,56 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
                         count=5
                     ),
                     idle_timeout_in_minutes=30,
-                )
+                ),
+                load_balancer_sku="standard",
+                outbound_type="managedNATGateway"
             ),
         )
-        self.assertEqual(dec_mc_3, ground_truth_mc_3)
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
+    def test_update_outbound_type(self):
+        # default value in `aks_update`
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "outbound_type": "managedNATGateway",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_outbound_type_in_network_profile(None)
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                load_balancer_sku="standard",
+                outbound_type="loadBalancer",
+            ),
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_outbound_type_in_network_profile(mc_1)
+
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                load_balancer_sku="standard",
+                outbound_type="managedNATGateway",
+            ),
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+        dec_2 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "vnet_subnet_id": "test_vnet_subnet_id",
+                "outbound_type": "managedNATGateway"
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_outbound_type_in_network_profile(dec_2)
+        
     def test_update_disable_local_accounts(self):
         # default value in `aks_update`
         dec_1 = AKSManagedClusterUpdateDecorator(
@@ -8616,6 +8970,42 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             identity=ground_truth_identity_5,
         )
         self.assertEqual(mc_5, ground_truth_mc_5)
+        # custom value
+        dec_6 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_managed_identity": True,
+                "assign_identity": "test_assign_identity",
+                "yes": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        user_assigned_identity_6 = {
+            "original_test_assign_identity": self.models.ManagedServiceIdentityUserAssignedIdentitiesValue()
+        }
+        identity_6 = self.models.ManagedClusterIdentity(
+            type="UserAssigned",
+            user_assigned_identities=user_assigned_identity_6,
+        )
+        mc_6 = self.models.ManagedCluster(
+            location="test_location",
+            identity=identity_6,
+        )
+        dec_6.context.attach_mc(mc_6)
+        dec_6.update_identity(mc_6)
+        ground_truth_user_assigned_identity_6 = {
+            "test_assign_identity": self.models.ManagedServiceIdentityUserAssignedIdentitiesValue()
+        }
+        ground_truth_identity_6 = self.models.ManagedClusterIdentity(
+            type="UserAssigned",
+            user_assigned_identities=ground_truth_user_assigned_identity_6,
+        )
+        ground_truth_mc_6 = self.models.ManagedCluster(
+            location="test_location",
+            identity=ground_truth_identity_6,
+        )
+        self.assertEqual(mc_6, ground_truth_mc_6)
 
     def test_ensure_azure_keyvault_secrets_provider_addon_profile(self):
         # custom
@@ -9188,6 +9578,43 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
 
+    def test_update_workload_identity_profile__default_value(self):
+        dec = AKSManagedClusterUpdateDecorator(self.cmd, self.client, {}, ResourceType.MGMT_CONTAINERSERVICE)
+        mc = self.models.ManagedCluster(location="test_location")
+        dec.context.attach_mc(mc)
+        updated_mc = dec.update_workload_identity_profile(mc)
+        self.assertIsNone(updated_mc.security_profile)
+
+    def test_update_workload_identity_profile__enabled(self):
+        dec = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_workload_identity": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc = self.models.ManagedCluster(location="test_location")
+        mc.oidc_issuer_profile = self.models.ManagedClusterOIDCIssuerProfile(enabled=True)
+        dec.context.attach_mc(mc)
+        updated_mc = dec.update_workload_identity_profile(mc)
+        self.assertTrue(updated_mc.security_profile.workload_identity.enabled)
+
+    def test_update_workload_identity_profile__disabled(self):
+        dec = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "disable_workload_identity": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc = self.models.ManagedCluster(location="test_location")
+        mc.oidc_issuer_profile = self.models.ManagedClusterOIDCIssuerProfile(enabled=True)
+        dec.context.attach_mc(mc)
+        updated_mc = dec.update_workload_identity_profile(mc)
+        self.assertFalse(updated_mc.security_profile.workload_identity.enabled)
+
     def test_update_identity_profile(self):
         dec_1 = AKSManagedClusterUpdateDecorator(
             self.cmd,
@@ -9316,6 +9743,190 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
                 identity_profile=identity_profile_5,
             )
             self.assertEqual(dec_mc_5, ground_truth_mc_5)
+
+    def test_update_network_plugin_settings(self):
+        # default value in `aks_update`
+        dec_1 =AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "pod_cidr": "100.64.0.0/10",
+                "network_plugin_mode": "overlay",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                pod_cidr=None,
+                service_cidr="192.168.0.0/16"
+            ),
+        )
+
+        dec_1.context.attach_mc(mc_1)
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_network_plugin_settings(None)
+        dec_mc_1 = dec_1.update_network_plugin_settings(mc_1)
+
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                pod_cidr="100.64.0.0/10",
+                service_cidr="192.168.0.0/16",
+            ),
+        )
+
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # test expanding pod cidr
+        dec_2 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "pod_cidr": "100.64.0.0/10",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                pod_cidr="100.64.0.0/16",
+                service_cidr="192.168.0.0/16"
+            ),
+        )
+
+        dec_2.context.attach_mc(mc_2)
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_2.update_network_plugin_settings(None)
+        dec_mc_2 = dec_2.update_network_plugin_settings(mc_2)
+
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                pod_cidr="100.64.0.0/10",
+                service_cidr="192.168.0.0/16",
+            ),
+        )
+
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+        # test no updates made with same network plugin mode
+        dec_3 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "network_plugin_mode": "overlay",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                pod_cidr="100.64.0.0/16",
+                service_cidr="192.168.0.0/16"
+            ),
+        )
+
+        dec_3.context.attach_mc(mc_3)
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_3.update_network_plugin_settings(None)
+        dec_mc_3 = dec_3.update_network_plugin_settings(mc_3)
+
+        ground_truth_mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                pod_cidr="100.64.0.0/16",
+                service_cidr="192.168.0.0/16",
+            ),
+        )
+
+        self.assertEqual(dec_mc_3, ground_truth_mc_3)
+
+        # test update network dataplane
+        dec_4 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "network_dataplane": "cilium",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_4 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                network_dataplane="cilium",
+                pod_cidr="100.64.0.0/16",
+                service_cidr="192.168.0.0/16"
+            ),
+        )
+
+        dec_4.context.attach_mc(mc_4)
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_4.update_network_plugin_settings(None)
+        dec_mc_4 = dec_4.update_network_plugin_settings(mc_4)
+
+        ground_truth_mc_4 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                network_dataplane="cilium",
+                pod_cidr="100.64.0.0/16",
+                service_cidr="192.168.0.0/16",
+            ),
+        )
+
+        self.assertEqual(dec_mc_4, ground_truth_mc_4)
+
+        # test no updates made with empty network plugin settings
+        dec_5 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_5 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                pod_cidr="100.64.0.0/16",
+                service_cidr="192.168.0.0/16"
+            ),
+        )
+
+        dec_5.context.attach_mc(mc_5)
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_5.update_network_plugin_settings(None)
+        dec_mc_5 = dec_5.update_network_plugin_settings(mc_5)
+
+        ground_truth_mc_5 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                pod_cidr="100.64.0.0/16",
+                service_cidr="192.168.0.0/16",
+            ),
+        )
+
+        self.assertEqual(dec_mc_5, ground_truth_mc_5)
 
     def test_update_mc_profile_default(self):
         import inspect
@@ -9471,7 +10082,12 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSManagedClusterUpdateDecorator(
             self.cmd,
             self.client,
-            {"resource_group_name": "test_rg_name", "name": "test_name", "enable_msi_auth_for_monitoring": True},
+            {
+                "resource_group_name": "test_rg_name",
+                "name": "test_name",
+                "enable_msi_auth_for_monitoring": True,
+                "enable_addons": "monitoring"
+            },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
         monitoring_addon_profile_2 = self.models.ManagedClusterAddonProfile(

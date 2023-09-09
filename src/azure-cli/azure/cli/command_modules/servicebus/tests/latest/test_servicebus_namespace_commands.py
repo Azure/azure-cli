@@ -108,8 +108,13 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
         self.assertEqual(2, namespace['premiumMessagingPartitions'])
         self.assertEqual(0, len(namespace['tags']))
 
+        # List Namespace within ResourceGroup
+        self.cmd('servicebus namespace list --resource-group {rg}')
+
+        # List all Namespace within subscription
+        self.cmd('servicebus namespace list')
+
         # Delete Namespace list by ResourceGroup
         self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename} ')
         self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename1} ')
         self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename2} ')
-

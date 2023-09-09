@@ -99,7 +99,7 @@ def _pack_artifacts(cmd, template_abs_file_path, context):
             # Let's make sure we're not referencing a file outside of our root directory
             # hierarchy. We won't allow such references for security purposes:
 
-            if(not os.path.commonpath([getattr(context, 'RootTemplateDirectory')]) ==
+            if (not os.path.commonpath([getattr(context, 'RootTemplateDirectory')]) ==
                os.path.commonpath([getattr(context, 'RootTemplateDirectory'), abs_local_path])):
                 raise BadRequestError('Unable to handle the reference to file ' + abs_local_path + 'from ' +
                                       template_abs_file_path +
@@ -136,13 +136,15 @@ def _get_deployment_resource_objects(cmd, template_obj, includeNested=False):
 
     if 'resources' in template_obj:
         resources = template_obj['resources']
+        if isinstance(resources, dict):  # Check if resources is an object
+            resources = list(resources.values())  # Convert object to array
         for resource in resources:
-            if (str(resource['type']) == 'Microsoft.Resources/deployments') is True:
+            if 'type' in resource and resource['type'] == 'Microsoft.Resources/deployments':
                 immediate_deployment_resources.append(resource)
     results = []
     for deployment_resource_obj in immediate_deployment_resources:
         results.append(deployment_resource_obj)
-        if(includeNested and 'properties' in deployment_resource_obj):
+        if (includeNested and 'properties' in deployment_resource_obj):
             deployment_resource_props_obj = deployment_resource_obj['properties']
             if 'mainTemplate' in deployment_resource_props_obj:
                 results.extend(_get_deployment_resource_objects(cmd,

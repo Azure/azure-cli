@@ -48,6 +48,8 @@ A great cloud needs great tools; we're excited to introduce Azure CLI,
 source %{buildroot}%{cli_lib_dir}/bin/activate
 %{python_cmd} -m pip install --upgrade pip setuptools
 source %{repo_path}/scripts/install_full.sh
+# Remove unused SDK version
+%{python_cmd} %{repo_path}/scripts/trim_sdk.py
 
 # cffi 1.15.0 doesn't work with RPM: https://foss.heptapod.net/pypy/cffi/-/issues/513
 %{python_cmd} -m pip install cffi==1.14.6

@@ -79,6 +79,13 @@ def load_arguments(self, _):
 
     with self.argument_context('container create', arg_group='Confidential Container Group') as c:
         c.argument('cce_policy', help="The CCE policy for the confidential container group")
+        c.argument('allow_privilege_escalation', options_list=['--allow-escalation'], help="Allow whether a process can gain more privileges than its parent process.", action='store_true')
+        c.argument('privileged', help='The flag to determine if the contianer permissions is elevated to Privileged', action='store_true')
+        c.argument('run_as_user', help="Set the User GID for the container")
+        c.argument('run_as_group', help="Set the User UID for the container")
+        c.argument('seccomp_profile', help="A base64 encoded string containing the contents of the JSON in the seccomp profile")
+        c.argument('add_capabilities', nargs='+', help="A List of security context capabilities to be added")
+        c.argument('drop_capabilities', nargs='+', help="A List of security context capabilities to be dropped")
 
     with self.argument_context('container create', arg_group='Managed Service Identity') as c:
         c.argument('assign_identity', nargs='*', validator=validate_msi, help="Space-separated list of assigned identities. Assigned identities are either user assigned identities (resource IDs) and / or the system assigned identity ('[system]'). See examples for more info.")

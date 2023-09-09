@@ -128,10 +128,10 @@ def retryable_method(retries=3, interval_sec=5, excpt_type=Exception):
             while True:
                 try:
                     return func(*args, **kwargs)
-                except excpt_type as exception:  # pylint: disable=broad-except
+                except excpt_type:  # pylint: disable=broad-except
                     current_retry -= 1
                     if current_retry <= 0:
-                        raise exception
+                        raise
                 time.sleep(interval_sec)
         return call
     return decorate
@@ -163,7 +163,7 @@ def _get_location_from_resource_group(cli_ctx, resource_group_name):
 
 def show_raw_functionapp(cmd, resource_group_name, name):
     client = web_client_factory(cmd.cli_ctx)
-    site_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'
+    site_url_base = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'
     subscription_id = get_subscription_id(cmd.cli_ctx)
     site_url = site_url_base.format(subscription_id, resource_group_name, name, client.DEFAULT_API_VERSION)
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + site_url
@@ -209,6 +209,15 @@ def _normalize_location(cmd, location):
         if loc.display_name.lower() == location or loc.name.lower() == location:
             return loc.name
     return location
+
+
+def _remove_list_duplicates(webapp):
+    outbound_ips = webapp.possible_outbound_ip_addresses.split(',')
+    outbound_ips_list = list(dict.fromkeys(outbound_ips))
+    outbound_ips_list.sort()
+    outbound_ips = ','.join(outbound_ips_list)
+    del webapp.possible_outbound_ip_addresses
+    setattr(webapp, 'possible_outbound_ip_addresses', outbound_ips)
 
 
 def get_pool_manager(url):

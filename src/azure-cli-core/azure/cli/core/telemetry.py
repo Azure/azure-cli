@@ -47,6 +47,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.extension_name = None
         self.extension_version = None
         self.event_id = str(uuid.uuid4())
+        self.cli_recommendation = None
         self.feedback = None
         self.extension_management_detail = None
         self.raw_command = None
@@ -70,6 +71,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.poll_start_time = None
         self.poll_end_time = None
         self.allow_broker = None
+        self.msal_telemetry = None
 
     def add_event(self, name, properties):
         for key in self.instrumentation_key:
@@ -200,6 +202,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'PythonVersion', platform.python_version())
         set_custom_properties(result, 'ModuleCorrelation', self.module_correlation)
         set_custom_properties(result, 'ExtensionName', ext_info)
+        set_custom_properties(result, 'CLIRecommendation', self.cli_recommendation)
         set_custom_properties(result, 'Feedback', self.feedback)
         set_custom_properties(result, 'ExtensionManagementDetail', self.extension_management_detail)
         set_custom_properties(result, 'Mode', self.mode)
@@ -215,6 +218,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'RegionInput', self.region_input)
         set_custom_properties(result, 'RegionIdentified', self.region_identified)
         set_custom_properties(result, 'AllowBroker', str(self.allow_broker))
+        set_custom_properties(result, 'MsalTelemetry', self.msal_telemetry)
 
         return result
 
@@ -403,6 +407,15 @@ def set_feedback(feedback):
 
 
 @decorators.suppress_all_exceptions()
+def set_cli_recommendation(api_version, feedback):
+    # This function returns the user's selection and feedback on the cli-recommendation results
+    # Please refer to feedback_design.md of cli-recommendation for detailed information
+    # json.dumps converts the JSON-formatted feedback into a string format before storing it in the telemetry database.
+    # Telemetry property only accepts string inputs, and it cannot directly upload JSON content.
+    _session.cli_recommendation = json.dumps({"api_version": api_version, "feedback": feedback})
+
+
+@decorators.suppress_all_exceptions()
 def set_extension_management_detail(ext_name, ext_version):
     content = '{}@{}'.format(ext_name, ext_version)
     _session.extension_management_detail = content[:512]
@@ -446,6 +459,12 @@ def set_region_identified(region_input, region_identified):
 def set_broker_info(allow_broker):
     # whether customer has configured `allow_broker` to enable WAM(Web Account Manager) login for authentication
     _session.allow_broker = allow_broker
+
+
+@decorators.suppress_all_exceptions()
+def set_msal_telemetry(msal_telemetry):
+    if not _session.msal_telemetry:
+        _session.msal_telemetry = msal_telemetry
 
 
 @decorators.suppress_all_exceptions()

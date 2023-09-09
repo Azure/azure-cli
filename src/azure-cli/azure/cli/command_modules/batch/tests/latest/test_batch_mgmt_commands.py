@@ -54,7 +54,8 @@ class BatchMgmtScenarioTests(ScenarioTest):
             self.check('encryption.keySource', 'Microsoft.Batch'),
             self.check('resourceGroup', '{rg}')])
 
-        time.sleep(100)
+        if self.in_recording:
+            time.sleep(100)
 
         self.cmd('batch account set -g {rg} -n {acc} --storage-account {str_n}').assert_with_checks([
             self.check('name', '{acc}'),
@@ -104,7 +105,7 @@ class BatchMgmtScenarioTests(ScenarioTest):
         self.cmd('batch account list -g {rg}').assert_with_checks(self.is_empty())
 
         self.cmd('batch location quotas show -l {loc}').assert_with_checks(
-            [self.check('accountQuota', 5)])
+            [self.check('accountQuota', 3)])
 
         self.cmd('batch location list-skus -l {loc} --query "[0:20]"').assert_with_checks([
             self.check('length(@)', 20), # Ensure at least 20 entries

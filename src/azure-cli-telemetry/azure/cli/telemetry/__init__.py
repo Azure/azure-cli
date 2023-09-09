@@ -10,7 +10,7 @@ import portalocker
 
 from azure.cli.telemetry.util import save_payload
 
-__version__ = "1.0.8"
+__version__ = "1.1.0"
 
 DEFAULT_INSTRUMENTATION_KEY = 'c4395b75-49cc-422c-bc95-c7d51aef5d46'
 
@@ -47,15 +47,14 @@ def _start(config_dir):
 
 
 def save(config_dir, payload):
-    from azure.cli.telemetry.util import should_upload
     from azure.cli.telemetry.components.telemetry_client import CliTelemetryClient
     from azure.cli.telemetry.components.telemetry_logging import get_logger
 
     logger = get_logger('main')
     try:
         # Split payload to cli events and extra events by instrumentation key
-        # cli events should be stored in local cache and sent together
         # extra events can be sent immediately
+        # cli events will be handled in separate process
         import json
         events = json.loads(payload)
 
@@ -75,14 +74,13 @@ def save(config_dir, payload):
         logger.info("Split cli events and extra events failure: %s", str(ex))
         cli_payload = payload
 
-    if save_payload(config_dir, cli_payload) and should_upload(config_dir):
+    if save_payload(config_dir, cli_payload):
         logger.info('Begin creating telemetry upload process.')
         _start(config_dir)
         logger.info('Finish creating telemetry upload process.')
 
 
 def main():
-    from azure.cli.telemetry.util import should_upload
     from azure.cli.telemetry.components.telemetry_note import TelemetryNote
     from azure.cli.telemetry.components.records_collection import RecordsCollection
     from azure.cli.telemetry.components.telemetry_client import CliTelemetryClient
@@ -94,10 +92,6 @@ def main():
 
         logger = get_logger('main')
         logger.info('Attempt start. Configuration directory [%s].', sys.argv[1])
-
-        if not should_upload(config_dir):
-            logger.info('Exit early. The note file indicates it is not a suitable time to upload telemetry.')
-            sys.exit(0)
 
         try:
             with TelemetryNote(config_dir) as telemetry_note:

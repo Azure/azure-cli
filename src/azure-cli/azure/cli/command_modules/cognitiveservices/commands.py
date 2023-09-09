@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import CliCommandType
-from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus,\
-    cf_deleted_accounts, cf_deployments, cf_commitment_plans, cf_commitment_tiers
+from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus, \
+    cf_deleted_accounts, cf_deployments, cf_commitment_plans, cf_commitment_tiers, cf_models, cf_usages
 
 
 def load_command_table(self, _):
@@ -27,6 +27,16 @@ def load_command_table(self, _):
     commitment_tiers_type = CliCommandType(
         operations_tmpl='azure.mgmt.cognitiveservices.operations#CommitmentTiersOperations.{}',
         client_factory=cf_commitment_tiers
+    )
+
+    models_type = CliCommandType(
+        operations_tmpl='azure.mgmt.cognitiveservices.operations#ModelsOperations.{}',
+        client_factory=cf_models
+    )
+
+    usages_type = CliCommandType(
+        operations_tmpl='azure.mgmt.cognitiveservices.operations#UsagesOperations.{}',
+        client_factory=cf_usages
     )
 
     with self.command_group('cognitiveservices account', accounts_type, client_factory=cf_accounts) as g:
@@ -86,4 +96,10 @@ def load_command_table(self, _):
         g.command('list', 'list')
 
     with self.command_group('cognitiveservices commitment-tier', commitment_tiers_type) as g:
+        g.command('list', 'list')
+
+    with self.command_group('cognitiveservices model', models_type) as g:
+        g.command('list', 'list')
+
+    with self.command_group('cognitiveservices usage', usages_type) as g:
         g.command('list', 'list')

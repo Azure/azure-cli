@@ -1,7 +1,7 @@
 interactions:
 - request:
-    body: '{"kind": "Face", "sku": {"name": "E0"}, "location": "SOUTHCENTRALUS", "properties":
-      {}}'
+    body: '{"kind": "FormRecognizer", "sku": {"name": "S0"}, "location": "SOUTHCENTRALUS",
+      "properties": {}}'
     headers:
       Accept:
       - application/json
@@ -12,31 +12,32 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '87'
+      - '97'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g --kind --sku -l --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.50.0 azsdk-python-mgmt-cognitiveservices/13.5.0 Python/3.10.11
+        (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2023-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"1700ee73-0000-0500-0000-6358af490000\"","location":"SOUTHCENTRALUS","sku":{"name":"E0"},"kind":"Face","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","internalId":"d1cc3f87937d495fbaf5faf26262f5e9","dateCreated":"2022-10-26T03:53:45.5150634Z","callRateLimit":{"rules":[{"key":"face","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"face/*","method":"*"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"Container","value":"Face.*,Face.Face"},{"name":"CustomerManagedKey"},{"name":"Scenario","value":"Face.LegacyPreview,Face.Legacy"}],"endpoints":{"Face":"https://southcentralus.api.cognitive.microsoft.com/"},"provisioningState":"Creating"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-10-26T03:53:45.2965209Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-10-26T03:53:45.2965209Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"7e005d02-0000-0500-0000-64bf59090000\"","location":"SOUTHCENTRALUS","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","internalId":"7afe16659c6d463ca5ab4e7c79c85ccc","dateCreated":"2023-07-25T05:09:29.4344377Z","callRateLimit":{"rules":[{"key":"container.billing","renewalPeriod":10,"count":500,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"formrecognizer.analyze","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{id}/analyze","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/businessCard/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/idDocument/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/invoice/analyze","method":"POST"},{"path":"formrecognizer/layout/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/asyncBatchAnalyze","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:analyze","method":"POST"},{"path":"formrecognizer/read","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}:analyze","method":"POST"}]},{"key":"formrecognizer.get.object","renewalPeriod":1,"count":50,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/businessCard/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/idDocument/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/invoice/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/operations/{operationId}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/layout/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}/copyResults/{resultId}","method":"GET"},{"path":"formrecognizer/operations/{operationId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{id}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"formrecognizer.list.objects","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/operations","method":"GET"},{"path":"formrecognizer/info","method":"GET"},{"path":"formrecognizer/documentModels","method":"GET"},{"path":"formrecognizer/custom/models","method":"GET"},{"path":"formrecognizer/documentClassifiers","method":"GET"}]},{"key":"formrecognizer.model.management","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"POST"},{"path":"formrecognizer/custom/models/compose","method":"POST"},{"path":"formrecognizer/custom/models/copyAuthorization","method":"POST"},{"path":"formrecognizer/custom/models/{id}","method":"DELETE"},{"path":"formrecognizer/custom/models/{id}/keys","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/custom/models/{modelId}/copy","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:copyTo","method":"POST"},{"path":"formrecognizer/documentModels:authorizeCopy","method":"POST"},{"path":"formrecognizer/documentModels:build","method":"POST"},{"path":"formrecognizer/documentModels:compose","method":"POST"},{"path":"formrecognizer/custom/train","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentModels/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentClassifiers:build","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"DELETE"}]},{"key":"default","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"DynamicThrottling"},{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://southcentralus.api.cognitive.microsoft.com/","Container":"https://southcentralus.api.cognitive.microsoft.com/"},"provisioningState":"Creating"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2023-07-25T05:09:29.1805206Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-07-25T05:09:29.1805206Z"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/56258759-beb4-4e94-b4c0-7781fe379597?api-version=2017-04-18
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/423b17bf-e282-4cd2-82f6-2557abb5233d?api-version=2017-04-18
       cache-control:
       - no-cache
       content-length:
-      - '1547'
+      - '5279'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Oct 2022 03:53:45 GMT
+      - Tue, 25 Jul 2023 05:09:29 GMT
       etag:
-      - '"1700ee73-0000-0500-0000-6358af490000"'
+      - '"7e005d02-0000-0500-0000-64bf59090000"'
       expires:
       - '-1'
       pragma:
@@ -48,9 +49,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '249'
+      - '261'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -68,12 +69,13 @@ interactions:
       ParameterSetName:
       - -n -g --kind --sku -l --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.50.0 azsdk-python-mgmt-cognitiveservices/13.5.0 Python/3.10.11
+        (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/56258759-beb4-4e94-b4c0-7781fe379597?api-version=2017-04-18
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/423b17bf-e282-4cd2-82f6-2557abb5233d?api-version=2017-04-18
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/56258759-beb4-4e94-b4c0-7781fe379597","name":"56258759-beb4-4e94-b4c0-7781fe379597","status":"Creating","startTime":"2022-10-26T03:53:45Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/423b17bf-e282-4cd2-82f6-2557abb5233d","name":"423b17bf-e282-4cd2-82f6-2557abb5233d","status":"Creating","startTime":"2023-07-25T05:09:29Z"}'
     headers:
       cache-control:
       - no-cache
@@ -82,7 +84,56 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Oct 2022 03:54:15 GMT
+      - Tue, 25 Jul 2023 05:09:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '5'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --kind --sku -l --yes
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-mgmt-cognitiveservices/13.5.0 Python/3.10.11
+        (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/423b17bf-e282-4cd2-82f6-2557abb5233d?api-version=2017-04-18
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/423b17bf-e282-4cd2-82f6-2557abb5233d","name":"423b17bf-e282-4cd2-82f6-2557abb5233d","status":"Succeeded","startTime":"2023-07-25T05:09:29Z","endTime":"2023-07-25T05:09:30Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '312'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 25 Jul 2023 05:09:59 GMT
       expires:
       - '-1'
       pragma:
@@ -116,119 +167,24 @@ interactions:
       ParameterSetName:
       - -n -g --kind --sku -l --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.50.0 azsdk-python-mgmt-cognitiveservices/13.5.0 Python/3.10.11
+        (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/56258759-beb4-4e94-b4c0-7781fe379597?api-version=2017-04-18
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2023-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/56258759-beb4-4e94-b4c0-7781fe379597","name":"56258759-beb4-4e94-b4c0-7781fe379597","status":"Creating","startTime":"2022-10-26T03:53:45Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"7e005e02-0000-0500-0000-64bf590a0000\"","location":"SOUTHCENTRALUS","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","internalId":"7afe16659c6d463ca5ab4e7c79c85ccc","dateCreated":"2023-07-25T05:09:29.4344377Z","callRateLimit":{"rules":[{"key":"container.billing","renewalPeriod":10,"count":500,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"formrecognizer.analyze","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{id}/analyze","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/businessCard/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/idDocument/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/invoice/analyze","method":"POST"},{"path":"formrecognizer/layout/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/asyncBatchAnalyze","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:analyze","method":"POST"},{"path":"formrecognizer/read","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}:analyze","method":"POST"}]},{"key":"formrecognizer.get.object","renewalPeriod":1,"count":50,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/businessCard/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/idDocument/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/invoice/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/operations/{operationId}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/layout/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}/copyResults/{resultId}","method":"GET"},{"path":"formrecognizer/operations/{operationId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{id}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"formrecognizer.list.objects","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/operations","method":"GET"},{"path":"formrecognizer/info","method":"GET"},{"path":"formrecognizer/documentModels","method":"GET"},{"path":"formrecognizer/custom/models","method":"GET"},{"path":"formrecognizer/documentClassifiers","method":"GET"}]},{"key":"formrecognizer.model.management","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"POST"},{"path":"formrecognizer/custom/models/compose","method":"POST"},{"path":"formrecognizer/custom/models/copyAuthorization","method":"POST"},{"path":"formrecognizer/custom/models/{id}","method":"DELETE"},{"path":"formrecognizer/custom/models/{id}/keys","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/custom/models/{modelId}/copy","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:copyTo","method":"POST"},{"path":"formrecognizer/documentModels:authorizeCopy","method":"POST"},{"path":"formrecognizer/documentModels:build","method":"POST"},{"path":"formrecognizer/documentModels:compose","method":"POST"},{"path":"formrecognizer/custom/train","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentModels/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentClassifiers:build","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"DELETE"}]},{"key":"default","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"DynamicThrottling"},{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://southcentralus.api.cognitive.microsoft.com/","Container":"https://southcentralus.api.cognitive.microsoft.com/"},"provisioningState":"Succeeded"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2023-07-25T05:09:29.1805206Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-07-25T05:09:29.1805206Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '278'
+      - '5280'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Oct 2022 03:54:46 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - istio-envoy
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-envoy-upstream-service-time:
-      - '7'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - cognitiveservices account create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --kind --sku -l --yes
-      User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/56258759-beb4-4e94-b4c0-7781fe379597?api-version=2017-04-18
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/56258759-beb4-4e94-b4c0-7781fe379597","name":"56258759-beb4-4e94-b4c0-7781fe379597","status":"Succeeded","startTime":"2022-10-26T03:53:45Z","endTime":"2022-10-26T03:54:47Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '312'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 26 Oct 2022 03:55:16 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - istio-envoy
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-envoy-upstream-service-time:
-      - '7'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - cognitiveservices account create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --kind --sku -l --yes
-      User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-10-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"17001374-0000-0500-0000-6358af870000\"","location":"SOUTHCENTRALUS","sku":{"name":"E0"},"kind":"Face","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","internalId":"d1cc3f87937d495fbaf5faf26262f5e9","dateCreated":"2022-10-26T03:53:45.5150634Z","callRateLimit":{"rules":[{"key":"face","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"face/*","method":"*"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"Container","value":"Face.*,Face.Face"},{"name":"CustomerManagedKey"},{"name":"Scenario","value":"Face.LegacyPreview,Face.Legacy"}],"endpoints":{"Face":"https://southcentralus.api.cognitive.microsoft.com/"},"provisioningState":"Succeeded"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-10-26T03:53:45.2965209Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-10-26T03:53:45.2965209Z"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1548'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 26 Oct 2022 03:55:16 GMT
+      - Tue, 25 Jul 2023 05:09:59 GMT
       etag:
-      - '"17001374-0000-0500-0000-6358af870000"'
+      - '"7e005e02-0000-0500-0000-64bf590a0000"'
       expires:
       - '-1'
       pragma:
@@ -262,23 +218,24 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.50.0 azsdk-python-mgmt-cognitiveservices/13.5.0 Python/3.10.11
+        (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2023-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"17001374-0000-0500-0000-6358af870000\"","location":"SOUTHCENTRALUS","sku":{"name":"E0"},"kind":"Face","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","internalId":"d1cc3f87937d495fbaf5faf26262f5e9","dateCreated":"2022-10-26T03:53:45.5150634Z","callRateLimit":{"rules":[{"key":"face","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"face/*","method":"*"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"Container","value":"Face.*,Face.Face"},{"name":"CustomerManagedKey"},{"name":"Scenario","value":"Face.LegacyPreview,Face.Legacy"}],"endpoints":{"Face":"https://southcentralus.api.cognitive.microsoft.com/"},"provisioningState":"Succeeded"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-10-26T03:53:45.2965209Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-10-26T03:53:45.2965209Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"7e005e02-0000-0500-0000-64bf590a0000\"","location":"SOUTHCENTRALUS","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","internalId":"7afe16659c6d463ca5ab4e7c79c85ccc","dateCreated":"2023-07-25T05:09:29.4344377Z","callRateLimit":{"rules":[{"key":"container.billing","renewalPeriod":10,"count":500,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"formrecognizer.analyze","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{id}/analyze","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/businessCard/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/idDocument/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/invoice/analyze","method":"POST"},{"path":"formrecognizer/layout/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/asyncBatchAnalyze","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:analyze","method":"POST"},{"path":"formrecognizer/read","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}:analyze","method":"POST"}]},{"key":"formrecognizer.get.object","renewalPeriod":1,"count":50,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/businessCard/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/idDocument/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/invoice/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/operations/{operationId}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/layout/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}/copyResults/{resultId}","method":"GET"},{"path":"formrecognizer/operations/{operationId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{id}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"formrecognizer.list.objects","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/operations","method":"GET"},{"path":"formrecognizer/info","method":"GET"},{"path":"formrecognizer/documentModels","method":"GET"},{"path":"formrecognizer/custom/models","method":"GET"},{"path":"formrecognizer/documentClassifiers","method":"GET"}]},{"key":"formrecognizer.model.management","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"POST"},{"path":"formrecognizer/custom/models/compose","method":"POST"},{"path":"formrecognizer/custom/models/copyAuthorization","method":"POST"},{"path":"formrecognizer/custom/models/{id}","method":"DELETE"},{"path":"formrecognizer/custom/models/{id}/keys","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/custom/models/{modelId}/copy","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:copyTo","method":"POST"},{"path":"formrecognizer/documentModels:authorizeCopy","method":"POST"},{"path":"formrecognizer/documentModels:build","method":"POST"},{"path":"formrecognizer/documentModels:compose","method":"POST"},{"path":"formrecognizer/custom/train","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentModels/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentClassifiers:build","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"DELETE"}]},{"key":"default","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"DynamicThrottling"},{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://southcentralus.api.cognitive.microsoft.com/","Container":"https://southcentralus.api.cognitive.microsoft.com/"},"provisioningState":"Succeeded"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2023-07-25T05:09:29.1805206Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-07-25T05:09:29.1805206Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1548'
+      - '5280'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Oct 2022 03:55:16 GMT
+      - Tue, 25 Jul 2023 05:10:00 GMT
       etag:
-      - '"17001374-0000-0500-0000-6358af870000"'
+      - '"7e005e02-0000-0500-0000-64bf590a0000"'
       expires:
       - '-1'
       pragma:
@@ -294,7 +251,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '10'
+      - '11'
     status:
       code: 200
       message: OK
@@ -312,23 +269,24 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.50.0 azsdk-python-mgmt-cognitiveservices/13.5.0 Python/3.10.11
+        (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2023-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"17001374-0000-0500-0000-6358af870000\"","location":"SOUTHCENTRALUS","sku":{"name":"E0"},"kind":"Face","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","internalId":"d1cc3f87937d495fbaf5faf26262f5e9","dateCreated":"2022-10-26T03:53:45.5150634Z","callRateLimit":{"rules":[{"key":"face","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"face/*","method":"*"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"Container","value":"Face.*,Face.Face"},{"name":"CustomerManagedKey"},{"name":"Scenario","value":"Face.LegacyPreview,Face.Legacy"}],"endpoints":{"Face":"https://southcentralus.api.cognitive.microsoft.com/"},"provisioningState":"Succeeded"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-10-26T03:53:45.2965209Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-10-26T03:53:45.2965209Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"7e005e02-0000-0500-0000-64bf590a0000\"","location":"SOUTHCENTRALUS","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","internalId":"7afe16659c6d463ca5ab4e7c79c85ccc","dateCreated":"2023-07-25T05:09:29.4344377Z","callRateLimit":{"rules":[{"key":"container.billing","renewalPeriod":10,"count":500,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"formrecognizer.analyze","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{id}/analyze","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/businessCard/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/idDocument/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/invoice/analyze","method":"POST"},{"path":"formrecognizer/layout/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/asyncBatchAnalyze","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:analyze","method":"POST"},{"path":"formrecognizer/read","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}:analyze","method":"POST"}]},{"key":"formrecognizer.get.object","renewalPeriod":1,"count":50,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/businessCard/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/idDocument/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/invoice/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/operations/{operationId}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/layout/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}/copyResults/{resultId}","method":"GET"},{"path":"formrecognizer/operations/{operationId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{id}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"formrecognizer.list.objects","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/operations","method":"GET"},{"path":"formrecognizer/info","method":"GET"},{"path":"formrecognizer/documentModels","method":"GET"},{"path":"formrecognizer/custom/models","method":"GET"},{"path":"formrecognizer/documentClassifiers","method":"GET"}]},{"key":"formrecognizer.model.management","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"POST"},{"path":"formrecognizer/custom/models/compose","method":"POST"},{"path":"formrecognizer/custom/models/copyAuthorization","method":"POST"},{"path":"formrecognizer/custom/models/{id}","method":"DELETE"},{"path":"formrecognizer/custom/models/{id}/keys","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/custom/models/{modelId}/copy","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:copyTo","method":"POST"},{"path":"formrecognizer/documentModels:authorizeCopy","method":"POST"},{"path":"formrecognizer/documentModels:build","method":"POST"},{"path":"formrecognizer/documentModels:compose","method":"POST"},{"path":"formrecognizer/custom/train","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentModels/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentClassifiers:build","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"DELETE"}]},{"key":"default","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"DynamicThrottling"},{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://southcentralus.api.cognitive.microsoft.com/","Container":"https://southcentralus.api.cognitive.microsoft.com/"},"provisioningState":"Succeeded"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2023-07-25T05:09:29.1805206Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-07-25T05:09:29.1805206Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1548'
+      - '5280'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Oct 2022 03:55:17 GMT
+      - Tue, 25 Jul 2023 05:10:00 GMT
       etag:
-      - '"17001374-0000-0500-0000-6358af870000"'
+      - '"7e005e02-0000-0500-0000-64bf590a0000"'
       expires:
       - '-1'
       pragma:
@@ -366,29 +324,30 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.50.0 azsdk-python-mgmt-cognitiveservices/13.5.0 Python/3.10.11
+        (Windows-10-10.0.22621-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2023-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"17002e74-0000-0500-0000-6358afa70000\"","location":"SOUTHCENTRALUS","sku":{"name":"E0"},"kind":"Face","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","provisioningState":"Accepted","internalId":"d1cc3f87937d495fbaf5faf26262f5e9","dateCreated":"2022-10-26T03:53:45.5150634Z","callRateLimit":{"rules":[{"key":"face","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"face/*","method":"*"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"Container","value":"Face.*,Face.Face"},{"name":"CustomerManagedKey"},{"name":"Scenario","value":"Face.LegacyPreview,Face.Legacy"}],"endpoints":{"Face":"https://southcentralus.api.cognitive.microsoft.com/"}},"identity":{"principalId":"474a8719-7dd9-40a1-a982-ab2a5e4b4056","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-10-26T03:53:45.2965209Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-10-26T03:55:19.4570102Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"7e007202-0000-0500-0000-64bf592a0000\"","location":"SOUTHCENTRALUS","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","provisioningState":"Accepted","internalId":"7afe16659c6d463ca5ab4e7c79c85ccc","dateCreated":"2023-07-25T05:09:29.4344377Z","callRateLimit":{"rules":[{"key":"container.billing","renewalPeriod":10,"count":500,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"formrecognizer.analyze","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{id}/analyze","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/businessCard/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/idDocument/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/invoice/analyze","method":"POST"},{"path":"formrecognizer/layout/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/asyncBatchAnalyze","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:analyze","method":"POST"},{"path":"formrecognizer/read","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}:analyze","method":"POST"}]},{"key":"formrecognizer.get.object","renewalPeriod":1,"count":50,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/businessCard/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/idDocument/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/invoice/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/operations/{operationId}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/layout/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}/copyResults/{resultId}","method":"GET"},{"path":"formrecognizer/operations/{operationId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{id}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"formrecognizer.list.objects","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/operations","method":"GET"},{"path":"formrecognizer/info","method":"GET"},{"path":"formrecognizer/documentModels","method":"GET"},{"path":"formrecognizer/custom/models","method":"GET"},{"path":"formrecognizer/documentClassifiers","method":"GET"}]},{"key":"formrecognizer.model.management","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"POST"},{"path":"formrecognizer/custom/models/compose","method":"POST"},{"path":"formrecognizer/custom/models/copyAuthorization","method":"POST"},{"path":"formrecognizer/custom/models/{id}","method":"DELETE"},{"path":"formrecognizer/custom/models/{id}/keys","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/custom/models/{modelId}/copy","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:copyTo","method":"POST"},{"path":"formrecognizer/documentModels:authorizeCopy","method":"POST"},{"path":"formrecognizer/documentModels:build","method":"POST"},{"path":"formrecognizer/documentModels:compose","method":"POST"},{"path":"formrecognizer/custom/train","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentModels/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentClassifiers:build","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"DELETE"}]},{"key":"default","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"DynamicThrottling"},{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://southcentralus.api.cognitive.microsoft.com/","Container":"https://southcentralus.api.cognitive.microsoft.com/"}},"identity":{"principalId":"5b04df58-d20f-4ba2-a1e1-ac17e8c4777f","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2023-07-25T05:09:29.1805206Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-07-25T05:10:02.8782247Z"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/bdcf8635-8965-41de-a331-1016068fb74f?api-version=2017-04-18
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/22f877be-7204-425c-88b4-2ce9c58882d9?api-version=2017-04-18
       cache-control:
       - no-cache
       content-length:
-      - '1687'
+      - '5419'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Oct 2022 03:55:19 GMT
+      - Tue, 25 Jul 2023 05:10:02 GMT
       etag:
-      - '"17002e74-0000-0500-0000-6358afa70000"'
+      - '"7e007202-0000-0500-0000-64bf592a0000"'
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/bdcf8635-8965-41de-a331-1016068fb74f?api-version=2017-04-18&operationResultResponseType=Location
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/22f877be-7204-425c-88b4-2ce9c58882d9?api-version=2017-04-18&operationResultResponseType=Location
       pragma:
       - no-cache
       server:
@@ -398,7 +357,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '107'
+      - '92'
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -418,12 +377,62 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.50.0 azsdk-python-mgmt-cognitiveservices/13.5.0 Python/3.10.11
+        (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/bdcf8635-8965-41de-a331-1016068fb74f?api-version=2017-04-18
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/22f877be-7204-425c-88b4-2ce9c58882d9?api-version=2017-04-18
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/bdcf8635-8965-41de-a331-1016068fb74f","name":"bdcf8635-8965-41de-a331-1016068fb74f","status":"Succeeded","startTime":"2022-10-26T03:55:19Z","endTime":"2022-10-26T03:55:19Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/22f877be-7204-425c-88b4-2ce9c58882d9","name":"22f877be-7204-425c-88b4-2ce9c58882d9","status":"Updating","startTime":"2023-07-25T05:10:02Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '278'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 25 Jul 2023 05:10:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '10'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account identity assign
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-mgmt-cognitiveservices/13.5.0 Python/3.10.11
+        (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/22f877be-7204-425c-88b4-2ce9c58882d9?api-version=2017-04-18
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/22f877be-7204-425c-88b4-2ce9c58882d9","name":"22f877be-7204-425c-88b4-2ce9c58882d9","status":"Succeeded","startTime":"2023-07-25T05:10:02Z","endTime":"2023-07-25T05:10:03Z"}'
     headers:
       cache-control:
       - no-cache
@@ -432,7 +441,264 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Oct 2022 03:55:49 GMT
+      - Tue, 25 Jul 2023 05:10:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '7'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account identity assign
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-mgmt-cognitiveservices/13.5.0 Python/3.10.11
+        (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2023-05-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"7e007302-0000-0500-0000-64bf592b0000\"","location":"SOUTHCENTRALUS","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","provisioningState":"Succeeded","internalId":"7afe16659c6d463ca5ab4e7c79c85ccc","dateCreated":"2023-07-25T05:09:29.4344377Z","callRateLimit":{"rules":[{"key":"container.billing","renewalPeriod":10,"count":500,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"formrecognizer.analyze","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{id}/analyze","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/businessCard/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/idDocument/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/invoice/analyze","method":"POST"},{"path":"formrecognizer/layout/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/asyncBatchAnalyze","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:analyze","method":"POST"},{"path":"formrecognizer/read","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}:analyze","method":"POST"}]},{"key":"formrecognizer.get.object","renewalPeriod":1,"count":50,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/businessCard/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/idDocument/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/invoice/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/operations/{operationId}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/layout/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}/copyResults/{resultId}","method":"GET"},{"path":"formrecognizer/operations/{operationId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{id}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"formrecognizer.list.objects","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/operations","method":"GET"},{"path":"formrecognizer/info","method":"GET"},{"path":"formrecognizer/documentModels","method":"GET"},{"path":"formrecognizer/custom/models","method":"GET"},{"path":"formrecognizer/documentClassifiers","method":"GET"}]},{"key":"formrecognizer.model.management","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"POST"},{"path":"formrecognizer/custom/models/compose","method":"POST"},{"path":"formrecognizer/custom/models/copyAuthorization","method":"POST"},{"path":"formrecognizer/custom/models/{id}","method":"DELETE"},{"path":"formrecognizer/custom/models/{id}/keys","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/custom/models/{modelId}/copy","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:copyTo","method":"POST"},{"path":"formrecognizer/documentModels:authorizeCopy","method":"POST"},{"path":"formrecognizer/documentModels:build","method":"POST"},{"path":"formrecognizer/documentModels:compose","method":"POST"},{"path":"formrecognizer/custom/train","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentModels/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentClassifiers:build","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"DELETE"}]},{"key":"default","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"DynamicThrottling"},{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://southcentralus.api.cognitive.microsoft.com/","Container":"https://southcentralus.api.cognitive.microsoft.com/"}},"identity":{"principalId":"5b04df58-d20f-4ba2-a1e1-ac17e8c4777f","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2023-07-25T05:09:29.1805206Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-07-25T05:10:02.8782247Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5420'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 25 Jul 2023 05:10:32 GMT
+      etag:
+      - '"7e007302-0000-0500-0000-64bf592b0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '10'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account identity show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-mgmt-cognitiveservices/13.5.0 Python/3.10.11
+        (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2023-05-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"7e007302-0000-0500-0000-64bf592b0000\"","location":"SOUTHCENTRALUS","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","provisioningState":"Succeeded","internalId":"7afe16659c6d463ca5ab4e7c79c85ccc","dateCreated":"2023-07-25T05:09:29.4344377Z","callRateLimit":{"rules":[{"key":"container.billing","renewalPeriod":10,"count":500,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"formrecognizer.analyze","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{id}/analyze","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/businessCard/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/idDocument/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/invoice/analyze","method":"POST"},{"path":"formrecognizer/layout/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/asyncBatchAnalyze","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:analyze","method":"POST"},{"path":"formrecognizer/read","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}:analyze","method":"POST"}]},{"key":"formrecognizer.get.object","renewalPeriod":1,"count":50,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/businessCard/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/idDocument/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/invoice/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/operations/{operationId}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/layout/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}/copyResults/{resultId}","method":"GET"},{"path":"formrecognizer/operations/{operationId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{id}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"formrecognizer.list.objects","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/operations","method":"GET"},{"path":"formrecognizer/info","method":"GET"},{"path":"formrecognizer/documentModels","method":"GET"},{"path":"formrecognizer/custom/models","method":"GET"},{"path":"formrecognizer/documentClassifiers","method":"GET"}]},{"key":"formrecognizer.model.management","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"POST"},{"path":"formrecognizer/custom/models/compose","method":"POST"},{"path":"formrecognizer/custom/models/copyAuthorization","method":"POST"},{"path":"formrecognizer/custom/models/{id}","method":"DELETE"},{"path":"formrecognizer/custom/models/{id}/keys","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/custom/models/{modelId}/copy","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:copyTo","method":"POST"},{"path":"formrecognizer/documentModels:authorizeCopy","method":"POST"},{"path":"formrecognizer/documentModels:build","method":"POST"},{"path":"formrecognizer/documentModels:compose","method":"POST"},{"path":"formrecognizer/custom/train","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentModels/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentClassifiers:build","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"DELETE"}]},{"key":"default","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"DynamicThrottling"},{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://southcentralus.api.cognitive.microsoft.com/","Container":"https://southcentralus.api.cognitive.microsoft.com/"}},"identity":{"principalId":"5b04df58-d20f-4ba2-a1e1-ac17e8c4777f","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2023-07-25T05:09:29.1805206Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-07-25T05:10:02.8782247Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5420'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 25 Jul 2023 05:10:33 GMT
+      etag:
+      - '"7e007302-0000-0500-0000-64bf592b0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '10'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"identity": {"type": "None"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account identity remove
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '30'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-mgmt-cognitiveservices/13.5.0 Python/3.10.11
+        (Windows-10-10.0.22621-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2023-05-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"7e00e802-0000-0500-0000-64bf59ff0000\"","location":"SOUTHCENTRALUS","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","provisioningState":"Accepted","internalId":"7afe16659c6d463ca5ab4e7c79c85ccc","dateCreated":"2023-07-25T05:09:29.4344377Z","callRateLimit":{"rules":[{"key":"container.billing","renewalPeriod":10,"count":500,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"formrecognizer.analyze","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{id}/analyze","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/businessCard/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/idDocument/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/invoice/analyze","method":"POST"},{"path":"formrecognizer/layout/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/asyncBatchAnalyze","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:analyze","method":"POST"},{"path":"formrecognizer/read","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}:analyze","method":"POST"}]},{"key":"formrecognizer.get.object","renewalPeriod":1,"count":50,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/businessCard/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/idDocument/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/invoice/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/operations/{operationId}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/layout/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}/copyResults/{resultId}","method":"GET"},{"path":"formrecognizer/operations/{operationId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{id}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"formrecognizer.list.objects","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/operations","method":"GET"},{"path":"formrecognizer/info","method":"GET"},{"path":"formrecognizer/documentModels","method":"GET"},{"path":"formrecognizer/custom/models","method":"GET"},{"path":"formrecognizer/documentClassifiers","method":"GET"}]},{"key":"formrecognizer.model.management","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"POST"},{"path":"formrecognizer/custom/models/compose","method":"POST"},{"path":"formrecognizer/custom/models/copyAuthorization","method":"POST"},{"path":"formrecognizer/custom/models/{id}","method":"DELETE"},{"path":"formrecognizer/custom/models/{id}/keys","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/custom/models/{modelId}/copy","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:copyTo","method":"POST"},{"path":"formrecognizer/documentModels:authorizeCopy","method":"POST"},{"path":"formrecognizer/documentModels:build","method":"POST"},{"path":"formrecognizer/documentModels:compose","method":"POST"},{"path":"formrecognizer/custom/train","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentModels/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentClassifiers:build","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"DELETE"}]},{"key":"default","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"DynamicThrottling"},{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://southcentralus.api.cognitive.microsoft.com/","Container":"https://southcentralus.api.cognitive.microsoft.com/"}},"identity":{"type":"None"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2023-07-25T05:09:29.1805206Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-07-25T05:13:35.507602Z"}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/e4d800b3-3103-41d4-ad61-d0574a12d32b?api-version=2017-04-18
+      cache-control:
+      - no-cache
+      content-length:
+      - '5305'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 25 Jul 2023 05:13:34 GMT
+      etag:
+      - '"7e00e802-0000-0500-0000-64bf59ff0000"'
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/e4d800b3-3103-41d4-ad61-d0574a12d32b?api-version=2017-04-18&operationResultResponseType=Location
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '81'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account identity remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-mgmt-cognitiveservices/13.5.0 Python/3.10.11
+        (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/e4d800b3-3103-41d4-ad61-d0574a12d32b?api-version=2017-04-18
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/e4d800b3-3103-41d4-ad61-d0574a12d32b","name":"e4d800b3-3103-41d4-ad61-d0574a12d32b","status":"Updating","startTime":"2023-07-25T05:13:35Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '278'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 25 Jul 2023 05:13:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '7'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account identity remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-mgmt-cognitiveservices/13.5.0 Python/3.10.11
+        (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/e4d800b3-3103-41d4-ad61-d0574a12d32b?api-version=2017-04-18
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/e4d800b3-3103-41d4-ad61-d0574a12d32b","name":"e4d800b3-3103-41d4-ad61-d0574a12d32b","status":"Succeeded","startTime":"2023-07-25T05:13:35Z","endTime":"2023-07-25T05:13:36Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '312'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 25 Jul 2023 05:14:05 GMT
       expires:
       - '-1'
       pragma:
@@ -460,29 +726,30 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - cognitiveservices account identity assign
+      - cognitiveservices account identity remove
       Connection:
       - keep-alive
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.50.0 azsdk-python-mgmt-cognitiveservices/13.5.0 Python/3.10.11
+        (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2023-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"17002f74-0000-0500-0000-6358afa70000\"","location":"SOUTHCENTRALUS","sku":{"name":"E0"},"kind":"Face","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","provisioningState":"Succeeded","internalId":"d1cc3f87937d495fbaf5faf26262f5e9","dateCreated":"2022-10-26T03:53:45.5150634Z","callRateLimit":{"rules":[{"key":"face","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"face/*","method":"*"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"Container","value":"Face.*,Face.Face"},{"name":"CustomerManagedKey"},{"name":"Scenario","value":"Face.LegacyPreview,Face.Legacy"}],"endpoints":{"Face":"https://southcentralus.api.cognitive.microsoft.com/"}},"identity":{"principalId":"474a8719-7dd9-40a1-a982-ab2a5e4b4056","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-10-26T03:53:45.2965209Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-10-26T03:55:19.4570102Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"7e00e902-0000-0500-0000-64bf5a000000\"","location":"SOUTHCENTRALUS","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","provisioningState":"Succeeded","internalId":"7afe16659c6d463ca5ab4e7c79c85ccc","dateCreated":"2023-07-25T05:09:29.4344377Z","callRateLimit":{"rules":[{"key":"container.billing","renewalPeriod":10,"count":500,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"formrecognizer.analyze","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{id}/analyze","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/businessCard/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/idDocument/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/invoice/analyze","method":"POST"},{"path":"formrecognizer/layout/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/asyncBatchAnalyze","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:analyze","method":"POST"},{"path":"formrecognizer/read","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}:analyze","method":"POST"}]},{"key":"formrecognizer.get.object","renewalPeriod":1,"count":50,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/businessCard/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/idDocument/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/invoice/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/operations/{operationId}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/layout/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}/copyResults/{resultId}","method":"GET"},{"path":"formrecognizer/operations/{operationId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{id}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"formrecognizer.list.objects","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/operations","method":"GET"},{"path":"formrecognizer/info","method":"GET"},{"path":"formrecognizer/documentModels","method":"GET"},{"path":"formrecognizer/custom/models","method":"GET"},{"path":"formrecognizer/documentClassifiers","method":"GET"}]},{"key":"formrecognizer.model.management","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"POST"},{"path":"formrecognizer/custom/models/compose","method":"POST"},{"path":"formrecognizer/custom/models/copyAuthorization","method":"POST"},{"path":"formrecognizer/custom/models/{id}","method":"DELETE"},{"path":"formrecognizer/custom/models/{id}/keys","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/custom/models/{modelId}/copy","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:copyTo","method":"POST"},{"path":"formrecognizer/documentModels:authorizeCopy","method":"POST"},{"path":"formrecognizer/documentModels:build","method":"POST"},{"path":"formrecognizer/documentModels:compose","method":"POST"},{"path":"formrecognizer/custom/train","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentModels/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentClassifiers:build","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"DELETE"}]},{"key":"default","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"DynamicThrottling"},{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://southcentralus.api.cognitive.microsoft.com/","Container":"https://southcentralus.api.cognitive.microsoft.com/"}},"identity":{"type":"None"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2023-07-25T05:09:29.1805206Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-07-25T05:13:35.507602Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1688'
+      - '5306'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Oct 2022 03:55:50 GMT
+      - Tue, 25 Jul 2023 05:14:05 GMT
       etag:
-      - '"17002f74-0000-0500-0000-6358afa70000"'
+      - '"7e00e902-0000-0500-0000-64bf5a000000"'
       expires:
       - '-1'
       pragma:
@@ -498,7 +765,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '8'
+      - '12'
     status:
       code: 200
       message: OK
@@ -516,23 +783,24 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.50.0 azsdk-python-mgmt-cognitiveservices/13.5.0 Python/3.10.11
+        (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2023-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"17002f74-0000-0500-0000-6358afa70000\"","location":"SOUTHCENTRALUS","sku":{"name":"E0"},"kind":"Face","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","provisioningState":"Succeeded","internalId":"d1cc3f87937d495fbaf5faf26262f5e9","dateCreated":"2022-10-26T03:53:45.5150634Z","callRateLimit":{"rules":[{"key":"face","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"face/*","method":"*"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"Container","value":"Face.*,Face.Face"},{"name":"CustomerManagedKey"},{"name":"Scenario","value":"Face.LegacyPreview,Face.Legacy"}],"endpoints":{"Face":"https://southcentralus.api.cognitive.microsoft.com/"}},"identity":{"principalId":"474a8719-7dd9-40a1-a982-ab2a5e4b4056","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-10-26T03:53:45.2965209Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-10-26T03:55:19.4570102Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"7e00e902-0000-0500-0000-64bf5a000000\"","location":"SOUTHCENTRALUS","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","provisioningState":"Succeeded","internalId":"7afe16659c6d463ca5ab4e7c79c85ccc","dateCreated":"2023-07-25T05:09:29.4344377Z","callRateLimit":{"rules":[{"key":"container.billing","renewalPeriod":10,"count":500,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"formrecognizer.analyze","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{id}/analyze","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/businessCard/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/idDocument/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/invoice/analyze","method":"POST"},{"path":"formrecognizer/layout/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/asyncBatchAnalyze","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:analyze","method":"POST"},{"path":"formrecognizer/read","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}:analyze","method":"POST"}]},{"key":"formrecognizer.get.object","renewalPeriod":1,"count":50,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/businessCard/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/idDocument/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/invoice/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/operations/{operationId}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/layout/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}/copyResults/{resultId}","method":"GET"},{"path":"formrecognizer/operations/{operationId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{id}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"formrecognizer.list.objects","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/operations","method":"GET"},{"path":"formrecognizer/info","method":"GET"},{"path":"formrecognizer/documentModels","method":"GET"},{"path":"formrecognizer/custom/models","method":"GET"},{"path":"formrecognizer/documentClassifiers","method":"GET"}]},{"key":"formrecognizer.model.management","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"POST"},{"path":"formrecognizer/custom/models/compose","method":"POST"},{"path":"formrecognizer/custom/models/copyAuthorization","method":"POST"},{"path":"formrecognizer/custom/models/{id}","method":"DELETE"},{"path":"formrecognizer/custom/models/{id}/keys","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/custom/models/{modelId}/copy","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:copyTo","method":"POST"},{"path":"formrecognizer/documentModels:authorizeCopy","method":"POST"},{"path":"formrecognizer/documentModels:build","method":"POST"},{"path":"formrecognizer/documentModels:compose","method":"POST"},{"path":"formrecognizer/custom/train","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentModels/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentClassifiers:build","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"DELETE"}]},{"key":"default","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"DynamicThrottling"},{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://southcentralus.api.cognitive.microsoft.com/","Container":"https://southcentralus.api.cognitive.microsoft.com/"}},"identity":{"type":"None"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2023-07-25T05:09:29.1805206Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-07-25T05:13:35.507602Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1688'
+      - '5306'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Oct 2022 03:55:50 GMT
+      - Tue, 25 Jul 2023 05:14:06 GMT
       etag:
-      - '"17002f74-0000-0500-0000-6358afa70000"'
+      - '"7e00e902-0000-0500-0000-64bf5a000000"'
       expires:
       - '-1'
       pragma:
@@ -548,211 +816,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '13'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"identity": {"type": "None"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - cognitiveservices account identity remove
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '30'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - -n -g
-      User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
-    method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-10-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"1700a174-0000-0500-0000-6358b07d0000\"","location":"SOUTHCENTRALUS","sku":{"name":"E0"},"kind":"Face","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","provisioningState":"Accepted","internalId":"d1cc3f87937d495fbaf5faf26262f5e9","dateCreated":"2022-10-26T03:53:45.5150634Z","callRateLimit":{"rules":[{"key":"face","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"face/*","method":"*"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"Container","value":"Face.*,Face.Face"},{"name":"CustomerManagedKey"},{"name":"Scenario","value":"Face.LegacyPreview,Face.Legacy"}],"endpoints":{"Face":"https://southcentralus.api.cognitive.microsoft.com/"}},"identity":{"type":"None"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-10-26T03:53:45.2965209Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-10-26T03:58:53.2558038Z"}}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/89dc100f-c6f5-4b58-b4fd-56e5e46276aa?api-version=2017-04-18
-      cache-control:
-      - no-cache
-      content-length:
-      - '1574'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 26 Oct 2022 03:58:52 GMT
-      etag:
-      - '"1700a174-0000-0500-0000-6358b07d0000"'
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/89dc100f-c6f5-4b58-b4fd-56e5e46276aa?api-version=2017-04-18&operationResultResponseType=Location
-      pragma:
-      - no-cache
-      server:
-      - istio-envoy
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-envoy-upstream-service-time:
-      - '102'
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - cognitiveservices account identity remove
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g
-      User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/89dc100f-c6f5-4b58-b4fd-56e5e46276aa?api-version=2017-04-18
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/89dc100f-c6f5-4b58-b4fd-56e5e46276aa","name":"89dc100f-c6f5-4b58-b4fd-56e5e46276aa","status":"Succeeded","startTime":"2022-10-26T03:58:53Z","endTime":"2022-10-26T03:58:54Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '312'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 26 Oct 2022 03:59:22 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - istio-envoy
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-envoy-upstream-service-time:
-      - '5'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - cognitiveservices account identity remove
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g
-      User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-10-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"1700a374-0000-0500-0000-6358b07e0000\"","location":"SOUTHCENTRALUS","sku":{"name":"E0"},"kind":"Face","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","provisioningState":"Succeeded","internalId":"d1cc3f87937d495fbaf5faf26262f5e9","dateCreated":"2022-10-26T03:53:45.5150634Z","callRateLimit":{"rules":[{"key":"face","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"face/*","method":"*"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"Container","value":"Face.*,Face.Face"},{"name":"CustomerManagedKey"},{"name":"Scenario","value":"Face.LegacyPreview,Face.Legacy"}],"endpoints":{"Face":"https://southcentralus.api.cognitive.microsoft.com/"}},"identity":{"type":"None"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-10-26T03:53:45.2965209Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-10-26T03:58:53.2558038Z"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1575'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 26 Oct 2022 03:59:22 GMT
-      etag:
-      - '"1700a374-0000-0500-0000-6358b07e0000"'
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - istio-envoy
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-envoy-upstream-service-time:
-      - '10'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - cognitiveservices account identity show
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g
-      User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-10-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"1700a374-0000-0500-0000-6358b07e0000\"","location":"SOUTHCENTRALUS","sku":{"name":"E0"},"kind":"Face","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","provisioningState":"Succeeded","internalId":"d1cc3f87937d495fbaf5faf26262f5e9","dateCreated":"2022-10-26T03:53:45.5150634Z","callRateLimit":{"rules":[{"key":"face","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"face/*","method":"*"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"Container","value":"Face.*,Face.Face"},{"name":"CustomerManagedKey"},{"name":"Scenario","value":"Face.LegacyPreview,Face.Legacy"}],"endpoints":{"Face":"https://southcentralus.api.cognitive.microsoft.com/"}},"identity":{"type":"None"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-10-26T03:53:45.2965209Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-10-26T03:58:53.2558038Z"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1575'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 26 Oct 2022 03:59:24 GMT
-      etag:
-      - '"1700a374-0000-0500-0000-6358b07e0000"'
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - istio-envoy
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-envoy-upstream-service-time:
-      - '10'
+      - '12'
     status:
       code: 200
       message: OK
@@ -772,9 +836,10 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.50.0 azsdk-python-mgmt-cognitiveservices/13.5.0 Python/3.10.11
+        (Windows-10-10.0.22621-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2023-05-01
   response:
     body:
       string: ''
@@ -784,7 +849,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 26 Oct 2022 04:01:27 GMT
+      - Tue, 25 Jul 2023 05:16:10 GMT
       expires:
       - '-1'
       pragma:
@@ -796,9 +861,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '80'
+      - '62'
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14997'
     status:
       code: 200
       message: OK

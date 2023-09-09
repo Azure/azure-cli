@@ -336,14 +336,10 @@ class Create(AAZCommand):
             custom_bgp_ip_addresses.Element = AAZStrType()
 
             default_bgp_ip_addresses = cls._schema_on_200_201.properties.bgp_settings.bgp_peering_addresses.Element.default_bgp_ip_addresses
-            default_bgp_ip_addresses.Element = AAZStrType(
-                flags={"read_only": True},
-            )
+            default_bgp_ip_addresses.Element = AAZStrType()
 
             tunnel_ip_addresses = cls._schema_on_200_201.properties.bgp_settings.bgp_peering_addresses.Element.tunnel_ip_addresses
-            tunnel_ip_addresses.Element = AAZStrType(
-                flags={"read_only": True},
-            )
+            tunnel_ip_addresses.Element = AAZStrType()
 
             local_network_address_space = cls._schema_on_200_201.properties.local_network_address_space
             local_network_address_space.address_prefixes = AAZListType(

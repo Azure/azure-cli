@@ -198,7 +198,7 @@ max_size_bytes_param_type = CLIArgumentType(
 
 zone_redundant_param_type = CLIArgumentType(
     options_list=['--zone-redundant', '-z'],
-    help='Specifies whether to enable zone redundancy',
+    help='Specifies whether to enable zone redundancy. Default is true if no value is specified',
     arg_type=get_three_state_flag())
 
 maintenance_configuration_id_param_type = CLIArgumentType(
@@ -214,7 +214,7 @@ ledger_on_param_type = CLIArgumentType(
 
 preferred_enclave_param_type = CLIArgumentType(
     options_list=['--preferred-enclave-type'],
-    help='Create a database configured with Default or VBS preferred enclave type. ',
+    help='Specifies type of enclave for this resource.',
     arg_type=get_enum_type(AlwaysEncryptedEnclaveType))
 
 database_assign_identity_param_type = CLIArgumentType(
@@ -250,13 +250,19 @@ database_federated_client_id_param_type = CLIArgumentType(
     options_list=['--federated-client-id'],
     help='The federated client id for the SQL Database. It is used for cross tenant CMK scenario.')
 
+database_encryption_protector_auto_rotation_param_type = CLIArgumentType(
+    options_list=['--encryption-protector-auto-rotation', '--epauto'],
+    help='Specifies the database encryption protector key auto rotation flag. Can be either true, false or null.',
+    required=False,
+    arg_type=get_three_state_flag())
+
 database_availability_zone_param_type = CLIArgumentType(
     options_list=['--availability-zone'],
     help='Availability zone')
 
 managed_instance_param_type = CLIArgumentType(
     options_list=['--managed-instance', '--mi'],
-    help='Name of the Azure SQL managed instance.')
+    help='Name of the Azure SQL Managed Instance.')
 
 kid_param_type = CLIArgumentType(
     options_list=['--kid', '-k'],
@@ -300,6 +306,12 @@ grace_period_param_type = CLIArgumentType(
 
 allow_data_loss_param_type = CLIArgumentType(
     help='Complete the failover even if doing so may result in data loss. '
+    'This will allow the failover to proceed even if a primary database is unavailable.')
+
+try_planned_before_forced_failover_param_type = CLIArgumentType(
+    options_list=['--try-planned-before-forced-failover', '--tpbff'],
+    help='Performs a planned failover as the first step, and if it fails for any reason, '
+    'then initiates a forced failover with potential data loss. '
     'This will allow the failover to proceed even if a primary database is unavailable.')
 
 secondary_type_param_type = CLIArgumentType(
@@ -474,6 +486,9 @@ def _configure_db_dw_params(arg_ctx):
     arg_ctx.argument('availability_zone',
                      arg_type=database_availability_zone_param_type)
 
+    arg_ctx.argument('encryption_protector_auto_rotation',
+                     arg_type=database_encryption_protector_auto_rotation_param_type)
+
 
 def _configure_db_dw_create_params(
         arg_ctx,
@@ -574,6 +589,7 @@ def _configure_db_dw_create_params(
             'user_assigned_identity_id',
             'federated_client_id',
             'availability_zone',
+            'encryption_protector_auto_rotation'
         ])
 
     # Create args that will be used to build up the Database's Sku object
@@ -623,6 +639,9 @@ def _configure_db_dw_create_params(
 
     arg_ctx.argument('federated_client_id',
                      arg_type=database_federated_client_id_param_type)
+
+    arg_ctx.argument('encryption_protector_auto_rotation',
+                     arg_type=database_encryption_protector_auto_rotation_param_type)
 
     # *** Step 3: Ignore params that are not applicable (based on engine & create mode) ***
 
@@ -681,6 +700,9 @@ def _configure_db_dw_create_params(
 
         # Federated client id is not applicable to DataWarehouse
         arg_ctx.ignore('federated_client_id')
+
+        # Encryption Protector auto rotation is not applicable to DataWarehouse
+        arg_ctx.ignore('encryption_protector_auto_rotation')
 
         # Provisioning with capacity is not applicable to DataWarehouse
         arg_ctx.ignore('capacity')
@@ -1492,6 +1514,11 @@ def load_arguments(self, _):
         c.argument('high_availability_replica_count',
                    arg_type=read_replicas_param_type)
 
+        c.argument('preferred_enclave_type',
+                   arg_type=preferred_enclave_param_type,
+                   help='The preferred enclave type for the Azure SQL Elastic Pool. '
+                   'Allowed values include: Default, VBS.')
+
     with self.argument_context('sql elastic-pool create') as c:
         # Create args that will be used to build up the ElasticPool object
         create_args_for_complex_type(
@@ -1504,6 +1531,7 @@ def load_arguments(self, _):
                 'zone_redundant',
                 'maintenance_configuration_id',
                 'high_availability_replica_count',
+                'preferred_enclave_type',
             ])
 
         # Create args that will be used to build up the ElasticPoolPerDatabaseSettings object
@@ -1564,6 +1592,9 @@ def load_arguments(self, _):
         c.argument('storage_mb',
                    help='Storage limit for the elastic pool in MB.')
 
+        c.argument('preferred_enclave_type',
+                   help='Type of enclave to be configured for the elastic pool.')
+
     #####
     #           sql elastic-pool op
     #####
@@ -1595,6 +1626,8 @@ def load_arguments(self, _):
                    help='List of databases to remove from Failover Group')
         c.argument('allow_data_loss',
                    arg_type=allow_data_loss_param_type)
+        c.argument('try_planned_before_forced_failover',
+                   arg_type=try_planned_before_forced_failover_param_type)
 
     ###############################################
     #             sql instance pool               #
@@ -2428,6 +2461,7 @@ def load_arguments(self, _):
             c, 'parameters', ManagedDatabase, [
                 'collation',
                 'tags',
+                'is_ledger_on'
             ])
 
         c.argument('tags', arg_type=tags_type)
@@ -2436,6 +2470,10 @@ def load_arguments(self, _):
                    required=False,
                    help='The collation of the Azure SQL Managed Database collation to use, '
                    'e.g.: SQL_Latin1_General_CP1_CI_AS or Latin1_General_100_CS_AS_SC')
+
+        c.argument('is_ledger_on',
+                   required=False,
+                   arg_type=ledger_on_param_type)
 
     with self.argument_context('sql midb update') as c:
         create_args_for_complex_type(
@@ -2598,7 +2636,7 @@ def load_arguments(self, _):
 
         c.argument('managed_instance_name',
                    options_list=['--managed-instance', '--mi'],
-                   help='Name of the Azure SQL managed instance. '
+                   help='Name of the Azure SQL Managed Instance. '
                    'If specified, retrieves all requested backups under this managed instance.')
 
         c.argument('database_state',
@@ -2686,6 +2724,94 @@ def load_arguments(self, _):
                    required=False,
                    options_list=['--last-backup-name', '--last-bn'],
                    help='The name of the last backup to restore.')
+
+    ######
+    #           sql midb ledger-digest-uploads
+    ######
+    with self.argument_context('sql midb ledger-digest-uploads enable') as c:
+        c.argument('endpoint',
+                   options_list=['--endpoint'],
+                   help='The endpoint of a digest storage, '
+                   'which can be either an Azure Blob storage or a ledger in Azure Confidential Ledger.')
+
+    ######
+    #           sql midb move/copy
+    ######
+    with self.argument_context('sql midb move') as c:
+        c.argument('dest_resource_group_name',
+                   required=False,
+                   options_list=['--dest-resource-group', '--dest-rg'],
+                   help='Name of the resource group to move the managed database to.'
+                   ' If unspecified, defaults to the origin resource group.')
+
+        c.argument('dest_instance_name',
+                   required=True,
+                   options_list=['--dest-mi'],
+                   help='Name of the managed instance to move the managed database to.')
+
+    with self.argument_context('sql midb copy') as c:
+        c.argument('dest_resource_group_name',
+                   required=False,
+                   options_list=['--dest-resource-group', '--dest-rg'],
+                   help='Name of the resource group to copy the managed database to.'
+                   ' If unspecified, defaults to the origin resource group.')
+
+        c.argument('dest_instance_name',
+                   required=True,
+                   options_list=['--dest-mi'],
+                   help='Name of the managed instance to copy the managed database to.')
+
+    with self.argument_context('sql midb move list') as c:
+        c.argument('resource_group_name',
+                   options_list=['--resource-group', '-g'],
+                   required=True,
+                   help='Name of the source resource group.')
+
+        c.argument('managed_instance_name',
+                   options_list=['--managed-instance', '--mi'],
+                   required=True,
+                   help='Name of the source managed instance.')
+
+        c.argument('dest_instance_name',
+                   required=False,
+                   options_list=['--dest-mi'],
+                   help='Name of the target managed instance to show move operations for.')
+
+        c.argument('dest_resource_group',
+                   required=False,
+                   options_list=['--dest-resource-group', '--dest-rg'],
+                   help='Name of the target resource group to show move operations for.')
+
+        c.argument('only_latest_per_database',
+                   required=False,
+                   options_list=['--only-latest-per-database', '--latest'],
+                   help='Flag that only shows latest move operation per managed database.')
+
+    with self.argument_context('sql midb copy list') as c:
+        c.argument('resource_group_name',
+                   options_list=['--resource-group', '-g'],
+                   required=True,
+                   help='Name of the source resource group.')
+
+        c.argument('managed_instance_name',
+                   options_list=['--managed-instance', '--mi'],
+                   required=True,
+                   help='Name of the source managed instance.')
+
+        c.argument('dest_instance_name',
+                   required=False,
+                   options_list=['--dest-mi'],
+                   help='Name of the target managed instance to show copy operations for.')
+
+        c.argument('dest_resource_group',
+                   required=False,
+                   options_list=['--dest-resource-group', '--dest-rg'],
+                   help='Name of the target resource group to show copy operations for.')
+
+        c.argument('only_latest_per_database',
+                   required=False,
+                   options_list=['--only-latest-per-database', '--latest'],
+                   help='Flag that only shows latest copy operation per managed database.')
 
     ###############################################
     #                sql virtual cluster          #

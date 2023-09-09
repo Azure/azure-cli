@@ -111,6 +111,7 @@ class Update(AAZCommand):
         _element = cls._args_schema.frontend_ip_configurations.Element
         _element.id = AAZStrArg(
             options=["id"],
+            help="Resource ID.",
             nullable=True,
         )
         return cls._args_schema
@@ -934,7 +935,7 @@ class _UpdateHelper:
         _element.id = AAZStrType()
         _element.name = AAZStrType()
         _element.properties = AAZObjectType(
-            flags={"client_flatten": True},
+            flags={"required": True, "client_flatten": True},
         )
         _element.type = AAZStrType(
             flags={"read_only": True},

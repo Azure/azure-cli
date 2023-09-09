@@ -3,6 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=line-too-long
+# pylint: disable=ungrouped-imports
+
 import base64
 import errno
 import io
@@ -22,16 +25,15 @@ import time
 import uuid
 import webbrowser
 import zipfile
-from distutils.version import StrictVersion
+from distutils.version import StrictVersion  # pylint: disable=deprecated-module
 from urllib.error import URLError
 from urllib.request import urlopen
+from azure.cli.command_modules.acs.maintenanceconfiguration import aks_maintenanceconfiguration_update_internal
 
 import colorama
 import requests
 import yaml
-from azure.cli.command_modules.acs._client_factory import (
-    cf_agent_pools,
-)
+from azure.cli.command_modules.acs._client_factory import cf_agent_pools
 from azure.cli.command_modules.acs._consts import (
     ADDONS,
     CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
@@ -59,12 +61,12 @@ from azure.cli.command_modules.acs._consts import (
     CONST_VIRTUAL_NODE_SUBNET_NAME,
     DecoratorEarlyExitException,
 )
+
 from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.command_modules.acs.addonconfiguration import (
     add_ingress_appgw_addon_role_assignment,
-    add_monitoring_role_assignment,
     add_virtual_node_role_assignment,
     ensure_container_insights_for_monitoring,
     ensure_default_log_analytics_workspace_for_monitoring,
@@ -343,6 +345,105 @@ def which(binary):
     return None
 
 
+def aks_maintenanceconfiguration_list(
+    cmd,
+    client,
+    resource_group_name,
+    cluster_name
+):
+    return client.list_by_managed_cluster(resource_group_name, cluster_name)
+
+
+def aks_maintenanceconfiguration_show(
+    cmd,
+    client,
+    resource_group_name,
+    cluster_name,
+    config_name
+):
+    logger.warning('resource_group_name: %s, cluster_name: %s, config_name: %s ',
+                   resource_group_name, cluster_name, config_name)
+    return client.get(resource_group_name, cluster_name, config_name)
+
+
+def aks_maintenanceconfiguration_delete(
+    cmd,
+    client,
+    resource_group_name,
+    cluster_name,
+    config_name
+):
+    logger.warning('resource_group_name: %s, cluster_name: %s, config_name: %s ',
+                   resource_group_name, cluster_name, config_name)
+    return client.delete(resource_group_name, cluster_name, config_name)
+
+
+def aks_maintenanceconfiguration_add(
+    cmd,
+    client,
+    resource_group_name,
+    cluster_name,
+    config_name,
+    config_file=None,
+    weekday=None,
+    start_hour=None,
+    schedule_type=None,
+    interval_days=None,
+    interval_weeks=None,
+    interval_months=None,
+    day_of_week=None,
+    day_of_month=None,
+    week_index=None,
+    duration_hours=None,
+    utc_offset=None,
+    start_date=None,
+    start_time=None
+):
+    configs = client.list_by_managed_cluster(resource_group_name, cluster_name)
+    for config in configs:
+        if config.name == config_name:
+            raise CLIError("Maintenance configuration '{}' already exists, please try a different name, "
+                           "use 'aks maintenanceconfiguration list' to get current list of maitenance configurations".format(config_name))
+    # DO NOT MOVE: get all the original parameters and save them as a dictionary
+    raw_parameters = locals()
+    return aks_maintenanceconfiguration_update_internal(cmd, client, raw_parameters)
+
+
+def aks_maintenanceconfiguration_update(
+    cmd,
+    client,
+    resource_group_name,
+    cluster_name,
+    config_name,
+    config_file=None,
+    weekday=None,
+    start_hour=None,
+    schedule_type=None,
+    interval_days=None,
+    interval_weeks=None,
+    interval_months=None,
+    day_of_week=None,
+    day_of_month=None,
+    week_index=None,
+    duration_hours=None,
+    utc_offset=None,
+    start_date=None,
+    start_time=None
+):
+    configs = client.list_by_managed_cluster(resource_group_name, cluster_name)
+    found = False
+    for config in configs:
+        if config.name == config_name:
+            found = True
+            break
+    if not found:
+        raise ResourceNotFoundError("Maintenance configuration '{}' doesn't exist."
+                                    "use 'aks maintenanceconfiguration list' to get current list of maitenance configurations".format(config_name))
+    # DO NOT MOVE: get all the original parameters and save them as a dictionary
+    raw_parameters = locals()
+    return aks_maintenanceconfiguration_update_internal(cmd, client, raw_parameters)
+
+
 def wait_then_open(url):
     """
     Waits for a bit then opens a URL.  Useful for waiting for a proxy to come up, and then open the URL.
@@ -403,7 +504,9 @@ def aks_create(
     network_plugin=None,
     network_plugin_mode=None,
     network_policy=None,
+    network_dataplane=None,
     auto_upgrade_channel=None,
+    node_os_upgrade_channel=None,
     cluster_autoscaler_profile=None,
     uptime_sla=False,
     tier=None,
@@ -434,11 +537,13 @@ def aks_create(
     attach_acr=None,
     skip_subnet_role_assignment=False,
     node_resource_group=None,
+    k8s_support_plan=None,
     enable_defender=False,
     defender_config=None,
     disable_disk_driver=False,
     disable_file_driver=False,
     enable_blob_driver=None,
+    enable_workload_identity=False,
     disable_snapshot_controller=False,
     enable_azure_keyvault_kms=False,
     azure_keyvault_kms_key_id=None,
@@ -447,10 +552,11 @@ def aks_create(
     enable_image_cleaner=False,
     image_cleaner_interval_hours=None,
     enable_keda=False,
+    enable_vpa=False,
     # addons
     enable_addons=None,
     workspace_resource_id=None,
-    enable_msi_auth_for_monitoring=False,
+    enable_msi_auth_for_monitoring=True,
     enable_syslog=False,
     data_collection_settings=None,
     aci_subnet_name=None,
@@ -477,13 +583,14 @@ def aks_create(
     node_count=3,
     nodepool_tags=None,
     nodepool_labels=None,
+    nodepool_taints=None,
     node_osdisk_type=None,
-    node_osdisk_size=0,
+    node_osdisk_size=None,
     vm_set_type=None,
     zones=None,
     ppg=None,
     http_proxy_config=None,
-    max_pods=0,
+    max_pods=None,
     enable_encryption_at_host=False,
     enable_ultra_ssd=False,
     enable_fips_image=False,
@@ -491,6 +598,13 @@ def aks_create(
     linux_os_config=None,
     host_group_id=None,
     gpu_instance_profile=None,
+    # azure monitor profile
+    enable_azure_monitor_metrics=False,
+    azure_monitor_workspace_resource_id=None,
+    ksm_metric_labels_allow_list=None,
+    ksm_metric_annotations_allow_list=None,
+    grafana_resource_id=None,
+    enable_windows_recording_rules=False,
     # misc
     yes=False,
     no_wait=False,
@@ -539,6 +653,9 @@ def aks_update(
     tags=None,
     disable_local_accounts=False,
     enable_local_accounts=False,
+    network_plugin_mode=None,
+    network_dataplane=None,
+    pod_cidr=None,
     load_balancer_managed_outbound_ip_count=None,
     load_balancer_managed_outbound_ipv6_count=None,
     load_balancer_outbound_ips=None,
@@ -547,7 +664,9 @@ def aks_update(
     load_balancer_idle_timeout=None,
     nat_gateway_managed_outbound_ip_count=None,
     nat_gateway_idle_timeout=None,
+    outbound_type=None,
     auto_upgrade_channel=None,
+    node_os_upgrade_channel=None,
     cluster_autoscaler_profile=None,
     uptime_sla=False,
     no_uptime_sla=False,
@@ -555,6 +674,7 @@ def aks_update(
     api_server_authorized_ip_ranges=None,
     enable_public_fqdn=False,
     disable_public_fqdn=False,
+    private_dns_zone=None,
     enable_managed_identity=False,
     assign_identity=None,
     assign_kubelet_identity=None,
@@ -564,12 +684,14 @@ def aks_update(
     aad_tenant_id=None,
     aad_admin_group_object_ids=None,
     enable_oidc_issuer=False,
+    k8s_support_plan=None,
     windows_admin_password=None,
     enable_ahub=False,
     disable_ahub=False,
     enable_windows_gmsa=False,
     gmsa_dns_server=None,
     gmsa_root_domain_name=None,
+    disable_windows_gmsa=False,
     attach_acr=None,
     detach_acr=None,
     enable_defender=False,
@@ -581,6 +703,8 @@ def aks_update(
     disable_file_driver=False,
     enable_blob_driver=None,
     disable_blob_driver=None,
+    enable_workload_identity=False,
+    disable_workload_identity=False,
     enable_snapshot_controller=False,
     disable_snapshot_controller=False,
     enable_azure_keyvault_kms=False,
@@ -594,6 +718,8 @@ def aks_update(
     http_proxy_config=None,
     enable_keda=False,
     disable_keda=False,
+    enable_vpa=False,
+    disable_vpa=False,
     # addons
     enable_secret_rotation=False,
     disable_secret_rotation=False,
@@ -605,6 +731,15 @@ def aks_update(
     min_count=None,
     max_count=None,
     nodepool_labels=None,
+    nodepool_taints=None,
+    # azure monitor profile
+    enable_azure_monitor_metrics=False,
+    azure_monitor_workspace_resource_id=None,
+    ksm_metric_labels_allow_list=None,
+    ksm_metric_annotations_allow_list=None,
+    grafana_resource_id=None,
+    enable_windows_recording_rules=False,
+    disable_azure_monitor_metrics=False,
     # misc
     yes=False,
     no_wait=False,
@@ -847,14 +982,16 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                       enable_sgxquotehelper=False,
                       enable_secret_rotation=False,
                       rotation_poll_interval=None,
-                      no_wait=False,
-                      enable_msi_auth_for_monitoring=False,
+                      enable_msi_auth_for_monitoring=True,
                       enable_syslog=False,
-                      data_collection_settings=None,):
+                      data_collection_settings=None,
+                      no_wait=False,):
     instance = client.get(resource_group_name, name)
     msi_auth = False
     if instance.service_principal_profile.client_id == "msi":
         msi_auth = True
+    else:
+        enable_msi_auth_for_monitoring = False
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
     instance = _update_addons(cmd, instance, subscription_id, resource_group_name, name, addons, enable=True,
@@ -919,21 +1056,6 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
         result = LongRunningOperation(cmd.cli_ctx)(
             client.begin_create_or_update(resource_group_name, name, instance))
 
-        # For monitoring addon, Metrics role assignement doesnt require in case of MSI auth
-        if enable_monitoring and not enable_msi_auth_for_monitoring:
-            cloud_name = cmd.cli_ctx.cloud.name
-            # mdm metrics supported only in Azure Public cloud so add the role assignment only in this cloud
-            if cloud_name.lower() == 'azurecloud':
-                from msrestazure.tools import resource_id
-                cluster_resource_id = resource_id(
-                    subscription=subscription_id,
-                    resource_group=resource_group_name,
-                    namespace='Microsoft.ContainerService', type='managedClusters',
-                    name=name
-                )
-                add_monitoring_role_assignment(
-                    result, cluster_resource_id, cmd)
-
         if ingress_appgw_addon_enabled:
             add_ingress_appgw_addon_role_assignment(result, cmd)
 
@@ -954,7 +1076,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
 
 def _update_addons(cmd, instance, subscription_id, resource_group_name, name, addons, enable,
                    workspace_resource_id=None,
-                   enable_msi_auth_for_monitoring=False,
+                   enable_msi_auth_for_monitoring=True,
                    subnet_name=None,
                    appgw_name=None,
                    appgw_subnet_cidr=None,
@@ -1012,9 +1134,16 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                     workspace_resource_id = '/' + workspace_resource_id
                 if workspace_resource_id.endswith('/'):
                     workspace_resource_id = workspace_resource_id.rstrip('/')
+
+                cloud_name = cmd.cli_ctx.cloud.name
+                if enable_msi_auth_for_monitoring and (cloud_name.lower() == 'ussec' or cloud_name.lower() == 'usnat'):
+                    if instance.identity is not None and instance.identity.type is not None and instance.identity.type == "userassigned":
+                        logger.warning("--enable_msi_auth_for_monitoring is not supported in %s cloud and continuing monitoring enablement without this flag.", cloud_name)
+                        enable_msi_auth_for_monitoring = False
+
                 addon_profile.config = {
                     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: workspace_resource_id}
-                addon_profile.config[CONST_MONITORING_USING_AAD_MSI_AUTH] = enable_msi_auth_for_monitoring
+                addon_profile.config[CONST_MONITORING_USING_AAD_MSI_AUTH] = "true" if enable_msi_auth_for_monitoring else "false"
             elif addon == (CONST_VIRTUAL_NODE_ADDON_NAME + os_type):
                 if addon_profile.enabled:
                     raise CLIError('The virtual-node addon is already enabled for this managed cluster.\n'
@@ -1469,15 +1598,22 @@ def k8s_install_cli(cmd, client_version='latest', install_location=None, base_sr
 # Note: the results returned here may be inaccurate if the installed python is translated (e.g. by Rosetta)
 def get_arch_for_cli_binary():
     arch = platform.machine().lower()
-    # default arch
-    formatted_arch = "amd64"
-    # set to "arm64" when the detection value contains the word "arm"
-    if "arm" in arch:
+    if "amd64" in arch or "x86_64" in arch:
+        formatted_arch = "amd64"
+    elif "armv8" in arch or "aarch64" in arch or "arm64" in arch:
         formatted_arch = "arm64"
+    else:
+        raise CLIInternalError(
+            "Unsupported architecture: '{}'. Currently only supports downloading the binary "
+            "of arm64/amd64 architecture for linux/darwin/windows platform, please download "
+            "the corresponding binary for other platforms or architectures by yourself".format(
+                arch
+            )
+        )
     logger.warning(
-        "The detected architecture is '%s', which will be regarded as '%s' and "
-        "the corresponding binary will be downloaded. "
-        "If there is any problem, please download the appropriate binary by yourself.",
+        'The detected architecture of current device is "%s", and the binary for "%s" '
+        'will be downloaded. If the detectiton is wrong, please download and install '
+        'the binary corresponding to the appropriate architecture.',
         arch,
         formatted_arch,
     )
@@ -1561,6 +1697,27 @@ def log_windows_post_installation_manual_steps_warning(install_dir, binary_name)
     )
 
 
+def validate_install_location(install_location: str, exe_name: str) -> None:
+    # check if the installation path is a directory
+    if os.path.isdir(install_location):
+        from azure.cli.command_modules.acs._params import _get_default_install_location
+        raise InvalidArgumentValueError(
+            'The installation location "{}" is a directory. Please specify a path '
+            'including the binary filename e.g. "{}".'.format(
+                install_location, _get_default_install_location(exe_name)
+            )
+        )
+    # check if the binary filename in installation path is correct
+    binary_name = os.path.basename(install_location)
+    if binary_name != exe_name:
+        logger.error(
+            'The binary filename "%s" in install location does not match '
+            'the expected binary name "%s".',
+            binary_name,
+            exe_name,
+        )
+
+
 # install kubectl
 def k8s_install_kubectl(cmd, client_version='latest', install_location=None, source_url=None, arch=None):
     """
@@ -1574,8 +1731,9 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
             source_url = 'https://mirror.azure.cn/kubernetes/kubectl'
 
     if client_version == 'latest':
-        context = _ssl_context()
-        version = urlopen(source_url + '/stable.txt', context=context).read()
+        latest_version_url = source_url + '/stable.txt'
+        logger.warning('No version specified, will get the latest version of kubectl from "%s"', latest_version_url)
+        version = urlopen(source_url + '/stable.txt', context=_ssl_context()).read()
         client_version = version.decode('UTF-8').strip()
     else:
         client_version = "v%s" % client_version
@@ -1593,16 +1751,21 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
         os.makedirs(install_dir)
 
     if system == 'Windows':
-        file_url = base_url.format(client_version, 'windows', 'kubectl.exe')
+        binary_name = 'kubectl.exe'
+        file_url = base_url.format(client_version, 'windows', binary_name)
     elif system == 'Linux':
-        file_url = base_url.format(client_version, 'linux', 'kubectl')
+        binary_name = 'kubectl'
+        file_url = base_url.format(client_version, 'linux', binary_name)
     elif system == 'Darwin':
-        file_url = base_url.format(client_version, 'darwin', 'kubectl')
+        binary_name = 'kubectl'
+        file_url = base_url.format(client_version, 'darwin', binary_name)
     else:
         raise UnknownError("Unsupported system '{}'.".format(system))
 
-    logger.warning('Downloading client to "%s" from "%s"',
-                   install_location, file_url)
+    # validate install location
+    validate_install_location(install_location, binary_name)
+
+    logger.warning('Downloading client to "%s" from "%s"', install_location, file_url)
     try:
         _urlretrieve(file_url, install_location)
         os.chmod(install_location,
@@ -1632,11 +1795,11 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
             source_url = 'https://mirror.azure.cn/kubernetes/kubelogin'
 
     if client_version == 'latest':
-        context = _ssl_context()
         latest_release_url = 'https://api.github.com/repos/Azure/kubelogin/releases/latest'
         if cloud_name.lower() == 'azurechinacloud':
             latest_release_url = 'https://mirror.azure.cn/kubernetes/kubelogin/latest'
-        latest_release = urlopen(latest_release_url, context=context).read()
+        logger.warning('No version specified, will get the latest version of kubelogin from "%s"', latest_release_url)
+        latest_release = urlopen(latest_release_url, context=_ssl_context()).read()
         client_version = json.loads(latest_release)['tag_name'].strip()
     else:
         client_version = "v%s" % client_version
@@ -1662,6 +1825,9 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
     else:
         raise UnknownError("Unsupported system '{}'.".format(system))
 
+    # validate install location
+    validate_install_location(install_location, binary_name)
+
     with tempfile.TemporaryDirectory() as tmp_dir:
         try:
             download_path = os.path.join(tmp_dir, 'kubelogin.zip')
@@ -1673,6 +1839,7 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
                 'Connection error while attempting to download client ({})'.format(ex))
         _unzip(download_path, tmp_dir)
         download_path = os.path.join(tmp_dir, 'bin', sub_dir, binary_name)
+        logger.warning('Moving binary to "%s" from "%s"', install_location, download_path)
         shutil.move(download_path, install_location)
     os.chmod(install_location, os.stat(install_location).st_mode |
              stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
@@ -1716,7 +1883,7 @@ def aks_rotate_certs(cmd, client, resource_group_name, name, no_wait=True):
 
 
 def aks_get_versions(cmd, client, location):
-    return client.list_orchestrators(location, resource_type='managedClusters')
+    return client.list_kubernetes_versions(location)
 
 
 def aks_runcommand(cmd, client, resource_group_name, name, command_string="", command_files=None, no_wait=False):
@@ -2005,11 +2172,11 @@ def aks_agentpool_add(
     tags=None,
     node_taints=None,
     node_osdisk_type=None,
-    node_osdisk_size=0,
+    node_osdisk_size=None,
     max_surge=None,
     mode=CONST_NODEPOOL_MODE_USER,
     scale_down_mode=CONST_SCALE_DOWN_MODE_DELETE,
-    max_pods=0,
+    max_pods=None,
     zones=None,
     ppg=None,
     enable_encryption_at_host=False,
@@ -2372,6 +2539,20 @@ def aks_nodepool_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-m
         allow_appending_values_to_same_key=True,
     )
     return client.create_or_update(resource_group_name, snapshot_name, snapshot, headers=aks_custom_headers)
+
+
+def aks_nodepool_snapshot_update(cmd, client, resource_group_name, snapshot_name, tags):   # pylint: disable=unused-argument
+    TagsObject = cmd.get_models(
+        "TagsObject",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="snapshots",
+    )
+    tagsObject = TagsObject(
+        tags=tags
+    )
+
+    snapshot = client.update_tags(resource_group_name, snapshot_name, tagsObject)
+    return snapshot
 
 
 def aks_nodepool_snapshot_show(cmd, client, resource_group_name, snapshot_name):   # pylint: disable=unused-argument

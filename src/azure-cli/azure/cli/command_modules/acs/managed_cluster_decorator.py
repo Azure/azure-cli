@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=line-too-long
 
 import os
 import re
@@ -9,11 +10,14 @@ import time
 from types import SimpleNamespace
 from typing import Dict, List, Optional, Tuple, TypeVar, Union
 
+from azure.mgmt.containerservice.models import KubernetesSupportPlan
+
 from azure.cli.command_modules.acs._consts import (
     CONST_LOAD_BALANCER_SKU_BASIC,
     CONST_LOAD_BALANCER_SKU_STANDARD,
     CONST_MANAGED_CLUSTER_SKU_TIER_FREE,
     CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD,
+    CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM,
     CONST_OUTBOUND_TYPE_LOAD_BALANCER,
     CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
@@ -38,7 +42,7 @@ from azure.cli.command_modules.acs._helpers import (
 )
 from azure.cli.command_modules.acs._loadbalancer import create_load_balancer_profile
 from azure.cli.command_modules.acs._loadbalancer import update_load_balancer_profile as _update_load_balancer_profile
-from azure.cli.command_modules.acs._natgateway import create_nat_gateway_profile, is_nat_gateway_profile_provided
+from azure.cli.command_modules.acs._natgateway import create_nat_gateway_profile
 from azure.cli.command_modules.acs._natgateway import update_nat_gateway_profile as _update_nat_gateway_profile
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._roleassignments import (
@@ -60,6 +64,9 @@ from azure.cli.command_modules.acs.agentpool_decorator import (
     AKSAgentPoolContext,
     AKSAgentPoolModels,
     AKSAgentPoolUpdateDecorator,
+)
+from azure.cli.command_modules.acs.azuremonitormetrics.azuremonitorprofile import (
+    ensure_azure_monitor_profile_prerequisites
 )
 from azure.cli.command_modules.acs.base_decorator import (
     BaseAKSContext,
@@ -102,6 +109,7 @@ ManagedClusterAddonProfile = TypeVar("ManagedClusterAddonProfile")
 Snapshot = TypeVar("Snapshot")
 KubeletConfig = TypeVar("KubeletConfig")
 LinuxOSConfig = TypeVar("LinuxOSConfig")
+ManagedClusterSecurityProfileWorkloadIdentity = TypeVar("ManagedClusterSecurityProfileWorkloadIdentity")
 ManagedClusterOIDCIssuerProfile = TypeVar("ManagedClusterOIDCIssuerProfile")
 ManagedClusterSecurityProfileDefender = TypeVar("ManagedClusterSecurityProfileDefender")
 ManagedClusterStorageProfile = TypeVar('ManagedClusterStorageProfile')
@@ -128,6 +136,8 @@ class AKSManagedClusterModels(AKSAgentPoolModels):
         self.__loadbalancer_models = None
         # holder for nat gateway related models
         self.__nat_gateway_models = None
+        # holder for maintenance configuration related models
+        self.__maintenance_configuration_models = None
 
     @property
     def load_balancer_models(self) -> SimpleNamespace:
@@ -175,6 +185,31 @@ class AKSManagedClusterModels(AKSAgentPoolModels):
             )   # backward compatibility
             self.__nat_gateway_models = SimpleNamespace(**nat_gateway_models)
         return self.__nat_gateway_models
+
+    @property
+    def maintenance_configuration_models(self) -> SimpleNamespace:
+        """Get maintenance configuration related models.
+
+        The models are stored in a SimpleNamespace object, could be accessed by the dot operator like
+        `maintenance_configuration_models.ManagedClusterMaintenanceConfigurationProfile`.
+
+        :return: SimpleNamespace
+        """
+        if self.__maintenance_configuration_models is None:
+            maintenance_configuration_models = {}
+            # getting maintenance configuration related models
+            maintenance_configuration_models["MaintenanceConfiguration"] = self.MaintenanceConfiguration
+            maintenance_configuration_models["MaintenanceConfigurationListResult"] = self.MaintenanceConfigurationListResult
+            maintenance_configuration_models["MaintenanceWindow"] = self.MaintenanceWindow
+            maintenance_configuration_models["Schedule"] = self.Schedule
+            maintenance_configuration_models["DailySchedule"] = self.DailySchedule
+            maintenance_configuration_models["WeeklySchedule"] = self.WeeklySchedule
+            maintenance_configuration_models["AbsoluteMonthlySchedule"] = self.AbsoluteMonthlySchedule
+            maintenance_configuration_models["RelativeMonthlySchedule"] = self.RelativeMonthlySchedule
+            maintenance_configuration_models["TimeSpan"] = self.TimeSpan
+            maintenance_configuration_models["TimeInWeek"] = self.TimeInWeek
+            self.__maintenance_configuration_models = SimpleNamespace(**maintenance_configuration_models)
+        return self.__maintenance_configuration_models
 
 
 # pylint: disable=too-few-public-methods
@@ -250,6 +285,9 @@ class AKSManagedClusterContext(BaseAKSContext):
             external_functions["add_monitoring_role_assignment"] = add_monitoring_role_assignment
             external_functions["add_virtual_node_role_assignment"] = add_virtual_node_role_assignment
             external_functions["ensure_container_insights_for_monitoring"] = ensure_container_insights_for_monitoring
+            external_functions[
+                "ensure_azure_monitor_profile_prerequisites"
+            ] = ensure_azure_monitor_profile_prerequisites
             external_functions[
                 "ensure_default_log_analytics_workspace_for_monitoring"
             ] = ensure_default_log_analytics_workspace_for_monitoring
@@ -370,21 +408,29 @@ class AKSManagedClusterContext(BaseAKSContext):
     def __validate_gmsa_options(
         self,
         enable_windows_gmsa,
+        disable_windows_gmsa,
         gmsa_dns_server,
         gmsa_root_domain_name,
         yes,
     ) -> None:
         """Helper function to validate gmsa related options.
 
-        When enable_windows_gmsa is specified, if both gmsa_dns_server and gmsa_root_domain_name are not assigned and
-        user does not confirm the operation, a DecoratorEarlyExitException will be raised; if only one of
-        gmsa_dns_server or gmsa_root_domain_name is assigned, raise a RequiredArgumentMissingError. When
-        enable_windows_gmsa is not specified, if any of gmsa_dns_server or gmsa_root_domain_name is assigned, raise
-        a RequiredArgumentMissingError.
+        When enable_windows_gmsa is specified, a InvalidArgumentValueError will be raised if disable_windows_gmsa
+        is also specified; if both gmsa_dns_server and gmsa_root_domain_name are not assigned and user does not
+        confirm the operation, a DecoratorEarlyExitException will be raised; if only one of gmsa_dns_server or
+        gmsa_root_domain_name is assigned, raise a RequiredArgumentMissingError. When enable_windows_gmsa is
+        not specified, if any of gmsa_dns_server or gmsa_root_domain_name is assigned, raise a RequiredArgumentMissingError.
+        When disable_windows_gmsa is specified, if gmsa_dns_server or gmsa_root_domain_name is
+        assigned, raise a InvalidArgumentValueError.
 
         :return: bool
         """
         if enable_windows_gmsa:
+            if disable_windows_gmsa:
+                raise InvalidArgumentValueError(
+                    "You should not set --disable-windows-gmsa "
+                    "when setting --enable-windows-gmsa."
+                )
             if gmsa_dns_server is None and gmsa_root_domain_name is None:
                 msg = (
                     "Please assure that you have set the DNS server in the vnet used by the cluster "
@@ -397,10 +443,18 @@ class AKSManagedClusterContext(BaseAKSContext):
                     "You must set or not set --gmsa-dns-server and --gmsa-root-domain-name at the same time."
                 )
         else:
+            if not disable_windows_gmsa:
+                if any([gmsa_dns_server, gmsa_root_domain_name]):
+                    raise RequiredArgumentMissingError(
+                        "You only can set --gmsa-dns-server and --gmsa-root-domain-name "
+                        "when setting --enable-windows-gmsa."
+                    )
+
+        if disable_windows_gmsa:
             if any([gmsa_dns_server, gmsa_root_domain_name]):
-                raise RequiredArgumentMissingError(
-                    "You only can set --gmsa-dns-server and --gmsa-root-domain-name "
-                    "when setting --enable-windows-gmsa."
+                raise InvalidArgumentValueError(
+                    "You should not set --gmsa-dns-server nor --gmsa-root-domain-name "
+                    "when setting --disable-windows-gmsa."
                 )
 
     def get_subscription_id(self):
@@ -774,6 +828,13 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: dictionary or None
         """
         return self.agentpool_context.get_nodepool_labels()
+
+    def get_nodepool_taints(self) -> Union[List[str], None]:
+        """Obtain the value of nodepool_labels.
+
+        :return: dictionary or None
+        """
+        return self.agentpool_context.get_node_taints()
 
     def _get_dns_name_prefix(
         self, enable_validation: bool = False, read_only: bool = False
@@ -1205,14 +1266,14 @@ class AKSManagedClusterContext(BaseAKSContext):
                 enable_validation=False
             )
             self.__validate_gmsa_options(
-                enable_windows_gmsa, gmsa_dns_server, gmsa_root_domain_name, self.get_yes()
+                enable_windows_gmsa, self._get_disable_windows_gmsa(enable_validation=False), gmsa_dns_server, gmsa_root_domain_name, self.get_yes()
             )
         return enable_windows_gmsa
 
     def get_enable_windows_gmsa(self) -> bool:
         """Obtain the value of enable_windows_gmsa.
 
-        This function will verify the parameter by default. When enable_windows_gmsa is specified, if both
+        This function will verify the parameter by default. When enable_windows_gmsa is specified, a ; if both
         gmsa_dns_server and gmsa_root_domain_name are not assigned and user does not confirm the operation,
         a DecoratorEarlyExitException will be raised; if only one of gmsa_dns_server or gmsa_root_domain_name is
         assigned, raise a RequiredArgumentMissingError. When enable_windows_gmsa is not specified, if any of
@@ -1275,6 +1336,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         if enable_validation:
             self.__validate_gmsa_options(
                 self._get_enable_windows_gmsa(enable_validation=False),
+                self._get_disable_windows_gmsa(enable_validation=False),
                 gmsa_dns_server,
                 gmsa_root_domain_name,
                 self.get_yes(),
@@ -1294,6 +1356,49 @@ class AKSManagedClusterContext(BaseAKSContext):
         string type or None
         """
         return self._get_gmsa_dns_server_and_root_domain_name(enable_validation=True)
+
+    def _get_disable_windows_gmsa(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of disable_windows_gmsa.
+
+        This function supports the option of enable_validation. Please refer to function __validate_gmsa_options for
+        details of validation.
+
+        :return: bool
+        """
+        # disable_windows_gmsa is only supported in UPDATE
+        if self.decorator_mode == DecoratorMode.CREATE:
+            disable_windows_gmsa = False
+        else:
+            # read the original value passed by the command
+            disable_windows_gmsa = self.raw_param.get("disable_windows_gmsa")
+
+        # this parameter does not need dynamic completion
+        # validation
+        if enable_validation:
+            (
+                gmsa_dns_server,
+                gmsa_root_domain_name,
+            ) = self._get_gmsa_dns_server_and_root_domain_name(
+                enable_validation=False
+            )
+            self.__validate_gmsa_options(
+                self._get_enable_windows_gmsa(enable_validation=False),
+                disable_windows_gmsa,
+                gmsa_dns_server,
+                gmsa_root_domain_name,
+                self.get_yes(),
+            )
+        return disable_windows_gmsa
+
+    def get_disable_windows_gmsa(self) -> bool:
+        """Obtain the value of disable_windows_gmsa.
+
+        This function will verify the parameter by default. When disable_windows_gmsa is specified, if
+        gmsa_dns_server or gmsa_root_domain_name is assigned, a InvalidArgumentValueError will be raised;
+
+        :return: bool
+        """
+        return self._get_disable_windows_gmsa(enable_validation=True)
 
     # pylint: disable=too-many-statements
     def _get_service_principal_and_client_secret(
@@ -1714,25 +1819,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: int or None
         """
         # read the original value passed by the command
-        load_balancer_managed_outbound_ip_count = self.raw_param.get(
-            "load_balancer_managed_outbound_ip_count"
-        )
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.network_profile and
-                self.mc.network_profile.load_balancer_profile and
-                self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps and
-                self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count is not None
-            ):
-                load_balancer_managed_outbound_ip_count = (
-                    self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count
-                )
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return load_balancer_managed_outbound_ip_count
+        return self.raw_param.get("load_balancer_managed_outbound_ip_count")
 
     def get_load_balancer_managed_outbound_ipv6_count(self) -> Union[int, None]:
         """Obtain the expected count of IPv6 managed outbound IPs.
@@ -1741,37 +1828,7 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         :return: int or None
         """
-        count_ipv6 = self.raw_param.get('load_balancer_managed_outbound_ipv6_count')
-
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.network_profile and
-                self.mc.network_profile.load_balancer_profile and
-                self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps and
-                self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count_ipv6 is not None
-            ):
-                count_ipv6 = (
-                    self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count_ipv6
-                )
-        elif self.decorator_mode == DecoratorMode.UPDATE:
-            if (
-                not self.get_load_balancer_outbound_ips() and
-                not self.get_load_balancer_outbound_ip_prefixes() and
-                count_ipv6 is None
-            ):
-                if (
-                    self.mc and
-                    self.mc.network_profile and
-                    self.mc.network_profile.load_balancer_profile and
-                    self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps and
-                    self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count_ipv6 is not None
-                ):
-                    count_ipv6 = (
-                        self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count_ipv6
-                    )
-
-        return count_ipv6
+        return self.raw_param.get('load_balancer_managed_outbound_ipv6_count')
 
     def get_load_balancer_outbound_ips(self) -> Union[str, List[ResourceReference], None]:
         """Obtain the value of load_balancer_outbound_ips.
@@ -1781,25 +1838,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: string, list of ResourceReference, or None
         """
         # read the original value passed by the command
-        load_balancer_outbound_ips = self.raw_param.get(
-            "load_balancer_outbound_ips"
-        )
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.network_profile and
-                self.mc.network_profile.load_balancer_profile and
-                self.mc.network_profile.load_balancer_profile.outbound_i_ps and
-                self.mc.network_profile.load_balancer_profile.outbound_i_ps.public_i_ps is not None
-            ):
-                load_balancer_outbound_ips = (
-                    self.mc.network_profile.load_balancer_profile.outbound_i_ps.public_i_ps
-                )
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return load_balancer_outbound_ips
+        return self.raw_param.get("load_balancer_outbound_ips")
 
     def get_load_balancer_outbound_ip_prefixes(self) -> Union[str, List[ResourceReference], None]:
         """Obtain the value of load_balancer_outbound_ip_prefixes.
@@ -1807,25 +1846,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: string, list of ResourceReference, or None
         """
         # read the original value passed by the command
-        load_balancer_outbound_ip_prefixes = self.raw_param.get(
-            "load_balancer_outbound_ip_prefixes"
-        )
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.network_profile and
-                self.mc.network_profile.load_balancer_profile and
-                self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes and
-                self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes.public_ip_prefixes is not None
-            ):
-                load_balancer_outbound_ip_prefixes = (
-                    self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes.public_ip_prefixes
-                )
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return load_balancer_outbound_ip_prefixes
+        return self.raw_param.get("load_balancer_outbound_ip_prefixes")
 
     def get_load_balancer_outbound_ports(self) -> Union[int, None]:
         """Obtain the value of load_balancer_outbound_ports.
@@ -1835,24 +1856,9 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: int or None
         """
         # read the original value passed by the command
-        load_balancer_outbound_ports = self.raw_param.get(
+        return self.raw_param.get(
             "load_balancer_outbound_ports"
         )
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.network_profile and
-                self.mc.network_profile.load_balancer_profile and
-                self.mc.network_profile.load_balancer_profile.allocated_outbound_ports is not None
-            ):
-                load_balancer_outbound_ports = (
-                    self.mc.network_profile.load_balancer_profile.allocated_outbound_ports
-                )
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return load_balancer_outbound_ports
 
     def get_load_balancer_idle_timeout(self) -> Union[int, None]:
         """Obtain the value of load_balancer_idle_timeout.
@@ -1862,24 +1868,9 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: int or None
         """
         # read the original value passed by the command
-        load_balancer_idle_timeout = self.raw_param.get(
+        return self.raw_param.get(
             "load_balancer_idle_timeout"
         )
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.network_profile and
-                self.mc.network_profile.load_balancer_profile and
-                self.mc.network_profile.load_balancer_profile.idle_timeout_in_minutes is not None
-            ):
-                load_balancer_idle_timeout = (
-                    self.mc.network_profile.load_balancer_profile.idle_timeout_in_minutes
-                )
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return load_balancer_idle_timeout
 
     def get_nat_gateway_managed_outbound_ip_count(self) -> Union[int, None]:
         """Obtain the value of nat_gateway_managed_outbound_ip_count.
@@ -1891,7 +1882,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         # read the original value passed by the command
         nat_gateway_managed_outbound_ip_count = self.raw_param.get("nat_gateway_managed_outbound_ip_count")
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
+        if nat_gateway_managed_outbound_ip_count is None and self.decorator_mode == DecoratorMode.UPDATE:
             if (
                 self.mc and
                 self.mc.network_profile and
@@ -1917,7 +1908,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         # read the original value passed by the command
         nat_gateway_idle_timeout = self.raw_param.get("nat_gateway_idle_timeout")
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
+        if nat_gateway_idle_timeout is None and self.decorator_mode == DecoratorMode.UPDATE:
             if (
                 self.mc and
                 self.mc.network_profile and
@@ -2020,13 +2011,14 @@ class AKSManagedClusterContext(BaseAKSContext):
         outbound_type = self.raw_param.get("outbound_type")
         # try to read the property value corresponding to the parameter from the `mc` object
         read_from_mc = False
-        if (
-            self.mc and
-            self.mc.network_profile and
-            self.mc.network_profile.outbound_type is not None
-        ):
-            outbound_type = self.mc.network_profile.outbound_type
-            read_from_mc = True
+        if outbound_type is None and self.decorator_mode != DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.network_profile and
+                self.mc.network_profile.outbound_type is not None
+            ):
+                outbound_type = self.mc.network_profile.outbound_type
+                read_from_mc = True
 
         # skip dynamic completion & validation if option read_only is specified
         if read_only:
@@ -2075,17 +2067,16 @@ class AKSManagedClusterContext(BaseAKSContext):
                                 "userDefinedRouting doesn't support customizing \
                                 a standard load balancer with IP addresses"
                             )
-                    else:
-                        if (
-                            self.get_load_balancer_managed_outbound_ip_count() or
-                            self.get_load_balancer_managed_outbound_ipv6_count() or
-                            self.get_load_balancer_outbound_ips() or
-                            self.get_load_balancer_outbound_ip_prefixes()
-                        ):
-                            raise MutuallyExclusiveArgumentError(
-                                "userDefinedRouting doesn't support customizing \
-                                a standard load balancer with IP addresses"
-                            )
+                    if (
+                        self.get_load_balancer_managed_outbound_ip_count() or
+                        self.get_load_balancer_managed_outbound_ipv6_count() or
+                        self.get_load_balancer_outbound_ips() or
+                        self.get_load_balancer_outbound_ip_prefixes()
+                    ):
+                        raise MutuallyExclusiveArgumentError(
+                            "userDefinedRouting doesn't support customizing \
+                            a standard load balancer with IP addresses"
+                        )
 
         return outbound_type
 
@@ -2120,12 +2111,15 @@ class AKSManagedClusterContext(BaseAKSContext):
         # read the original value passed by the command
         network_plugin_mode = self.raw_param.get("network_plugin_mode")
         # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.network_profile and
-            self.mc.network_profile.network_plugin_mode is not None
-        ):
-            network_plugin_mode = self.mc.network_profile.network_plugin_mode
+
+        # if create, try and read from the mc object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.network_profile and
+                self.mc.network_profile.network_plugin_mode is not None
+            ):
+                network_plugin_mode = self.mc.network_profile.network_plugin_mode
 
         if enable_validation:
             # todo(tyler-lloyd) do we need any validation?
@@ -2177,12 +2171,10 @@ class AKSManagedClusterContext(BaseAKSContext):
             network_plugin_mode = self._get_network_plugin_mode(enable_validation=False)
             if network_plugin:
                 if network_plugin == "azure" and pod_cidr and network_plugin_mode != "overlay":
-                    logger.warning(
-                        'The provided pod CIDR "%s" will be overwritten with the node subnet CIDR. '
-                        'To use a pod CIDR, please specify network plugin mode `overlay` or '
-                        'use network plugin `kubenet`. For more information about Azure CNI '
-                        'Overlay please see https://aka.ms/aks/azure-cni-overlay. This warning '
-                        'will become an error in the Build sprint release.', pod_cidr
+                    raise InvalidArgumentValueError(
+                        "Please specify network plugin mode `overlay` when using --pod-cidr or "
+                        "use network plugin `kubenet`. For more information about Azure CNI "
+                        "Overlay please see https://aka.ms/aks/azure-cni-overlay"
                     )
             else:
                 if (
@@ -2212,6 +2204,13 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         return self._get_network_plugin(enable_validation=True)
 
+    def get_network_dataplane(self) -> Union[str, None]:
+        """Get the value of network_dataplane.
+
+        :return: str or None
+        """
+        return self.raw_param.get("network_dataplane")
+
     def _get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
         self, enable_validation: bool = False
     ) -> Tuple[
@@ -2231,8 +2230,6 @@ class AKSManagedClusterContext(BaseAKSContext):
         Note: SDK provides default value "10.0.0.10" and performs the following validation
         {'pattern': r'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'}
         for dns_service_ip.
-        Note: SDK provides default value "172.17.0.1/16" and performs the following validation
-        {'pattern': r'^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$'} for docker_bridge_address.
 
         This function supports the option of enable_validation. When enabled, if pod_cidr is assigned and the value of
         network_plugin is azure, an InvalidArgumentValueError will be raised; otherwise, if any of pod_cidr,
@@ -2252,8 +2249,10 @@ class AKSManagedClusterContext(BaseAKSContext):
         # read the original value passed by the command
         pod_cidr = self.raw_param.get("pod_cidr")
         # try to read the property value corresponding to the parameter from the `mc` object
-        if network_profile and network_profile.pod_cidr is not None:
-            pod_cidr = network_profile.pod_cidr
+        # pod_cidr is allowed to be updated so only read from mc object during creates
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if network_profile and network_profile.pod_cidr is not None:
+                pod_cidr = network_profile.pod_cidr
 
         # service_cidr
         # read the original value passed by the command
@@ -2268,13 +2267,6 @@ class AKSManagedClusterContext(BaseAKSContext):
         # try to read the property value corresponding to the parameter from the `mc` object
         if network_profile and network_profile.dns_service_ip is not None:
             dns_service_ip = network_profile.dns_service_ip
-
-        # docker_bridge_address
-        # read the original value passed by the command
-        docker_bridge_address = self.raw_param.get("docker_bridge_address")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if network_profile and network_profile.docker_bridge_cidr is not None:
-            docker_bridge_address = network_profile.docker_bridge_cidr
 
         # network_policy
         # read the original value passed by the command
@@ -2293,13 +2285,12 @@ class AKSManagedClusterContext(BaseAKSContext):
                     pod_cidr or
                     service_cidr or
                     dns_service_ip or
-                    docker_bridge_address or
                     network_policy
                 ):
                     raise RequiredArgumentMissingError(
                         "Please explicitly specify the network plugin type"
                     )
-        return pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy
+        return pod_cidr, service_cidr, dns_service_ip, None, network_policy
 
     def get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
         self,
@@ -2601,6 +2592,12 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         # read the original value passed by the command
         enable_msi_auth_for_monitoring = self.raw_param.get("enable_msi_auth_for_monitoring")
+        if (
+            self.mc and
+            self.mc.service_principal_profile and
+            self.mc.service_principal_profile.client_id is not None
+        ):
+            return False
         # try to read the property value corresponding to the parameter from the `mc` object
         if (
             self.mc and
@@ -3833,13 +3830,14 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         # read the original value passed by the command
         private_dns_zone = self.raw_param.get("private_dns_zone")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.api_server_access_profile and
-            self.mc.api_server_access_profile.private_dns_zone is not None
-        ):
-            private_dns_zone = self.mc.api_server_access_profile.private_dns_zone
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.api_server_access_profile and
+                self.mc.api_server_access_profile.private_dns_zone is not None
+            ):
+                private_dns_zone = self.mc.api_server_access_profile.private_dns_zone
 
         # this parameter does not need dynamic completion
         # validation
@@ -3975,6 +3973,26 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return auto_upgrade_channel
 
+    def get_node_os_upgrade_channel(self) -> Union[str, None]:
+        """Obtain the value of node_os_upgrade_channel.
+        :return: string or None
+        """
+        # read the original value passed by the command
+        node_os_upgrade_channel = self.raw_param.get("node_os_upgrade_channel")
+
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.auto_upgrade_profile and
+                self.mc.auto_upgrade_profile.node_os_upgrade_channel is not None
+            ):
+                node_os_upgrade_channel = self.mc.auto_upgrade_profile.node_os_upgrade_channel
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return node_os_upgrade_channel
+
     def _get_cluster_autoscaler_profile(self, read_only: bool = False) -> Union[Dict[str, str], None]:
         """Internal function to dynamically obtain the value of cluster_autoscaler_profile according to the context.
 
@@ -4031,6 +4049,10 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: dictionary or None
         """
         return self._get_cluster_autoscaler_profile()
+
+    def _get_k8s_support_plan(self) -> KubernetesSupportPlan:
+        support_plan = self.raw_param.get("k8s_support_plan")
+        return support_plan
 
     def _get_uptime_sla(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of uptime_sla.
@@ -4180,6 +4202,61 @@ class AKSManagedClusterContext(BaseAKSContext):
             ),
         )
         return azure_defender
+
+    def get_workload_identity_profile(self) -> Optional[ManagedClusterSecurityProfileWorkloadIdentity]:
+        """Obtrain the value of security_profile.workload_identity.
+        :return: Optional[ManagedClusterSecurityProfileWorkloadIdentity]
+        """
+        enable_workload_identity = self.raw_param.get("enable_workload_identity")
+        disable_workload_identity = self.raw_param.get("disable_workload_identity")
+
+        if not enable_workload_identity and not disable_workload_identity:
+            return None
+
+        if enable_workload_identity and disable_workload_identity:
+            raise MutuallyExclusiveArgumentError(
+                "Cannot specify --enable-workload-identity and "
+                "--disable-workload-identity at the same time."
+            )
+
+        if not hasattr(self.models, "ManagedClusterSecurityProfileWorkloadIdentity"):
+            return None
+
+        profile = self.models.ManagedClusterSecurityProfileWorkloadIdentity()
+
+        if self.decorator_mode == DecoratorMode.CREATE:
+            profile.enabled = bool(enable_workload_identity)
+        elif self.decorator_mode == DecoratorMode.UPDATE:
+            if (
+                hasattr(self.mc, "security_profile") and
+                self.mc.security_profile is not None and
+                self.mc.security_profile.workload_identity is not None
+            ):
+                # reuse previous profile is has been set
+                profile = self.mc.security_profile.workload_identity
+
+            if enable_workload_identity:
+                profile.enabled = True
+            elif disable_workload_identity:
+                profile.enabled = False
+
+        if profile.enabled:
+            # in enable case, we need to check if OIDC issuer has been enabled
+            oidc_issuer_profile = self.get_oidc_issuer_profile()
+            if self.decorator_mode == DecoratorMode.UPDATE and oidc_issuer_profile is None:
+                # if the cluster has enabled OIDC issuer before, in update call:
+                #
+                #    az aks update --enable-workload-identity
+                #
+                # we need to use previous OIDC issuer profile
+                oidc_issuer_profile = self.mc.oidc_issuer_profile
+            oidc_issuer_enabled = oidc_issuer_profile is not None and oidc_issuer_profile.enabled
+            if not oidc_issuer_enabled:
+                raise RequiredArgumentMissingError(
+                    "Enabling workload identity requires enabling OIDC issuer (--enable-oidc-issuer)."
+                )
+
+        return profile
 
     def _get_enable_azure_keyvault_kms(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of enable_azure_keyvault_kms.
@@ -4622,6 +4699,24 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return node_resource_group
 
+    def get_k8s_support_plan(self) -> Union[str, None]:
+        """Obtain the value of kubernetes_support_plan.
+
+        :return: string or None
+        """
+        # default to None
+        support_plan = None
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if self.mc and hasattr(self.mc, "support_plan") and self.mc.support_plan is not None:
+            support_plan = self.mc.support_plan
+
+        # if specified by customer, use the specified value
+        support_plan = self.raw_param.get("k8s_support_plan")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return support_plan
+
     def get_yes(self) -> bool:
         """Obtain the value of yes.
 
@@ -4674,6 +4769,124 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         # this parameter does not need validation
         return aks_custom_headers
+
+    def _get_enable_azure_monitor_metrics(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of enable_azure_monitor_metrics.
+        This function supports the option of enable_validation.
+        When enabled, if both enable_azure_monitor_metrics and disable_azure_monitor_metrics are
+        specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        # print("_get_enable_azure_monitor_metrics being called...")
+        # Read the original value passed by the command.
+        enable_azure_monitor_metrics = self.raw_param.get("enable_azure_monitor_metrics")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                hasattr(self.mc, "azure_monitor_profile") and
+                self.mc.azure_monitor_profile and
+                self.mc.azure_monitor_profile.metrics
+            ):
+                enable_azure_monitor_metrics = self.mc.azure_monitor_profile.metrics.enabled
+        # This parameter does not need dynamic completion.
+        if enable_validation:
+            if enable_azure_monitor_metrics and self._get_disable_azure_monitor_metrics(False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-azure-monitor-metrics and --disable-azure-monitor-metrics at the same time"
+                )
+            if enable_azure_monitor_metrics and not check_is_msi_cluster(self.mc):
+                raise RequiredArgumentMissingError(
+                    "--enable-azure-monitor-metrics can only be specified for clusters with managed identity enabled"
+                )
+        return enable_azure_monitor_metrics
+
+    def get_enable_azure_monitor_metrics(self) -> bool:
+        """Obtain the value of enable_azure_monitor_metrics.
+        This function will verify the parameter by default.
+        If both enable_azure_monitor_metrics and disable_azure_monitor_metrics are specified,
+        raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        return self._get_enable_azure_monitor_metrics(enable_validation=True)
+
+    def _get_disable_azure_monitor_metrics(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of disable_azure_monito4790r_metrics.
+        This function supports the option of enable_validation.
+        When enabled, if both enable_azure_monitor_metrics and disable_azure_monitor_metrics are
+        specified, raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        # Read the original value passed by the command.
+        disable_azure_monitor_metrics = self.raw_param.get("disable_azure_monitor_metrics")
+        if enable_validation:
+            if disable_azure_monitor_metrics and self._get_enable_azure_monitor_metrics(False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-azure-monitor-metrics and --disable-azure-monitor-metrics at the same time"
+                )
+        return disable_azure_monitor_metrics
+
+    def get_disable_azure_monitor_metrics(self) -> bool:
+        """Obtain the value of disable_azure_monitor_metrics.
+        This function will verify the parameter by default.
+        If both enable_azure_monitor_metrics and disable_azure_monitor_metrics are specified,
+        raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        return self._get_disable_azure_monitor_metrics(enable_validation=True)
+
+    def _get_enable_vpa(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of enable_vpa.
+        This function supports the option of enable_vpa. When enabled, if both enable_vpa and enable_vpa are
+        specified, raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        # Read the original value passed by the command.
+        enable_vpa = self.raw_param.get("enable_vpa")
+
+        # This parameter does not need dynamic completion.
+        if enable_validation:
+            if enable_vpa and self._get_disable_vpa(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-vpa and --disable-vpa at the same time."
+                )
+
+        return enable_vpa
+
+    def get_enable_vpa(self) -> bool:
+        """Obtain the value of enable_vpa.
+        This function will verify the parameter by default. If both enable_vpa and disable_vpa are specified, raise
+        a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        return self._get_enable_vpa(enable_validation=True)
+
+    def _get_disable_vpa(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of disable_vpa.
+        This function supports the option of enable_vpa. When enabled, if both enable_vpa and disable_vpa are specified,
+        raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        # Read the original value passed by the command.
+        disable_vpa = self.raw_param.get("disable_vpa")
+
+        # This option is not supported in create mode, hence we do not read the property value from the `mc` object.
+        # This parameter does not need dynamic completion.
+        if enable_validation:
+            if disable_vpa and self._get_enable_vpa(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-vpa and --disable-vpa at the same time."
+                )
+
+        return disable_vpa
+
+    def get_disable_vpa(self) -> bool:
+        """Obtain the value of disable_vpa.
+        This function will verify the parameter by default. If both enable_vpa and disable_vpa are specified, raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        return self._get_disable_vpa(enable_validation=True)
 
 
 class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
@@ -4775,6 +4988,20 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         for key, value in defaults_in_mc.items():
             if getattr(mc, key, None) is None:
                 setattr(mc, key, value)
+        return mc
+
+    def set_up_workload_identity_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up workload identity for the ManagedCluster object.
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        profile = self.context.get_workload_identity_profile()
+        if profile:
+            if mc.security_profile is None:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile()
+            mc.security_profile.workload_identity = profile
+
         return mc
 
     def set_up_defender(self, mc: ManagedCluster) -> ManagedCluster:
@@ -5124,6 +5351,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             self.context.get_pod_cidrs_and_service_cidrs_and_ip_families()
         )
 
+        network_dataplane = self.context.get_network_dataplane()
+
         if any(
             [
                 network_plugin,
@@ -5136,6 +5365,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 dns_service_ip,
                 docker_bridge_address,
                 network_policy,
+                network_dataplane,
             ]
         ):
             # Attention: RP would return UnexpectedLoadBalancerSkuForCurrentOutboundConfiguration internal server error
@@ -5153,6 +5383,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 dns_service_ip=dns_service_ip,
                 docker_bridge_cidr=docker_bridge_address,
                 network_policy=network_policy,
+                network_dataplane=network_dataplane,
                 load_balancer_sku=load_balancer_sku,
                 load_balancer_profile=load_balancer_profile,
                 outbound_type=outbound_type,
@@ -5227,9 +5458,9 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             enabled=True,
             config={
                 CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: self.context.get_workspace_resource_id(),
-                CONST_MONITORING_USING_AAD_MSI_AUTH: "True"
+                CONST_MONITORING_USING_AAD_MSI_AUTH: "true"
                 if self.context.get_enable_msi_auth_for_monitoring()
-                else "False",
+                else "false",
             },
         )
         # post-process, create a deployment
@@ -5528,6 +5759,13 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoScalerProfile()
             mc.workload_auto_scaler_profile.keda = self.models.ManagedClusterWorkloadAutoScalerProfileKeda(enabled=True)
 
+        if self.context.get_enable_vpa():
+            if mc.workload_auto_scaler_profile is None:
+                mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoScalerProfile()
+            if mc.workload_auto_scaler_profile.vertical_pod_autoscaler is None:
+                mc.workload_auto_scaler_profile.vertical_pod_autoscaler = self.models.ManagedClusterWorkloadAutoScalerProfileVerticalPodAutoscaler(enabled=True)
+            else:
+                mc.workload_auto_scaler_profile.vertical_pod_autoscaler.enabled = True
         return mc
 
     def set_up_api_server_access_profile(self, mc: ManagedCluster) -> ManagedCluster:
@@ -5634,6 +5872,12 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         if auto_upgrade_channel:
             auto_upgrade_profile = self.models.ManagedClusterAutoUpgradeProfile(upgrade_channel=auto_upgrade_channel)
         mc.auto_upgrade_profile = auto_upgrade_profile
+
+        node_os_upgrade_channel = self.context.get_node_os_upgrade_channel()
+        if node_os_upgrade_channel:
+            if mc.auto_upgrade_profile is None:
+                mc.auto_upgrade_profile = self.models.ManagedClusterAutoUpgradeProfile()
+            mc.auto_upgrade_profile.node_os_upgrade_channel = node_os_upgrade_channel
         return mc
 
     def set_up_auto_scaler_profile(self, mc: ManagedCluster) -> ManagedCluster:
@@ -5658,6 +5902,12 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             mc.sku = self.models.ManagedClusterSKU(
                 name="Base",
                 tier="Standard"
+            )
+
+        if self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM:
+            mc.sku = self.models.ManagedClusterSKU(
+                name="Base",
+                tier="Premium"
             )
         return mc
 
@@ -5684,6 +5934,43 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         self._ensure_mc(mc)
 
         mc.node_resource_group = self.context.get_node_resource_group()
+        return mc
+
+    def set_up_k8s_support_plan(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up supportPlan for the ManagedCluster object.
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        support_plan = self.context.get_k8s_support_plan()
+        if support_plan == KubernetesSupportPlan.AKS_LONG_TERM_SUPPORT:
+            if mc is None or mc.sku is None or mc.sku.tier.lower() != CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM.lower():
+                raise AzCLIError("Long term support is only available for premium tier clusters.")
+
+        mc.support_plan = support_plan
+        return mc
+
+    def set_up_azure_monitor_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up azure monitor profile for the ManagedCluster object.
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+        # read the original value passed by the command
+        ksm_metric_labels_allow_list = self.context.raw_param.get("ksm_metric_labels_allow_list")
+        ksm_metric_annotations_allow_list = self.context.raw_param.get("ksm_metric_annotations_allow_list")
+        if ksm_metric_labels_allow_list is None:
+            ksm_metric_labels_allow_list = ""
+        if ksm_metric_annotations_allow_list is None:
+            ksm_metric_annotations_allow_list = ""
+        if self.context.get_enable_azure_monitor_metrics():
+            if mc.azure_monitor_profile is None:
+                mc.azure_monitor_profile = self.models.ManagedClusterAzureMonitorProfile()
+            mc.azure_monitor_profile.metrics = self.models.ManagedClusterAzureMonitorProfileMetrics(enabled=False)
+            mc.azure_monitor_profile.metrics.kube_state_metrics = self.models.ManagedClusterAzureMonitorProfileKubeStateMetrics(  # pylint:disable=line-too-long
+                metric_labels_allowlist=str(ksm_metric_labels_allow_list),
+                metric_annotations_allow_list=str(ksm_metric_annotations_allow_list))
+            # set intermediate
+            self.context.set_intermediate("azuremonitormetrics_addon_enabled", True, overwrite_exists=True)
         return mc
 
     def construct_mc_profile_default(self, bypass_restore_defaults: bool = False) -> ManagedCluster:
@@ -5739,6 +6026,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_node_resource_group(mc)
         # set up defender
         mc = self.set_up_defender(mc)
+        # set up workload identity profile
+        mc = self.set_up_workload_identity_profile(mc)
         # set up storage profile
         mc = self.set_up_storage_profile(mc)
         # set up azure keyvalut kms
@@ -5750,6 +6039,10 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         # set up workload autoscaler profile
         mc = self.set_up_workload_auto_scaler_profile(mc)
 
+        # setup k8s support plan
+        mc = self.set_up_k8s_support_plan(mc)
+        # set up azure monitor metrics profile
+        mc = self.set_up_azure_monitor_profile(mc)
         # DO NOT MOVE: keep this at the bottom, restore defaults
         if not bypass_restore_defaults:
             mc = self._restore_defaults_in_mc(mc)
@@ -5765,6 +6058,10 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         monitoring_addon_enabled = self.context.get_intermediate("monitoring_addon_enabled", default_value=False)
         ingress_appgw_addon_enabled = self.context.get_intermediate("ingress_appgw_addon_enabled", default_value=False)
         virtual_node_addon_enabled = self.context.get_intermediate("virtual_node_addon_enabled", default_value=False)
+        azuremonitormetrics_addon_enabled = self.context.get_intermediate(
+            "azuremonitormetrics_addon_enabled",
+            default_value=False
+        )
         enable_managed_identity = self.context.get_enable_managed_identity()
         attach_acr = self.context.get_attach_acr()
         need_grant_vnet_permission_to_cluster_identity = self.context.get_intermediate(
@@ -5775,6 +6072,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             monitoring_addon_enabled or
             ingress_appgw_addon_enabled or
             virtual_node_addon_enabled or
+            azuremonitormetrics_addon_enabled or
             (enable_managed_identity and attach_acr) or
             need_grant_vnet_permission_to_cluster_identity
         ):
@@ -5833,7 +6131,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                     self.context.external_functions.add_monitoring_role_assignment(
                         cluster, cluster_resource_id, self.cmd
                     )
-            else:
+            elif self.context.raw_param.get("enable_addons") is not None:
                 # Create the DCR Association here
                 addon_consts = self.context.get_addon_consts()
                 CONST_MONITORING_ADDON_NAME = addon_consts.get("CONST_MONITORING_ADDON_NAME")
@@ -5884,6 +6182,24 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                     subscription_id=self.context.get_subscription_id(),
                     is_service_principal=False,
                 )
+
+        # azure monitor metrics addon (v2)
+        azuremonitormetrics_addon_enabled = self.context.get_intermediate(
+            "azuremonitormetrics_addon_enabled",
+            default_value=False
+        )
+        if azuremonitormetrics_addon_enabled:
+            # Create the DC* objects, AMW, recording rules and grafana link here
+            self.context.external_functions.ensure_azure_monitor_profile_prerequisites(
+                self.cmd,
+                self.context.get_subscription_id(),
+                self.context.get_resource_group_name(),
+                self.context.get_name(),
+                self.context.get_location(),
+                self.__raw_parameters,
+                self.context.get_disable_azure_monitor_metrics(),
+                True
+            )
 
     def put_mc(self, mc: ManagedCluster) -> ManagedCluster:
         if self.check_is_postprocessing_required(mc):
@@ -6002,7 +6318,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         is_default = (
             self.context.get_cluster_autoscaler_profile() is None and
             self.context.get_api_server_authorized_ip_ranges() is None and
-            self.context.get_nodepool_labels() is None
+            self.context.get_nodepool_labels() is None and
+            self.context.get_nodepool_taints() is None
         )
 
         if not is_changed and is_default:
@@ -6071,6 +6388,12 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         if nodepool_labels is not None:
             for agent_profile in mc.agent_pool_profiles:
                 agent_profile.node_labels = nodepool_labels
+
+        # update nodepool taints for all nodepools
+        nodepool_taints = self.context.get_nodepool_taints()
+        if nodepool_taints is not None:
+            for agent_profile in mc.agent_pool_profiles:
+                agent_profile.node_taints = nodepool_taints
         return mc
 
     def update_auto_scaler_profile(self, mc):
@@ -6139,6 +6462,13 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
+        # Premium without LTS is ok (not vice versa)
+        if self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM:
+            mc.sku = self.models.ManagedClusterSKU(
+                name="Base",
+                tier="Premium"
+            )
+
         if self.context.get_uptime_sla() or self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
             mc.sku = self.models.ManagedClusterSKU(
                 name="Base",
@@ -6150,6 +6480,33 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 name="Base",
                 tier="Free"
             )
+        return mc
+
+    def update_outbound_type_in_network_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update outbound type of network profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        outboundType = self.context.get_outbound_type()
+        if outboundType:
+            vnet_subnet_id = self.context.get_vnet_subnet_id()
+            if vnet_subnet_id is None and outboundType not in [
+                CONST_OUTBOUND_TYPE_LOAD_BALANCER,
+                CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
+                CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
+            ]:
+                raise InvalidArgumentValueError("Invalid outbound type, supported values are loadBalancer,"
+                                                " managedNATGateway, userAssignedNATGateway and userDefinedRouting.")
+            if vnet_subnet_id is not None and outboundType not in [
+                CONST_OUTBOUND_TYPE_LOAD_BALANCER,
+                CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
+                CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
+            ]:
+                raise InvalidArgumentValueError("Invalid outbound type, supported values are loadBalancer,"
+                                                " managedNATGateway, userAssignedNATGateway and userDefinedRouting.")
+            mc.network_profile.outbound_type = outboundType
         return mc
 
     def update_load_balancer_profile(self, mc: ManagedCluster) -> ManagedCluster:
@@ -6164,25 +6521,22 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 "Encounter an unexpected error while getting network profile from the cluster in the process of "
                 "updating its load balancer profile."
             )
-
-        load_balancer_managed_outbound_ip_count = self.context.get_load_balancer_managed_outbound_ip_count()
-        load_balancer_managed_outbound_ipv6_count = self.context.get_load_balancer_managed_outbound_ipv6_count()
-        load_balancer_outbound_ips = self.context.get_load_balancer_outbound_ips()
-        load_balancer_outbound_ip_prefixes = self.context.get_load_balancer_outbound_ip_prefixes()
-        load_balancer_outbound_ports = self.context.get_load_balancer_outbound_ports()
-        load_balancer_idle_timeout = self.context.get_load_balancer_idle_timeout()
-        # In the internal function "_update_load_balancer_profile", it will check whether the provided parameters
-        # have been assigned, and if there are any, the corresponding profile will be modified; otherwise, it will
-        # remain unchanged.
-        mc.network_profile.load_balancer_profile = _update_load_balancer_profile(
-            managed_outbound_ip_count=load_balancer_managed_outbound_ip_count,
-            managed_outbound_ipv6_count=load_balancer_managed_outbound_ipv6_count,
-            outbound_ips=load_balancer_outbound_ips,
-            outbound_ip_prefixes=load_balancer_outbound_ip_prefixes,
-            outbound_ports=load_balancer_outbound_ports,
-            idle_timeout=load_balancer_idle_timeout,
-            profile=mc.network_profile.load_balancer_profile,
-            models=self.models.load_balancer_models)
+        outbound_type = self.context.get_outbound_type()
+        if outbound_type and outbound_type != CONST_OUTBOUND_TYPE_LOAD_BALANCER:
+            mc.network_profile.load_balancer_profile = None
+        else:
+            # In the internal function "_update_load_balancer_profile", it will check whether the provided parameters
+            # have been assigned, and if there are any, the corresponding profile will be modified; otherwise, it will
+            # remain unchanged.
+            mc.network_profile.load_balancer_profile = _update_load_balancer_profile(
+                managed_outbound_ip_count=self.context.get_load_balancer_managed_outbound_ip_count(),
+                managed_outbound_ipv6_count=self.context.get_load_balancer_managed_outbound_ipv6_count(),
+                outbound_ips=self.context.get_load_balancer_outbound_ips(),
+                outbound_ip_prefixes=self.context.get_load_balancer_outbound_ip_prefixes(),
+                outbound_ports=self.context.get_load_balancer_outbound_ports(),
+                idle_timeout=self.context.get_load_balancer_idle_timeout(),
+                profile=mc.network_profile.load_balancer_profile,
+                models=self.models.load_balancer_models)
         return mc
 
     def update_nat_gateway_profile(self, mc: ManagedCluster) -> ManagedCluster:
@@ -6192,17 +6546,17 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
-        nat_gateway_managed_outbound_ip_count = self.context.get_nat_gateway_managed_outbound_ip_count()
-        nat_gateway_idle_timeout = self.context.get_nat_gateway_idle_timeout()
-        if is_nat_gateway_profile_provided(nat_gateway_managed_outbound_ip_count, nat_gateway_idle_timeout):
-            if not mc.network_profile:
-                raise UnknownError(
-                    "Unexpectedly get an empty network profile in the process of updating nat gateway profile."
-                )
-
+        if not mc.network_profile:
+            raise UnknownError(
+                "Unexpectedly get an empty network profile in the process of updating nat gateway profile."
+            )
+        outbound_type = self.context.get_outbound_type()
+        if outbound_type and outbound_type != CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY:
+            mc.network_profile.nat_gateway_profile = None
+        else:
             mc.network_profile.nat_gateway_profile = _update_nat_gateway_profile(
-                nat_gateway_managed_outbound_ip_count,
-                nat_gateway_idle_timeout,
+                self.context.get_nat_gateway_managed_outbound_ip_count(),
+                self.context.get_nat_gateway_idle_timeout(),
                 mc.network_profile.nat_gateway_profile,
                 models=self.models.nat_gateway_models,
             )
@@ -6237,6 +6591,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         api_server_authorized_ip_ranges = self.context.get_api_server_authorized_ip_ranges()
         disable_public_fqdn = self.context.get_disable_public_fqdn()
         enable_public_fqdn = self.context.get_enable_public_fqdn()
+        private_dns_zone = self.context.get_private_dns_zone()
         if api_server_authorized_ip_ranges is not None:
             # empty string is valid as it disables ip whitelisting
             profile_holder.authorized_ip_ranges = api_server_authorized_ip_ranges
@@ -6244,6 +6599,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             profile_holder.enable_private_cluster_public_fqdn = False
         if enable_public_fqdn:
             profile_holder.enable_private_cluster_public_fqdn = True
+        if private_dns_zone is not None:
+            profile_holder.private_dns_zone = private_dns_zone
 
         # keep api_server_access_profile empty if none of its properties are updated
         if (
@@ -6265,8 +6622,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         disable_ahub = self.context.get_disable_ahub()
         windows_admin_password = self.context.get_windows_admin_password()
         enable_windows_gmsa = self.context.get_enable_windows_gmsa()
+        disable_windows_gmsa = self.context.get_disable_windows_gmsa()
 
-        if any([enable_ahub, disable_ahub, windows_admin_password, enable_windows_gmsa]) and not mc.windows_profile:
+        if any([enable_ahub, disable_ahub, windows_admin_password, enable_windows_gmsa, disable_windows_gmsa]) and not mc.windows_profile:
+            # seems we know the error
             raise UnknownError(
                 "Encounter an unexpected error while getting windows profile from the cluster in the process of update."
             )
@@ -6283,6 +6642,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 enabled=True,
                 dns_server=gmsa_dns_server,
                 root_domain_name=gmsa_root_domain_name,
+            )
+        if disable_windows_gmsa:
+            mc.windows_profile.gmsa_profile = self.models.WindowsGmsaProfile(
+                enabled=False,
             )
         return mc
 
@@ -6337,6 +6700,40 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             if mc.auto_upgrade_profile is None:
                 mc.auto_upgrade_profile = self.models.ManagedClusterAutoUpgradeProfile()
             mc.auto_upgrade_profile.upgrade_channel = auto_upgrade_channel
+
+        node_os_upgrade_channel = self.context.get_node_os_upgrade_channel()
+        if node_os_upgrade_channel is not None:
+            if mc.auto_upgrade_profile is None:
+                mc.auto_upgrade_profile = self.models.ManagedClusterAutoUpgradeProfile()
+            mc.auto_upgrade_profile.node_os_upgrade_channel = node_os_upgrade_channel
+
+        return mc
+
+    def update_network_plugin_settings(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update network plugin settings of network profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        network_plugin_mode = self.context.get_network_plugin_mode()
+        if network_plugin_mode:
+            mc.network_profile.network_plugin_mode = network_plugin_mode
+
+        (
+            pod_cidr,
+            _,
+            _,
+            _,
+            _
+        ) = self.context.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
+
+        network_dataplane = self.context.get_network_dataplane()
+        if network_dataplane:
+            mc.network_profile.network_dataplane = network_dataplane
+
+        if pod_cidr:
+            mc.network_profile.pod_cidr = pod_cidr
         return mc
 
     def update_http_proxy_config(self, mc: ManagedCluster) -> ManagedCluster:
@@ -6357,8 +6754,11 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         self._ensure_mc(mc)
 
         current_identity_type = "spn"
+        current_user_assigned_identity = ""
         if mc.identity is not None:
             current_identity_type = mc.identity.type.casefold()
+            if mc.identity.user_assigned_identities is not None and len(mc.identity.user_assigned_identities) > 0:
+                current_user_assigned_identity = list(mc.identity.user_assigned_identities.keys())[0]
 
         goal_identity_type = current_identity_type
         assign_identity = self.context.get_assign_identity()
@@ -6368,7 +6768,12 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             else:
                 goal_identity_type = "userassigned"
 
-        if current_identity_type != goal_identity_type:
+        is_update_identity = ((current_identity_type != goal_identity_type) or
+                              (current_identity_type == goal_identity_type and
+                              current_identity_type == "userassigned" and
+                              assign_identity is not None and
+                              current_user_assigned_identity != assign_identity))
+        if is_update_identity:
             if current_identity_type == "spn":
                 msg = (
                     "Your cluster is using service principal, and you are going to update "
@@ -6378,12 +6783,18 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     "until you upgrade your agentpool.\n"
                     "Are you sure you want to perform this operation?"
                 ).format(goal_identity_type)
-            else:
+            elif current_identity_type != goal_identity_type:
                 msg = (
                     "Your cluster is already using {} managed identity, and you are going to "
                     "update the cluster to use {} managed identity.\n"
                     "Are you sure you want to perform this operation?"
                 ).format(current_identity_type, goal_identity_type)
+            else:
+                msg = (
+                    "Your cluster is already using userassigned managed identity, current control plane identity is {},"
+                    "and you are going to update the cluster identity to {}.\n"
+                    "Are you sure you want to perform this operation?"
+                ).format(current_user_assigned_identity, assign_identity)
             # gracefully exit if user does not confirm
             if not self.context.get_yes() and not prompt_y_n(msg, default="n"):
                 raise DecoratorEarlyExitException
@@ -6569,6 +6980,34 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def update_workload_identity_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update workload identity profile for the ManagedCluster object.
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        profile = self.context.get_workload_identity_profile()
+        if profile:
+            if mc.security_profile is None:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile()
+            mc.security_profile.workload_identity = profile
+
+        return mc
+
+    def update_k8s_support_plan(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update supportPlan for the ManagedCluster object.
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        support_plan = self.context.get_k8s_support_plan()
+        if support_plan == KubernetesSupportPlan.AKS_LONG_TERM_SUPPORT:
+            if mc is None or mc.sku is None or mc.sku.tier.lower() != CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM.lower():
+                raise AzCLIError("Long term support is only available for premium tier clusters.")
+
+        mc.support_plan = support_plan
+        return mc
+
     def update_azure_keyvault_kms(self, mc: ManagedCluster) -> ManagedCluster:
         """Update security profile azureKeyvaultKms for the ManagedCluster object.
 
@@ -6699,6 +7138,68 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 enabled=False
             )
 
+        if self.context.get_enable_vpa():
+            if mc.workload_auto_scaler_profile is None:
+                mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoScalerProfile()
+            if mc.workload_auto_scaler_profile.vertical_pod_autoscaler is None:
+                mc.workload_auto_scaler_profile.vertical_pod_autoscaler = self.models.ManagedClusterWorkloadAutoScalerProfileVerticalPodAutoscaler()
+
+            # set enabled
+            mc.workload_auto_scaler_profile.vertical_pod_autoscaler.enabled = True
+
+        if self.context.get_disable_vpa():
+            if mc.workload_auto_scaler_profile is None:
+                mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoScalerProfile()
+            if mc.workload_auto_scaler_profile.vertical_pod_autoscaler is None:
+                mc.workload_auto_scaler_profile.vertical_pod_autoscaler = self.models.ManagedClusterWorkloadAutoScalerProfileVerticalPodAutoscaler()
+
+            # set disabled
+            mc.workload_auto_scaler_profile.vertical_pod_autoscaler.enabled = False
+
+        return mc
+
+    def update_azure_monitor_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update azure monitor profile for the ManagedCluster object.
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        # read the original value passed by the command
+        ksm_metric_labels_allow_list = self.context.raw_param.get("ksm_metric_labels_allow_list")
+        ksm_metric_annotations_allow_list = self.context.raw_param.get("ksm_metric_annotations_allow_list")
+
+        if ksm_metric_labels_allow_list is None:
+            ksm_metric_labels_allow_list = ""
+        if ksm_metric_annotations_allow_list is None:
+            ksm_metric_annotations_allow_list = ""
+
+        if self.context.get_enable_azure_monitor_metrics():
+            if mc.azure_monitor_profile is None:
+                mc.azure_monitor_profile = self.models.ManagedClusterAzureMonitorProfile()
+            mc.azure_monitor_profile.metrics = self.models.ManagedClusterAzureMonitorProfileMetrics(enabled=True)
+            mc.azure_monitor_profile.metrics.kube_state_metrics = self.models.ManagedClusterAzureMonitorProfileKubeStateMetrics(  # pylint:disable=line-too-long
+                metric_labels_allowlist=str(ksm_metric_labels_allow_list),
+                metric_annotations_allow_list=str(ksm_metric_annotations_allow_list))
+
+        if self.context.get_disable_azure_monitor_metrics():
+            if mc.azure_monitor_profile is None:
+                mc.azure_monitor_profile = self.models.ManagedClusterAzureMonitorProfile()
+            mc.azure_monitor_profile.metrics = self.models.ManagedClusterAzureMonitorProfileMetrics(enabled=False)
+
+        if (
+            self.context.raw_param.get("enable_azure_monitor_metrics") or
+            self.context.raw_param.get("disable_azure_monitor_metrics")
+        ):
+            self.context.external_functions.ensure_azure_monitor_profile_prerequisites(
+                self.cmd,
+                self.context.get_subscription_id(),
+                self.context.get_resource_group_name(),
+                self.context.get_name(),
+                self.context.get_location(),
+                self.__raw_parameters,
+                self.context.get_disable_azure_monitor_metrics(),
+                False)
+
         return mc
 
     def update_mc_profile_default(self) -> ManagedCluster:
@@ -6724,6 +7225,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         self.process_attach_detach_acr(mc)
         # update sku (uptime sla)
         mc = self.update_sku(mc)
+        # update outbound type
+        mc = self.update_outbound_type_in_network_profile(mc)
         # update load balancer profile
         mc = self.update_load_balancer_profile(mc)
         # update nat gateway profile
@@ -6734,6 +7237,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_api_server_access_profile(mc)
         # update windows profile
         mc = self.update_windows_profile(mc)
+        # update network plugin settings
+        mc = self.update_network_plugin_settings(mc)
         # update aad profile
         mc = self.update_aad_profile(mc)
         # update oidc issuer profile
@@ -6746,6 +7251,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_addon_profiles(mc)
         # update defender
         mc = self.update_defender(mc)
+        # update workload identity profile
+        mc = self.update_workload_identity_profile(mc)
         # update stroage profile
         mc = self.update_storage_profile(mc)
         # update azure keyvalut kms
@@ -6758,6 +7265,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_http_proxy_config(mc)
         # update workload autoscaler profile
         mc = self.update_workload_auto_scaler_profile(mc)
+        # update kubernetes support plan
+        mc = self.update_k8s_support_plan(mc)
+        # update azure monitor metrics profile
+        mc = self.update_azure_monitor_profile(mc)
         return mc
 
     def check_is_postprocessing_required(self, mc: ManagedCluster) -> bool:
@@ -6816,7 +7327,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     self.context.external_functions.add_monitoring_role_assignment(
                         cluster, cluster_resource_id, self.cmd
                     )
-            else:
+            elif (
+                self.context.raw_param.get("enable_addons") is not None or
+                self.context.raw_param.get("disable_addons") is not None
+            ):
                 # Create the DCR Association here
                 addon_consts = self.context.get_addon_consts()
                 CONST_MONITORING_ADDON_NAME = addon_consts.get("CONST_MONITORING_ADDON_NAME")

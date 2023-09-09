@@ -1157,7 +1157,7 @@ def list_service_principal_owners(client, identifier):
 def create_service_principal_for_rbac(
         # pylint:disable=too-many-statements,too-many-locals, too-many-branches, unused-argument
         cmd, display_name=None, years=None, create_cert=False, cert=None, scopes=None, role=None,
-        show_auth_for_sdk=None, skip_assignment=False, keyvault=None):
+        show_auth_in_json=None, skip_assignment=False, keyvault=None):
     import time
 
     if role and not scopes or not role and scopes:
@@ -1272,7 +1272,7 @@ def create_service_principal_for_rbac(
 
     logger.warning(CREDENTIAL_WARNING)
 
-    if show_auth_for_sdk:
+    if show_auth_in_json:
         from azure.cli.core._profile import Profile
         profile = Profile(cli_ctx=cmd.cli_ctx)
         result = profile.get_sp_auth_info(scopes[0].split('/')[2] if scopes else None,

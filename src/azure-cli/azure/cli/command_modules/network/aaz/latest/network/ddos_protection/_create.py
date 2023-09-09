@@ -241,15 +241,11 @@ class Create(AAZCommand):
             )
 
             public_ip_addresses = cls._schema_on_200_201.properties.public_ip_addresses
-            public_ip_addresses.Element = AAZObjectType(
-                flags={"read_only": True},
-            )
+            public_ip_addresses.Element = AAZObjectType()
             _CreateHelper._build_schema_sub_resource_read(public_ip_addresses.Element)
 
             virtual_networks = cls._schema_on_200_201.properties.virtual_networks
-            virtual_networks.Element = AAZObjectType(
-                flags={"read_only": True},
-            )
+            virtual_networks.Element = AAZObjectType()
             _CreateHelper._build_schema_sub_resource_read(virtual_networks.Element)
 
             tags = cls._schema_on_200_201.tags
@@ -269,14 +265,10 @@ class _CreateHelper:
             _schema.id = cls._schema_sub_resource_read.id
             return
 
-        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType(
-            flags={"read_only": True}
-        )
+        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
 
         sub_resource_read = _schema_sub_resource_read
-        sub_resource_read.id = AAZStrType(
-            flags={"read_only": True},
-        )
+        sub_resource_read.id = AAZStrType()
 
         _schema.id = cls._schema_sub_resource_read.id
 

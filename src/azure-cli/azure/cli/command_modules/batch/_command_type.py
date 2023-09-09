@@ -294,9 +294,8 @@ class BatchArgumentTree:
         except DeserializationError as error:
             message += f": {error}"
             raise ValueError(message.format(self._request_param['model']))
-        else:
-            if kwargs[self._request_param['name']] is None:
-                raise ValueError(message.format(self._request_param['model']))
+        if kwargs[self._request_param['name']] is None:
+            raise ValueError(message.format(self._request_param['model']))
 
     def queue_argument(self, name=None, path=None, root=None,
                        options=None, type=None,  # pylint: disable=redefined-builtin

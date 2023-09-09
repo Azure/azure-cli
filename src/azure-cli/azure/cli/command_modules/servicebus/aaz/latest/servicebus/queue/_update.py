@@ -105,12 +105,6 @@ class Update(AAZCommand):
             help="A value that indicates whether Express Entities are enabled. An express queue holds a message in memory temporarily before writing it to persistent storage.",
             nullable=True,
         )
-        _args_schema.enable_partitioning = AAZBoolArg(
-            options=["--enable-partitioning"],
-            arg_group="Properties",
-            help="A value that indicates whether the queue is to be partitioned across multiple message brokers.",
-            nullable=True,
-        )
         _args_schema.forward_dead_lettered_messages_to = AAZStrArg(
             options=["--forward-dead-lettered-messages-to"],
             arg_group="Properties",
@@ -145,18 +139,6 @@ class Update(AAZCommand):
             options=["--max-size", "--max-size-in-megabytes"],
             arg_group="Properties",
             help="Maximum size of the topic in megabytes, which is the size of the memory allocated for the topic. Default is 1024.",
-            nullable=True,
-        )
-        _args_schema.enable_duplicate_detection = AAZBoolArg(
-            options=["--duplicate-detection", "--enable-duplicate-detection"],
-            arg_group="Properties",
-            help="A value indicating if this queue requires duplicate detection.",
-            nullable=True,
-        )
-        _args_schema.enable_session = AAZBoolArg(
-            options=["--enable-session"],
-            arg_group="Properties",
-            help="A value that indicates whether the queue supports the concept of sessions.",
             nullable=True,
         )
         _args_schema.status = AAZStrArg(
@@ -405,15 +387,12 @@ class Update(AAZCommand):
                 properties.set_prop("duplicateDetectionHistoryTimeWindow", AAZStrType, ".duplicate_detection_history_time_window")
                 properties.set_prop("enableBatchedOperations", AAZBoolType, ".enable_batched_operations")
                 properties.set_prop("enableExpress", AAZBoolType, ".enable_express")
-                properties.set_prop("enablePartitioning", AAZBoolType, ".enable_partitioning")
                 properties.set_prop("forwardDeadLetteredMessagesTo", AAZStrType, ".forward_dead_lettered_messages_to")
                 properties.set_prop("forwardTo", AAZStrType, ".forward_to")
                 properties.set_prop("lockDuration", AAZStrType, ".lock_duration")
                 properties.set_prop("maxDeliveryCount", AAZIntType, ".max_delivery_count")
                 properties.set_prop("maxMessageSizeInKilobytes", AAZIntType, ".max_message_size_in_kilobytes")
                 properties.set_prop("maxSizeInMegabytes", AAZIntType, ".max_size_in_megabytes")
-                properties.set_prop("requiresDuplicateDetection", AAZBoolType, ".enable_duplicate_detection")
-                properties.set_prop("requiresSession", AAZBoolType, ".enable_session")
                 properties.set_prop("status", AAZStrType, ".status")
 
             return _instance_value

@@ -404,6 +404,39 @@ class TestStaticAppCommands(unittest.TestCase):
         # validate
         self.staticapp_client.create_or_update_static_site_app_settings.assert_called_once()
 
+    def test_list_staticsite_app_settings_with_resourcegroup_with_environment(self):
+        list_staticsite_app_settings(self.mock_cmd, self.name1, self.rg1, self.environment1)
+
+        self.staticapp_client.list_static_site_build_app_settings.assert_called_once_with(
+            self.rg1, self.name1, self.environment1)
+
+    def test_set_staticsite_app_settings_with_resourcegroup_with_environment(self):
+        from azure.mgmt.web.models import StringDictionary
+
+        app_settings1_input = ['key1=val1', 'key2=val2==', 'key3=val3=']
+
+        self.staticapp_client.list_static_site_build_app_settings.return_value = StringDictionary(properties={})
+
+        set_staticsite_app_settings(self.mock_cmd, self.name1, app_settings1_input, self.rg1, self.environment1)
+
+        self.staticapp_client.create_or_update_static_site_build_app_settings.assert_called_once()
+
+    def test_delete_staticsite_app_settings_with_resourcegroup_with_environment(self):
+        # setup
+        current_app_settings = {'key1': 'val1', 'key2': 'val2'}
+        app_settings_keys_to_delete = ['key1']
+
+        class AppSettings:
+            properties = current_app_settings
+
+        self.staticapp_client.list_static_site_build_app_settings.return_value = AppSettings
+
+        # action
+        delete_staticsite_app_settings(self.mock_cmd, self.name1, app_settings_keys_to_delete, self.rg1, self.environment1)
+
+        # validate
+        self.staticapp_client.create_or_update_static_site_build_app_settings.assert_called_once()
+
     def test_list_staticsite_users_with_resourcegroup(self):
         authentication_provider = 'GitHub'
 

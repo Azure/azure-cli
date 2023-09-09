@@ -362,6 +362,13 @@ Authentication failure. This may be caused by either invalid account key, connec
                          'for the authentication. The legacy "key" mode will attempt to query for '
                          'an account key if no authentication parameters for the account are provided. '
                          'Environment variable: AZURE_STORAGE_AUTH_MODE')
+            if command_name.startswith('storage share') or command_name.startswith('storage directory') \
+                    or command_name.startswith('storage file'):
+                c.extra('enable_file_backup_request_intent', action='store_true',
+                        options_list=['--enable-file-backup-request-intent', '--backup-intent'],
+                        help='Required parameter to use with OAuth (Azure AD) Authentication for Files. This will '
+                             'bypass any file/directory level permission checks and allow access, based on the '
+                             'allowed data actions, even if there are ACLs in place for those files/directories.')
 
 
 class AzureStackStorageCommandGroup(StorageCommandGroup):

@@ -42,6 +42,14 @@ def _validate_template_spec_out(namespace):
         raise CLIError('Please enter a valid output folder')
 
 
+def validate_deployment_stack_files(namespace):
+    from azure.cli.core.commands.validators import validate_tags
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    validate_tags(namespace)
+    if namespace.template_file and not os.path.isfile(namespace.template_file):
+        raise InvalidArgumentValueError('Please enter a valid template file path')
+
+
 def _validate_deployment_name_with_template_specs(namespace):
     # If missing,try come out with a name associated with the template name
     if namespace.deployment_name is None:
@@ -90,7 +98,7 @@ def process_deployment_create_namespace(namespace):
         if [bool(namespace.template_uri), bool(namespace.template_file)].count(True) != 1:
             raise CLIError('incorrect usage: Chose only one of'
                            ' --template-file FILE | --template-uri URI')
-    if(bool(namespace.template_uri) or bool(namespace.template_file)):
+    if (bool(namespace.template_uri) or bool(namespace.template_file)):
         _validate_deployment_name(namespace)
     else:
         _validate_deployment_name_with_template_specs(namespace)
@@ -129,12 +137,12 @@ def internal_validate_lock_parameters(namespace, resource_group, resource_provid
         return
 
     if not resource_type:
-        raise CLIError('--resource-type is required if the name, --resource, is present')
+        raise CLIError('--resource-type is required if the --name, --resource, --resource-group is present')
 
     parts = resource_type.split('/')
     if resource_provider_namespace is None:
         if len(parts) == 1:
-            raise CLIError('A resource namespace is required if the name, --resource, is present.'
+            raise CLIError('A resource namespace is required if the --name, --resource, --resource-group is present.'
                            'Expected <namespace>/<type> or --namespace=<namespace>')
     elif len(parts) != 1:
         raise CLIError('Resource namespace specified in both --resource-type and --namespace')

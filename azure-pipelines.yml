@@ -29,7 +29,7 @@ parameters:
 jobs:
 - job: CheckPullRequest
   displayName: "Check the Format of Pull Request Title and Content"
-  condition: and(succeeded(), in(variables['System.PullRequest.TargetBranch'], 'dev', 'release'))
+  condition: and(succeeded(), in(variables['System.PullRequest.TargetBranch'], 'dev', 'release', 'main'))
 
   pool:
     name: ${{ variables.ubuntu_pool }}
@@ -42,6 +42,10 @@ jobs:
       echo $body
       if [ "$(System.PullRequest.TargetBranch)" != "release" ] && echo $title | grep -iqF hotfix:; then
         echo "Hotfix PR should target release branch."
+        exit 1
+      fi
+      if [ "$(System.PullRequest.TargetBranch)" == "main" ]; then
+        echo "Feature PR should target dev branch."
         exit 1
       fi
       python scripts/ci/check_pull_request.py "$title" "$body"
@@ -186,6 +190,12 @@ jobs:
 
 - job: BuildWindowsMSI
   displayName: Build Windows MSI
+  strategy:
+    matrix:
+      x86:
+        Platform: x86
+      x64:
+        Platform: x64
 
   dependsOn: ExtractMetadata
   condition: succeeded()
@@ -200,6 +210,7 @@ jobs:
 
 
   - script: |
+      set ARCH=$(Platform)
       set /p CLI_VERSION=<$(System.ArtifactsDirectory)/metadata/version
       set
       
@@ -215,10 +226,16 @@ jobs:
     displayName: 'Publish Artifact: MSI'
     inputs:
       TargetPath: 'build_scripts/windows/out/'
-      ArtifactName: msi
+      ArtifactName: msi-$(Platform)
 
-- job: TestWindowsMSI
-  displayName: Test Windows MSI
+- job: TestMsiInstallation
+  displayName: Test MSI Installation
+  strategy:
+    matrix:
+      x86:
+        Platform: x86
+      x64:
+        Platform: x64
 
   dependsOn: BuildWindowsMSI
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
@@ -235,52 +252,12 @@ jobs:
     displayName: 'Download Build Artifacts'
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/msi'
-      artifactName: msi
+      artifactName: msi-$(Platform)
 
   - task: PowerShell@2
     displayName: Install and Load CLI
     inputs:
-      targetType: inline
-      script: |
-        if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-          # Start another Powershell process as Admin and execute this script again
-          $arguments = "& '" +$myinvocation.mycommand.definition + "'"
-          Start-Process powershell -Verb runAs -ArgumentList $arguments
-          # Stop if the PowerShell is not run as Admin
-          Break
-        }
-        # The following are executed by elevated PowerShell
-        az --version
-        
-        $InstallArgs = @(
-          "/i"
-          "`"$env:SYSTEM_ARTIFACTSDIRECTORY\msi\Microsoft Azure CLI.msi`""
-          "/q"
-          "/norestart"
-          "/l*v"
-          ".\install_logs.txt"
-        )
-        $pre_installed_version=az version --query '\"azure-cli\"' -o tsv
-        $to_be_installed_version=Get-Content $(System.ArtifactsDirectory)/metadata/version
-        if ($pre_installed_version -eq $to_be_installed_version){
-          # See https://docs.microsoft.com/windows/win32/msi/reinstallmode about options of REINSTALLMODE
-          $reinstall_option="REINSTALL=ALL REINSTALLMODE=emus"
-          $InstallArgs += $reinstall_option
-        }
-        Start-Process "msiexec.exe" -ArgumentList $InstallArgs -Wait -NoNewWindow
-        $install_time=Measure-Command {Start-Process "msiexec.exe" -ArgumentList $InstallArgs -Wait -NoNewWindow} | select -expand TotalSeconds
-        $installed_version=az version --query '\"azure-cli\"' -o tsv
-        if ($installed_version -ne $to_be_installed_version){
-          echo "The MSI failed to install."
-          Exit 1
-        }
-        echo 'Install time(seconds):' $install_time
-        az --version
-        # Test bundled pip with extension installation
-        az extension add -n rdbms-connect
-        az self-test
-        
-        Get-Content .\install_logs.txt
+      filePath: build_scripts\windows\scripts\test_msi_installation.ps1
 
 - job: BuildDockerImage
   displayName: Build Docker Image
@@ -429,20 +406,15 @@ jobs:
       CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
       PYPI_FILES=$(cd $BUILD_ARTIFACTSTAGINGDIRECTORY/pypi; pwd)
       
-      echo "== Testing pip install on Python 3.7 =="
-      docker run \
-        --rm -v $PYPI_FILES:/mnt/pypi python:3.7 \
-        /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
-      
       echo "== Testing pip install on Python 3.9 =="
       docker run \
         --rm -v $PYPI_FILES:/mnt/pypi python:3.9 \
-        /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
+        /bin/bash -c "cd /mnt/pypi && ls && pip install --find-links ./ azure_cli-$CLI_VERSION*whl && az self-test && az --version && sleep 5"
       
       echo "== Testing pip install on Python 3.10 =="
       docker run \
         --rm -v $PYPI_FILES:/mnt/pypi python:3.10 \
-        /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
+        /bin/bash -c "cd /mnt/pypi && ls && pip install --find-links ./ azure_cli-$CLI_VERSION*whl && az self-test && az --version && sleep 5"
 
     displayName: 'Test pip Install'
 
@@ -720,10 +692,10 @@ jobs:
 
   - bash: |
       set -ex
-      
+
       CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
       RPM_NAME=$(find $SYSTEM_ARTIFACTSDIRECTORY/rpm/ -type f -name "azure-cli-$CLI_VERSION-1.cm2.*.rpm" -printf '%f\n')
-      
+
       echo "== Test rpm package on ${IMAGE} =="
       docker pull $IMAGE
       docker run --rm -e RPM_NAME=$RPM_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_mariner_in_docker.sh"
@@ -751,12 +723,6 @@ jobs:
           image: registry.access.redhat.com/ubi9/ubi:9.0.0
           artifact: rpm-ubi9-${{ arch.value }}
           python_package: python3.9
-          pool: ${{ arch.pool }}
-        Fedora 35 ${{ arch.name }}:
-          dockerfile: fedora
-          image: fedora:35
-          artifact: rpm-fedora35-${{ arch.value }}
-          python_package: python3
           pool: ${{ arch.pool }}
         Fedora 36 ${{ arch.name }}:
           dockerfile: fedora
@@ -810,14 +776,6 @@ jobs:
           python_package: python3.9
           python_cmd: python3.9
           pip_cmd: pip3.9
-          pool: ${{ arch.pool }}
-        Fedora 35 ${{ arch.name }}:
-          artifact: rpm-fedora35-${{ arch.value }}
-          distro: fc35
-          image: fedora:35
-          python_package: python3
-          python_cmd: python3
-          pip_cmd: pip3
           pool: ${{ arch.pool }}
         Fedora 36 ${{ arch.name }}:
           artifact: rpm-fedora36-${{ arch.value }}
@@ -896,6 +854,12 @@ jobs:
           distro: bullseye
           arch: ${{ arch.value }}
           pool: ${{ arch.pool }}
+        Bookworm ${{ arch.name }}:
+          # 12
+          deb_system: debian
+          distro: bookworm
+          arch: ${{ arch.value }}
+          pool: ${{ arch.pool }}
   steps:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
@@ -945,6 +909,11 @@ jobs:
         Bullseye ${{ arch.name }}:
           deb_system: debian
           distro: bullseye
+          arch: ${{ arch.value }}
+          pool: ${{ arch.pool }}
+        Bookworm ${{ arch.name }}:
+          deb_system: debian
+          distro: bookworm
           arch: ${{ arch.value }}
           pool: ${{ arch.pool }}
   pool:
@@ -1064,6 +1033,7 @@ jobs:
       fi
 
 - job: CodegenCoverage
+  condition: and(succeededOrFailed(), in(variables['Build.Reason'], 'BatchedCI'))
   displayName: "Codegen Coverage"
   pool:
     name: ${{ variables.ubuntu_pool }}
@@ -1086,7 +1056,20 @@ jobs:
       # CLI repo only
       azdev statistics list-command-table CLI --statistics-only
       # CLI + EXT repos
-      azdev statistics list-command-table --statistics-only
+      azdev statistics list-command-table --statistics-only > /tmp/codegen_report.json
+      # azure-kusto is not compatible with azure-cli
+      # so we need run azdev statistics before installing azure-kusto to avoid the error `No module named azure.cli`
+      pip install azure-kusto-data azure-kusto-ingest
+      python s/scripts/ci/codegen_report.py
+    env:
+      BUILD_ID: $(Build.BuildId)
+      BUILD_BRANCH: $(Build.SourceBranchName)
+      KUSTO_CLIENT_ID: $(KUSTO_CLIENT_ID)
+      KUSTO_CLIENT_SECRET: $(KUSTO_CLIENT_SECRET)
+      KUSTO_CLUSTER: $(KUSTO_CLUSTER)
+      KUSTO_DATABASE: $(KUSTO_DATABASE)
+      KUSTO_TABLE: $(KUSTO_TABLE)
+      KUSTO_TENANT_ID: $(KUSTO_TENANT_ID)
 
 - job: VerifySphinxDocumentGenerator
   displayName: "Verify Sphinx Document Generator"
@@ -1101,3 +1084,65 @@ jobs:
     displayName: "Install pip and wheel"
   - bash: ./scripts/ci/test_ref_doc.sh
     displayName: "Verify Sphinx Document Generator"
+
+- job: NotifyCIErrors
+  dependsOn:
+    - CheckPullRequest
+    - RejectPullRequestToMasterBranch
+    - CredentialScanner
+    - PolicyCheck
+    - ExtractMetadata
+    - VerifyLinuxRequirements
+    - VerifyDarwinRequirements
+    - VerifyWindowsRequirements
+    - VerifyVersions
+    - BuildWindowsMSI
+    - TestMsiInstallation
+    - BuildDockerImage
+    - TestDockerImage
+    - BuildPythonWheel
+    - TestPythonWheel
+    - TestCore
+    - TestTelemetry
+    - IntegrationTestAgainstProfiles
+    - TestExtensionsLoading
+    - BuildHomebrewFormula
+    - TestHomebrewFormula
+    - TestHomebrewPackage
+    - BuildRpmPackageMariner
+    - BuildRpmPackages
+    - TestRpmPackage
+    - BuildDebPackages
+    - TestDebPackages
+    - CheckStyle
+    - CheckHeaders
+    - PerformanceCheck
+    - CheckLinter
+    - CodegenCoverage
+    - VerifySphinxDocumentGenerator
+  condition: and(failed(), in(variables['Build.Reason'], 'BatchedCI'))
+  displayName: Notify CI Errors
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.10'
+    inputs:
+      versionSpec: 3.10
+  - task: AzureCLI@2
+    inputs:
+      azureSubscription: 'Azure CLI'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        pip install requests
+        teams_api_url=$(az keyvault secret show --vault-name $(TEAMS_BOT_VAULT_NAME) --name $(TEAMS_BOT_API_URL_SECRET_NAME) --query value -otsv)
+        teams_api_key=$(az keyvault secret show --vault-name $(TEAMS_BOT_VAULT_NAME) --name $(TEAMS_BOT_API_KEY_SECRET_NAME) --query value -otsv)
+        echo "If any task fails, notify to teams channel"
+        python scripts/ci/notify_ci_errors.py $teams_api_url $teams_api_key $(TEAMS_CHANNEL_ID)
+    displayName: 'Notify To Teams Channel'
+    env:
+      BASE_URI: $(System.CollectionUri)
+      PROJECT_TYPE: $(System.TeamProject)
+      BUILD_ID: $(Build.BuildId)
+      JOB_ID: $(System.JobId)

@@ -34,7 +34,7 @@ sqlvm_max_length = 15
 class SqlVirtualMachinePreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix=sqlvm_name_prefix, location='westus',
                  vm_user='admin123', vm_password='SecretPassword123', parameter_name='sqlvm',
-                 resource_group_parameter_name='resource_group', skip_delete=True, 
+                 resource_group_parameter_name='resource_group', skip_delete=True,
                  image='microsoftsqlserver:sql2019-ws2022:enterprise:latest'):
         super(SqlVirtualMachinePreparer, self).__init__(name_prefix, sqlvm_max_length)
         self.location = location
@@ -113,11 +113,12 @@ class DomainPreparer(AbstractPreparer, SingleValueReplacer):
 
 class SqlVmScenarioTest(ScenarioTest):
     @AllowLargeResponse()
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(parameter_name='resource_group')
+    @ResourceGroupPreparer(parameter_name='resource_group2')
     @SqlVirtualMachinePreparer()
     @LogAnalyticsWorkspacePreparer(location="westus")
-    def test_sqlvm_mgmt_assessment(self, resource_group, resource_group_location, sqlvm, laworkspace):
-        
+    def test_sqlvm_mgmt_assessment(self, resource_group, resource_group2, resource_group_location, sqlvm, laworkspace):
+
         # create sqlvm1 with minimal required parameters
         self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --sql-mgmt-type {}'
                  .format(sqlvm, resource_group, resource_group_location, 'PAYG', 'Full'),
@@ -133,10 +134,10 @@ class SqlVmScenarioTest(ScenarioTest):
             self.cmd('sql vm update -n {} -g {} --assessment-weekly-interval {} --assessment-day-of-week {} --assessment-start-time-local {} '
                  .format(sqlvm, resource_group, 1, 'Monday', '20:30'))
 
-        # test assessment schedule enabling succeeds
+        # test assessment schedule enabling succeeds with agent rg set to another rg
         self.cmd('sql vm update -n {} -g {} --assessment-weekly-interval {} --assessment-day-of-week {} --assessment-start-time-local {} '
-                 '--workspace-rg {} --workspace-name {}'
-                 .format(sqlvm, resource_group, 1, 'Monday', '20:30', resource_group, laworkspace),
+                 '--workspace-rg {} --workspace-name {} --agent-rg {}'
+                 .format(sqlvm, resource_group, 1, 'Monday', '20:30', resource_group, laworkspace, resource_group2),
                  checks=[
                      JMESPathCheck('name', sqlvm),
                      JMESPathCheck('location', resource_group_location),
@@ -726,29 +727,29 @@ class SqlVmAndGroupScenarioTest(ScenarioTest):
     @SqlVirtualMachinePreparer(parameter_name='sqlvm2022', image='microsoftsqlserver:sql2022-ws2022:enterprise-gen2:latest')
     def test_sqlvm_aad_auth_negative(self, resource_group, resource_group_location, sqlvm2019, sqlvm2022):
         """
-        Due to the requirement of Azure AD Global Administrator or Privileged Role Administrator role to grant the 
-        necessary permissions for the positive test cases. This automatic test case concentrates on negative test cases 
+        Due to the requirement of Azure AD Global Administrator or Privileged Role Administrator role to grant the
+        necessary permissions for the positive test cases. This automatic test case concentrates on negative test cases
         covering the validation of Azure AD authentication
         """
 
-        # Test create sqlvm2019 with LightWeight management mode
-        self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --sql-mgmt-type LightWeight'
-                 .format(sqlvm2019, resource_group, resource_group_location, 'PAYG'), 
+        # Test create sqlvm2019
+        self.cmd('sql vm create -n {} -g {} -l {} --license-type {}'
+                 .format(sqlvm2019, resource_group, resource_group_location, 'PAYG'),
                     checks=[
                         JMESPathCheck('name', sqlvm2019),
                         JMESPathCheck('location', resource_group_location),
                         JMESPathCheck('sqlServerLicenseType', 'PAYG'),
                         JMESPathCheck('sqlManagement', 'LightWeight')
                     ]).get_output_in_json()
-        
-        # Test create sqlvm2022 with Full management mode
-        self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --sql-mgmt-type Full'
-                 .format(sqlvm2022, resource_group, resource_group_location, 'PAYG'), 
+
+        # Test create sqlvm2022
+        self.cmd('sql vm create -n {} -g {} -l {} --license-type {}'
+                 .format(sqlvm2022, resource_group, resource_group_location, 'PAYG'),
                     checks=[
                         JMESPathCheck('name', sqlvm2022),
                         JMESPathCheck('location', resource_group_location),
                         JMESPathCheck('sqlServerLicenseType', 'PAYG'),
-                        JMESPathCheck('sqlManagement', 'Full')
+                        JMESPathCheck('sqlManagement', 'LightWeight')
                     ]).get_output_in_json()
 
         # Create user-assigned managed identity to attach to the virtual machine
@@ -757,19 +758,6 @@ class SqlVmAndGroupScenarioTest(ScenarioTest):
 
         # Create user-assigned managed identity not attached to any virtual machine
         unattached_identity = self.cmd('identity create -n {} -g {}'.format('other_msi', resource_group)).get_output_in_json()
-
-        # Assert customer cannot enable Azure AD authentication with LightWeight management mode
-        with self.assertRaisesRegex(InvalidArgumentValueError, "Enabling Azure AD authentication requires Full SQL VM management mode"):
-            self.cmd('sql vm validate-azure-ad-auth -n {} -g {}'.format(sqlvm2019, resource_group))
-
-        # test update sqlvm with management mode to make sure it updates to Full.
-        self.cmd('sql vm update -n {} -g {} --sql-mgmt-type {}'
-                .format(sqlvm2019, resource_group, 'Full'),
-                checks=[
-                    JMESPathCheck('name', sqlvm2019),
-                    JMESPathCheck('location', resource_group_location),
-                    JMESPathCheck('sqlManagement', 'Full')
-                ]).get_output_in_json()
 
         # Test both enable and validate commands
         commands = ["enable-azure-ad-auth", "validate-azure-ad-auth"]
@@ -798,7 +786,7 @@ class SqlVmAndGroupScenarioTest(ScenarioTest):
             # Enable the system-assigned managed identity on the VM
             self.cmd('vm identity assign -n {} -g {} --identities [system]'.format(sqlvm2022, resource_group))
 
-            # Assert customer cannot enable Azure AD authentication with system-assigned MSI 
+            # Assert customer cannot enable Azure AD authentication with system-assigned MSI
             # if the system-assigned managed identity does not have enough permission
             with self.assertRaisesRegex(InvalidArgumentValueError, "The managed identity is lack of the following roles for Azure AD authentication: "\
                                         "User.Read.All, Application.Read.All, GroupMember.Read.All."):
@@ -807,7 +795,7 @@ class SqlVmAndGroupScenarioTest(ScenarioTest):
             # Disable the system-assigned managed identity on the VM
             self.cmd('vm identity remove -n {} -g {} --identities [system]'.format(sqlvm2022, resource_group))
 
-            # Assert customer cannot enable Azure AD authentication with user-assigned MSI 
+            # Assert customer cannot enable Azure AD authentication with user-assigned MSI
             # if the user-assigned managed identity does not have enough permission
             with self.assertRaisesRegex(InvalidArgumentValueError, "The managed identity is lack of the following roles for Azure AD authentication: "\
                                         "User.Read.All, Application.Read.All, GroupMember.Read.All."):

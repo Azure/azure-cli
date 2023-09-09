@@ -6,76 +6,30 @@
 # pylint: disable=line-too-long
 # pylint: disable=too-many-statements
 # pylint: disable=too-many-locals
+# pylint: disable=reimported
 
 from azure.cli.core.commands import CliCommandType
-from azure.cli.core.profiles import ResourceType
 
 
 def load_command_table(self, _):
-    from azure.cli.command_modules.servicebus._client_factory import (namespaces_mgmt_client_factory,
-                                                                      disaster_recovery_mgmt_client_factory,
-                                                                      migration_mgmt_client_factory,
-                                                                      private_endpoint_connections_mgmt_client_factory,
-                                                                      private_link_mgmt_client_factory)
-
-    sb_namespace_util = CliCommandType(
-        operations_tmpl='azure.mgmt.servicebus.operations#NamespacesOperations.{}',
-        client_factory=namespaces_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_SERVICEBUS)
-
     sb_namespace_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.servicebus.Operation.NamespaceCustomFile#{}',
+        operations_tmpl='azure.cli.command_modules.servicebus.operations.namespace_custom#{}',
     )
-
-    sb_geodr_util = CliCommandType(
-        operations_tmpl='azure.mgmt.servicebus.operations#DisasterRecoveryConfigsOperations.{}',
-        client_factory=disaster_recovery_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_SERVICEBUS)
-
-    sb_migration_util = CliCommandType(
-        operations_tmpl='azure.mgmt.servicebus.operations#MigrationConfigsOperations.{}',
-        client_factory=migration_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_SERVICEBUS)
-
-    sb_private_endpoints_util = CliCommandType(
-        operations_tmpl='azure.mgmt.servicebus.operations#PrivateEndpointConnectionsOperations.{}',
-        client_factory=private_endpoint_connections_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_SERVICEBUS)
-
-    sb_private_links_util = CliCommandType(
-        operations_tmpl='azure.mgmt.servicebus.operations#PrivateLinkResourcesOperations.{}',
-        client_factory=private_link_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_SERVICEBUS)
-
-    from ._validators import validate_subnet
+    sb_network_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.servicebus.operations.network_rule_set#{}',
+    )
 
 # Namespace Region
     with self.command_group('servicebus namespace', custom_command_type=sb_namespace_custom,
                             is_preview=True) as g:
         g.custom_command('create', 'create_servicebus_namespace', supports_no_wait=True)
 
-    custom_tmpl = 'azure.cli.command_modules.servicebus.custom#{}'
-    servicebus_custom = CliCommandType(operations_tmpl=custom_tmpl)
-    with self.command_group('servicebus namespace', sb_namespace_util, client_factory=namespaces_mgmt_client_factory, min_api='2021-06-01-preview') as g:
-        g.custom_command('exists', 'cli_namespace_exists')
-
-    with self.command_group('servicebus namespace private-endpoint-connection', sb_private_endpoints_util, resource_type=ResourceType.MGMT_SERVICEBUS,
-                            custom_command_type=servicebus_custom, is_preview=True,
-                            client_factory=private_endpoint_connections_mgmt_client_factory) as g:
+    with self.command_group('servicebus namespace private-endpoint-connection', custom_command_type=sb_namespace_custom,
+                            is_preview=True) as g:
         from ._validators import validate_private_endpoint_connection_id
-        g.command('delete', 'begin_delete', confirmation=True, validator=validate_private_endpoint_connection_id)
-        g.show_command('show', 'get', validator=validate_private_endpoint_connection_id)
-        g.command('list', 'list', validator=validate_private_endpoint_connection_id)
-        g.custom_command('approve', 'approve_private_endpoint_connection',
-                         validator=validate_private_endpoint_connection_id)
-        g.custom_command('reject', 'reject_private_endpoint_connection',
-                         validator=validate_private_endpoint_connection_id)
-
-    with self.command_group('servicebus namespace private-link-resource', sb_private_links_util,
-                            resource_type=ResourceType.MGMT_SERVICEBUS) as g:
-        from azure.cli.core.commands.transform import gen_dict_to_list_transform
-        g.show_command('show', 'get', is_preview=True, min_api='2021-06-01-preview',
-                       transform=gen_dict_to_list_transform(key="value"))
+        g.custom_command('approve', 'approve_private_endpoint_connection', validator=validate_private_endpoint_connection_id)
+        g.custom_command('reject', 'reject_private_endpoint_connection', validator=validate_private_endpoint_connection_id)
+        g.custom_command('delete', 'delete_private_endpoint_connection', confirmation=True, validator=validate_private_endpoint_connection_id)
 
 # Rules Region
     with self.command_group('servicebus topic subscription rule', custom_command_type=sb_namespace_custom,
@@ -83,34 +37,23 @@ def load_command_table(self, _):
         g.custom_command('create', 'sb_rule_create', supports_no_wait=True)
 
 # DisasterRecoveryConfigs Region
-    with self.command_group('servicebus georecovery-alias', sb_geodr_util, client_factory=disaster_recovery_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
-        g.custom_command('set', 'cli_georecovery_alias_create')
-        g.show_command('show', 'get')
-        g.command('list', 'list')
-        g.command('break-pair', 'break_pairing')
-        g.command('fail-over', 'fail_over')
-        g.custom_command('exists', 'cli_georecovery_alias_exists')
-        g.command('delete', 'delete')
+    with self.command_group('servicebus georecovery-alias', custom_command_type=sb_namespace_custom,
+                            is_preview=True) as g:
+        g.custom_command('set', 'set_georecovery_alias', supports_no_wait=True)
 
-# DisasterRecoveryConfigs Authorization Region
-    with self.command_group('servicebus georecovery-alias authorization-rule', sb_geodr_util, client_factory=disaster_recovery_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
-        g.command('list', 'list_authorization_rules')
-        g.show_command('show', 'get_authorization_rule')
-        g.command('keys list', 'list_keys')
-
-# MigrationConfigs Region
-    with self.command_group('servicebus migration', sb_migration_util, client_factory=migration_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
-        g.custom_command('start', 'cli_migration_start')
-        g.custom_show_command('show', 'cli_migration_show')
-        g.custom_command('complete', 'cli_migration_complete')
-        g.custom_command('abort', 'revert')
+    from azure.cli.command_modules.servicebus.aaz.latest.servicebus.georecovery_alias._update import Update as georeccovery_alias_update
+    self.command_table['servicebus georecovery-alias update'] = georeccovery_alias_update(loader=self, deprecate_info=self.deprecate())
 
 # NetwrokRuleSet Region
-    with self.command_group('servicebus namespace network-rule', sb_namespace_util, client_factory=namespaces_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
-        g.custom_command('add', 'cli_networkrule_createupdate', validator=validate_subnet)
-        g.command('list', 'get_network_rule_set')
-        g.custom_command('remove', 'cli_networkrule_delete', validator=validate_subnet)
-        g.custom_command('update', 'cli_networkrule_update')
+    with self.command_group('servicebus namespace network-rule-set ip-rule', custom_command_type=sb_network_custom,
+                            is_preview=True) as g:
+        g.custom_command('add', 'add_network_rule_set_ip_rule')
+        g.custom_command('remove', 'remove_network_rule_set_ip_rule')
+
+    with self.command_group('servicebus namespace network-rule-set virtual-network-rule', custom_command_type=sb_network_custom,
+                            is_preview=True) as g:
+        g.custom_command('add', 'add_virtual_network_rule')
+        g.custom_command('remove', 'remove_virtual_network_rule')
 
 # Identity Region
     with self.command_group('servicebus namespace identity', custom_command_type=sb_namespace_custom, is_preview=True) as g:
@@ -121,3 +64,7 @@ def load_command_table(self, _):
     with self.command_group('servicebus namespace encryption', custom_command_type=sb_namespace_custom, is_preview=True) as g:
         g.custom_command('add', 'cli_add_encryption')
         g.custom_command('remove', 'cli_remove_encryption')
+
+# Migration Region
+    from azure.cli.command_modules.servicebus.aaz.latest.servicebus.migration._update import Update as migration_update
+    self.command_table['servicebus migration update'] = migration_update(loader=self, deprecate_info=self.deprecate())

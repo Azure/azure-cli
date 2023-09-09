@@ -1,0 +1,893 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - identity show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.48.0 azsdk-python-azure-mgmt-msi/7.0.0 Python/3.9.7 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.ManagedIdentity/userAssignedIdentities/servicelinker-springcloud-identity?api-version=2023-01-31
+  response:
+    body:
+      string: '{"location": "eastus", "tags": {}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/servicelinker-test-linux-group/providers/Microsoft.ManagedIdentity/userAssignedIdentities/servicelinker-springcloud-identity",
+        "name": "servicelinker-springcloud-identity", "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+        "properties": {"tenantId" :"00000000-0000-0000-0000-000000000000", "principalId"
+        :"00000000-0000-0000-0000-000000000000", "clientId" :"00000000-0000-0000-0000-000000000000"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '516'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 27 Apr 2023 06:58:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"targetService": {"type": "AzureResource", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppConfiguration/configurationStores/servicelinker-app-configuration"},
+      "authInfo": {"authType": "userAssignedIdentity", "clientId":"00000000-0000-0000-0000-000000000000",
+      "subscriptionId":"00000000-0000-0000-0000-000000000000"}, "clientType": "java",
+      "secretStore": {}, "configurationInfo": {}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection create appconfig
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '480'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --connection --source-id --target-id --user-identity --client-type
+      User-Agent:
+      - AZURECLI/2.48.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/appconfiguration/deployments/mock-deployment/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2022-11-01-preview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/appconfiguration/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
+        {"createdBy": "wchi@microsoft.com", "createdByType": "User", "createdAt":
+        "2023-04-27T06:58:25.9269045Z", "lastModifiedBy": "wchi@microsoft.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2023-04-27T06:58:25.9269045Z"}, "properties": {"provisioningState":
+        "Accepted", "targetService": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppConfiguration/configurationStores/servicelinker-app-configuration",
+        "resourceProperties": null, "type": "AzureResource"}, "authInfo": {"subscriptionId"
+        :"00000000-0000-0000-0000-000000000000", "clientId" :"00000000-0000-0000-0000-000000000000",
+        "roles": null, "userName": null, "authType": "userAssignedIdentity", "deleteOrUpdateBehavior":
+        null}, "vNetSolution": null, "clientType": "java", "secretStore": {"keyVaultId":
+        null, "keyVaultSecretName": null}, "scope": null, "publicNetworkSolution":
+        null, "configurationInfo": {"customizedKeys": null, "additionalConfigurations":
+        null, "deleteOrUpdateBehavior": null, "action": null, "daprProperties": null}}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/49767855-c52f-4d7f-b7c0-7391c40184ae*04AA2C81BD800F306175BAA1008429B627B927138143FB1316A3B97B9C5FDD74?api-version=2021-01-01-privatepreview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1419'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 27 Apr 2023 06:58:27 GMT
+      etag:
+      - '"4b0053f5-0000-0100-0000-644a1d140000"'
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - c5cd6858-981f-4a0e-a8ec-52d9161f954a
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection create appconfig
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --connection --source-id --target-id --user-identity --client-type
+      User-Agent:
+      - AZURECLI/2.48.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/49767855-c52f-4d7f-b7c0-7391c40184ae*04AA2C81BD800F306175BAA1008429B627B927138143FB1316A3B97B9C5FDD74?api-version=2021-01-01-privatepreview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/49767855-c52f-4d7f-b7c0-7391c40184ae*04AA2C81BD800F306175BAA1008429B627B927138143FB1316A3B97B9C5FDD74",
+        "name": "49767855-c52f-4d7f-b7c0-7391c40184ae*04AA2C81BD800F306175BAA1008429B627B927138143FB1316A3B97B9C5FDD74",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/appconfiguration/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "status": "Accepted", "startTime": "2023-04-27T06:58:28.0223375Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '685'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 27 Apr 2023 06:58:28 GMT
+      etag:
+      - '"1400ca29-0000-0100-0000-644a1d140000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection create appconfig
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --connection --source-id --target-id --user-identity --client-type
+      User-Agent:
+      - AZURECLI/2.48.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/49767855-c52f-4d7f-b7c0-7391c40184ae*04AA2C81BD800F306175BAA1008429B627B927138143FB1316A3B97B9C5FDD74?api-version=2021-01-01-privatepreview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/49767855-c52f-4d7f-b7c0-7391c40184ae*04AA2C81BD800F306175BAA1008429B627B927138143FB1316A3B97B9C5FDD74",
+        "name": "49767855-c52f-4d7f-b7c0-7391c40184ae*04AA2C81BD800F306175BAA1008429B627B927138143FB1316A3B97B9C5FDD74",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/appconfiguration/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "status": "Succeeded", "startTime": "2023-04-27T06:58:28.0223375Z", "endTime":
+        "2023-04-27T06:58:35.9534615Z", "properties": {"Message": ""}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '760'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 27 Apr 2023 06:58:59 GMT
+      etag:
+      - '"1400cc29-0000-0100-0000-644a1d1b0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection create appconfig
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --connection --source-id --target-id --user-identity --client-type
+      User-Agent:
+      - AZURECLI/2.48.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/appconfiguration/deployments/mock-deployment/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2022-11-01-preview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/appconfiguration/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
+        {"createdBy": "wchi@microsoft.com", "createdByType": "User", "createdAt":
+        "2023-04-27T06:58:25.9269045Z", "lastModifiedBy": "wchi@microsoft.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2023-04-27T06:58:25.9269045Z"}, "properties": {"publicNetworkSolution":
+        null, "configurationInfo": {"customizedKeys": null, "additionalConfigurations":
+        null, "deleteOrUpdateBehavior": null, "action": null, "daprProperties": null},
+        "provisioningState": "Succeeded", "targetService": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppConfiguration/configurationStores/servicelinker-app-configuration",
+        "resourceProperties": null, "type": "AzureResource"}, "authInfo": {"subscriptionId"
+        :"00000000-0000-0000-0000-000000000000", "clientId" :"00000000-0000-0000-0000-000000000000",
+        "roles": null, "userName": null, "authType": "userAssignedIdentity", "deleteOrUpdateBehavior":
+        null}, "clientType": "java", "scope": null, "vNetSolution": null, "secretStore":
+        {"keyVaultId": null, "keyVaultSecretName": null}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1420'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 27 Apr 2023 06:59:01 GMT
+      etag:
+      - '"4b005bf5-0000-0100-0000-644a1d1b0000"'
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - 298a31e4-d2a6-4f91-b095-f8e9cdd72dca
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --source-id
+      User-Agent:
+      - AZURECLI/2.48.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/appconfiguration/deployments/mock-deployment/providers/Microsoft.ServiceLinker/linkers?api-version=2022-11-01-preview
+  response:
+    body:
+      string: '{"value": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/appconfiguration/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
+        {"createdBy": "wchi@microsoft.com", "createdByType": "User", "createdAt":
+        "2023-04-27T06:58:25.9269045Z", "lastModifiedBy": "wchi@microsoft.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2023-04-27T06:58:25.9269045Z"}, "properties": {"publicNetworkSolution":
+        null, "configurationInfo": {"customizedKeys": null, "additionalConfigurations":
+        null, "deleteOrUpdateBehavior": null, "action": null, "daprProperties": null},
+        "provisioningState": "Succeeded", "targetService": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppConfiguration/configurationStores/servicelinker-app-configuration",
+        "resourceProperties": null, "type": "AzureResource"}, "authInfo": {"subscriptionId"
+        :"00000000-0000-0000-0000-000000000000", "clientId" :"00000000-0000-0000-0000-000000000000",
+        "roles": null, "userName": null, "authType": "userAssignedIdentity", "deleteOrUpdateBehavior":
+        null}, "clientType": "java", "scope": null, "vNetSolution": null, "secretStore":
+        {"keyVaultId": null, "keyVaultSecretName": null}}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1433'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 27 Apr 2023 06:59:09 GMT
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - 5b481123-0987-4cc3-8aa4-69cc9cb75e40
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection list-configuration
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - AZURECLI/2.48.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22621-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/appconfiguration/deployments/mock-deployment/providers/Microsoft.ServiceLinker/linkers/testconn/listConfigurations?api-version=2022-11-01-preview
+  response:
+    body:
+      string: '{"configurations": [{"name": "AZURE_APPCONFIGURATION_ENDPOINT", "value":
+        "https://servicelinker-app-configuration.azconfig.io"}, {"name": "AZURE_APPCONFIGURATION_CLIENTID",
+        "value": "3f818911-f7b7-4224-b88e-810f2479084b"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '223'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 27 Apr 2023 06:59:13 GMT
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - e41c6802-c4fa-48b9-88b8-10567844b30d
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection validate
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - AZURECLI/2.48.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/appconfiguration/deployments/mock-deployment/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2022-11-01-preview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/appconfiguration/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
+        {"createdBy": "wchi@microsoft.com", "createdByType": "User", "createdAt":
+        "2023-04-27T06:58:25.9269045Z", "lastModifiedBy": "wchi@microsoft.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2023-04-27T06:58:25.9269045Z"}, "properties": {"publicNetworkSolution":
+        null, "configurationInfo": {"customizedKeys": null, "additionalConfigurations":
+        null, "deleteOrUpdateBehavior": null, "action": null, "daprProperties": null},
+        "provisioningState": "Succeeded", "targetService": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppConfiguration/configurationStores/servicelinker-app-configuration",
+        "resourceProperties": null, "type": "AzureResource"}, "authInfo": {"subscriptionId"
+        :"00000000-0000-0000-0000-000000000000", "clientId" :"00000000-0000-0000-0000-000000000000",
+        "roles": null, "userName": null, "authType": "userAssignedIdentity", "deleteOrUpdateBehavior":
+        null}, "clientType": "java", "scope": null, "vNetSolution": null, "secretStore":
+        {"keyVaultId": null, "keyVaultSecretName": null}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1420'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 27 Apr 2023 06:59:16 GMT
+      etag:
+      - '"4b005bf5-0000-0100-0000-644a1d1b0000"'
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - faf1d100-172f-4f60-b79e-21e65a444943
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection validate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - AZURECLI/2.48.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22621-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/appconfiguration/deployments/mock-deployment/providers/Microsoft.ServiceLinker/linkers/testconn/validateLinker?api-version=2022-11-01-preview
+  response:
+    body:
+      string: 'null'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/2ccf15b8-5339-412f-9534-51911803e7f0*04AA2C81BD800F306175BAA1008429B627B927138143FB1316A3B97B9C5FDD74?api-version=2021-01-01-privatepreview
+      cache-control:
+      - no-cache
+      content-length:
+      - '4'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 27 Apr 2023 06:59:17 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/2ccf15b8-5339-412f-9534-51911803e7f0*04AA2C81BD800F306175BAA1008429B627B927138143FB1316A3B97B9C5FDD74?api-version=2021-01-01-privatepreview
+      mise-correlation-id:
+      - 66d4b1b4-4e24-464e-8d7a-fd9b3cce3d84
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection validate
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - AZURECLI/2.48.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/2ccf15b8-5339-412f-9534-51911803e7f0*04AA2C81BD800F306175BAA1008429B627B927138143FB1316A3B97B9C5FDD74?api-version=2021-01-01-privatepreview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/2ccf15b8-5339-412f-9534-51911803e7f0*04AA2C81BD800F306175BAA1008429B627B927138143FB1316A3B97B9C5FDD74",
+        "name": "2ccf15b8-5339-412f-9534-51911803e7f0*04AA2C81BD800F306175BAA1008429B627B927138143FB1316A3B97B9C5FDD74",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/appconfiguration/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "status": "Accepted", "startTime": "2023-04-27T06:59:17.8143515Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '685'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 27 Apr 2023 06:59:19 GMT
+      etag:
+      - '"1400dc29-0000-0100-0000-644a1d450000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection validate
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - AZURECLI/2.48.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/2ccf15b8-5339-412f-9534-51911803e7f0*04AA2C81BD800F306175BAA1008429B627B927138143FB1316A3B97B9C5FDD74?api-version=2021-01-01-privatepreview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/2ccf15b8-5339-412f-9534-51911803e7f0*04AA2C81BD800F306175BAA1008429B627B927138143FB1316A3B97B9C5FDD74",
+        "name": "2ccf15b8-5339-412f-9534-51911803e7f0*04AA2C81BD800F306175BAA1008429B627B927138143FB1316A3B97B9C5FDD74",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/appconfiguration/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "status": "Succeeded", "startTime": "2023-04-27T06:59:17.8143515Z", "endTime":
+        "2023-04-27T06:59:21.8986436Z", "properties": {"Message": "{\"ConnectionName\":\"testconn\",\"IsConnectionAvailable\":true,\"ValidationDetail\":[{\"Name\":\"Target
+        resource existence validated.\",\"Description\":null,\"Result\":0},{\"Name\":\"Target
+        network access validated.\",\"Description\":null,\"Result\":0},{\"Name\":\"Configured
+        connection information validated.\",\"Description\":null,\"Result\":0},{\"Name\":\"Managed
+        Identity existence validated.\",\"Description\":null,\"Result\":0},{\"Name\":\"Managed
+        Identity permissions validated.\",\"Description\":null,\"Result\":0}],\"ReportStartTimeUtc\":\"2023-04-27T06:59:19.1527616Z\",\"ReportEndTimeUtc\":\"2023-04-27T06:59:20.7929281Z\",\"SourceId\":null,\"TargetId\":null,\"AuthType\":1}",
+        "linkerName": "testconn", "isConnectionAvailable": true, "validationDetail":
+        [{"name": "Target resource existence validated.", "description": null, "result":
+        "success"}, {"name": "Target network access validated.", "description": null,
+        "result": "success"}, {"name": "Configured connection information validated.",
+        "description": null, "result": "success"}, {"name": "Managed Identity existence
+        validated.", "description": null, "result": "success"}, {"name": "Managed
+        Identity permissions validated.", "description": null, "result": "success"}],
+        "reportStartTimeUtc": "2023-04-27T06:59:19.1527616Z", "reportEndTimeUtc":
+        "2023-04-27T06:59:20.7929281Z", "sourceId": null, "targetId": null, "authType":
+        "userAssignedIdentity"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2171'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 27 Apr 2023 06:59:49 GMT
+      etag:
+      - '"1400df29-0000-0100-0000-644a1d490000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection validate
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - AZURECLI/2.48.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/2ccf15b8-5339-412f-9534-51911803e7f0*04AA2C81BD800F306175BAA1008429B627B927138143FB1316A3B97B9C5FDD74?api-version=2021-01-01-privatepreview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/2ccf15b8-5339-412f-9534-51911803e7f0*04AA2C81BD800F306175BAA1008429B627B927138143FB1316A3B97B9C5FDD74",
+        "name": "2ccf15b8-5339-412f-9534-51911803e7f0*04AA2C81BD800F306175BAA1008429B627B927138143FB1316A3B97B9C5FDD74",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/appconfiguration/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "status": "Succeeded", "startTime": "2023-04-27T06:59:17.8143515Z", "endTime":
+        "2023-04-27T06:59:21.8986436Z", "properties": {"Message": "{\"ConnectionName\":\"testconn\",\"IsConnectionAvailable\":true,\"ValidationDetail\":[{\"Name\":\"Target
+        resource existence validated.\",\"Description\":null,\"Result\":0},{\"Name\":\"Target
+        network access validated.\",\"Description\":null,\"Result\":0},{\"Name\":\"Configured
+        connection information validated.\",\"Description\":null,\"Result\":0},{\"Name\":\"Managed
+        Identity existence validated.\",\"Description\":null,\"Result\":0},{\"Name\":\"Managed
+        Identity permissions validated.\",\"Description\":null,\"Result\":0}],\"ReportStartTimeUtc\":\"2023-04-27T06:59:19.1527616Z\",\"ReportEndTimeUtc\":\"2023-04-27T06:59:20.7929281Z\",\"SourceId\":null,\"TargetId\":null,\"AuthType\":1}",
+        "linkerName": "testconn", "isConnectionAvailable": true, "validationDetail":
+        [{"name": "Target resource existence validated.", "description": null, "result":
+        "success"}, {"name": "Target network access validated.", "description": null,
+        "result": "success"}, {"name": "Configured connection information validated.",
+        "description": null, "result": "success"}, {"name": "Managed Identity existence
+        validated.", "description": null, "result": "success"}, {"name": "Managed
+        Identity permissions validated.", "description": null, "result": "success"}],
+        "reportStartTimeUtc": "2023-04-27T06:59:19.1527616Z", "reportEndTimeUtc":
+        "2023-04-27T06:59:20.7929281Z", "sourceId": null, "targetId": null, "authType":
+        "userAssignedIdentity"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2171'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 27 Apr 2023 06:59:49 GMT
+      etag:
+      - '"1400df29-0000-0100-0000-644a1d490000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - AZURECLI/2.48.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/appconfiguration/deployments/mock-deployment/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2022-11-01-preview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/appconfiguration/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
+        {"createdBy": "wchi@microsoft.com", "createdByType": "User", "createdAt":
+        "2023-04-27T06:58:25.9269045Z", "lastModifiedBy": "wchi@microsoft.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2023-04-27T06:58:25.9269045Z"}, "properties": {"publicNetworkSolution":
+        null, "configurationInfo": {"customizedKeys": null, "additionalConfigurations":
+        null, "deleteOrUpdateBehavior": null, "action": null, "daprProperties": null},
+        "provisioningState": "Succeeded", "targetService": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppConfiguration/configurationStores/servicelinker-app-configuration",
+        "resourceProperties": null, "type": "AzureResource"}, "authInfo": {"subscriptionId"
+        :"00000000-0000-0000-0000-000000000000", "clientId" :"00000000-0000-0000-0000-000000000000",
+        "roles": null, "userName": null, "authType": "userAssignedIdentity", "deleteOrUpdateBehavior":
+        null}, "clientType": "java", "scope": null, "vNetSolution": null, "secretStore":
+        {"keyVaultId": null, "keyVaultSecretName": null}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1420'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 27 Apr 2023 06:59:53 GMT
+      etag:
+      - '"4b005bf5-0000-0100-0000-644a1d1b0000"'
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - ed479bef-44a2-4f55-9734-27523942e6de
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --id --yes
+      User-Agent:
+      - AZURECLI/2.48.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22621-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/appconfiguration/deployments/mock-deployment/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2022-11-01-preview
+  response:
+    body:
+      string: 'null'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/7571cb30-ef88-43a6-bcbf-351ac3533229*04AA2C81BD800F306175BAA1008429B627B927138143FB1316A3B97B9C5FDD74?api-version=2021-01-01-privatepreview
+      cache-control:
+      - no-cache
+      content-length:
+      - '4'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 27 Apr 2023 07:00:02 GMT
+      etag:
+      - '"4b00e1f5-0000-0100-0000-644a1d720000"'
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/7571cb30-ef88-43a6-bcbf-351ac3533229*04AA2C81BD800F306175BAA1008429B627B927138143FB1316A3B97B9C5FDD74?api-version=2021-01-01-privatepreview
+      mise-correlation-id:
+      - ef8fccc6-6016-4fcf-bc79-c92e1261306e
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --yes
+      User-Agent:
+      - AZURECLI/2.48.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/7571cb30-ef88-43a6-bcbf-351ac3533229*04AA2C81BD800F306175BAA1008429B627B927138143FB1316A3B97B9C5FDD74?api-version=2021-01-01-privatepreview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/7571cb30-ef88-43a6-bcbf-351ac3533229*04AA2C81BD800F306175BAA1008429B627B927138143FB1316A3B97B9C5FDD74",
+        "name": "7571cb30-ef88-43a6-bcbf-351ac3533229*04AA2C81BD800F306175BAA1008429B627B927138143FB1316A3B97B9C5FDD74",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/appconfiguration/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "status": "Deleting", "startTime": "2023-04-27T07:00:02.7464799Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '685'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 27 Apr 2023 07:00:03 GMT
+      etag:
+      - '"1400ef29-0000-0100-0000-644a1d720000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --yes
+      User-Agent:
+      - AZURECLI/2.48.0 azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/7571cb30-ef88-43a6-bcbf-351ac3533229*04AA2C81BD800F306175BAA1008429B627B927138143FB1316A3B97B9C5FDD74?api-version=2021-01-01-privatepreview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/7571cb30-ef88-43a6-bcbf-351ac3533229*04AA2C81BD800F306175BAA1008429B627B927138143FB1316A3B97B9C5FDD74",
+        "name": "7571cb30-ef88-43a6-bcbf-351ac3533229*04AA2C81BD800F306175BAA1008429B627B927138143FB1316A3B97B9C5FDD74",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/appconfiguration/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "status": "Succeeded", "startTime": "2023-04-27T07:00:02.7464799Z", "endTime":
+        "2023-04-27T07:00:07.4449413Z", "properties": null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '749'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 27 Apr 2023 07:00:34 GMT
+      etag:
+      - '"1400f029-0000-0100-0000-644a1d770000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

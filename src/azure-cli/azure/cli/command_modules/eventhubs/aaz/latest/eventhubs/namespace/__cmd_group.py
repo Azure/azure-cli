@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "eventhubs namespace",
 )
 class __CMDGroup(AAZCommandGroup):
-    """NamespaceV2
+    """Eventhub namespace.
     """
     pass
 

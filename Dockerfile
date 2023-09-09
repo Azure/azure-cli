@@ -52,7 +52,7 @@ COPY . /azure-cli
 
 # 1. Build packages and store in tmp dir
 # 2. Install the cli and the other command modules that weren't included
-RUN ./scripts/install_full.sh \
+RUN ./scripts/install_full.sh && python ./scripts/trim_sdk.py \
  && cat /azure-cli/az.completion > ~/.bashrc \
  && runDeps="$( \
     scanelf --needed --nobanner --recursive /usr/local \

@@ -860,7 +860,8 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         # Test create
         self.cmd('container create -g {rg} -n {container_group_name} --image {image} --os-type {os_type} '
                  '--ip-address {ip_address_type} --cpu {cpu} --memory {memory} --sku {sku} '
-                 '--command-line {command} --restart-policy {restart_policy} --location {location} -e {env}',
+                 '--command-line {command} --restart-policy {restart_policy} --location {location} -e {env} '
+                 '--privileged --allow-escalation',
                  checks=[self.check('name', '{container_group_name}'),
                          self.check('location', '{location}'),
                          self.check('provisioningState', 'Succeeded'),
@@ -873,6 +874,8 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                              'containers[0].resources.requests.cpu', cpu),
                          self.check(
                              'containers[0].resources.requests.memoryInGb', memory),
+                         self.exists('containers[0].securityContext'),
+                         self.check('containers[0].securityContext.privileged', True),
                          self.check('sku', sku),
                          self.exists('confidentialComputeProperties.ccePolicy')])
         # Test show
@@ -889,6 +892,9 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                              'containers[0].resources.requests.cpu', cpu),
                          self.check(
                              'containers[0].resources.requests.memoryInGb', memory),
+                         self.exists('containers[0].securityContext'),
+                         self.check('containers[0].securityContext.privileged', True),
+                         self.check('containers[0].securityContext.allowPrivilegeEscalation', True),
                          self.check('sku', sku),
                          self.exists('confidentialComputeProperties.ccePolicy')])
 

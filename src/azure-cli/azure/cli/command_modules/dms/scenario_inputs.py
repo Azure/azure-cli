@@ -189,6 +189,10 @@ def create_db_input(database, has_schema_migration_options):
         set_optional(db_properties, 'selectedTriggers', database, 'selected_triggers', throw_if_not_list)
         set_optional(db_properties, 'selectedRoutines', database, 'selected_routines', throw_if_not_list)
         set_optional(db_properties, 'selectedEvents', database, 'selected_events', throw_if_not_list)
+        set_optional(db_properties,
+                     'selectDatabaseForSchemaMigration',
+                     database,
+                     'select_database_for_schema_migration')
 
         if len(db_properties) > 0:
             db_input.additional_properties = db_properties

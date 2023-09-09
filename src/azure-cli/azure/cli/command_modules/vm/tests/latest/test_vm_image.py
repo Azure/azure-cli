@@ -38,10 +38,10 @@ class TestVMImage(unittest.TestCase):
         # assert
         win_images = [i for i in images if i['publisher'] == 'MicrosoftWindowsServer']
         self.assertTrue(len(win_images) > 0)
-        ubuntu_image = next(i for i in images if i['publisher'] == 'Canonical')
+        ubuntu_image = next(i for i in images if i['publisher'] == 'Canonical' and i['sku'] == '22_04-lts-gen2')
         self.assertEqual(ubuntu_image['publisher'], 'Canonical')
-        self.assertEqual(ubuntu_image['offer'], 'UbuntuServer')
-        self.assertEqual(ubuntu_image['urnAlias'], 'UbuntuLTS')
+        self.assertEqual(ubuntu_image['offer'], '0001-com-ubuntu-server-jammy')
+        self.assertEqual(ubuntu_image['urnAlias'], 'Ubuntu2204')
         parts = ubuntu_image['urn'].split(':')
         self.assertEqual(parts[0], ubuntu_image['publisher'])
         self.assertEqual(parts[1], ubuntu_image['offer'])
@@ -59,8 +59,8 @@ class TestVMImage(unittest.TestCase):
         cli_ctx = DummyCli()
         cli_ctx.cloud = mock_cloud
         images = load_images_from_aliases_doc(cli_ctx)
-        self.assertEqual(images[0], {'urnAlias': 'CentOS', 'publisher': 'OpenLogic',
-                                     'offer': 'CentOS', 'sku': '7.5', 'version': 'latest',
+        self.assertEqual(images[1], {'urnAlias': 'CentOS85Gen2', 'publisher': 'OpenLogic',
+                                     'offer': 'CentOS', 'sku': '8_5-gen2', 'version': 'latest',
                                      'architecture': 'x64'})
 
 

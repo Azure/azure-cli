@@ -91,8 +91,8 @@ class BotJsonFormatter:  # pylint:disable=too-few-public-methods
             'appPassword': app_password,
             'endpoint': raw_bot_properties.properties.endpoint,
             'resourceGroup': str(resource_group_name),
-            'tenantId': profile.get_subscription(subscription=client.config.subscription_id)['tenantId'],
-            'subscriptionId': client.config.subscription_id,
+            'tenantId': profile.get_subscription(subscription=client._config.subscription_id)['tenantId'],  # pylint:disable=protected-access
+            'subscriptionId': client._config.subscription_id,  # pylint:disable=protected-access
             'serviceName': resource_name
         }
 

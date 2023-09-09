@@ -134,11 +134,7 @@ def _get_resource_group_from_vault_name(cli_ctx, vault_name):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from msrestazure.tools import parse_resource_id
     client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
-    if cli_ctx.cloud.profile == 'latest':
-        vaults = client.list()
-    else:
-        vaults = client.list(filter="resourceType eq 'Microsoft.KeyVault/vaults'", api_version='2015-11-01')
-    for vault in vaults:
+    for vault in client.list():
         id_comps = parse_resource_id(vault.id)
         if id_comps['name'] == vault_name:
             return id_comps['resource_group']
@@ -1337,7 +1333,7 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
         return
     from ._vm_utils import trusted_launch_warning_log
     if namespace.image is not None:
-        from ._vm_utils import parse_shared_gallery_image_id, parse_community_gallery_image_id,\
+        from ._vm_utils import parse_shared_gallery_image_id, parse_community_gallery_image_id, \
             is_valid_image_version_id, parse_gallery_image_id
         if is_valid_image_version_id(namespace.image):
             image_info = parse_gallery_image_id(namespace.image)
@@ -1662,8 +1658,15 @@ def get_network_lb(cli_ctx, resource_group_name, lb_name):
 
 def process_vmss_create_namespace(cmd, namespace):
     from azure.cli.core.azclierror import InvalidArgumentValueError
-    # uniform_str = 'Uniform'
+    uniform_str = 'Uniform'
     flexible_str = 'Flexible'
+
+    if namespace.orchestration_mode is None:
+        namespace.orchestration_mode = uniform_str
+        logger.warning(
+            'Starting Ignite (November) 2023, the "az vmss create" command will use the new default '
+            'orchestration mode: Flexible. To learn more about Flexible Orchestration mode, '
+            'please visit https://aka.ms/orchestrationModeVMSS')
 
     if namespace.os_disk_delete_option is not None or namespace.data_disk_delete_option is not None:
         if namespace.orchestration_mode.lower() != flexible_str.lower():
@@ -2381,6 +2384,10 @@ def process_image_version_create_namespace(cmd, namespace):
 def process_image_version_update_namespace(cmd, namespace):
     process_gallery_image_version_namespace(cmd, namespace)
 # endregion
+
+
+def process_image_version_undelete_namespace(cmd, namespace):  # pylint: disable=unused-argument
+    validate_tags(namespace)
 
 
 def process_image_resource_id_namespace(namespace):

@@ -1499,8 +1499,8 @@ class _UpdateHelper:
 
         _elements = _builder.get(".properties.ipTags[]")
         if _elements is not None:
-            _elements.set_prop("ipTagType", AAZStrType, "@PublicIPAddress_update.ip_tags.[].ip_tag_type")
-            _elements.set_prop("tag", AAZStrType, "@PublicIPAddress_update.ip_tags.[].tag")
+            _elements.set_prop("ipTagType", AAZStrType, ".ip_tag_type")
+            _elements.set_prop("tag", AAZStrType, ".tag")
 
         nat_gateway = _builder.get(".properties.natGateway")
         if nat_gateway is not None:
@@ -1590,13 +1590,13 @@ class _UpdateHelper:
 
         _elements = _builder.get(".properties.applicationGatewayIpConfigurations[]")
         if _elements is not None:
-            _elements.set_prop("id", AAZStrType, "@Subnet_update.application_gateway_ip_configurations.[].id")
-            _elements.set_prop("name", AAZStrType, "@Subnet_update.application_gateway_ip_configurations.[].name")
+            _elements.set_prop("id", AAZStrType, ".id")
+            _elements.set_prop("name", AAZStrType, ".name")
             _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
         properties = _builder.get(".properties.applicationGatewayIpConfigurations[].properties")
         if properties is not None:
-            cls._build_schema_sub_resource_update(properties.set_prop("subnet", AAZObjectType, "@Subnet_update.application_gateway_ip_configurations.[].subnet"))
+            cls._build_schema_sub_resource_update(properties.set_prop("subnet", AAZObjectType, ".subnet"))
 
         delegations = _builder.get(".properties.delegations")
         if delegations is not None:
@@ -1604,14 +1604,14 @@ class _UpdateHelper:
 
         _elements = _builder.get(".properties.delegations[]")
         if _elements is not None:
-            _elements.set_prop("id", AAZStrType, "@Subnet_update.delegations.[].id")
-            _elements.set_prop("name", AAZStrType, "@Subnet_update.delegations.[].name")
+            _elements.set_prop("id", AAZStrType, ".id")
+            _elements.set_prop("name", AAZStrType, ".name")
             _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _elements.set_prop("type", AAZStrType, "@Subnet_update.delegations.[].type")
+            _elements.set_prop("type", AAZStrType, ".type")
 
         properties = _builder.get(".properties.delegations[].properties")
         if properties is not None:
-            properties.set_prop("serviceName", AAZStrType, "@Subnet_update.delegations.[].service_name")
+            properties.set_prop("serviceName", AAZStrType, ".service_name")
 
         ip_allocations = _builder.get(".properties.ipAllocations")
         if ip_allocations is not None:
@@ -1635,28 +1635,28 @@ class _UpdateHelper:
 
         _elements = _builder.get(".properties.networkSecurityGroup.properties.securityRules[]")
         if _elements is not None:
-            _elements.set_prop("id", AAZStrType, "@Subnet_update.network_security_group.security_rules.[].id")
-            _elements.set_prop("name", AAZStrType, "@Subnet_update.network_security_group.security_rules.[].name")
+            _elements.set_prop("id", AAZStrType, ".id")
+            _elements.set_prop("name", AAZStrType, ".name")
             _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _elements.set_prop("type", AAZStrType, "@Subnet_update.network_security_group.security_rules.[].type")
+            _elements.set_prop("type", AAZStrType, ".type")
 
         properties = _builder.get(".properties.networkSecurityGroup.properties.securityRules[].properties")
         if properties is not None:
-            properties.set_prop("access", AAZStrType, "@Subnet_update.network_security_group.security_rules.[].access", typ_kwargs={"flags": {"required": True}})
-            properties.set_prop("description", AAZStrType, "@Subnet_update.network_security_group.security_rules.[].description")
-            properties.set_prop("destinationAddressPrefix", AAZStrType, "@Subnet_update.network_security_group.security_rules.[].destination_address_prefix")
-            properties.set_prop("destinationAddressPrefixes", AAZListType, "@Subnet_update.network_security_group.security_rules.[].destination_address_prefixes")
-            properties.set_prop("destinationApplicationSecurityGroups", AAZListType, "@Subnet_update.network_security_group.security_rules.[].destination_application_security_groups")
-            properties.set_prop("destinationPortRange", AAZStrType, "@Subnet_update.network_security_group.security_rules.[].destination_port_range")
-            properties.set_prop("destinationPortRanges", AAZListType, "@Subnet_update.network_security_group.security_rules.[].destination_port_ranges")
-            properties.set_prop("direction", AAZStrType, "@Subnet_update.network_security_group.security_rules.[].direction", typ_kwargs={"flags": {"required": True}})
-            properties.set_prop("priority", AAZIntType, "@Subnet_update.network_security_group.security_rules.[].priority")
-            properties.set_prop("protocol", AAZStrType, "@Subnet_update.network_security_group.security_rules.[].protocol", typ_kwargs={"flags": {"required": True}})
-            properties.set_prop("sourceAddressPrefix", AAZStrType, "@Subnet_update.network_security_group.security_rules.[].source_address_prefix")
-            properties.set_prop("sourceAddressPrefixes", AAZListType, "@Subnet_update.network_security_group.security_rules.[].source_address_prefixes")
-            properties.set_prop("sourceApplicationSecurityGroups", AAZListType, "@Subnet_update.network_security_group.security_rules.[].source_application_security_groups")
-            properties.set_prop("sourcePortRange", AAZStrType, "@Subnet_update.network_security_group.security_rules.[].source_port_range")
-            properties.set_prop("sourcePortRanges", AAZListType, "@Subnet_update.network_security_group.security_rules.[].source_port_ranges")
+            properties.set_prop("access", AAZStrType, ".access", typ_kwargs={"flags": {"required": True}})
+            properties.set_prop("description", AAZStrType, ".description")
+            properties.set_prop("destinationAddressPrefix", AAZStrType, ".destination_address_prefix")
+            properties.set_prop("destinationAddressPrefixes", AAZListType, ".destination_address_prefixes")
+            properties.set_prop("destinationApplicationSecurityGroups", AAZListType, ".destination_application_security_groups")
+            properties.set_prop("destinationPortRange", AAZStrType, ".destination_port_range")
+            properties.set_prop("destinationPortRanges", AAZListType, ".destination_port_ranges")
+            properties.set_prop("direction", AAZStrType, ".direction", typ_kwargs={"flags": {"required": True}})
+            properties.set_prop("priority", AAZIntType, ".priority")
+            properties.set_prop("protocol", AAZStrType, ".protocol", typ_kwargs={"flags": {"required": True}})
+            properties.set_prop("sourceAddressPrefix", AAZStrType, ".source_address_prefix")
+            properties.set_prop("sourceAddressPrefixes", AAZListType, ".source_address_prefixes")
+            properties.set_prop("sourceApplicationSecurityGroups", AAZListType, ".source_application_security_groups")
+            properties.set_prop("sourcePortRange", AAZStrType, ".source_port_range")
+            properties.set_prop("sourcePortRanges", AAZListType, ".source_port_ranges")
 
         destination_address_prefixes = _builder.get(".properties.networkSecurityGroup.properties.securityRules[].properties.destinationAddressPrefixes")
         if destination_address_prefixes is not None:
@@ -1704,17 +1704,17 @@ class _UpdateHelper:
 
         _elements = _builder.get(".properties.routeTable.properties.routes[]")
         if _elements is not None:
-            _elements.set_prop("id", AAZStrType, "@Subnet_update.route_table.routes.[].id")
-            _elements.set_prop("name", AAZStrType, "@Subnet_update.route_table.routes.[].name")
+            _elements.set_prop("id", AAZStrType, ".id")
+            _elements.set_prop("name", AAZStrType, ".name")
             _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _elements.set_prop("type", AAZStrType, "@Subnet_update.route_table.routes.[].type")
+            _elements.set_prop("type", AAZStrType, ".type")
 
         properties = _builder.get(".properties.routeTable.properties.routes[].properties")
         if properties is not None:
-            properties.set_prop("addressPrefix", AAZStrType, "@Subnet_update.route_table.routes.[].address_prefix")
-            properties.set_prop("hasBgpOverride", AAZBoolType, "@Subnet_update.route_table.routes.[].has_bgp_override")
-            properties.set_prop("nextHopIpAddress", AAZStrType, "@Subnet_update.route_table.routes.[].next_hop_ip_address")
-            properties.set_prop("nextHopType", AAZStrType, "@Subnet_update.route_table.routes.[].next_hop_type", typ_kwargs={"flags": {"required": True}})
+            properties.set_prop("addressPrefix", AAZStrType, ".address_prefix")
+            properties.set_prop("hasBgpOverride", AAZBoolType, ".has_bgp_override")
+            properties.set_prop("nextHopIpAddress", AAZStrType, ".next_hop_ip_address")
+            properties.set_prop("nextHopType", AAZStrType, ".next_hop_type", typ_kwargs={"flags": {"required": True}})
 
         tags = _builder.get(".properties.routeTable.tags")
         if tags is not None:
@@ -1726,16 +1726,16 @@ class _UpdateHelper:
 
         _elements = _builder.get(".properties.serviceEndpointPolicies[]")
         if _elements is not None:
-            _elements.set_prop("id", AAZStrType, "@Subnet_update.service_endpoint_policies.[].id")
-            _elements.set_prop("location", AAZStrType, "@Subnet_update.service_endpoint_policies.[].location")
+            _elements.set_prop("id", AAZStrType, ".id")
+            _elements.set_prop("location", AAZStrType, ".location")
             _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _elements.set_prop("tags", AAZDictType, "@Subnet_update.service_endpoint_policies.[].tags")
+            _elements.set_prop("tags", AAZDictType, ".tags")
 
         properties = _builder.get(".properties.serviceEndpointPolicies[].properties")
         if properties is not None:
-            properties.set_prop("contextualServiceEndpointPolicies", AAZListType, "@Subnet_update.service_endpoint_policies.[].contextual_service_endpoint_policies")
-            properties.set_prop("serviceAlias", AAZStrType, "@Subnet_update.service_endpoint_policies.[].service_alias")
-            properties.set_prop("serviceEndpointPolicyDefinitions", AAZListType, "@Subnet_update.service_endpoint_policies.[].service_endpoint_policy_definitions")
+            properties.set_prop("contextualServiceEndpointPolicies", AAZListType, ".contextual_service_endpoint_policies")
+            properties.set_prop("serviceAlias", AAZStrType, ".service_alias")
+            properties.set_prop("serviceEndpointPolicyDefinitions", AAZListType, ".service_endpoint_policy_definitions")
 
         contextual_service_endpoint_policies = _builder.get(".properties.serviceEndpointPolicies[].properties.contextualServiceEndpointPolicies")
         if contextual_service_endpoint_policies is not None:
@@ -1747,16 +1747,16 @@ class _UpdateHelper:
 
         _elements = _builder.get(".properties.serviceEndpointPolicies[].properties.serviceEndpointPolicyDefinitions[]")
         if _elements is not None:
-            _elements.set_prop("id", AAZStrType, "@Subnet_update.service_endpoint_policies.[].service_endpoint_policy_definitions.[].id")
-            _elements.set_prop("name", AAZStrType, "@Subnet_update.service_endpoint_policies.[].service_endpoint_policy_definitions.[].name")
+            _elements.set_prop("id", AAZStrType, ".id")
+            _elements.set_prop("name", AAZStrType, ".name")
             _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _elements.set_prop("type", AAZStrType, "@Subnet_update.service_endpoint_policies.[].service_endpoint_policy_definitions.[].type")
+            _elements.set_prop("type", AAZStrType, ".type")
 
         properties = _builder.get(".properties.serviceEndpointPolicies[].properties.serviceEndpointPolicyDefinitions[].properties")
         if properties is not None:
-            properties.set_prop("description", AAZStrType, "@Subnet_update.service_endpoint_policies.[].service_endpoint_policy_definitions.[].description")
-            properties.set_prop("service", AAZStrType, "@Subnet_update.service_endpoint_policies.[].service_endpoint_policy_definitions.[].service")
-            properties.set_prop("serviceResources", AAZListType, "@Subnet_update.service_endpoint_policies.[].service_endpoint_policy_definitions.[].service_resources")
+            properties.set_prop("description", AAZStrType, ".description")
+            properties.set_prop("service", AAZStrType, ".service")
+            properties.set_prop("serviceResources", AAZListType, ".service_resources")
 
         service_resources = _builder.get(".properties.serviceEndpointPolicies[].properties.serviceEndpointPolicyDefinitions[].properties.serviceResources")
         if service_resources is not None:
@@ -1772,8 +1772,8 @@ class _UpdateHelper:
 
         _elements = _builder.get(".properties.serviceEndpoints[]")
         if _elements is not None:
-            _elements.set_prop("locations", AAZListType, "@Subnet_update.service_endpoints.[].locations")
-            _elements.set_prop("service", AAZStrType, "@Subnet_update.service_endpoints.[].service")
+            _elements.set_prop("locations", AAZListType, ".locations")
+            _elements.set_prop("service", AAZStrType, ".service")
 
         locations = _builder.get(".properties.serviceEndpoints[].locations")
         if locations is not None:

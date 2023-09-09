@@ -78,7 +78,9 @@ from ._util import (
     get_sql_virtual_network_rules_operations,
     get_sql_instance_failover_groups_operations,
     get_sql_database_ledger_digest_uploads_operations,
-    get_sql_database_encryption_protector_operations
+    get_sql_database_encryption_protector_operations,
+    get_sql_managed_database_ledger_digest_uploads_operations,
+    get_sql_managed_database_move_operations
 )
 
 from ._validators import (
@@ -423,7 +425,7 @@ def load_command_table(self, _):
     with self.command_group('sql db threat-policy',
                             database_threat_detection_policies_operations,
                             client_factory=get_sql_database_threat_detection_policies_operations,
-                            deprecate_info=self.deprecate(redirect='sql db advanced-threat-protection-setting', hide=True, expiration='2.49.0')) as g:
+                            deprecate_info=self.deprecate(redirect='sql db advanced-threat-protection-setting', hide=True)) as g:
 
         g.custom_show_command('show', 'db_threat_detection_policy_get')
         g.generic_update_command('update',
@@ -991,6 +993,50 @@ def load_command_table(self, _):
                             client_factory=get_sql_managed_database_restore_details_operations) as g:
 
         g.custom_show_command('show', 'managed_db_log_replay_get')
+
+    managed_ledger_digest_uploads_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#ManagedLedgerDigestUploadsOperations.{}',
+        client_factory=get_sql_managed_database_ledger_digest_uploads_operations)
+
+    with self.command_group('sql midb ledger-digest-uploads',
+                            managed_ledger_digest_uploads_operations,
+                            client_factory=get_sql_managed_database_ledger_digest_uploads_operations) as g:
+
+        g.custom_show_command('show', 'managed_ledger_digest_uploads_show')
+        g.custom_command('enable', 'managed_ledger_digest_uploads_enable')
+        g.custom_command('disable', 'managed_ledger_digest_uploads_disable')
+
+    with self.command_group('sql midb move',
+                            managed_databases_operations,
+                            client_factory=get_sql_managed_databases_operations) as g:
+
+        g.custom_command('start', 'managed_db_move_start', supports_no_wait=True)
+        g.custom_command('complete', 'managed_db_move_copy_complete', supports_no_wait=True)
+        g.custom_command('cancel', 'managed_db_move_copy_cancel', supports_no_wait=True)
+
+    with self.command_group('sql midb copy',
+                            managed_databases_operations,
+                            client_factory=get_sql_managed_databases_operations) as g:
+
+        g.custom_command('start', 'managed_db_copy_start', supports_no_wait=True)
+        g.custom_command('complete', 'managed_db_move_copy_complete', supports_no_wait=True)
+        g.custom_command('cancel', 'managed_db_move_copy_cancel', supports_no_wait=True)
+
+    managed_databases_move_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#ManagedDatabaseMoveOperationsOperations.{}',
+        client_factory=get_sql_managed_database_move_operations)
+
+    with self.command_group('sql midb move',
+                            managed_databases_move_operations,
+                            client_factory=get_sql_managed_database_move_operations) as g:
+
+        g.custom_command('list', 'managed_db_move_list')
+
+    with self.command_group('sql midb copy',
+                            managed_databases_move_operations,
+                            client_factory=get_sql_managed_database_move_operations) as g:
+
+        g.custom_command('list', 'managed_db_copy_list')
 
     ###############################################
     #                sql virtual cluster         #

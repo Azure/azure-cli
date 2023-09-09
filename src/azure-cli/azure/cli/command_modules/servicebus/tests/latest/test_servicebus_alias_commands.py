@@ -41,9 +41,9 @@ class SBDRAliasCRUDScenarioTest(ScenarioTest):
         })
 
         # Create Namespace - Primary
-        self.cmd(
+        namespace = self.cmd(
             'servicebus namespace create --resource-group {rg} --name {namespacenameprimary} --location {loc_south} --tags {tags} --sku {sku}',
-            checks=[self.check('sku.name', '{sku}')])
+            checks=[self.check('sku.name', '{sku}')]).get_output_in_json()
 
         # Get Created Namespace - Primary
         self.cmd('servicebus namespace show --resource-group {rg} --name {namespacenameprimary}',
@@ -77,16 +77,22 @@ class SBDRAliasCRUDScenarioTest(ScenarioTest):
             checks=[self.check('nameAvailable', True)])
 
         # Create alias
-        self.cmd(
-            'servicebus georecovery-alias set  --resource-group {rg} --namespace-name {namespacenameprimary} -a {aliasname} --partner-namespace {namespacenamesecondary}')
+        alias = self.cmd(
+            'servicebus georecovery-alias set  --resource-group {rg} --namespace-name {namespacenameprimary} -a {aliasname} --partner-namespace {namespacenamesecondary}').get_output_in_json()
+        self.assertEqual(alias["partnerNamespace"], partnernamespaceid)
+        self.assertEqual(alias["role"], "Primary")
 
         # get alias - Primary
-        self.cmd(
-            'servicebus georecovery-alias show  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname}')
+        primary_alias = self.cmd(
+            'servicebus georecovery-alias show  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname}').get_output_in_json()
+        self.assertEqual(primary_alias["role"], "Primary")
+        self.assertEqual(primary_alias["partnerNamespace"], partnernamespaceid)
 
         # get alias - Secondary
-        self.cmd(
-            'servicebus georecovery-alias show  --resource-group {rg} --namespace-name {namespacenamesecondary} --alias {aliasname}')
+        secondary_alias = self.cmd(
+            'servicebus georecovery-alias show  --resource-group {rg} --namespace-name {namespacenamesecondary} --alias {aliasname}').get_output_in_json()
+        self.assertEqual(secondary_alias["role"], "Secondary")
+        self.assertEqual(secondary_alias["partnerNamespace"], namespace["id"])
 
         getaliasprimarynamespace = self.cmd(
             'servicebus georecovery-alias show  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname}').get_output_in_json()
@@ -124,8 +130,10 @@ class SBDRAliasCRUDScenarioTest(ScenarioTest):
                 'servicebus georecovery-alias show  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname}').get_output_in_json()
 
         # Create alias
-        self.cmd(
-            'servicebus georecovery-alias set  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname} --partner-namespace {id}')
+        secondary_alias = self.cmd(
+            'servicebus georecovery-alias set  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname} --partner-namespace {id}').get_output_in_json()
+        self.assertEqual(secondary_alias["role"], "Primary")
+        self.assertEqual(secondary_alias["partnerNamespace"], partnernamespaceid)
 
         getaliasaftercreate = self.cmd(
             'servicebus georecovery-alias show  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname}').get_output_in_json()
@@ -142,6 +150,8 @@ class SBDRAliasCRUDScenarioTest(ScenarioTest):
 
         getaliasafterfail = self.cmd(
             'servicebus georecovery-alias show  --resource-group {rg} --namespace-name {namespacenamesecondary} --alias {aliasname}').get_output_in_json()
+        self.assertEqual(getaliasafterbreak["partnerNamespace"], "")
+        self.assertEqual(getaliasafterbreak["role"], "PrimaryNotReplicating")
 
         # check for the Alias Provisioning succeeded
         while getaliasafterfail['provisioningState'] != ProvisioningStateDR.succeeded.value:

@@ -4,8 +4,13 @@ FROM ${image} AS build-env
 ARG cli_version=dev
 
 RUN tdnf update -y
+
 # kernel-headers, glibc-devel, binutils are needed to install psutil python package on ARM64
-RUN tdnf install -y binutils file rpm-build gcc libffi-devel python3-devel openssl-devel make diffutils patch dos2unix perl sed kernel-headers glibc-devel binutils
+# ca-certificates: Mariner by default only adds a very minimal set of root certs to trust certain Microsoft
+# resources (primarily packages.microsoft.com). ca-certificates contains the official Microsoft curated set of
+# trusted root certificates. It has replaced the set of Mozilla Trusted Root Certificates.
+RUN tdnf install -y binutils file rpm-build gcc libffi-devel python3-devel openssl-devel make diffutils patch \
+    dos2unix perl sed kernel-headers glibc-devel binutils ca-certificates
 
 WORKDIR /azure-cli
 

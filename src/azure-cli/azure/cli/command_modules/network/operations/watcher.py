@@ -1246,7 +1246,7 @@ class NwFlowLogUpdate(_NwFlowLogUpdate):
         elif has_value(args.nsg):
             args.target_resource_id = args.nsg
 
-        if args.retention > 0:
+        if has_value(args.retention) and args.retention > 0:
             args.retention_policy = {"days": args.retention, "enabled": True}
 
         if has_value(args.traffic_analytics_workspace):
