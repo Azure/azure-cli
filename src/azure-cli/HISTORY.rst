@@ -1663,6 +1663,15 @@ Release History
 * `az synapse workspace`: Add `--last-commit-id` for git repo config (#23257)
 * `az synapse ad-only-auth`: New command group for supporting synapse azure ad only authentication (#23227)
 
+2.38.1
+++++++
+
+This version is only available on CentOS 7 and RHEL 7.
+
+**App Service**
+
+* `az webapp ssh`: Backport #25141 to 2.38 (#26836)
+
 2.38.0
 ++++++
 
