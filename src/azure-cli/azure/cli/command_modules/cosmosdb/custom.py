@@ -135,7 +135,8 @@ def cli_cosmosdb_create(cmd,
                         is_restore_request=None,
                         restore_source=None,
                         restore_timestamp=None,
-                        enable_partition_merge=None):
+                        enable_partition_merge=None,
+                        minimal_tls_version=None):
     """Create a new Azure Cosmos DB database account."""
 
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -188,7 +189,8 @@ def cli_cosmosdb_create(cmd,
                                     gremlin_databases_to_restore=gremlin_databases_to_restore,
                                     tables_to_restore=tables_to_restore,
                                     arm_location=resource_group_location,
-                                    enable_partition_merge=enable_partition_merge)
+                                    enable_partition_merge=enable_partition_merge,
+                                    minimal_tls_version=minimal_tls_version)
 
 
 # pylint: disable=too-many-statements
@@ -231,7 +233,8 @@ def _create_database_account(client,
                              restore_source=None,
                              restore_timestamp=None,
                              arm_location=None,
-                             enable_partition_merge=None):
+                             enable_partition_merge=None,
+                             minimal_tls_version=None):
 
     consistency_policy = None
     if default_consistency_level is not None:
@@ -363,7 +366,8 @@ def _create_database_account(client,
         analytical_storage_configuration=analytical_storage_configuration,
         create_mode=create_mode,
         restore_parameters=restore_parameters,
-        enable_partition_merge=enable_partition_merge
+        enable_partition_merge=enable_partition_merge,
+        minimal_tls_version=minimal_tls_version
     )
 
     async_docdb_create = client.begin_create_or_update(resource_group_name, account_name, params)
@@ -401,7 +405,8 @@ def cli_cosmosdb_update(client,
                         analytical_storage_schema_type=None,
                         backup_policy_type=None,
                         continuous_tier=None,
-                        enable_partition_merge=None):
+                        enable_partition_merge=None,
+                        minimal_tls_version=None):
     """Update an existing Azure Cosmos DB database account. """
     existing = client.get(resource_group_name, account_name)
 
@@ -496,7 +501,8 @@ def cli_cosmosdb_update(client,
         backup_policy=backup_policy,
         default_identity=default_identity,
         analytical_storage_configuration=analytical_storage_configuration,
-        enable_partition_merge=enable_partition_merge)
+        enable_partition_merge=enable_partition_merge,
+        minimal_tls_version=minimal_tls_version)
 
     async_docdb_update = client.begin_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_update.result()

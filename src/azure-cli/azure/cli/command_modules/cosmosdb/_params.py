@@ -120,6 +120,7 @@ def load_arguments(self, _):
             c.argument('backup_policy_type', arg_type=get_enum_type(BackupPolicyType), help="The type of backup policy of the account to create", arg_group='Backup Policy')
             c.argument('enable_partition_merge', arg_type=get_three_state_flag(), help="Flag to enable partition merge on the account.")
             c.argument('continuous_tier', arg_type=get_enum_type(ContinuousTier), help="The tier of Continuous backup", arg_group='Backup Policy')
+            c.argument('minimal_tls_version', help="Indicates the minimum allowed TLS version")
 
     for scope in ['cosmosdb update']:
         c.argument('key_uri', help="The URI of the key vault", is_preview=True)
