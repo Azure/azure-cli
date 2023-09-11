@@ -107,7 +107,7 @@ def _process_parameters(template_obj, parameter_lists):  # pylint: disable=too-m
                 pass
         return None
 
-    def _get_parameter_type(template_obj, schema_node, visited = set()):
+    def _get_parameter_type(schema_node, visited = set()):
         if schema_node is None:
             return None
 
@@ -200,7 +200,7 @@ def _process_parameters(template_obj, parameter_lists):  # pylint: disable=too-m
                     return _InSchemaDictionary(property_value)
                 elif segment in ['items', 'additionalproperties']:
                     return _InSchemaNode(property_value)
-                elif segment == 'prefixItems':
+                elif segment == 'prefixitems':
                     return _InSchemaArray(property_value)
 
                 return _TerminalState()
@@ -212,7 +212,7 @@ def _process_parameters(template_obj, parameter_lists):  # pylint: disable=too-m
         for segment in pointer.split('/'):
             state = state.get(unquote(segment).replace('~1', '/').replace('~0', '~').lower())
 
-        return _get_parameter_type(template_obj, state.resolve(), visited)
+        return _get_parameter_type(state.resolve(), visited)
 
     def _try_parse_key_value_object(template_obj, parameters, value):
         # support situation where empty JSON "{}" is provided
@@ -229,7 +229,7 @@ def _process_parameters(template_obj, parameter_lists):  # pylint: disable=too-m
             raise CLIError("unrecognized template parameter '{}'. Allowed parameters: {}"
                            .format(key, ', '.join(sorted(template_obj.get('parameters', {}).keys()))))
 
-        param_type = _get_parameter_type(template_obj, param)
+        param_type = _get_parameter_type(param)
         if param_type:
             param_type = param_type.lower()
         if param_type in ['object', 'array', 'secureobject']:
