@@ -164,6 +164,7 @@ def load_arguments(self, _):
         c.argument('platform_reserved_cidr', options_list=['--platform-reserved-cidr'], help='IP range in CIDR notation that can be reserved for environment infrastructure IP addresses. It must not overlap with any other Subnet IP ranges')
         c.argument('platform_reserved_dns_ip', options_list=['--platform-reserved-dns-ip'], help='An IP address from the IP range defined by Platform Reserved CIDR that will be reserved for the internal DNS server.')
         c.argument('internal_only', arg_type=get_three_state_flag(), options_list=['--internal-only'], help='Boolean indicating the environment only has an internal load balancer. These environments do not have a public static IP resource, therefore must provide infrastructureSubnetResourceId if enabling this property')
+
     with self.argument_context('containerapp env', arg_group='Custom Domain') as c:
         c.argument('hostname', options_list=['--custom-domain-dns-suffix', '--dns-suffix'], help='The DNS suffix for the environment\'s custom domain.')
         c.argument('certificate_file', options_list=['--custom-domain-certificate-file', '--certificate-file'], help='The filepath of the certificate file (.pfx or .pem) for the environment\'s custom domain. To manage certificates for container apps, use `az containerapp env certificate`.')
@@ -415,11 +416,6 @@ def load_arguments(self, _):
     with self.argument_context('containerapp env workload-profile') as c:
         c.argument('env_name', options_list=['--name', '-n'], help="The name of the Container App environment")
         c.argument('workload_profile_name', options_list=['--workload-profile-name', '-w'], help='The friendly name for the workload profile')
-
-    with self.argument_context('containerapp env workload-profile set') as c:
-        c.argument('workload_profile_type', help="The type of workload profile to add or update. Run 'az containerapp env workload-profile list-supported -l <region>' to check the options for your region.")
-        c.argument('min_nodes', help="The minimum node count for the workload profile")
-        c.argument('max_nodes', help="The maximum node count for the workload profile")
 
     with self.argument_context('containerapp env workload-profile add') as c:
         c.argument('workload_profile_type', help="The type of workload profile to add to this environment. Run 'az containerapp env workload-profile list-supported -l <region>' to check the options for your region.")

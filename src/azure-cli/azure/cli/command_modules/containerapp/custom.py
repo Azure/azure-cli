@@ -4803,7 +4803,8 @@ def create_containerapps_from_compose(cmd,  # pylint: disable=R0914
         startup_command, startup_args = resolve_service_startup_command(service)
         cpu, memory = validate_memory_and_cpu_setting(
             resolve_cpu_configuration_from_service(service),
-            resolve_memory_configuration_from_service(service)
+            resolve_memory_configuration_from_service(service),
+            managed_environment
         )
         replicas = resolve_replicas_from_service(service)
         environment = resolve_environment_from_service(service)

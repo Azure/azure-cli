@@ -24,16 +24,14 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
     @ResourceGroupPreparer(location="eastus")
     @live_only()  # encounters 'CannotOverwriteExistingCassetteException' only when run from recording (passes when run live)
     def test_containerapp_env_workload_profiles_e2e(self, resource_group):
-        import requests
+        self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env = self.create_random_name(prefix='env', length=24)
         vnet = self.create_random_name(prefix='name', length=24)
         app1 = self.create_random_name(prefix='app1', length=24)
         app2 = self.create_random_name(prefix='app2', length=24)
 
-        location = "eastus"
-
-        self.cmd('containerapp env create -g {} -n {} --location {}  --logs-destination none'.format(resource_group, env, location))
+        self.cmd('containerapp env create -g {} -n {} --location {}  --logs-destination none'.format(resource_group, env, TEST_LOCATION))
 
         containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env)).get_output_in_json()
 
@@ -48,7 +46,7 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
             JMESPathCheck('properties.workloadProfiles[0].workloadProfileType', "Consumption", case_sensitive=False),
         ])
 
-        self.cmd("az containerapp env workload-profile list-supported -l {}".format(location))
+        self.cmd("az containerapp env workload-profile list-supported -l {}".format(TEST_LOCATION))
 
         profiles = self.cmd("az containerapp env workload-profile list -g {} -n {}".format(resource_group, env)).get_output_in_json()
         self.assertEqual(len(profiles), 1)
@@ -89,22 +87,23 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
 
         self.cmd("az containerapp create -g {} --target-port 80 --ingress external --image mcr.microsoft.com/k8se/quickstart:latest --environment {} -n {} --workload-profile-name Consumption".format(resource_group, env, app1))
         self.cmd("az containerapp create -g {} --target-port 80 --ingress external --image mcr.microsoft.com/k8se/quickstart:latest --environment {} -n {} --workload-profile-name my-d4".format(resource_group, env, app2))
+        self.cmd('containerapp delete -g {} -n {} --yes'.format(resource_group, app1), expect_failure=False)
+        self.cmd('containerapp delete -g {} -n {} --yes'.format(resource_group, app2), expect_failure=False)
+        self.cmd('containerapp env delete -g {} -n {} --yes'.format(resource_group, env), expect_failure=False)
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="eastus")
     @live_only()  # encounters 'CannotOverwriteExistingCassetteException' only when run from recording (passes when run live)
     def test_containerapp_env_workload_profiles_delete(self, resource_group):
-        import requests
+        self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env = self.create_random_name(prefix='env', length=24)
         vnet = self.create_random_name(prefix='name', length=24)
 
-        location = "eastus"
-
-        self.cmd("az network vnet create -l {} --address-prefixes '14.0.0.0/16' -g {} -n {}".format(location, resource_group, vnet))
+        self.cmd("az network vnet create -l {} --address-prefixes '14.0.0.0/16' -g {} -n {}".format(TEST_LOCATION, resource_group, vnet))
         sub_id = self.cmd("az network vnet subnet create --address-prefixes '14.0.0.0/22' --delegations Microsoft.App/environments -n sub -g {} --vnet-name {}".format(resource_group, vnet)).get_output_in_json()["id"]
 
-        self.cmd('containerapp env create -g {} -n {} -s {} --location {}  --logs-destination none'.format(resource_group, env, sub_id, location))
+        self.cmd('containerapp env create -g {} -n {} -s {} --location {}  --logs-destination none'.format(resource_group, env, sub_id, TEST_LOCATION))
 
         containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env)).get_output_in_json()
 
@@ -143,17 +142,16 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
 
         profiles = self.cmd("az containerapp env workload-profile list -g {} -n {}".format(resource_group, env)).get_output_in_json()
         self.assertEqual(len(profiles), 1)
+        self.cmd('containerapp env delete -g {} -n {} --yes'.format(resource_group, env), expect_failure=False)
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="eastus")
     def test_containerapp_create_with_workloadprofile_yaml(self, resource_group):
-
+        self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
         env = self.create_random_name(prefix='env', length=24)
         app = self.create_random_name(prefix='yaml', length=24)
 
-        location = "eastus"
-
-        self.cmd('containerapp env create -g {} -n {} --location {}  --logs-destination none'.format(resource_group, env, location))
+        self.cmd('containerapp env create -g {} -n {} --location {}  --logs-destination none'.format(resource_group, env, TEST_LOCATION))
 
         containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env)).get_output_in_json()
 
@@ -177,7 +175,7 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
 
         revision_01 = "revision01"
         containerapp_yaml_text_01 = f"""
-            location: {location}
+            location: {TEST_LOCATION}
             type: Microsoft.App/containerApps
             tags:
                 tagname: value
@@ -245,20 +243,20 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
 
         clean_up_test_file(containerapp_file_name_01)
         clean_up_test_file(containerapp_file_name_02)
+        self.cmd('containerapp delete -g {} -n {} --yes'.format(resource_group, app), expect_failure=False)
+        self.cmd('containerapp env delete -g {} -n {} --yes'.format(resource_group, env), expect_failure=False)
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="eastus")
     def test_containerapp_env_workload_profiles_e2e_no_waits(self, resource_group):
-        import requests
+        self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env = self.create_random_name(prefix='env', length=24)
         vnet = self.create_random_name(prefix='name', length=24)
         app1 = self.create_random_name(prefix='app1', length=24)
         app2 = self.create_random_name(prefix='app2', length=24)
 
-        location = "eastus"
-
-        self.cmd('containerapp env create -g {} -n {} --location {}  --logs-destination none'.format(resource_group, env, location))
+        self.cmd('containerapp env create -g {} -n {} --location {}  --logs-destination none'.format(resource_group, env, TEST_LOCATION))
 
         containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env)).get_output_in_json()
 
@@ -273,7 +271,7 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
             JMESPathCheck('properties.workloadProfiles[0].workloadProfileType', "Consumption", case_sensitive=False),
         ])
 
-        self.cmd("az containerapp env workload-profile list-supported -l {}".format(location))
+        self.cmd("az containerapp env workload-profile list-supported -l {}".format(TEST_LOCATION))
 
         profiles = self.cmd("az containerapp env workload-profile list -g {} -n {}".format(resource_group, env)).get_output_in_json()
         self.assertEqual(len(profiles), 1)
@@ -307,6 +305,9 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
             JMESPathCheck("properties.template.containers[0].resources.cpu", "0.5"),
             JMESPathCheck("properties.template.containers[0].resources.memory", "1Gi")
         ])
+        self.cmd('containerapp delete -g {} -n {} --yes'.format(resource_group, app1), expect_failure=False)
+        self.cmd('containerapp delete -g {} -n {} --yes'.format(resource_group, app2), expect_failure=False)
+        self.cmd('containerapp env delete -g {} -n {} --yes'.format(resource_group, env), expect_failure=False)
 
     def assertContainerappProperties(self, containerapp_env, rg, app, workload_profile_name, revision, cpu, mem):
         self.cmd(f'containerapp show -g {rg} -n {app}', checks=[

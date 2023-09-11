@@ -454,10 +454,6 @@ class ManagedEnvironmentClient():
     api_version = CURRENT_API_VERSION
 
     @classmethod
-    def get_api_version(cls):
-        return CURRENT_API_VERSION
-
-    @classmethod
     def create(cls, cmd, resource_group_name, name, managed_environment_envelope, no_wait=False):
         management_hostname = cmd.cli_ctx.cloud.endpoints.resource_manager
         sub_id = get_subscription_id(cmd.cli_ctx)
@@ -1062,6 +1058,41 @@ class ContainerAppsJobClient():
         return r.json()
 
 
+# Deprecated, workaround for sourcecontrols
+def poll(cmd, request_url, poll_if_status):  # pylint: disable=inconsistent-return-statements
+    from azure.cli.command_modules.containerapp._utils import safe_get
+    try:
+        start = time.time()
+        end = time.time() + POLLING_TIMEOUT
+        animation = PollingAnimation()
+
+        animation.tick()
+        r = send_raw_request(cmd.cli_ctx, "GET", request_url)
+
+        while r.status_code in [200, 201] and start < end:
+            time.sleep(POLLING_SECONDS)
+            animation.tick()
+
+            r = send_raw_request(cmd.cli_ctx, "GET", request_url)
+            r2 = r.json()
+            provisioning_state = safe_get(r2, "properties", "provisioningState")
+            operation_state = safe_get(r2, "properties", "operationState")
+            state = provisioning_state or operation_state
+            if state is None or state.lower() in ["succeeded", "failed", "canceled"]:
+                break
+            start = time.time()
+
+        animation.flush()
+        return r.json()
+    except Exception as e:  # pylint: disable=broad-except
+        animation.flush()
+
+        delete_statuses = ["scheduledfordelete", "cancelled"]
+
+        if poll_if_status not in delete_statuses:  # Catch "not found" errors if polling for delete
+            raise e
+
+
 class GitHubActionClient():
     api_version = CURRENT_API_VERSION
 
@@ -1082,12 +1113,14 @@ class GitHubActionClient():
         if no_wait:
             return r.json()
         elif r.status_code == 201:
-            operation_url = r.headers.get(HEADER_LOCATION) or r.headers.get(HEADER_AZURE_ASYNC_OPERATION)
-            response = poll_results(cmd, operation_url)
-            if response is None:
-                raise ResourceNotFoundError("Could not find a container app")
-            else:
-                return response
+            url_fmt = "{}/subscriptions/{}/resourceGroups/{}/providers/Microsoft.App/containerApps/{}/sourcecontrols/current?api-version={}"
+            request_url = url_fmt.format(
+                management_hostname.strip('/'),
+                sub_id,
+                resource_group_name,
+                name,
+                cls.api_version)
+            return poll(cmd, request_url, "inprogress")
 
         return r.json()
 
@@ -1107,7 +1140,7 @@ class GitHubActionClient():
         return r.json()
 
     @classmethod
-    def delete(cls, cmd, resource_group_name, name, headers):
+    def delete(cls, cmd, resource_group_name, name, headers, no_wait=False):
         management_hostname = cmd.cli_ctx.cloud.endpoints.resource_manager
         sub_id = get_subscription_id(cmd.cli_ctx)
         url_fmt = "{}/subscriptions/{}/resourceGroups/{}/providers/Microsoft.App/containerApps/{}/sourcecontrols/current?api-version={}"
@@ -1118,7 +1151,26 @@ class GitHubActionClient():
             name,
             cls.api_version)
 
-        send_raw_request(cmd.cli_ctx, "DELETE", request_url, headers=headers)
+        r = send_raw_request(cmd.cli_ctx, "DELETE", request_url, headers=headers)
+
+        if no_wait:
+            return  # API doesn't return JSON (it returns no content)
+        elif r.status_code in [200, 201, 202, 204]:
+            url_fmt = "{}/subscriptions/{}/resourceGroups/{}/providers/Microsoft.App/containerApps/{}/sourcecontrols/current?api-version={}"
+            request_url = url_fmt.format(
+                management_hostname.strip('/'),
+                sub_id,
+                resource_group_name,
+                name,
+                cls.api_version)
+
+            if r.status_code == 202:
+                from azure.cli.core.azclierror import ResourceNotFoundError
+                try:
+                    poll(cmd, request_url, "cancelled")
+                except ResourceNotFoundError:
+                    pass
+                logger.warning('Containerapp github action successfully deleted')
         return
 
     @classmethod

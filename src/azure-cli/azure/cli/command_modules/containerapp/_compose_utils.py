@@ -277,7 +277,12 @@ def valid_resource_settings():
     }
 
 
-def validate_memory_and_cpu_setting(cpu, memory):
+def validate_memory_and_cpu_setting(cpu, memory, managed_environment):
+    # only v1 cluster do the validation
+    from ._utils import safe_get
+    if safe_get(managed_environment, "properties", "workloadProfiles"):
+        return cpu, memory
+
     settings = valid_resource_settings()
 
     if cpu in settings.keys():  # pylint: disable=C0201
@@ -287,12 +292,12 @@ def validate_memory_and_cpu_setting(cpu, memory):
                 warning += f"The default value of {settings[cpu]}Gi will be used."
                 logger.warning(warning)
             memory = settings[cpu]
-        return (cpu, f"{memory}Gi")
+        return cpu, f"{memory}Gi"
 
     if cpu is not None:
         logger.warning(  # pylint: disable=W1203
             f"Invalid CPU reservation request of {cpu}. The default resource values will be used.")
-    return (None, None)
+    return None, None
 
 
 def resolve_cpu_configuration_from_service(service):

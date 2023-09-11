@@ -127,6 +127,7 @@ class ContainerappEnvScenarioTest(ScenarioTest):
             JMESPathCheck('name', env_name),
             JMESPathCheck('properties.appLogsConfiguration.destination', None),
         ])
+        self.cmd('containerapp env delete -g {} -n {} --yes'.format(resource_group, env_name), expect_failure=False)
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")
@@ -191,6 +192,7 @@ class ContainerappEnvScenarioTest(ScenarioTest):
         self.cmd('containerapp env dapr-component list -n {} -g {}'.format(env_name, resource_group), checks=[
             JMESPathCheck('length(@)', 0),
         ])
+        self.cmd('containerapp env delete -g {} -n {} --yes'.format(resource_group, env_name), expect_failure=False)
 
     @AllowLargeResponse(8192)
     @live_only()  # encounters 'CannotOverwriteExistingCassetteException' only when run from recording (passes when run live)
@@ -304,6 +306,8 @@ class ContainerappEnvScenarioTest(ScenarioTest):
         self.cmd('containerapp env certificate list -g {} -n {}'.format(resource_group, env_name), checks=[
             JMESPathCheck('length(@)', 0),
         ])
+        self.cmd('containerapp delete -g {} -n {} --yes'.format(resource_group, ca_name), expect_failure=False)
+        self.cmd('containerapp env delete -g {} -n {} --yes'.format(resource_group, env_name), expect_failure=False)
 
     @AllowLargeResponse(8192)
     @live_only()  # encounters 'CannotOverwriteExistingCassetteException' only when run from recording (passes when run live)
@@ -346,6 +350,7 @@ class ContainerappEnvScenarioTest(ScenarioTest):
             JMESPathCheck('name', env_name),
             JMESPathCheck('properties.customDomainConfiguration.dnsSuffix', hostname_1),
         ])
+        self.cmd('containerapp env delete -g {} -n {} --yes'.format(resource_group, env_name), expect_failure=False)
 
 
     @AllowLargeResponse(8192)
@@ -396,6 +401,7 @@ class ContainerappEnvScenarioTest(ScenarioTest):
             JMESPathCheck('name', env_name),
             JMESPathCheck('properties.customDomainConfiguration.dnsSuffix', hostname_2),
         ])
+        self.cmd('containerapp env delete -g {} -n {} --yes'.format(resource_group, env_name), expect_failure=False)
 
 
     @AllowLargeResponse(8192)
@@ -409,7 +415,7 @@ class ContainerappEnvScenarioTest(ScenarioTest):
         vnet = self.create_random_name(prefix='name', length=24)
 
         self.cmd(f"az network vnet create --address-prefixes '14.0.0.0/23' -g {resource_group} -n {vnet}")
-        sub_id = self.cmd(f"az network vnet subnet create --address-prefixes '14.0.0.0/23' -n sub -g {resource_group} --vnet-name {vnet}").get_output_in_json()["id"]
+        sub_id = self.cmd(f"az network vnet subnet create --address-prefixes '14.0.0.0/23' -n sub -g {resource_group} --vnet-name {vnet} --delegations Microsoft.App/environments").get_output_in_json()["id"]
 
         self.cmd(f'containerapp env create -g {resource_group} -n {env} --logs-workspace-id {laworkspace_customer_id} --logs-workspace-key {laworkspace_shared_key} --internal-only -s {sub_id}')
 
@@ -423,6 +429,7 @@ class ContainerappEnvScenarioTest(ScenarioTest):
             JMESPathCheck('name', env),
             JMESPathCheck('properties.vnetConfiguration.internal', True),
         ])
+        self.cmd('containerapp env delete -g {} -n {} --yes'.format(resource_group, env), expect_failure=False)
 
 
     @AllowLargeResponse(8192)
@@ -456,3 +463,4 @@ class ContainerappEnvScenarioTest(ScenarioTest):
             JMESPathCheck('name', env_name),
             JMESPathCheck('properties.peerAuthentication.mtls.enabled', False),
         ])
+        self.cmd('containerapp env delete -g {} -n {} --yes'.format(resource_group, env_name), expect_failure=False)
