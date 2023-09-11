@@ -306,7 +306,7 @@ jobs:
       ${{ each arch in parameters.architectures }}:
         Alpine ${{ arch.name }}:
           pool: ${{ arch.pool }}
-          artifactName: docker-${{ arch.name }}
+          artifactName: docker-${{ arch.value }}
           dockerfile: Dockerfile
   pool:
     name: $(pool)
