@@ -107,7 +107,7 @@ def _process_parameters(template_obj, parameter_lists):  # pylint: disable=too-m
                 pass
         return None
 
-    def _get_parameter_type(schema_node, visited = set()):
+    def _get_parameter_type(schema_node, visited=None):
         if schema_node is None:
             return None
 
@@ -116,6 +116,9 @@ def _process_parameters(template_obj, parameter_lists):  # pylint: disable=too-m
 
         if '$ref' not in schema_node:
             return None
+
+        if visited is None:
+            visited = set()
 
         pointer = schema_node['$ref']
         if pointer in visited:
@@ -133,14 +136,12 @@ def _process_parameters(template_obj, parameter_lists):  # pylint: disable=too-m
             def resolve(self):
                 return None
 
-
         class _TerminalState:
             def get(self, _):
                 return self
 
             def resolve(self):
                 return None
-
 
         class _Initialized:
             def get(self, segment):
@@ -151,7 +152,6 @@ def _process_parameters(template_obj, parameter_lists):  # pylint: disable=too-m
 
             def resolve(self):
                 return None
-
 
         class _InSchemaDictionary:
             def __init__(self, schema_dict):
@@ -167,7 +167,6 @@ def _process_parameters(template_obj, parameter_lists):  # pylint: disable=too-m
             def resolve(self):
                 return None
 
-
         class _InSchemaArray:
             def __init__(self, schema_array):
                 self.schema_array = schema_array
@@ -180,7 +179,6 @@ def _process_parameters(template_obj, parameter_lists):  # pylint: disable=too-m
 
             def resolve(self):
                 return None
-
 
         class _InSchemaNode:
             def __init__(self, schema_node):
@@ -198,9 +196,11 @@ def _process_parameters(template_obj, parameter_lists):  # pylint: disable=too-m
 
                 if segment == 'properties':
                     return _InSchemaDictionary(property_value)
-                elif segment in ['items', 'additionalproperties']:
+
+                if segment in ['items', 'additionalproperties']:
                     return _InSchemaNode(property_value)
-                elif segment == 'prefixitems':
+
+                if segment == 'prefixitems':
                     return _InSchemaArray(property_value)
 
                 return _TerminalState()
