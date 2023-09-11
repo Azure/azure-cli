@@ -198,7 +198,6 @@ class TestCustom(unittest.TestCase):
         parameters_path = os.path.join(curr_dir, 'param-validation-params.json').replace('\\', '\\\\')
 
         template = get_file_json(template_path, preserve_order=True)
-        template_param_defs = template.get('parameters', {})
 
         # test different ways of passing in parameters
         tests = [
@@ -234,7 +233,7 @@ class TestCustom(unittest.TestCase):
 
         for test in tests:
             parameter_list = test['parameter_list']
-            result_parameters = _process_parameters(template_param_defs, parameter_list)
+            result_parameters = _process_parameters(template, parameter_list)
             self.assertEqual(result_parameters, test['expected'])
 
     def test_deployment_missing_values(self):
@@ -248,7 +247,7 @@ class TestCustom(unittest.TestCase):
         template_param_defs = template.get('parameters', {})
 
         parameter_list = [[parameters_path], [parameters_with_reference_path]]
-        result_parameters = _process_parameters(template_param_defs, parameter_list)
+        result_parameters = _process_parameters(template, parameter_list)
         missing_parameters = _find_missing_parameters(result_parameters, template)
 
         # ensure that parameters with default values are not considered missing
@@ -268,10 +267,9 @@ class TestCustom(unittest.TestCase):
         parameters_with_reference_path = os.path.join(curr_dir, 'param-validation-ref-params.json').replace('\\', '\\\\')
 
         template = get_file_json(template_path, preserve_order=True)
-        template_param_defs = template.get('parameters', {})
 
         parameter_list = [[parameters_path], [parameters_with_reference_path]]
-        result_parameters = _process_parameters(template_param_defs, parameter_list)
+        result_parameters = _process_parameters(template, parameter_list)
         missing_parameters = _find_missing_parameters(result_parameters, template)
 
         param_file_order = ["[u'secureParam', u'boolParam', u'enumParam', u'arrayParam', u'objectParam']",
@@ -287,10 +285,9 @@ class TestCustom(unittest.TestCase):
         parameters_with_reference_path = os.path.join(curr_dir, 'param-validation-ref-params.json').replace('\\', '\\\\')
 
         template = get_file_json(template_path, preserve_order=False)
-        template_param_defs = template.get('parameters', {})
 
         parameter_list = [[parameters_path], [parameters_with_reference_path]]
-        result_parameters = _process_parameters(template_param_defs, parameter_list)
+        result_parameters = _process_parameters(template, parameter_list)
         missing_parameters = _find_missing_parameters(result_parameters, template)
 
         param_alpha_order = ["[u'arrayParam', u'boolParam', u'enumParam', u'objectParam', u'secureParam']",

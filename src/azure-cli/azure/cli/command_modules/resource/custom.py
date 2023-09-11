@@ -17,7 +17,7 @@ import uuid
 import base64
 
 from urllib.request import urlopen
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
@@ -72,39 +72,7 @@ def _build_resource_id(**kwargs):
         return None
 
 
-def _try_parse_key_value_object(template_param_defs, parameters, value):
-    # support situation where empty JSON "{}" is provided
-    if value == '{}' and not parameters:
-        return True
-
-    try:
-        key, value = value.split('=', 1)
-    except ValueError:
-        return False
-
-    param = template_param_defs.get(key, None)
-    if param is None:
-        raise InvalidArgumentValueError("unrecognized template parameter '{}'. Allowed parameters: {}".format(key, ', '.join(sorted(template_param_defs.keys()))))
-
-    param_type = param.get('type', None)
-    if param_type:
-        param_type = param_type.lower()
-    if param_type in ['object', 'array', 'secureobject']:
-        parameters[key] = {'value': shell_safe_json_parse(value)}
-    elif param_type in ['string', 'securestring']:
-        parameters[key] = {'value': value}
-    elif param_type == 'bool':
-        parameters[key] = {'value': value.lower() == 'true'}
-    elif param_type == 'int':
-        parameters[key] = {'value': int(value)}
-    else:
-        logger.warning("Unrecognized type '%s' for parameter '%s'. Interpretting as string.", param_type, key)
-        parameters[key] = {'value': value}
-
-    return True
-
-
-def _process_parameters(template_param_defs, parameter_lists):  # pylint: disable=too-many-statements
+def _process_parameters(template_obj, parameter_lists):  # pylint: disable=too-many-statements
 
     def _try_parse_json_object(value):
         try:
@@ -139,6 +107,145 @@ def _process_parameters(template_param_defs, parameter_lists):  # pylint: disabl
                 pass
         return None
 
+    def _get_parameter_type(template_obj, schema_node, visited = set()):
+        if schema_node is None:
+            return None
+
+        if 'type' in schema_node:
+            return schema_node['type']
+
+        if '$ref' not in schema_node:
+            return None
+
+        pointer = schema_node['$ref']
+        if pointer in visited:
+            logger.warning("Cyclic type reference detected at '%s'", pointer)
+            return None
+        pointer.add(pointer)
+
+        class _UninitalizedState:
+            def get(self, segment):
+                if segment == '#':
+                    return _Initialized()
+
+                return _TerminalState()
+
+            def resolve(self):
+                return None
+
+
+        class _TerminalState:
+            def get(self, _):
+                return self
+
+            def resolve(self):
+                return None
+
+
+        class _Initialized:
+            def get(self, segment):
+                if segment in ['definitions', 'parameters', 'outputs'] and segment in template_obj:
+                    return _InSchemaDictionary(template_obj[segment])
+
+                return _TerminalState()
+
+            def resolve(self):
+                return None
+
+
+        class _InSchemaDictionary:
+            def __init__(self, schema_dict):
+                self.schema_dict = schema_dict
+
+            def get(self, segment):
+                for key, value in self.schema_dict.items():
+                    if key.lower() == segment:
+                        return _InSchemaNode(value)
+
+                return _TerminalState()
+
+            def resolve(self):
+                return None
+
+
+        class _InSchemaArray:
+            def __init__(self, schema_array):
+                self.schema_array = schema_array
+
+            def get(self, segment):
+                if segment.isdigit() and len(self.schema_array) > int(segment):
+                    return _InSchemaNode(self.schema_array[int(segment)])
+
+                return _TerminalState()
+
+            def resolve(self):
+                return None
+
+
+        class _InSchemaNode:
+            def __init__(self, schema_node):
+                self.schema_node = schema_node
+
+            def get(self, segment):
+                property_value = None
+                for key, value in self.schema_node.items():
+                    if key.lower() == segment:
+                        property_value = value
+                        break
+
+                if property_value is None:
+                    return _TerminalState()
+
+                if segment == 'properties':
+                    return _InSchemaDictionary(property_value)
+                elif segment in ['items', 'additionalproperties']:
+                    return _InSchemaNode(property_value)
+                elif segment == 'prefixItems':
+                    return _InSchemaArray(property_value)
+
+                return _TerminalState()
+
+            def resolve(self):
+                return self.schema_node
+
+        state = _UninitalizedState()
+        for segment in pointer.split('/'):
+            state = state.get(unquote(segment).replace('~1', '/').replace('~0', '~').lower())
+
+        return _get_parameter_type(template_obj, state.resolve(), visited)
+
+    def _try_parse_key_value_object(template_obj, parameters, value):
+        # support situation where empty JSON "{}" is provided
+        if value == '{}' and not parameters:
+            return True
+
+        try:
+            key, value = value.split('=', 1)
+        except ValueError:
+            return False
+
+        param = template_obj.get('parameters', {}).get(key, None)
+        if param is None:
+            raise CLIError("unrecognized template parameter '{}'. Allowed parameters: {}"
+                           .format(key, ', '.join(sorted(template_obj.get('parameters', {}).keys()))))
+
+        param_type = _get_parameter_type(template_obj, param)
+        if param_type:
+            param_type = param_type.lower()
+        if param_type in ['object', 'array', 'secureobject']:
+            parameters[key] = {'value': shell_safe_json_parse(value)}
+        elif param_type in ['string', 'securestring']:
+            parameters[key] = {'value': value}
+        elif param_type == 'bool':
+            parameters[key] = {'value': value.lower() == 'true'}
+        elif param_type == 'int':
+            parameters[key] = {'value': int(value)}
+        else:
+            logger.warning("Unrecognized type '%s' for parameter '%s'. Interpretting as string.", param_type, key)
+            parameters[key] = {'value': value}
+
+        return True
+
     parameters = {}
     for params in parameter_lists or []:
         for item in params:
@@ -149,7 +256,7 @@ def _process_parameters(template_param_defs, parameter_lists):  # pylint: disabl
                 param_obj = _try_load_uri(item)
             if param_obj is not None:
                 parameters.update(param_obj)
-            elif not _try_parse_key_value_object(template_param_defs, parameters, item):
+            elif not _try_parse_key_value_object(template_obj, parameters, item):
                 raise CLIError('Unable to parse parameter: {}'.format(item))
 
     return parameters
@@ -344,9 +451,8 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
     elif rollback_on_error:
         on_error_deployment = OnErrorDeployment(type='SpecificDeployment', deployment_name=rollback_on_error)
 
-    template_param_defs = template_obj.get('parameters', {})
     template_obj['resources'] = template_obj.get('resources', [])
-    parameters = _process_parameters(template_param_defs, parameters) or {}
+    parameters = _process_parameters(template_obj, parameters) or {}
     parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, no_prompt)
 
     parameters = json.loads(json.dumps(parameters))
@@ -1089,13 +1195,12 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
     elif rollback_on_error:
         on_error_deployment = OnErrorDeployment(type='SpecificDeployment', deployment_name=rollback_on_error)
 
-    template_param_defs = template_obj.get('parameters', {})
     template_obj['resources'] = template_obj.get('resources', [])
 
     if _is_bicepparam_file_provided(parameters):
         parameters = json.loads(bicepparam_json_content).get('parameters', {})
     else:
-        parameters = _process_parameters(template_param_defs, parameters) or {}
+        parameters = _process_parameters(template_obj, parameters) or {}
         parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, no_prompt)
         parameters = json.loads(json.dumps(parameters))
 
@@ -1284,13 +1389,12 @@ def _prepare_stacks_templates_and_parameters(cmd, rcf, deployment_scope, deploym
         else:
             deployment_stack_model.template = json.load(open(template_file))
 
-    template_param_defs = template_obj.get('parameters', {})
     template_obj['resources'] = template_obj.get('resources', [])
 
     if _is_bicepparam_file_provided(parameters):
         parameters = json.loads(bicepparam_json_content).get('parameters', {})
     else:
-        parameters = _process_parameters(template_param_defs, parameters) or {}
+        parameters = _process_parameters(template_obj, parameters) or {}
         parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, False)
         parameters = json.loads(json.dumps(parameters))
 
