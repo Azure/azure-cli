@@ -121,7 +121,7 @@ def _process_parameters(template_obj, parameter_lists):  # pylint: disable=too-m
         if pointer in visited:
             logger.warning("Cyclic type reference detected at '%s'", pointer)
             return None
-        pointer.add(pointer)
+        visited.add(pointer)
 
         class _UninitalizedState:
             def get(self, segment):
