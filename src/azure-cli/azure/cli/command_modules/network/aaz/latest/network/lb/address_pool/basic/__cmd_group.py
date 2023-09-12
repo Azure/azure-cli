@@ -11,6 +11,9 @@
 from azure.cli.core.aaz import *
 
 
+@register_command_group(
+    "network lb address-pool basic",
+)
 class __CMDGroup(AAZCommandGroup):
     """Manage address pools of a basic load balancer
     """

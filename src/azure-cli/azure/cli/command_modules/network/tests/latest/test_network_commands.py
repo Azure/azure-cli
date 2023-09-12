@@ -3842,6 +3842,22 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         self.cmd('network lb address-pool list -g {rg} --lb-name {lb}',
                  checks=self.check('length(@)', 3))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_lb_address_pool_with_sync_mode', location='eastus2')
+    def test_network_lb_address_pool_with_sync_mode(self, resource_group):
+
+        self.kwargs.update({
+            'lb': self.create_random_name('lb', 10),
+            'ap': self.create_random_name('ap', 10),
+        })
+        self.cmd('network lb create -g {rg} -n {lb}')
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n {ap} --sync-mode Manual',
+                 checks=self.check('syncMode', 'Manual'))
+        self.cmd('network lb address-pool show -g {rg} --lb-name {lb} -n {ap}',
+                 checks=[self.check('name', '{ap}'),
+                         self.check('syncMode', 'Manual')])
+        self.cmd('network lb address-pool delete -g {rg} --lb-name {lb} -n {ap}',
+                 checks=self.is_empty())
+
     @ResourceGroupPreparer(name_prefix='cli_test_lb_address_pool_addresses', location='eastus2')
     def test_network_lb_address_pool_addresses(self, resource_group):
 
