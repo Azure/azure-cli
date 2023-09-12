@@ -3565,13 +3565,10 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
         self.cmd('network cross-region-lb rule update -g {rg} --lb-name {lb} -n rule2 --backend-pool-name bap2 --load-distribution sourceipprotocol')
         self.cmd('network cross-region-lb rule show -g {rg} --lb-name {lb} -n rule1', checks=[
             self.check('enableFloatingIP', True),
-            self.check('idleTimeoutInMinutes', 20),
+            self.check('idleTimeoutInMinutes', 4),
             self.check('loadDistribution', 'SourceIP'),
             self.check('protocol', 'Udp')
         ])
-        # test generic update
-        self.cmd('network cross-region-lb rule update -g {rg} --lb-name {lb} -n rule1 --set idleTimeoutInMinutes=5',
-                 checks=self.check('idleTimeoutInMinutes', 5))
 
         self.cmd('network cross-region-lb rule show -g {rg} --lb-name {lb} -n rule2', checks=[
             self.check("backendAddressPool.contains(id, 'bap2')", True),

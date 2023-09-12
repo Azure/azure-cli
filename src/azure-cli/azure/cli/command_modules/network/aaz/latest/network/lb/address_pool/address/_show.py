@@ -59,8 +59,8 @@ class Show(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.load_balancer_backend_address_name = AAZStrArg(
-            options=["--load-balancer-backend-address-name"],
+        _args_schema.name = AAZStrArg(
+            options=["-n", "--name"],
             help="Name of the backend address.",
             required=True,
         )
@@ -90,7 +90,7 @@ class Show(AAZCommand):
             result = result.properties.loadBalancerBackendAddresses
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].name == self.ctx.args.load_balancer_backend_address_name,
+                lambda e: e[1].name == self.ctx.args.name,
                 filters
             )
             idx = next(filters)[0]
@@ -101,7 +101,7 @@ class Show(AAZCommand):
             result = result.properties.loadBalancerBackendAddresses
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].name == self.ctx.args.load_balancer_backend_address_name,
+                lambda e: e[1].name == self.ctx.args.name,
                 filters
             )
             idx = next(filters, [len(result)])[0]
