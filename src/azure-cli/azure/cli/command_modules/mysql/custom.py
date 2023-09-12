@@ -26,7 +26,7 @@ from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flex
     cf_mysql_servers, cf_mysql_firewall_rules
 from ._util import resolve_poller, generate_missing_parameters, get_mysql_list_skus_info, generate_password, parse_maintenance_window, \
     replace_memory_optimized_tier, build_identity_and_data_encryption, get_identity_and_data_encryption, get_tenant_id, run_subprocess, \
-    run_subprocess_get_output, fill_action_template, get_git_root_dir, get_single_to_flex_sku_mapping, parse_single_server_firewall_rules, GITHUB_ACTION_PATH
+    run_subprocess_get_output, fill_action_template, get_git_root_dir, get_single_to_flex_sku_mapping, get_firewall_rules_from_paged_response, GITHUB_ACTION_PATH
 from ._network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_private_network, prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from ._validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, mysql_restore_tier_validator, \
     mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, validate_mysql_replica, validate_server_name, \
@@ -1798,7 +1798,7 @@ def map_single_server_configuration(single_server_client, source_server_id, tier
 def migrate_firewall_rules_from_single_to_flex(db_context, cmd, source_server_id, target_server_name):
     id_parts = parse_resource_id(source_server_id)
     firewall_client = cf_mysql_firewall_rules(cmd.cli_ctx, _=None)
-    firewall_rules = parse_single_server_firewall_rules(firewall_client.list_by_server(id_parts['resource_group'], id_parts['name']))
+    firewall_rules = get_firewall_rules_from_paged_response(firewall_client.list_by_server(id_parts['resource_group'], id_parts['name']))
     for rule in firewall_rules:
         create_firewall_rule(db_context=db_context,
                              cmd=cmd,
