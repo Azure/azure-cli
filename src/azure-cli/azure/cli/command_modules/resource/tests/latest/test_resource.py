@@ -5130,13 +5130,13 @@ class BicepLintTest(LiveScenarioTest):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         tf = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
 
-        self.cmd('az bicep generate-params -f {tf} --diagnostics-format default')
+        self.cmd('az bicep lint -f {tf} --diagnostics-format default')
 
     def test_bicep_lint_diagnostics_format_sarif(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         tf = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
 
-        self.cmd('az bicep generate-params -f {tf} --diagnostics-format sarif')
+        self.cmd('az bicep lint -f {tf} --diagnostics-format sarif')
 
 class BicepInstallationTest(LiveScenarioTest):
     def setup(self):
