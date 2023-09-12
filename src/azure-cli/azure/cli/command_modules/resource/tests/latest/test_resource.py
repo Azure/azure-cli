@@ -5105,6 +5105,34 @@ class BicepGenerateParamsTest(LiveScenarioTest):
         if os.path.exists(params_path):
             os.remove(params_path)
 
+    def test_bicep_generate_params_include_params_only(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+        params_path = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
+        self.kwargs.update({
+            'tf': tf,
+            'params_path': params_path,
+        })
+
+        self.cmd('az bicep generate-params -f {tf} --outfile {params_path} --include-params all')
+
+        if os.path.exists(params_path):
+            os.remove(params_path)
+
+    def test_bicep_generate_params(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+        params_path = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
+        self.kwargs.update({
+            'tf': tf,
+            'params_path': params_path,
+        })
+
+        self.cmd('az bicep generate-params -f {tf} --outfile {params_path}')
+
+        if os.path.exists(params_path):
+            os.remove(params_path)
+
 class BicepLintTest(LiveScenarioTest):
     def setup(self):
         super().setup()
