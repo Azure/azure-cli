@@ -223,7 +223,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         ss_storage_size = 51200
         ss_version = '5.7'
         source_sku_name = 'GP_Gen5_4'
-        source_public_network_access = 'Disabled'
+        source_public_network_access = 'all'
         source_backup_retention_days = 10 
         source_geo_redundant_backup = 'Enabled'
         source_admin_login = 'mysqluser'
@@ -244,7 +244,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         data_source_type = 'mysql_single'
         data_source = ss_server_name
         mode = 'Offline'
-        target_public_network_access = 'Disabled'
+        target_public_network_access = 'Enabled'
         target_backup_retention_days = 10 
         target_geo_redundant_backup = 'Enabled'
         target_admin_login = 'mysqluser'
@@ -266,6 +266,10 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.assertEqual(basic_info['backup']['backupRetentionDays'], target_backup_retention_days)
         self.assertEqual(basic_info['backup']['geoRedundantBackup'], target_geo_redundant_backup)
         self.assertEqual(basic_info['administratorLogin'], target_admin_login)
+
+        # check if firewall rules got migrated. There should be one firewall rule for all public access.
+        firewall_rules_count = self.cmd('{} flexible-server firewall-rule list -g {} -n {}'.format(database_engine, resource_group, server_name)).get_output_in_json()
+        self.assertEqual(len(firewall_rules_count), 1)
 
         # deletion of flexible server created
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name), checks=NoneCheck())
