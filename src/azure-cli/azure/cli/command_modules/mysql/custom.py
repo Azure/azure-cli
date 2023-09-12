@@ -497,7 +497,8 @@ def flexible_server_import_create(cmd, client,
                                                                                                                         tags=tags,
                                                                                                                         public_access=public_access,
                                                                                                                         administrator_login=administrator_login,
-                                                                                                                        administrator_login_password=administrator_login_password)
+                                                                                                                        administrator_login_password=administrator_login_password,
+                                                                                                                        subnet=subnet)
     db_context = DbContext(
         cmd=cmd, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
         cf_availability=cf_mysql_check_resource_availability,
@@ -1732,7 +1733,7 @@ def flexible_gtid_reset(client, resource_group_name, server_name, gtid_set, no_w
 
 
 def map_single_server_configuration(single_server_client, source_server_id, tier, sku_name, location, storage_gb, auto_grow, backup_retention,
-                                    geo_redundant_backup, version, tags, public_access, administrator_login, administrator_login_password):
+                                    geo_redundant_backup, version, tags, public_access, administrator_login, administrator_login_password, subnet):
     try:
         id_parts = parse_resource_id(source_server_id)
         source_single_server = single_server_client.get(id_parts['resource_group'], id_parts['name'])
@@ -1778,7 +1779,7 @@ def map_single_server_configuration(single_server_client, source_server_id, tier
         if not tags:
             tags = source_single_server.tags
 
-        if not public_access:
+        if not public_access and not subnet:
             public_access = source_single_server.public_network_access
     except Exception as e:
         raise ResourceNotFoundError(e)
