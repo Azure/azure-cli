@@ -22,6 +22,7 @@ from ._resource_config import (
     SOURCE_RESOURCES_PARAMS,
     SOURCE_RESOURCES_CREATE_PARAMS,
     TARGET_RESOURCES_PARAMS,
+    SOURCE_RESOURCES_OPTIONAL_PARAMS,
     TARGET_RESOURCES_CONNECTION_STRING,
     AUTH_TYPE_PARAMS,
     SUPPORTED_AUTH_TYPE,
@@ -82,6 +83,15 @@ def add_source_resource_block(context, source, enable_id=True, validate_source_i
     else:
         context.ignore('scope')
         context.ignore('enable_csi')
+
+    # slot parameter
+    for resource, args in SOURCE_RESOURCES_OPTIONAL_PARAMS.items():
+        for arg in args:
+            if resource == source:
+                context.argument(arg, options_list=args.get(arg).get(
+                    'options'), type=str, help=args.get(arg).get('help'))
+            else:
+                context.ignore(arg)
 
 
 def add_auth_block(context, source, target):
