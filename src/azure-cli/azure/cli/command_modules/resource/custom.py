@@ -214,7 +214,7 @@ def _process_parameters(template_obj, parameter_lists):  # pylint: disable=too-m
 
         return _get_parameter_type(state.resolve(), visited)
 
-    def _try_parse_key_value_object(template_obj, parameters, value):
+    def _try_parse_key_value_object(parameters, value):
         # support situation where empty JSON "{}" is provided
         if value == '{}' and not parameters:
             return True
@@ -256,7 +256,7 @@ def _process_parameters(template_obj, parameter_lists):  # pylint: disable=too-m
                 param_obj = _try_load_uri(item)
             if param_obj is not None:
                 parameters.update(param_obj)
-            elif not _try_parse_key_value_object(template_obj, parameters, item):
+            elif not _try_parse_key_value_object(parameters, item):
                 raise CLIError('Unable to parse parameter: {}'.format(item))
 
     return parameters
