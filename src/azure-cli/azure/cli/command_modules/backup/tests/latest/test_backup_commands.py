@@ -524,6 +524,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @ItemPreparer()
     @RPPreparer()
     @live_only()
+    @unittest.skip("Test temporarily skipped as the Resource appears to be deleted")
     def test_backup_csr(self, resource_group, vault_name, vm_name):
         self.kwargs.update({
             'vault': vault_name,
@@ -913,9 +914,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("resourceGroup", '{rg}')
         ])
 
-        # self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
+        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
         # TODO: once the soft delete feature move is enabled across the board, use the following lines instead 
-        self.cmd('backup vault create -g {rg} -v {vault} -l {location} --soft-delete-state Disable')
+        # self.cmd('backup vault create -g {rg} -v {vault} -l {location} --soft-delete-state Disable')
 
         self.cmd('backup item show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -n {vm}', checks=[
             self.check("properties.friendlyName", '{vm}'),
@@ -936,9 +937,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'sa': storage_account
         })
 
-        # self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
+        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
         # TODO: once the soft delete feature move is enabled across the board, use the following lines instead 
-        self.cmd('backup vault create -g {rg} -v {vault} -l {location} --soft-delete-state Disable')
+        # self.cmd('backup vault create -g {rg} -v {vault} -l {location} --soft-delete-state Disable')
 
         self.cmd('vm disk attach -g {rg} --vm-name {vm} --name mydisk1 --new --size-gb 10')
         self.cmd('vm disk attach -g {rg} --vm-name {vm} --name mydisk2 --new --size-gb 10')
@@ -1407,13 +1408,13 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
         # Try disabling soft delete
-        # self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable', checks=[
-        #     self.check('properties.softDeleteFeatureState', 'Disabled')
-        # ])
-        # TODO: once the soft delete feature move is enabled across the board, use the following lines instead 
-        self.cmd('backup vault create -g {rg} -v {vault} -l {location} --soft-delete-state Disable', checks=[
-            self.check('properties.securitySettings.softDeleteSettings.softDeleteState', 'Disabled')
+        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable', checks=[
+            self.check('properties.softDeleteFeatureState', 'Disabled')
         ])
+        # TODO: once the soft delete feature move is enabled across the board, use the following lines instead 
+        # self.cmd('backup vault create -g {rg} -v {vault} -l {location} --soft-delete-state Disable', checks=[
+        #     self.check('properties.securitySettings.softDeleteSettings.softDeleteState', 'Disabled')
+        # ])
 
         time.sleep(300)
 
