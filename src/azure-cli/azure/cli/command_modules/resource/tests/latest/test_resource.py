@@ -5105,33 +5105,38 @@ class BicepGenerateParamsTest(LiveScenarioTest):
         if os.path.exists(params_path):
             os.remove(params_path)
 
-    def test_bicep_generate_params_include_params_only(self):
+class BicepLintTest(LiveScenarioTest):
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
+    def test_bicep_lint(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         tf = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
-        params_path = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
-        self.kwargs.update({
-            'tf': tf,
-            'params_path': params_path,
-        })
 
-        self.cmd('az bicep generate-params -f {tf} --outfile {params_path} --include-params all')
+        self.cmd('az bicep lint -f {tf}')
 
-        if os.path.exists(params_path):
-            os.remove(params_path)
-
-    def test_bicep_generate_params(self):
+    def test_bicep_lint_no_restore(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         tf = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
-        params_path = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
-        self.kwargs.update({
-            'tf': tf,
-            'params_path': params_path,
-        })
 
-        self.cmd('az bicep generate-params -f {tf} --outfile {params_path}')
+        self.cmd('az bicep lint -f {tf} --no-restore')
 
-        if os.path.exists(params_path):
-            os.remove(params_path)
+    def test_bicep_lint_diagnostics_format_default(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+
+        self.cmd('az bicep generate-params -f {tf} --diagnostics-format default')
+
+    def test_bicep_lint_diagnostics_format_sarif(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+
+        self.cmd('az bicep generate-params -f {tf} --diagnostics-format sarif')
 
 class BicepInstallationTest(LiveScenarioTest):
     def setup(self):
