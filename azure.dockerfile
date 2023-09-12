@@ -24,8 +24,8 @@ LABEL maintainer="Microsoft" \
       org.label-schema.docker.cmd="docker run -v \${HOME}/.azure:/root/.azure -it mcr.microsoft.com/azure-cli:$CLI_VERSION-azure"
 
 
-# Azure Linux does not contain Mozilla CA certificates, install ca-certificates package to prevent CERTIFICATE_VERIFY_FAILED errors, see https://github.com/Azure/azure-cli/issues/26026
-RUN --mount=type=bind,target=/azure-cli.rpm,source=./docker/azure-cli.rpm tdnf install ca-certificates /azure-cli.rpm -y && tdnf clean all
+# Azure Linux base image does not contain Mozilla CA certificates, install ca-certificates package to prevent CERTIFICATE_VERIFY_FAILED errors, see https://github.com/Azure/azure-cli/issues/26026
+RUN --mount=type=bind,target=/azure-cli.rpm,source=./docker/azure-cli.rpm tdnf install ca-certificates /azure-cli.rpm -y && tdnf clean all && rm -rf /var/cache/tdnf
 
 ENV AZ_INSTALLER=DOCKER
 CMD bash
