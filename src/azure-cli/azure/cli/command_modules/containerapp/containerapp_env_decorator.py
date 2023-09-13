@@ -117,6 +117,9 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
         super().__init__(cmd, client, raw_parameters, models)
         self.managed_env_def = ManagedEnvironmentModel
 
+    def get_argument_enable_workload_profiles(self):
+        return self.get_param("enable_workload_profiles")
+
     def validate_arguments(self):
         location = self.get_argument_location()
         if self.get_argument_zone_redundant():
@@ -185,7 +188,8 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
             safe_set(self.managed_env_def, "properties", "peerAuthentication", "mtls", "enabled", value=self.get_argument_mtls_enabled())
 
     def set_up_workload_profiles(self):
-        self.managed_env_def["properties"]["workloadProfiles"] = get_default_workload_profiles(self.cmd, self.get_argument_location())
+        if self.get_argument_enable_workload_profiles():
+            self.managed_env_def["properties"]["workloadProfiles"] = get_default_workload_profiles(self.cmd, self.get_argument_location())
 
     def set_up_app_log_configuration(self):
         if (self.get_argument_logs_customer_id() is None or self.get_argument_logs_key() is None) and self.get_argument_logs_destination() == "log-analytics":
