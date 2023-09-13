@@ -164,10 +164,10 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
                 self.check('metricTrigger.timeAggregation', 'Average'),
                 self.check('metricTrigger.timeWindow', 'PT5M'),
                 self.check('metricTrigger.timeGrain', 'PT1M'),
-                self.check('metricTrigger.dimensions[0].dimensionName', 'VMName'),
-                self.check('metricTrigger.dimensions[0].operator', 'Equals'),
-                self.check('metricTrigger.dimensions[0].values[0]', 'cliname1'),
-                self.check('metricTrigger.dimensions[0].values[1]', 'cliname2'),
+                self.check('metricTrigger.dimensions[0].DimensionName', 'VMName'),
+                self.check('metricTrigger.dimensions[0].Operator', 'Equals'),
+                self.check('metricTrigger.dimensions[0].Values[0]', 'cliname1'),
+                self.check('metricTrigger.dimensions[0].Values[1]', 'cliname2'),
                 #self.check('metricTrigger.metricNamespace', 'Mynamespace.abcd'),
                 self.check('scaleAction.cooldown', 'PT5M'),
                 self.check('scaleAction.direction', 'None'),
@@ -185,10 +185,10 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
                 self.check('metricTrigger.timeAggregation', 'Average'),
                 self.check('metricTrigger.timeWindow', 'PT5M'),
                 self.check('metricTrigger.timeGrain', 'PT1M'),
-                self.check('metricTrigger.dimensions[0].dimensionName', 'VMName'),
-                self.check('metricTrigger.dimensions[0].operator', 'Equals'),
-                self.check('metricTrigger.dimensions[0].values[0]', 'cliname1'),
-                self.check('metricTrigger.dimensions[0].values[1]', 'cliname2'),
+                self.check('metricTrigger.dimensions[0].DimensionName', 'VMName'),
+                self.check('metricTrigger.dimensions[0].Operator', 'Equals'),
+                self.check('metricTrigger.dimensions[0].Values[0]', 'cliname1'),
+                self.check('metricTrigger.dimensions[0].Values[1]', 'cliname2'),
                 #self.check('metricTrigger.metricNamespace', 'Mynamespace.abcd'),
                 self.check('scaleAction.cooldown', 'PT5M'),
                 self.check('scaleAction.direction', 'None'),
@@ -206,10 +206,10 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
                 self.check('metricTrigger.timeAggregation', 'Average'),
                 self.check('metricTrigger.timeWindow', 'PT5M'),
                 self.check('metricTrigger.timeGrain', 'PT1M'),
-                self.check('metricTrigger.dimensions[0].dimensionName', 'VMName'),
-                self.check('metricTrigger.dimensions[0].operator', 'Equals'),
-                self.check('metricTrigger.dimensions[0].values[0]', 'cliname1'),
-                self.check('metricTrigger.dimensions[0].values[1]', 'cliname2'),
+                self.check('metricTrigger.dimensions[0].DimensionName', 'VMName'),
+                self.check('metricTrigger.dimensions[0].Operator', 'Equals'),
+                self.check('metricTrigger.dimensions[0].Values[0]', 'cliname1'),
+                self.check('metricTrigger.dimensions[0].Values[1]', 'cliname2'),
                 #self.check('metricTrigger.metricNamespace', 'Mynamespace.abcd'),
                 self.check('scaleAction.cooldown', 'PT5M'),
                 self.check('scaleAction.direction', 'None'),
@@ -236,8 +236,8 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
             self.check('capacity.default', 5),
             self.check('capacity.minimum', 5),
             self.check('capacity.maximum', 5),
-            self.check('fixedDate.end', '2018-12-26T00:00:00+00:00'),
-            self.check('fixedDate.start', '2018-12-24T00:00:00+00:00'),
+            self.check('fixedDate.end', '2018-12-26T00:00:00Z'),
+            self.check('fixedDate.start', '2018-12-24T00:00:00Z'),
             self.check('fixedDate.timeZone', 'Pacific Standard Time'),
             self.check('recurrence', None)
         ])
@@ -288,7 +288,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
         schedules = self.cmd('monitor autoscale profile list -g {rg} --autoscale-name {vmss}').get_output_in_json()
 
         def _is_default(val):
-            if not val['fixedDate'] and not val['recurrence']:
+            if not val.get('fixedDate', None) and not val.get('recurrence', None):
                 return True
             try:
                 json.loads(val['name'])

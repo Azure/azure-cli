@@ -4285,6 +4285,23 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_resto
         print(output)
 
 
+def build_bicepparam_file(cmd, file, stdout=None, outdir=None, outfile=None, no_restore=None):
+    args = ["build-params", file]
+    if outdir:
+        args += ["--outdir", outdir]
+    if outfile:
+        args += ["--outfile", outfile]
+    if no_restore:
+        args += ["--no-restore"]
+    if stdout:
+        args += ["--stdout"]
+
+    output = run_bicep_command(cmd.cli_ctx, args)
+
+    if stdout:
+        print(output)
+
+
 def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline=None, indent_kind=None, indent_size=None, insert_final_newline=None):
     ensure_bicep_installation(cmd.cli_ctx)
 
@@ -4357,6 +4374,29 @@ def decompile_bicep_file(cmd, file, force=None):
     run_bicep_command(cmd.cli_ctx, args)
 
 
+def decompileparams_bicep_file(cmd, file, bicep_file=None, outdir=None, outfile=None, stdout=None):
+    ensure_bicep_installation(cmd.cli_ctx)
+
+    minimum_supported_version = "0.18.4"
+    if bicep_version_greater_than_or_equal_to(minimum_supported_version):
+        args = ["decompile-params", file]
+        if bicep_file:
+            args += ["--bicep-file", bicep_file]
+        if outdir:
+            args += ["--outdir", outdir]
+        if outfile:
+            args += ["--outfile", outfile]
+        if stdout:
+            args += ["--stdout"]
+
+        output = run_bicep_command(cmd.cli_ctx, args)
+
+        if stdout:
+            print(output)
+    else:
+        logger.error("az bicep decompile-params could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
+
+
 def show_bicep_cli_version(cmd):
     print(run_bicep_command(cmd.cli_ctx, ["--version"], auto_install=False))
 
@@ -4365,7 +4405,7 @@ def list_bicep_cli_versions(cmd):
     return get_bicep_available_release_tags()
 
 
-def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, stdout=None):
+def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, stdout=None, output_format=None, include_params=None):
     ensure_bicep_installation(cmd.cli_ctx)
 
     minimum_supported_version = "0.7.4"
@@ -4377,6 +4417,10 @@ def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, 
             args += ["--outdir", outdir]
         if outfile:
             args += ["--outfile", outfile]
+        if output_format:
+            args += ["--output-format", output_format]
+        if include_params:
+            args += ["--include-params", include_params]
         if stdout:
             args += ["--stdout"]
 

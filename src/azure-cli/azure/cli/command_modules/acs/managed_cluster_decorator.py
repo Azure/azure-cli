@@ -408,21 +408,29 @@ class AKSManagedClusterContext(BaseAKSContext):
     def __validate_gmsa_options(
         self,
         enable_windows_gmsa,
+        disable_windows_gmsa,
         gmsa_dns_server,
         gmsa_root_domain_name,
         yes,
     ) -> None:
         """Helper function to validate gmsa related options.
 
-        When enable_windows_gmsa is specified, if both gmsa_dns_server and gmsa_root_domain_name are not assigned and
-        user does not confirm the operation, a DecoratorEarlyExitException will be raised; if only one of
-        gmsa_dns_server or gmsa_root_domain_name is assigned, raise a RequiredArgumentMissingError. When
-        enable_windows_gmsa is not specified, if any of gmsa_dns_server or gmsa_root_domain_name is assigned, raise
-        a RequiredArgumentMissingError.
+        When enable_windows_gmsa is specified, a InvalidArgumentValueError will be raised if disable_windows_gmsa
+        is also specified; if both gmsa_dns_server and gmsa_root_domain_name are not assigned and user does not
+        confirm the operation, a DecoratorEarlyExitException will be raised; if only one of gmsa_dns_server or
+        gmsa_root_domain_name is assigned, raise a RequiredArgumentMissingError. When enable_windows_gmsa is
+        not specified, if any of gmsa_dns_server or gmsa_root_domain_name is assigned, raise a RequiredArgumentMissingError.
+        When disable_windows_gmsa is specified, if gmsa_dns_server or gmsa_root_domain_name is
+        assigned, raise a InvalidArgumentValueError.
 
         :return: bool
         """
         if enable_windows_gmsa:
+            if disable_windows_gmsa:
+                raise InvalidArgumentValueError(
+                    "You should not set --disable-windows-gmsa "
+                    "when setting --enable-windows-gmsa."
+                )
             if gmsa_dns_server is None and gmsa_root_domain_name is None:
                 msg = (
                     "Please assure that you have set the DNS server in the vnet used by the cluster "
@@ -435,10 +443,18 @@ class AKSManagedClusterContext(BaseAKSContext):
                     "You must set or not set --gmsa-dns-server and --gmsa-root-domain-name at the same time."
                 )
         else:
+            if not disable_windows_gmsa:
+                if any([gmsa_dns_server, gmsa_root_domain_name]):
+                    raise RequiredArgumentMissingError(
+                        "You only can set --gmsa-dns-server and --gmsa-root-domain-name "
+                        "when setting --enable-windows-gmsa."
+                    )
+
+        if disable_windows_gmsa:
             if any([gmsa_dns_server, gmsa_root_domain_name]):
-                raise RequiredArgumentMissingError(
-                    "You only can set --gmsa-dns-server and --gmsa-root-domain-name "
-                    "when setting --enable-windows-gmsa."
+                raise InvalidArgumentValueError(
+                    "You should not set --gmsa-dns-server nor --gmsa-root-domain-name "
+                    "when setting --disable-windows-gmsa."
                 )
 
     def get_subscription_id(self):
@@ -1250,14 +1266,14 @@ class AKSManagedClusterContext(BaseAKSContext):
                 enable_validation=False
             )
             self.__validate_gmsa_options(
-                enable_windows_gmsa, gmsa_dns_server, gmsa_root_domain_name, self.get_yes()
+                enable_windows_gmsa, self._get_disable_windows_gmsa(enable_validation=False), gmsa_dns_server, gmsa_root_domain_name, self.get_yes()
             )
         return enable_windows_gmsa
 
     def get_enable_windows_gmsa(self) -> bool:
         """Obtain the value of enable_windows_gmsa.
 
-        This function will verify the parameter by default. When enable_windows_gmsa is specified, if both
+        This function will verify the parameter by default. When enable_windows_gmsa is specified, a ; if both
         gmsa_dns_server and gmsa_root_domain_name are not assigned and user does not confirm the operation,
         a DecoratorEarlyExitException will be raised; if only one of gmsa_dns_server or gmsa_root_domain_name is
         assigned, raise a RequiredArgumentMissingError. When enable_windows_gmsa is not specified, if any of
@@ -1320,6 +1336,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         if enable_validation:
             self.__validate_gmsa_options(
                 self._get_enable_windows_gmsa(enable_validation=False),
+                self._get_disable_windows_gmsa(enable_validation=False),
                 gmsa_dns_server,
                 gmsa_root_domain_name,
                 self.get_yes(),
@@ -1339,6 +1356,49 @@ class AKSManagedClusterContext(BaseAKSContext):
         string type or None
         """
         return self._get_gmsa_dns_server_and_root_domain_name(enable_validation=True)
+
+    def _get_disable_windows_gmsa(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of disable_windows_gmsa.
+
+        This function supports the option of enable_validation. Please refer to function __validate_gmsa_options for
+        details of validation.
+
+        :return: bool
+        """
+        # disable_windows_gmsa is only supported in UPDATE
+        if self.decorator_mode == DecoratorMode.CREATE:
+            disable_windows_gmsa = False
+        else:
+            # read the original value passed by the command
+            disable_windows_gmsa = self.raw_param.get("disable_windows_gmsa")
+
+        # this parameter does not need dynamic completion
+        # validation
+        if enable_validation:
+            (
+                gmsa_dns_server,
+                gmsa_root_domain_name,
+            ) = self._get_gmsa_dns_server_and_root_domain_name(
+                enable_validation=False
+            )
+            self.__validate_gmsa_options(
+                self._get_enable_windows_gmsa(enable_validation=False),
+                disable_windows_gmsa,
+                gmsa_dns_server,
+                gmsa_root_domain_name,
+                self.get_yes(),
+            )
+        return disable_windows_gmsa
+
+    def get_disable_windows_gmsa(self) -> bool:
+        """Obtain the value of disable_windows_gmsa.
+
+        This function will verify the parameter by default. When disable_windows_gmsa is specified, if
+        gmsa_dns_server or gmsa_root_domain_name is assigned, a InvalidArgumentValueError will be raised;
+
+        :return: bool
+        """
+        return self._get_disable_windows_gmsa(enable_validation=True)
 
     # pylint: disable=too-many-statements
     def _get_service_principal_and_client_secret(
@@ -1759,25 +1819,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: int or None
         """
         # read the original value passed by the command
-        load_balancer_managed_outbound_ip_count = self.raw_param.get(
-            "load_balancer_managed_outbound_ip_count"
-        )
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if load_balancer_managed_outbound_ip_count is None and self.decorator_mode == DecoratorMode.UPDATE:
-            if (
-                self.mc and
-                self.mc.network_profile and
-                self.mc.network_profile.load_balancer_profile and
-                self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps and
-                self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count is not None
-            ):
-                load_balancer_managed_outbound_ip_count = (
-                    self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count
-                )
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return load_balancer_managed_outbound_ip_count
+        return self.raw_param.get("load_balancer_managed_outbound_ip_count")
 
     def get_load_balancer_managed_outbound_ipv6_count(self) -> Union[int, None]:
         """Obtain the expected count of IPv6 managed outbound IPs.
@@ -1786,20 +1828,7 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         :return: int or None
         """
-        count_ipv6 = self.raw_param.get('load_balancer_managed_outbound_ipv6_count')
-
-        if count_ipv6 is None and self.decorator_mode == DecoratorMode.UPDATE:
-            if (
-                self.mc and
-                self.mc.network_profile and
-                self.mc.network_profile.load_balancer_profile and
-                self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps and
-                self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count_ipv6 is not None
-            ):
-                count_ipv6 = (
-                    self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count_ipv6
-                )
-        return count_ipv6
+        return self.raw_param.get('load_balancer_managed_outbound_ipv6_count')
 
     def get_load_balancer_outbound_ips(self) -> Union[str, List[ResourceReference], None]:
         """Obtain the value of load_balancer_outbound_ips.
@@ -1809,25 +1838,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: string, list of ResourceReference, or None
         """
         # read the original value passed by the command
-        load_balancer_outbound_ips = self.raw_param.get(
-            "load_balancer_outbound_ips"
-        )
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if load_balancer_outbound_ips is None and self.decorator_mode == DecoratorMode.UPDATE:
-            if (
-                self.mc and
-                self.mc.network_profile and
-                self.mc.network_profile.load_balancer_profile and
-                self.mc.network_profile.load_balancer_profile.outbound_i_ps and
-                self.mc.network_profile.load_balancer_profile.outbound_i_ps.public_i_ps is not None
-            ):
-                load_balancer_outbound_ips = (
-                    self.mc.network_profile.load_balancer_profile.outbound_i_ps.public_i_ps
-                )
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return load_balancer_outbound_ips
+        return self.raw_param.get("load_balancer_outbound_ips")
 
     def get_load_balancer_outbound_ip_prefixes(self) -> Union[str, List[ResourceReference], None]:
         """Obtain the value of load_balancer_outbound_ip_prefixes.
@@ -1835,25 +1846,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: string, list of ResourceReference, or None
         """
         # read the original value passed by the command
-        load_balancer_outbound_ip_prefixes = self.raw_param.get(
-            "load_balancer_outbound_ip_prefixes"
-        )
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if load_balancer_outbound_ip_prefixes is None and self.decorator_mode == DecoratorMode.UPDATE:
-            if (
-                self.mc and
-                self.mc.network_profile and
-                self.mc.network_profile.load_balancer_profile and
-                self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes and
-                self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes.public_ip_prefixes is not None
-            ):
-                load_balancer_outbound_ip_prefixes = (
-                    self.mc.network_profile.load_balancer_profile.outbound_ip_prefixes.public_ip_prefixes
-                )
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return load_balancer_outbound_ip_prefixes
+        return self.raw_param.get("load_balancer_outbound_ip_prefixes")
 
     def get_load_balancer_outbound_ports(self) -> Union[int, None]:
         """Obtain the value of load_balancer_outbound_ports.
@@ -1863,24 +1856,9 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: int or None
         """
         # read the original value passed by the command
-        load_balancer_outbound_ports = self.raw_param.get(
+        return self.raw_param.get(
             "load_balancer_outbound_ports"
         )
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if load_balancer_outbound_ports is None and self.decorator_mode == DecoratorMode.UPDATE:
-            if (
-                self.mc and
-                self.mc.network_profile and
-                self.mc.network_profile.load_balancer_profile and
-                self.mc.network_profile.load_balancer_profile.allocated_outbound_ports is not None
-            ):
-                load_balancer_outbound_ports = (
-                    self.mc.network_profile.load_balancer_profile.allocated_outbound_ports
-                )
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return load_balancer_outbound_ports
 
     def get_load_balancer_idle_timeout(self) -> Union[int, None]:
         """Obtain the value of load_balancer_idle_timeout.
@@ -1890,24 +1868,9 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: int or None
         """
         # read the original value passed by the command
-        load_balancer_idle_timeout = self.raw_param.get(
+        return self.raw_param.get(
             "load_balancer_idle_timeout"
         )
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if load_balancer_idle_timeout is None and self.decorator_mode == DecoratorMode.UPDATE:
-            if (
-                self.mc and
-                self.mc.network_profile and
-                self.mc.network_profile.load_balancer_profile and
-                self.mc.network_profile.load_balancer_profile.idle_timeout_in_minutes is not None
-            ):
-                load_balancer_idle_timeout = (
-                    self.mc.network_profile.load_balancer_profile.idle_timeout_in_minutes
-                )
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return load_balancer_idle_timeout
 
     def get_nat_gateway_managed_outbound_ip_count(self) -> Union[int, None]:
         """Obtain the value of nat_gateway_managed_outbound_ip_count.
@@ -2104,17 +2067,16 @@ class AKSManagedClusterContext(BaseAKSContext):
                                 "userDefinedRouting doesn't support customizing \
                                 a standard load balancer with IP addresses"
                             )
-                    else:
-                        if (
-                            self.get_load_balancer_managed_outbound_ip_count() or
-                            self.get_load_balancer_managed_outbound_ipv6_count() or
-                            self.get_load_balancer_outbound_ips() or
-                            self.get_load_balancer_outbound_ip_prefixes()
-                        ):
-                            raise MutuallyExclusiveArgumentError(
-                                "userDefinedRouting doesn't support customizing \
-                                a standard load balancer with IP addresses"
-                            )
+                    if (
+                        self.get_load_balancer_managed_outbound_ip_count() or
+                        self.get_load_balancer_managed_outbound_ipv6_count() or
+                        self.get_load_balancer_outbound_ips() or
+                        self.get_load_balancer_outbound_ip_prefixes()
+                    ):
+                        raise MutuallyExclusiveArgumentError(
+                            "userDefinedRouting doesn't support customizing \
+                            a standard load balancer with IP addresses"
+                        )
 
         return outbound_type
 
@@ -3868,13 +3830,14 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         # read the original value passed by the command
         private_dns_zone = self.raw_param.get("private_dns_zone")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.api_server_access_profile and
-            self.mc.api_server_access_profile.private_dns_zone is not None
-        ):
-            private_dns_zone = self.mc.api_server_access_profile.private_dns_zone
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.api_server_access_profile and
+                self.mc.api_server_access_profile.private_dns_zone is not None
+            ):
+                private_dns_zone = self.mc.api_server_access_profile.private_dns_zone
 
         # this parameter does not need dynamic completion
         # validation
@@ -6562,22 +6525,16 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         if outbound_type and outbound_type != CONST_OUTBOUND_TYPE_LOAD_BALANCER:
             mc.network_profile.load_balancer_profile = None
         else:
-            load_balancer_managed_outbound_ip_count = self.context.get_load_balancer_managed_outbound_ip_count()
-            load_balancer_managed_outbound_ipv6_count = self.context.get_load_balancer_managed_outbound_ipv6_count()
-            load_balancer_outbound_ips = self.context.get_load_balancer_outbound_ips()
-            load_balancer_outbound_ip_prefixes = self.context.get_load_balancer_outbound_ip_prefixes()
-            load_balancer_outbound_ports = self.context.get_load_balancer_outbound_ports()
-            load_balancer_idle_timeout = self.context.get_load_balancer_idle_timeout()
             # In the internal function "_update_load_balancer_profile", it will check whether the provided parameters
             # have been assigned, and if there are any, the corresponding profile will be modified; otherwise, it will
             # remain unchanged.
             mc.network_profile.load_balancer_profile = _update_load_balancer_profile(
-                managed_outbound_ip_count=load_balancer_managed_outbound_ip_count,
-                managed_outbound_ipv6_count=load_balancer_managed_outbound_ipv6_count,
-                outbound_ips=load_balancer_outbound_ips,
-                outbound_ip_prefixes=load_balancer_outbound_ip_prefixes,
-                outbound_ports=load_balancer_outbound_ports,
-                idle_timeout=load_balancer_idle_timeout,
+                managed_outbound_ip_count=self.context.get_load_balancer_managed_outbound_ip_count(),
+                managed_outbound_ipv6_count=self.context.get_load_balancer_managed_outbound_ipv6_count(),
+                outbound_ips=self.context.get_load_balancer_outbound_ips(),
+                outbound_ip_prefixes=self.context.get_load_balancer_outbound_ip_prefixes(),
+                outbound_ports=self.context.get_load_balancer_outbound_ports(),
+                idle_timeout=self.context.get_load_balancer_idle_timeout(),
                 profile=mc.network_profile.load_balancer_profile,
                 models=self.models.load_balancer_models)
         return mc
@@ -6634,6 +6591,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         api_server_authorized_ip_ranges = self.context.get_api_server_authorized_ip_ranges()
         disable_public_fqdn = self.context.get_disable_public_fqdn()
         enable_public_fqdn = self.context.get_enable_public_fqdn()
+        private_dns_zone = self.context.get_private_dns_zone()
         if api_server_authorized_ip_ranges is not None:
             # empty string is valid as it disables ip whitelisting
             profile_holder.authorized_ip_ranges = api_server_authorized_ip_ranges
@@ -6641,6 +6599,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             profile_holder.enable_private_cluster_public_fqdn = False
         if enable_public_fqdn:
             profile_holder.enable_private_cluster_public_fqdn = True
+        if private_dns_zone is not None:
+            profile_holder.private_dns_zone = private_dns_zone
 
         # keep api_server_access_profile empty if none of its properties are updated
         if (
@@ -6662,8 +6622,9 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         disable_ahub = self.context.get_disable_ahub()
         windows_admin_password = self.context.get_windows_admin_password()
         enable_windows_gmsa = self.context.get_enable_windows_gmsa()
+        disable_windows_gmsa = self.context.get_disable_windows_gmsa()
 
-        if any([enable_ahub, disable_ahub, windows_admin_password, enable_windows_gmsa]) and not mc.windows_profile:
+        if any([enable_ahub, disable_ahub, windows_admin_password, enable_windows_gmsa, disable_windows_gmsa]) and not mc.windows_profile:
             # seems we know the error
             raise UnknownError(
                 "Encounter an unexpected error while getting windows profile from the cluster in the process of update."
@@ -6681,6 +6642,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 enabled=True,
                 dns_server=gmsa_dns_server,
                 root_domain_name=gmsa_root_domain_name,
+            )
+        if disable_windows_gmsa:
+            mc.windows_profile.gmsa_profile = self.models.WindowsGmsaProfile(
+                enabled=False,
             )
         return mc
 

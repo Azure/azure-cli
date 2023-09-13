@@ -228,14 +228,14 @@ jobs:
       TargetPath: 'build_scripts/windows/out/'
       ArtifactName: msi-$(Platform)
 
-- job: TestWindowsMSI
-  displayName: Test Windows MSI
+- job: TestMsiInstallation
+  displayName: Test MSI Installation
   strategy:
     matrix:
       x86:
         Platform: x86
-#      x64:
-#        Platform: x64
+      x64:
+        Platform: x64
 
   dependsOn: BuildWindowsMSI
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
@@ -257,47 +257,7 @@ jobs:
   - task: PowerShell@2
     displayName: Install and Load CLI
     inputs:
-      targetType: inline
-      script: |
-        if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-          # Start another Powershell process as Admin and execute this script again
-          $arguments = "& '" +$myinvocation.mycommand.definition + "'"
-          Start-Process powershell -Verb runAs -ArgumentList $arguments
-          # Stop if the PowerShell is not run as Admin
-          Break
-        }
-        # The following are executed by elevated PowerShell
-        az --version
-        
-        $InstallArgs = @(
-          "/i"
-          "`"$env:SYSTEM_ARTIFACTSDIRECTORY\msi\Microsoft Azure CLI.msi`""
-          "/q"
-          "/norestart"
-          "/l*v"
-          ".\install_logs.txt"
-        )
-        $pre_installed_version=az version --query '\"azure-cli\"' -o tsv
-        $to_be_installed_version=Get-Content $(System.ArtifactsDirectory)/metadata/version
-        if ($pre_installed_version -eq $to_be_installed_version){
-          # See https://docs.microsoft.com/windows/win32/msi/reinstallmode about options of REINSTALLMODE
-          $reinstall_option="REINSTALL=ALL REINSTALLMODE=emus"
-          $InstallArgs += $reinstall_option
-        }
-        Start-Process "msiexec.exe" -ArgumentList $InstallArgs -Wait -NoNewWindow
-        $install_time=Measure-Command {Start-Process "msiexec.exe" -ArgumentList $InstallArgs -Wait -NoNewWindow} | select -expand TotalSeconds
-        $installed_version=az version --query '\"azure-cli\"' -o tsv
-        if ($installed_version -ne $to_be_installed_version){
-          echo "The MSI failed to install."
-          Exit 1
-        }
-        echo 'Install time(seconds):' $install_time
-        az --version
-        # Test bundled pip with extension installation
-        az extension add -n rdbms-connect
-        az self-test
-        
-        Get-Content .\install_logs.txt
+      filePath: build_scripts\windows\scripts\test_msi_installation.ps1
 
 - job: BuildDockerImage
   displayName: Build Docker Image
@@ -1137,7 +1097,7 @@ jobs:
     - VerifyWindowsRequirements
     - VerifyVersions
     - BuildWindowsMSI
-    - TestWindowsMSI
+    - TestMsiInstallation
     - BuildDockerImage
     - TestDockerImage
     - BuildPythonWheel

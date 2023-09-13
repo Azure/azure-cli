@@ -98,7 +98,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_BOTSERVICE = ('azure.mgmt.botservice', None)
     MGMT_CDN = ('azure.mgmt.cdn', None)
     MGMT_COGNITIVESERVICES = ('azure.mgmt.cognitiveservices', None)
-    MGMT_CONSUMPTION = ('azure.mgmt.consumption', None)
     MGMT_CONTAINERINSTANCE = ('azure.mgmt.containerinstance', None)
     MGMT_COSMOSDB = ('azure.mgmt.cosmosdb', None)
     MGMT_DATALAKE_ANALYTICS = ('azure.cli.command_modules.dla.vendored_sdks.azure_mgmt_datalake_analytics', None)
@@ -110,7 +109,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_POLICYINSIGHTS = ('azure.mgmt.policyinsights', None)
     MGMT_RDBMS = ('azure.mgmt.rdbms', None)
     MGMT_REDIS = ('azure.mgmt.redis', None)
-    MGMT_RELAY = ('azure.mgmt.relay', None)
     MGMT_SEARCH = ('azure.mgmt.search', None)
     MGMT_SERVICEFABRIC = ('azure.mgmt.servicefabric', None)
     MGMT_SIGNALR = ('azure.mgmt.signalr', None)
@@ -190,7 +188,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_KEYVAULT: '2023-02-01',
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2022-04-01', {
             'classic_administrators': '2015-06-01',
-            'role_definitions': '2022-04-01',
+            'role_definitions': '2022-05-01-preview',
             'provider_operations_metadata': '2018-01-01-preview'
         }),
         ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2022-02-01-preview', {
