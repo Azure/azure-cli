@@ -51,7 +51,8 @@ def add_source_resource_block(context, source, enable_id=True, validate_source_i
         context.argument(arg, configured_default=content.get('configured_default'),
                          options_list=content.get('options'), type=str,
                          deprecate_info=context.deprecate() if deprecate_info else None,
-                         help='{}. Required if {} is not specified.{}'.format(content.get('help'), id_arg, deprecate_info))
+                         help='{}. Required if {} is not specified.{}'.format(
+                             content.get('help'), id_arg, deprecate_info))
         required_args.append(content.get('options')[0])
 
     validator_kwargs = {
