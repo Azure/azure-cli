@@ -7,35 +7,35 @@
 
 import io
 import json
-from difflib import Differ
-from itertools import filterfalse
+from itertools import chain
 from json import JSONDecodeError
 from urllib.parse import urlparse
+from ._snapshot_custom_client import AppConfigSnapshotClient
 
 import chardet
 import javaproperties
 import yaml
-from jsondiff import JsonDiffer
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azure.keyvault.key_vault_id import KeyVaultIdentifier
+from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1.key_vault_id import KeyVaultIdentifier
 from azure.appconfiguration import ResourceReadOnlyError, ConfigurationSetting
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.util import user_confirmation
 from azure.cli.core.azclierror import (FileOperationError,
                                        AzureInternalError,
+                                       InvalidArgumentValueError,
                                        ValidationError,
                                        AzureResponseError,
-                                       RequiredArgumentMissingError)
+                                       RequiredArgumentMissingError,
+                                       ResourceNotFoundError)
 
-from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles, AppServiceConstants, JsonDiff)
-from ._utils import prep_label_filter_for_url_encoding
+from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles, AppServiceConstants, JsonDiff, CompareFieldsMap, StatusCodes, ImportMode)
+from ._diff_utils import get_serializer, KVComparer, print_preview, __print_diff
+from ._utils import prep_label_filter_for_url_encoding, is_json_content_type, validate_feature_flag_name, validate_feature_flag_key
 from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting, QueryFields)
-from._featuremodels import (map_keyvalue_to_featureflag,
-                            map_featureflag_to_keyvalue,
-                            FeatureFlagValue)
+from ._featuremodels import (map_featureflag_to_keyvalue, is_feature_flag, FeatureFlagValue)
 
 logger = get_logger(__name__)
 FEATURE_MANAGEMENT_KEYWORDS = ["FeatureManagement", "featureManagement", "feature_management", "feature-management"]
@@ -79,28 +79,6 @@ class FeatureManagementReservedKeywords:
             select_keywords()
 
 
-def __compare_kvs_for_restore(restore_kvs, current_kvs):
-    # compares two lists and find those that are new or changed in the restore_kvs
-    # optionally (delete == True) find the new ones in current_kvs for deletion
-    dict_current_kvs = {(kv.key, kv.label): (kv.value, kv.content_type, kv.locked, kv.tags) for kv in current_kvs}
-    kvs_to_restore = []
-    kvs_to_modify = []
-    kvs_to_delete = []
-    for entry in restore_kvs:
-        current_tuple = dict_current_kvs.get((entry.key, entry.label), None)
-        if current_tuple is None:
-            kvs_to_restore.append(entry)
-        elif current_tuple != (entry.value, entry.content_type, entry.locked, entry.tags):
-            kvs_to_modify.append(entry)
-
-    set_restore_kvs = {(kv.key, kv.label) for kv in restore_kvs}
-    for entry in current_kvs:
-        if (entry.key, entry.label) not in set_restore_kvs:
-            kvs_to_delete.append(entry)
-
-    return kvs_to_restore, kvs_to_modify, kvs_to_delete
-
-
 def validate_import_key(key):
     if key:
         if not isinstance(key, str):
@@ -119,12 +97,20 @@ def validate_import_key(key):
 
 
 def validate_import_feature(feature):
-    if feature:
-        if '%' in feature:
-            logger.warning("Ignoring invalid feature '%s'. Feature name cannot contain the '%%' character.", feature)
-            return False
-    else:
-        logger.warning("Ignoring invalid feature ''. Feature name cannot be empty.")
+    try:
+        validate_feature_flag_name(feature)
+    except InvalidArgumentValueError as exception:
+        logger.warning("Ignoring invalid feature '%s'. %s", feature, exception.error_msg)
+        return False
+
+    return True
+
+
+def validate_import_feature_key(key):
+    try:
+        validate_feature_flag_key(key)
+    except InvalidArgumentValueError as exception:
+        logger.warning("Ignoring invalid feature with key '%s'. %s", key, exception.error_msg)
         return False
 
     return True
@@ -196,7 +182,7 @@ def __read_kv_from_file(file_path,
         raise FileOperationError('File is not available.')
 
     flattened_data = {}
-    if format_ == 'json' and content_type and __is_json_content_type(content_type):
+    if format_ == 'json' and content_type and is_json_content_type(content_type):
         for key in config_data:
             __flatten_json_key_value(key=prefix_to_add + key,
                                      value=config_data[key],
@@ -309,6 +295,7 @@ def __map_to_appservice_config_reference(key_value, endpoint, prefix):
 def __read_kv_from_config_store(azconfig_client,
                                 key=None,
                                 label=None,
+                                snapshot=None,
                                 datetime=None,
                                 fields=None,
                                 top=None,
@@ -316,6 +303,7 @@ def __read_kv_from_config_store(azconfig_client,
                                 cli_ctx=None,
                                 prefix_to_remove="",
                                 prefix_to_add=""):
+    # pylint: disable=too-many-branches too-many-statements
 
     # list_configuration_settings returns kv with null label when:
     # label = ASCII null 0x00 (or URL encoded %00)
@@ -333,13 +321,22 @@ def __read_kv_from_config_store(azconfig_client,
                 break
             query_fields.append(field.name.lower())
 
-    try:
-        configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key,
-                                                                             label_filter=label,
-                                                                             accept_datetime=datetime,
-                                                                             fields=query_fields)
-    except HttpResponseError as exception:
-        raise AzureResponseError('Failed to read key-value(s) that match the specified key and label. ' + str(exception))
+    if snapshot:
+        try:
+            configsetting_iterable = AppConfigSnapshotClient(azconfig_client).list_snapshot_kv(name=snapshot,
+                                                                                               fields=query_fields)
+
+        except HttpResponseError as exception:
+            raise AzureResponseError('Failed to read key-values(s) from snapshot {}. '.format(snapshot) + str(exception))
+
+    else:
+        try:
+            configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key,
+                                                                                 label_filter=label,
+                                                                                 accept_datetime=datetime,
+                                                                                 fields=query_fields)
+        except HttpResponseError as exception:
+            raise AzureResponseError('Failed to read key-value(s) that match the specified key and label. ' + str(exception))
 
     retrieved_kvs = []
     count = 0
@@ -382,6 +379,17 @@ def __read_kv_from_config_store(azconfig_client,
         count += 1
         if count >= top:
             return retrieved_kvs
+
+    # A request to list kvs of a non-existent snapshot returns an empty result.
+    # We first check if the snapshot exists before returning an empty result.
+    if snapshot and len(retrieved_kvs) == 0:
+        try:
+            _ = AppConfigSnapshotClient(azconfig_client).get_snapshot(name=snapshot)
+
+        except HttpResponseError as exception:
+            if exception.status_code == StatusCodes.NOT_FOUND:
+                raise ResourceNotFoundError("No snapshot with name '{}' was found.".format(snapshot))
+
     return retrieved_kvs
 
 
@@ -405,16 +413,10 @@ def __write_kv_and_features_to_config_store(azconfig_client,
             set_kv.label = label
 
         # Don't overwrite the content type of feature flags or key vault references
-        if content_type and not __is_feature_flag(set_kv) and not __is_key_vault_ref(set_kv):
+        if content_type and not is_feature_flag(set_kv) and not __is_key_vault_ref(set_kv):
             set_kv.content_type = content_type
 
         __write_configuration_setting_to_config_store(azconfig_client, set_kv)
-
-
-def __is_feature_flag(kv):
-    if kv and kv.key and isinstance(kv.key, str) and kv.content_type and isinstance(kv.content_type, str):
-        return kv.key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX) and kv.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE
-    return False
 
 
 def __is_key_vault_ref(kv):
@@ -423,7 +425,7 @@ def __is_key_vault_ref(kv):
 
 def __discard_features_from_retrieved_kv(src_kvs):
     try:
-        src_kvs[:] = [kv for kv in src_kvs if not __is_feature_flag(kv)]
+        src_kvs[:] = [kv for kv in src_kvs if not is_feature_flag(kv)]
     except Exception as exception:
         raise CLIError(str(exception))
 
@@ -481,7 +483,7 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add="", conten
                         logger.debug(
                             'Key "%s" with value "%s" is not a well-formatted KeyVault reference. It will be treated like a regular key-value.\n%s', key, value, str(e))
 
-                elif content_type and __is_json_content_type(content_type):
+                elif content_type and is_json_content_type(content_type):
                     # If appservice values are being imported with JSON content type,
                     # we need to validate that values are in valid JSON format.
                     try:
@@ -534,253 +536,17 @@ def __write_kv_to_app_service(cmd, key_values, appservice_account):
 
 
 # Helper functions
-
-
-def __serialize_kv_list_to_comparable_json_object(keyvalues, level):
-    res = {}
-    if level == 'file':  # import/export only key and value
-        for kv in keyvalues:
-            kv_json = {'value': kv.value}
-            res[kv.key] = kv_json
-    # import/export key, value, and tags (same level as key-value)
-    elif level == 'appservice':
-        for kv in keyvalues:
-            kv_json = {'value': kv.value}
-            # Explicitly assign slot settings for comparison.
-            slot_setting = 'false'
-            if kv.tags:
-                slot_setting = kv.tags.get(AppServiceConstants.APPSVC_SLOT_SETTING_KEY, 'false')
-            kv_json[AppServiceConstants.APPSVC_SLOT_SETTING_KEY] = slot_setting
-
-            res[kv.key] = kv_json
-    # import/export key, value, content-type, and tags (as a sub group)
-    elif level == 'appconfig':
-        for kv in keyvalues:
-            # value
-            kv_json = {'value': kv.value}
-            # tags
-            tag_json = {}
-            if kv.tags:
-                for tag_k, tag_v in kv.tags.items():
-                    tag_json[tag_k] = tag_v
-            kv_json['tags'] = tag_json
-            # content type
-            if kv.content_type:
-                kv_json['content type'] = kv.content_type
-            else:
-                kv_json['content type'] = ""
-            # key
-            res[kv.key] = kv_json
-    return res
-
-
-def __serialize_features_from_kv_list_to_comparable_json_object(keyvalues):
-    features = []
-    for kv in keyvalues:
-        feature = map_keyvalue_to_featureflag(kv)
-        features.append(feature)
-
-    return __serialize_feature_list_to_comparable_json_object(features)
-
-
-def __serialize_feature_list_to_comparable_json_object(features):
-    res = {}
-    for feature in features:
-        # state
-        feature_json = {'state': feature.state}
-        # description
-        feature_json['description'] = feature.description
-        # conditions
-        feature_json['conditions'] = feature.conditions
-        # name
-        res[feature.name] = feature_json
-    return res
-
-
-def __serialize_kv_list_to_comparable_json_list(keyvalues, profile=None):
-    res = []
-    for kv in keyvalues:
-        # value
-        if profile == ImportExportProfiles.KVSET:
-            kv_json = {'key': kv.key,
-                       'value': kv.value,
-                       'label': kv.label,
-                       'content_type': kv.content_type}
-        else:
-            kv_json = {'key': kv.key,
-                       'value': kv.value,
-                       'label': kv.label,
-                       'locked': kv.locked,
-                       'last modified': kv.last_modified,
-                       'content type': kv.content_type}
-        # tags
-        tag_json = {}
-        if kv.tags:
-            for tag_k, tag_v in kv.tags.items():
-                tag_json[tag_k] = tag_v
-        kv_json['tags'] = tag_json
-        res.append(kv_json)
-    return res
-
-
-def __print_features_preview(old_json, new_json, strict=False, yes=False):
-    if not yes:
-        logger.warning('\n---------------- Feature Flags Preview -------------')
-
-    if not strict and not new_json:
-        logger.warning('\nSource configuration is empty. No changes will be made.')
-        return False
-
-    diff_output = __find_ff_diff(old_json=old_json, new_json=new_json, strict=strict)
-
-    if diff_output == {}:
-        logger.warning('\nThe target configuration already contains all feature flags in source. No changes will be made.')
-        return False
-
-    if not yes:
-        __print_preview(diff_output=diff_output)
-    return True
-
-
-def __print_kv_preview(old_json, new_json, strict=False, yes=False):
-    if not yes:
-        logger.warning('\n---------------- Key Values Preview ----------------')
-
-    if not strict and not new_json:
-        logger.warning('\nSource configuration is empty. No changes will be made.')
-        return False
-
-    diff_output = __find_kv_diff(old_json=old_json, new_json=new_json, strict=strict)
-
-    if diff_output == {}:
-        logger.warning('\nTarget configuration already contains all key-values in source. No changes will be made.')
-        return False
-
-    if not yes:
-        __print_preview(diff_output=diff_output)
-    return True
-
-
-def __print_preview(diff_output):
-    # format result printing
-    for action, changes in diff_output.items():
-        if action == JsonDiff.UPDATE and len(changes) > 0:
-            logger.warning('\nUpdating:')
-            for update in changes:
-                logger.warning('- %s', json.dumps(update["old"], ensure_ascii=False))
-                logger.warning('+ %s', json.dumps(update["new"], ensure_ascii=False))
-
-        elif action in (JsonDiff.DELETE, JsonDiff.ADD):
-            subtitle = 'Deleting' if action == JsonDiff.DELETE else 'Adding'
-            logger.warning('\n %s:', subtitle)
-
-            for record in changes:
-                logger.warning(json.dumps(record, ensure_ascii=False))
-
-    logger.warning("")  # printing an empty line for formatting purpose
-
-
-def __find_ff_diff(old_json, new_json, strict=False):
-    ff_diff = {}
-    if not strict and not new_json:
-        return ff_diff
-
-    # perform diff operation
-    # to simplify output, add one shared key in src and dest configuration
-    new_json['@base'] = ''
-    old_json['@base'] = ''
-    differ = JsonDiffer(syntax='explicit')
-    res = differ.diff(old_json, new_json)
-    keys = str(res.keys())
-
-    # return the empty diff if there are no additions, deletions or updates
-    if res == {} or (('update' not in keys) and ('insert' not in keys) and (not strict or ('delete' not in keys))):
-        return ff_diff
-
-    # format result printing
-    for action, changes in res.items():
-        if action.label == 'delete':
-            if strict:
-                ff_diff[JsonDiff.DELETE] = [{"key": key} for key in changes]
-            else:
-                continue  # we do not delete KVs while importing/exporting unless it is strict mode.
-        if action.label == 'insert':
-            ff_diff[JsonDiff.ADD] = []
-            for key, adding in changes.items():
-                record = {'feature': key}
-                for attribute, value in adding.items():
-                    if attribute in ('description', 'conditions'):
-                        continue
-                    record[str(attribute)] = str(value)
-                ff_diff[JsonDiff.ADD].append(record)
-        elif action.label == 'update':
-            ff_diff[JsonDiff.UPDATE] = []
-            for key, updates in changes.items():
-                updates = list(updates.values())[0]
-                attributes = list(updates.keys())
-                old_record = {'feature': key}
-                new_record = {'feature': key}
-                for attribute in attributes:
-                    old_record[attribute] = old_json[key][attribute]
-                    new_record[attribute] = new_json[key][attribute]
-                ff_diff[JsonDiff.UPDATE].append({"old": old_record, "new": new_record})
-    return ff_diff
-
-
-def __find_kv_diff(old_json, new_json, strict=False):
-    kv_diff = {}
-
-    if not strict and not new_json:
-        return kv_diff
-
-    # perform diff operation
-    # to simplify output, add one shared key in src and dest configuration
-    new_json['@base'] = ''
-    old_json['@base'] = ''
-    differ = JsonDiffer(syntax='explicit')
-    res = differ.diff(old_json, new_json)
-    keys = str(res.keys())
-
-    # return the empty diff if there are no additions, deletions or updates
-    if res == {} or (('update' not in keys) and ('insert' not in keys) and (not strict or ('delete' not in keys))):
-        return kv_diff
-
-    for action, changes in res.items():
-        if action.label == 'delete':
-            if strict:
-                kv_diff[JsonDiff.DELETE] = [{"key": key} for key in changes]
-            else:
-                continue  # we do not delete KVs while importing/exporting unless it is strict mode.
-        if action.label == 'insert':
-            kv_diff[JsonDiff.ADD] = []
-            for key, adding in changes.items():
-                record = {'key': key}
-                for attribute, value in adding.items():
-                    record[str(attribute)] = str(value)
-                kv_diff[JsonDiff.ADD].append(record)
-        elif action.label == 'update':
-            kv_diff[JsonDiff.UPDATE] = []
-            for key, updates in changes.items():
-                updates = list(updates.values())[0]
-                attributes = list(updates.keys())
-                old_record = {'key': key}
-                new_record = {'key': key}
-                for attribute in attributes:
-                    old_record[attribute] = old_json[key][attribute]
-                    new_record[attribute] = new_json[key][attribute]
-                kv_diff[JsonDiff.UPDATE].append({"old": old_record, "new": new_record})
-    return kv_diff
-
-
 def __export_kvset_to_file(file_path, keyvalues, yes):
-    kvset = __serialize_kv_list_to_comparable_json_list(keyvalues, ImportExportProfiles.KVSET)
-    obj = {KVSetConstants.KVSETRootElementName: kvset}
-
-    if len(kvset) == 0:
+    if len(keyvalues) == 0:
         logger.warning('\nSource configuration is empty. Nothing to export.')
         return
 
-    __print_kvset_json_diff(new_obj=obj, yes=yes)
+    kvset_serializer = get_serializer("kvset")
+    kvset = [kvset_serializer(keyvalue) for keyvalue in keyvalues]
+    obj = {KVSetConstants.KVSETRootElementName: kvset}
+
+    updates = {JsonDiff.ADD: kvset}
+    print_preview(updates, level="kvset", yes=yes, title="KVSet", indent=2, show_update_diff=False)
 
     if not yes:
         user_confirmation('Do you want to continue? \n')
@@ -791,51 +557,20 @@ def __export_kvset_to_file(file_path, keyvalues, yes):
         raise FileOperationError("Failed to export key-values to file. " + str(exception))
 
 
-def __print_restore_preview(kvs_to_restore, kvs_to_modify, kvs_to_delete):
-    logger.warning('\n---------------- Preview ----------------')
-    if len(kvs_to_restore) + len(kvs_to_modify) + len(kvs_to_delete) == 0:
-        logger.warning('\nNo records matching found to be restored. No changes will be made.')
+def __print_restore_preview(diff, yes):
+    if not yes:
+        logger.warning('\n---------------- Restore Preview ----------------')
+
+    if not diff or not any(diff.values()):
+        logger.warning('\nNo matching records found to be restored. No changes will be made.')
         return False
 
-    # format result printing
-    if kvs_to_restore:
-        logger.warning('\nAdding:')
-        logger.warning(json.dumps(__serialize_kv_list_to_comparable_json_list(kvs_to_restore), indent=2, ensure_ascii=False))
-
-    if kvs_to_modify:
-        logger.warning('\nUpdating:')
-        logger.warning(json.dumps(__serialize_kv_list_to_comparable_json_list(kvs_to_modify), indent=2, ensure_ascii=False))
-
-    if kvs_to_delete:
-        logger.warning('\nDeleting:')
-        logger.warning(json.dumps(__serialize_kv_list_to_comparable_json_list(kvs_to_delete), indent=2, ensure_ascii=False))
+    if not yes:
+        __print_diff(diff, "restore", indent=2, show_update_diff=False)
 
     logger.warning("")  # printing an empty line for formatting purpose
-    confirmation_message = "Do you want to continue? \n"
-    user_confirmation(confirmation_message)
+
     return True
-
-
-def __is_json_content_type(content_type):
-    if not content_type:
-        return False
-
-    content_type = content_type.strip().lower()
-    mime_type = content_type.split(';')[0].strip()
-
-    type_parts = mime_type.split('/')
-    if len(type_parts) != 2:
-        return False
-
-    (main_type, sub_type) = type_parts
-    if main_type != "application":
-        return False
-
-    sub_types = sub_type.split('+')
-    if "json" in sub_types:
-        return True
-
-    return False
 
 
 def __flatten_json_key_value(key, value, flattened_data, depth, separator):
@@ -902,7 +637,7 @@ def __export_keyvalues(fetched_items, format_, separator, prefix=None):
     try:
         for kv in fetched_items:
             key = kv.key
-            if format_ != 'properties' and __is_json_content_type(kv.content_type):
+            if format_ != 'properties' and is_json_content_type(kv.content_type):
                 try:
                     # Convert JSON string value to python object
                     kv.value = json.loads(kv.value)
@@ -1094,7 +829,7 @@ def __compact_key_values(key_values):
 
 
 def __resolve_secret(keyvault_client, keyvault_reference):
-    from azure.keyvault.key_vault_id import SecretId
+    from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1.key_vault_id import SecretId
     try:
         secret_id = json.loads(keyvault_reference.value)["uri"]
         kv_identifier = SecretId(uri=secret_id)
@@ -1110,7 +845,7 @@ def __resolve_secret(keyvault_client, keyvault_reference):
         raise CLIError(str(exception))
 
 
-def __import_kvset_from_file(client, path, strict, yes):
+def __import_kvset_from_file(client, path, strict, yes, import_mode=ImportMode.IGNORE_MATCH):
     new_kvset = __read_with_appropriate_encoding(file_path=path, format_='json')
     if KVSetConstants.KVSETRootElementName not in new_kvset:
         raise FileOperationError("file '{0}' is not in a valid '{1}' format.".format(path, ImportExportProfiles.KVSET))
@@ -1122,30 +857,16 @@ def __import_kvset_from_file(client, path, strict, yes):
                                             tags=kv.get('tags', None))
                        for kv in new_kvset[KVSetConstants.KVSETRootElementName]]
 
-    kvset_to_import = []
-
-    for config_setting in kvset_from_file:
-        if __validate_import_config_setting(config_setting):
-            kvset_to_import.append(config_setting)
+    kvset_from_file = list(filter(__validate_import_config_setting, kvset_from_file))
 
     existing_kvset = __read_kv_from_config_store(client,
                                                  key=SearchFilterOptions.ANY_KEY,
                                                  label=SearchFilterOptions.ANY_LABEL)
-    kvset_to_delete = []
-    if strict:
-        kvset_to_delete = list(filterfalse(lambda kv: any(kv_import.key == kv.key and kv_import.label == kv.label
-                                                          for kv_import in kvset_to_import), existing_kvset))
 
-    # When strict mode is not enabled, we don't delete configurations if they are missing from the import file,
-    # so don't need to show them in the diff, so omit them from existing kvset
-    if not strict:
-        existing_kvset = list(filter(lambda kv: any(kv_import.key == kv.key and kv_import.label == kv.label
-                                                    for kv_import in kvset_to_import), existing_kvset))
+    comparer = KVComparer(kvset_from_file, CompareFieldsMap["kvset"])
+    diff = comparer.compare(existing_kvset, strict=strict)
 
-    existing_kvset_list = __serialize_kv_list_to_comparable_json_list(existing_kvset, ImportExportProfiles.KVSET)
-    kvset_to_import_list = __serialize_kv_list_to_comparable_json_list(kvset_to_import, ImportExportProfiles.KVSET)
-
-    changes_detected = __print_kvset_json_diff(existing_kvset_list, kvset_to_import_list, yes=yes)
+    changes_detected = print_preview(diff, level="kvset", yes=yes, strict=strict, title="KVSet", indent=2, show_update_diff=False)
 
     if not changes_detected:
         return
@@ -1153,11 +874,18 @@ def __import_kvset_from_file(client, path, strict, yes):
     if not yes:
         user_confirmation('Do you want to continue?\n')
 
-    if len(kvset_to_delete) > 0:
-        for config_setting in kvset_to_delete:
-            __delete_configuration_setting_from_config_store(client, config_setting)
+    for config_setting in diff.get(JsonDiff.DELETE, []):
+        __delete_configuration_setting_from_config_store(client, config_setting)
 
-    for config_setting in kvset_to_import:
+    # Create joint iterable from added and updated kvs
+    if import_mode == ImportMode.IGNORE_MATCH:
+        kvset_to_import_iter = chain(
+            diff.get(JsonDiff.ADD, []),
+            (update["new"] for update in diff.get(JsonDiff.UPDATE, [])))  # The value of diff update property is of the form List[{"new": KeyValue, "old": KeyValue}]
+    else:
+        kvset_to_import_iter = kvset_from_file
+
+    for config_setting in kvset_to_import_iter:
         __write_configuration_setting_to_config_store(client, config_setting)
 
 
@@ -1184,11 +912,12 @@ def __validate_import_keyvault_ref(kv):
 
 
 def __validate_import_feature_flag(kv):
-    if kv and validate_import_feature(kv.key):
+    if kv and validate_import_feature_key(kv.key):
         try:
             ff = json.loads(kv.value)
             if FEATURE_FLAG_PROPERTIES == ff.keys():
-                return True
+                return validate_import_feature(ff["id"])
+
             logger.warning("The feature flag with key '{%s}' is not a valid feature flag. It will not be imported.", kv.key)
         except JSONDecodeError as exception:
             logger.warning("The feature flag with key '{%s}' is not in a valid JSON format. It will not be imported.\n{%s}", kv.id, str(exception))
@@ -1199,7 +928,7 @@ def __validate_import_config_setting(config_setting):
     if __is_key_vault_ref(kv=config_setting):
         if not __validate_import_keyvault_ref(kv=config_setting):
             return False
-    elif __is_feature_flag(kv=config_setting):
+    elif is_feature_flag(kv=config_setting):
         if not __validate_import_feature_flag(kv=config_setting):
             return False
     elif not validate_import_key(config_setting.key):
@@ -1259,35 +988,6 @@ def __delete_configuration_setting_from_config_store(azconfig_client, configurat
             configuration_setting.key, configuration_setting.label, str(exception))
     except Exception as exception:
         raise AzureInternalError(str(exception))
-
-
-def __get_json_diff(old_obj=None, new_obj=None):
-    # prints the json diff if two objects differ, returns whether the diff was found.
-
-    old_json = "" if old_obj is None else json.dumps(old_obj, indent=2, ensure_ascii=False).splitlines(True)
-    new_json = "" if new_obj is None else json.dumps(new_obj, indent=2, ensure_ascii=False).splitlines(True)
-
-    differ = Differ()
-    diff = list(differ.compare(old_json, new_json))
-
-    return diff
-
-
-def __print_kvset_json_diff(old_obj=None, new_obj=None, yes=False):
-    if not yes:
-        logger.warning('\n---------------- KVSet Preview ----------------')
-
-    diff = __get_json_diff(old_obj=old_obj, new_obj=new_obj)
-    if not any(line.startswith('-') or line.startswith('+') for line in diff):
-        logger.warning('Target configuration store already contains all configuration settings in source. No changes will be made.')
-        return False
-
-    if not yes:
-        # omit minuscule details of the diff outlining the characters that changed, and show rest of the diff.
-        logger.warning(''.join(filter(lambda line: not line.startswith('?'), diff)))
-        # print newline for readability
-        logger.warning('\n')
-    return True
 
 
 class Undef:  # pylint: disable=too-few-public-methods

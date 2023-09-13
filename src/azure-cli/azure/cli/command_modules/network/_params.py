@@ -20,7 +20,7 @@ from azure.cli.command_modules.network._validators import (
     validate_dns_record_type, validate_private_ip_address,
     get_servers_validator, get_public_ip_validator, get_nsg_validator,
     get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id,
-    validate_service_endpoint_policy, validate_subresource_list,
+    validate_service_endpoint_policy,
     validate_custom_error_pages,
     validate_custom_headers, validate_status_code_ranges, validate_subnet_ranges,
     WafConfigExclusionAction,
@@ -34,6 +34,7 @@ from azure.cli.command_modules.network._completers import (
 from azure.cli.command_modules.network._actions import (
     TrustedClientCertificateCreate,
     SslProfilesCreate, AddMappingRequest, WAFRulesCreate)
+from azure.cli.command_modules.network.custom import RULESET_VERSION
 from azure.cli.core.profiles import ResourceType
 
 
@@ -228,9 +229,9 @@ def load_arguments(self, _):
                    help='The type of the web application firewall rule set.')
         c.argument('rule_set_version',
                    options_list='--version',
-                   arg_type=get_enum_type(['0.1', '2.2.9', '3.0', '3.1', '3.2']),
+                   arg_type=get_enum_type(RULESET_VERSION.values()),
                    help='The version of the web application firewall rule set type. '
-                        '0.1 is used for Microsoft_BotManagerRuleSet')
+                        '0.1 and 1.0 are used for Microsoft_BotManagerRuleSet.')
 
     with self.argument_context('network application-gateway waf-policy policy-setting') as c:
         c.argument('policy_name', options_list='--policy-name', id_part=None,
@@ -280,7 +281,7 @@ def load_arguments(self, _):
                    options_list='--group-name',
                    help='The managed rule group for exclusion.')
         c.argument('rule_ids', nargs='+', help='List of rules that will be disabled. If provided, --group-name must be provided too.')
-    # region
+    # endregion
 
     # region DDoS Protection Plans
     with self.argument_context('network ddos-protection') as c:
@@ -296,14 +297,11 @@ def load_arguments(self, _):
         c.argument('zone_name', options_list=['--zone-name', '-z'], help='The name of the zone.', type=dns_zone_name_type)
         c.argument('metadata', nargs='+', help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.', validator=validate_metadata)
 
-    with self.argument_context('network dns list-references') as c:
-        c.argument('target_resources', nargs='+', help='Space-separated list of resource IDs you wish to query.', validator=validate_subresource_list)
-
     with self.argument_context('network dns zone') as c:
         c.argument('zone_name', name_arg_type)
         c.ignore('location')
 
-        c.argument('zone_type', help='Type of DNS zone to create.', deprecate_info=c.deprecate(), arg_type=get_enum_type(ZoneType))
+        c.argument('zone_type', help='Type of DNS zone to create.', deprecate_info=c.deprecate(hide=True), arg_type=get_enum_type(ZoneType))
 
         c.argument('registration_vnets',
                    arg_group='Private Zone',
@@ -312,11 +310,13 @@ def load_arguments(self, _):
                         'Number of private DNS zones with virtual network auto-registration enabled is 1. '
                         'If you need to increase this limit, please contact Azure Support: '
                         'https://docs.microsoft.com/en-us/azure/azure-subscription-service-limits',
+                   deprecate_info=c.deprecate(hide=True),
                    validator=get_vnet_validator('registration_vnets'))
         c.argument('resolution_vnets',
                    arg_group='Private Zone',
                    nargs='+',
                    help='Space-separated names or IDs of virtual networks that resolve records in this DNS zone.',
+                   deprecate_info=c.deprecate(hide=True),
                    validator=get_vnet_validator('resolution_vnets'))
 
     with self.argument_context('network dns zone import') as c:
@@ -336,12 +336,12 @@ def load_arguments(self, _):
         for item in ['record_type', 'record_set_type']:
             c.argument(item, ignore_type, validator=validate_dns_record_type)
 
-    for item in ['', 'a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
+    for item in ['', 'a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'ns', 'ptr', 'srv', 'tlsa', 'txt']:
         with self.argument_context('network dns record-set {} create'.format(item)) as c:
-            c.argument('ttl', help='Record set TTL (time-to-live)')
+            c.argument('ttl', type=int, help='Record set TTL (time-to-live)')
             c.argument('if_none_match', help='Create the record set only if it does not already exist.', action='store_true')
 
-    for item in ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
+    for item in ['a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'ns', 'ptr', 'srv', 'tlsa', 'txt']:
         with self.argument_context('network dns record-set {} add-record'.format(item)) as c:
             c.argument('ttl', type=int, help='Record set TTL (time-to-live)')
             c.argument('record_set_name',
@@ -357,7 +357,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network dns record-set cname set-record') as c:
         c.argument('record_set_name', options_list=['--record-set-name', '-n'], help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
-        c.argument('ttl', help='Record set TTL (time-to-live)')
+        c.argument('ttl', type=int, help='Record set TTL (time-to-live)')
         c.argument('if_none_match', help='Create the record set only if it does not already exist.',
                    action='store_true')
 
@@ -379,6 +379,12 @@ def load_arguments(self, _):
 
     with self.argument_context('network dns record-set cname') as c:
         c.argument('cname', options_list=['--cname', '-c'], help='Value of the cname record-set. It should be Canonical name.')
+
+    with self.argument_context('network dns record-set ds') as c:
+        c.argument('key_tag', help='The key tag value is used to determine which DNSKEY Resource Record is used for signature verification.', type=int)
+        c.argument('algorithm', help='The security algorithm type represents the standard security algorithm number of the DNSKEY Resource Record. See: https://www.iana.org/assignments/dns-sec-alg-numbers/dns-sec-alg-numbers.xhtml', type=int)
+        c.argument('digest_type', help='The digest algorithm type represents the standard digest algorithm number used to construct the digest. See: https://www.iana.org/assignments/ds-rr-types/ds-rr-types.xhtml', type=int)
+        c.argument('digest', help='The digest value is a cryptographic hash value of the referenced DNSKEY Resource Record.')
 
     with self.argument_context('network dns record-set mx') as c:
         c.argument('exchange', options_list=['--exchange', '-e'], help='Exchange metric.')
@@ -408,6 +414,12 @@ def load_arguments(self, _):
         c.argument('weight', type=int, options_list=['--weight', '-w'], help='Weight metric.')
         c.argument('port', type=int, options_list=['--port', '-r'], help='Service port.')
         c.argument('target', options_list=['--target', '-t'], help='Target domain name.')
+
+    with self.argument_context('network dns record-set tlsa') as c:
+        c.argument('certificate_usage', help='The usage specifies the provided association that will be used to match the certificate presented in the TLS handshake.', type=int)
+        c.argument('selector', help='The selector specifies which part of the TLS certificate presented by the server will be matched against the association data.', type=int)
+        c.argument('matching_type', help='The matching type specifies how the certificate association is presented.', type=int)
+        c.argument('certificate_data', help='This specifies the certificate association data to be matched.')
 
     with self.argument_context('network dns record-set txt') as c:
         c.argument('value', options_list=['--value', '-v'], nargs='+', help='Space-separated list of text values which will be concatenated together.')
@@ -603,6 +615,7 @@ def load_arguments(self, _):
         c.argument('name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), help='The name of the public IP address.')
         c.argument('reverse_fqdn', help='Reverse FQDN (fully qualified domain name).')
         c.argument('dns_name', help='Globally unique DNS entry.')
+        c.argument('dns_name_scope', help='The domain name label scope. If a domain name label and a domain name label scope are specified, an A DNS record is created for the public IP in the Microsoft Azure DNS system with a hashed value includes in FQDN.', arg_type=get_enum_type(["NoReuse", "ResourceGroupReuse", "SubscriptionReuse", "TenantReuse"]))
         c.argument('idle_timeout', type=int, help='Idle timeout in minutes.')
         c.argument('zone', zone_type)
         c.argument('zone', zone_compatible_type)
@@ -655,9 +668,9 @@ def load_arguments(self, _):
         c.argument('endpoint_location', help="Location of the external or nested endpoints when using the 'Performance' routing method.")
         c.argument('endpoint_monitor_status', help='The monitoring status of the endpoint.')
         c.argument('endpoint_status', arg_type=get_enum_type(['Enabled', 'Disabled']), help="The status of the endpoint. If enabled the endpoint is probed for endpoint health and included in the traffic routing method.")
-        c.argument('min_child_endpoints', help="The minimum number of endpoints that must be available in the child profile for the parent profile to be considered available. Only applicable to an endpoint of type 'NestedEndpoints'.")
-        c.argument('min_child_ipv4', help="The minimum number of IPv4 (DNS record type A) endpoints that must be available in the child profile in order for the parent profile to be considered available. Only applicable to endpoint of type 'NestedEndpoints'.")
-        c.argument('min_child_ipv6', help="The minimum number of IPv6 (DNS record type AAAA) endpoints that must be available in the child profile in order for the parent profile to be considered available. Only applicable to endpoint of type 'NestedEndpoints'.")
+        c.argument('min_child_endpoints', type=int, help="The minimum number of endpoints that must be available in the child profile for the parent profile to be considered available. Only applicable to an endpoint of type 'NestedEndpoints'.")
+        c.argument('min_child_ipv4', type=int, help="The minimum number of IPv4 (DNS record type A) endpoints that must be available in the child profile in order for the parent profile to be considered available. Only applicable to endpoint of type 'NestedEndpoints'.")
+        c.argument('min_child_ipv6', type=int, help="The minimum number of IPv6 (DNS record type AAAA) endpoints that must be available in the child profile in order for the parent profile to be considered available. Only applicable to endpoint of type 'NestedEndpoints'.")
         c.argument('priority', help="Priority of the endpoint when using the 'Priority' traffic routing method. Values range from 1 to 1000, with lower values representing higher priority.", type=int)
         c.argument('target', help='Fully-qualified DNS name of the endpoint.')
         c.argument('target_resource_id', help="The Azure Resource URI of the endpoint. Not applicable for endpoints of type 'ExternalEndpoints'.")

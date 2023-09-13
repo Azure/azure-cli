@@ -268,6 +268,15 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                  custom_func_name='update_blob_service_properties',
                                  transform=transform_restore_policy_output)
 
+    with self.command_group('storage account blob-service-properties cors-rule',
+                            blob_service_mgmt_sdk, resource_type=ResourceType.MGMT_STORAGE, min_api='2022-09-01',
+                            custom_command_type=get_custom_sdk('account',
+                                                               client_factory=cf_mgmt_blob_services,
+                                                               resource_type=ResourceType.MGMT_STORAGE)) as g:
+        g.custom_command('list', 'list_blob_cors_rules')
+        g.custom_command('add', 'add_blob_cors_rule')
+        g.custom_command('clear', 'clear_blob_cors_rules')
+
     with self.command_group('storage account file-service-properties', file_service_mgmt_sdk,
                             custom_command_type=get_custom_sdk('account', client_factory=cf_mgmt_file_services,
                                                                resource_type=ResourceType.MGMT_STORAGE),

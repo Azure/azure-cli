@@ -14,13 +14,18 @@ from azure.cli.command_modules.keyvault._client_factory import (
 from azure.cli.command_modules.keyvault._transformers import (
     extract_subresource_name, filter_out_managed_resources,
     multi_transformers, transform_key_decryption_output, keep_max_results,
-    transform_key_output, transform_key_encryption_output, transform_key_random_output)
+    transform_key_output, transform_key_encryption_output, transform_key_random_output,
+    transform_secret_list, transform_deleted_secret_list, transform_secret_set,
+    transform_secret_set_attributes, transform_secret_show_deleted, transform_secret_delete, transform_secret_recover,
+    transform_certificate_create, transform_certificate_list, transform_certificate_list_deleted,
+    transform_certificate_show, transform_certificate_show_deleted, transform_certificate_delete,
+    transform_certificate_recover, transform_certificate_contact_list, transform_certificate_contact_add,
+    transform_certificate_issuer_create, transform_certificate_issuer_list, transform_certificate_issuer_admin_list)
 
-from azure.cli.command_modules.keyvault._format import transform_secret_list
+from azure.cli.command_modules.keyvault._format import transform_secret_list_table
 
 from azure.cli.command_modules.keyvault._validators import (
-    process_secret_set_namespace, process_certificate_cancel_namespace,
-    validate_private_endpoint_connection_id, validate_role_assignment_args)
+    process_secret_set_namespace, validate_private_endpoint_connection_id, validate_role_assignment_args)
 
 
 def transform_assignment_list(result):
@@ -42,16 +47,19 @@ def load_command_table(self, _):
     mgmt_plr_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.private_link_resources)
     data_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT)
     data_key_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_KEYS)
+    data_certificate_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_CERTIFICATES)
+    data_secret_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_SECRETS)
 
     if not is_azure_stack_profile(self):
         mgmt_hsms_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)
         mgmt_hsms_regions_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.mhsm_regions)
-        private_data_entity = get_client(self.cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT)
+        private_data_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT, Clients.private_7_2)
         data_backup_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)
         data_access_control_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL)
+        data_setting_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING)
     else:
         mgmt_hsms_entity = mgmt_hsms_regions_entity = private_data_entity = data_backup_entity = \
-            data_access_control_entity = None
+            data_access_control_entity = data_setting_entity = None
 
     kv_vaults_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
@@ -190,67 +198,66 @@ def load_command_table(self, _):
         with self.command_group('keyvault key', data_key_entity.command_type) as g:
             g.keyvault_command('random', 'get_random_bytes', transform=transform_key_random_output)
             g.keyvault_command('rotate', 'rotate_key', transform=transform_key_output)
+            g.keyvault_custom('sign', 'sign_key')
+            g.keyvault_custom('verify', 'verify_key')
 
         with self.command_group('keyvault key rotation-policy', data_key_entity.command_type) as g:
             g.keyvault_command('show', 'get_key_rotation_policy', )
             g.keyvault_custom('update', 'update_key_rotation_policy')
 
-    with self.command_group('keyvault secret', data_entity.command_type) as g:
-        g.keyvault_command('list', 'get_secrets',
-                           transform=multi_transformers(
-                               filter_out_managed_resources,
-                               keep_max_results,
-                               extract_subresource_name()),
-                           table_transformer=transform_secret_list)
-        g.keyvault_command('list-versions', 'get_secret_versions',
-                           transform=multi_transformers(
-                               keep_max_results,
-                               extract_subresource_name()))
-        g.keyvault_command('list-deleted', 'get_deleted_secrets',
+    # secret track2
+    with self.command_group('keyvault secret', data_secret_entity.command_type) as g:
+        g.keyvault_custom('list', "list_secret",
+                          transform=multi_transformers(
+                              filter_out_managed_resources,
+                              keep_max_results,
+                              transform_secret_list),
+                          table_transformer=transform_secret_list_table)
+        g.keyvault_command('list-versions', 'list_properties_of_secret_versions',
                            transform=multi_transformers(
                                keep_max_results,
-                               extract_subresource_name()))
-        g.keyvault_command('set', 'set_secret', validator=process_secret_set_namespace,
-                           transform=extract_subresource_name())
-        g.keyvault_command('set-attributes', 'update_secret', transform=extract_subresource_name())
-        g.keyvault_command('show', 'get_secret', transform=extract_subresource_name())
-        g.keyvault_command('show-deleted', 'get_deleted_secret', transform=extract_subresource_name())
-        g.keyvault_command('delete', 'delete_secret', transform=extract_subresource_name(), deprecate_info=g.deprecate(
-            tag_func=lambda x: '',
-            message_func=lambda x: 'Warning! If you have soft-delete protection enabled on this key vault, this secret '
-                                   'will be moved to the soft deleted state. You will not be able to create a secret '
-                                   'with the same name within this key vault until the secret has been purged from the '
-                                   'soft-deleted state. Please see the following documentation for additional guidance.'
-                                   '\nhttps://docs.microsoft.com/azure/key-vault/general/soft-delete-overview'))
+                               transform_secret_list))
+        g.keyvault_command('list-deleted', 'list_deleted_secrets',
+                           transform=multi_transformers(
+                               keep_max_results,
+                               transform_deleted_secret_list))
+        g.keyvault_command('set', 'set_secret', validator=process_secret_set_namespace, transform=transform_secret_set)
+        g.keyvault_command('set-attributes', 'update_secret_properties', transform=transform_secret_set_attributes)
+        g.keyvault_command('show', 'get_secret', transform=transform_secret_set)
+        g.keyvault_command('show-deleted', 'get_deleted_secret', transform=transform_secret_show_deleted)
+        g.keyvault_command('delete', 'begin_delete_secret', transform=transform_secret_delete,
+                           deprecate_info=g.deprecate(
+                               tag_func=lambda x: '',
+                               message_func=lambda x:
+                               'Warning! If you have soft-delete protection enabled on this key vault, this secret '
+                               'will be moved to the soft deleted state. You will not be able to create a secret '
+                               'with the same name within this key vault until the secret has been purged from the '
+                               'soft-deleted state. Please see the following documentation for additional guidance.'
+                               '\nhttps://docs.microsoft.com/azure/key-vault/general/soft-delete-overview'))
         g.keyvault_command('purge', 'purge_deleted_secret')
-        g.keyvault_command('recover', 'recover_deleted_secret', transform=extract_subresource_name())
+        g.keyvault_command('recover', 'begin_recover_deleted_secret', transform=transform_secret_recover)
         g.keyvault_custom('download', 'download_secret')
-        g.keyvault_custom('backup', 'backup_secret',
-                          doc_string_source=data_entity.operations_docs_tmpl.format('backup_secret'))
-        g.keyvault_custom('restore', 'restore_secret',
-                          doc_string_source=data_entity.operations_docs_tmpl.format('restore_secret'),
-                          transform=extract_subresource_name())
+        g.keyvault_custom('backup', 'backup_secret')
+        g.keyvault_custom('restore', 'restore_secret', transform=transform_secret_set_attributes)
 
-    with self.command_group('keyvault certificate', data_entity.command_type) as g:
-        g.keyvault_custom('create',
-                          'create_certificate',
-                          doc_string_source=data_entity.operations_docs_tmpl.format('create_certificate'),
-                          transform=extract_subresource_name())
-        g.keyvault_command('list', 'get_certificates',
+    # certificate track2
+    with self.command_group('keyvault certificate', data_certificate_entity.command_type) as g:
+        g.keyvault_custom('create', 'create_certificate', transform=transform_certificate_create)
+        g.keyvault_command('list', 'list_properties_of_certificates',
                            transform=multi_transformers(
                                keep_max_results,
-                               extract_subresource_name()))
-        g.keyvault_command('list-versions', 'get_certificate_versions',
+                               transform_certificate_list))
+        g.keyvault_command('list-versions', 'list_properties_of_certificate_versions',
                            transform=multi_transformers(
                                keep_max_results,
-                               extract_subresource_name()))
-        g.keyvault_command('list-deleted', 'get_deleted_certificates',
+                               transform_certificate_list))
+        g.keyvault_command('list-deleted', 'list_deleted_certificates',
                            transform=multi_transformers(
                                keep_max_results,
-                               extract_subresource_name()))
-        g.keyvault_command('show', 'get_certificate', transform=extract_subresource_name())
-        g.keyvault_command('show-deleted', 'get_deleted_certificate', transform=extract_subresource_name())
-        g.keyvault_command('delete', 'delete_certificate', deprecate_info=g.deprecate(
+                               transform_certificate_list_deleted))
+        g.keyvault_command('show', 'get_certificate_version', transform=transform_certificate_show)
+        g.keyvault_command('show-deleted', 'get_deleted_certificate', transform=transform_certificate_show_deleted)
+        g.keyvault_command('delete', 'begin_delete_certificate', deprecate_info=g.deprecate(
             tag_func=lambda x: '',
             message_func=lambda x: 'Warning! If you have soft-delete protection enabled on this key vault, this '
                                    'certificate will be moved to the soft deleted state. You will not be able to '
@@ -258,35 +265,48 @@ def load_command_table(self, _):
                                    'certificate has been purged from the soft-deleted state. Please see the following '
                                    'documentation for additional guidance.\n'
                                    'https://docs.microsoft.com/azure/key-vault/general/soft-delete-overview'),
-                           transform=extract_subresource_name())
+                           transform=transform_certificate_delete)
         g.keyvault_command('purge', 'purge_deleted_certificate')
-        g.keyvault_command('recover', 'recover_deleted_certificate', transform=extract_subresource_name())
-        g.keyvault_command('set-attributes', 'update_certificate', transform=extract_subresource_name())
-        g.keyvault_custom('import', 'import_certificate', transform=extract_subresource_name())
+        g.keyvault_command('recover', 'begin_recover_deleted_certificate', transform=transform_certificate_recover)
+        g.keyvault_custom('set-attributes', 'set_attributes_certificate', transform=transform_certificate_show)
+        g.keyvault_command('import', 'import_certificate', transform=transform_certificate_show)
         g.keyvault_custom('download', 'download_certificate')
         g.keyvault_custom('get-default-policy', 'get_default_policy')
 
-    with self.command_group('keyvault certificate pending', data_entity.command_type) as g:
-        g.keyvault_command('merge', 'merge_certificate', transform=extract_subresource_name())
-        g.keyvault_command('show', 'get_certificate_operation', transform=extract_subresource_name())
-        g.keyvault_command('delete', 'delete_certificate_operation', validator=process_certificate_cancel_namespace,
-                           transform=extract_subresource_name())
+    data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT)). \
+        replace('.', '_').replace('-', '_')
 
-    with self.command_group('keyvault certificate contact', data_entity.command_type) as g:
-        g.keyvault_command('list', 'get_certificate_contacts', transform=keep_max_results)
-        g.keyvault_custom('add', 'add_certificate_contact')
-        g.keyvault_custom('delete', 'delete_certificate_contact')
+    if data_api_version != '2016_10_01':
+        with self.command_group('keyvault certificate', data_certificate_entity.command_type) as g:
+            g.keyvault_custom('backup', 'backup_certificate')
+            g.keyvault_custom('restore', 'restore_certificate', transform=transform_certificate_show)
 
-    with self.command_group('keyvault certificate issuer', data_entity.command_type) as g:
-        g.keyvault_custom('update', 'update_certificate_issuer')
-        g.keyvault_command('list', 'get_certificate_issuers', transform=keep_max_results)
-        g.keyvault_custom('create', 'create_certificate_issuer')
-        g.keyvault_command('show', 'get_certificate_issuer')
-        g.keyvault_command('delete', 'delete_certificate_issuer')
+    with self.command_group('keyvault certificate pending', data_certificate_entity.command_type) as g:
+        g.keyvault_command('merge', 'merge_certificate', transform=transform_certificate_show)
+        g.keyvault_command('show', 'get_certificate_operation', transform=transform_certificate_create)
+        g.keyvault_command('delete', 'delete_certificate_operation', transform=transform_certificate_create)
 
-    with self.command_group('keyvault certificate issuer admin', data_entity.command_type) as g:
-        g.keyvault_custom('list', 'list_certificate_issuer_admins', transform=keep_max_results)
+    with self.command_group('keyvault certificate contact', data_certificate_entity.command_type) as g:
+        g.keyvault_command('list', 'get_contacts', transform=transform_certificate_contact_list)
+        g.keyvault_custom('add', 'add_certificate_contact', transform=transform_certificate_contact_add)
+        g.keyvault_custom('delete', 'delete_certificate_contact', transform=transform_certificate_contact_add)
+
+    with self.command_group('keyvault certificate issuer', data_certificate_entity.command_type) as g:
+        g.keyvault_custom('create', 'create_certificate_issuer', transform=transform_certificate_issuer_create)
+        g.keyvault_custom('update', 'update_certificate_issuer', transform=transform_certificate_issuer_create)
+        g.keyvault_command('list', 'list_properties_of_issuers',
+                           transform=multi_transformers(
+                               keep_max_results,
+                               transform_certificate_issuer_list))
+        g.keyvault_command('show', 'get_issuer', transform=transform_certificate_issuer_create)
+        g.keyvault_command('delete', 'delete_issuer', transform=transform_certificate_issuer_create)
+
+    with self.command_group('keyvault certificate issuer admin', data_certificate_entity.command_type) as g:
         g.keyvault_custom('add', 'add_certificate_issuer_admin')
+        g.keyvault_command('list', 'get_issuer',
+                           transform=multi_transformers(
+                               keep_max_results,
+                               transform_certificate_issuer_admin_list))
         g.keyvault_custom('delete', 'delete_certificate_issuer_admin')
 
     if not is_azure_stack_profile(self):
@@ -305,18 +325,17 @@ def load_command_table(self, _):
             g.keyvault_custom('delete', 'delete_role_definition')
             g.keyvault_custom('show', 'show_role_definition')
 
+    if not is_azure_stack_profile(self):
+        with self.command_group('keyvault setting', data_setting_entity.command_type) as g:
+            g.keyvault_command('list', 'list_settings')
+            g.keyvault_command('show', 'get_setting')
+            g.keyvault_custom('update', 'update_hsm_setting')
+
     data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT)).\
         replace('.', '_').replace('-', '_')
 
     if data_api_version != '2016_10_01':
-        with self.command_group('keyvault certificate', data_entity.command_type) as g:
-            g.keyvault_custom('backup', 'backup_certificate',
-                              doc_string_source=data_entity.operations_docs_tmpl.format('backup_certificate'))
-            g.keyvault_custom('restore', 'restore_certificate',
-                              doc_string_source=data_entity.operations_docs_tmpl.format('restore_certificate'))
-
-    if data_api_version != '2016_10_01':
-        with self.command_group('keyvault storage', data_entity.command_type) as g:
+        with self.command_group('keyvault storage', data_entity.command_type, deprecate_info=self.deprecate()) as g:
             g.keyvault_command('add', 'set_storage_account')
             g.keyvault_command('list', 'get_storage_accounts', transform=keep_max_results)
             g.keyvault_command('show', 'get_storage_account')

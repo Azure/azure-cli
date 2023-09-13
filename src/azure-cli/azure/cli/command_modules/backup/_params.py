@@ -44,7 +44,7 @@ backup_type_help = """'Full, Differential, Log, CopyOnlyFull' for backup Item ty
 retain_until_help = """The date until which this backed up copy will be available for retrieval, in UTC (d-m-Y). In case of VM and AzureFileShare a default value of 30 days is taken. For MSSQL workload, retain-until min value is 2 days and max value is 99 years for backup-type 'CopyOnlyFull'. For MSSQL and SAPHANA, retain-until min value is 45 days and max value is 99 years for backup-type 'Full'. For any other backup-type, retain-until value is overriden by Policy. If not specified, a default value of 30 days will be taken for backup-type 'CopyOnlyFull', and a value of 45 days for backup-type 'Full' and no default value for other backup types."""
 diskslist_help = """List of disks to be excluded or included."""
 disk_list_setting_help = """option to decide whether to include or exclude the disk or reset any previous settings to default behavior"""
-target_container_name_help = """The target container to which the DB recovery point should be downloaded as files."""
+target_container_name_help = """The target container to which the DB recovery point should be restored."""
 target_tier_help = """ The destination/target tier to which a particular recovery point has to be moved."""
 tier_help = """ Provide 'tier' parameter to filter recovery points."""
 rehyd_priority_type_help = """The type of priority to be maintained while rehydrating a recovery point """
@@ -102,6 +102,7 @@ def load_arguments(self, _):
         c.argument('public_network_access', arg_type=get_enum_type(['Enable', 'Disable']), help='Use this property to specify whether public network access for the vault should be enabled or disabled. It is enabled by default. For setting up private endpoints, it has to be disabled.')
         c.argument('azure_monitor_alerts_for_job_failures', options_list=['--job-failure-alerts'], arg_type=get_enum_type(['Enable', 'Disable']), help='Use this property to specify whether built-in Azure Monitor alerts should be received for every job failure.')
         c.argument('immutability_state', arg_type=get_enum_type(['Disabled', 'Locked', 'Unlocked']), help='Use this parameter to configure immutability settings for the vault. By default, immutability is "Disabled" for the vault. "Unlocked" means that immutability is enabled for the vault and can be reversed. "Locked" means that immutability is enabled for the vault and cannot be reversed.')
+        c.argument('cross_subscription_restore_state', arg_type=get_enum_type(['Enable', 'Disable', 'PermanentlyDisable']), help='Use this parameter to configure cross subscription restore settings for the vault. By default, the property is "Enabled" for the vault.')
 
     with self.argument_context('backup vault backup-properties set') as c:
         c.argument('backup_storage_redundancy', arg_type=get_enum_type(['GeoRedundant', 'LocallyRedundant', 'ZoneRedundant']), help='Set backup storage properties for a Recovery Services vault.')
@@ -379,6 +380,9 @@ def load_arguments(self, _):
         c.argument('target_file_share', options_list=['--target-file-share'], help='Destination file share to which content will be restored')
         c.argument('target_folder', options_list=['--target-folder'], help='Destination folder to which content will be restored. To restore content to root , leave the folder name empty')
         c.argument('target_storage_account', options_list=['--target-storage-account'], help='Destination storage account to which content will be restored')
+        c.argument('target_resource_group_name',
+                   options_list=['--target-resource-group-name', '--target-rg-name'],
+                   help='Resource group of the destination storage account to which the content will be restored, needed if it is different from the vault resource group')
 
     with self.argument_context('backup restore restore-azurefiles') as c:
         c.argument('resolve_conflict', resolve_conflict_type)
@@ -404,6 +408,7 @@ def load_arguments(self, _):
         c.argument('vault_name', vault_name_type, id_part='name')
         c.argument('log_point_in_time', options_list=['--log-point-in-time'], help="""Specify the point-in-time (in UTC) which will be restored.""")
         c.argument('rp_name', rp_name_type)
+        c.argument('target_instance_name', help="""Specify the target instance name for the restore operation.""")
         c.argument('target_item_name', options_list=['--target-item-name'], help="""Specify the target item name for the restore operation.""")
         c.argument('target_server_type', target_server_type)
         c.argument('target_server_name', options_list=['--target-server-name'], help="""Specify the parent server name of the target item.""")
@@ -414,6 +419,7 @@ def load_arguments(self, _):
         c.argument('backup_management_type', backup_management_type)
         c.argument('target_resource_group', options_list=['--target-resource-group'], help="""Specify the resource group of target item for Cross Region Restore. Default value will be same as --resource-group if not specified.""")
         c.argument('target_vault_name', options_list=['--target-vault-name'], help="""Specify the vault name of target item for Cross Region Restore. Default value will be same as --vault-name if not specified.""")
+        c.argument('target_subscription_id', help="""Specify the subscription of the target item for Cross Subscription Restore. Defaulted to source subscription if not specified.""")
 
     # Job
     with self.argument_context('backup job') as c:

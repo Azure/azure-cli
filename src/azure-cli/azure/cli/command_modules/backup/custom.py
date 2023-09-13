@@ -17,7 +17,8 @@ from azure.cli.core.profiles import ResourceType
 
 from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuName, PatchVault, IdentityData, \
     CmkKeyVaultProperties, CmkKekIdentity, VaultPropertiesEncryption, UserIdentity, MonitoringSettings, \
-    AzureMonitorAlertSettings, ClassicAlertSettings, SecuritySettings, ImmutabilitySettings
+    AzureMonitorAlertSettings, ClassicAlertSettings, SecuritySettings, ImmutabilitySettings, RestoreSettings, \
+    CrossSubscriptionRestoreSettings
 from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemResource, \
     AzureIaaSComputeVMProtectedItem, AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, \
     BackupRequestResource, IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, \
@@ -47,13 +48,25 @@ import azure.cli.command_modules.backup.custom_help as cust_help
 logger = get_logger(__name__)
 
 # Mapping of workload type
-secondary_region_map = {"eastasia": "southeastasia",
+secondary_region_map = {"ussecwest": "usseceast",
+                        "usseceast": "ussecwest",
+                        "usnateast": "usnatwest",
+                        "usnatwest": "usnateast",
+                        "swedencentral": "swedensouth",
+                        "swedensouth": "swedencentral",
+                        "norwaywest": "norwayeast",
+                        "norwayeast": "norwaywest",
+                        "germanynorth": "germanywestcentral",
+                        "germanywestcentral": "germanynorth",
+                        "westus3": "eastus",
+                        "eastasia": "southeastasia",
                         "southeastasia": "eastasia",
                         "australiaeast": "australiasoutheast",
                         "australiasoutheast": "australiaeast",
                         "australiacentral": "australiacentral2",
                         "australiacentral2": "australiacentral",
                         "brazilsouth": "southcentralus",
+                        "brazilsoutheast": "brazilsouth",
                         "canadacentral": "canadaeast",
                         "canadaeast": "canadacentral",
                         "chinanorth": "chinaeast",
@@ -68,8 +81,6 @@ secondary_region_map = {"eastasia": "southeastasia",
                         "francesouth": "francecentral",
                         "germanycentral": "germanynortheast",
                         "germanynortheast": "germanycentral",
-                        "germanywestcentral": "germanynorth",
-                        "germanynorth": "germanywestcentral",
                         "centralindia": "southindia",
                         "southindia": "centralindia",
                         "westindia": "southindia",
@@ -100,7 +111,10 @@ secondary_region_map = {"eastasia": "southeastasia",
                         "usgovarizona": "usgovtexas",
                         "usgovtexas": "usgovarizona",
                         "usgoviowa": "usgovvirginia",
-                        "usgovvirginia": "usgovtexas"}
+                        "usgovvirginia": "usgovtexas",
+                        "malaysiasouth": "japanwest",
+                        "jioindiacentral": "jioindiawest",
+                        "jioindiawest": "jioindiacentral"}
 
 fabric_name = "Azure"
 default_policy_name = "DefaultPolicy"
@@ -113,8 +127,8 @@ password_length = 15
 
 
 def create_vault(client, vault_name, resource_group_name, location, tags=None,
-                 public_network_access=None, immutability_state=None, classic_alerts='Enable',
-                 azure_monitor_alerts_for_job_failures='Enable'):
+                 public_network_access=None, immutability_state=None, cross_subscription_restore_state=None,
+                 classic_alerts='Enable', azure_monitor_alerts_for_job_failures='Enable'):
     vault_sku = Sku(name=SkuName.standard)
     if public_network_access is None:
         # get the existing value of public_network_access so the request is made correctly
@@ -128,26 +142,22 @@ def create_vault(client, vault_name, resource_group_name, location, tags=None,
         except CoreResourceNotFoundError:
             public_network_access = 'Enable'
 
-    # TODO Refactor
-    if immutability_state is None:
-        vault_properties = VaultProperties(
-            monitoring_settings=MonitoringSettings(
-                azure_monitor_alert_settings=AzureMonitorAlertSettings(
-                    alerts_for_all_job_failures=azure_monitor_alerts_for_job_failures + 'd'),
-                classic_alert_settings=ClassicAlertSettings(alerts_for_critical_operations=classic_alerts + 'd')),
-            public_network_access=public_network_access + 'd')
-    else:
-        vault_properties = VaultProperties(
-            monitoring_settings=MonitoringSettings(
-                azure_monitor_alert_settings=AzureMonitorAlertSettings(
-                    alerts_for_all_job_failures=azure_monitor_alerts_for_job_failures + 'd'),
-                classic_alert_settings=ClassicAlertSettings(alerts_for_critical_operations=classic_alerts + 'd')),
-            public_network_access=public_network_access + 'd',
-            security_settings=SecuritySettings(
-                immutability_settings=ImmutabilitySettings(
-                    state=immutability_state
-                )
-            ))
+    vault_properties = VaultProperties(
+        monitoring_settings=MonitoringSettings(
+            azure_monitor_alert_settings=AzureMonitorAlertSettings(
+                alerts_for_all_job_failures=azure_monitor_alerts_for_job_failures + 'd'),
+            classic_alert_settings=ClassicAlertSettings(alerts_for_critical_operations=classic_alerts + 'd')),
+        public_network_access=public_network_access + 'd',
+        security_settings=None if immutability_state is None else SecuritySettings(
+            immutability_settings=ImmutabilitySettings(
+                state=immutability_state
+            )
+        ),
+        restore_settings=None if cross_subscription_restore_state is None else RestoreSettings(
+            cross_subscription_restore_settings=CrossSubscriptionRestoreSettings(
+                cross_subscription_restore_state=cross_subscription_restore_state + 'd'
+            )
+        ))
     vault = Vault(location=location, sku=vault_sku, properties=vault_properties, tags=tags)
     return client.begin_create_or_update(resource_group_name, vault_name, vault)
 
@@ -646,6 +656,12 @@ def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, p
     vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
     policy = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
 
+    logger.warning('Ignite (November) 2023 onwards Virtual Machine deployments using PS and CLI will default to '
+                   'security type Trusted Launch. Please ensure Policy Name used with "az backup '
+                   'protection enable-for-vm" command is of type Enhanced Policy for Trusted Launch VMs. Non-Trusted '
+                   'Launch Virtual Machines will not be impacted by this change. To know more about default change '
+                   'and Trusted Launch, please visit https://aka.ms/TLaD.')
+
     # throw error if policy has more than 1000 protected VMs.
     if policy.properties.protected_items_count >= 1000:
         raise CLIError("Cannot configure backup for more than 1000 VMs per policy")
@@ -932,7 +948,7 @@ def move_recovery_points(cmd, resource_group_name, vault_name, item_name, rp_nam
     container_uri = cust_help.get_protection_container_uri_from_id(item_name.id)
     item_uri = cust_help.get_protected_item_uri_from_id(item_name.id)
 
-    if source_tier not in common.tier_type_map.keys():
+    if source_tier not in common.tier_type_map:
         raise InvalidArgumentValueError('This source tier-type is not accepted by move command at present.')
 
     parameters = MoveRPAcrossTiersRequest(source_tier_type=common.tier_type_map[source_tier],
@@ -977,6 +993,12 @@ def _should_use_original_storage_account(recovery_point, restore_to_staging_stor
     return use_original_storage_account
 
 
+def get_vault_csr_state(vault):
+    restore_settings = vault.properties.restore_settings
+    return (None if restore_settings is None else
+            restore_settings.cross_subscription_restore_settings.cross_subscription_restore_state)
+
+
 def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
                                     source_resource_id, target_rg_id,
                                     use_original_storage_account, restore_disk_lun_list,
@@ -985,9 +1007,9 @@ def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
                                     mi_user_assigned, restore_mode):
 
     if disk_encryption_set_id is not None:
-        if not(encryption.properties.encryption_at_rest_type == "CustomerManaged" and
-               recovery_point.properties.is_managed_virtual_machine and
-               not recovery_point.properties.is_source_vm_encrypted):
+        if not (encryption.properties.encryption_at_rest_type == "CustomerManaged" and
+                recovery_point.properties.is_managed_virtual_machine and
+                not recovery_point.properties.is_source_vm_encrypted):
             raise InvalidArgumentValueError("disk_encryption_set_id can't be specified")
 
     identity_info = None
@@ -1099,9 +1121,21 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                   mi_user_assigned=None, target_zone=None, restore_mode='AlternateLocation', target_vm_name=None,
                   target_vnet_name=None, target_vnet_resource_group=None, target_subnet_name=None,
                   target_subscription_id=None, storage_account_resource_group=None):
+    vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
+    vault_location = vault.location
+    vault_identity = vault.identity
+
     target_subscription = get_subscription_id(cmd.cli_ctx)
     if target_subscription_id is not None and restore_mode == "AlternateLocation":
-        target_subscription = target_subscription_id
+        vault_csr_state = get_vault_csr_state(vault)
+        if vault_csr_state is None or vault_csr_state == "Enabled":
+            target_subscription = target_subscription_id
+        else:
+            raise ArgumentUsageError(
+                """
+                Cross Subscription Restore is not allowed on this Vault. Please either enable CSR on the vault or
+                try restoring in the same subscription.
+                """)
     item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
                      item_name, "AzureIaasVM", "VM", use_secondary_region)
     cust_help.validate_item(item)
@@ -1112,10 +1146,6 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
     common.fetch_tier_for_rp(recovery_point)
 
     validators.validate_archive_restore(recovery_point, rehydration_priority)
-
-    vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
-    vault_location = vault.location
-    vault_identity = vault.identity
 
     encryption = backup_resource_encryption_config_cf(cmd.cli_ctx).get(vault_name, resource_group_name)
 

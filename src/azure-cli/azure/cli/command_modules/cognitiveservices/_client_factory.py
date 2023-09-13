@@ -32,3 +32,11 @@ def cf_commitment_plans(cli_ctx, *_):
 
 def cf_resource_skus(cli_ctx, *_):
     return get_cognitiveservices_management_client(cli_ctx).resource_skus
+
+
+def cf_models(cli_ctx, *_):
+    return get_cognitiveservices_management_client(cli_ctx).models
+
+
+def cf_usages(cli_ctx, *_):
+    return get_cognitiveservices_management_client(cli_ctx).usages

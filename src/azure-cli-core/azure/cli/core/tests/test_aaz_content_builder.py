@@ -941,3 +941,12 @@ class TestAAZContentBuilder(unittest.TestCase):
         self.assertTrue(element_schema._discriminators['D'].get_attr_name('country') is None)
         self.assertTrue(element_schema._discriminators['D'].get_attr_name('kind') is None)
         self.assertTrue(element_schema._discriminators['D'].get_attr_name('people') is None)
+
+    def test_split_keys(self):
+        from azure.cli.core.aaz._content_builder import AAZContentBuilder
+        parts = AAZContentBuilder._split_key(key=".properties.resourceSettings{}.abc[].d")
+        self.assertEqual(parts, ['properties', 'resourceSettings', '{}', 'abc', '[]', 'd'])
+        parts = AAZContentBuilder._split_key(key=".properties.resourceSettings{resourceType:Microsoft.Network/publicIPAddresses}")
+        self.assertEqual(parts, ['properties', 'resourceSettings', '{resourceType:Microsoft.Network/publicIPAddresses}'])
+        parts = AAZContentBuilder._split_key(key=".properties.resourceSettings{resourceType:Microsoft.Network.networkInterfaces}{}.ipConfigurations[].loadBalancerNatRules")
+        self.assertEqual(parts, ['properties', 'resourceSettings', '{resourceType:Microsoft.Network.networkInterfaces}', '{}', 'ipConfigurations', '[]', 'loadBalancerNatRules'])

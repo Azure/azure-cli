@@ -2013,7 +2013,7 @@ def _add_sas_for_url(cmd, url, account_name, account_key, sas_token, service, re
             logger.info("Cannot generate sas token. %s", ex)
             sas_token = None
     if sas_token:
-        return'{}?{}'.format(url, sas_token)
+        return '{}?{}'.format(url, sas_token)
     return url
 
 

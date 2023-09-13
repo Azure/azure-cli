@@ -858,7 +858,10 @@ class AKSAgentPoolContext(BaseAKSContext):
         :return: empty list, list of strings or None
         """
         # read the original value passed by the command
-        node_taints = self.raw_param.get("node_taints")
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            node_taints = self.raw_param.get("nodepool_taints")
+        else:
+            node_taints = self.raw_param.get("node_taints")
         # normalize, default is an empty list
         if node_taints is not None:
             node_taints = [x.strip() for x in (node_taints.split(",") if node_taints else [])]
@@ -1041,16 +1044,16 @@ class AKSAgentPoolContext(BaseAKSContext):
         return zones
 
     def get_max_pods(self) -> Union[int, None]:
-        """Obtain the value of max_pods, default value is 0.
+        """Obtain the value of max_pods.
 
         This function will normalize the parameter by default. Int 0 would be converted to None.
 
         :return: int or None
         """
         # read the original value passed by the command
-        max_pods = self.raw_param.get("max_pods", 0)
+        max_pods = self.raw_param.get("max_pods")
         # normalize
-        if max_pods == 0:
+        if max_pods == 0:  # 0 is not a valid value
             max_pods = None
 
         # try to read the property value corresponding to the parameter from the `agentpool` object

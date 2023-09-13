@@ -1,0 +1,960 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - identity show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.49.0 (MSI) azsdk-python-azure-mgmt-msi/7.0.0 Python/3.9.7 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.ManagedIdentity/userAssignedIdentities/servicelinker-springcloud-identity?api-version=2023-01-31
+  response:
+    body:
+      string: '{"location": "eastus", "tags": {}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/servicelinker-test-linux-group/providers/Microsoft.ManagedIdentity/userAssignedIdentities/servicelinker-springcloud-identity",
+        "name": "servicelinker-springcloud-identity", "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+        "properties": {"tenantId": "00000000-0000-0000-0000-000000000000", "principalId":
+        "00000000-0000-0000-0000-000000000000", "clientId": "00000000-0000-0000-0000-000000000000"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '516'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jul 2023 05:13:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"targetService": {"type": "AzureResource", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-sql-cosmos/sqlDatabases/coreDB"},
+      "authInfo": {"authType": "userAssignedIdentity", "clientId": "00000000-0000-0000-0000-000000000000",
+      "subscriptionId": "00000000-0000-0000-0000-000000000000"}, "clientType": "springBoot",
+      "secretStore": {}, "configurationInfo": {}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection create cosmos-sql
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '490'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --connection --source-id --target-id --user-identity --client-type
+      User-Agent:
+      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
+        (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/mock-deployment/providers/Microsoft.ServiceLinker/linkers/testconn_umi?api-version=2022-11-01-preview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn_umi",
+        "name": "testconn_umi", "type": "microsoft.servicelinker/linkers", "systemData":
+        {"createdBy": "wchi@microsoft.com", "createdByType": "User", "createdAt":
+        "2023-07-03T05:13:13.4484118Z", "lastModifiedBy": "wchi@microsoft.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2023-07-03T05:13:13.4484118Z"}, "properties": {"provisioningState":
+        "Accepted", "targetService": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-sql-cosmos/sqlDatabases/coreDB",
+        "resourceProperties": null, "type": "AzureResource"}, "authInfo": {"subscriptionId":
+        "00000000-0000-0000-0000-000000000000", "clientId": "00000000-0000-0000-0000-000000000000",
+        "roles": null, "userName": null, "authType": "userAssignedIdentity", "deleteOrUpdateBehavior":
+        null}, "vNetSolution": null, "clientType": "springBoot", "secretStore": {"keyVaultId":
+        null, "keyVaultSecretName": null}, "scope": null, "publicNetworkSolution":
+        null, "configurationInfo": {"customizedKeys": null, "additionalConfigurations":
+        null, "deleteOrUpdateBehavior": null, "action": null, "daprProperties": null}}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/b416c8a6-a532-4f80-97ad-1e04e0d7a4dd*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A?api-version=2021-01-01-privatepreview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jul 2023 05:13:14 GMT
+      etag:
+      - '"d700eb60-0000-0100-0000-64a258ea0000"'
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - 6f66dcea-968f-4d6f-8c32-5165cb6012dc
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection create cosmos-sql
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --connection --source-id --target-id --user-identity --client-type
+      User-Agent:
+      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
+        (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/b416c8a6-a532-4f80-97ad-1e04e0d7a4dd*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A?api-version=2021-01-01-privatepreview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/b416c8a6-a532-4f80-97ad-1e04e0d7a4dd*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A",
+        "name": "b416c8a6-a532-4f80-97ad-1e04e0d7a4dd*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn_umi",
+        "status": "Accepted", "startTime": "2023-07-03T05:13:14.577446Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '681'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jul 2023 05:13:15 GMT
+      etag:
+      - '"0f02960f-0000-0100-0000-64a258ea0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection create cosmos-sql
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --connection --source-id --target-id --user-identity --client-type
+      User-Agent:
+      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
+        (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/b416c8a6-a532-4f80-97ad-1e04e0d7a4dd*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A?api-version=2021-01-01-privatepreview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/b416c8a6-a532-4f80-97ad-1e04e0d7a4dd*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A",
+        "name": "b416c8a6-a532-4f80-97ad-1e04e0d7a4dd*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn_umi",
+        "status": "Accepted", "startTime": "2023-07-03T05:13:14.577446Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '681'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jul 2023 05:13:48 GMT
+      etag:
+      - '"0f02960f-0000-0100-0000-64a258ea0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection create cosmos-sql
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --connection --source-id --target-id --user-identity --client-type
+      User-Agent:
+      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
+        (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/b416c8a6-a532-4f80-97ad-1e04e0d7a4dd*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A?api-version=2021-01-01-privatepreview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/b416c8a6-a532-4f80-97ad-1e04e0d7a4dd*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A",
+        "name": "b416c8a6-a532-4f80-97ad-1e04e0d7a4dd*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn_umi",
+        "status": "Succeeded", "startTime": "2023-07-03T05:13:14.577446Z", "endTime":
+        "2023-07-03T05:14:13.6328454Z", "properties": {"Message": null}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '758'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jul 2023 05:14:20 GMT
+      etag:
+      - '"0f02b711-0000-0100-0000-64a259250000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection create cosmos-sql
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --connection --source-id --target-id --user-identity --client-type
+      User-Agent:
+      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
+        (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/mock-deployment/providers/Microsoft.ServiceLinker/linkers/testconn_umi?api-version=2022-11-01-preview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn_umi",
+        "name": "testconn_umi", "type": "microsoft.servicelinker/linkers", "systemData":
+        {"createdBy": "wchi@microsoft.com", "createdByType": "User", "createdAt":
+        "2023-07-03T05:13:13.4484118Z", "lastModifiedBy": "wchi@microsoft.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2023-07-03T05:13:13.4484118Z"}, "properties": {"publicNetworkSolution":
+        null, "configurationInfo": {"customizedKeys": null, "additionalConfigurations":
+        null, "deleteOrUpdateBehavior": null, "action": null, "daprProperties": null},
+        "provisioningState": "Succeeded", "targetService": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-sql-cosmos/sqlDatabases/coreDB",
+        "resourceProperties": null, "type": "AzureResource"}, "authInfo": {"subscriptionId":
+        "00000000-0000-0000-0000-000000000000", "clientId": "00000000-0000-0000-0000-000000000000",
+        "roles": null, "userName": null, "authType": "userAssignedIdentity", "deleteOrUpdateBehavior":
+        null}, "clientType": "springBoot", "scope": null, "vNetSolution": null, "secretStore":
+        {"keyVaultId": null, "keyVaultSecretName": null}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1429'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jul 2023 05:14:21 GMT
+      etag:
+      - '"d7000464-0000-0100-0000-64a259250000"'
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - f27c31c5-3735-45e1-bbaa-3522f0a9460d
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --source-id
+      User-Agent:
+      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
+        (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/mock-deployment/providers/Microsoft.ServiceLinker/linkers?api-version=2022-11-01-preview
+  response:
+    body:
+      string: '{"value": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn_umi",
+        "name": "testconn_umi", "type": "microsoft.servicelinker/linkers", "systemData":
+        {"createdBy": "wchi@microsoft.com", "createdByType": "User", "createdAt":
+        "2023-07-03T05:13:13.4484118Z", "lastModifiedBy": "wchi@microsoft.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2023-07-03T05:13:13.4484118Z"}, "properties": {"publicNetworkSolution":
+        null, "configurationInfo": {"customizedKeys": null, "additionalConfigurations":
+        null, "deleteOrUpdateBehavior": null, "action": null, "daprProperties": null},
+        "provisioningState": "Succeeded", "targetService": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-sql-cosmos/sqlDatabases/coreDB",
+        "resourceProperties": null, "type": "AzureResource"}, "authInfo": {"subscriptionId":
+        "00000000-0000-0000-0000-000000000000", "clientId": "00000000-0000-0000-0000-000000000000",
+        "roles": null, "userName": null, "authType": "userAssignedIdentity", "deleteOrUpdateBehavior":
+        null}, "clientType": "springBoot", "scope": null, "vNetSolution": null, "secretStore":
+        {"keyVaultId": null, "keyVaultSecretName": null}}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1442'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jul 2023 05:14:28 GMT
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - f88cab19-7e58-4fdb-b380-b7b95ced335a
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection list-configuration
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
+        (Windows-10-10.0.22621-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/mock-deployment/providers/Microsoft.ServiceLinker/linkers/testconn_umi/listConfigurations?api-version=2022-11-01-preview
+  response:
+    body:
+      string: '{"configurations": [{"name": "spring.cloud.azure.cosmos.endpoint",
+        "value": "https://servicelinker-sql-cosmos.documents.azure.com:443/"}, {"name":
+        "spring.cloud.azure.cosmos.database", "value": "coreDB"}, {"name": "spring.cloud.azure.cosmos.credential.managed-identity-enabled",
+        "value": "True"}, {"name": "spring.cloud.azure.cosmos.credential.client-id",
+        "value": "3f818911-f7b7-4224-b88e-810f2479084b"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '406'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jul 2023 05:14:30 GMT
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - b6163a76-f4f8-4dda-bec2-fa13ab124cc3
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection validate
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
+        (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/mock-deployment/providers/Microsoft.ServiceLinker/linkers/testconn_umi?api-version=2022-11-01-preview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn_umi",
+        "name": "testconn_umi", "type": "microsoft.servicelinker/linkers", "systemData":
+        {"createdBy": "wchi@microsoft.com", "createdByType": "User", "createdAt":
+        "2023-07-03T05:13:13.4484118Z", "lastModifiedBy": "wchi@microsoft.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2023-07-03T05:13:13.4484118Z"}, "properties": {"publicNetworkSolution":
+        null, "configurationInfo": {"customizedKeys": null, "additionalConfigurations":
+        null, "deleteOrUpdateBehavior": null, "action": null, "daprProperties": null},
+        "provisioningState": "Succeeded", "targetService": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-sql-cosmos/sqlDatabases/coreDB",
+        "resourceProperties": null, "type": "AzureResource"}, "authInfo": {"subscriptionId":
+        "00000000-0000-0000-0000-000000000000", "clientId": "00000000-0000-0000-0000-000000000000",
+        "roles": null, "userName": null, "authType": "userAssignedIdentity", "deleteOrUpdateBehavior":
+        null}, "clientType": "springBoot", "scope": null, "vNetSolution": null, "secretStore":
+        {"keyVaultId": null, "keyVaultSecretName": null}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1429'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jul 2023 05:14:32 GMT
+      etag:
+      - '"d7000464-0000-0100-0000-64a259250000"'
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - 04e0cf3b-01c5-4a29-bcdd-903e53c7eb85
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection validate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
+        (Windows-10-10.0.22621-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/mock-deployment/providers/Microsoft.ServiceLinker/linkers/testconn_umi/validateLinker?api-version=2022-11-01-preview
+  response:
+    body:
+      string: 'null'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/6567bb96-9d16-4297-b9b8-6c1b4ec16c3c*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A?api-version=2021-01-01-privatepreview
+      cache-control:
+      - no-cache
+      content-length:
+      - '4'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jul 2023 05:14:33 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/6567bb96-9d16-4297-b9b8-6c1b4ec16c3c*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A?api-version=2021-01-01-privatepreview
+      mise-correlation-id:
+      - 3480117a-e4bf-4455-9626-4a44e0ead3a8
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection validate
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
+        (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/6567bb96-9d16-4297-b9b8-6c1b4ec16c3c*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A?api-version=2021-01-01-privatepreview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/6567bb96-9d16-4297-b9b8-6c1b4ec16c3c*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A",
+        "name": "6567bb96-9d16-4297-b9b8-6c1b4ec16c3c*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn_umi",
+        "status": "Accepted", "startTime": "2023-07-03T05:14:33.2264305Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '682'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jul 2023 05:14:34 GMT
+      etag:
+      - '"0f027612-0000-0100-0000-64a259390000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection validate
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
+        (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/6567bb96-9d16-4297-b9b8-6c1b4ec16c3c*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A?api-version=2021-01-01-privatepreview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/6567bb96-9d16-4297-b9b8-6c1b4ec16c3c*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A",
+        "name": "6567bb96-9d16-4297-b9b8-6c1b4ec16c3c*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn_umi",
+        "status": "Succeeded", "startTime": "2023-07-03T05:14:33.2264305Z", "endTime":
+        "2023-07-03T05:14:43.0135606Z", "properties": {"Message": "{\"ConnectionName\":\"testconn_umi\",\"IsConnectionAvailable\":true,\"ValidationDetail\":[{\"Name\":\"Target
+        resource existence validated.\",\"Description\":null,\"Result\":0},{\"Name\":\"Target
+        service firewall validated.\",\"Description\":null,\"Result\":0},{\"Name\":\"Configured
+        connection information validated.\",\"Description\":null,\"Result\":0},{\"Name\":\"Managed
+        Identity existence validated.\",\"Description\":null,\"Result\":0},{\"Name\":\"Managed
+        Identity permissions validated.\",\"Description\":null,\"Result\":0}],\"ReportStartTimeUtc\":\"2023-07-03T05:14:34.6008538Z\",\"ReportEndTimeUtc\":\"2023-07-03T05:14:41.9011623Z\",\"SourceId\":null,\"TargetId\":null,\"AuthType\":\"userAssignedIdentity\"}",
+        "linkerName": "testconn_umi", "isConnectionAvailable": true, "validationDetail":
+        [{"name": "Target resource existence validated.", "description": null, "result":
+        "success"}, {"name": "Target service firewall validated.", "description":
+        null, "result": "success"}, {"name": "Configured connection information validated.",
+        "description": null, "result": "success"}, {"name": "Managed Identity existence
+        validated.", "description": null, "result": "success"}, {"name": "Managed
+        Identity permissions validated.", "description": null, "result": "success"}],
+        "reportStartTimeUtc": "2023-07-03T05:14:34.6008538Z", "reportEndTimeUtc":
+        "2023-07-03T05:14:41.9011623Z", "sourceId": null, "targetId": null, "authType":
+        "userAssignedIdentity"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jul 2023 05:15:04 GMT
+      etag:
+      - '"0f02cd12-0000-0100-0000-64a259430000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection validate
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
+        (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/6567bb96-9d16-4297-b9b8-6c1b4ec16c3c*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A?api-version=2021-01-01-privatepreview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/6567bb96-9d16-4297-b9b8-6c1b4ec16c3c*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A",
+        "name": "6567bb96-9d16-4297-b9b8-6c1b4ec16c3c*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn_umi",
+        "status": "Succeeded", "startTime": "2023-07-03T05:14:33.2264305Z", "endTime":
+        "2023-07-03T05:14:43.0135606Z", "properties": {"Message": "{\"ConnectionName\":\"testconn_umi\",\"IsConnectionAvailable\":true,\"ValidationDetail\":[{\"Name\":\"Target
+        resource existence validated.\",\"Description\":null,\"Result\":0},{\"Name\":\"Target
+        service firewall validated.\",\"Description\":null,\"Result\":0},{\"Name\":\"Configured
+        connection information validated.\",\"Description\":null,\"Result\":0},{\"Name\":\"Managed
+        Identity existence validated.\",\"Description\":null,\"Result\":0},{\"Name\":\"Managed
+        Identity permissions validated.\",\"Description\":null,\"Result\":0}],\"ReportStartTimeUtc\":\"2023-07-03T05:14:34.6008538Z\",\"ReportEndTimeUtc\":\"2023-07-03T05:14:41.9011623Z\",\"SourceId\":null,\"TargetId\":null,\"AuthType\":\"userAssignedIdentity\"}",
+        "linkerName": "testconn_umi", "isConnectionAvailable": true, "validationDetail":
+        [{"name": "Target resource existence validated.", "description": null, "result":
+        "success"}, {"name": "Target service firewall validated.", "description":
+        null, "result": "success"}, {"name": "Configured connection information validated.",
+        "description": null, "result": "success"}, {"name": "Managed Identity existence
+        validated.", "description": null, "result": "success"}, {"name": "Managed
+        Identity permissions validated.", "description": null, "result": "success"}],
+        "reportStartTimeUtc": "2023-07-03T05:14:34.6008538Z", "reportEndTimeUtc":
+        "2023-07-03T05:14:41.9011623Z", "sourceId": null, "targetId": null, "authType":
+        "userAssignedIdentity"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jul 2023 05:15:05 GMT
+      etag:
+      - '"0f02cd12-0000-0100-0000-64a259430000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
+        (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/mock-deployment/providers/Microsoft.ServiceLinker/linkers/testconn_umi?api-version=2022-11-01-preview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn_umi",
+        "name": "testconn_umi", "type": "microsoft.servicelinker/linkers", "systemData":
+        {"createdBy": "wchi@microsoft.com", "createdByType": "User", "createdAt":
+        "2023-07-03T05:13:13.4484118Z", "lastModifiedBy": "wchi@microsoft.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2023-07-03T05:13:13.4484118Z"}, "properties": {"publicNetworkSolution":
+        null, "configurationInfo": {"customizedKeys": null, "additionalConfigurations":
+        null, "deleteOrUpdateBehavior": null, "action": null, "daprProperties": null},
+        "provisioningState": "Succeeded", "targetService": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-sql-cosmos/sqlDatabases/coreDB",
+        "resourceProperties": null, "type": "AzureResource"}, "authInfo": {"subscriptionId":
+        "00000000-0000-0000-0000-000000000000", "clientId": "00000000-0000-0000-0000-000000000000",
+        "roles": null, "userName": null, "authType": "userAssignedIdentity", "deleteOrUpdateBehavior":
+        null}, "clientType": "springBoot", "scope": null, "vNetSolution": null, "secretStore":
+        {"keyVaultId": null, "keyVaultSecretName": null}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1429'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jul 2023 05:15:10 GMT
+      etag:
+      - '"d7000464-0000-0100-0000-64a259250000"'
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - 7d5f9e51-e868-464a-bf94-b2fb55b2fd74
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --id --yes
+      User-Agent:
+      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
+        (Windows-10-10.0.22621-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/mock-deployment/providers/Microsoft.ServiceLinker/linkers/testconn_umi?api-version=2022-11-01-preview
+  response:
+    body:
+      string: 'null'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/ae64e0fa-7231-42b4-95f7-006a81aaf9f0*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A?api-version=2021-01-01-privatepreview
+      cache-control:
+      - no-cache
+      content-length:
+      - '4'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jul 2023 05:15:21 GMT
+      etag:
+      - '"d700e967-0000-0100-0000-64a2596a0000"'
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/ae64e0fa-7231-42b4-95f7-006a81aaf9f0*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A?api-version=2021-01-01-privatepreview
+      mise-correlation-id:
+      - 051d6c91-20e4-4de3-8335-b34a08deb61a
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --yes
+      User-Agent:
+      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
+        (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/ae64e0fa-7231-42b4-95f7-006a81aaf9f0*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A?api-version=2021-01-01-privatepreview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/ae64e0fa-7231-42b4-95f7-006a81aaf9f0*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A",
+        "name": "ae64e0fa-7231-42b4-95f7-006a81aaf9f0*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn_umi",
+        "status": "Deleting", "startTime": "2023-07-03T05:15:21.9272906Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '682'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jul 2023 05:15:23 GMT
+      etag:
+      - '"0f02e113-0000-0100-0000-64a259690000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - spring connection delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --yes
+      User-Agent:
+      - AZURECLI/2.49.0 (MSI) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.9.7
+        (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/ae64e0fa-7231-42b4-95f7-006a81aaf9f0*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A?api-version=2021-01-01-privatepreview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/ae64e0fa-7231-42b4-95f7-006a81aaf9f0*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A",
+        "name": "ae64e0fa-7231-42b4-95f7-006a81aaf9f0*BE2E2948FA323D537546CE45EC02465230A5438197F0D005A5A360BA74810A2A",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.AppPlatform/Spring/servicelinker-springcloud/apps/cosmossql/deployments/default/providers/Microsoft.ServiceLinker/linkers/testconn_umi",
+        "status": "Succeeded", "startTime": "2023-07-03T05:15:21.9272906Z", "endTime":
+        "2023-07-03T05:15:25.4784409Z", "properties": null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '746'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jul 2023 05:15:52 GMT
+      etag:
+      - '"0f02f713-0000-0100-0000-64a2596d0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

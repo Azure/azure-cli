@@ -56,6 +56,7 @@ from azure.mgmt.cosmosdb.models import (
     AnalyticalStorageConfiguration,
     RestoreParameters,
     ContinuousModeBackupPolicy,
+    ContinuousModeProperties,
     ContinuousBackupRestoreLocation,
     CreateMode,
     ManagedServiceIdentityUserAssignedIdentity,
@@ -114,7 +115,7 @@ def cli_cosmosdb_create(cmd,
                         enable_multiple_write_locations=None,
                         disable_key_based_metadata_write_access=None,
                         key_uri=None,
-                        enable_public_network=None,
+                        public_network_access=None,
                         enable_analytical_storage=None,
                         enable_free_tier=None,
                         server_version=None,
@@ -127,12 +128,14 @@ def cli_cosmosdb_create(cmd,
                         default_identity=None,
                         analytical_storage_schema_type=None,
                         backup_policy_type=None,
+                        continuous_tier=None,
                         databases_to_restore=None,
                         gremlin_databases_to_restore=None,
                         tables_to_restore=None,
                         is_restore_request=None,
                         restore_source=None,
-                        restore_timestamp=None):
+                        restore_timestamp=None,
+                        enable_partition_merge=None):
     """Create a new Azure Cosmos DB database account."""
 
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -164,7 +167,7 @@ def cli_cosmosdb_create(cmd,
                                     enable_multiple_write_locations=enable_multiple_write_locations,
                                     disable_key_based_metadata_write_access=disable_key_based_metadata_write_access,
                                     key_uri=key_uri,
-                                    enable_public_network=enable_public_network,
+                                    public_network_access=public_network_access,
                                     enable_analytical_storage=enable_analytical_storage,
                                     enable_free_tier=enable_free_tier,
                                     server_version=server_version,
@@ -175,6 +178,7 @@ def cli_cosmosdb_create(cmd,
                                     restore_timestamp=restore_timestamp_utc,
                                     analytical_storage_schema_type=analytical_storage_schema_type,
                                     backup_policy_type=backup_policy_type,
+                                    continuous_tier=continuous_tier,
                                     backup_interval=backup_interval,
                                     backup_redundancy=backup_redundancy,
                                     assign_identity=assign_identity,
@@ -183,7 +187,8 @@ def cli_cosmosdb_create(cmd,
                                     databases_to_restore=databases_to_restore,
                                     gremlin_databases_to_restore=gremlin_databases_to_restore,
                                     tables_to_restore=tables_to_restore,
-                                    arm_location=resource_group_location)
+                                    arm_location=resource_group_location,
+                                    enable_partition_merge=enable_partition_merge)
 
 
 # pylint: disable=too-many-statements
@@ -205,7 +210,7 @@ def _create_database_account(client,
                              enable_multiple_write_locations=None,
                              disable_key_based_metadata_write_access=None,
                              key_uri=None,
-                             enable_public_network=None,
+                             public_network_access=None,
                              enable_analytical_storage=None,
                              enable_free_tier=None,
                              server_version=None,
@@ -217,6 +222,7 @@ def _create_database_account(client,
                              assign_identity=None,
                              default_identity=None,
                              backup_policy_type=None,
+                             continuous_tier=None,
                              analytical_storage_schema_type=None,
                              databases_to_restore=None,
                              gremlin_databases_to_restore=None,
@@ -224,7 +230,8 @@ def _create_database_account(client,
                              is_restore_request=None,
                              restore_source=None,
                              restore_timestamp=None,
-                             arm_location=None):
+                             arm_location=None,
+                             enable_partition_merge=None):
 
     consistency_policy = None
     if default_consistency_level is not None:
@@ -235,10 +242,6 @@ def _create_database_account(client,
     if not locations:
         locations = []
         locations.append(Location(location_name=arm_location, failover_priority=0, is_zone_redundant=False))
-
-    public_network_access = None
-    if enable_public_network is not None:
-        public_network_access = 'Enabled' if enable_public_network else 'Disabled'
 
     managed_service_identity = None
     SYSTEM_ID = '[system]'
@@ -288,6 +291,15 @@ def _create_database_account(client,
             backup_policy.periodic_mode_properties = periodic_mode_properties
         elif backup_policy_type.lower() == 'continuous':
             backup_policy = ContinuousModeBackupPolicy()
+            if continuous_tier is not None:
+                continuous_mode_properties = ContinuousModeProperties(
+                    tier=continuous_tier
+                )
+            else:
+                continuous_mode_properties = ContinuousModeProperties(
+                    tier='Continuous30Days'
+                )
+            backup_policy.continuous_mode_properties = continuous_mode_properties
         else:
             raise CLIError('backup-policy-type argument is invalid.')
     elif backup_interval is not None or backup_retention is not None or backup_redundancy is not None:
@@ -350,7 +362,8 @@ def _create_database_account(client,
         default_identity=default_identity,
         analytical_storage_configuration=analytical_storage_configuration,
         create_mode=create_mode,
-        restore_parameters=restore_parameters
+        restore_parameters=restore_parameters,
+        enable_partition_merge=enable_partition_merge
     )
 
     async_docdb_create = client.begin_create_or_update(resource_group_name, account_name, params)
@@ -376,7 +389,7 @@ def cli_cosmosdb_update(client,
                         enable_multiple_write_locations=None,
                         disable_key_based_metadata_write_access=None,
                         key_uri=None,
-                        enable_public_network=None,
+                        public_network_access=None,
                         enable_analytical_storage=None,
                         network_acl_bypass=None,
                         network_acl_bypass_resource_ids=None,
@@ -386,7 +399,9 @@ def cli_cosmosdb_update(client,
                         backup_redundancy=None,
                         default_identity=None,
                         analytical_storage_schema_type=None,
-                        backup_policy_type=None):
+                        backup_policy_type=None,
+                        continuous_tier=None,
+                        enable_partition_merge=None):
     """Update an existing Azure Cosmos DB database account. """
     existing = client.get(resource_group_name, account_name)
 
@@ -419,10 +434,6 @@ def cli_cosmosdb_update(client,
                                                max_staleness_prefix=max_staleness_prefix,
                                                max_interval_in_seconds=max_interval)
 
-    public_network_access = None
-    if enable_public_network is not None:
-        public_network_access = 'Enabled' if enable_public_network else 'Disabled'
-
     api_properties = {'ServerVersion': server_version}
 
     backup_policy = None
@@ -443,6 +454,22 @@ def cli_cosmosdb_update(client,
     elif backup_policy_type is not None and backup_policy_type.lower() == 'continuous':
         if isinstance(existing.backup_policy, PeriodicModeBackupPolicy):
             backup_policy = ContinuousModeBackupPolicy()
+            if continuous_tier is not None:
+                continuous_mode_properties = ContinuousModeProperties(
+                    tier=continuous_tier
+                )
+            else:
+                continuous_mode_properties = ContinuousModeProperties(
+                    tier='Continuous30Days'
+                )
+            backup_policy.continuous_mode_properties = continuous_mode_properties
+        else:
+            backup_policy = existing.backup_policy
+            if continuous_tier is not None:
+                continuous_mode_properties = ContinuousModeProperties(
+                    tier=continuous_tier
+                )
+                backup_policy.continuous_mode_properties = continuous_mode_properties
 
     analytical_storage_configuration = None
     if analytical_storage_schema_type is not None:
@@ -468,7 +495,8 @@ def cli_cosmosdb_update(client,
         api_properties=api_properties,
         backup_policy=backup_policy,
         default_identity=default_identity,
-        analytical_storage_configuration=analytical_storage_configuration)
+        analytical_storage_configuration=analytical_storage_configuration,
+        enable_partition_merge=enable_partition_merge)
 
     async_docdb_update = client.begin_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_update.result()
@@ -1746,9 +1774,12 @@ def cli_cosmosdb_restore(cmd,
                          target_database_account_name,
                          restore_timestamp,
                          location,
+                         assign_identity=None,
+                         default_identity=None,
                          databases_to_restore=None,
                          gremlin_databases_to_restore=None,
-                         tables_to_restore=None):
+                         tables_to_restore=None,
+                         public_network_access=None):
     from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_database_accounts
     restorable_database_accounts_client = cf_restorable_database_accounts(cmd.cli_ctx, [])
     restorable_database_accounts = restorable_database_accounts_client.list()
@@ -1845,13 +1876,16 @@ def cli_cosmosdb_restore(cmd,
                                     resource_group_name=resource_group_name,
                                     account_name=target_database_account_name,
                                     locations=locations,
+                                    assign_identity=assign_identity,
+                                    default_identity=default_identity,
                                     is_restore_request=True,
                                     restore_source=target_restorable_account.id,
                                     restore_timestamp=restore_timestamp_datetime_utc.isoformat(),
                                     databases_to_restore=databases_to_restore,
                                     gremlin_databases_to_restore=gremlin_databases_to_restore,
                                     tables_to_restore=tables_to_restore,
-                                    arm_location=target_restorable_account.location)
+                                    arm_location=target_restorable_account.location,
+                                    public_network_access=public_network_access)
 
 
 def _convert_to_utc_timestamp(timestamp_string):

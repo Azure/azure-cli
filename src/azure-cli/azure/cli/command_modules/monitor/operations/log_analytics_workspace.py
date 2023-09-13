@@ -3,9 +3,15 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=protected-access
+
 from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.data_export import \
     Create as _WorkspaceDataExportCreate, \
     Update as _WorkspaceDataExportUpdate
+from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.table import \
+    Create as _WorkspaceTableCreate, \
+    Update as _WorkspaceTableUpdate
+
 from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, RequiredArgumentMissingError
 from azure.cli.core.commands.transform import _parse_id
 
@@ -153,15 +159,40 @@ class WorkspaceDataExportUpdate(_WorkspaceDataExportUpdate):
                                                 ' an evenhug namespace or an event hub resource id.')
 
 
+class WorkspaceTableCreate(_WorkspaceTableCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZIntArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.total_retention_time._fmt = AAZIntArgFormat(
+            maximum=2556,
+            minimum=4,
+        )
+        return args_schema
+
+
+class WorkspaceTableUpdate(_WorkspaceTableUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZIntArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.total_retention_time._fmt = AAZIntArgFormat(
+            maximum=2556,
+            minimum=4,
+        )
+        return args_schema
+
+
 # pylint:disable=too-many-locals
 def create_log_analytics_workspace_table(cmd, resource_group_name, workspace_name, table_name, columns=None,
                                          retention_in_days=None, total_retention_in_days=None, plan=None,
                                          description=None, no_wait=False):
-    from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.table import Create
     if retention_in_days and total_retention_in_days:
         if total_retention_in_days < retention_in_days:
-            InvalidArgumentValueError('InvalidArgumentValueError: The specified value of --retention-time'
-                                      ' should be less than --total-retention-time')
+            raise InvalidArgumentValueError('InvalidArgumentValueError: The specified value of --retention-time'
+                                            ' should be less than --total-retention-time')
     columns_list = None
     if columns:
         columns_list = []
@@ -175,7 +206,7 @@ def create_log_analytics_workspace_table(cmd, resource_group_name, workspace_nam
     if columns or description is not None:
         if not columns:
             raise RequiredArgumentMissingError('Usage error: When using --description, --columns must be provided')
-    return Create(cli_ctx=cmd.cli_ctx)(command_args={
+    return WorkspaceTableCreate(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "table_name": table_name,
         "workspace_name": workspace_name,
@@ -195,8 +226,8 @@ def create_log_analytics_workspace_table_search_job(cmd, resource_group_name, wo
                                                     search_query, start_search_time, end_search_time,
                                                     retention_in_days=None, total_retention_in_days=None, limit=None,
                                                     no_wait=False):
-    from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.table import Create
-    return Create(cli_ctx=cmd.cli_ctx)(command_args={
+
+    return WorkspaceTableCreate(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "table_name": table_name,
         "workspace_name": workspace_name,
@@ -215,9 +246,7 @@ def create_log_analytics_workspace_table_search_job(cmd, resource_group_name, wo
 def create_log_analytics_workspace_table_restore(cmd, resource_group_name, workspace_name, table_name,
                                                  start_restore_time, end_restore_time, restore_source_table,
                                                  no_wait=False):
-    from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.table import Create
-
-    return Create(cli_ctx=cmd.cli_ctx)(command_args={
+    return WorkspaceTableCreate(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "table_name": table_name,
         "workspace_name": workspace_name,
@@ -233,8 +262,6 @@ def create_log_analytics_workspace_table_restore(cmd, resource_group_name, works
 def update_log_analytics_workspace_table(cmd, resource_group_name, workspace_name, table_name, columns=None,
                                          retention_in_days=None, total_retention_in_days=None, plan=None,
                                          description=None, no_wait=False):
-    from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.table import Update
-
     columns_list = None
     if columns:
         columns_list = []
@@ -263,4 +290,4 @@ def update_log_analytics_workspace_table(cmd, resource_group_name, workspace_nam
         command_args["schema"]["columns"] = columns_list
     if description is not None:
         command_args["schema"]["description"] = description
-    return Update(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+    return WorkspaceTableUpdate(cli_ctx=cmd.cli_ctx)(command_args=command_args)

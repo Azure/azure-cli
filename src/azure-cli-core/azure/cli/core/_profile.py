@@ -640,8 +640,8 @@ class Profile:
         self._set_subscriptions(result, merge=False)
 
     def get_sp_auth_info(self, subscription_id=None, name=None, password=None, cert_file=None):
-        """Generate a JSON for --sdk-auth argument when used in:
-            - az ad sp create-for-rbac --sdk-auth
+        """Generate a JSON for --json-auth argument when used in:
+            - az ad sp create-for-rbac --json-auth
         """
         from collections import OrderedDict
         account = self.get_subscription(subscription_id)

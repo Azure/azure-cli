@@ -20,6 +20,7 @@ from .action import (
 class RESOURCE(Enum):
     Local = 'connection'
     WebApp = 'webapp'
+    FunctionApp = 'functionapp'
     # `az spring-cloud` migrated to `az spring`
     SpringCloud = 'spring'
     SpringCloudDeprecated = 'spring-cloud'
@@ -57,9 +58,8 @@ class RESOURCE(Enum):
 
         raise ValueError(f"'{cls.__name__}' enum not found for '{value}'")
 
+
 # The dict defines the auth types
-
-
 class AUTH_TYPE(Enum):
     Secret = 'secret'
     SecretAuto = 'secret(auto)'  # secret which don't need user provide name & password
@@ -97,15 +97,20 @@ TARGET_RESOURCES_USERTOKEN = [RESOURCE.PostgresFlexible, RESOURCE.MysqlFlexible,
 # The target resources could be set to connection string
 TARGET_RESOURCES_CONNECTION_STRING = [RESOURCE.Sql, RESOURCE.Mysql, RESOURCE.MysqlFlexible, RESOURCE.Postgres, RESOURCE.PostgresFlexible]
 
+# The target resources to be deprecated
+TARGET_RESOURCES_DEPRECATED = [RESOURCE.Mysql, RESOURCE.Postgres]
+
 # The dict defines the resource id pattern of source resources.
 SOURCE_RESOURCES = {
     RESOURCE.WebApp: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.Web/sites/{site}',
+    RESOURCE.FunctionApp: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.Web/sites/{site}',
     RESOURCE.SpringCloud: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.AppPlatform/Spring/{spring}/apps/{app}/deployments/{deployment}',
     RESOURCE.SpringCloudDeprecated: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.AppPlatform/Spring/{spring}/apps/{app}/deployments/{deployment}',
     # RESOURCE.KubernetesCluster: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.ContainerService/managedClusters/{cluster}',
     RESOURCE.ContainerApp: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.App/containerApps/{app}'
 }
 
+WEB_APP_SLOT_RESOURCE = '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.Web/sites/{site}/slots/{slot}'
 LOCAL_CONNECTION_RESOURCE = '/subscriptions/{subscriptionId}/resourceGroups/{resource_group}/providers/Microsoft.ServiceLinker/locations/{location}/connectors/{connection_name}'
 
 # The dict defines the resource id pattern of target resources.
@@ -168,6 +173,20 @@ SOURCE_RESOURCES_PARAMS = {
             'options': ['--name', '-n'],
             'help': 'Name of the webapp',
             'placeholder': 'MyWebApp'
+        }
+    },
+    RESOURCE.FunctionApp: {
+        'source_resource_group': {
+            'configured_default': 'group',
+            'options': ['--resource-group', '-g'],
+            'help': 'The resource group which contains the function app',
+            'placeholder': 'FuncAppRG'
+        },
+        'site': {
+            'configured_default': 'web',
+            'options': ['--name', '-n'],
+            'help': 'Name of the function app',
+            'placeholder': 'MyFunctionApp'
         }
     },
     RESOURCE.SpringCloud: {
@@ -252,6 +271,16 @@ SOURCE_RESOURCES_CREATE_PARAMS = {
     },
 }
 
+# The dict defines the optional parameters used in the source resources for WebApp creation.
+SOURCE_RESOURCES_OPTIONAL_PARAMS = {
+    RESOURCE.WebApp: {
+        'slot': {
+            'options': ['--slot'],
+            'help': 'The name of the slot. Default to the production slot if not specified.',
+            'placeholder': 'WebAppSlot'
+        },
+    },
+}
 
 # The dict defines the parameters used to position the target resources.
 # The parmaters should include all variables defined in target resource id expect
@@ -748,23 +777,23 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
         RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 
-        RESOURCE.CosmosCassandra: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
-        RESOURCE.CosmosGremlin: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
-        RESOURCE.CosmosMongo: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
-        RESOURCE.CosmosTable: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
-        RESOURCE.CosmosSql: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosCassandra: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosGremlin: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosMongo: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosTable: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosSql: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
 
-        RESOURCE.StorageBlob: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
-        RESOURCE.StorageQueue: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.StorageBlob: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.StorageQueue: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.StorageFile: [AUTH_TYPE.SecretAuto],
         RESOURCE.StorageTable: [AUTH_TYPE.SecretAuto],
 
-        RESOURCE.KeyVault: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.KeyVault: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.AppConfig: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.EventHub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.ServiceBus: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
-        RESOURCE.SignalR: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
-        RESOURCE.WebPubSub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.SignalR: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.WebPubSub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
     },
     RESOURCE.KubernetesCluster: {
@@ -825,6 +854,7 @@ SUPPORTED_AUTH_TYPE = {
     },
 }
 SUPPORTED_AUTH_TYPE[RESOURCE.SpringCloudDeprecated] = SUPPORTED_AUTH_TYPE[RESOURCE.SpringCloud]
+SUPPORTED_AUTH_TYPE[RESOURCE.FunctionApp] = SUPPORTED_AUTH_TYPE[RESOURCE.WebApp]
 
 
 # The dict defines the supported client types of each source-target resource pair
@@ -947,6 +977,7 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
+            CLIENT_TYPE.SpringBoot,
             CLIENT_TYPE.Blank
         ],
         RESOURCE.StorageBlob: [
@@ -1043,3 +1074,4 @@ SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloudDeprecated] = SUPPORTED_CLIENT_TYPE[RE
 SUPPORTED_CLIENT_TYPE[RESOURCE.KubernetesCluster] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
 SUPPORTED_CLIENT_TYPE[RESOURCE.ContainerApp] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
 SUPPORTED_CLIENT_TYPE[RESOURCE.Local] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
+SUPPORTED_CLIENT_TYPE[RESOURCE.FunctionApp] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]

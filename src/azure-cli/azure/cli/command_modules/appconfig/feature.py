@@ -27,7 +27,8 @@ from ._models import (KeyValue,
                       convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting)
 from ._utils import (get_appconfig_data_client,
-                     prep_label_filter_for_url_encoding)
+                     prep_label_filter_for_url_encoding,
+                     validate_feature_flag_name)
 from ._featuremodels import (map_keyvalue_to_featureflag,
                              map_keyvalue_to_featureflagvalue,
                              FeatureFilter)
@@ -52,7 +53,15 @@ def set_feature(cmd,
         raise CLIErrors.RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
 
     key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature if key is None else key
-    feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):] if feature is None else feature
+
+    # If only key is indicated, ensure that the feature name derived from the key is valid.
+    if feature is None:
+        feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
+        try:
+            validate_feature_flag_name(feature)
+        except CLIErrors.InvalidArgumentValueError as exception:
+            exception.error_msg = "The feature name derived from the specified key is invalid. " + exception.error_msg
+            raise exception
 
     # when creating a new Feature flag, these defaults will be used
     tags = {}
@@ -255,6 +264,8 @@ def show_feature(cmd,
         raise CLIErrors.ResourceNotFoundError("Feature '{}' with label '{}' does not exist.".format(feature, label))
     except HttpResponseError as exception:
         raise CLIErrors.AzureResponseError(str(exception))
+    except Exception as exception:
+        raise CLIError(str(exception))
 
 
 def list_feature(cmd,
@@ -284,10 +295,21 @@ def list_feature(cmd,
                                                    key_filter=key_filter,
                                                    label=label if label else SearchFilterOptions.ANY_LABEL)
         retrieved_featureflags = []
+
+        invalid_ffs = 0
         for kv in retrieved_keyvalues:
-            retrieved_featureflags.append(
-                map_keyvalue_to_featureflag(
-                    keyvalue=kv, show_conditions=True))
+            try:
+                retrieved_featureflags.append(
+                    map_keyvalue_to_featureflag(
+                        keyvalue=kv, show_conditions=True))
+            except (ValueError) as exception:
+                logger.warning("%s\n", exception)
+                invalid_ffs += 1
+                continue
+
+        if invalid_ffs > 0:
+            logger.warning("Found %s invalid feature flags. These feature flags will be skipped.", invalid_ffs)
+
         filtered_featureflags = []
         count = 0
 

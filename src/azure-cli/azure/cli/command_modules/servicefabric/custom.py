@@ -1392,7 +1392,7 @@ def _get_thumbprint_from_secret_identifier(cli_ctx, vault, secret_identifier):
         x509 = crypto.load_certificate(crypto.FILETYPE_PEM, cert_bytes)
 
     if not x509:
-        raise Exception('invalid certificate')
+        raise Exception('invalid certificate')  # pylint: disable=broad-exception-raised
 
     thumbprint = x509.digest("sha1").decode("utf-8").replace(':', '')
     return thumbprint
@@ -1652,7 +1652,7 @@ def _create_keyvault(cmd,
                                         KeyPermissions.delete,
                                         KeyPermissions.list,
                                         KeyPermissions.update,
-                                        KeyPermissions.IMPORT,
+                                        KeyPermissions.import_enum,
                                         KeyPermissions.backup,
                                         KeyPermissions.restore],
                                   secrets=[SecretPermissions.get,
@@ -1666,7 +1666,7 @@ def _create_keyvault(cmd,
                                                 CertificatePermissions.list,
                                                 CertificatePermissions.delete,
                                                 CertificatePermissions.create,
-                                                CertificatePermissions.IMPORT,
+                                                CertificatePermissions.import_enum,
                                                 CertificatePermissions.update,
                                                 CertificatePermissions.managecontacts,
                                                 CertificatePermissions.getissuers,
@@ -1690,7 +1690,7 @@ def _create_keyvault(cmd,
                                              permissions=permissions)]
 
     properties = VaultProperties(tenant_id=tenant_id,
-                                 sku=KeyVaultSku(name=sku, family='A'),
+                                 sku=KeyVaultSku(name=sku),
                                  access_policies=access_policies,
                                  vault_uri=None,
                                  enabled_for_deployment=enabled_for_deployment,

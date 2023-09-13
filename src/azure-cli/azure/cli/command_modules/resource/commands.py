@@ -15,11 +15,11 @@ from azure.cli.core.commands import CliCommandType, DeploymentOutputLongRunningO
 from azure.cli.core.commands.arm import handle_template_based_exception
 from azure.cli.command_modules.resource._client_factory import (
     cf_resource_groups, cf_providers, cf_features, cf_feature_registrations, cf_tags, cf_deployments,
-    cf_deployment_operations, cf_policy_definitions, cf_policy_set_definitions, cf_policy_exemptions, cf_resource_links,
+    cf_deployment_operations, cf_policy_definitions, cf_policy_set_definitions, cf_policy_exemptions, cf_resource_links, cf_resource_deploymentstacks,
     cf_resource_deploymentscripts, cf_resource_managedapplications, cf_resource_managedappdefinitions, cf_management_groups, cf_management_groups_mixin, cf_management_group_subscriptions, cf_management_group_entities, cf_hierarchy_settings, cf_resource_templatespecs, cf_resource_resourcemanagementprivatelinks, cf_resource_privatelinkassociations)
 from azure.cli.command_modules.resource._validators import (
     process_deployment_create_namespace, process_ts_create_or_update_namespace, _validate_template_spec, _validate_template_spec_out,
-    process_assign_identity_namespace, process_assignment_create_namespace)
+    process_assign_identity_namespace, process_assignment_create_namespace, validate_deployment_stack_files)
 
 from ._exception_handler import managementgroups_exception_handler
 
@@ -75,6 +75,32 @@ def transform_resource_list(result):
     return transformed
 
 
+def transform_stacks(result):
+    return OrderedDict([('Name', result['name']),
+                        ('State', result['provisioningState']),
+                        ('Last Modified', result['systemData']['lastModifiedAt'])])
+
+
+def transform_stacks_list(result):
+    transformed = []
+    for r in result:
+        resources = ""
+        if r['resources']:
+            for reslist in r['resources']:
+                resources += reslist['id'] + ","
+
+            res = OrderedDict([('Name', r['name']), ('State', r['provisioningState']),
+                              ('Last Modified', r['systemData']['lastModifiedAt'])])
+            transformed.append(res)
+    return transformed
+
+
+def transform_stacks_export(result):
+    return OrderedDict([('$schema', result['template']['$schema']),
+                       ('ContentVersion', result['template']['contentVersion'])])
+
+
+# pylint: disable=too-many-statements
 def transform_deployment(result):
     r = result
     format_result = OrderedDict([('Name', r['name']),
@@ -89,6 +115,7 @@ def transform_deployment(result):
     return format_result
 
 
+# pylint: disable=too-many-locals
 def transform_deployments_list(result):
     sort_list = sorted(result, key=lambda deployment: deployment['properties']['timestamp'])
     return [transform_deployment(r) for r in sort_list]
@@ -219,6 +246,12 @@ def load_command_table(self, _):
         resource_type=ResourceType.MGMT_RESOURCE_TEMPLATESPECS
     )
 
+    resource_deploymentstacks_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.resource.deploymentstacks.operations#ResourceLinksOperations.{}',
+        client_factory=cf_resource_deploymentstacks,
+        resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS
+    )
+
     with self.command_group('account lock', resource_lock_sdk, resource_type=ResourceType.MGMT_RESOURCE_LOCKS) as g:
         g.custom_command('create', 'create_lock')
         g.custom_command('delete', 'delete_lock')
@@ -250,7 +283,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_resources', table_transformer=transform_resource_list)
         g.custom_command('tag', 'tag_resource')
         g.custom_command('move', 'move_resource')
-        g.custom_command('invoke-action', 'invoke_resource_action', transform=DeploymentOutputLongRunningOperation(self.cli_ctx))
+        g.custom_command('invoke-action', 'invoke_resource_action', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), supports_no_wait=True)
         g.generic_update_command('update', getter_name='show_resource', setter_name='update_resource',
                                  client_factory=None)
         g.custom_command('patch', 'patch_resource')
@@ -369,6 +402,29 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_template_specs')
         g.custom_command('delete', 'delete_template_spec', validator=_validate_template_spec, confirmation=True)
 
+    with self.command_group('stack mg', resource_deploymentstacks_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
+        g.custom_show_command('show', 'show_deployment_stack_at_management_group', table_transformer=transform_stacks)
+        g.custom_command('list', 'list_deployment_stack_at_management_group', table_transformer=transform_stacks_list)
+        g.custom_command('delete', 'delete_deployment_stack_at_management_group')
+        g.custom_command('create', 'create_deployment_stack_at_management_group',
+                         validator=validate_deployment_stack_files, table_transformer=transform_stacks)
+        g.custom_command('export', 'export_template_deployment_stack_at_management_group',
+                         table_transformer=transform_stacks_export)
+
+    with self.command_group('stack sub', resource_deploymentstacks_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
+        g.custom_show_command('show', 'show_deployment_stack_at_subscription', table_transformer=transform_stacks)
+        g.custom_command('list', 'list_deployment_stack_at_subscription', table_transformer=transform_stacks_list)
+        g.custom_command('delete', 'delete_deployment_stack_at_subscription')
+        g.custom_command('create', 'create_deployment_stack_at_subscription', validator=validate_deployment_stack_files, table_transformer=transform_stacks)
+        g.custom_command('export', 'export_template_deployment_stack_at_subscription', table_transformer=transform_stacks_export)
+
+    with self.command_group('stack group', resource_deploymentstacks_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
+        g.custom_show_command('show', 'show_deployment_stack_at_resource_group', table_transformer=transform_stacks)
+        g.custom_command('list', 'list_deployment_stack_at_resource_group', table_transformer=transform_stacks_list)
+        g.custom_command('delete', 'delete_deployment_stack_at_resource_group')
+        g.custom_command('create', 'create_deployment_stack_at_resource_group', validator=validate_deployment_stack_files, table_transformer=transform_stacks)
+        g.custom_command('export', 'export_template_deployment_stack_at_resource_group', table_transformer=transform_stacks_export)
+
     # az deployment group
     with self.command_group('deployment group', resource_deployment_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
         g.custom_command('list', 'list_deployments_at_resource_group', table_transformer=transform_deployments_list)
@@ -426,38 +482,48 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_deployment_operations_at_tenant_scope')
         g.custom_show_command('show', 'get_deployment_operations_at_tenant_scope', client_factory=cf_deployment_operations)
 
-    with self.command_group('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as g:
+    # Since "MGMT_RESOURCE_POLICY" is not the default resource type used by the __init__ method
+    # in ResourceCommandsLoader, so the default "operation_group" cannot be specified in the commandsLoader,
+    # the "operation_group" needs to be explicitly specified for "MGMT_RESOURCE_POLICY".
+
+    with self.command_group('policy assignment',
+                            operation_group='policy_assignments', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as g:
         g.custom_command('create', 'create_policy_assignment', validator=process_assignment_create_namespace)
         g.custom_command('delete', 'delete_policy_assignment')
         g.custom_command('list', 'list_policy_assignment')
         g.custom_show_command('show', 'show_policy_assignment')
         g.custom_command('update', 'update_policy_assignment')
 
-    with self.command_group('policy assignment identity', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as g:
+    with self.command_group('policy assignment identity',
+                            operation_group='policy_assignments', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as g:
         g.custom_command('assign', 'set_identity', validator=process_assign_identity_namespace, min_api='2021-06-01')
         g.custom_show_command('show', 'show_identity')
         g.custom_command('remove', 'remove_identity')
 
-    with self.command_group('policy assignment non-compliance-message', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2020-09-01') as g:
+    with self.command_group('policy assignment non-compliance-message',
+                            operation_group='policy_assignments', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2020-09-01') as g:
         g.custom_command('create', 'create_policy_non_compliance_message')
         g.custom_command('list', 'list_policy_non_compliance_message')
         g.custom_command('delete', 'delete_policy_non_compliance_message')
 
-    with self.command_group('policy definition', resource_policy_definitions_sdk, resource_type=ResourceType.MGMT_RESOURCE_POLICY) as g:
+    with self.command_group('policy definition', resource_policy_definitions_sdk,
+                            operation_group='policy_definitions', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as g:
         g.custom_command('create', 'create_policy_definition')
         g.custom_command('delete', 'delete_policy_definition')
         g.custom_command('list', 'list_policy_definition')
         g.custom_show_command('show', 'get_policy_definition')
         g.custom_command('update', 'update_policy_definition')
 
-    with self.command_group('policy set-definition', resource_policy_set_definitions_sdk, resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview') as g:
+    with self.command_group('policy set-definition', resource_policy_set_definitions_sdk,
+                            operation_group='policy_set_definitions', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview') as g:
         g.custom_command('create', 'create_policy_setdefinition')
         g.custom_command('delete', 'delete_policy_setdefinition')
         g.custom_command('list', 'list_policy_setdefinition')
         g.custom_show_command('show', 'get_policy_setdefinition')
         g.custom_command('update', 'update_policy_setdefinition')
 
-    with self.command_group('policy exemption', resource_policy_exemptions_sdk, is_preview=True, resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2020-09-01') as g:
+    with self.command_group('policy exemption', resource_policy_exemptions_sdk, is_preview=True,
+                            operation_group='policy_exemptions', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2020-07-01-preview') as g:
         g.custom_command('create', 'create_policy_exemption')
         g.custom_command('delete', 'delete_policy_exemption')
         g.custom_command('list', 'list_policy_exemption')
@@ -541,8 +607,10 @@ def load_command_table(self, _):
         g.custom_command('uninstall', 'uninstall_bicep_cli')
         g.custom_command('upgrade', 'upgrade_bicep_cli')
         g.custom_command('build', 'build_bicep_file')
+        g.custom_command('build-params', 'build_bicepparam_file')
         g.custom_command('format', 'format_bicep_file')
         g.custom_command('decompile', 'decompile_bicep_file')
+        g.custom_command('decompile-params', 'decompileparams_bicep_file')
         g.custom_command('restore', 'restore_bicep_file')
         g.custom_command('publish', 'publish_bicep_file')
         g.custom_command('version', 'show_bicep_cli_version')

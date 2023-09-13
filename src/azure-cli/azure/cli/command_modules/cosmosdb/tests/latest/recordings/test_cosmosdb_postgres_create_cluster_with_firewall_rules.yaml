@@ -1,0 +1,1936 @@
+interactions:
+- request:
+    body: '{"location": "eastus2", "properties": {"administratorLoginPassword": "aBcD1234!@#$",
+      "coordinatorServerEdition": "GeneralPurpose", "coordinatorStorageQuotaInMb":
+      131072, "coordinatorVCores": 4, "nodeCount": 2, "nodeServerEdition": "MemoryOptimized",
+      "nodeStorageQuotaInMb": 131072, "nodeVCores": 2}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres cluster create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '299'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name -g -l --coordinator-v-cores --coordinator-server-edition --node-count
+        --node-v-cores --coordinator-storage-quota-in-mb --administrator-login-password
+        --node-server-edition --node-storage-quota-in-mb
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test000001/providers/Microsoft.DBforPostgreSQL/serverGroupsv2/cli000002?api-version=2022-11-08
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test000001/providers/Microsoft.DBforPostgreSQL/serverGroupsv2/cli000002\",\n
+        \ \"name\": \"cli000002\",\n  \"type\": \"Microsoft.DBforPostgreSQL/serverGroupsv2\",\n
+        \ \"tags\": {\n},\n  \"location\": \"eastus2\",\n  \"systemData\": {\n  \"createdBy\":
+        \"segungor@microsoft.com\",\n  \"createdByType\": \"User\",\n  \"createdAt\":
+        \"2023-07-19T05:24:28.0409281Z\",\n  \"lastModifiedBy\": \"segungor@microsoft.com\",\n
+        \ \"lastModifiedByType\": \"User\",\n  \"lastModifiedAt\": \"2023-07-19T05:24:28.0409281Z\"\n},\n
+        \ \"properties\": {\n    \"provisioningState\": \"Provisioning\",\n    \"state\":
+        \"Provisioning\",\n    \"administratorLogin\": \"citus\",\n    \"postgresqlVersion\":
+        \"15\",\n    \"citusVersion\": \"11.3\",\n    \"maintenanceWindow\": {\n      \"customWindow\":
+        \"Disabled\",\n      \"dayOfWeek\": 0,\n      \"startHour\": 0,\n      \"startMinute\":
+        0\n    },\n    \"preferredPrimaryZone\": null,\n    \"enableShardsOnCoordinator\":
+        false,\n    \"earliestRestoreTime\": null,\n    \"sourceResourceId\": null,\n
+        \   \"enableHa\": false,\n    \"coordinatorServerEdition\": \"GeneralPurpose\",\n
+        \   \"nodeServerEdition\": \"MemoryOptimized\",\n    \"coordinatorStorageQuotaInMb\":
+        131072,\n    \"nodeStorageQuotaInMb\": 131072,\n    \"coordinatorVCores\":
+        4,\n    \"nodeVCores\": 2,\n    \"coordinatorEnablePublicIpAccess\": true,\n
+        \   \"nodeEnablePublicIpAccess\": false,\n    \"nodeCount\": 2,\n    \"serverNames\":
+        [\n      {\n        \"name\": \"cli000002-c\",\n        \"fullyQualifiedDomainName\":
+        \"c-cli000002.dab7tf2bb2ohfs.postgres.cosmos.azure.com\"\n      },\n      {\n
+        \       \"name\": \"cli000002-w0\",\n        \"fullyQualifiedDomainName\":
+        \"w0-cli000002.dab7tf2bb2ohfs.postgres.cosmos.azure.com\"\n      },\n      {\n
+        \       \"name\": \"cli000002-w1\",\n        \"fullyQualifiedDomainName\":
+        \"w1-cli000002.dab7tf2bb2ohfs.postgres.cosmos.azure.com\"\n      }\n    ],\n
+        \   \"readReplicas\": [],\n    \"privateEndpointConnections\": []\n  }\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+      cache-control:
+      - no-cache
+      content-length:
+      - '1855'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:24:29 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/operationResults/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - 47c92f24-231d-4067-b35b-abaa424c5d24
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --coordinator-v-cores --coordinator-server-edition --node-count
+        --node-v-cores --coordinator-storage-quota-in-mb --administrator-login-password
+        --node-server-edition --node-storage-quota-in-mb
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151\",\n
+        \ \"name\": \"d6a6eeca-aa24-422f-bce5-11133efbd151\",\n  \"status\": \"InProgress\",\n
+        \ \"startTime\": \"2023-07-19 05:24:28 +0000\"\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+      cache-control:
+      - no-cache
+      content-length:
+      - '296'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:24:29 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/operationResults/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - 5536a99d-8f77-4c5c-9acb-67737ada094b
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --coordinator-v-cores --coordinator-server-edition --node-count
+        --node-v-cores --coordinator-storage-quota-in-mb --administrator-login-password
+        --node-server-edition --node-storage-quota-in-mb
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151\",\n
+        \ \"name\": \"d6a6eeca-aa24-422f-bce5-11133efbd151\",\n  \"status\": \"InProgress\",\n
+        \ \"startTime\": \"2023-07-19 05:24:28 +0000\"\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+      cache-control:
+      - no-cache
+      content-length:
+      - '296'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:24:59 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/operationResults/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - 4a794514-2251-4c31-8ace-e7d4d42ce79e
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --coordinator-v-cores --coordinator-server-edition --node-count
+        --node-v-cores --coordinator-storage-quota-in-mb --administrator-login-password
+        --node-server-edition --node-storage-quota-in-mb
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151\",\n
+        \ \"name\": \"d6a6eeca-aa24-422f-bce5-11133efbd151\",\n  \"status\": \"InProgress\",\n
+        \ \"startTime\": \"2023-07-19 05:24:28 +0000\"\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+      cache-control:
+      - no-cache
+      content-length:
+      - '296'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:25:30 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/operationResults/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - 485b1b7c-68f7-4405-83e3-8aad2dc46b6b
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --coordinator-v-cores --coordinator-server-edition --node-count
+        --node-v-cores --coordinator-storage-quota-in-mb --administrator-login-password
+        --node-server-edition --node-storage-quota-in-mb
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151\",\n
+        \ \"name\": \"d6a6eeca-aa24-422f-bce5-11133efbd151\",\n  \"status\": \"InProgress\",\n
+        \ \"startTime\": \"2023-07-19 05:24:28 +0000\"\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+      cache-control:
+      - no-cache
+      content-length:
+      - '296'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:26:00 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/operationResults/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - f8feb1a7-5f0b-487b-9aed-ea110f80598c
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --coordinator-v-cores --coordinator-server-edition --node-count
+        --node-v-cores --coordinator-storage-quota-in-mb --administrator-login-password
+        --node-server-edition --node-storage-quota-in-mb
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151\",\n
+        \ \"name\": \"d6a6eeca-aa24-422f-bce5-11133efbd151\",\n  \"status\": \"InProgress\",\n
+        \ \"startTime\": \"2023-07-19 05:24:28 +0000\"\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+      cache-control:
+      - no-cache
+      content-length:
+      - '296'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:26:30 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/operationResults/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - a8c79fe1-11e3-49a5-98bd-453abefd3eb6
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --coordinator-v-cores --coordinator-server-edition --node-count
+        --node-v-cores --coordinator-storage-quota-in-mb --administrator-login-password
+        --node-server-edition --node-storage-quota-in-mb
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151\",\n
+        \ \"name\": \"d6a6eeca-aa24-422f-bce5-11133efbd151\",\n  \"status\": \"InProgress\",\n
+        \ \"startTime\": \"2023-07-19 05:24:28 +0000\"\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+      cache-control:
+      - no-cache
+      content-length:
+      - '296'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:27:01 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/operationResults/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - 7b816cee-ee48-4cbf-9352-7a6e01e7b2a5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --coordinator-v-cores --coordinator-server-edition --node-count
+        --node-v-cores --coordinator-storage-quota-in-mb --administrator-login-password
+        --node-server-edition --node-storage-quota-in-mb
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151\",\n
+        \ \"name\": \"d6a6eeca-aa24-422f-bce5-11133efbd151\",\n  \"status\": \"InProgress\",\n
+        \ \"startTime\": \"2023-07-19 05:24:28 +0000\"\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+      cache-control:
+      - no-cache
+      content-length:
+      - '296'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:27:32 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/operationResults/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - 2960bc58-cee9-4ec4-9ab0-7f00ac2864e6
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --coordinator-v-cores --coordinator-server-edition --node-count
+        --node-v-cores --coordinator-storage-quota-in-mb --administrator-login-password
+        --node-server-edition --node-storage-quota-in-mb
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151\",\n
+        \ \"name\": \"d6a6eeca-aa24-422f-bce5-11133efbd151\",\n  \"status\": \"InProgress\",\n
+        \ \"startTime\": \"2023-07-19 05:24:28 +0000\"\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+      cache-control:
+      - no-cache
+      content-length:
+      - '296'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:28:02 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/operationResults/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - d58caca6-1a91-482d-b0fc-efdd04ffe178
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --coordinator-v-cores --coordinator-server-edition --node-count
+        --node-v-cores --coordinator-storage-quota-in-mb --administrator-login-password
+        --node-server-edition --node-storage-quota-in-mb
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151\",\n
+        \ \"name\": \"d6a6eeca-aa24-422f-bce5-11133efbd151\",\n  \"status\": \"InProgress\",\n
+        \ \"startTime\": \"2023-07-19 05:24:28 +0000\"\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+      cache-control:
+      - no-cache
+      content-length:
+      - '296'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:28:32 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/operationResults/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - 45e74791-3187-4860-ae46-fe5a18ef6655
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --coordinator-v-cores --coordinator-server-edition --node-count
+        --node-v-cores --coordinator-storage-quota-in-mb --administrator-login-password
+        --node-server-edition --node-storage-quota-in-mb
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151\",\n
+        \ \"name\": \"d6a6eeca-aa24-422f-bce5-11133efbd151\",\n  \"status\": \"Succeeded\",\n
+        \ \"startTime\": \"2023-07-19 05:24:28 +0000\"\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+      cache-control:
+      - no-cache
+      content-length:
+      - '295'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:29:03 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/operationResults/d6a6eeca-aa24-422f-bce5-11133efbd151?api-version=2022-11-08
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - fcd14b96-06a3-4f25-b6b2-c8197d6777bd
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --coordinator-v-cores --coordinator-server-edition --node-count
+        --node-v-cores --coordinator-storage-quota-in-mb --administrator-login-password
+        --node-server-edition --node-storage-quota-in-mb
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test000001/providers/Microsoft.DBforPostgreSQL/serverGroupsv2/cli000002?api-version=2022-11-08
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test000001/providers/Microsoft.DBforPostgreSQL/serverGroupsv2/cli000002\",\n
+        \ \"name\": \"cli000002\",\n  \"type\": \"Microsoft.DBforPostgreSQL/serverGroupsv2\",\n
+        \ \"tags\": {\n},\n  \"location\": \"eastus2\",\n  \"systemData\": {\n  \"createdAt\":
+        \"2023-07-19T05:24:28.0409281Z\",\n  \"createdBy\": \"segungor@microsoft.com\",\n
+        \ \"createdByType\": \"User\",\n  \"lastModifiedAt\": \"2023-07-19T05:24:28.0409281Z\",\n
+        \ \"lastModifiedBy\": \"segungor@microsoft.com\",\n  \"lastModifiedByType\":
+        \"User\"\n},\n  \"properties\": {\n    \"provisioningState\": \"Succeeded\",\n
+        \   \"state\": \"Ready\",\n    \"administratorLogin\": \"citus\",\n    \"postgresqlVersion\":
+        \"15\",\n    \"citusVersion\": \"11.3\",\n    \"maintenanceWindow\": {\n      \"customWindow\":
+        \"Disabled\",\n      \"dayOfWeek\": 0,\n      \"startHour\": 0,\n      \"startMinute\":
+        0\n    },\n    \"preferredPrimaryZone\": null,\n    \"enableShardsOnCoordinator\":
+        false,\n    \"earliestRestoreTime\": null,\n    \"sourceResourceId\": null,\n
+        \   \"enableHa\": false,\n    \"coordinatorServerEdition\": \"GeneralPurpose\",\n
+        \   \"nodeServerEdition\": \"MemoryOptimized\",\n    \"coordinatorStorageQuotaInMb\":
+        131072,\n    \"nodeStorageQuotaInMb\": 131072,\n    \"coordinatorVCores\":
+        4,\n    \"nodeVCores\": 2,\n    \"coordinatorEnablePublicIpAccess\": true,\n
+        \   \"nodeEnablePublicIpAccess\": false,\n    \"nodeCount\": 2,\n    \"serverNames\":
+        [\n      {\n        \"name\": \"cli000002-c\",\n        \"fullyQualifiedDomainName\":
+        \"c-cli000002.dab7tf2bb2ohfs.postgres.cosmos.azure.com\"\n      },\n      {\n
+        \       \"name\": \"cli000002-w0\",\n        \"fullyQualifiedDomainName\":
+        \"w0-cli000002.dab7tf2bb2ohfs.postgres.cosmos.azure.com\"\n      },\n      {\n
+        \       \"name\": \"cli000002-w1\",\n        \"fullyQualifiedDomainName\":
+        \"w1-cli000002.dab7tf2bb2ohfs.postgres.cosmos.azure.com\"\n      }\n    ],\n
+        \   \"readReplicas\": [],\n    \"privateEndpointConnections\": []\n  }\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1845'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:29:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - cd0a416d-7631-4a06-8bce-e9c777763ea3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"endIpAddress": "255.255.255.255", "startIpAddress": "0.0.0.0"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres firewall-rule create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '80'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --cluster-name -n -g --start-ip-address --end-ip-address
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test000001/providers/Microsoft.DBforPostgreSQL/serverGroupsv2/cli000002/firewallRules/fw_rule?api-version=2022-11-08
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test000001/providers/Microsoft.DBforPostgreSQL/serverGroupsv2/cli000002/firewallRules/fw_rule\",\n
+        \ \"name\": \"fw_rule\",\n  \"type\": \"Microsoft.DBforPostgreSQL/serverGroupsv2/firewallRules\",\n
+        \ \"systemData\": {\n  \"createdAt\": \"2023-07-19T05:29:06.7030906Z\",\n
+        \ \"createdBy\": \"segungor@microsoft.com\",\n  \"createdByType\": \"User\",\n
+        \ \"lastModifiedAt\": \"2023-07-19T05:29:06.7030906Z\",\n  \"lastModifiedBy\":
+        \"segungor@microsoft.com\",\n  \"lastModifiedByType\": \"User\"\n},\n  \"properties\":
+        {\n    \"provisioningState\": \"InProgress\",\n    \"startIpAddress\": \"0.0.0.0\",\n
+        \   \"endIpAddress\": \"255.255.255.255\"\n  }\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/b6a3cd08-c646-4217-8785-304577aa537c?api-version=2022-11-08
+      cache-control:
+      - no-cache
+      content-length:
+      - '665'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:29:09 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/operationResults/b6a3cd08-c646-4217-8785-304577aa537c?api-version=2022-11-08
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - 4bdb8c24-d85a-4d2d-ac23-be5acfadbd0b
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres firewall-rule create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name -n -g --start-ip-address --end-ip-address
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/b6a3cd08-c646-4217-8785-304577aa537c?api-version=2022-11-08
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/b6a3cd08-c646-4217-8785-304577aa537c\",\n
+        \ \"name\": \"b6a3cd08-c646-4217-8785-304577aa537c\",\n  \"status\": \"InProgress\",\n
+        \ \"startTime\": \"2023-07-19 05:29:09 +0000\"\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/b6a3cd08-c646-4217-8785-304577aa537c?api-version=2022-11-08
+      cache-control:
+      - no-cache
+      content-length:
+      - '296'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:29:09 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/operationResults/b6a3cd08-c646-4217-8785-304577aa537c?api-version=2022-11-08
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - af8b02d6-14b4-451a-a722-e72e99f5101f
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres firewall-rule create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name -n -g --start-ip-address --end-ip-address
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/b6a3cd08-c646-4217-8785-304577aa537c?api-version=2022-11-08
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/b6a3cd08-c646-4217-8785-304577aa537c\",\n
+        \ \"name\": \"b6a3cd08-c646-4217-8785-304577aa537c\",\n  \"status\": \"Succeeded\",\n
+        \ \"startTime\": \"2023-07-19 05:29:09 +0000\"\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/b6a3cd08-c646-4217-8785-304577aa537c?api-version=2022-11-08
+      cache-control:
+      - no-cache
+      content-length:
+      - '295'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:29:39 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/operationResults/b6a3cd08-c646-4217-8785-304577aa537c?api-version=2022-11-08
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - ec0e3a1d-0486-4517-910d-097b1b5e8db5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres firewall-rule create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name -n -g --start-ip-address --end-ip-address
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test000001/providers/Microsoft.DBforPostgreSQL/serverGroupsv2/cli000002/firewallRules/fw_rule?api-version=2022-11-08
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test000001/providers/Microsoft.DBforPostgreSQL/serverGroupsv2/cli000002/firewallRules/fw_rule\",\n
+        \ \"name\": \"fw_rule\",\n  \"type\": \"Microsoft.DBforPostgreSQL/serverGroupsv2/firewallRules\",\n
+        \ \"systemData\": {\n  \"createdAt\": \"2023-07-19T05:29:06.7030906Z\",\n
+        \ \"createdBy\": \"segungor@microsoft.com\",\n  \"createdByType\": \"User\",\n
+        \ \"lastModifiedAt\": \"2023-07-19T05:29:06.7030906Z\",\n  \"lastModifiedBy\":
+        \"segungor@microsoft.com\",\n  \"lastModifiedByType\": \"User\"\n},\n  \"properties\":
+        {\n    \"provisioningState\": \"Succeeded\",\n    \"startIpAddress\": \"0.0.0.0\",\n
+        \   \"endIpAddress\": \"255.255.255.255\"\n  }\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '664'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:29:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - 11380ed6-adf3-4455-93bb-a80c5b98e208
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres firewall-rule update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name -n -g --end-ip-address
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test000001/providers/Microsoft.DBforPostgreSQL/serverGroupsv2/cli000002/firewallRules/fw_rule?api-version=2022-11-08
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test000001/providers/Microsoft.DBforPostgreSQL/serverGroupsv2/cli000002/firewallRules/fw_rule\",\n
+        \ \"name\": \"fw_rule\",\n  \"type\": \"Microsoft.DBforPostgreSQL/serverGroupsv2/firewallRules\",\n
+        \ \"systemData\": {\n  \"createdAt\": \"2023-07-19T05:29:06.7030906Z\",\n
+        \ \"createdBy\": \"segungor@microsoft.com\",\n  \"createdByType\": \"User\",\n
+        \ \"lastModifiedAt\": \"2023-07-19T05:29:06.7030906Z\",\n  \"lastModifiedBy\":
+        \"segungor@microsoft.com\",\n  \"lastModifiedByType\": \"User\"\n},\n  \"properties\":
+        {\n    \"provisioningState\": \"Succeeded\",\n    \"startIpAddress\": \"0.0.0.0\",\n
+        \   \"endIpAddress\": \"255.255.255.255\"\n  }\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '664'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:29:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - bb3be604-5e51-4884-a96d-952bfd38d49e
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"endIpAddress": "255.255.255.1", "startIpAddress": "0.0.0.0"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres firewall-rule update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '78'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --cluster-name -n -g --end-ip-address
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test000001/providers/Microsoft.DBforPostgreSQL/serverGroupsv2/cli000002/firewallRules/fw_rule?api-version=2022-11-08
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test000001/providers/Microsoft.DBforPostgreSQL/serverGroupsv2/cli000002/firewallRules/fw_rule\",\n
+        \ \"name\": \"fw_rule\",\n  \"type\": \"Microsoft.DBforPostgreSQL/serverGroupsv2/firewallRules\",\n
+        \ \"systemData\": {\n  \"createdAt\": \"2023-07-19T05:29:43.8380772Z\",\n
+        \ \"createdBy\": \"segungor@microsoft.com\",\n  \"createdByType\": \"User\",\n
+        \ \"lastModifiedAt\": \"2023-07-19T05:29:43.8380772Z\",\n  \"lastModifiedBy\":
+        \"segungor@microsoft.com\",\n  \"lastModifiedByType\": \"User\"\n},\n  \"properties\":
+        {\n    \"provisioningState\": \"InProgress\",\n    \"startIpAddress\": \"0.0.0.0\",\n
+        \   \"endIpAddress\": \"255.255.255.1\"\n  }\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/a6106c0c-352f-41be-857e-4269a9e31181?api-version=2022-11-08
+      cache-control:
+      - no-cache
+      content-length:
+      - '663'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:29:44 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/operationResults/a6106c0c-352f-41be-857e-4269a9e31181?api-version=2022-11-08
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - 4af0d690-0078-483a-9599-dca202e7a76b
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres firewall-rule update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name -n -g --end-ip-address
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/a6106c0c-352f-41be-857e-4269a9e31181?api-version=2022-11-08
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/a6106c0c-352f-41be-857e-4269a9e31181\",\n
+        \ \"name\": \"a6106c0c-352f-41be-857e-4269a9e31181\",\n  \"status\": \"InProgress\",\n
+        \ \"startTime\": \"2023-07-19 05:29:44 +0000\"\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/a6106c0c-352f-41be-857e-4269a9e31181?api-version=2022-11-08
+      cache-control:
+      - no-cache
+      content-length:
+      - '296'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:29:44 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/operationResults/a6106c0c-352f-41be-857e-4269a9e31181?api-version=2022-11-08
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - 82e74e9b-d49c-4d3a-8140-b6df8fba1f50
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres firewall-rule update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name -n -g --end-ip-address
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/a6106c0c-352f-41be-857e-4269a9e31181?api-version=2022-11-08
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/a6106c0c-352f-41be-857e-4269a9e31181\",\n
+        \ \"name\": \"a6106c0c-352f-41be-857e-4269a9e31181\",\n  \"status\": \"Succeeded\",\n
+        \ \"startTime\": \"2023-07-19 05:29:44 +0000\"\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/a6106c0c-352f-41be-857e-4269a9e31181?api-version=2022-11-08
+      cache-control:
+      - no-cache
+      content-length:
+      - '295'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:30:15 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/operationResults/a6106c0c-352f-41be-857e-4269a9e31181?api-version=2022-11-08
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - 506b5aeb-1928-4b0a-b4ec-e413fe364ade
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres firewall-rule update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name -n -g --end-ip-address
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test000001/providers/Microsoft.DBforPostgreSQL/serverGroupsv2/cli000002/firewallRules/fw_rule?api-version=2022-11-08
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test000001/providers/Microsoft.DBforPostgreSQL/serverGroupsv2/cli000002/firewallRules/fw_rule\",\n
+        \ \"name\": \"fw_rule\",\n  \"type\": \"Microsoft.DBforPostgreSQL/serverGroupsv2/firewallRules\",\n
+        \ \"systemData\": {\n  \"createdAt\": \"2023-07-19T05:29:43.8380772Z\",\n
+        \ \"createdBy\": \"segungor@microsoft.com\",\n  \"createdByType\": \"User\",\n
+        \ \"lastModifiedAt\": \"2023-07-19T05:29:43.8380772Z\",\n  \"lastModifiedBy\":
+        \"segungor@microsoft.com\",\n  \"lastModifiedByType\": \"User\"\n},\n  \"properties\":
+        {\n    \"provisioningState\": \"Succeeded\",\n    \"startIpAddress\": \"0.0.0.0\",\n
+        \   \"endIpAddress\": \"255.255.255.1\"\n  }\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '662'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:30:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - bad6ba00-2d18-4152-a4cb-f7f3eaf678db
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres firewall-rule list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name -g
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test000001/providers/Microsoft.DBforPostgreSQL/serverGroupsv2/cli000002/firewallRules?api-version=2022-11-08
+  response:
+    body:
+      string: "{\n  \"value\": [\n    {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test000001/providers/Microsoft.DBforPostgreSQL/serverGroupsv2/cli000002/firewallRules/fw_rule\",\n
+        \     \"name\": \"fw_rule\",\n      \"type\": \"Microsoft.DBforPostgreSQL/serverGroupsv2/firewallRules\",\n
+        \     \"systemData\": {\n  \"createdAt\": \"2023-07-19T05:29:43.8380772Z\",\n
+        \ \"createdBy\": \"segungor@microsoft.com\",\n  \"createdByType\": \"User\",\n
+        \ \"lastModifiedAt\": \"2023-07-19T05:29:43.8380772Z\",\n  \"lastModifiedBy\":
+        \"segungor@microsoft.com\",\n  \"lastModifiedByType\": \"User\"\n},\n      \"properties\":
+        {\n        \"provisioningState\": \"Succeeded\",\n        \"startIpAddress\":
+        \"0.0.0.0\",\n        \"endIpAddress\": \"255.255.255.1\"\n      }\n    }\n
+        \ ]\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '727'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:30:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - 51b1e4dd-196d-403a-8728-544d8d9f1bb8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres firewall-rule delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --cluster-name -n -g --yes
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test000001/providers/Microsoft.DBforPostgreSQL/serverGroupsv2/cli000002/firewallRules/fw_rule?api-version=2022-11-08
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/4456692d-31f5-4804-bb8f-1d863a6b9602?api-version=2022-11-08
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:30:21 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/operationResults/4456692d-31f5-4804-bb8f-1d863a6b9602?api-version=2022-11-08
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - 5fb9a0ce-98a6-4bec-9599-5ba552e4b436
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres firewall-rule delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name -n -g --yes
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/4456692d-31f5-4804-bb8f-1d863a6b9602?api-version=2022-11-08
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/4456692d-31f5-4804-bb8f-1d863a6b9602\",\n
+        \ \"name\": \"4456692d-31f5-4804-bb8f-1d863a6b9602\",\n  \"status\": \"InProgress\",\n
+        \ \"startTime\": \"2023-07-19 05:30:21 +0000\"\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/4456692d-31f5-4804-bb8f-1d863a6b9602?api-version=2022-11-08
+      cache-control:
+      - no-cache
+      content-length:
+      - '296'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:30:21 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/operationResults/4456692d-31f5-4804-bb8f-1d863a6b9602?api-version=2022-11-08
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - fae251ee-3153-4793-bb18-e646b4e4e128
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres firewall-rule delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name -n -g --yes
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/4456692d-31f5-4804-bb8f-1d863a6b9602?api-version=2022-11-08
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/4456692d-31f5-4804-bb8f-1d863a6b9602\",\n
+        \ \"name\": \"4456692d-31f5-4804-bb8f-1d863a6b9602\",\n  \"status\": \"InProgress\",\n
+        \ \"startTime\": \"2023-07-19 05:30:21 +0000\"\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/4456692d-31f5-4804-bb8f-1d863a6b9602?api-version=2022-11-08
+      cache-control:
+      - no-cache
+      content-length:
+      - '296'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:30:51 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/operationResults/4456692d-31f5-4804-bb8f-1d863a6b9602?api-version=2022-11-08
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - 0ddf54a0-849f-4048-a613-8b62d2a8225d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres firewall-rule delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name -n -g --yes
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/4456692d-31f5-4804-bb8f-1d863a6b9602?api-version=2022-11-08
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/4456692d-31f5-4804-bb8f-1d863a6b9602\",\n
+        \ \"name\": \"4456692d-31f5-4804-bb8f-1d863a6b9602\",\n  \"status\": \"Succeeded\",\n
+        \ \"startTime\": \"2023-07-19 05:30:21 +0000\"\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/4456692d-31f5-4804-bb8f-1d863a6b9602?api-version=2022-11-08
+      cache-control:
+      - no-cache
+      content-length:
+      - '295'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:31:21 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/operationResults/4456692d-31f5-4804-bb8f-1d863a6b9602?api-version=2022-11-08
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - 8c635ca1-a61a-489f-a035-d878e8571ca7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres firewall-rule delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name -n -g --yes
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/operationResults/4456692d-31f5-4804-bb8f-1d863a6b9602?api-version=2022-11-08
+  response:
+    body:
+      string: '{
+
+        }'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/azureAsyncOperation/4456692d-31f5-4804-bb8f-1d863a6b9602?api-version=2022-11-08
+      cache-control:
+      - no-cache
+      content-length:
+      - '3'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:31:21 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2/operationResults/4456692d-31f5-4804-bb8f-1d863a6b9602?api-version=2022-11-08
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - ba6af867-4a93-4e9d-8fd7-b4de800c4631
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb postgres firewall-rule list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name -g
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test000001/providers/Microsoft.DBforPostgreSQL/serverGroupsv2/cli000002/firewallRules?api-version=2022-11-08
+  response:
+    body:
+      string: "{\n  \"value\": []\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '17'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 19 Jul 2023 05:31:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - f21d183b-fd95-47d7-83d6-22d2d704e37b
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+version: 1

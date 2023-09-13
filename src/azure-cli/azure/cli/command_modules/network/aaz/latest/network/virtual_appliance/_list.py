@@ -23,12 +23,14 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2021-08-01",
+        "version": "2023-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/networkvirtualappliances", "2021-08-01"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkvirtualappliances", "2021-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/networkvirtualappliances", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkvirtualappliances", "2023-05-01"],
         ]
     }
+
+    AZ_SUPPORT_PAGINATION = True
 
     def _handler(self, command_args):
         super()._handler(command_args)
@@ -115,7 +117,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-08-01",
+                    "api-version", "2023-05-01",
                     required=True,
                 ),
             }
@@ -202,6 +204,9 @@ class List(AAZCommand):
             )
 
             properties = cls._schema_on_200.value.Element.properties
+            properties.additional_nics = AAZListType(
+                serialized_name="additionalNics",
+            )
             properties.address_prefix = AAZStrType(
                 serialized_name="addressPrefix",
                 flags={"read_only": True},
@@ -215,12 +220,20 @@ class List(AAZCommand):
             properties.cloud_init_configuration_blobs = AAZListType(
                 serialized_name="cloudInitConfigurationBlobs",
             )
+            properties.delegation = AAZObjectType()
+            properties.deployment_type = AAZStrType(
+                serialized_name="deploymentType",
+                flags={"read_only": True},
+            )
             properties.inbound_security_rules = AAZListType(
                 serialized_name="inboundSecurityRules",
                 flags={"read_only": True},
             )
             properties.nva_sku = AAZObjectType(
                 serialized_name="nvaSku",
+            )
+            properties.partner_managed_resource = AAZObjectType(
+                serialized_name="partnerManagedResource",
             )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -231,6 +244,10 @@ class List(AAZCommand):
             )
             properties.virtual_appliance_asn = AAZIntType(
                 serialized_name="virtualApplianceAsn",
+            )
+            properties.virtual_appliance_connections = AAZListType(
+                serialized_name="virtualApplianceConnections",
+                flags={"read_only": True},
             )
             properties.virtual_appliance_nics = AAZListType(
                 serialized_name="virtualApplianceNics",
@@ -245,11 +262,29 @@ class List(AAZCommand):
             )
             _ListHelper._build_schema_sub_resource_read(properties.virtual_hub)
 
+            additional_nics = cls._schema_on_200.value.Element.properties.additional_nics
+            additional_nics.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.additional_nics.Element
+            _element.has_public_ip = AAZBoolType(
+                serialized_name="hasPublicIp",
+            )
+            _element.name = AAZStrType()
+
             boot_strap_configuration_blobs = cls._schema_on_200.value.Element.properties.boot_strap_configuration_blobs
             boot_strap_configuration_blobs.Element = AAZStrType()
 
             cloud_init_configuration_blobs = cls._schema_on_200.value.Element.properties.cloud_init_configuration_blobs
             cloud_init_configuration_blobs.Element = AAZStrType()
+
+            delegation = cls._schema_on_200.value.Element.properties.delegation
+            delegation.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+            delegation.service_name = AAZStrType(
+                serialized_name="serviceName",
+            )
 
             inbound_security_rules = cls._schema_on_200.value.Element.properties.inbound_security_rules
             inbound_security_rules.Element = AAZObjectType()
@@ -264,12 +299,31 @@ class List(AAZCommand):
             )
             nva_sku.vendor = AAZStrType()
 
-            virtual_appliance_nics = cls._schema_on_200.value.Element.properties.virtual_appliance_nics
-            virtual_appliance_nics.Element = AAZObjectType(
+            partner_managed_resource = cls._schema_on_200.value.Element.properties.partner_managed_resource
+            partner_managed_resource.id = AAZStrType(
+                flags={"read_only": True},
+            )
+            partner_managed_resource.internal_load_balancer_id = AAZStrType(
+                serialized_name="internalLoadBalancerId",
+                flags={"read_only": True},
+            )
+            partner_managed_resource.standard_load_balancer_id = AAZStrType(
+                serialized_name="standardLoadBalancerId",
                 flags={"read_only": True},
             )
 
+            virtual_appliance_connections = cls._schema_on_200.value.Element.properties.virtual_appliance_connections
+            virtual_appliance_connections.Element = AAZObjectType()
+            _ListHelper._build_schema_sub_resource_read(virtual_appliance_connections.Element)
+
+            virtual_appliance_nics = cls._schema_on_200.value.Element.properties.virtual_appliance_nics
+            virtual_appliance_nics.Element = AAZObjectType()
+
             _element = cls._schema_on_200.value.Element.properties.virtual_appliance_nics.Element
+            _element.instance_name = AAZStrType(
+                serialized_name="instanceName",
+                flags={"read_only": True},
+            )
             _element.name = AAZStrType(
                 flags={"read_only": True},
             )
@@ -331,7 +385,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-08-01",
+                    "api-version", "2023-05-01",
                     required=True,
                 ),
             }
@@ -418,6 +472,9 @@ class List(AAZCommand):
             )
 
             properties = cls._schema_on_200.value.Element.properties
+            properties.additional_nics = AAZListType(
+                serialized_name="additionalNics",
+            )
             properties.address_prefix = AAZStrType(
                 serialized_name="addressPrefix",
                 flags={"read_only": True},
@@ -431,12 +488,20 @@ class List(AAZCommand):
             properties.cloud_init_configuration_blobs = AAZListType(
                 serialized_name="cloudInitConfigurationBlobs",
             )
+            properties.delegation = AAZObjectType()
+            properties.deployment_type = AAZStrType(
+                serialized_name="deploymentType",
+                flags={"read_only": True},
+            )
             properties.inbound_security_rules = AAZListType(
                 serialized_name="inboundSecurityRules",
                 flags={"read_only": True},
             )
             properties.nva_sku = AAZObjectType(
                 serialized_name="nvaSku",
+            )
+            properties.partner_managed_resource = AAZObjectType(
+                serialized_name="partnerManagedResource",
             )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -447,6 +512,10 @@ class List(AAZCommand):
             )
             properties.virtual_appliance_asn = AAZIntType(
                 serialized_name="virtualApplianceAsn",
+            )
+            properties.virtual_appliance_connections = AAZListType(
+                serialized_name="virtualApplianceConnections",
+                flags={"read_only": True},
             )
             properties.virtual_appliance_nics = AAZListType(
                 serialized_name="virtualApplianceNics",
@@ -461,11 +530,29 @@ class List(AAZCommand):
             )
             _ListHelper._build_schema_sub_resource_read(properties.virtual_hub)
 
+            additional_nics = cls._schema_on_200.value.Element.properties.additional_nics
+            additional_nics.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.additional_nics.Element
+            _element.has_public_ip = AAZBoolType(
+                serialized_name="hasPublicIp",
+            )
+            _element.name = AAZStrType()
+
             boot_strap_configuration_blobs = cls._schema_on_200.value.Element.properties.boot_strap_configuration_blobs
             boot_strap_configuration_blobs.Element = AAZStrType()
 
             cloud_init_configuration_blobs = cls._schema_on_200.value.Element.properties.cloud_init_configuration_blobs
             cloud_init_configuration_blobs.Element = AAZStrType()
+
+            delegation = cls._schema_on_200.value.Element.properties.delegation
+            delegation.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+            delegation.service_name = AAZStrType(
+                serialized_name="serviceName",
+            )
 
             inbound_security_rules = cls._schema_on_200.value.Element.properties.inbound_security_rules
             inbound_security_rules.Element = AAZObjectType()
@@ -480,12 +567,31 @@ class List(AAZCommand):
             )
             nva_sku.vendor = AAZStrType()
 
-            virtual_appliance_nics = cls._schema_on_200.value.Element.properties.virtual_appliance_nics
-            virtual_appliance_nics.Element = AAZObjectType(
+            partner_managed_resource = cls._schema_on_200.value.Element.properties.partner_managed_resource
+            partner_managed_resource.id = AAZStrType(
+                flags={"read_only": True},
+            )
+            partner_managed_resource.internal_load_balancer_id = AAZStrType(
+                serialized_name="internalLoadBalancerId",
+                flags={"read_only": True},
+            )
+            partner_managed_resource.standard_load_balancer_id = AAZStrType(
+                serialized_name="standardLoadBalancerId",
                 flags={"read_only": True},
             )
 
+            virtual_appliance_connections = cls._schema_on_200.value.Element.properties.virtual_appliance_connections
+            virtual_appliance_connections.Element = AAZObjectType()
+            _ListHelper._build_schema_sub_resource_read(virtual_appliance_connections.Element)
+
+            virtual_appliance_nics = cls._schema_on_200.value.Element.properties.virtual_appliance_nics
+            virtual_appliance_nics.Element = AAZObjectType()
+
             _element = cls._schema_on_200.value.Element.properties.virtual_appliance_nics.Element
+            _element.instance_name = AAZStrType(
+                serialized_name="instanceName",
+                flags={"read_only": True},
+            )
             _element.name = AAZStrType(
                 flags={"read_only": True},
             )

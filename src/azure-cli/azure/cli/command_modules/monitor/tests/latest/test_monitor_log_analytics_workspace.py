@@ -532,3 +532,55 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check('schema.searchResults.limit', 1),
             self.check('schema.searchResults.sourceTable', "Heartbeat"),
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_table_total_retention', location='WestEurope')
+    @AllowLargeResponse()
+    def test_monitor_log_analytics_workspace_table_total_retention_upper_fix(self, resource_group):
+        self.kwargs.update({
+            'ws_name': self.create_random_name('ws-', 10),
+            'table_name': self.create_random_name('TB', 10) + '_CL',
+        })
+
+        self.cmd('monitor log-analytics workspace create -g {rg} -n {ws_name}')
+        self.cmd(
+            'monitor log-analytics workspace table create -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 45 --total-retention-time 2556 --plan Analytics --columns col1=guid TimeGenerated=datetime',
+            checks=[
+                self.check('name', '{table_name}'),
+                self.check('retentionInDays', 45),
+                self.check('totalRetentionInDays', 2556),
+                self.check('schema.columns[0].name', 'col1'),
+                self.check('schema.columns[0].type', 'guid'),
+                self.check('schema.columns[1].name', 'TimeGenerated'),
+                self.check('schema.columns[1].type', 'datetime'),
+            ])
+        self.cmd(
+            'monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --total-retention-time 400 --columns col2=guid',
+            checks=[
+                self.check('name', '{table_name}'),
+                self.check('totalRetentionInDays', 400),
+                self.check('schema.columns[0].name', 'col2'),
+                self.check('schema.columns[0].type', 'guid'),
+            ])
+        self.cmd('monitor log-analytics workspace table show -g {rg} -n {table_name} --workspace-name {ws_name}',
+                 checks=[
+                     self.check('name', '{table_name}'),
+                     self.check('retentionInDays', 45),
+                     self.check('totalRetentionInDays', 400),
+                 ])
+
+        self.cmd(
+            'monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --total-retention-time 2556 --retention-time 50',
+            checks=[
+                self.check('name', '{table_name}'),
+                self.check('retentionInDays', 50),
+                self.check('totalRetentionInDays', 2556),
+            ])
+        self.cmd('monitor log-analytics workspace table show -g {rg} -n {table_name} --workspace-name {ws_name}',
+                 checks=[
+                     self.check('name', '{table_name}'),
+                     self.check('retentionInDays', 50),
+                     self.check('totalRetentionInDays', 2556),
+                 ])
+
+        self.cmd('monitor log-analytics workspace table delete -g {rg} -n {table_name} --workspace-name {ws_name} -y')
+

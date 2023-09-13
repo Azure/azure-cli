@@ -2,6 +2,10 @@
 
 Release History
 ===============
+1.1.0
++++++
+* Drop telemetry cache strategy. Records will be uploaded immediately
+
 1.0.8
 +++++
 * Keep storing telemetry to CLI AppInsights in local cache but send telemetry to other AppInsights immediately

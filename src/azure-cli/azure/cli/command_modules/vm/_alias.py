@@ -95,6 +95,13 @@ alias_json = """
             "version": "latest",
             "architecture": "x64"
           },
+          "SuseSles15SP3": {
+            "publisher": "SUSE",
+            "offer": "sles-15-sp3",
+            "sku": "gen2",
+            "version": "latest",
+            "architecture": "x64"
+          },
           "UbuntuLTS": {
             "publisher": "Canonical",
             "offer": "UbuntuServer",

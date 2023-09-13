@@ -35,9 +35,7 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_
 
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
-from azure.mgmt.relay.models import AccessRights
 from azure.mgmt.web.models import KeyInfo
-from azure.cli.command_modules.relay._client_factory import hycos_mgmt_client_factory, namespaces_mgmt_client_factory
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
@@ -68,7 +66,7 @@ from .utils import (_normalize_sku,
                     _normalize_location,
                     get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
                     get_resource_if_exists, repo_url_to_name, get_token,
-                    app_service_plan_exists, is_centauri_functionapp)
+                    app_service_plan_exists, is_centauri_functionapp, _remove_list_duplicates)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -84,6 +82,10 @@ from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
 
 from .aaz.latest.network.vnet import List as VNetList, Show as VNetShow
 from .aaz.latest.network.vnet.subnet import Show as SubnetShow, Update as SubnetUpdate
+from .aaz.latest.relay.hyco import Show as HyCoShow
+from .aaz.latest.relay.hyco.authorization_rule import List as HycoAuthoList, Create as HycoAuthoCreate
+from .aaz.latest.relay.hyco.authorization_rule.keys import List as HycoAuthoKeysList
+from .aaz.latest.relay.namespace import List as NamespaceList
 
 logger = get_logger(__name__)
 
@@ -613,7 +615,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     # check the status of async deployment
     if res.status_code == 202:
         response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
-                                                headers, timeout)
+                                                slot, timeout)
         return response
 
     # check if there's an ongoing process
@@ -990,8 +992,10 @@ def show_app(cmd, resource_group_name, name, slot=None):
                                                                                                  resource_group_name))
     app.site_config = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration',
                                               slot)
-    _rename_server_farm_props(app)
-    _fill_ftp_publishing_url(cmd, app, resource_group_name, name, slot)
+    if not is_centauri_functionapp(cmd, resource_group_name, name):
+        _rename_server_farm_props(app)
+        _fill_ftp_publishing_url(cmd, app, resource_group_name, name, slot)
+        _remove_list_duplicates(app)
     return app
 
 
@@ -1336,7 +1340,7 @@ def get_connection_strings(cmd, resource_group_name, name, slot=None):
                               .connection_string_names or []
     result = [{'name': p,
                'value': result.properties[p].value,
-               'type':result.properties[p].type,
+               'type': result.properties[p].type,
                'slotSetting': p in slot_constr_names} for p in result.properties]
     return result
 
@@ -1446,7 +1450,9 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
                         app_command_line=None,
                         ftps_state=None,
                         vnet_route_all_enabled=None,
-                        generic_configurations=None):
+                        generic_configurations=None,
+                        min_replicas=None,
+                        max_replicas=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                            'list_application_settings', slot)
@@ -1503,6 +1509,10 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
         setattr(configs, 'scm_ip_security_restrictions', None)
 
     if is_centauri_functionapp(cmd, resource_group_name, name):
+        if min_replicas is not None:
+            setattr(configs, 'minimum_elastic_instance_count', min_replicas)
+        if max_replicas is not None:
+            setattr(configs, 'function_app_scale_limit', max_replicas)
         return update_configuration_polling(cmd, resource_group_name, name, slot, configs)
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
 
@@ -1594,34 +1604,67 @@ def _build_app_settings_output(app_settings, slot_cfg_names):
              'slotSetting': p in slot_cfg_names} for p in _mask_creds_related_appsettings(app_settings)]
 
 
-def update_connection_strings(cmd, resource_group_name, name, connection_string_type,
+def _build_app_settings_input(settings, connection_string_type):
+    if not settings:
+        return []
+    try:
+        # check if its a json file
+        settings_str = ''.join([i.rstrip() for i in settings])
+        json_obj = json.loads(settings_str)
+        json_obj = json_obj if isinstance(json_obj, list) else [json_obj]
+        for i in json_obj:
+            keys = i.keys()
+            if 'value' not in keys or 'name' not in keys or 'type' not in keys:
+                raise KeyError
+        return json_obj
+    except KeyError:
+        raise ArgumentUsageError("In json settings, 'value', 'name' and 'type' is required; 'slotSetting' is optional")
+    except json.decoder.JSONDecodeError:
+        # this may not be a json file
+        if not connection_string_type:
+            raise ArgumentUsageError('either --connection-string-type is required if not using json, or bad json file')
+        results = []
+        for name_value in settings:
+            conn_string_name, value = name_value.split('=', 1)
+            if value[0] in ["'", '"']:  # strip away the quots used as separators
+                value = value[1:-1]
+            results.append({'name': conn_string_name, 'value': value, 'type': connection_string_type})
+        return results
+
+
+def update_connection_strings(cmd, resource_group_name, name, connection_string_type=None,
                               settings=None, slot=None, slot_settings=None):
     from azure.mgmt.web.models import ConnStringValueTypePair
     if not settings and not slot_settings:
         raise ArgumentUsageError('Usage Error: --settings |--slot-settings')
-
-    settings = settings or []
-    slot_settings = slot_settings or []
+    settings = _build_app_settings_input(settings, connection_string_type)
+    sticky_slot_settings = _build_app_settings_input(slot_settings, connection_string_type)
+    rm_sticky_slot_settings = set()
 
     conn_strings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                            'list_connection_strings', slot)
-    for name_value in settings + slot_settings:
+
+    for name_value_type in settings + sticky_slot_settings:
         # split at the first '=', connection string should not have '=' in the name
-        conn_string_name, value = name_value.split('=', 1)
-        if value[0] in ["'", '"']:  # strip away the quots used as separators
-            value = value[1:-1]
-        conn_strings.properties[conn_string_name] = ConnStringValueTypePair(value=value,
-                                                                            type=connection_string_type)
+        conn_strings.properties[name_value_type['name']] = ConnStringValueTypePair(value=name_value_type['value'],
+                                                                                   type=name_value_type['type'])
+        if 'slotSetting' in name_value_type:
+            if name_value_type['slotSetting']:
+                sticky_slot_settings.append(name_value_type)
+            else:
+                rm_sticky_slot_settings.add(name_value_type['name'])
+
     client = web_client_factory(cmd.cli_ctx)
     result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
                                          'update_connection_strings',
                                          conn_strings, slot, client)
 
-    if slot_settings:
-        new_slot_setting_names = [n.split('=', 1)[0] for n in slot_settings]
+    if sticky_slot_settings or rm_sticky_slot_settings:
+        new_slot_setting_names = set(n['name'] for n in sticky_slot_settings)  # add setting name
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
-        slot_cfg_names.connection_string_names = slot_cfg_names.connection_string_names or []
-        slot_cfg_names.connection_string_names += new_slot_setting_names
+        slot_cfg_names.connection_string_names = set(slot_cfg_names.connection_string_names or [])
+        slot_cfg_names.connection_string_names.update(new_slot_setting_names)
+        slot_cfg_names.connection_string_names -= rm_sticky_slot_settings
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
     return result.properties
@@ -1656,7 +1699,8 @@ APPSETTINGS_TO_MASK = ['DOCKER_REGISTRY_SERVER_PASSWORD']
 def update_container_settings(cmd, resource_group_name, name, docker_registry_server_url=None,
                               docker_custom_image_name=None, docker_registry_server_user=None,
                               websites_enable_app_service_storage=None, docker_registry_server_password=None,
-                              multicontainer_config_type=None, multicontainer_config_file=None, slot=None):
+                              multicontainer_config_type=None, multicontainer_config_file=None,
+                              slot=None, min_replicas=None, max_replicas=None):
     settings = []
     if docker_registry_server_url is not None:
         settings.append('DOCKER_REGISTRY_SERVER_URL=' + docker_registry_server_url)
@@ -1691,17 +1735,21 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
     elif multicontainer_config_file or multicontainer_config_type:
         logger.warning('Must change both settings --multicontainer-config-file FILE --multicontainer-config-type TYPE')
 
+    if min_replicas is not None or max_replicas is not None:
+        update_site_configs(cmd, resource_group_name, name, min_replicas=min_replicas, max_replicas=max_replicas)
+
     return _mask_creds_related_appsettings(_filter_for_container_settings(cmd, resource_group_name, name, settings,
                                                                           slot=slot))
 
 
 def update_container_settings_functionapp(cmd, resource_group_name, name, registry_server=None,
                                           image=None, registry_username=None,
-                                          registry_password=None, slot=None):
+                                          registry_password=None, slot=None, min_replicas=None, max_replicas=None):
     return update_container_settings(cmd, resource_group_name, name, registry_server,
                                      image, registry_username, None,
                                      registry_password, multicontainer_config_type=None,
-                                     multicontainer_config_file=None, slot=slot)
+                                     multicontainer_config_file=None, slot=slot,
+                                     min_replicas=min_replicas, max_replicas=max_replicas)
 
 
 def _get_acr_cred(cli_ctx, registry_name):
@@ -2165,7 +2213,7 @@ def update_app_service_plan(instance, sku=None, number_of_workers=None, elastic_
 def show_plan(cmd, resource_group_name, name):
     from azure.cli.core.commands.client_factory import get_subscription_id
     client = web_client_factory(cmd.cli_ctx)
-    serverfarm_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/serverfarms/{}?api-version={}'
+    serverfarm_url_base = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/serverfarms/{}?api-version={}'
     subscription_id = get_subscription_id(cmd.cli_ctx)
     serverfarm_url = serverfarm_url_base.format(subscription_id, resource_group_name, name, client.DEFAULT_API_VERSION)
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + serverfarm_url
@@ -2782,13 +2830,6 @@ def get_scm_site_headers(cli_ctx, name, resource_group_name, slot=None, addition
 
 
 def _get_log(url, headers, log_file=None):
-    import urllib3
-    try:
-        import urllib3.contrib.pyopenssl
-        urllib3.contrib.pyopenssl.inject_into_urllib3()
-    except ImportError:
-        pass
-
     http = get_pool_manager(url)
     r = http.request(
         'GET',
@@ -3054,14 +3095,20 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
     webapp_certs = client.certificates.list_by_resource_group(cert_resource_group_name)
 
     found_cert = None
+    # search for a cert that matches in the app service plan's RG
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
             found_cert = webapp_cert
+    # search for a cert that matches in the webapp's RG
     if not found_cert:
         webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
         for webapp_cert in webapp_certs:
             if webapp_cert.thumbprint == certificate_thumbprint:
                 found_cert = webapp_cert
+    # search for a cert that matches in the subscription, filtering on the serverfarm
+    if not found_cert:
+        sub_certs = client.certificates.list(filter=f"ServerFarmId eq '{webapp.server_farm_id}'")
+        found_cert = next(iter([c for c in sub_certs if c.thumbprint == certificate_thumbprint]), None)
     if found_cert:
         if not hostname:
             if len(found_cert.host_names) == 1 and not found_cert.host_names[0].startswith('*'):
@@ -3640,9 +3687,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        consumption_plan_location=None, app_insights=None, app_insights_key=None,
                        disable_app_insights=None, deployment_source_url=None,
                        deployment_source_branch='master', deployment_local_git=None,
-                       registry_password=None, registry_username=None,
+                       registry_server=None, registry_password=None, registry_username=None,
                        image=None, tags=None, assign_identities=None,
-                       role='Contributor', scope=None, vnet=None, subnet=None, https_only=False, environment=None):
+                       role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
+                       environment=None, min_replicas=None, max_replicas=None):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
@@ -3653,6 +3701,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if environment is None and bool(plan) == bool(consumption_plan_location):
         raise MutuallyExclusiveArgumentError("usage error: You must specify one of these parameter "
                                              "--plan NAME_OR_ID | --consumption-plan-location LOCATION")
+    if ((min_replicas is not None or max_replicas is not None) and environment is None):
+        raise RequiredArgumentMissingError("usage error: parameters --min-replicas and --max-replicas must be "
+                                           "used with parameter --environment, please provide the name "
+                                           "of the container app environment using --environment.")
     from azure.mgmt.web.models import Site
     SiteConfig, NameValuePair = cmd.get_models('SiteConfig', 'NameValuePair')
     disable_app_insights = (disable_app_insights == "true")
@@ -3741,7 +3793,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         if image is None:
             image = DEFAULT_CENTAURI_IMAGE
 
-    docker_registry_server_url = parse_docker_image_name(image, environment)
+    if registry_server:
+        docker_registry_server_url = registry_server
+    else:
+        docker_registry_server_url = parse_docker_image_name(image, environment)
 
     if functions_version == '2' and functionapp_def.location in FUNCTIONS_NO_V2_REGIONS:
         raise ValidationError("2.x functions are not supported in this region. To create a 3.x function, "
@@ -3841,6 +3896,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         site_config.linux_fx_version = _format_fx_version(image)
         site_config.http20_enabled = None
         site_config.local_my_sql_enabled = None
+        if min_replicas is not None:
+            site_config.minimum_elastic_instance_count = min_replicas
+        if max_replicas is not None:
+            site_config.function_app_scale_limit = max_replicas
 
         managed_environment = get_managed_environment(cmd, resource_group_name, environment)
         location = managed_environment.location
@@ -4073,10 +4132,11 @@ def list_locations(cmd, sku, linux_workers_enabled=None):
     return [geo_region for geo_region in web_client_geo_regions if geo_region.name in providers_client_locations_list]
 
 
-def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, headers, timeout=None):
+def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, slot, timeout=None):
     import requests
     from azure.cli.core.util import should_disable_connection_verify
 
+    headers = get_scm_site_headers(cmd.cli_ctx, name, rg_name, slot)
     total_trials = (int(timeout) // 2) if timeout else 450
     num_trials = 0
     while num_trials < total_trials:
@@ -4191,14 +4251,12 @@ def add_hc(cmd, name, resource_group_name, namespace, hybrid_connection, slot=No
     HybridConnection = cmd.get_models('HybridConnection')
 
     web_client = web_client_factory(cmd.cli_ctx)
-    hy_co_client = hycos_mgmt_client_factory(cmd.cli_ctx, cmd.cli_ctx)
-    namespace_client = namespaces_mgmt_client_factory(cmd.cli_ctx, cmd.cli_ctx)
 
     hy_co_id = ''
-    for n in namespace_client.list():
-        logger.warning(n.name)
-        if n.name == namespace:
-            hy_co_id = n.id
+    for n in NamespaceList(cli_ctx=cmd.cli_ctx)(command_args={}):
+        logger.warning(n['name'])
+        if n['name'] == namespace:
+            hy_co_id = n['id']
 
     if hy_co_id == '':
         raise ResourceNotFoundError('Azure Service Bus Relay namespace {} was not found.'.format(namespace))
@@ -4212,26 +4270,33 @@ def add_hc(cmd, name, resource_group_name, namespace, hybrid_connection, slot=No
         i = i + 1
 
     # calling the relay API to get information about the hybrid connection
-    hy_co = hy_co_client.get(hy_co_resource_group, namespace, hybrid_connection)
+    hy_co = HyCoShow(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": hy_co_resource_group,
+                                                        "namespace_name": namespace,
+                                                        "name": hybrid_connection})
 
     # if the hybrid connection does not have a default sender authorization
     # rule, create it
-    hy_co_rules = hy_co_client.list_authorization_rules(hy_co_resource_group, namespace, hybrid_connection)
+    hy_co_rules = HycoAuthoList(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": hy_co_resource_group,
+                                                                   "namespace_name": namespace,
+                                                                   "hybrid_connection_name": hybrid_connection})
     has_default_sender_key = False
     for r in hy_co_rules:
-        if r.name.lower() == "defaultsender":
-            for z in r.rights:
-                if z == z.send:
+        if r['name'].lower() == "defaultsender":
+            for z in r['rights']:
+                if z[0].lower() == 'send' and len(z) == 1:
                     has_default_sender_key = True
 
     if not has_default_sender_key:
-        rights = [AccessRights.send]
-        hy_co_client.create_or_update_authorization_rule(hy_co_resource_group, namespace, hybrid_connection,
-                                                         "defaultSender", rights)
-
-    hy_co_keys = hy_co_client.list_keys(hy_co_resource_group, namespace, hybrid_connection, "defaultSender")
-    hy_co_info = hy_co.id
-    hy_co_metadata = ast.literal_eval(hy_co.user_metadata)
+        rights = ["Send"]
+        args = {"resource_group": hy_co_resource_group, "namespace_name": namespace,
+                "hybrid_connection_name": hybrid_connection, "name": "defaultSender", "rights": rights}
+        HycoAuthoCreate(cli_ctx=cmd.cli_ctx)(command_args=args)
+    hy_co_keys = HycoAuthoKeysList(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": hy_co_resource_group,
+                                                                      "namespace_name": namespace,
+                                                                      "hybrid_connection_name": hybrid_connection,
+                                                                      "name": "defaultSender"})
+    hy_co_info = hy_co['id']
+    hy_co_metadata = ast.literal_eval(hy_co['userMetadata'])
     hy_co_hostname = ''
     for x in hy_co_metadata:
         if x["key"] == "endpoint":
@@ -4251,7 +4316,7 @@ def add_hc(cmd, name, resource_group_name, namespace, hybrid_connection, slot=No
                           hostname=hostname,
                           port=port,
                           send_key_name="defaultSender",
-                          send_key_value=hy_co_keys.primary_key,
+                          send_key_value=hy_co_keys['primaryKey'],
                           service_bus_suffix=".servicebus.windows.net")
 
     if slot is None:
@@ -4290,26 +4355,34 @@ def set_hc_key(cmd, plan, resource_group_name, namespace, hybrid_connection, key
     resource_group_strings = split_uri[1].split('/')
     relay_resource_group = resource_group_strings[0]
 
-    hy_co_client = hycos_mgmt_client_factory(cmd.cli_ctx, cmd.cli_ctx)
     # calling the relay function to obtain information about the hc in question
-    hy_co = hy_co_client.get(relay_resource_group, namespace, hybrid_connection)
+    hy_co = HyCoShow(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": relay_resource_group,
+                                                        "namespace_name": namespace,
+                                                        "name": hybrid_connection})
 
     # if the hybrid connection does not have a default sender authorization
     # rule, create it
-    hy_co_rules = hy_co_client.list_authorization_rules(relay_resource_group, namespace, hybrid_connection)
+    hy_co_rules = HycoAuthoList(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": relay_resource_group,
+                                                                   "namespace_name": namespace,
+                                                                   "hybrid_connection_name": hybrid_connection})
+
     has_default_sender_key = False
     for r in hy_co_rules:
-        if r.name.lower() == "defaultsender":
-            for z in r.rights:
-                if z == z.send:
+        if r['name'].lower() == "defaultsender":
+            for z in r['rights']:
+                if z[0].lower() == 'send' and len(z) == 1:
                     has_default_sender_key = True
 
     if not has_default_sender_key:
-        rights = [AccessRights.send]
-        hy_co_client.create_or_update_authorization_rule(relay_resource_group, namespace, hybrid_connection,
-                                                         "defaultSender", rights)
+        rights = ["Send"]
+        args = {"resource_group": relay_resource_group, "namespace_name": namespace,
+                "hybrid_connection_name": hybrid_connection, "name": "defaultSender", "rights": rights}
+        HycoAuthoCreate(cli_ctx=cmd.cli_ctx)(command_args=args)
 
-    hy_co_keys = hy_co_client.list_keys(relay_resource_group, namespace, hybrid_connection, "defaultSender")
+    hy_co_keys = HycoAuthoKeysList(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": relay_resource_group,
+                                                                      "namespace_name": namespace,
+                                                                      "hybrid_connection_name": hybrid_connection,
+                                                                      "name": "defaultSender"})
     hy_co_metadata = ast.literal_eval(hy_co.user_metadata)
     hy_co_hostname = 0
     for x in hy_co_metadata:
@@ -4322,9 +4395,9 @@ def set_hc_key(cmd, plan, resource_group_name, namespace, hybrid_connection, key
 
     key = "empty"
     if key_type.lower() == "primary":
-        key = hy_co_keys.primary_key
+        key = hy_co_keys['primaryKey']
     elif key_type.lower() == "secondary":
-        key = hy_co_keys.secondary_key
+        key = hy_co_keys['secondaryKey']
     # enures input is correct
     if key == "empty":
         logger.warning("Key type is invalid - must be primary or secondary")
@@ -4695,7 +4768,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         create_resource_group(cmd, rg_name, loc)
         logger.warning("Resource group creation complete")
     # create ASP
-    logger.warning("Creating AppServicePlan '%s' ...", plan)
+    logger.warning("Creating AppServicePlan '%s' or Updating if already exists", plan)
     # we will always call the ASP create or update API so that in case of re-deployment, if the SKU or plan setting are
     # updated we update those
     try:
@@ -4986,6 +5059,12 @@ class OneDeployParams:
 
 
 def _build_onedeploy_url(params):
+    if params.src_url:
+        return _build_onedeploy_arm_url(params)
+    return _build_onedeploy_scm_url(params)
+
+
+def _build_onedeploy_scm_url(params):
     scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
     deploy_url = scm_url + '/api/publish?type=' + params.artifact_type
 
@@ -5007,6 +5086,38 @@ def _build_onedeploy_url(params):
     return deploy_url
 
 
+def _build_onedeploy_arm_url(params):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    client = web_client_factory(params.cmd.cli_ctx)
+    sub_id = get_subscription_id(params.cmd.cli_ctx)
+    if not params.slot:
+        base_url = (
+            f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
+            f"{params.webapp_name}/extensions/onedeploy?api-version={client.DEFAULT_API_VERSION}"
+        )
+    else:
+        base_url = (
+            f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
+            f"{params.webapp_name}/slots/{params.slot}/extensions/onedeploy"
+            f"?api-version={client.DEFAULT_API_VERSION}"
+        )
+    return params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
+
+
+def _get_ondeploy_headers(params):
+    if params.src_path:
+        content_type = 'application/octet-stream'
+    elif params.src_url:
+        content_type = 'application/json'
+    else:
+        raise RequiredArgumentMissingError('Unable to determine source location of the artifact being deployed')
+
+    additional_headers = {"Content-Type": content_type, "Cache-Control": "no-cache"}
+
+    return get_scm_site_headers(params.cmd.cli_ctx, params.webapp_name, params.resource_group_name, params.slot,
+                                additional_headers=additional_headers)
+
+
 def _get_onedeploy_status_url(params):
     scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
     return scm_url + '/api/deployments/latest'
@@ -5025,9 +5136,18 @@ def _get_onedeploy_request_body(params):
                                         "access it".format(params.src_path)) from e
     elif params.src_url:
         logger.info('Deploying from URL: %s', params.src_url)
-        body = json.dumps({
-            "packageUri": params.src_url
-        })
+        body = {
+            "properties": {
+                "packageUri": params.src_url,
+                "type": params.artifact_type,
+                "path": params.target_path,
+                "ignorestack": params.should_ignore_stack,
+                "clean": params.is_clean_deployment,
+                "restart": params.should_restart,
+            }
+        }
+        body = {"properties": {k: v for k, v in body["properties"].items() if v is not None}}
+        body = json.dumps(body)
     else:
         raise ResourceNotFoundError('Unable to determine source location of the artifact being deployed')
 
@@ -5035,14 +5155,14 @@ def _get_onedeploy_request_body(params):
 
 
 def _update_artifact_type(params):
-    import ntpath
+    import os
 
     if params.artifact_type is not None:
         return
 
     # Interpret deployment type from the file extension if the type parameter is not passed
-    file_name = ntpath.basename(params.src_path)
-    file_extension = file_name.split(".", 1)[1]
+    _, file_extension = os.path.splitext(params.src_path)
+    file_extension = file_extension[1:]
     if file_extension in ('war', 'jar', 'ear', 'zip'):
         params.artifact_type = file_extension
     elif file_extension in ('sh', 'bat'):
@@ -5061,14 +5181,17 @@ def _make_onedeploy_request(params):
     body = _get_onedeploy_request_body(params)
     deploy_url = _build_onedeploy_url(params)
     deployment_status_url = _get_onedeploy_status_url(params)
-    headers = get_scm_site_headers(params.cmd.cli_ctx, params.webapp_name, params.resource_group_name, params.slot)
-
-    logger.info("Deployment API: %s", deploy_url)
-    response = requests.post(deploy_url, data=body, headers=headers, verify=not should_disable_connection_verify())
+    headers = _get_ondeploy_headers(params)
 
     # For debugging purposes only, you can change the async deployment into a sync deployment by polling the API status
     # For that, set poll_async_deployment_for_debugging=True
-    poll_async_deployment_for_debugging = True
+    logger.info("Deployment API: %s", deploy_url)
+    if not params.src_url:  # use SCM endpoint
+        response = requests.post(deploy_url, data=body, headers=headers, verify=not should_disable_connection_verify())
+        poll_async_deployment_for_debugging = True
+    else:
+        response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_url, body=body)
+        poll_async_deployment_for_debugging = False
 
     # check the status of async deployment
     if response.status_code == 202 or response.status_code == 200:
@@ -5076,8 +5199,14 @@ def _make_onedeploy_request(params):
         if poll_async_deployment_for_debugging:
             logger.info('Polling the status of async deployment')
             response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
-                                                         deployment_status_url, headers, params.timeout)
+                                                         deployment_status_url, params.slot, params.timeout)
             logger.info('Async deployment complete. Server response: %s', response_body)
+        else:
+            if 'application/json' in response.headers.get('content-type', ""):
+                state = response.json().get("properties", {}).get("provisioningState")
+                if state:
+                    logger.warning("Deployment status is: \"%s\"", state)
+                response_body = response.json().get("properties", {})
         return response_body
 
     # API not available yet!
@@ -5387,7 +5516,7 @@ def add_github_actions(cmd, resource_group, name, repo, runtime=None, token=None
         cmd=cmd, resource_group=resource_group, name=name, slot=slot, is_linux=is_linux)
 
     app_runtime_string = None
-    if(app_runtime_info and app_runtime_info['display_name']):
+    if (app_runtime_info and app_runtime_info['display_name']):
         app_runtime_string = app_runtime_info['display_name']
 
     github_actions_version = None

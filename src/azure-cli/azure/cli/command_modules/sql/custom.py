@@ -1084,6 +1084,7 @@ def _db_dw_create(
         user_assigned_identity_id=None,
         keys=None,
         encryption_protector=None,
+        encryption_protector_auto_rotation=None,
         **kwargs):
     '''
     Creates a DB (with any create mode) or DW.
@@ -1137,6 +1138,8 @@ def _db_dw_create(
     kwargs['keys'] = _get_database_keys(keys)
     kwargs['encryption_protector'] = encryption_protector
 
+    kwargs['encryption_protector_auto_rotation'] = encryption_protector_auto_rotation
+
     # Create
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        server_name=dest_db.server_name,
@@ -1186,6 +1189,7 @@ def db_create(
         user_assigned_identity_id=None,
         keys=None,
         encryption_protector=None,
+        encryption_protector_auto_rotation=None,
         **kwargs):
     '''
     Creates a DB (with 'Default' create mode.)
@@ -1214,6 +1218,7 @@ def db_create(
         user_assigned_identity_id=user_assigned_identity_id,
         keys=keys,
         encryption_protector=encryption_protector,
+        encryption_protector_auto_rotation=encryption_protector_auto_rotation,
         **kwargs)
 
 
@@ -1246,6 +1251,7 @@ def db_copy(
         user_assigned_identity_id=None,
         keys=None,
         encryption_protector=None,
+        encryption_protector_auto_rotation=None,
         **kwargs):
     '''
     Copies a DB (i.e. create with 'Copy' create mode.)
@@ -1288,6 +1294,7 @@ def db_copy(
         user_assigned_identity_id=user_assigned_identity_id,
         keys=keys,
         encryption_protector=encryption_protector,
+        encryption_protector_auto_rotation=encryption_protector_auto_rotation,
         **kwargs)
 
 
@@ -1306,6 +1313,7 @@ def db_create_replica(
         user_assigned_identity_id=None,
         keys=None,
         encryption_protector=None,
+        encryption_protector_auto_rotation=None,
         **kwargs):
     '''
     Creates a secondary replica DB (i.e. create with 'Secondary' create mode.)
@@ -1351,6 +1359,7 @@ def db_create_replica(
         user_assigned_identity_id=user_assigned_identity_id,
         keys=keys,
         encryption_protector=encryption_protector,
+        encryption_protector_auto_rotation=encryption_protector_auto_rotation,
         **kwargs)
 
 
@@ -1399,6 +1408,7 @@ def db_restore(
         user_assigned_identity_id=None,
         keys=None,
         encryption_protector=None,
+        encryption_protector_auto_rotation=None,
         **kwargs):
     '''
     Restores an existing or deleted DB (i.e. create with 'Restore'
@@ -1436,6 +1446,7 @@ def db_restore(
         user_assigned_identity_id=user_assigned_identity_id,
         keys=keys,
         encryption_protector=encryption_protector,
+        encryption_protector_auto_rotation=encryption_protector_auto_rotation,
         **kwargs)
 
 
@@ -1717,7 +1728,8 @@ def db_update(  # pylint: disable=too-many-locals
         keys=None,
         encryption_protector=None,
         federated_client_id=None,
-        keys_to_remove=None):
+        keys_to_remove=None,
+        encryption_protector_auto_rotation=None):
     '''
     Applies requested parameters to a db resource instance for a DB update.
     '''
@@ -1836,6 +1848,9 @@ def db_update(  # pylint: disable=too-many-locals
         instance.federated_client_id = federated_client_id
 
     instance.availability_zone = None
+
+    if encryption_protector_auto_rotation is not None:
+        instance.encryption_protector_auto_rotation = encryption_protector_auto_rotation
 
     return instance
 
@@ -3481,7 +3496,7 @@ def db_sensitivity_label_update(
         sensitivity_label.information_type_id = current_label.information_type_id
 
     except ResourceNotFoundError as ex:
-        if not(ex and 'SensitivityLabelsLabelNotFound' in str(ex)):
+        if not (ex and 'SensitivityLabelsLabelNotFound' in str(ex)):
             raise ex
 
     # Find the label id and information type id in the policy by the label name provided
@@ -3667,6 +3682,7 @@ def elastic_pool_create(
         elastic_pool_name,
         sku=None,
         maintenance_configuration_id=None,
+        preferred_enclave_type=None,
         **kwargs):
     '''
     Creates an elastic pool.
@@ -3687,6 +3703,9 @@ def elastic_pool_create(
         cmd.cli_ctx,
         maintenance_configuration_id)
 
+    # Add preferred enclave type, if requested
+    kwargs['preferred_enclave_type'] = preferred_enclave_type
+
     # Create
     return client.begin_create_or_update(
         server_name=server_name,
@@ -3706,7 +3725,8 @@ def elastic_pool_update(
         family=None,
         capacity=None,
         maintenance_configuration_id=None,
-        high_availability_replica_count=None):
+        high_availability_replica_count=None,
+        preferred_enclave_type=None):
     '''
     Updates an elastic pool. Custom update function to apply parameters to instance.
     '''
@@ -3747,6 +3767,9 @@ def elastic_pool_update(
 
     if high_availability_replica_count is not None:
         instance.high_availability_replica_count = high_availability_replica_count
+
+    if preferred_enclave_type is not None:
+        instance.preferred_enclave_type = preferred_enclave_type
 
     return instance
 
@@ -6006,6 +6029,227 @@ def managed_ledger_digest_uploads_disable(
         ledger_digest_uploads=LedgerDigestUploadsName.CURRENT)
 
 
+def managed_db_move_start(
+        cmd,
+        client,
+        resource_group_name,
+        managed_instance_name,
+        database_name,
+        dest_resource_group_name,
+        dest_instance_name,
+        **kwargs):
+    '''
+    Starts managed database move operation
+    '''
+
+    return managed_db_move_copy_start(
+        cmd,
+        client,
+        resource_group_name,
+        managed_instance_name,
+        database_name,
+        dest_resource_group_name,
+        dest_instance_name,
+        'Move',
+        **kwargs)
+
+
+def managed_db_copy_start(
+        cmd,
+        client,
+        resource_group_name,
+        managed_instance_name,
+        database_name,
+        dest_resource_group_name,
+        dest_instance_name,
+        **kwargs):
+    '''
+    Starts managed database copy operation
+    '''
+
+    return managed_db_move_copy_start(
+        cmd,
+        client,
+        resource_group_name,
+        managed_instance_name,
+        database_name,
+        dest_resource_group_name,
+        dest_instance_name,
+        'Copy',
+        **kwargs)
+
+
+def managed_db_move_copy_start(
+        cmd,
+        client,
+        resource_group_name,
+        managed_instance_name,
+        database_name,
+        dest_resource_group_name,
+        dest_instance_name,
+        operation_mode,
+        **kwargs):
+    '''
+    Starts managed database move/copy operation
+    '''
+
+    kwargs['operation_mode'] = operation_mode
+    kwargs['destination_managed_database_id'] = _get_managed_db_resource_id(
+        cmd.cli_ctx,
+        dest_resource_group_name or resource_group_name,
+        dest_instance_name,
+        database_name)
+
+    return client.begin_start_move(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        database_name=database_name,
+        parameters=kwargs)
+
+
+def managed_db_move_copy_complete(
+        cmd,
+        client,
+        resource_group_name,
+        managed_instance_name,
+        database_name,
+        dest_resource_group_name,
+        dest_instance_name,
+        **kwargs):
+    '''
+    Completes managed database move/copy operation
+    '''
+
+    kwargs['destination_managed_database_id'] = _get_managed_db_resource_id(
+        cmd.cli_ctx,
+        dest_resource_group_name or resource_group_name,
+        dest_instance_name,
+        database_name)
+
+    return client.begin_complete_move(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        database_name=database_name,
+        parameters=kwargs)
+
+
+def managed_db_move_copy_cancel(
+        cmd,
+        client,
+        resource_group_name,
+        managed_instance_name,
+        database_name,
+        dest_resource_group_name,
+        dest_instance_name,
+        **kwargs):
+    '''
+    Cancels managed database move/copy operation
+    '''
+
+    kwargs['destination_managed_database_id'] = _get_managed_db_resource_id(
+        cmd.cli_ctx,
+        dest_resource_group_name or resource_group_name,
+        dest_instance_name,
+        database_name)
+
+    return client.begin_cancel_move(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        database_name=database_name,
+        parameters=kwargs)
+
+
+def managed_db_move_list(
+        cmd,
+        client,
+        resource_group_name,
+        managed_instance_name,
+        database_name=None,
+        dest_instance_name=None,
+        dest_resource_group=None,
+        only_latest_per_database=False):
+    '''
+    Lists managed database move operations
+    '''
+
+    return managed_db_move_copy_list(
+        cmd,
+        client,
+        resource_group_name,
+        managed_instance_name,
+        'Move',
+        database_name,
+        dest_instance_name,
+        dest_resource_group,
+        only_latest_per_database)
+
+
+def managed_db_copy_list(
+        cmd,
+        client,
+        resource_group_name,
+        managed_instance_name,
+        database_name=None,
+        dest_instance_name=None,
+        dest_resource_group=None,
+        only_latest_per_database=False):
+    '''
+    Lists managed database copy operations
+    '''
+
+    return managed_db_move_copy_list(
+        cmd,
+        client,
+        resource_group_name,
+        managed_instance_name,
+        'Copy',
+        database_name,
+        dest_instance_name,
+        dest_resource_group,
+        only_latest_per_database,)
+
+
+def managed_db_move_copy_list(
+        cmd,
+        client,
+        resource_group_name,
+        managed_instance_name,
+        operation_mode,
+        database_name,
+        dest_instance_name,
+        dest_resource_group,
+        only_latest_per_database):
+    '''
+    Lists managed database move/copy operations
+    '''
+
+    location = _get_managed_instance_location(
+        cmd.cli_ctx,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name)
+
+    custom_filter = "Properties/OperationMode eq '{}' and Properties/SourceManagedInstanceName eq '{}'".format(
+        operation_mode,
+        managed_instance_name
+    )
+
+    if dest_instance_name is not None:
+        custom_filter += " and Properties/TargetManagedInstanceName eq '{}'".format(dest_instance_name)
+
+    if database_name is not None:
+        custom_filter += " and Properties/TargetDatabaseName eq '{}'".format(database_name)
+
+    result = client.list_by_location(
+        resource_group_name=resource_group_name,
+        location_name=location,
+        only_latest_per_database=only_latest_per_database,
+        filter=custom_filter)
+
+    if dest_resource_group is not None:
+        result = list(filter(lambda operation: "resourceGroups/{}/".format(dest_resource_group).lower() in operation.target_managed_instance_id.lower(), result))
+
+    return result
+
 ###############################################
 #              sql failover-group             #
 ###############################################
@@ -6110,7 +6354,8 @@ def failover_group_failover(
         resource_group_name,
         server_name,
         failover_group_name,
-        allow_data_loss=False):
+        allow_data_loss=False,
+        try_planned_before_forced_failover=False):
     '''
     Failover a failover group.
     '''
@@ -6124,7 +6369,9 @@ def failover_group_failover(
         return
 
     # Choose which failover method to use
-    if allow_data_loss:
+    if try_planned_before_forced_failover:
+        failover_func = client.begin_try_planned_before_forced_failover
+    elif allow_data_loss:
         failover_func = client.begin_force_failover_allow_data_loss
     else:
         failover_func = client.begin_failover

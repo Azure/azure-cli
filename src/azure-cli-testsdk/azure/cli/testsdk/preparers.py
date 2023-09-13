@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import sys
 from datetime import datetime
 
 from .scenario_tests import AbstractPreparer, SingleValueReplacer
@@ -72,11 +73,21 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
             self.test_class_instance.kwargs[self.key] = self.dev_setting_name
             return {self.parameter_name: self.dev_setting_name,
                     self.parameter_name_for_location: self.dev_setting_location}
-
+        test_class_path = sys.modules[self.test_class_instance.__module__].__file__.split(os.sep)
+        # get index of the module name for main repo
+        if 'command_modules' in test_class_path:
+            index_of_module = test_class_path.index('command_modules') + 1
+        # get index of the extension name for extension repo
+        elif 'src' in test_class_path:
+            index_of_module = test_class_path.index('src') + 1
+        else:
+            index_of_module = -1
+        module = test_class_path[index_of_module] if index_of_module >= 0 else 'unknown'
         tags = {'product': 'azurecli',
                 'cause': 'automation test',
                 'date': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-                'test': self.test_class_instance._testMethodName}
+                'test': self.test_class_instance._testMethodName,
+                'module': module}
         if 'ENV_JOB_NAME' in os.environ:
             tags['job'] = os.environ['ENV_JOB_NAME']
         tags = ' '.join(['{}={}'.format(key, value) for key, value in tags.items()])
@@ -165,6 +176,7 @@ class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 class KeyVaultPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest', sku='standard', location='westus',
                  parameter_name='key_vault', resource_group_parameter_name='resource_group', skip_delete=False,
+                 skip_purge=False,
                  dev_setting_name='AZURE_CLI_TEST_DEV_KEY_VAULT_NAME', key='kv', name_len=24, additional_params=None):
         super(KeyVaultPreparer, self).__init__(name_prefix, name_len)
         self.cli_ctx = get_dummy_cli()
@@ -172,6 +184,7 @@ class KeyVaultPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         self.sku = sku
         self.resource_group_parameter_name = resource_group_parameter_name
         self.skip_delete = skip_delete
+        self.skip_purge = skip_purge
         self.parameter_name = parameter_name
         self.key = key
         self.additional_params = additional_params
@@ -197,6 +210,8 @@ class KeyVaultPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
             group = self._get_resource_group(**kwargs)
             self.live_only_execute(self.cli_ctx, 'az keyvault delete -n {} -g {}'.format(name, group))
             from azure.core.exceptions import HttpResponseError
+            if self.skip_purge:
+                return
             try:
                 self.live_only_execute(self.cli_ctx, 'az keyvault purge -n {} -l {}'.format(name, self.location))
             except HttpResponseError:
@@ -477,18 +492,33 @@ class VnetNicPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 
 class LogAnalyticsWorkspacePreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='laworkspace', location='eastus2euap', parameter_name='laworkspace',
-                 resource_group_parameter_name='resource_group', skip_delete=False):
+                 resource_group_parameter_name='resource_group', skip_delete=False, get_shared_key=False):
         super(LogAnalyticsWorkspacePreparer, self).__init__(name_prefix, 15)
         self.cli_ctx = get_dummy_cli()
         self.location = location
         self.parameter_name = parameter_name
         self.resource_group_parameter_name = resource_group_parameter_name
         self.skip_delete = skip_delete
+        self.get_shared_key = get_shared_key
 
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
         template = ('az monitor log-analytics workspace create -l {} -g {} -n {}')
-        self.live_only_execute(self.cli_ctx, template.format(self.location, group, name))
+        try:
+            customer_id = self.live_only_execute(self.cli_ctx, template.format(self.location, group, name)).get_output_in_json()["customerId"]
+        except AttributeError:  # live only execute returns None if playing from record
+            customer_id = None
+        if self.get_shared_key:
+            get_share_key_template = ('az monitor log-analytics workspace get-shared-keys -g {} -n {}')
+            try:
+                log_shared_key = self.live_only_execute(self.cli_ctx, get_share_key_template.format(group, name)).get_output_in_json()["primarySharedKey"]
+            except AttributeError:  # live only execute returns None if playing from record
+                log_shared_key = None
+
+            return {self.parameter_name: name,
+                    self.parameter_name + '_customer_id': (customer_id or 'veryFakedCustomerId=='),
+                    self.parameter_name + '_shared_key': (log_shared_key or 'veryFakedPrivateSharedKey==')}
+
         return {self.parameter_name: name}
 
     def remove_resource(self, name, **kwargs):

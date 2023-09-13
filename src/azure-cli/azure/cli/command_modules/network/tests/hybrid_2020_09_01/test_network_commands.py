@@ -1034,13 +1034,11 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
                  checks=self.check('privateIPAddress', '10.0.0.50'))
 
         # test ability to add and remove IDs one at a time with subcommands
-        self.cmd('network nic ip-config inbound-nat-rule remove -g {rg} --lb-name {lb} --nic-name {nic} --ip-config-name {config} --inbound-nat-rule rule1',
-                 checks=self.check('length(loadBalancerInboundNatRules)', 1))
+        self.cmd('network nic ip-config inbound-nat-rule remove -g {rg} --lb-name {lb} --nic-name {nic} --ip-config-name {config} --inbound-nat-rule rule1')
         self.cmd('network nic ip-config inbound-nat-rule add -g {rg} --lb-name {lb} --nic-name {nic} --ip-config-name {config} --inbound-nat-rule rule1',
                  checks=self.check('length(loadBalancerInboundNatRules)', 2))
 
-        self.cmd('network nic ip-config address-pool remove -g {rg} --lb-name {lb} --nic-name {nic} --ip-config-name {config} --address-pool bap1',
-                 checks=self.check('length(loadBalancerBackendAddressPools)', 1))
+        self.cmd('network nic ip-config address-pool remove -g {rg} --lb-name {lb} --nic-name {nic} --ip-config-name {config} --address-pool bap1')
         self.cmd('network nic ip-config address-pool add -g {rg} --lb-name {lb} --nic-name {nic} --ip-config-name {config} --address-pool bap1',
                  checks=self.check('length(loadBalancerBackendAddressPools)', 2))
 

@@ -120,6 +120,15 @@ def validate_create_managed_cluster(cmd, namespace):
             raise CLIError("--upgrade-cadence should only be used whe --upgrade-mode is set to 'Automatic'.")
 
 
+def validate_add_network_security_rule(cmd, namespace):
+    client = servicefabric_managed_client_factory(cmd.cli_ctx)
+    cluster = _safe_get_resource(client.managed_clusters.get,
+                                 (namespace.resource_group_name, namespace.cluster_name))
+
+    if cluster is None or cluster.cluster_state != 'Ready':
+        raise ValidationError("cluster state is invalid for this operation")
+
+
 def validate_create_managed_service(namespace):
     validate_tags(namespace)
     if namespace.service_type is None:

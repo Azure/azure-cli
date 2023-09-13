@@ -100,23 +100,17 @@ def aks_upgrades_table_format(result):
 def aks_versions_table_format(result):
     """Format get-versions results as a summary for display with "-o table"."""
 
-    preview = {}
+    version_table = flatten_version_table(result.get("values", []))
 
-    def find_preview_versions():
-        for orchestrator in result.get('orchestrators', []):
-            if orchestrator.get('isPreview', False):
-                preview[orchestrator['orchestratorVersion']] = True
-    find_preview_versions()
-
-    parsed = compile_jmes("""orchestrators[].{
-        kubernetesVersion: orchestratorVersion | set_preview(@),
-        upgrades: upgrades[].orchestratorVersion || [`None available`] | sort_versions(@) | set_preview_array(@) | join(`, `, @)
+    parsed = compile_jmes("""[].{
+        kubernetesVersion: version,
+        isPreview: isPreview,
+        upgrades: upgrades || [`None available`] | sort_versions(@) | join(`, `, @)
     }""")
-
     # use ordered dicts so headers are predictable
-    results = parsed.search(result, Options(
-        dict_cls=OrderedDict, custom_functions=_custom_functions(preview)))
-    return sorted(results, key=lambda x: version_to_tuple(x.get('kubernetesVersion')), reverse=True)
+    results = parsed.search(version_table, Options(
+        dict_cls=OrderedDict, custom_functions=_custom_functions({})))
+    return sorted(results, key=lambda x: version_to_tuple(x.get("kubernetesVersion")), reverse=True)
 
 
 def aks_list_nodepool_snapshot_table_format(results):
@@ -150,6 +144,17 @@ def version_to_tuple(version):
     return tuple(map(int, (version.split('.'))))
 
 
+def flatten_version_table(release_info):
+    """Flattens version table"""
+    flattened = []
+    for release in release_info:
+        isPreview = release.get("isPreview", False)
+        for k, v in release.get("patchVersions", {}).items():
+            item = {"version": k, "upgrades": v.get("upgrades", []), "isPreview": isPreview}
+            flattened.append(item)
+    return flattened
+
+
 def _custom_functions(preview_versions):
     class CustomFunctions(functions.Functions):  # pylint: disable=too-few-public-methods
 
@@ -169,7 +174,7 @@ def _custom_functions(preview_versions):
                 for i, _ in enumerate(versions):
                     versions[i] = self._func_set_preview(versions[i])
                 return versions
-            except(TypeError, ValueError):
+            except (TypeError, ValueError):
                 return versions
 
         @functions.signature({'types': ['string']})
@@ -179,7 +184,7 @@ def _custom_functions(preview_versions):
                 if preview_versions.get(version, False):
                     return version + '(preview)'
                 return version
-            except(TypeError, ValueError):
+            except (TypeError, ValueError):
                 return version
 
     return CustomFunctions()

@@ -19,12 +19,15 @@ class Create(AAZCommand):
 
     :example: Create an application gateway WAF policy custom rule.
         az network application-gateway waf-policy custom-rule create --action Allow --name MyWafPolicyRule --policy-name MyPolicy --priority 500 --resource-group MyResourceGroup --rule-type MatchRule
+
+    :example: Create an application gateway WAF policy custom rule with user session identifier.
+        az network application-gateway waf-policy custom-rule create -g MyResourceGroup --policy-name MyPolicy -n MyRule --priority 3 --action Block --rule-type RateLimitRule --rate-limit-duration FiveMins --rate-limit-threshold 15 --group-by-user-session "[{group-by-variables:[{variable-name:GeoLocation}]}]"
     """
 
     _aaz_info = {
-        "version": "2022-09-01",
+        "version": "2022-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgatewaywebapplicationfirewallpolicies/{}", "2022-09-01", "properties.customRules[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgatewaywebapplicationfirewallpolicies/{}", "2022-11-01", "properties.customRules[]"],
         ]
     }
 
@@ -79,7 +82,7 @@ class Create(AAZCommand):
             options=["--rule-type"],
             help="Type of rule.",
             required=True,
-            enum={"Invalid": "Invalid", "MatchRule": "MatchRule"},
+            enum={"Invalid": "Invalid", "MatchRule": "MatchRule", "RateLimitRule": "RateLimitRule"},
         )
         _args_schema.state = AAZStrArg(
             options=["--state"],
@@ -91,12 +94,49 @@ class Create(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.group_by_user_session = AAZListArg(
+            options=["--group-by-user-session"],
+            arg_group="Properties",
+            help="List of user session identifier group by clauses.",
+        )
         _args_schema.match_conditions = AAZListArg(
             options=["--match-conditions"],
             arg_group="Properties",
             help="List of match conditions.",
             required=True,
             default=[],
+        )
+        _args_schema.rate_limit_duration = AAZStrArg(
+            options=["--rate-limit-duration"],
+            arg_group="Properties",
+            help="Duration over which Rate Limit policy will be applied. Applies only when ruleType is RateLimitRule.",
+            enum={"FiveMins": "FiveMins", "OneMin": "OneMin"},
+        )
+        _args_schema.rate_limit_threshold = AAZIntArg(
+            options=["--rate-limit-threshold"],
+            arg_group="Properties",
+            help="Rate Limit threshold to apply in case ruleType is RateLimitRule. Must be greater than or equal to 1",
+        )
+
+        group_by_user_session = cls._args_schema.group_by_user_session
+        group_by_user_session.Element = AAZObjectArg()
+
+        _element = cls._args_schema.group_by_user_session.Element
+        _element.group_by_variables = AAZListArg(
+            options=["group-by-variables"],
+            help="List of group by clause variables.",
+            required=True,
+        )
+
+        group_by_variables = cls._args_schema.group_by_user_session.Element.group_by_variables
+        group_by_variables.Element = AAZObjectArg()
+
+        _element = cls._args_schema.group_by_user_session.Element.group_by_variables.Element
+        _element.variable_name = AAZStrArg(
+            options=["variable-name"],
+            help="User Session clause variable.",
+            required=True,
+            enum={"ClientAddr": "ClientAddr", "GeoLocation": "GeoLocation", "None": "None"},
         )
 
         match_conditions = cls._args_schema.match_conditions
@@ -106,7 +146,6 @@ class Create(AAZCommand):
         _element.values = AAZListArg(
             options=["values"],
             help="Space-separated list of values to match.",
-            required=True,
         )
         _element.variables = AAZListArg(
             options=["variables"],
@@ -254,7 +293,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-09-01",
+                    "api-version", "2022-11-01",
                     required=True,
                 ),
             }
@@ -337,7 +376,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-09-01",
+                    "api-version", "2022-11-01",
                     required=True,
                 ),
             }
@@ -395,11 +434,30 @@ class Create(AAZCommand):
                 typ=AAZObjectType
             )
             _builder.set_prop("action", AAZStrType, ".action", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("groupByUserSession", AAZListType, ".group_by_user_session")
             _builder.set_prop("matchConditions", AAZListType, ".match_conditions", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("name", AAZStrType, ".name")
             _builder.set_prop("priority", AAZIntType, ".priority", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("rateLimitDuration", AAZStrType, ".rate_limit_duration")
+            _builder.set_prop("rateLimitThreshold", AAZIntType, ".rate_limit_threshold")
             _builder.set_prop("ruleType", AAZStrType, ".rule_type", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("state", AAZStrType, ".state")
+
+            group_by_user_session = _builder.get(".groupByUserSession")
+            if group_by_user_session is not None:
+                group_by_user_session.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".groupByUserSession[]")
+            if _elements is not None:
+                _elements.set_prop("groupByVariables", AAZListType, ".group_by_variables", typ_kwargs={"flags": {"required": True}})
+
+            group_by_variables = _builder.get(".groupByUserSession[].groupByVariables")
+            if group_by_variables is not None:
+                group_by_variables.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".groupByUserSession[].groupByVariables[]")
+            if _elements is not None:
+                _elements.set_prop("variableName", AAZStrType, ".variable_name", typ_kwargs={"flags": {"required": True}})
 
             match_conditions = _builder.get(".matchConditions")
             if match_conditions is not None:
@@ -407,7 +465,7 @@ class Create(AAZCommand):
 
             _elements = _builder.get(".matchConditions[]")
             if _elements is not None:
-                _elements.set_prop("matchValues", AAZListType, ".values", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("matchValues", AAZListType, ".values")
                 _elements.set_prop("matchVariables", AAZListType, ".variables", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("negationConditon", AAZBoolType, ".negate")
                 _elements.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
@@ -1215,6 +1273,9 @@ class _CreateHelper:
         properties.auxiliary_mode = AAZStrType(
             serialized_name="auxiliaryMode",
         )
+        properties.auxiliary_sku = AAZStrType(
+            serialized_name="auxiliarySku",
+        )
         properties.disable_tcp_state_tracking = AAZBoolType(
             serialized_name="disableTcpStateTracking",
         )
@@ -1447,6 +1508,10 @@ class _CreateHelper:
             serialized_name="privateEndpoint",
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
+        properties.private_endpoint_location = AAZStrType(
+            serialized_name="privateEndpointLocation",
+            flags={"read_only": True},
+        )
         properties.private_link_service_connection_state = AAZObjectType(
             serialized_name="privateLinkServiceConnectionState",
         )
@@ -1971,6 +2036,9 @@ class _CreateHelper:
         dns_settings = _schema_public_ip_address_read.properties.dns_settings
         dns_settings.domain_name_label = AAZStrType(
             serialized_name="domainNameLabel",
+        )
+        dns_settings.domain_name_label_scope = AAZStrType(
+            serialized_name="domainNameLabelScope",
         )
         dns_settings.fqdn = AAZStrType()
         dns_settings.reverse_fqdn = AAZStrType(
@@ -3927,6 +3995,9 @@ class _CreateHelper:
         _element.etag = AAZStrType(
             flags={"read_only": True},
         )
+        _element.group_by_user_session = AAZListType(
+            serialized_name="groupByUserSession",
+        )
         _element.match_conditions = AAZListType(
             serialized_name="matchConditions",
             flags={"required": True},
@@ -3935,11 +4006,35 @@ class _CreateHelper:
         _element.priority = AAZIntType(
             flags={"required": True},
         )
+        _element.rate_limit_duration = AAZStrType(
+            serialized_name="rateLimitDuration",
+        )
+        _element.rate_limit_threshold = AAZIntType(
+            serialized_name="rateLimitThreshold",
+        )
         _element.rule_type = AAZStrType(
             serialized_name="ruleType",
             flags={"required": True},
         )
         _element.state = AAZStrType()
+
+        group_by_user_session = _schema_web_application_firewall_policy_read.properties.custom_rules.Element.group_by_user_session
+        group_by_user_session.Element = AAZObjectType()
+
+        _element = _schema_web_application_firewall_policy_read.properties.custom_rules.Element.group_by_user_session.Element
+        _element.group_by_variables = AAZListType(
+            serialized_name="groupByVariables",
+            flags={"required": True},
+        )
+
+        group_by_variables = _schema_web_application_firewall_policy_read.properties.custom_rules.Element.group_by_user_session.Element.group_by_variables
+        group_by_variables.Element = AAZObjectType()
+
+        _element = _schema_web_application_firewall_policy_read.properties.custom_rules.Element.group_by_user_session.Element.group_by_variables.Element
+        _element.variable_name = AAZStrType(
+            serialized_name="variableName",
+            flags={"required": True},
+        )
 
         match_conditions = _schema_web_application_firewall_policy_read.properties.custom_rules.Element.match_conditions
         match_conditions.Element = AAZObjectType()
@@ -3947,7 +4042,6 @@ class _CreateHelper:
         _element = _schema_web_application_firewall_policy_read.properties.custom_rules.Element.match_conditions.Element
         _element.match_values = AAZListType(
             serialized_name="matchValues",
-            flags={"required": True},
         )
         _element.match_variables = AAZListType(
             serialized_name="matchVariables",
@@ -4090,8 +4184,14 @@ class _CreateHelper:
         policy_settings.custom_block_response_status_code = AAZIntType(
             serialized_name="customBlockResponseStatusCode",
         )
+        policy_settings.file_upload_enforcement = AAZBoolType(
+            serialized_name="fileUploadEnforcement",
+        )
         policy_settings.file_upload_limit_in_mb = AAZIntType(
             serialized_name="fileUploadLimitInMb",
+        )
+        policy_settings.log_scrubbing = AAZObjectType(
+            serialized_name="logScrubbing",
         )
         policy_settings.max_request_body_size_in_kb = AAZIntType(
             serialized_name="maxRequestBodySizeInKb",
@@ -4100,7 +4200,34 @@ class _CreateHelper:
         policy_settings.request_body_check = AAZBoolType(
             serialized_name="requestBodyCheck",
         )
+        policy_settings.request_body_enforcement = AAZBoolType(
+            serialized_name="requestBodyEnforcement",
+        )
+        policy_settings.request_body_inspect_limit_in_kb = AAZIntType(
+            serialized_name="requestBodyInspectLimitInKB",
+        )
         policy_settings.state = AAZStrType()
+
+        log_scrubbing = _schema_web_application_firewall_policy_read.properties.policy_settings.log_scrubbing
+        log_scrubbing.scrubbing_rules = AAZListType(
+            serialized_name="scrubbingRules",
+        )
+        log_scrubbing.state = AAZStrType()
+
+        scrubbing_rules = _schema_web_application_firewall_policy_read.properties.policy_settings.log_scrubbing.scrubbing_rules
+        scrubbing_rules.Element = AAZObjectType()
+
+        _element = _schema_web_application_firewall_policy_read.properties.policy_settings.log_scrubbing.scrubbing_rules.Element
+        _element.match_variable = AAZStrType(
+            serialized_name="matchVariable",
+            flags={"required": True},
+        )
+        _element.selector = AAZStrType()
+        _element.selector_match_operator = AAZStrType(
+            serialized_name="selectorMatchOperator",
+            flags={"required": True},
+        )
+        _element.state = AAZStrType()
 
         tags = _schema_web_application_firewall_policy_read.tags
         tags.Element = AAZStrType()

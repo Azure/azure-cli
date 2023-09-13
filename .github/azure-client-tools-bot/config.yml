@@ -1,3 +1,4 @@
+similar_issue: true
 allowed_branches:
   - "dev"
 auto_choose_milestone:
@@ -9,6 +10,7 @@ pull_request:
           - "Azure.azure-cli Full Test"
         result_path: "/test_results/"
       group_by_keys:
+        - "TestName"
         - "Module"
         - "Profile"
         - "PythonVersion"
@@ -17,13 +19,27 @@ pull_request:
       init_comment: |
         Validation for Azure CLI Full Test Starting...
         Thanks for your contribution!
+      disable_check_suit: true
+    - azure_pipeline:
+        allow_list:
+          - "Azure.azure-cli Breaking Change Test"
+        result_path: "/breaking_change_test/"
+      group_by_keys:
+        - "TestName"
+        - "Module"
+      template_path: "templates/BreakingChangeTest.handlebars"
+      comment_title: "AzureCLI-BreakingChangeTest"
+      init_comment: |
+        Validation for Breaking Change Starting...
+        Thanks for your contribution!
+      disable_check_suit: true
 cli_common_issues:
   issues:
     - tag: unofficial_cli
       keywords:
-        - "2\\.0\\.80"
-        - "2\\.0\\.81"
-        - "2\\.18\\.0"
+        - "azure-cli 2\\.0\\.80"
+        - "azure-cli 2\\.0\\.81"
+        - "azure-cli 2\\.18\\.0"
         - "dist-packages"
       solution: |
         Hi @${author},
@@ -81,4 +97,4 @@ cli_common_issues:
 
         ${currentVersion} is not the latest Azure CLI(${latestVersion}).
 
-        Please upgrade to the latest Azure CLI version by following https://learn.microsoft.com/en-us/cli/azure/update-azure-cli.
+        If you haven't already attempted to do so, please upgrade to the latest Azure CLI version by following https://learn.microsoft.com/en-us/cli/azure/update-azure-cli.

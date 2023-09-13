@@ -58,9 +58,9 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
         from azure.core.exceptions import ResourceNotFoundError
         try:
             if edge_zone is not None:
-                offers = edge_zone_client.list_offers(location, edge_zone, publisher)
+                offers = edge_zone_client.list_offers(location=location, edge_zone=edge_zone, publisher_name=publisher)
             else:
-                offers = client.virtual_machine_images.list_offers(location, publisher)
+                offers = client.virtual_machine_images.list_offers(location=location, publisher_name=publisher)
         except ResourceNotFoundError as e:
             logger.warning(str(e))
             return
@@ -69,9 +69,11 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
         for o in offers:
             try:
                 if edge_zone is not None:
-                    skus = edge_zone_client.list_skus(location, edge_zone, publisher, o.name)
+                    skus = edge_zone_client.list_skus(location=location, edge_zone=edge_zone,
+                                                      publisher_name=publisher, offer=o.name)
                 else:
-                    skus = client.virtual_machine_images.list_skus(location, publisher, o.name)
+                    skus = client.virtual_machine_images.list_skus(location=location, publisher_name=publisher,
+                                                                   offer=o.name)
             except ResourceNotFoundError as e:
                 logger.warning(str(e))
                 continue
@@ -81,9 +83,11 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
                 try:
                     expand = "properties"
                     if edge_zone is not None:
-                        images = edge_zone_client.list(location, edge_zone, publisher, o.name, s.name, expand)
+                        images = edge_zone_client.list(location=location, edge_zone=edge_zone, publisher_name=publisher,
+                                                       offer=o.name, skus=s.name, expand=expand)
                     else:
-                        images = client.virtual_machine_images.list(location, publisher, o.name, s.name, expand)
+                        images = client.virtual_machine_images.list(location=location, publisher_name=publisher,
+                                                                    offer=o.name, skus=s.name, expand=expand)
                 except ResourceNotFoundError as e:
                     logger.warning(str(e))
                     continue
@@ -106,9 +110,9 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
         from azure.cli.core.profiles import ResourceType
         edge_zone_client = get_mgmt_service_client(cli_ctx,
                                                    ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
-        publishers = edge_zone_client.list_publishers(location, edge_zone)
+        publishers = edge_zone_client.list_publishers(location=location, edge_zone=edge_zone)
     else:
-        publishers = client.virtual_machine_images.list_publishers(location)
+        publishers = client.virtual_machine_images.list_publishers(location=location)
     if publisher:
         publishers = [p for p in publishers if _matched(publisher, p.name)]
 
@@ -218,7 +222,7 @@ def load_extension_images_thru_services(cli_ctx, publisher, name, version, locat
                         'name': t.name,
                         'version': v.name})
 
-    publishers = client.virtual_machine_images.list_publishers(location)
+    publishers = client.virtual_machine_images.list_publishers(location=location)
     if publisher:
         publishers = [p for p in publishers if _matched(publisher, p.name, partial_match)]
 

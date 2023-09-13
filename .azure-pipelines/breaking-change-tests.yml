@@ -1,0 +1,50 @@
+resources:
+- repo: self
+
+trigger: none
+
+pr:
+  branches:
+    include:
+    - '*'
+
+variables:
+- template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
+
+jobs:
+- job: BreakingChangeTest
+  displayName: "Breaking Change Test"
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+  - checkout: self
+    fetchDepth: 0
+    fetchTags: true
+    persistCredentials: true
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.10'
+    inputs:
+      versionSpec: 3.10
+  - template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/azdev_setup.yml
+  - bash: |
+      set -ev
+      . env/bin/activate
+      python scripts/ci/breaking_change_test.py
+      breakingChangeTest='false'
+      if [[ -f '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/breaking_change_test.json' ]]; then
+        breakingChangeTest='true'
+      fi
+      echo "##vso[task.setvariable variable=breakingChangeTest]$breakingChangeTest"
+    displayName: "Breaking Change Test"
+    env:
+      PR_SRC_BRANCH: $(System.PullRequest.SourceBranch)
+      PR_TARGET_BRANCH: $(System.PullRequest.TargetBranch)
+      PULL_REQUEST_NUMBER: $(System.PullRequest.PullRequestNumber)
+      JOB_NAME: "breaking_change_test"
+  - task: PublishBuildArtifacts@1
+    condition: and(succeededOrFailed(), eq(variables.breakingChangeTest, 'true'))
+    inputs:
+      # /mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/breaking_change_test.json
+      PathtoPublish: '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/breaking_change_test.json'
+      ArtifactName: 'breaking_change_test'
+      publishLocation: 'Container'

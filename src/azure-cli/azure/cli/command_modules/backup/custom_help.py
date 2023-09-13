@@ -521,6 +521,14 @@ def get_resource_group_from_id(arm_id):
     return m.group(0)
 
 
+def get_subscription_from_id(arm_id):
+    # Search for the pattern following "/subscriptions/" in the ARM ID
+    # (?<=/subscriptions/)   Positive lookbehind: Match the pattern after "/subscriptions/"
+    # [^/]+                  Match one or more characters that are not a forward slash
+    m = re.search('(?<=/subscriptions/)[^/]+', arm_id)
+    return m.group(0)
+
+
 def get_operation_id_from_header(header):
     parse_object = urlparse(header)
     return parse_object.path.split("/")[-1]
@@ -543,7 +551,7 @@ def validate_and_extract_container_type(container_name, backup_management_type):
     container_type = container_name.split(";")[0].lower()
     container_type_mappings = {"iaasvmcontainer": "AzureIaasVM", "storagecontainer": "AzureStorage",
                                "vmappcontainer": "AzureWorkload", "windows": "MAB",
-                               "sqlagworkloadcontainer": "AzureWorkload"}
+                               "sqlagworkloadcontainer": "AzureWorkload", "hanahsrcontainer": "AzureWorkload"}
 
     if container_type in container_type_mappings:
         return container_type_mappings[container_type]

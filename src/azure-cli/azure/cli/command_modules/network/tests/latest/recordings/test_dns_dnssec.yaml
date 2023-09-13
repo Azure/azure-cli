@@ -1,0 +1,380 @@
+interactions:
+- request:
+    body: '{"location": "global", "properties": {"zoneType": "Public"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns zone create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '60'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.11.2 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dnssec000001/providers/Microsoft.Network/dnsZones/myzone.com?api-version=2023-07-01-preview
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dnssec000001\/providers\/Microsoft.Network\/dnszones\/myzone.com","name":"myzone.com","type":"Microsoft.Network\/dnszones","etag":"bd0ca23e-0934-420f-850d-e3f710b4b4ca","location":"global","tags":{},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-34.daily.azure-dns.com.","ns2-34.daily.azure-dns.net.","ns3-34.daily.azure-dns.org.","ns4-34.daily.azure-dns.info."],"numberOfRecordSets":2,"zoneType":"Public"}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '549'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Jun 2023 03:25:17 GMT
+      etag:
+      - bd0ca23e-0934-420f-850d-e3f710b4b4ca
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11998'
+      x-msedge-ref:
+      - 'Ref A: 7E8756814B6B4E8D85D5BCBC80E5DA6E Ref B: CO6AA3150217025 Ref C: 2023-06-27T03:25:15Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns dnssec-config create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -z
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.11.2 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dnssec000001/providers/Microsoft.Network/dnsZones/myzone.com/dnssecConfigs/default?api-version=2023-07-01-preview
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dnssec000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/dnssecConfigs\/default","name":"default","type":"Microsoft.Network\/dnszones\/dnssecConfigs","etag":"66df078d-9ea6-4bd0-a485-61de011e8411","properties":{"provisioningState":"Creating","signingKeys":[]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '355'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Jun 2023 03:25:18 GMT
+      etag:
+      - 66df078d-9ea6-4bd0-a485-61de011e8411
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: 8722C610CB7E4D57A59A49EAFEA9AEE9 Ref B: CO6AA3150220021 Ref C: 2023-06-27T03:25:18Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns dnssec-config create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -z
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.11.2 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dnssec000001/providers/Microsoft.Network/dnsZones/myzone.com/dnssecConfigs/default?api-version=2023-07-01-preview
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dnssec000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/dnssecConfigs\/default","name":"default","type":"Microsoft.Network\/dnszones\/dnssecConfigs","etag":"66df078d-9ea6-4bd0-a485-61de011e8411","properties":{"provisioningState":"Creating","signingKeys":[]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '355'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Jun 2023 03:25:18 GMT
+      etag:
+      - 66df078d-9ea6-4bd0-a485-61de011e8411
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: 5B2F2771D44849E9A74C36119BA69290 Ref B: CO6AA3150220021 Ref C: 2023-06-27T03:25:18Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns dnssec-config create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -z
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.11.2 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dnssec000001/providers/Microsoft.Network/dnsZones/myzone.com/dnssecConfigs/default?api-version=2023-07-01-preview
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dnssec000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/dnssecConfigs\/default","name":"default","type":"Microsoft.Network\/dnszones\/dnssecConfigs","etag":"990c45be-f7dd-42c1-97a1-54f4a9795f98","properties":{"provisioningState":"Succeeded","signingKeys":[{"delegationSignerInfo":[],"flags":256,"keyTag":27227,"protocol":3,"publicKey":"GjdirrNglhbEeI3QEd1WiM+UpIFGvb8THsrNarVUXB7GXB1OXFcmRsyV10ba0GK94A0ZAi5TJCgXiAMgSa12Hw==","securityAlgorithmType":13},{"delegationSignerInfo":[{"digestAlgorithmType":2,"digestValue":"klOF4PMiWDOuesxjTPmzKK5fxp6qxIISsWo37Beeh5A=","record":"4426
+        13 2 klOF4PMiWDOuesxjTPmzKK5fxp6qxIISsWo37Beeh5A="}],"flags":257,"keyTag":4426,"protocol":3,"publicKey":"m+ntB+lPfzIbMlcGc4Mgu\/9RtQxe9+Bjq35FG4EmOLA0sHEVbtsVqLZyFK8vpcglem2LvWXVwUAoYkPmr2pA\/A==","securityAlgorithmType":13}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '904'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Jun 2023 03:25:48 GMT
+      etag:
+      - 990c45be-f7dd-42c1-97a1-54f4a9795f98
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11998'
+      x-msedge-ref:
+      - 'Ref A: 9D6FE7289BA1466984044FB3B721D03B Ref B: CO6AA3150220021 Ref C: 2023-06-27T03:25:48Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns dnssec-config show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -z
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.11.2 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dnssec000001/providers/Microsoft.Network/dnsZones/myzone.com/dnssecConfigs/default?api-version=2023-07-01-preview
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dnssec000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/dnssecConfigs\/default","name":"default","type":"Microsoft.Network\/dnszones\/dnssecConfigs","etag":"990c45be-f7dd-42c1-97a1-54f4a9795f98","properties":{"provisioningState":"Succeeded","signingKeys":[{"delegationSignerInfo":[],"flags":256,"keyTag":27227,"protocol":3,"publicKey":"GjdirrNglhbEeI3QEd1WiM+UpIFGvb8THsrNarVUXB7GXB1OXFcmRsyV10ba0GK94A0ZAi5TJCgXiAMgSa12Hw==","securityAlgorithmType":13},{"delegationSignerInfo":[{"digestAlgorithmType":2,"digestValue":"klOF4PMiWDOuesxjTPmzKK5fxp6qxIISsWo37Beeh5A=","record":"4426
+        13 2 klOF4PMiWDOuesxjTPmzKK5fxp6qxIISsWo37Beeh5A="}],"flags":257,"keyTag":4426,"protocol":3,"publicKey":"m+ntB+lPfzIbMlcGc4Mgu\/9RtQxe9+Bjq35FG4EmOLA0sHEVbtsVqLZyFK8vpcglem2LvWXVwUAoYkPmr2pA\/A==","securityAlgorithmType":13}]}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '904'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Jun 2023 03:25:49 GMT
+      etag:
+      - 990c45be-f7dd-42c1-97a1-54f4a9795f98
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: AF1844EA989A4AB0BBD2F6E3D74540E2 Ref B: CO6AA3150220051 Ref C: 2023-06-27T03:25:49Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns dnssec-config delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -z -y
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.11.2 (Windows-10-10.0.22621-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dnssec000001/providers/Microsoft.Network/dnsZones/myzone.com/dnssecConfigs/default?api-version=2023-07-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dnssec000001/providers/Microsoft.Network/dnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtEZWxldGVab25lRG5zc2VjO2NiMWNjYmUwLTliYjctNDY2Yi1iODk4LTE2MjNkNzE3MTkzYw==?api-version=2023-07-01-preview
+      cache-control:
+      - private
+      content-length:
+      - '0'
+      date:
+      - Tue, 27 Jun 2023 03:25:50 GMT
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dnssec000001/providers/Microsoft.Network/dnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtEZWxldGVab25lRG5zc2VjO2NiMWNjYmUwLTliYjctNDY2Yi1iODk4LTE2MjNkNzE3MTkzYw==?api-version=2023-07-01-preview
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: 8EBC7B0A5FC347FC8177ED1ECCADDECA Ref B: CO6AA3150219049 Ref C: 2023-06-27T03:25:50Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns dnssec-config delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -z -y
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.11.2 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dnssec000001/providers/Microsoft.Network/dnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtEZWxldGVab25lRG5zc2VjO2NiMWNjYmUwLTliYjctNDY2Yi1iODk4LTE2MjNkNzE3MTkzYw==?api-version=2023-07-01-preview
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dnssec000001/providers/Microsoft.Network/dnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtEZWxldGVab25lRG5zc2VjO2NiMWNjYmUwLTliYjctNDY2Yi1iODk4LTE2MjNkNzE3MTkzYw==?api-version=2023-07-01-preview
+      cache-control:
+      - private
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Jun 2023 03:25:50 GMT
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dnssec000001/providers/Microsoft.Network/dnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtEZWxldGVab25lRG5zc2VjO2NiMWNjYmUwLTliYjctNDY2Yi1iODk4LTE2MjNkNzE3MTkzYw==?api-version=2023-07-01-preview
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11998'
+      x-msedge-ref:
+      - 'Ref A: 9F0A13C87FFE4FF2A3E8AF140A5AC73D Ref B: CO6AA3150219049 Ref C: 2023-06-27T03:25:50Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns dnssec-config delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -z -y
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.11.2 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dnssec000001/providers/Microsoft.Network/dnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtEZWxldGVab25lRG5zc2VjO2NiMWNjYmUwLTliYjctNDY2Yi1iODk4LTE2MjNkNzE3MTkzYw==?api-version=2023-07-01-preview
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Jun 2023 03:25:53 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11997'
+      x-msedge-ref:
+      - 'Ref A: D15D3687BAC9415EA44FD5ED4CA0B1C0 Ref B: CO6AA3150219049 Ref C: 2023-06-27T03:25:53Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+version: 1
