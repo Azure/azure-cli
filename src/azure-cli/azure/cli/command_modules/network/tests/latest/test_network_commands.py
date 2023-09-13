@@ -6517,7 +6517,7 @@ class NetworkExtendedLocation(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} '
                  '--disable-private-link-service-network-policies')
         self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} '
-                 '--address-prefixes 10.0.2.0/24 --default-outbound-access false')
+                 '--address-prefixes 10.0.2.0/24')
         self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} '
                  '--disable-private-endpoint-network-policies')
 
