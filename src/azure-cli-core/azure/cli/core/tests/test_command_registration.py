@@ -160,10 +160,10 @@ class TestCommandRegistration(unittest.TestCase):
             return "azext_always_loaded"
 
     def _mock_get_extensions():
-        MockExtension = namedtuple('Extension', ['name', 'preview', 'experimental', 'path', 'get_metadata', 'version', 'ext_type'])
-        return [MockExtension(name=__name__ + '.ExtCommandsLoader', preview=False, experimental=False, path=None, get_metadata=lambda: {}, version='0.0.1', ext_type='dev'),
-                MockExtension(name=__name__ + '.Ext2CommandsLoader', preview=False, experimental=False, path=None, get_metadata=lambda: {}, version='0.0.1', ext_type='dev'),
-                MockExtension(name=__name__ + '.ExtAlwaysLoadedCommandsLoader', preview=False, experimental=False, path=None, get_metadata=lambda: {}, version='0.0.1', ext_type='dev')]
+        MockExtension = namedtuple('Extension', ['name', 'preview', 'experimental', 'path', 'get_metadata'])
+        return [MockExtension(name=__name__ + '.ExtCommandsLoader', preview=False, experimental=False, path=None, get_metadata=lambda: {}),
+                MockExtension(name=__name__ + '.Ext2CommandsLoader', preview=False, experimental=False, path=None, get_metadata=lambda: {}),
+                MockExtension(name=__name__ + '.ExtAlwaysLoadedCommandsLoader', preview=False, experimental=False, path=None, get_metadata=lambda: {})]
 
     def _mock_load_command_loader(loader, args, name, prefix):
 
