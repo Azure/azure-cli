@@ -5406,7 +5406,7 @@ class NetworkSubnetScenarioTests(ScenarioTest):
         self.cmd('network nat gateway create --resource-group {rg} --location {location} --public-ip-prefixes {ip_prefix} --name {nat} --public-ip-addresses {ip_addr} --idle-timeout {idle_timeout} --zone {zone}')
         self.cmd('network vnet create --resource-group {rg} --name {vnet} --address-prefix {vnet_prefix}')
 
-        self.cmd('network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefixes {subnet_prefix} --nat-gateway {nat} --default-outbound-access false',
+        self.cmd('network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefixes {subnet_prefix} --nat-gateway {nat}',
                  checks=self.check('ends_with(@.natGateway.id, `/{nat}`)', True))
         self.cmd('network vnet subnet update --resource-group {rg} --vnet-name {vnet} --name {subnet} --nat-gateway null',
                  checks=self.check('natGateway', None))
