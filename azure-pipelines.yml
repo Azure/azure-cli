@@ -27,795 +27,795 @@ parameters:
     pool: ubuntu-arm64-2004-pool
 
 jobs:
-- job: CheckPullRequest
-  displayName: "Check the Format of Pull Request Title and Content"
-  condition: and(succeeded(), in(variables['System.PullRequest.TargetBranch'], 'dev', 'release', 'main'))
-
-  pool:
-    name: ${{ variables.ubuntu_pool }}
-  steps:
-  - bash: |
-      echo "Check Title of Pull Request: #$(System.PullRequest.PullRequestNumber)"
-      title=$(curl https://api.github.com/repos/$(Build.Repository.Name)/pulls/$(System.PullRequest.PullRequestNumber) | jq -r '.title')
-      echo $title
-      body=$(curl https://api.github.com/repos/$(Build.Repository.Name)/pulls/$(System.PullRequest.PullRequestNumber) | jq -r '.body')
-      echo $body
-      if [ "$(System.PullRequest.TargetBranch)" != "release" ] && echo $title | grep -iqF hotfix:; then
-        echo "Hotfix PR should target release branch."
-        exit 1
-      fi
-      if [ "$(System.PullRequest.TargetBranch)" == "main" ]; then
-        echo "Feature PR should target dev branch."
-        exit 1
-      fi
-      python scripts/ci/check_pull_request.py "$title" "$body"
-
-- job: RejectPullRequestToMasterBranch
-  displayName: "Reject Pull Request To Master Branch"
-  condition: and(succeeded(), eq(variables['System.PullRequest.TargetBranch'], 'master'))
-
-  pool:
-    name: ${{ variables.ubuntu_pool }}
-  steps:
-  - bash: |
-      echo "Reject pull request directly to master branch"
-      exit 1
-
-- job: CredentialScanner
-  displayName: "Credential Scanner"
-  pool:
-    name: ${{ variables.windows_pool }}
-  steps:
-  - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-credscan.CredScan@2
-    displayName: 'Run Credential Scanner'
-    inputs:
-      toolMajorVersion: V2
-      suppressionsFile: './scripts/ci/credscan/CredScanSuppressions.json'
-      toolVersionV2: '2.1.17'
-
-  - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-postanalysis.PostAnalysis@1
-    displayName: 'Post Analysis'
-    inputs:
-      AllTools: false
-      BinSkim: false
-      CredScan: true
-      PoliCheck: false
-      RoslynAnalyzers: false
-      TSLint: false
-      ToolLogsNotFoundAction: 'Standard'
-
-- job: PolicyCheck
-  displayName: "Policy Check"
-  pool:
-    name: ${{ variables.windows_pool }}
-  steps:
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@2
-    displayName: 'Run Policy Check'
-    inputs:
-      targetType: F
-      result: PoliCheckResult.xml
-
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@2
-    displayName: 'Post Analysis'
-    inputs:
-      GdnBreakAllTools: false
-      GdnBreakGdnToolPoliCheck: true
-      GdnBreakGdnToolPoliCheckSeverity: Error
-
-- job: ExtractMetadata
-  displayName: Extract Metadata
-
-  condition: succeeded()
-  pool:
-    name: ${{ variables.ubuntu_pool }}
-  steps:
-  - task: Bash@3
-    displayName: 'Extract Version'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/get_version.sh
-
-
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: metadata'
-    inputs:
-      TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: metadata
-
-- job: VerifyLinuxRequirements
-  displayName: 'Verify src/azure-cli/requirements.*.Linux.txt'
-  condition: succeeded()
-  pool:
-    name: ${{ variables.ubuntu_pool }}
-
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
-    inputs:
-      versionSpec: 3.10
-
-  - bash: ./scripts/ci/dependency_check.sh
-    displayName: 'Verify src/azure-cli/requirements.py3.Linux.txt'
-
-- job: VerifyDarwinRequirements
-  displayName: 'Verify src/azure-cli/requirements.*.Darwin.txt'
-  condition: succeeded()
-  pool:
-    vmImage: 'macOS-12'
-
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
-    inputs:
-      versionSpec: 3.10
-
-  - bash: ./scripts/ci/dependency_check.sh
-    displayName: 'Verify src/azure-cli/requirements.py3.Darwin.txt'
-
-- job: VerifyWindowsRequirements
-  displayName: 'Verify src/azure-cli/requirements.*.Windows.txt'
-  condition: succeeded()
-  pool:
-    name: ${{ variables.windows_pool }}
-
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
-    inputs:
-      versionSpec: 3.10
-
-  - task: BatchScript@1
-    inputs:
-      filename: ./scripts/ci/dependency_check.bat
-    displayName: 'Verify src/azure-cli/requirements.py3.Windows.txt'
-
-- job: VerifyVersions
-  displayName: Verify Command Module Versions
-  condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/release'), eq(variables['System.PullRequest.TargetBranch'], 'release')))
-
-  pool:
-    name: ${{ variables.ubuntu_pool }}
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
-    inputs:
-      versionSpec: 3.10
-  - template: .azure-pipelines/templates/azdev_setup.yml
-  - bash: |
-      set -ev
-      . env/bin/activate
-      azdev verify history
-
-    displayName: 'Verify History'
-
-- job: BuildWindowsMSI
-  displayName: Build Windows MSI
-  strategy:
-    matrix:
-      x86:
-        Platform: x86
-      x64:
-        Platform: x64
-
-  dependsOn: ExtractMetadata
-  condition: succeeded()
-  pool:
-    name: ${{ variables.windows_pool }}
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-      artifactName: metadata
-
-
-  - script: |
-      set ARCH=$(Platform)
-      set /p CLI_VERSION=<$(System.ArtifactsDirectory)/metadata/version
-      set
-      
-      build_scripts/windows/scripts/build.cmd
-    displayName: 'Build Windows MSI'
-
-  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-    displayName: 'SBOM'
-    inputs:
-      BuildDropPath: 'build_scripts/windows/out/'
-
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: MSI'
-    inputs:
-      TargetPath: 'build_scripts/windows/out/'
-      ArtifactName: msi-$(Platform)
-
-- job: TestMsiInstallation
-  displayName: Test MSI Installation
-  strategy:
-    matrix:
-      x86:
-        Platform: x86
-      x64:
-        Platform: x64
-
-  dependsOn: BuildWindowsMSI
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
-  pool:
-    name: ${{ variables.windows_pool }}
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-      artifactName: metadata
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/msi'
-      artifactName: msi-$(Platform)
-
-  - task: PowerShell@2
-    displayName: Install and Load CLI
-    inputs:
-      filePath: build_scripts\windows\scripts\test_msi_installation.ps1
-
-- job: BuildDockerImage
-  displayName: Build Docker Image
-
-  dependsOn: ExtractMetadata
-  condition: succeeded()
-  strategy:
-    matrix:
-      AMD64:
-        pool: ${{ variables.ubuntu_pool }}
-        artifactName: docker-amd64
-      ARM64:
-        pool: ${{ variables.ubuntu_arm64_pool }}
-        artifactName: docker-arm64
-  pool:
-    name: $(pool)
-  steps:
-  - bash: ./scripts/ci/install_docker.sh
-    displayName: Install Docker
-  - task: Bash@3
-    displayName: 'Bash Script'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/docker/pipeline.sh
-
-  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-    displayName: 'SBOM'
-    inputs:
-      BuildDropPath: $(Build.ArtifactStagingDirectory)
-      DockerImagesToScan: 'clibuild$BUILD_BUILDNUMBER:latest'
-
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: docker image'
-    inputs:
-      TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: $(artifactName)
-
-- job: TestDockerImage
-  displayName: Test Docker Image
-
-  dependsOn: BuildDockerImage
-  condition: succeeded()
-  strategy:
-    matrix:
-      AMD64:
-        pool: ${{ variables.ubuntu_pool }}
-        artifactName: docker-amd64
-      ARM64:
-        pool: ${{ variables.ubuntu_arm64_pool }}
-        artifactName: docker-arm64
-  pool:
-    name: $(pool)
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Metadata'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-      artifactName: metadata
-
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Docker Image'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
-      artifactName: $(artifactName)
-
-  - bash: ./scripts/ci/install_docker.sh
-    displayName: Install Docker
-
-  - bash: |
-      set -exv
-      
-      CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
-      IMAGE_NAME=clibuild$BUILD_BUILDNUMBER:latest
-      TAR_FILE=$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-$CLI_VERSION.tar
-      
-      echo "== Test docker image =="
-      
-      docker load < $TAR_FILE
-      docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && sleep 5"
-    displayName: 'Bash Script'
-
-- job: BuildPythonWheel
-  displayName: Build Python Wheels
-
-  dependsOn: ExtractMetadata
-  condition: succeeded()
-  pool:
-    name: ${{ variables.ubuntu_pool }}
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
-    inputs:
-      versionSpec: 3.10
-
-
-  - script: |
-      if [[ "$(Build.Reason)" == "PullRequest" ]]; then
-        branch=$(System.PullRequest.TargetBranch)
-      else
-        branch=$(Build.SourceBranchName)
-      fi
-      scripts/release/pypi/build.sh $branch
-    displayName: 'Run Wheel Build Script'
-
-  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-    displayName: 'SBOM'
-    inputs:
-      BuildDropPath: $(Build.ArtifactStagingDirectory)
-
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: pypi'
-    inputs:
-      TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: pypi
-
-- job: TestPythonWheel
-  displayName: Test Python Wheels
-
-  dependsOn: BuildPythonWheel
-  condition: succeeded()
-  pool:
-    name: ${{ variables.ubuntu_pool }}
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Metadata'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-      artifactName: metadata
-
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download PyPI Packages'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-
-
-  - bash: |
-      #!/usr/bin/env bash
-      
-      # Verify the pip wheels
-      
-      set -ex
-      
-      CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
-      PYPI_FILES=$(cd $BUILD_ARTIFACTSTAGINGDIRECTORY/pypi; pwd)
-      
-      echo "== Testing pip install on Python 3.9 =="
-      docker run \
-        --rm -v $PYPI_FILES:/mnt/pypi python:3.9 \
-        /bin/bash -c "cd /mnt/pypi && ls && pip install --find-links ./ azure_cli-$CLI_VERSION*whl && az self-test && az --version && sleep 5"
-      
-      echo "== Testing pip install on Python 3.10 =="
-      docker run \
-        --rm -v $PYPI_FILES:/mnt/pypi python:3.10 \
-        /bin/bash -c "cd /mnt/pypi && ls && pip install --find-links ./ azure_cli-$CLI_VERSION*whl && az self-test && az --version && sleep 5"
-
-    displayName: 'Test pip Install'
-
-- job: TestCore
-  displayName: Unit Test for Core
-  timeoutInMinutes: 10
-  pool:
-    name: ${{ variables.ubuntu_pool }}
-  strategy:
-    matrix:
-      Python39:
-        python.version: '3.9'
-      Python310:
-        python.version: '3.10'
-  steps:
-  - template: .azure-pipelines/templates/automation_test.yml
-    parameters:
-      pythonVersion: '$(python.version)'
-      module: 'azure-cli-core'
-
-- job: TestTelemetry
-  displayName: Unit Test for Telemetry
-  timeoutInMinutes: 10
-  pool:
-    name: ${{ variables.ubuntu_pool }}
-  strategy:
-    matrix:
-      Python39:
-        python.version: '3.9'
-      Python310:
-        python.version: '3.10'
-  steps:
-  - template: .azure-pipelines/templates/automation_test.yml
-    parameters:
-      pythonVersion: '$(python.version)'
-      module: 'azure-cli-telemetry'
-
-- job: IntegrationTestAgainstProfiles
-  displayName: Integration Test against Profiles
-  dependsOn: BuildPythonWheel
-  condition: succeeded()
-  timeoutInMinutes: 20
-
-  pool:
-    name: ${{ variables.ubuntu_pool }}
-  strategy:
-    matrix:
-      Python39:
-        python.version: '3.9'
-      Python310:
-        python.version: '3.10'
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python $(python.version)'
-    inputs:
-      versionSpec: '$(python.version)'
-  - bash: pip install --upgrade pip wheel
-    displayName: 'Install pip and wheel'
-  - bash: ./scripts/ci/test_profile_integration.sh
-    displayName: 'Run Integration Test against Profiles'
-
-- job: TestExtensionsLoading
-  displayName: Test Extensions Loading
-  condition: succeeded()
-  timeoutInMinutes: 40
-
-  pool:
-    name: ${{ variables.ubuntu_pool }}
-  strategy:
-    matrix:
-      Python310:
-        python.version: '3.10'
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python $(python.version)'
-    inputs:
-      versionSpec: '$(python.version)'
-  - bash: pip install --upgrade pip wheel
-    displayName: 'Install pip and wheel'
-  - bash: ./scripts/ci/test_extensions.sh
-    displayName: 'Load extensions'
-
-- job: BuildHomebrewFormula
-  displayName: Build Homebrew Formula
-
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
-  pool:
-    name: ${{ variables.ubuntu_pool }}
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Metadata'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-      artifactName: metadata
-
-  - bash: |
-      #!/bin/bash
-      
-      root=$(cd $(dirname $0); pwd)
-      
-      set -evx
-      
-      CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
-      HOMEBREW_UPSTREAM_URL=`curl -Ls -o /dev/null -w %{url_effective} https://api.github.com/repos/Azure/azure-cli/tarball/$BUILD_SOURCEVERSION`
-      
-      docker_files=$(cd $BUILD_SOURCESDIRECTORY/scripts/release/homebrew/docker; pwd)
-      src_files=$(cd $BUILD_SOURCESDIRECTORY/src; pwd)
-      
-      echo "Generating formula in docker container ... "
-      docker run -v $docker_files:/mnt/scripts \
-                 -v $src_files:/mnt/src \
-                 -e CLI_VERSION=$CLI_VERSION \
-                 -e HOMEBREW_UPSTREAM_URL=$HOMEBREW_UPSTREAM_URL \
-                 --name azurecli \
-                 python:3.10 \
-                 /mnt/scripts/run.sh
-      
-      # clean up
-      rm -rf $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata
-      
-      docker cp azurecli:azure-cli.rb $BUILD_ARTIFACTSTAGINGDIRECTORY/azure-cli.rb
-      docker rm --force azurecli
-    displayName: 'Build homebrew formula'
-
-  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-    displayName: 'SBOM'
-    inputs:
-      BuildDropPath: $(Build.ArtifactStagingDirectory)
-
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: homebrew'
-    inputs:
-      TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: homebrew
-
-- job: TestHomebrewFormula
-  displayName: Test Homebrew Formula
-
-  dependsOn: BuildHomebrewFormula
-  condition: succeeded()
-  pool:
-    vmImage: 'macOS-12'
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Metadata'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-      artifactName: metadata
-
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Homebrew'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/homebrew'
-      artifactName: homebrew
-
-
-  - bash: |
-      set -ev
-      
-      echo == Remove pre-installed azure-cli ==
-      brew uninstall azure-cli
-      
-      echo == Install azure-cli.rb formula ==
-      brew install --build-from-source $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb
-      
-      echo == Az Version ==
-      az --version
-      
-      echo == Run Self-Test ==
-      az self-test
-
-    displayName: 'Bash Script'
-
-- job: TestHomebrewPackage
-  displayName: Test Homebrew Package
-  timeoutInMinutes: 180
-  dependsOn: BuildHomebrewFormula
-  # condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
-  condition: false
-  pool:
-    vmImage: 'macOS-12'
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Metadata'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-      artifactName: metadata
-
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/homebrew'
-      artifactName: homebrew
-
-
-  - bash: ./scripts/release/homebrew/test_homebrew_package.sh
-
-
-    displayName: 'Test Homebrew Package'
-
-
-- job: BuildRpmPackageMariner
-  displayName: Build Rpm Package Mariner
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
-  strategy:
-    matrix:
-      2.0 AMD64:
-        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-        artifact: rpm-mariner2.0-amd64
-        pool: ${{ variables.ubuntu_pool }}
-      2.0 ARM64:
-        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-        artifact: rpm-mariner2.0-arm64
-        pool: ${{ variables.ubuntu_arm64_pool }}
-  pool:
-    name: $(pool)
-  steps:
-  - bash: ./scripts/ci/install_docker.sh
-    displayName: Install Docker
-
-  - task: Bash@3
-    displayName: 'Build Rpm Package: Mariner'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/rpm/pipeline_mariner.sh
-
-  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-    displayName: 'SBOM'
-    inputs:
-      BuildDropPath: $(Build.ArtifactStagingDirectory)
-
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: rpm-mariner'
-    inputs:
-      TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: $(artifact)
-
-- job: TestRpmPackageMariner
-  displayName: Test Rpm Package Mariner
-  timeoutInMinutes: 120
-  dependsOn:
-  - BuildRpmPackageMariner
-  - ExtractMetadata
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
-  pool:
-    name: $(pool)
-  strategy:
-    matrix:
-      2.0 AMD64:
-        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-        artifact: rpm-mariner2.0-amd64
-        pool: ${{ variables.ubuntu_pool }}
-      2.0 ARM64:
-        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-        artifact: rpm-mariner2.0-arm64
-        pool: ${{ variables.ubuntu_arm64_pool }}
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Metadata'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-      artifactName: metadata
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/rpm'
-      artifactName: $(artifact)
-
-  - bash: ./scripts/ci/install_docker.sh
-    displayName: Install Docker
-
-  - bash: |
-      set -ex
-
-      CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
-      RPM_NAME=$(find $SYSTEM_ARTIFACTSDIRECTORY/rpm/ -type f -name "azure-cli-$CLI_VERSION-1.cm2.*.rpm" -printf '%f\n')
-
-      echo "== Test rpm package on ${IMAGE} =="
-      docker pull $IMAGE
-      docker run --rm -e RPM_NAME=$RPM_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_mariner_in_docker.sh"
-
-    displayName: 'Test Rpm Package Mariner'
-
-# TODO: rpmbuild on Red Hat UBI 8 is slow for unknown reason. Still working with Red Hat to investigate.
-- job: BuildRpmPackages
-  displayName: Build Rpm Packages
-  # Do not run this job for Pull Requests due to the slowness
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
-  pool:
-    name: $(pool)
-  strategy:
-    matrix:
-      ${{ each arch in parameters.architectures }}:
-        Red Hat Universal Base Image 8 ${{ arch.name }}:
-          dockerfile: ubi
-          image: registry.access.redhat.com/ubi8/ubi:8.4
-          artifact: rpm-ubi8-${{ arch.value }}
-          python_package: python39
-          pool: ${{ arch.pool }}
-        Red Hat Universal Base Image 9 ${{ arch.name }}:
-          dockerfile: ubi
-          image: registry.access.redhat.com/ubi9/ubi:9.0.0
-          artifact: rpm-ubi9-${{ arch.value }}
-          python_package: python3.9
-          pool: ${{ arch.pool }}
-        Fedora 36 ${{ arch.name }}:
-          dockerfile: fedora
-          image: fedora:36
-          artifact: rpm-fedora36-${{ arch.value }}
-          python_package: python3
-          pool: ${{ arch.pool }}
-  steps:
-  - bash: ./scripts/ci/install_docker.sh
-    displayName: Install Docker
-  - task: Bash@3
-    displayName: 'Build Rpm Package'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/rpm/pipeline.sh
-  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-    displayName: 'SBOM'
-    inputs:
-      BuildDropPath: $(Build.ArtifactStagingDirectory)
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: rpm'
-    inputs:
-      TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: $(artifact)
-
-
-- job: TestRpmPackage
-  displayName: Test Rpm Package
-  timeoutInMinutes: 120
-  dependsOn:
-    - BuildRpmPackages
-    - ExtractMetadata
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
-  pool:
-    name: $(pool)
-  strategy:
-    matrix:
-      ${{ each arch in parameters.architectures }}:
-        Red Hat Universal Base Image 8 ${{ arch.name }}:
-          artifact: rpm-ubi8-${{ arch.value }}
-          distro: el8
-          image: registry.access.redhat.com/ubi8/ubi:8.4
-          python_package: python39
-          python_cmd: python3.9
-          pip_cmd: pip3.9
-          pool: ${{ arch.pool }}
-        Red Hat Universal Base Image 9 ${{ arch.name }}:
-          artifact: rpm-ubi9-${{ arch.value }}
-          distro: el9
-          image: registry.access.redhat.com/ubi9/ubi:9.0.0
-          python_package: python3.9
-          python_cmd: python3.9
-          pip_cmd: pip3.9
-          pool: ${{ arch.pool }}
-        Fedora 36 ${{ arch.name }}:
-          artifact: rpm-fedora36-${{ arch.value }}
-          distro: fc36
-          image: fedora:36
-          python_package: python3
-          python_cmd: python3
-          pip_cmd: pip3
-          pool: ${{ arch.pool }}
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Metadata'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-      artifactName: metadata
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/rpm'
-      artifactName: $(artifact)
-
-  - bash: ./scripts/ci/install_docker.sh
-    displayName: Install Docker
-
-  - bash: |
-      set -ex
-      
-      CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
-      RPM_NAME=$(find $SYSTEM_ARTIFACTSDIRECTORY/rpm/ -type f -name "azure-cli-$CLI_VERSION-1.${DISTRO}.*.rpm" -printf '%f\n')
-      
-      echo "== Test rpm package on ${IMAGE} =="
-      docker pull $IMAGE
-      docker run --rm -e RPM_NAME=$RPM_NAME -e PYTHON_PACKAGE=${PYTHON_PACKAGE} -e PYTHON_CMD=${PYTHON_CMD} -e PIP_CMD=${PIP_CMD} -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_rpm_in_docker.sh"
-
-    displayName: 'Test Rpm Package'
+#- job: CheckPullRequest
+#  displayName: "Check the Format of Pull Request Title and Content"
+#  condition: and(succeeded(), in(variables['System.PullRequest.TargetBranch'], 'dev', 'release', 'main'))
+#
+#  pool:
+#    name: ${{ variables.ubuntu_pool }}
+#  steps:
+#  - bash: |
+#      echo "Check Title of Pull Request: #$(System.PullRequest.PullRequestNumber)"
+#      title=$(curl https://api.github.com/repos/$(Build.Repository.Name)/pulls/$(System.PullRequest.PullRequestNumber) | jq -r '.title')
+#      echo $title
+#      body=$(curl https://api.github.com/repos/$(Build.Repository.Name)/pulls/$(System.PullRequest.PullRequestNumber) | jq -r '.body')
+#      echo $body
+#      if [ "$(System.PullRequest.TargetBranch)" != "release" ] && echo $title | grep -iqF hotfix:; then
+#        echo "Hotfix PR should target release branch."
+#        exit 1
+#      fi
+#      if [ "$(System.PullRequest.TargetBranch)" == "main" ]; then
+#        echo "Feature PR should target dev branch."
+#        exit 1
+#      fi
+#      python scripts/ci/check_pull_request.py "$title" "$body"
+#
+#- job: RejectPullRequestToMasterBranch
+#  displayName: "Reject Pull Request To Master Branch"
+#  condition: and(succeeded(), eq(variables['System.PullRequest.TargetBranch'], 'master'))
+#
+#  pool:
+#    name: ${{ variables.ubuntu_pool }}
+#  steps:
+#  - bash: |
+#      echo "Reject pull request directly to master branch"
+#      exit 1
+#
+#- job: CredentialScanner
+#  displayName: "Credential Scanner"
+#  pool:
+#    name: ${{ variables.windows_pool }}
+#  steps:
+#  - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-credscan.CredScan@2
+#    displayName: 'Run Credential Scanner'
+#    inputs:
+#      toolMajorVersion: V2
+#      suppressionsFile: './scripts/ci/credscan/CredScanSuppressions.json'
+#      toolVersionV2: '2.1.17'
+#
+#  - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-postanalysis.PostAnalysis@1
+#    displayName: 'Post Analysis'
+#    inputs:
+#      AllTools: false
+#      BinSkim: false
+#      CredScan: true
+#      PoliCheck: false
+#      RoslynAnalyzers: false
+#      TSLint: false
+#      ToolLogsNotFoundAction: 'Standard'
+#
+#- job: PolicyCheck
+#  displayName: "Policy Check"
+#  pool:
+#    name: ${{ variables.windows_pool }}
+#  steps:
+#  - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@2
+#    displayName: 'Run Policy Check'
+#    inputs:
+#      targetType: F
+#      result: PoliCheckResult.xml
+#
+#  - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@2
+#    displayName: 'Post Analysis'
+#    inputs:
+#      GdnBreakAllTools: false
+#      GdnBreakGdnToolPoliCheck: true
+#      GdnBreakGdnToolPoliCheckSeverity: Error
+#
+#- job: ExtractMetadata
+#  displayName: Extract Metadata
+#
+#  condition: succeeded()
+#  pool:
+#    name: ${{ variables.ubuntu_pool }}
+#  steps:
+#  - task: Bash@3
+#    displayName: 'Extract Version'
+#    inputs:
+#      targetType: 'filePath'
+#      filePath: scripts/release/get_version.sh
+#
+#
+#  - task: PublishPipelineArtifact@0
+#    displayName: 'Publish Artifact: metadata'
+#    inputs:
+#      TargetPath: $(Build.ArtifactStagingDirectory)
+#      ArtifactName: metadata
+#
+#- job: VerifyLinuxRequirements
+#  displayName: 'Verify src/azure-cli/requirements.*.Linux.txt'
+#  condition: succeeded()
+#  pool:
+#    name: ${{ variables.ubuntu_pool }}
+#
+#  steps:
+#  - task: UsePythonVersion@0
+#    displayName: 'Use Python 3.10'
+#    inputs:
+#      versionSpec: 3.10
+#
+#  - bash: ./scripts/ci/dependency_check.sh
+#    displayName: 'Verify src/azure-cli/requirements.py3.Linux.txt'
+#
+#- job: VerifyDarwinRequirements
+#  displayName: 'Verify src/azure-cli/requirements.*.Darwin.txt'
+#  condition: succeeded()
+#  pool:
+#    vmImage: 'macOS-12'
+#
+#  steps:
+#  - task: UsePythonVersion@0
+#    displayName: 'Use Python 3.10'
+#    inputs:
+#      versionSpec: 3.10
+#
+#  - bash: ./scripts/ci/dependency_check.sh
+#    displayName: 'Verify src/azure-cli/requirements.py3.Darwin.txt'
+#
+#- job: VerifyWindowsRequirements
+#  displayName: 'Verify src/azure-cli/requirements.*.Windows.txt'
+#  condition: succeeded()
+#  pool:
+#    name: ${{ variables.windows_pool }}
+#
+#  steps:
+#  - task: UsePythonVersion@0
+#    displayName: 'Use Python 3.10'
+#    inputs:
+#      versionSpec: 3.10
+#
+#  - task: BatchScript@1
+#    inputs:
+#      filename: ./scripts/ci/dependency_check.bat
+#    displayName: 'Verify src/azure-cli/requirements.py3.Windows.txt'
+#
+#- job: VerifyVersions
+#  displayName: Verify Command Module Versions
+#  condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/release'), eq(variables['System.PullRequest.TargetBranch'], 'release')))
+#
+#  pool:
+#    name: ${{ variables.ubuntu_pool }}
+#  steps:
+#  - task: UsePythonVersion@0
+#    displayName: 'Use Python 3.10'
+#    inputs:
+#      versionSpec: 3.10
+#  - template: .azure-pipelines/templates/azdev_setup.yml
+#  - bash: |
+#      set -ev
+#      . env/bin/activate
+#      azdev verify history
+#
+#    displayName: 'Verify History'
+#
+#- job: BuildWindowsMSI
+#  displayName: Build Windows MSI
+#  strategy:
+#    matrix:
+#      x86:
+#        Platform: x86
+#      x64:
+#        Platform: x64
+#
+#  dependsOn: ExtractMetadata
+#  condition: succeeded()
+#  pool:
+#    name: ${{ variables.windows_pool }}
+#  steps:
+#  - task: DownloadPipelineArtifact@1
+#    displayName: 'Download Build Artifacts'
+#    inputs:
+#      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+#      artifactName: metadata
+#
+#
+#  - script: |
+#      set ARCH=$(Platform)
+#      set /p CLI_VERSION=<$(System.ArtifactsDirectory)/metadata/version
+#      set
+#
+#      build_scripts/windows/scripts/build.cmd
+#    displayName: 'Build Windows MSI'
+#
+#  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+#    displayName: 'SBOM'
+#    inputs:
+#      BuildDropPath: 'build_scripts/windows/out/'
+#
+#  - task: PublishPipelineArtifact@0
+#    displayName: 'Publish Artifact: MSI'
+#    inputs:
+#      TargetPath: 'build_scripts/windows/out/'
+#      ArtifactName: msi-$(Platform)
+#
+#- job: TestMsiInstallation
+#  displayName: Test MSI Installation
+#  strategy:
+#    matrix:
+#      x86:
+#        Platform: x86
+#      x64:
+#        Platform: x64
+#
+#  dependsOn: BuildWindowsMSI
+#  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
+#  pool:
+#    name: ${{ variables.windows_pool }}
+#  steps:
+#  - task: DownloadPipelineArtifact@1
+#    displayName: 'Download Build Artifacts'
+#    inputs:
+#      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+#      artifactName: metadata
+#
+#  - task: DownloadPipelineArtifact@1
+#    displayName: 'Download Build Artifacts'
+#    inputs:
+#      TargetPath: '$(Build.ArtifactStagingDirectory)/msi'
+#      artifactName: msi-$(Platform)
+#
+#  - task: PowerShell@2
+#    displayName: Install and Load CLI
+#    inputs:
+#      filePath: build_scripts\windows\scripts\test_msi_installation.ps1
+#
+#- job: BuildDockerImage
+#  displayName: Build Docker Image
+#
+#  dependsOn: ExtractMetadata
+#  condition: succeeded()
+#  strategy:
+#    matrix:
+#      AMD64:
+#        pool: ${{ variables.ubuntu_pool }}
+#        artifactName: docker-amd64
+#      ARM64:
+#        pool: ${{ variables.ubuntu_arm64_pool }}
+#        artifactName: docker-arm64
+#  pool:
+#    name: $(pool)
+#  steps:
+#  - bash: ./scripts/ci/install_docker.sh
+#    displayName: Install Docker
+#  - task: Bash@3
+#    displayName: 'Bash Script'
+#    inputs:
+#      targetType: 'filePath'
+#      filePath: scripts/release/docker/pipeline.sh
+#
+#  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+#    displayName: 'SBOM'
+#    inputs:
+#      BuildDropPath: $(Build.ArtifactStagingDirectory)
+#      DockerImagesToScan: 'clibuild$BUILD_BUILDNUMBER:latest'
+#
+#  - task: PublishPipelineArtifact@0
+#    displayName: 'Publish Artifact: docker image'
+#    inputs:
+#      TargetPath: $(Build.ArtifactStagingDirectory)
+#      ArtifactName: $(artifactName)
+#
+#- job: TestDockerImage
+#  displayName: Test Docker Image
+#
+#  dependsOn: BuildDockerImage
+#  condition: succeeded()
+#  strategy:
+#    matrix:
+#      AMD64:
+#        pool: ${{ variables.ubuntu_pool }}
+#        artifactName: docker-amd64
+#      ARM64:
+#        pool: ${{ variables.ubuntu_arm64_pool }}
+#        artifactName: docker-arm64
+#  pool:
+#    name: $(pool)
+#  steps:
+#  - task: DownloadPipelineArtifact@1
+#    displayName: 'Download Metadata'
+#    inputs:
+#      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+#      artifactName: metadata
+#
+#
+#  - task: DownloadPipelineArtifact@1
+#    displayName: 'Download Docker Image'
+#    inputs:
+#      TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
+#      artifactName: $(artifactName)
+#
+#  - bash: ./scripts/ci/install_docker.sh
+#    displayName: Install Docker
+#
+#  - bash: |
+#      set -exv
+#
+#      CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
+#      IMAGE_NAME=clibuild$BUILD_BUILDNUMBER:latest
+#      TAR_FILE=$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-$CLI_VERSION.tar
+#
+#      echo "== Test docker image =="
+#
+#      docker load < $TAR_FILE
+#      docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && sleep 5"
+#    displayName: 'Bash Script'
+#
+#- job: BuildPythonWheel
+#  displayName: Build Python Wheels
+#
+#  dependsOn: ExtractMetadata
+#  condition: succeeded()
+#  pool:
+#    name: ${{ variables.ubuntu_pool }}
+#  steps:
+#  - task: UsePythonVersion@0
+#    displayName: 'Use Python 3.10'
+#    inputs:
+#      versionSpec: 3.10
+#
+#
+#  - script: |
+#      if [[ "$(Build.Reason)" == "PullRequest" ]]; then
+#        branch=$(System.PullRequest.TargetBranch)
+#      else
+#        branch=$(Build.SourceBranchName)
+#      fi
+#      scripts/release/pypi/build.sh $branch
+#    displayName: 'Run Wheel Build Script'
+#
+#  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+#    displayName: 'SBOM'
+#    inputs:
+#      BuildDropPath: $(Build.ArtifactStagingDirectory)
+#
+#  - task: PublishPipelineArtifact@0
+#    displayName: 'Publish Artifact: pypi'
+#    inputs:
+#      TargetPath: $(Build.ArtifactStagingDirectory)
+#      ArtifactName: pypi
+#
+#- job: TestPythonWheel
+#  displayName: Test Python Wheels
+#
+#  dependsOn: BuildPythonWheel
+#  condition: succeeded()
+#  pool:
+#    name: ${{ variables.ubuntu_pool }}
+#  steps:
+#  - task: DownloadPipelineArtifact@1
+#    displayName: 'Download Metadata'
+#    inputs:
+#      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+#      artifactName: metadata
+#
+#
+#  - task: DownloadPipelineArtifact@1
+#    displayName: 'Download PyPI Packages'
+#    inputs:
+#      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
+#      artifactName: pypi
+#
+#
+#  - bash: |
+#      #!/usr/bin/env bash
+#
+#      # Verify the pip wheels
+#
+#      set -ex
+#
+#      CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
+#      PYPI_FILES=$(cd $BUILD_ARTIFACTSTAGINGDIRECTORY/pypi; pwd)
+#
+#      echo "== Testing pip install on Python 3.9 =="
+#      docker run \
+#        --rm -v $PYPI_FILES:/mnt/pypi python:3.9 \
+#        /bin/bash -c "cd /mnt/pypi && ls && pip install --find-links ./ azure_cli-$CLI_VERSION*whl && az self-test && az --version && sleep 5"
+#
+#      echo "== Testing pip install on Python 3.10 =="
+#      docker run \
+#        --rm -v $PYPI_FILES:/mnt/pypi python:3.10 \
+#        /bin/bash -c "cd /mnt/pypi && ls && pip install --find-links ./ azure_cli-$CLI_VERSION*whl && az self-test && az --version && sleep 5"
+#
+#    displayName: 'Test pip Install'
+#
+#- job: TestCore
+#  displayName: Unit Test for Core
+#  timeoutInMinutes: 10
+#  pool:
+#    name: ${{ variables.ubuntu_pool }}
+#  strategy:
+#    matrix:
+#      Python39:
+#        python.version: '3.9'
+#      Python310:
+#        python.version: '3.10'
+#  steps:
+#  - template: .azure-pipelines/templates/automation_test.yml
+#    parameters:
+#      pythonVersion: '$(python.version)'
+#      module: 'azure-cli-core'
+#
+#- job: TestTelemetry
+#  displayName: Unit Test for Telemetry
+#  timeoutInMinutes: 10
+#  pool:
+#    name: ${{ variables.ubuntu_pool }}
+#  strategy:
+#    matrix:
+#      Python39:
+#        python.version: '3.9'
+#      Python310:
+#        python.version: '3.10'
+#  steps:
+#  - template: .azure-pipelines/templates/automation_test.yml
+#    parameters:
+#      pythonVersion: '$(python.version)'
+#      module: 'azure-cli-telemetry'
+#
+#- job: IntegrationTestAgainstProfiles
+#  displayName: Integration Test against Profiles
+#  dependsOn: BuildPythonWheel
+#  condition: succeeded()
+#  timeoutInMinutes: 20
+#
+#  pool:
+#    name: ${{ variables.ubuntu_pool }}
+#  strategy:
+#    matrix:
+#      Python39:
+#        python.version: '3.9'
+#      Python310:
+#        python.version: '3.10'
+#  steps:
+#  - task: UsePythonVersion@0
+#    displayName: 'Use Python $(python.version)'
+#    inputs:
+#      versionSpec: '$(python.version)'
+#  - bash: pip install --upgrade pip wheel
+#    displayName: 'Install pip and wheel'
+#  - bash: ./scripts/ci/test_profile_integration.sh
+#    displayName: 'Run Integration Test against Profiles'
+#
+#- job: TestExtensionsLoading
+#  displayName: Test Extensions Loading
+#  condition: succeeded()
+#  timeoutInMinutes: 40
+#
+#  pool:
+#    name: ${{ variables.ubuntu_pool }}
+#  strategy:
+#    matrix:
+#      Python310:
+#        python.version: '3.10'
+#  steps:
+#  - task: UsePythonVersion@0
+#    displayName: 'Use Python $(python.version)'
+#    inputs:
+#      versionSpec: '$(python.version)'
+#  - bash: pip install --upgrade pip wheel
+#    displayName: 'Install pip and wheel'
+#  - bash: ./scripts/ci/test_extensions.sh
+#    displayName: 'Load extensions'
+#
+#- job: BuildHomebrewFormula
+#  displayName: Build Homebrew Formula
+#
+#  dependsOn: BuildPythonWheel
+#  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
+#  pool:
+#    name: ${{ variables.ubuntu_pool }}
+#  steps:
+#  - task: DownloadPipelineArtifact@1
+#    displayName: 'Download Metadata'
+#    inputs:
+#      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+#      artifactName: metadata
+#
+#  - bash: |
+#      #!/bin/bash
+#
+#      root=$(cd $(dirname $0); pwd)
+#
+#      set -evx
+#
+#      CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
+#      HOMEBREW_UPSTREAM_URL=`curl -Ls -o /dev/null -w %{url_effective} https://api.github.com/repos/Azure/azure-cli/tarball/$BUILD_SOURCEVERSION`
+#
+#      docker_files=$(cd $BUILD_SOURCESDIRECTORY/scripts/release/homebrew/docker; pwd)
+#      src_files=$(cd $BUILD_SOURCESDIRECTORY/src; pwd)
+#
+#      echo "Generating formula in docker container ... "
+#      docker run -v $docker_files:/mnt/scripts \
+#                 -v $src_files:/mnt/src \
+#                 -e CLI_VERSION=$CLI_VERSION \
+#                 -e HOMEBREW_UPSTREAM_URL=$HOMEBREW_UPSTREAM_URL \
+#                 --name azurecli \
+#                 python:3.10 \
+#                 /mnt/scripts/run.sh
+#
+#      # clean up
+#      rm -rf $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata
+#
+#      docker cp azurecli:azure-cli.rb $BUILD_ARTIFACTSTAGINGDIRECTORY/azure-cli.rb
+#      docker rm --force azurecli
+#    displayName: 'Build homebrew formula'
+#
+#  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+#    displayName: 'SBOM'
+#    inputs:
+#      BuildDropPath: $(Build.ArtifactStagingDirectory)
+#
+#  - task: PublishPipelineArtifact@0
+#    displayName: 'Publish Artifact: homebrew'
+#    inputs:
+#      TargetPath: $(Build.ArtifactStagingDirectory)
+#      ArtifactName: homebrew
+#
+#- job: TestHomebrewFormula
+#  displayName: Test Homebrew Formula
+#
+#  dependsOn: BuildHomebrewFormula
+#  condition: succeeded()
+#  pool:
+#    vmImage: 'macOS-12'
+#  steps:
+#  - task: DownloadPipelineArtifact@1
+#    displayName: 'Download Metadata'
+#    inputs:
+#      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+#      artifactName: metadata
+#
+#
+#  - task: DownloadPipelineArtifact@1
+#    displayName: 'Download Homebrew'
+#    inputs:
+#      TargetPath: '$(Build.ArtifactStagingDirectory)/homebrew'
+#      artifactName: homebrew
+#
+#
+#  - bash: |
+#      set -ev
+#
+#      echo == Remove pre-installed azure-cli ==
+#      brew uninstall azure-cli
+#
+#      echo == Install azure-cli.rb formula ==
+#      brew install --build-from-source $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb
+#
+#      echo == Az Version ==
+#      az --version
+#
+#      echo == Run Self-Test ==
+#      az self-test
+#
+#    displayName: 'Bash Script'
+#
+#- job: TestHomebrewPackage
+#  displayName: Test Homebrew Package
+#  timeoutInMinutes: 180
+#  dependsOn: BuildHomebrewFormula
+#  # condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
+#  condition: false
+#  pool:
+#    vmImage: 'macOS-12'
+#  steps:
+#  - task: DownloadPipelineArtifact@1
+#    displayName: 'Download Metadata'
+#    inputs:
+#      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+#      artifactName: metadata
+#
+#
+#  - task: DownloadPipelineArtifact@1
+#    displayName: 'Download Build Artifacts'
+#    inputs:
+#      TargetPath: '$(Build.ArtifactStagingDirectory)/homebrew'
+#      artifactName: homebrew
+#
+#
+#  - bash: ./scripts/release/homebrew/test_homebrew_package.sh
+#
+#
+#    displayName: 'Test Homebrew Package'
+#
+#
+#- job: BuildRpmPackageMariner
+#  displayName: Build Rpm Package Mariner
+#  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
+#  strategy:
+#    matrix:
+#      2.0 AMD64:
+#        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
+#        artifact: rpm-mariner2.0-amd64
+#        pool: ${{ variables.ubuntu_pool }}
+#      2.0 ARM64:
+#        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
+#        artifact: rpm-mariner2.0-arm64
+#        pool: ${{ variables.ubuntu_arm64_pool }}
+#  pool:
+#    name: $(pool)
+#  steps:
+#  - bash: ./scripts/ci/install_docker.sh
+#    displayName: Install Docker
+#
+#  - task: Bash@3
+#    displayName: 'Build Rpm Package: Mariner'
+#    inputs:
+#      targetType: 'filePath'
+#      filePath: scripts/release/rpm/pipeline_mariner.sh
+#
+#  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+#    displayName: 'SBOM'
+#    inputs:
+#      BuildDropPath: $(Build.ArtifactStagingDirectory)
+#
+#  - task: PublishPipelineArtifact@0
+#    displayName: 'Publish Artifact: rpm-mariner'
+#    inputs:
+#      TargetPath: $(Build.ArtifactStagingDirectory)
+#      ArtifactName: $(artifact)
+#
+#- job: TestRpmPackageMariner
+#  displayName: Test Rpm Package Mariner
+#  timeoutInMinutes: 120
+#  dependsOn:
+#  - BuildRpmPackageMariner
+#  - ExtractMetadata
+#  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
+#  pool:
+#    name: $(pool)
+#  strategy:
+#    matrix:
+#      2.0 AMD64:
+#        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
+#        artifact: rpm-mariner2.0-amd64
+#        pool: ${{ variables.ubuntu_pool }}
+#      2.0 ARM64:
+#        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
+#        artifact: rpm-mariner2.0-arm64
+#        pool: ${{ variables.ubuntu_arm64_pool }}
+#  steps:
+#  - task: DownloadPipelineArtifact@1
+#    displayName: 'Download Metadata'
+#    inputs:
+#      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+#      artifactName: metadata
+#
+#  - task: DownloadPipelineArtifact@1
+#    displayName: 'Download Build Artifacts'
+#    inputs:
+#      TargetPath: '$(Build.ArtifactStagingDirectory)/rpm'
+#      artifactName: $(artifact)
+#
+#  - bash: ./scripts/ci/install_docker.sh
+#    displayName: Install Docker
+#
+#  - bash: |
+#      set -ex
+#
+#      CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
+#      RPM_NAME=$(find $SYSTEM_ARTIFACTSDIRECTORY/rpm/ -type f -name "azure-cli-$CLI_VERSION-1.cm2.*.rpm" -printf '%f\n')
+#
+#      echo "== Test rpm package on ${IMAGE} =="
+#      docker pull $IMAGE
+#      docker run --rm -e RPM_NAME=$RPM_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_mariner_in_docker.sh"
+#
+#    displayName: 'Test Rpm Package Mariner'
+#
+## TODO: rpmbuild on Red Hat UBI 8 is slow for unknown reason. Still working with Red Hat to investigate.
+#- job: BuildRpmPackages
+#  displayName: Build Rpm Packages
+#  # Do not run this job for Pull Requests due to the slowness
+#  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
+#  pool:
+#    name: $(pool)
+#  strategy:
+#    matrix:
+#      ${{ each arch in parameters.architectures }}:
+#        Red Hat Universal Base Image 8 ${{ arch.name }}:
+#          dockerfile: ubi
+#          image: registry.access.redhat.com/ubi8/ubi:8.4
+#          artifact: rpm-ubi8-${{ arch.value }}
+#          python_package: python39
+#          pool: ${{ arch.pool }}
+#        Red Hat Universal Base Image 9 ${{ arch.name }}:
+#          dockerfile: ubi
+#          image: registry.access.redhat.com/ubi9/ubi:9.0.0
+#          artifact: rpm-ubi9-${{ arch.value }}
+#          python_package: python3.9
+#          pool: ${{ arch.pool }}
+#        Fedora 36 ${{ arch.name }}:
+#          dockerfile: fedora
+#          image: fedora:36
+#          artifact: rpm-fedora36-${{ arch.value }}
+#          python_package: python3
+#          pool: ${{ arch.pool }}
+#  steps:
+#  - bash: ./scripts/ci/install_docker.sh
+#    displayName: Install Docker
+#  - task: Bash@3
+#    displayName: 'Build Rpm Package'
+#    inputs:
+#      targetType: 'filePath'
+#      filePath: scripts/release/rpm/pipeline.sh
+#  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+#    displayName: 'SBOM'
+#    inputs:
+#      BuildDropPath: $(Build.ArtifactStagingDirectory)
+#  - task: PublishPipelineArtifact@0
+#    displayName: 'Publish Artifact: rpm'
+#    inputs:
+#      TargetPath: $(Build.ArtifactStagingDirectory)
+#      ArtifactName: $(artifact)
+#
+#
+#- job: TestRpmPackage
+#  displayName: Test Rpm Package
+#  timeoutInMinutes: 120
+#  dependsOn:
+#    - BuildRpmPackages
+#    - ExtractMetadata
+#  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
+#  pool:
+#    name: $(pool)
+#  strategy:
+#    matrix:
+#      ${{ each arch in parameters.architectures }}:
+#        Red Hat Universal Base Image 8 ${{ arch.name }}:
+#          artifact: rpm-ubi8-${{ arch.value }}
+#          distro: el8
+#          image: registry.access.redhat.com/ubi8/ubi:8.4
+#          python_package: python39
+#          python_cmd: python3.9
+#          pip_cmd: pip3.9
+#          pool: ${{ arch.pool }}
+#        Red Hat Universal Base Image 9 ${{ arch.name }}:
+#          artifact: rpm-ubi9-${{ arch.value }}
+#          distro: el9
+#          image: registry.access.redhat.com/ubi9/ubi:9.0.0
+#          python_package: python3.9
+#          python_cmd: python3.9
+#          pip_cmd: pip3.9
+#          pool: ${{ arch.pool }}
+#        Fedora 36 ${{ arch.name }}:
+#          artifact: rpm-fedora36-${{ arch.value }}
+#          distro: fc36
+#          image: fedora:36
+#          python_package: python3
+#          python_cmd: python3
+#          pip_cmd: pip3
+#          pool: ${{ arch.pool }}
+#  steps:
+#  - task: DownloadPipelineArtifact@1
+#    displayName: 'Download Metadata'
+#    inputs:
+#      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+#      artifactName: metadata
+#
+#  - task: DownloadPipelineArtifact@1
+#    displayName: 'Download Build Artifacts'
+#    inputs:
+#      TargetPath: '$(Build.ArtifactStagingDirectory)/rpm'
+#      artifactName: $(artifact)
+#
+#  - bash: ./scripts/ci/install_docker.sh
+#    displayName: Install Docker
+#
+#  - bash: |
+#      set -ex
+#
+#      CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
+#      RPM_NAME=$(find $SYSTEM_ARTIFACTSDIRECTORY/rpm/ -type f -name "azure-cli-$CLI_VERSION-1.${DISTRO}.*.rpm" -printf '%f\n')
+#
+#      echo "== Test rpm package on ${IMAGE} =="
+#      docker pull $IMAGE
+#      docker run --rm -e RPM_NAME=$RPM_NAME -e PYTHON_PACKAGE=${PYTHON_PACKAGE} -e PYTHON_CMD=${PYTHON_CMD} -e PIP_CMD=${PIP_CMD} -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_rpm_in_docker.sh"
+#
+#    displayName: 'Test Rpm Package'
 
 - job: BuildDebPackages
   displayName: Build Deb Packages
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
+#  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     name: $(pool)
   strategy:
@@ -887,7 +887,7 @@ jobs:
   displayName: Test Deb Packages
   dependsOn:
   - BuildDebPackages
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
+#  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
@@ -947,202 +947,202 @@ jobs:
         docker pull ${DISTRO_BASE_IMAGE}
         docker run --rm -e DISTRO=${DISTRO} -e CLI_VERSION=$CLI_VERSION -v $SYSTEM_ARTIFACTSDIRECTORY/debian:/mnt/artifacts -v $(pwd):/azure-cli ${DISTRO_BASE_IMAGE} /bin/bash "/azure-cli/scripts/release/debian/test_deb_in_docker.sh"
 
-- job: CheckStyle
-  displayName: "Check CLI Style"
-  timeoutInMinutes: 120
-  pool:
-    name: ${{ variables.ubuntu_pool }}
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
-    inputs:
-      versionSpec: 3.10
-  - template: .azure-pipelines/templates/azdev_setup.yml
-  - bash: |
-      set -ev
-      . env/bin/activate
-      azdev style
-
-- job: CheckHeaders
-  displayName: "Check License, History, and DocMap"
-
-  pool:
-    name: ${{ variables.ubuntu_pool }}
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
-    inputs:
-      versionSpec: 3.10
-  - template: .azure-pipelines/templates/azdev_setup.yml
-  - bash: |
-      set -ev
-      . env/bin/activate
-      azdev verify license
-      azdev verify history
-      azdev verify document-map
-
-- job: PerformanceCheck
-  displayName: "PerformanceCheck"
-  strategy:
-    matrix:
-      Python39:
-        python.version: '3.9'
-      Python310:
-        python.version: '3.10'
-  pool:
-    name: ${{ variables.ubuntu_pool }}
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python $(python.version)'
-    inputs:
-      versionSpec: '$(python.version)'
-  - template: .azure-pipelines/templates/azdev_setup.yml
-  - bash: |
-      set -ev
-      . env/bin/activate
-      azdev perf load-times
-    displayName: "Load Performance"
-  # - bash: |
-  #     set -ev
-  #     . env/bin/activate
-
-  #     azdev perf benchmark "version" "network vnet -h" "rest -h" "storage account"
-  #   displayName: "Execution Performance"
-
-- job: CheckLinter
-  displayName: "Check CLI Linter"
-
-  pool:
-    name: ${{ variables.ubuntu_pool }}
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
-    inputs:
-      versionSpec: 3.10
-  - template: .azure-pipelines/templates/azdev_setup.yml
-  - bash: |
-      set -ev
-      . env/bin/activate
-      python scripts/ci/service_name.py
-      if [[ "$(System.PullRequest.TargetBranch)" != "" ]]; then
-        # If CI is set to shallow fetch, target branch should be expilictly fetched.
-        git fetch origin --depth=1 $(System.PullRequest.TargetBranch)
-        azdev linter --ci-exclusions --min-severity medium --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch)
-      else
-        azdev linter --ci-exclusions --min-severity medium
-      fi
-
-- job: CodegenCoverage
-  condition: and(succeededOrFailed(), in(variables['Build.Reason'], 'BatchedCI'))
-  displayName: "Codegen Coverage"
-  pool:
-    name: ${{ variables.ubuntu_pool }}
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
-    inputs:
-      versionSpec: 3.10
-  - template: .azure-pipelines/templates/azdev_setup.yml
-  - bash: |
-      set -ev
-      . env/bin/activate
-      # clone azure-cli-extensions
-      cd ..
-      git clone --depth 1 -b main https://github.com/Azure/azure-cli-extensions.git ./azure-cli-extensions
-      azdev extension repo add ./azure-cli-extensions
-      azdev extension add "*"
-      # Some extension will change the dependence, so run `azdev setup` again after all extensions installed.
-      azdev setup -c $CLI_REPO_PATH -r ./azure-cli-extensions
-      # CLI repo only
-      azdev statistics list-command-table CLI --statistics-only
-      # CLI + EXT repos
-      azdev statistics list-command-table --statistics-only > /tmp/codegen_report.json
-      # azure-kusto is not compatible with azure-cli
-      # so we need run azdev statistics before installing azure-kusto to avoid the error `No module named azure.cli`
-      pip install azure-kusto-data azure-kusto-ingest
-      python s/scripts/ci/codegen_report.py
-    env:
-      BUILD_ID: $(Build.BuildId)
-      BUILD_BRANCH: $(Build.SourceBranchName)
-      KUSTO_CLIENT_ID: $(KUSTO_CLIENT_ID)
-      KUSTO_CLIENT_SECRET: $(KUSTO_CLIENT_SECRET)
-      KUSTO_CLUSTER: $(KUSTO_CLUSTER)
-      KUSTO_DATABASE: $(KUSTO_DATABASE)
-      KUSTO_TABLE: $(KUSTO_TABLE)
-      KUSTO_TENANT_ID: $(KUSTO_TENANT_ID)
-
-- job: VerifySphinxDocumentGenerator
-  displayName: "Verify Sphinx Document Generator"
-  pool:
-    name: ${{ variables.ubuntu_pool }}
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
-    inputs:
-      versionSpec: 3.10
-  - bash: pip install --upgrade pip wheel
-    displayName: "Install pip and wheel"
-  - bash: ./scripts/ci/test_ref_doc.sh
-    displayName: "Verify Sphinx Document Generator"
-
-- job: NotifyCIErrors
-  dependsOn:
-    - CheckPullRequest
-    - RejectPullRequestToMasterBranch
-    - CredentialScanner
-    - PolicyCheck
-    - ExtractMetadata
-    - VerifyLinuxRequirements
-    - VerifyDarwinRequirements
-    - VerifyWindowsRequirements
-    - VerifyVersions
-    - BuildWindowsMSI
-    - TestMsiInstallation
-    - BuildDockerImage
-    - TestDockerImage
-    - BuildPythonWheel
-    - TestPythonWheel
-    - TestCore
-    - TestTelemetry
-    - IntegrationTestAgainstProfiles
-    - TestExtensionsLoading
-    - BuildHomebrewFormula
-    - TestHomebrewFormula
-    - TestHomebrewPackage
-    - BuildRpmPackageMariner
-    - BuildRpmPackages
-    - TestRpmPackage
-    - BuildDebPackages
-    - TestDebPackages
-    - CheckStyle
-    - CheckHeaders
-    - PerformanceCheck
-    - CheckLinter
-    - CodegenCoverage
-    - VerifySphinxDocumentGenerator
-  condition: and(failed(), in(variables['Build.Reason'], 'BatchedCI'))
-  displayName: Notify CI Errors
-  pool:
-    name: ${{ variables.ubuntu_pool }}
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
-    inputs:
-      versionSpec: 3.10
-  - task: AzureCLI@2
-    inputs:
-      azureSubscription: 'Azure CLI'
-      scriptType: 'bash'
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        pip install requests
-        teams_api_url=$(az keyvault secret show --vault-name $(TEAMS_BOT_VAULT_NAME) --name $(TEAMS_BOT_API_URL_SECRET_NAME) --query value -otsv)
-        teams_api_key=$(az keyvault secret show --vault-name $(TEAMS_BOT_VAULT_NAME) --name $(TEAMS_BOT_API_KEY_SECRET_NAME) --query value -otsv)
-        echo "If any task fails, notify to teams channel"
-        python scripts/ci/notify_ci_errors.py $teams_api_url $teams_api_key $(TEAMS_CHANNEL_ID)
-    displayName: 'Notify To Teams Channel'
-    env:
-      BASE_URI: $(System.CollectionUri)
-      PROJECT_TYPE: $(System.TeamProject)
-      BUILD_ID: $(Build.BuildId)
-      JOB_ID: $(System.JobId)
+#- job: CheckStyle
+#  displayName: "Check CLI Style"
+#  timeoutInMinutes: 120
+#  pool:
+#    name: ${{ variables.ubuntu_pool }}
+#  steps:
+#  - task: UsePythonVersion@0
+#    displayName: 'Use Python 3.10'
+#    inputs:
+#      versionSpec: 3.10
+#  - template: .azure-pipelines/templates/azdev_setup.yml
+#  - bash: |
+#      set -ev
+#      . env/bin/activate
+#      azdev style
+#
+#- job: CheckHeaders
+#  displayName: "Check License, History, and DocMap"
+#
+#  pool:
+#    name: ${{ variables.ubuntu_pool }}
+#  steps:
+#  - task: UsePythonVersion@0
+#    displayName: 'Use Python 3.10'
+#    inputs:
+#      versionSpec: 3.10
+#  - template: .azure-pipelines/templates/azdev_setup.yml
+#  - bash: |
+#      set -ev
+#      . env/bin/activate
+#      azdev verify license
+#      azdev verify history
+#      azdev verify document-map
+#
+#- job: PerformanceCheck
+#  displayName: "PerformanceCheck"
+#  strategy:
+#    matrix:
+#      Python39:
+#        python.version: '3.9'
+#      Python310:
+#        python.version: '3.10'
+#  pool:
+#    name: ${{ variables.ubuntu_pool }}
+#  steps:
+#  - task: UsePythonVersion@0
+#    displayName: 'Use Python $(python.version)'
+#    inputs:
+#      versionSpec: '$(python.version)'
+#  - template: .azure-pipelines/templates/azdev_setup.yml
+#  - bash: |
+#      set -ev
+#      . env/bin/activate
+#      azdev perf load-times
+#    displayName: "Load Performance"
+#  # - bash: |
+#  #     set -ev
+#  #     . env/bin/activate
+#
+#  #     azdev perf benchmark "version" "network vnet -h" "rest -h" "storage account"
+#  #   displayName: "Execution Performance"
+#
+#- job: CheckLinter
+#  displayName: "Check CLI Linter"
+#
+#  pool:
+#    name: ${{ variables.ubuntu_pool }}
+#  steps:
+#  - task: UsePythonVersion@0
+#    displayName: 'Use Python 3.10'
+#    inputs:
+#      versionSpec: 3.10
+#  - template: .azure-pipelines/templates/azdev_setup.yml
+#  - bash: |
+#      set -ev
+#      . env/bin/activate
+#      python scripts/ci/service_name.py
+#      if [[ "$(System.PullRequest.TargetBranch)" != "" ]]; then
+#        # If CI is set to shallow fetch, target branch should be expilictly fetched.
+#        git fetch origin --depth=1 $(System.PullRequest.TargetBranch)
+#        azdev linter --ci-exclusions --min-severity medium --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch)
+#      else
+#        azdev linter --ci-exclusions --min-severity medium
+#      fi
+#
+#- job: CodegenCoverage
+#  condition: and(succeededOrFailed(), in(variables['Build.Reason'], 'BatchedCI'))
+#  displayName: "Codegen Coverage"
+#  pool:
+#    name: ${{ variables.ubuntu_pool }}
+#  steps:
+#  - task: UsePythonVersion@0
+#    displayName: 'Use Python 3.10'
+#    inputs:
+#      versionSpec: 3.10
+#  - template: .azure-pipelines/templates/azdev_setup.yml
+#  - bash: |
+#      set -ev
+#      . env/bin/activate
+#      # clone azure-cli-extensions
+#      cd ..
+#      git clone --depth 1 -b main https://github.com/Azure/azure-cli-extensions.git ./azure-cli-extensions
+#      azdev extension repo add ./azure-cli-extensions
+#      azdev extension add "*"
+#      # Some extension will change the dependence, so run `azdev setup` again after all extensions installed.
+#      azdev setup -c $CLI_REPO_PATH -r ./azure-cli-extensions
+#      # CLI repo only
+#      azdev statistics list-command-table CLI --statistics-only
+#      # CLI + EXT repos
+#      azdev statistics list-command-table --statistics-only > /tmp/codegen_report.json
+#      # azure-kusto is not compatible with azure-cli
+#      # so we need run azdev statistics before installing azure-kusto to avoid the error `No module named azure.cli`
+#      pip install azure-kusto-data azure-kusto-ingest
+#      python s/scripts/ci/codegen_report.py
+#    env:
+#      BUILD_ID: $(Build.BuildId)
+#      BUILD_BRANCH: $(Build.SourceBranchName)
+#      KUSTO_CLIENT_ID: $(KUSTO_CLIENT_ID)
+#      KUSTO_CLIENT_SECRET: $(KUSTO_CLIENT_SECRET)
+#      KUSTO_CLUSTER: $(KUSTO_CLUSTER)
+#      KUSTO_DATABASE: $(KUSTO_DATABASE)
+#      KUSTO_TABLE: $(KUSTO_TABLE)
+#      KUSTO_TENANT_ID: $(KUSTO_TENANT_ID)
+#
+#- job: VerifySphinxDocumentGenerator
+#  displayName: "Verify Sphinx Document Generator"
+#  pool:
+#    name: ${{ variables.ubuntu_pool }}
+#  steps:
+#  - task: UsePythonVersion@0
+#    displayName: 'Use Python 3.10'
+#    inputs:
+#      versionSpec: 3.10
+#  - bash: pip install --upgrade pip wheel
+#    displayName: "Install pip and wheel"
+#  - bash: ./scripts/ci/test_ref_doc.sh
+#    displayName: "Verify Sphinx Document Generator"
+#
+#- job: NotifyCIErrors
+#  dependsOn:
+#    - CheckPullRequest
+#    - RejectPullRequestToMasterBranch
+#    - CredentialScanner
+#    - PolicyCheck
+#    - ExtractMetadata
+#    - VerifyLinuxRequirements
+#    - VerifyDarwinRequirements
+#    - VerifyWindowsRequirements
+#    - VerifyVersions
+#    - BuildWindowsMSI
+#    - TestMsiInstallation
+#    - BuildDockerImage
+#    - TestDockerImage
+#    - BuildPythonWheel
+#    - TestPythonWheel
+#    - TestCore
+#    - TestTelemetry
+#    - IntegrationTestAgainstProfiles
+#    - TestExtensionsLoading
+#    - BuildHomebrewFormula
+#    - TestHomebrewFormula
+#    - TestHomebrewPackage
+#    - BuildRpmPackageMariner
+#    - BuildRpmPackages
+#    - TestRpmPackage
+#    - BuildDebPackages
+#    - TestDebPackages
+#    - CheckStyle
+#    - CheckHeaders
+#    - PerformanceCheck
+#    - CheckLinter
+#    - CodegenCoverage
+#    - VerifySphinxDocumentGenerator
+#  condition: and(failed(), in(variables['Build.Reason'], 'BatchedCI'))
+#  displayName: Notify CI Errors
+#  pool:
+#    name: ${{ variables.ubuntu_pool }}
+#  steps:
+#  - task: UsePythonVersion@0
+#    displayName: 'Use Python 3.10'
+#    inputs:
+#      versionSpec: 3.10
+#  - task: AzureCLI@2
+#    inputs:
+#      azureSubscription: 'Azure CLI'
+#      scriptType: 'bash'
+#      scriptLocation: 'inlineScript'
+#      inlineScript: |
+#        pip install requests
+#        teams_api_url=$(az keyvault secret show --vault-name $(TEAMS_BOT_VAULT_NAME) --name $(TEAMS_BOT_API_URL_SECRET_NAME) --query value -otsv)
+#        teams_api_key=$(az keyvault secret show --vault-name $(TEAMS_BOT_VAULT_NAME) --name $(TEAMS_BOT_API_KEY_SECRET_NAME) --query value -otsv)
+#        echo "If any task fails, notify to teams channel"
+#        python scripts/ci/notify_ci_errors.py $teams_api_url $teams_api_key $(TEAMS_CHANNEL_ID)
+#    displayName: 'Notify To Teams Channel'
+#    env:
+#      BASE_URI: $(System.CollectionUri)
+#      PROJECT_TYPE: $(System.TeamProject)
+#      BUILD_ID: $(Build.BuildId)
+#      JOB_ID: $(System.JobId)
