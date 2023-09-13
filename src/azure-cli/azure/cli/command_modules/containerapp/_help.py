@@ -375,6 +375,14 @@ helps['containerapp env create'] = """
               --logs-workspace-id myLogsWorkspaceID \\
               --logs-workspace-key myLogsWorkspaceKey \\
               --location eastus2
+    - name: Create an environment with workload profiles enabled.
+      text: |
+          az containerapp env create -n MyContainerappEnvironment -g MyResourceGroup \\
+              --location eastus2 --enable-workload-profiles
+    - name: Create an environment without workload profiles enabled.
+      text: |
+          az containerapp env create -n MyContainerappEnvironment -g MyResourceGroup \\
+              --location eastus2 --enable-workload-profiles false
 """
 
 
