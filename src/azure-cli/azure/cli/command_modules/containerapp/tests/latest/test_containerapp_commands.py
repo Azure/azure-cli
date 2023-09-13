@@ -23,6 +23,9 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class ContainerappIdentityTests(ScenarioTest):
+    def __init__(self, *arg, **kwargs):
+        super().__init__(*arg, random_config_dir=True, **kwargs)
+
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="eastus2")
     @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
@@ -161,6 +164,9 @@ class ContainerappIdentityTests(ScenarioTest):
 
 
 class ContainerappIngressTests(ScenarioTest):
+    def __init__(self, *arg, **kwargs):
+        super().__init__(*arg, random_config_dir=True, **kwargs)
+
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="eastus2")
     @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
@@ -633,6 +639,9 @@ class ContainerappIngressTests(ScenarioTest):
 
 
 class ContainerappDaprTests(ScenarioTest):
+    def __init__(self, *arg, **kwargs):
+        super().__init__(*arg, random_config_dir=True, **kwargs)
+
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="eastus2")
     @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
@@ -728,6 +737,9 @@ class ContainerappDaprTests(ScenarioTest):
 
 
 class ContainerappEnvStorageTests(ScenarioTest):
+    def __init__(self, *arg, **kwargs):
+        super().__init__(*arg, random_config_dir=True, **kwargs)
+
     @AllowLargeResponse(8192)
     @live_only()  # Passes locally but fails in CI
     @ResourceGroupPreparer(location="eastus")
@@ -767,6 +779,9 @@ class ContainerappEnvStorageTests(ScenarioTest):
 
 
 class ContainerappRevisionTests(ScenarioTest):
+    def __init__(self, *arg, **kwargs):
+        super().__init__(*arg, random_config_dir=True, **kwargs)
+
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")
     @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
@@ -836,6 +851,9 @@ class ContainerappRevisionTests(ScenarioTest):
 
 
 class ContainerappAnonymousRegistryTests(ScenarioTest):
+    def __init__(self, *arg, **kwargs):
+        super().__init__(*arg, random_config_dir=True, **kwargs)
+
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")
     @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
@@ -854,6 +872,9 @@ class ContainerappAnonymousRegistryTests(ScenarioTest):
 
 
 class ContainerappRegistryIdentityTests(ScenarioTest):
+    def __init__(self, *arg, **kwargs):
+        super().__init__(*arg, random_config_dir=True, **kwargs)
+
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="westeurope")
     @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
@@ -987,6 +1008,9 @@ class ContainerappRegistryIdentityTests(ScenarioTest):
 
 
 class ContainerappScaleTests(ScenarioTest):
+    def __init__(self, *arg, **kwargs):
+        super().__init__(*arg, random_config_dir=True, **kwargs)
+
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="westeurope")
     @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
@@ -1522,6 +1546,9 @@ class ContainerappScaleTests(ScenarioTest):
 
 
 class ContainerappOtherPropertyTests(ScenarioTest):
+    def __init__(self, *arg, **kwargs):
+        super().__init__(*arg, random_config_dir=True, **kwargs)
+
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")
     @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)

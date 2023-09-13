@@ -20,6 +20,9 @@ from .utils import create_containerapp_env
 
 
 class ContainerappComposePreviewResourceSettingsScenarioTest(ContainerappComposePreviewScenarioTest):
+    def __init__(self, *arg, **kwargs):
+        super().__init__(*arg, random_config_dir=True, **kwargs)
+
     @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_test_containerapp_preview', location='eastus')
     @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
