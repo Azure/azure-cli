@@ -775,8 +775,7 @@ parameters:
     short-summary: Supply deployment parameter values.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax. Also note if you are providing a bicepparam file with a bicep template then you can use this
-        argument only once.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax. Also note if you are providing a bicepparam file then you can use this argument only once.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -812,9 +811,9 @@ examples:
   - name: Create a deployment at resource group scope from a template-spec
     text: >
         az deployment group create --resource-group testrg --template-spec "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Resources/templateSpecs/myTemplateSpec/versions/1.0"
-  - name: Create a deployment at resource group scope from a bicep template and a bicepparam parameter file
+  - name: Create a deployment at resource group scope from a bicepparam parameter file
     text: >
-        az deployment group create --resource-group testrg --template-file azuredeploy.bicep --parameters parameters.bicepparam
+        az deployment group create --resource-group testrg --parameters parameters.bicepparam
   - name: Create a deployment at resource group across tenants
     text: >
         az deployment group create --resource-group testrg --name rollout01 \\
