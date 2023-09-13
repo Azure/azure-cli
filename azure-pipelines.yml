@@ -101,27 +101,27 @@ jobs:
 #      GdnBreakAllTools: false
 #      GdnBreakGdnToolPoliCheck: true
 #      GdnBreakGdnToolPoliCheckSeverity: Error
-#
-#- job: ExtractMetadata
-#  displayName: Extract Metadata
-#
-#  condition: succeeded()
-#  pool:
-#    name: ${{ variables.ubuntu_pool }}
-#  steps:
-#  - task: Bash@3
-#    displayName: 'Extract Version'
-#    inputs:
-#      targetType: 'filePath'
-#      filePath: scripts/release/get_version.sh
-#
-#
-#  - task: PublishPipelineArtifact@0
-#    displayName: 'Publish Artifact: metadata'
-#    inputs:
-#      TargetPath: $(Build.ArtifactStagingDirectory)
-#      ArtifactName: metadata
-#
+
+- job: ExtractMetadata
+  displayName: Extract Metadata
+
+  condition: succeeded()
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+  - task: Bash@3
+    displayName: 'Extract Version'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/release/get_version.sh
+
+
+  - task: PublishPipelineArtifact@0
+    displayName: 'Publish Artifact: metadata'
+    inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
+      ArtifactName: metadata
+
 #- job: VerifyLinuxRequirements
 #  displayName: 'Verify src/azure-cli/requirements.*.Linux.txt'
 #  condition: succeeded()
@@ -339,41 +339,41 @@ jobs:
 #      docker load < $TAR_FILE
 #      docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && sleep 5"
 #    displayName: 'Bash Script'
-#
-#- job: BuildPythonWheel
-#  displayName: Build Python Wheels
-#
-#  dependsOn: ExtractMetadata
-#  condition: succeeded()
-#  pool:
-#    name: ${{ variables.ubuntu_pool }}
-#  steps:
-#  - task: UsePythonVersion@0
-#    displayName: 'Use Python 3.10'
-#    inputs:
-#      versionSpec: 3.10
-#
-#
-#  - script: |
-#      if [[ "$(Build.Reason)" == "PullRequest" ]]; then
-#        branch=$(System.PullRequest.TargetBranch)
-#      else
-#        branch=$(Build.SourceBranchName)
-#      fi
-#      scripts/release/pypi/build.sh $branch
-#    displayName: 'Run Wheel Build Script'
-#
-#  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-#    displayName: 'SBOM'
-#    inputs:
-#      BuildDropPath: $(Build.ArtifactStagingDirectory)
-#
-#  - task: PublishPipelineArtifact@0
-#    displayName: 'Publish Artifact: pypi'
-#    inputs:
-#      TargetPath: $(Build.ArtifactStagingDirectory)
-#      ArtifactName: pypi
-#
+
+- job: BuildPythonWheel
+  displayName: Build Python Wheels
+
+  dependsOn: ExtractMetadata
+  condition: succeeded()
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.10'
+    inputs:
+      versionSpec: 3.10
+
+
+  - script: |
+      if [[ "$(Build.Reason)" == "PullRequest" ]]; then
+        branch=$(System.PullRequest.TargetBranch)
+      else
+        branch=$(Build.SourceBranchName)
+      fi
+      scripts/release/pypi/build.sh $branch
+    displayName: 'Run Wheel Build Script'
+
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
+
+  - task: PublishPipelineArtifact@0
+    displayName: 'Publish Artifact: pypi'
+    inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
+      ArtifactName: pypi
+
 #- job: TestPythonWheel
 #  displayName: Test Python Wheels
 #
@@ -497,321 +497,321 @@ jobs:
 #  - bash: ./scripts/ci/test_extensions.sh
 #    displayName: 'Load extensions'
 #
-#- job: BuildHomebrewFormula
-#  displayName: Build Homebrew Formula
-#
-#  dependsOn: BuildPythonWheel
+- job: BuildHomebrewFormula
+  displayName: Build Homebrew Formula
+
+  dependsOn: BuildPythonWheel
 #  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
-#  pool:
-#    name: ${{ variables.ubuntu_pool }}
-#  steps:
-#  - task: DownloadPipelineArtifact@1
-#    displayName: 'Download Metadata'
-#    inputs:
-#      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-#      artifactName: metadata
-#
-#  - bash: |
-#      #!/bin/bash
-#
-#      root=$(cd $(dirname $0); pwd)
-#
-#      set -evx
-#
-#      CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
-#      HOMEBREW_UPSTREAM_URL=`curl -Ls -o /dev/null -w %{url_effective} https://api.github.com/repos/Azure/azure-cli/tarball/$BUILD_SOURCEVERSION`
-#
-#      docker_files=$(cd $BUILD_SOURCESDIRECTORY/scripts/release/homebrew/docker; pwd)
-#      src_files=$(cd $BUILD_SOURCESDIRECTORY/src; pwd)
-#
-#      echo "Generating formula in docker container ... "
-#      docker run -v $docker_files:/mnt/scripts \
-#                 -v $src_files:/mnt/src \
-#                 -e CLI_VERSION=$CLI_VERSION \
-#                 -e HOMEBREW_UPSTREAM_URL=$HOMEBREW_UPSTREAM_URL \
-#                 --name azurecli \
-#                 python:3.10 \
-#                 /mnt/scripts/run.sh
-#
-#      # clean up
-#      rm -rf $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata
-#
-#      docker cp azurecli:azure-cli.rb $BUILD_ARTIFACTSTAGINGDIRECTORY/azure-cli.rb
-#      docker rm --force azurecli
-#    displayName: 'Build homebrew formula'
-#
-#  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-#    displayName: 'SBOM'
-#    inputs:
-#      BuildDropPath: $(Build.ArtifactStagingDirectory)
-#
-#  - task: PublishPipelineArtifact@0
-#    displayName: 'Publish Artifact: homebrew'
-#    inputs:
-#      TargetPath: $(Build.ArtifactStagingDirectory)
-#      ArtifactName: homebrew
-#
-#- job: TestHomebrewFormula
-#  displayName: Test Homebrew Formula
-#
-#  dependsOn: BuildHomebrewFormula
-#  condition: succeeded()
-#  pool:
-#    vmImage: 'macOS-12'
-#  steps:
-#  - task: DownloadPipelineArtifact@1
-#    displayName: 'Download Metadata'
-#    inputs:
-#      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-#      artifactName: metadata
-#
-#
-#  - task: DownloadPipelineArtifact@1
-#    displayName: 'Download Homebrew'
-#    inputs:
-#      TargetPath: '$(Build.ArtifactStagingDirectory)/homebrew'
-#      artifactName: homebrew
-#
-#
-#  - bash: |
-#      set -ev
-#
-#      echo == Remove pre-installed azure-cli ==
-#      brew uninstall azure-cli
-#
-#      echo == Install azure-cli.rb formula ==
-#      brew install --build-from-source $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb
-#
-#      echo == Az Version ==
-#      az --version
-#
-#      echo == Run Self-Test ==
-#      az self-test
-#
-#    displayName: 'Bash Script'
-#
-#- job: TestHomebrewPackage
-#  displayName: Test Homebrew Package
-#  timeoutInMinutes: 180
-#  dependsOn: BuildHomebrewFormula
-#  # condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
-#  condition: false
-#  pool:
-#    vmImage: 'macOS-12'
-#  steps:
-#  - task: DownloadPipelineArtifact@1
-#    displayName: 'Download Metadata'
-#    inputs:
-#      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-#      artifactName: metadata
-#
-#
-#  - task: DownloadPipelineArtifact@1
-#    displayName: 'Download Build Artifacts'
-#    inputs:
-#      TargetPath: '$(Build.ArtifactStagingDirectory)/homebrew'
-#      artifactName: homebrew
-#
-#
-#  - bash: ./scripts/release/homebrew/test_homebrew_package.sh
-#
-#
-#    displayName: 'Test Homebrew Package'
-#
-#
-#- job: BuildRpmPackageMariner
-#  displayName: Build Rpm Package Mariner
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Metadata'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+      artifactName: metadata
+
+  - bash: |
+      #!/bin/bash
+
+      root=$(cd $(dirname $0); pwd)
+
+      set -evx
+
+      CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
+      HOMEBREW_UPSTREAM_URL=`curl -Ls -o /dev/null -w %{url_effective} https://api.github.com/repos/Azure/azure-cli/tarball/$BUILD_SOURCEVERSION`
+
+      docker_files=$(cd $BUILD_SOURCESDIRECTORY/scripts/release/homebrew/docker; pwd)
+      src_files=$(cd $BUILD_SOURCESDIRECTORY/src; pwd)
+
+      echo "Generating formula in docker container ... "
+      docker run -v $docker_files:/mnt/scripts \
+                 -v $src_files:/mnt/src \
+                 -e CLI_VERSION=$CLI_VERSION \
+                 -e HOMEBREW_UPSTREAM_URL=$HOMEBREW_UPSTREAM_URL \
+                 --name azurecli \
+                 python:3.10 \
+                 /mnt/scripts/run.sh
+
+      # clean up
+      rm -rf $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata
+
+      docker cp azurecli:azure-cli.rb $BUILD_ARTIFACTSTAGINGDIRECTORY/azure-cli.rb
+      docker rm --force azurecli
+    displayName: 'Build homebrew formula'
+
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
+
+  - task: PublishPipelineArtifact@0
+    displayName: 'Publish Artifact: homebrew'
+    inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
+      ArtifactName: homebrew
+
+- job: TestHomebrewFormula
+  displayName: Test Homebrew Formula
+
+  dependsOn: BuildHomebrewFormula
+  condition: succeeded()
+  pool:
+    vmImage: 'macOS-12'
+  steps:
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Metadata'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+      artifactName: metadata
+
+
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Homebrew'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/homebrew'
+      artifactName: homebrew
+
+
+  - bash: |
+      set -ev
+
+      echo == Remove pre-installed azure-cli ==
+      brew uninstall azure-cli
+
+      echo == Install azure-cli.rb formula ==
+      brew install --build-from-source $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb
+
+      echo == Az Version ==
+      az --version
+
+      echo == Run Self-Test ==
+      az self-test
+
+    displayName: 'Bash Script'
+
+- job: TestHomebrewPackage
+  displayName: Test Homebrew Package
+  timeoutInMinutes: 180
+  dependsOn: BuildHomebrewFormula
+  # condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
+  condition: false
+  pool:
+    vmImage: 'macOS-12'
+  steps:
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Metadata'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+      artifactName: metadata
+
+
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Build Artifacts'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/homebrew'
+      artifactName: homebrew
+
+
+  - bash: ./scripts/release/homebrew/test_homebrew_package.sh
+
+
+    displayName: 'Test Homebrew Package'
+
+
+- job: BuildRpmPackageMariner
+  displayName: Build Rpm Package Mariner
 #  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
-#  strategy:
-#    matrix:
-#      2.0 AMD64:
-#        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-#        artifact: rpm-mariner2.0-amd64
-#        pool: ${{ variables.ubuntu_pool }}
-#      2.0 ARM64:
-#        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-#        artifact: rpm-mariner2.0-arm64
-#        pool: ${{ variables.ubuntu_arm64_pool }}
-#  pool:
-#    name: $(pool)
-#  steps:
-#  - bash: ./scripts/ci/install_docker.sh
-#    displayName: Install Docker
-#
-#  - task: Bash@3
-#    displayName: 'Build Rpm Package: Mariner'
-#    inputs:
-#      targetType: 'filePath'
-#      filePath: scripts/release/rpm/pipeline_mariner.sh
-#
-#  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-#    displayName: 'SBOM'
-#    inputs:
-#      BuildDropPath: $(Build.ArtifactStagingDirectory)
-#
-#  - task: PublishPipelineArtifact@0
-#    displayName: 'Publish Artifact: rpm-mariner'
-#    inputs:
-#      TargetPath: $(Build.ArtifactStagingDirectory)
-#      ArtifactName: $(artifact)
-#
-#- job: TestRpmPackageMariner
-#  displayName: Test Rpm Package Mariner
-#  timeoutInMinutes: 120
-#  dependsOn:
-#  - BuildRpmPackageMariner
-#  - ExtractMetadata
-#  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
-#  pool:
-#    name: $(pool)
-#  strategy:
-#    matrix:
-#      2.0 AMD64:
-#        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-#        artifact: rpm-mariner2.0-amd64
-#        pool: ${{ variables.ubuntu_pool }}
-#      2.0 ARM64:
-#        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-#        artifact: rpm-mariner2.0-arm64
-#        pool: ${{ variables.ubuntu_arm64_pool }}
-#  steps:
-#  - task: DownloadPipelineArtifact@1
-#    displayName: 'Download Metadata'
-#    inputs:
-#      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-#      artifactName: metadata
-#
-#  - task: DownloadPipelineArtifact@1
-#    displayName: 'Download Build Artifacts'
-#    inputs:
-#      TargetPath: '$(Build.ArtifactStagingDirectory)/rpm'
-#      artifactName: $(artifact)
-#
-#  - bash: ./scripts/ci/install_docker.sh
-#    displayName: Install Docker
-#
-#  - bash: |
-#      set -ex
-#
-#      CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
-#      RPM_NAME=$(find $SYSTEM_ARTIFACTSDIRECTORY/rpm/ -type f -name "azure-cli-$CLI_VERSION-1.cm2.*.rpm" -printf '%f\n')
-#
-#      echo "== Test rpm package on ${IMAGE} =="
-#      docker pull $IMAGE
-#      docker run --rm -e RPM_NAME=$RPM_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_mariner_in_docker.sh"
-#
-#    displayName: 'Test Rpm Package Mariner'
-#
+  strategy:
+    matrix:
+      2.0 AMD64:
+        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
+        artifact: rpm-mariner2.0-amd64
+        pool: ${{ variables.ubuntu_pool }}
+      2.0 ARM64:
+        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
+        artifact: rpm-mariner2.0-arm64
+        pool: ${{ variables.ubuntu_arm64_pool }}
+  pool:
+    name: $(pool)
+  steps:
+  - bash: ./scripts/ci/install_docker.sh
+    displayName: Install Docker
+
+  - task: Bash@3
+    displayName: 'Build Rpm Package: Mariner'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/release/rpm/pipeline_mariner.sh
+
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
+
+  - task: PublishPipelineArtifact@0
+    displayName: 'Publish Artifact: rpm-mariner'
+    inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
+      ArtifactName: $(artifact)
+
+- job: TestRpmPackageMariner
+  displayName: Test Rpm Package Mariner
+  timeoutInMinutes: 120
+  dependsOn:
+  - BuildRpmPackageMariner
+  - ExtractMetadata
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
+  pool:
+    name: $(pool)
+  strategy:
+    matrix:
+      2.0 AMD64:
+        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
+        artifact: rpm-mariner2.0-amd64
+        pool: ${{ variables.ubuntu_pool }}
+      2.0 ARM64:
+        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
+        artifact: rpm-mariner2.0-arm64
+        pool: ${{ variables.ubuntu_arm64_pool }}
+  steps:
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Metadata'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+      artifactName: metadata
+
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Build Artifacts'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/rpm'
+      artifactName: $(artifact)
+
+  - bash: ./scripts/ci/install_docker.sh
+    displayName: Install Docker
+
+  - bash: |
+      set -ex
+
+      CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
+      RPM_NAME=$(find $SYSTEM_ARTIFACTSDIRECTORY/rpm/ -type f -name "azure-cli-$CLI_VERSION-1.cm2.*.rpm" -printf '%f\n')
+
+      echo "== Test rpm package on ${IMAGE} =="
+      docker pull $IMAGE
+      docker run --rm -e RPM_NAME=$RPM_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_mariner_in_docker.sh"
+
+    displayName: 'Test Rpm Package Mariner'
+
 ## TODO: rpmbuild on Red Hat UBI 8 is slow for unknown reason. Still working with Red Hat to investigate.
-#- job: BuildRpmPackages
-#  displayName: Build Rpm Packages
-#  # Do not run this job for Pull Requests due to the slowness
+- job: BuildRpmPackages
+  displayName: Build Rpm Packages
+  # Do not run this job for Pull Requests due to the slowness
 #  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
-#  pool:
-#    name: $(pool)
-#  strategy:
-#    matrix:
-#      ${{ each arch in parameters.architectures }}:
-#        Red Hat Universal Base Image 8 ${{ arch.name }}:
-#          dockerfile: ubi
-#          image: registry.access.redhat.com/ubi8/ubi:8.4
-#          artifact: rpm-ubi8-${{ arch.value }}
-#          python_package: python39
-#          pool: ${{ arch.pool }}
-#        Red Hat Universal Base Image 9 ${{ arch.name }}:
-#          dockerfile: ubi
-#          image: registry.access.redhat.com/ubi9/ubi:9.0.0
-#          artifact: rpm-ubi9-${{ arch.value }}
-#          python_package: python3.9
-#          pool: ${{ arch.pool }}
-#        Fedora 36 ${{ arch.name }}:
-#          dockerfile: fedora
-#          image: fedora:36
-#          artifact: rpm-fedora36-${{ arch.value }}
-#          python_package: python3
-#          pool: ${{ arch.pool }}
-#  steps:
-#  - bash: ./scripts/ci/install_docker.sh
-#    displayName: Install Docker
-#  - task: Bash@3
-#    displayName: 'Build Rpm Package'
-#    inputs:
-#      targetType: 'filePath'
-#      filePath: scripts/release/rpm/pipeline.sh
-#  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-#    displayName: 'SBOM'
-#    inputs:
-#      BuildDropPath: $(Build.ArtifactStagingDirectory)
-#  - task: PublishPipelineArtifact@0
-#    displayName: 'Publish Artifact: rpm'
-#    inputs:
-#      TargetPath: $(Build.ArtifactStagingDirectory)
-#      ArtifactName: $(artifact)
-#
-#
-#- job: TestRpmPackage
-#  displayName: Test Rpm Package
-#  timeoutInMinutes: 120
-#  dependsOn:
-#    - BuildRpmPackages
-#    - ExtractMetadata
-#  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
-#  pool:
-#    name: $(pool)
-#  strategy:
-#    matrix:
-#      ${{ each arch in parameters.architectures }}:
-#        Red Hat Universal Base Image 8 ${{ arch.name }}:
-#          artifact: rpm-ubi8-${{ arch.value }}
-#          distro: el8
-#          image: registry.access.redhat.com/ubi8/ubi:8.4
-#          python_package: python39
-#          python_cmd: python3.9
-#          pip_cmd: pip3.9
-#          pool: ${{ arch.pool }}
-#        Red Hat Universal Base Image 9 ${{ arch.name }}:
-#          artifact: rpm-ubi9-${{ arch.value }}
-#          distro: el9
-#          image: registry.access.redhat.com/ubi9/ubi:9.0.0
-#          python_package: python3.9
-#          python_cmd: python3.9
-#          pip_cmd: pip3.9
-#          pool: ${{ arch.pool }}
-#        Fedora 36 ${{ arch.name }}:
-#          artifact: rpm-fedora36-${{ arch.value }}
-#          distro: fc36
-#          image: fedora:36
-#          python_package: python3
-#          python_cmd: python3
-#          pip_cmd: pip3
-#          pool: ${{ arch.pool }}
-#  steps:
-#  - task: DownloadPipelineArtifact@1
-#    displayName: 'Download Metadata'
-#    inputs:
-#      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-#      artifactName: metadata
-#
-#  - task: DownloadPipelineArtifact@1
-#    displayName: 'Download Build Artifacts'
-#    inputs:
-#      TargetPath: '$(Build.ArtifactStagingDirectory)/rpm'
-#      artifactName: $(artifact)
-#
-#  - bash: ./scripts/ci/install_docker.sh
-#    displayName: Install Docker
-#
-#  - bash: |
-#      set -ex
-#
-#      CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
-#      RPM_NAME=$(find $SYSTEM_ARTIFACTSDIRECTORY/rpm/ -type f -name "azure-cli-$CLI_VERSION-1.${DISTRO}.*.rpm" -printf '%f\n')
-#
-#      echo "== Test rpm package on ${IMAGE} =="
-#      docker pull $IMAGE
-#      docker run --rm -e RPM_NAME=$RPM_NAME -e PYTHON_PACKAGE=${PYTHON_PACKAGE} -e PYTHON_CMD=${PYTHON_CMD} -e PIP_CMD=${PIP_CMD} -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_rpm_in_docker.sh"
-#
-#    displayName: 'Test Rpm Package'
+  pool:
+    name: $(pool)
+  strategy:
+    matrix:
+      ${{ each arch in parameters.architectures }}:
+        Red Hat Universal Base Image 8 ${{ arch.name }}:
+          dockerfile: ubi
+          image: registry.access.redhat.com/ubi8/ubi:8.4
+          artifact: rpm-ubi8-${{ arch.value }}
+          python_package: python39
+          pool: ${{ arch.pool }}
+        Red Hat Universal Base Image 9 ${{ arch.name }}:
+          dockerfile: ubi
+          image: registry.access.redhat.com/ubi9/ubi:9.0.0
+          artifact: rpm-ubi9-${{ arch.value }}
+          python_package: python3.9
+          pool: ${{ arch.pool }}
+        Fedora 36 ${{ arch.name }}:
+          dockerfile: fedora
+          image: fedora:36
+          artifact: rpm-fedora36-${{ arch.value }}
+          python_package: python3
+          pool: ${{ arch.pool }}
+  steps:
+  - bash: ./scripts/ci/install_docker.sh
+    displayName: Install Docker
+  - task: Bash@3
+    displayName: 'Build Rpm Package'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/release/rpm/pipeline.sh
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
+  - task: PublishPipelineArtifact@0
+    displayName: 'Publish Artifact: rpm'
+    inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
+      ArtifactName: $(artifact)
+
+
+- job: TestRpmPackage
+  displayName: Test Rpm Package
+  timeoutInMinutes: 120
+  dependsOn:
+    - BuildRpmPackages
+    - ExtractMetadata
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
+  pool:
+    name: $(pool)
+  strategy:
+    matrix:
+      ${{ each arch in parameters.architectures }}:
+        Red Hat Universal Base Image 8 ${{ arch.name }}:
+          artifact: rpm-ubi8-${{ arch.value }}
+          distro: el8
+          image: registry.access.redhat.com/ubi8/ubi:8.4
+          python_package: python39
+          python_cmd: python3.9
+          pip_cmd: pip3.9
+          pool: ${{ arch.pool }}
+        Red Hat Universal Base Image 9 ${{ arch.name }}:
+          artifact: rpm-ubi9-${{ arch.value }}
+          distro: el9
+          image: registry.access.redhat.com/ubi9/ubi:9.0.0
+          python_package: python3.9
+          python_cmd: python3.9
+          pip_cmd: pip3.9
+          pool: ${{ arch.pool }}
+        Fedora 36 ${{ arch.name }}:
+          artifact: rpm-fedora36-${{ arch.value }}
+          distro: fc36
+          image: fedora:36
+          python_package: python3
+          python_cmd: python3
+          pip_cmd: pip3
+          pool: ${{ arch.pool }}
+  steps:
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Metadata'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+      artifactName: metadata
+
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Build Artifacts'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/rpm'
+      artifactName: $(artifact)
+
+  - bash: ./scripts/ci/install_docker.sh
+    displayName: Install Docker
+
+  - bash: |
+      set -ex
+
+      CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
+      RPM_NAME=$(find $SYSTEM_ARTIFACTSDIRECTORY/rpm/ -type f -name "azure-cli-$CLI_VERSION-1.${DISTRO}.*.rpm" -printf '%f\n')
+
+      echo "== Test rpm package on ${IMAGE} =="
+      docker pull $IMAGE
+      docker run --rm -e RPM_NAME=$RPM_NAME -e PYTHON_PACKAGE=${PYTHON_PACKAGE} -e PYTHON_CMD=${PYTHON_CMD} -e PIP_CMD=${PIP_CMD} -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_rpm_in_docker.sh"
+
+    displayName: 'Test Rpm Package'
 
 - job: BuildDebPackages
   displayName: Build Deb Packages
