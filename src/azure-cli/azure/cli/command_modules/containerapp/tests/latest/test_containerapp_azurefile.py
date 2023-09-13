@@ -25,6 +25,9 @@ from azure.cli.command_modules.containerapp.tests.latest.common import (
 
 
 class ContainerAppMountAzureFileTest(ScenarioTest):
+    def __init__(self, *arg, **kwargs):
+        super().__init__(*arg, random_config_dir=True, **kwargs)
+
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=TEST_LOCATION)
     @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
