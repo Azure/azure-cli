@@ -22,6 +22,9 @@ from azure.cli.command_modules.acs._consts import (
     CONST_NETWORK_PLUGIN_AZURE, CONST_NETWORK_PLUGIN_KUBENET,
     CONST_NETWORK_PLUGIN_MODE_OVERLAY, CONST_NETWORK_PLUGIN_NONE,
     CONST_NODE_IMAGE_UPGRADE_CHANNEL, CONST_NONE_UPGRADE_CHANNEL,
+    CONST_NODE_OS_CHANNEL_NODE_IMAGE,
+    CONST_NODE_OS_CHANNEL_NONE,
+    CONST_NODE_OS_CHANNEL_UNMANAGED,
     CONST_NODEPOOL_MODE_SYSTEM, CONST_NODEPOOL_MODE_USER,
     CONST_OS_DISK_TYPE_EPHEMERAL, CONST_OS_DISK_TYPE_MANAGED,
     CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER, CONST_OS_SKU_UBUNTU,
@@ -130,6 +133,12 @@ auto_upgrade_channels = [
     CONST_NONE_UPGRADE_CHANNEL,
 ]
 
+node_os_upgrade_channels = [
+    CONST_NODE_OS_CHANNEL_NODE_IMAGE,
+    CONST_NODE_OS_CHANNEL_NONE,
+    CONST_NODE_OS_CHANNEL_UNMANAGED,
+]
+
 dev_space_endpoint_types = ['Public', 'Private', 'None']
 
 keyvault_network_access_types = [CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC, CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE]
@@ -212,6 +221,7 @@ def load_arguments(self, _):
         c.argument('network_policy', validator=validate_network_policy)
         c.argument('network_dataplane', arg_type=get_enum_type(network_dataplanes))
         c.argument('auto_upgrade_channel', arg_type=get_enum_type(auto_upgrade_channels))
+        c.argument('node_os_upgrade_channel', arg_type=get_enum_type(node_os_upgrade_channels))
         c.argument('cluster_autoscaler_profile', nargs='+', options_list=["--cluster-autoscaler-profile", "--ca-profile"],
                    help="Comma-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
         c.argument('uptime_sla', action='store_true', deprecate_info=c.deprecate(target='--uptime-sla', hide=True))
@@ -338,8 +348,10 @@ def load_arguments(self, _):
         c.argument('no_uptime_sla', action='store_true', deprecate_info=c.deprecate(target='--no-uptime-sla', hide=True))
         c.argument('tier', arg_type=get_enum_type(sku_tiers), validator=validate_sku_tier)
         c.argument('api_server_authorized_ip_ranges', validator=validate_ip_ranges)
+        # private cluster parameters
         c.argument('enable_public_fqdn', action='store_true')
         c.argument('disable_public_fqdn', action='store_true')
+        c.argument('private_dns_zone')
         c.argument('enable_managed_identity', action='store_true')
         c.argument('assign_identity', validator=validate_assign_identity)
         c.argument('assign_kubelet_identity', validator=validate_assign_kubelet_identity)
@@ -356,6 +368,7 @@ def load_arguments(self, _):
         c.argument('enable_windows_gmsa', action='store_true')
         c.argument('gmsa_dns_server')
         c.argument('gmsa_root_domain_name')
+        c.argument('disable_windows_gmsa', action='store_true')
         c.argument('attach_acr', acr_arg_type, validator=validate_acr)
         c.argument('detach_acr', acr_arg_type, validator=validate_acr)
         c.argument('disable_defender', action='store_true', validator=validate_defender_disable_and_enable_parameters)

@@ -15,7 +15,7 @@ from azure.cli.command_modules.appservice._appservice_utils import MSI_LOCAL_ID
 from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider, AzureStorageType
 
 from ._completers import get_hostname_completion_list
-from ._constants import (FUNCTIONS_VERSIONS, WINDOWS_OS_NAME, LINUX_OS_NAME)
+from ._constants import (FUNCTIONS_VERSIONS, LOGICAPPS_NODE_RUNTIME_VERSIONS, WINDOWS_OS_NAME, LINUX_OS_NAME)
 
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
                           validate_front_end_scale_factor, validate_ase_create, validate_ip_address,
@@ -804,6 +804,9 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-d'], help='The container registry server username.')
         c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'],
                    help='The container registry server password. Required for private registries.')
+        c.argument('runtime_version', help='The runtime version for logic app.', arg_type=get_enum_type(LOGICAPPS_NODE_RUNTIME_VERSIONS))
+        c.argument('functions_version', options_list=['--functions-version', '-v'],
+                   help='The functions version for logic app.', arg_type=get_enum_type(FUNCTIONS_VERSIONS))
 
     with self.argument_context('logicapp show') as c:
         c.argument('name', arg_type=logicapp_name_arg_type)

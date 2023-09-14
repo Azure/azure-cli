@@ -2119,11 +2119,13 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
         policy_path = os.path.join(TEST_DIR, 'policy.json')
         policy2_path = os.path.join(TEST_DIR, 'policy2.json')
         policy3_path = os.path.join(TEST_DIR, 'policy3.json')
+        policy4_path = os.path.join(TEST_DIR, 'policy4.json')
         cert_secret_path = os.path.join(TEST_DIR, 'cert_secret.der')
         self.kwargs.update({
             'policy_path': policy_path,
             'policy2_path': policy2_path,
             'policy3_path': policy3_path,
+            'policy4_path': policy4_path,
             'cert_secret_path': cert_secret_path
         })
 
@@ -2152,6 +2154,12 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
                      self.check('name', 'cert2'),
                      self.check('policy.secretProperties.contentType',
                                 policy['secretProperties']['contentType'])
+                 ])
+        # test cert import using policy without content-type specified
+        self.cmd('keyvault certificate import --vault-name {kv} --file "{cert_secret_path}" -n cert2 -p @"{policy4_path}"',
+                 checks=[
+                     self.check('name', 'cert2'),
+                     self.check('policy.secretProperties.contentType', 'application/x-pkcs12')
                  ])
         self.cmd('keyvault certificate delete --vault-name {kv} -n cert2')
         if os.path.exists(cert_secret_path):
