@@ -21,6 +21,17 @@ class ProfileCommandsLoader(AzCommandsLoader):
         super(ProfileCommandsLoader, self).__init__(cli_ctx=cli_ctx)
 
     def load_command_table(self, args):
+        from azure.cli.core.aaz import load_aaz_command_table
+        try:
+            from . import aaz
+        except ImportError:
+            aaz = None
+        if aaz:
+            load_aaz_command_table(
+                loader=self,
+                aaz_pkg_name=aaz.__name__,
+                args=args
+            )
 
         profile_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.profile.custom#{}'
@@ -36,7 +47,6 @@ class ProfileCommandsLoader(AzCommandsLoader):
             g.command('set', 'set_active_subscription')
             g.show_command('show', 'show_subscription')
             g.command('clear', 'account_clear')
-            g.command('list-locations', 'list_locations')
             g.command('get-access-token', 'get_access_token')
 
         return self.command_table

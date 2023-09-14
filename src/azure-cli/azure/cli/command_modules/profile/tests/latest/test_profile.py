@@ -28,10 +28,12 @@ class ProfileTest(ScenarioTest):
             assert result['user']['name'] == MOCKED_USER_NAME
 
     def test_list_locations(self):
-        result = self.cmd('account list-locations').get_output_in_json()
+        result = self.cmd('account list-locations --include-extended-locations').get_output_in_json()
         assert isinstance(result, list)
         # Verify there is an item with displayName 'East US'.
         assert any('East US' == loc['displayName'] for loc in result)
+        assert any('metadata' in loc for loc in result)
+        assert any('availabilityZoneMappings' in loc for loc in result)
 
 
 if __name__ == '__main__':
