@@ -124,7 +124,7 @@ def load_arguments(self, _):
             c.argument('continuous_tier', arg_type=get_enum_type(ContinuousTier), help="The tier of Continuous backup", arg_group='Backup Policy')
             c.argument('minimal_tls_version', arg_type=get_enum_type(MinimalTlsVersion), help="Indicates the minimum allowed TLS version")
 
-    for scope in ['cosmosdb update']:
+    with self.argument_context('cosmosdb update') as c:
         c.argument('key_uri', help="The URI of the key vault", is_preview=True)
         
     for scope in ['cosmosdb regenerate-key', 'cosmosdb keys regenerate']:
