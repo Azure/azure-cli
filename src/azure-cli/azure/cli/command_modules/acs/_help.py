@@ -974,17 +974,17 @@ type: command
 short-summary: Enable Kubernetes addons.
 long-summary: |-
     These addons are available:
-        - http_application_routing : configure ingress with automatic public DNS name creation.
-        - monitoring               : turn on Log Analytics monitoring. Requires "--workspace-resource-id".
-                                     Requires "--enable-msi-auth-for-monitoring" for managed identity auth.
-                                     Requires "--enable-syslog" to enable syslog data collection from nodes. Note MSI must be enabled
-                                     If monitoring addon is enabled --no-wait argument will have no effect
-        - virtual-node             : enable AKS Virtual Node. Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
-        - azure-policy             : enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
-                                     Learn more at aka.ms/aks/policy.
-        - ingress-appgw            : enable Application Gateway Ingress Controller addon.
-        - open-service-mesh        : enable Open Service Mesh addon.
-        - azure-keyvault-secrets-provider : enable Azure Keyvault Secrets Provider addon.
+    - http_application_routing : configure ingress with automatic public DNS name creation.
+    - monitoring               : turn on Log Analytics monitoring. Requires "--workspace-resource-id".
+                                 Requires "--enable-msi-auth-for-monitoring" for managed identity auth.
+                                 Requires "--enable-syslog" to enable syslog data collection from nodes. Note MSI must be enabled
+                                 If monitoring addon is enabled --no-wait argument will have no effect
+    - virtual-node             : enable AKS Virtual Node. Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
+    - azure-policy             : enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
+                                 Learn more at aka.ms/aks/policy.
+    - ingress-appgw            : enable Application Gateway Ingress Controller addon.
+    - open-service-mesh        : enable Open Service Mesh addon.
+    - azure-keyvault-secrets-provider : enable Azure Keyvault Secrets Provider addon.
 parameters:
   - name: --addons -a
     type: string
