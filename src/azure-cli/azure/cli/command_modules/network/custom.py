@@ -3956,6 +3956,13 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
             "in the future."
         )
 
+    if sku is None or sku.lower() == "basic":
+        logger.warning(
+            "It's recommended to create with `--sku standard`. "
+            "Please be aware that the default LB SKU will be changed from Basic to Standard in the future and "
+            "Basic option will be removed."
+        )
+
     tags = tags or {}
     public_ip_address = public_ip_address or 'PublicIP{}'.format(load_balancer_name)
     backend_pool_name = backend_pool_name or '{}bepool'.format(load_balancer_name)
