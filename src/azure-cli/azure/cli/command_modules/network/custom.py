@@ -5148,10 +5148,11 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         tier = pip_obj['sku']['tier']
         zone = pip_obj['zones'] if 'zones' in pip_obj else None
 
-    if sku is None:
+    if sku is None or sku.lower() == "basic":
         logger.warning(
-            "Please note that the default public IP used for creation will be changed from Basic to Standard "
-            "in the future."
+            "It's recommended to create with `--sku standard`. "
+            "Please be aware that the default Public IP SKU will be changed from Basic to Standard in the future and "
+            "Basic option will be removed."
         )
 
     if not allocation_method:
