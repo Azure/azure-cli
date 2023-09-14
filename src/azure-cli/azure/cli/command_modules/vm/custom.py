@@ -3218,14 +3218,14 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                            'the aliases without version suffix (such as: `UbuntuLTS`, `CentOS`, `Debian`, `Flatcar`, '
                            '`SLES`, `openSUSE-Leap` and `RHEL`) will be removed.')
 
-    # The default load balancer will be expected to be changed from Basic to Standard.
+    # The default load balancer will be expected to be changed from Basic to Standard, and Basic will be removed.
     # In order to avoid breaking change which has a big impact to users,
     # we use the hint to guide users to use Standard load balancer to create VMSS in the first stage.
-    if load_balancer_sku is None:
+    if load_balancer_sku is None or load_balancer_sku == 'Basic':
         logger.warning(
-            'It is recommended to use parameter "--lb-sku Standard" to create new VMSS with Standard load balancer. '
-            'Please note that the default load balancer used for VMSS creation will be changed from Basic to Standard '
-            'in the future.')
+            "It's recommended to create with `--lb-sku Standard`. "
+            "Please be aware that the default LB SKU will be changed from Basic to Standard in the future and "
+            "Basic option will be removed.")
 
     # Build up the ARM template
     master_template = ArmTemplateBuilder()
