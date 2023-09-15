@@ -582,8 +582,8 @@ def transform_softdelete_parameters(parameter):
 
 
 def transform_enable_parameters(parameter):
-    if parameter in ('Enable', 'Disable'):
+    if parameter in ('Enable', 'Disable', 'PermanentlyDisable'):
         return parameter + 'd'
-    if parameter in ('Enabled', 'Disabled'):
+    if parameter in ('Enabled', 'Disabled', 'PermanentlyDisabled'):
         return parameter[:-1]
     raise CLIError("Please provide a valid parameter.")

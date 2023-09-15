@@ -747,6 +747,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('storage blob exists --account-name {sa} -c {container} -n {blob}', checks=self.check("exists", True))
 
+    # @unittest.skip("Test skipped due to temporary test infrastructure issues")
     @AllowLargeResponse()
     @ResourceGroupPreparer(location="centraluseuap")
     @ResourceGroupPreparer(parameter_name="target_resource_group", location="centraluseuap")

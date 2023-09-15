@@ -79,7 +79,8 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=t
         try:
             execute(self.cli_ctx, 'az backup vault delete -n {} -g {} --yes'.format(vault_name, resource_group))
         except HttpResponseError as ex:
-            if "Operation returned an invalid status 'Bad Request'" not in str(ex):
+            if "Operation returned an invalid status 'Bad Request'" not in str(ex) and \
+                  "Operation returned an invalid status 'Accepted'" not in str(ex):
                 raise ex
 
 
@@ -101,10 +102,11 @@ class VMPreparer(AbstractPreparer, SingleValueReplacer):
         if not self.dev_setting_value:
             self.resource_group = self._get_resource_group(**kwargs)
             self.location = self._get_resource_group_location(**kwargs)
-            param_format = '-n {} -g {} --image {} --admin-username {} --admin-password {} --tags {} --nsg-rule None'
+            param_format = '-n {} -g {} --image {} --admin-username {} --admin-password {} '
+            param_format += '--tags {} --size {} --nsg-rule None'
             param_tags = 'MabUsed=Yes Owner=sisi Purpose=CLITest DeleteBy=12-2099 AutoShutdown=No'
             param_string = param_format.format(name, self.resource_group, 'Win2012R2Datacenter', name,
-                                               '%j^VYw9Q3Z@Cu$*h', param_tags)
+                                               '%j^VYw9Q3Z@Cu$*h', param_tags, 'Standard_D2a_v4')
             cmd = 'az vm create {}'.format(param_string)
             execute(self.cli_ctx, cmd)
             return {self.parameter_name: name}
