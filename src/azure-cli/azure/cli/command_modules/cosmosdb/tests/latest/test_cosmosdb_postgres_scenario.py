@@ -22,11 +22,11 @@ class CosmosDBPostgresScenarioTest(ScenarioTest):
 
         self.cmd('az cosmosdb postgres cluster create '
                 '--name {cluster_name} -g {rg} -l {loc} --coordinator-v-cores 4 '
-                '--coordinator-server-edition "GeneralPurpose" --node-count "2" '
-                '--node-v-cores 2 --coordinator-storage-quota-in-mb {storage} '
-                '--administrator-login-password {pass} '
-                '--node-server-edition "MemoryOptimized" '
-                '--node-storage-quota-in-mb {storage}', checks=[
+                '--coordinator-edition "GeneralPurpose" --node-count "2" '
+                '--node-v-cores 2 --coordinator-storage {storage} '
+                '--admin-login-password {pass} '
+                '--node-edition "MemoryOptimized" '
+                '--node-storage {storage}', checks=[
                     self.check('name', "{cluster_name}"),
                     self.check('provisioningState', 'Succeeded')
                 ])
@@ -82,11 +82,11 @@ class CosmosDBPostgresScenarioTest(ScenarioTest):
 
         self.cmd('az cosmosdb postgres cluster create '
                 '--name {cluster_name} -g {rg} -l {loc} --coordinator-v-cores 4 '
-                '--coordinator-server-edition "GeneralPurpose" --node-count "2" '
-                '--node-v-cores 2 --coordinator-storage-quota-in-mb {storage} '
-                '--administrator-login-password {pass} '
-                '--node-server-edition "MemoryOptimized" '
-                '--node-storage-quota-in-mb {storage}', checks=[
+                '--coordinator-edition "GeneralPurpose" --node-count "2" '
+                '--node-v-cores 2 --coordinator-storage {storage} '
+                '--admin-login-password {pass} '
+                '--node-edition "MemoryOptimized" '
+                '--node-storage {storage}', checks=[
                     self.check('name', "{cluster_name}"),
                     self.check('provisioningState', 'Succeeded')
                 ])
@@ -127,11 +127,11 @@ class CosmosDBPostgresScenarioTest(ScenarioTest):
 
         self.cmd('az cosmosdb postgres cluster create '
                 '--name {cluster_name} -g {rg} -l {loc} --coordinator-v-cores 4 '
-                '--coordinator-server-edition "GeneralPurpose" --node-count "2" '
-                '--node-v-cores 2 --coordinator-storage-quota-in-mb {storage} '
-                '--administrator-login-password {pass} '
-                '--node-server-edition "MemoryOptimized" '
-                '--node-storage-quota-in-mb {storage}', checks=[
+                '--coordinator-edition "GeneralPurpose" --node-count "2" '
+                '--node-v-cores 2 --coordinator-storage {storage} '
+                '--admin-login-password {pass} '
+                '--node-edition "MemoryOptimized" '
+                '--node-storage {storage}', checks=[
                     self.check('name', "{cluster_name}"),
                     self.check('provisioningState', 'Succeeded')
                 ])
@@ -171,11 +171,11 @@ class CosmosDBPostgresScenarioTest(ScenarioTest):
 
         self.cmd('az cosmosdb postgres cluster create '
                 '--name {cluster_name} -g {rg} -l {loc} --coordinator-v-cores 4 '
-                '--coordinator-server-edition "GeneralPurpose" --node-count "2" '
-                '--node-v-cores 2 --coordinator-storage-quota-in-mb {storage} '
-                '--administrator-login-password {pass} '
-                '--node-server-edition "MemoryOptimized" '
-                '--node-storage-quota-in-mb {storage}'
+                '--coordinator-edition "GeneralPurpose" --node-count "2" '
+                '--node-v-cores 2 --coordinator-storage {storage} '
+                '--admin-login-password {pass} '
+                '--node-edition "MemoryOptimized" '
+                '--node-storage {storage}'
                 )
         
         self.cmd('az cosmosdb postgres cluster wait --created -n {cluster_name} -g {rg}')

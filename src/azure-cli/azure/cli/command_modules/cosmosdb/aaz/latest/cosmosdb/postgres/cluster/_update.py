@@ -13,25 +13,30 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "cosmosdb postgres cluster update",
-    is_preview=True,
 )
 class Update(AAZCommand):
     """Update an existing cluster. The request body can contain one or several properties from the cluster definition.
 
-    :example: Scale compute up or down
+    :example: Scale worker node compute up or down
         az cosmosdb postgres cluster update -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --node-v-cores 16
 
     :example: Scale out: Add new worker nodes
         az cosmosdb postgres cluster update -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --node-count 2
 
-    :example: Scale up storage
-        az cosmosdb postgres cluster update -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --coordinator-storage 2097152
+    :example: Scale up worker node storage
+        az cosmosdb postgres cluster update -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --node-storage 2097152
 
     :example: Update multiple configuration settings of the cluster
-        az cosmosdb postgres cluster update -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --node-v-cores 16 --node-count 4 coordinator-v-cores 16 --login-password "newPassword"
+        az cosmosdb postgres cluster update -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --node-v-cores 16 --node-count 4 coordinator-v-cores 16 --admin-login-password "newPassword"
 
     :example: Update or define maintenance window
         az cosmosdb postgres cluster update -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --maintenance-window day-of-week=1 start-hour=2 --start-minute=0 custom-window="Enabled"
+
+    :example: Upgrade PostgreSQL major version
+        az cosmosdb postgres cluster update -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --postgresql-version "15"
+
+    :example: Scale up coordinator storage
+        az cosmosdb postgres cluster update -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --coordinator-storage 2097152
     """
 
     _aaz_info = {
@@ -88,8 +93,8 @@ class Update(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.administrator_login_password = AAZPasswordArg(
-            options=["--login-password", "--administrator-login-password"],
+        _args_schema.admin_login_password = AAZPasswordArg(
+            options=["--admin-login-password"],
             arg_group="Properties",
             help="The password of the administrator login. Required for creation.",
             blank=AAZPromptPasswordInput(
@@ -106,13 +111,13 @@ class Update(AAZCommand):
             arg_group="Properties",
             help="If public access is enabled on coordinator.",
         )
-        _args_schema.coordinator_server_edition = AAZStrArg(
-            options=["--coord-server-edition", "--coordinator-server-edition"],
+        _args_schema.coordinator_edition = AAZStrArg(
+            options=["--coordinator-edition"],
             arg_group="Properties",
             help="The edition of a coordinator server (default: GeneralPurpose). Required for creation.",
         )
-        _args_schema.coordinator_storage_quota_in_mb = AAZIntArg(
-            options=["--coordinator-storage", "--coordinator-storage-quota-in-mb"],
+        _args_schema.coordinator_storage = AAZIntArg(
+            options=["--coordinator-storage"],
             arg_group="Properties",
             help="The storage of a server in MB. Required for creation. See https://learn.microsoft.com/azure/cosmos-db/postgresql/resources-compute for more information.",
         )
@@ -141,13 +146,13 @@ class Update(AAZCommand):
             arg_group="Properties",
             help="Worker node count of the cluster. When node count is 0, it represents a single node configuration with the ability to create distributed tables on that node. 2 or more worker nodes represent multi-node configuration. Node count value cannot be 1.",
         )
-        _args_schema.node_server_edition = AAZStrArg(
-            options=["--node-server-edition"],
+        _args_schema.node_edition = AAZStrArg(
+            options=["--node-edition"],
             arg_group="Properties",
-            help="The edition of a node (default: MemoryOptimized).",
+            help="The edition of a node server (default: MemoryOptimized).",
         )
-        _args_schema.node_storage_quota_in_mb = AAZIntArg(
-            options=["--node-storage", "--node-storage-quota-in-mb"],
+        _args_schema.node_storage = AAZIntArg(
+            options=["--node-storage"],
             arg_group="Properties",
             help="The storage in MB on each worker node. See https://learn.microsoft.com/azure/cosmos-db/postgresql/resources-compute for more information.",
         )
@@ -297,18 +302,18 @@ class Update(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("administratorLoginPassword", AAZStrType, ".administrator_login_password", typ_kwargs={"flags": {"secret": True}})
+                properties.set_prop("administratorLoginPassword", AAZStrType, ".admin_login_password", typ_kwargs={"flags": {"secret": True}})
                 properties.set_prop("citusVersion", AAZStrType, ".citus_version")
                 properties.set_prop("coordinatorEnablePublicIpAccess", AAZBoolType, ".coordinator_enable_public_ip_access")
-                properties.set_prop("coordinatorServerEdition", AAZStrType, ".coordinator_server_edition")
-                properties.set_prop("coordinatorStorageQuotaInMb", AAZIntType, ".coordinator_storage_quota_in_mb")
+                properties.set_prop("coordinatorServerEdition", AAZStrType, ".coordinator_edition")
+                properties.set_prop("coordinatorStorageQuotaInMb", AAZIntType, ".coordinator_storage")
                 properties.set_prop("coordinatorVCores", AAZIntType, ".coordinator_v_cores")
                 properties.set_prop("enableHa", AAZBoolType, ".enable_ha")
                 properties.set_prop("enableShardsOnCoordinator", AAZBoolType, ".enable_shards_on_coordinator")
                 properties.set_prop("maintenanceWindow", AAZObjectType, ".maintenance_window")
                 properties.set_prop("nodeCount", AAZIntType, ".node_count")
-                properties.set_prop("nodeServerEdition", AAZStrType, ".node_server_edition")
-                properties.set_prop("nodeStorageQuotaInMb", AAZIntType, ".node_storage_quota_in_mb")
+                properties.set_prop("nodeServerEdition", AAZStrType, ".node_edition")
+                properties.set_prop("nodeStorageQuotaInMb", AAZIntType, ".node_storage")
                 properties.set_prop("nodeVCores", AAZIntType, ".node_v_cores")
                 properties.set_prop("postgresqlVersion", AAZStrType, ".postgresql_version")
                 properties.set_prop("preferredPrimaryZone", AAZStrType, ".preferred_primary_zone")
