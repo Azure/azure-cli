@@ -149,7 +149,7 @@ class Update(AAZCommand):
             help="Worker node count of the cluster. When node count is 0, it represents a single node configuration with the ability to create distributed tables on that node. 2 or more worker nodes represent multi-node configuration. Node count value cannot be 1.",
         )
         _args_schema.node_server_edition = AAZStrArg(
-            options=["--node-edition", "--node-server-edition"],
+            options=["--node-server-edition"],
             arg_group="Properties",
             help="The edition of a node server (default: MemoryOptimized).",
         )

@@ -158,7 +158,7 @@ class Create(AAZCommand):
             help="If public access is enabled on worker nodes.",
         )
         _args_schema.node_server_edition = AAZStrArg(
-            options=["--node-edition", "--node-server-edition"],
+            options=["--node-server-edition"],
             arg_group="Properties",
             help="The edition of a node server (default: MemoryOptimized).",
         )
