@@ -79,8 +79,7 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=t
         try:
             execute(self.cli_ctx, 'az backup vault delete -n {} -g {} --yes'.format(vault_name, resource_group))
         except HttpResponseError as ex:
-            if "Operation returned an invalid status 'Bad Request'" not in str(ex) and \
-                  "Operation returned an invalid status 'Accepted'" not in str(ex):
+            if "Operation returned an invalid status 'Bad Request'" not in str(ex):
                 raise ex
 
 

@@ -294,6 +294,9 @@ def delete_vault(cmd, client, vault_name, resource_group_name, force=False):
     except HttpResponseError as ex:  # pylint: disable=broad-except
         if 'existing resources within the vault' in ex.message and force:  # pylint: disable=no-member
             _force_delete_vault(cmd, vault_name, resource_group_name)
+        elif "Operation returned an invalid status 'Accepted'"  in ex.message:
+            # TODO: Once the swagger is updated, this won't be needed.
+            pass
         else:
             raise ex
 
