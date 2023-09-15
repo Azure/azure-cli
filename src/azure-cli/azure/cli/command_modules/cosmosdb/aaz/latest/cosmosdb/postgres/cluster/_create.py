@@ -17,8 +17,10 @@ from azure.cli.core.aaz import *
 class Create(AAZCommand):
     """Create a new cluster with nodes.
 
+    Use the following reference to determine supported values for various parameters for Azure Cosmos DB for PostgreSQL clusters and nodes CLI commands: https://learn.microsoft.com/rest/api/postgresqlhsc/#values
+
     :example: Create a new single node cluster
-        az cosmosdb postgres cluster create -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --enable-ha false --coordinator-v-cores 8 --coordinator-server-edition "GeneralPurpose" --coordinator-storage 131072 --enable-shards-on-coord true --node-count 0 --preferred-primary-zone "1" --login-password "password"
+        az cosmosdb postgres cluster create -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --enable-ha false --coordinator-v-cores 8 --coordinator-server-edition "GeneralPurpose" --coordinator-storage 131072 --enable-shards-on-coord true --node-count 0 --preferred-primary-zone "1" --admin-login-password "password"
 
     :example: Create a new cluster as a point in time restore
         az cosmosdb postgres cluster create -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --point-in-time-utc "2017-12-14T00:00:37.467Z" --source-location "eastus" --source-resource-id "/subscriptions/ffffffff-ffff-ffff-ffff-ffffffffffff/resourceGroups/testGroup/providers/Microsoft.DBforPostgreSQL/serverGroupsv2/source-cluster"
@@ -27,13 +29,13 @@ class Create(AAZCommand):
         az cosmosdb postgres cluster create -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --source-location "eastus" --source-resource-id "/subscriptions/ffffffff-ffff-ffff-ffff-ffffffffffff/resourceGroups/testGroup/providers/Microsoft.DBforPostgreSQL/serverGroupsv2/source-cluster"
 
     :example: Create a new multi-node cluster
-        az cosmosdb postgres cluster create -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --enable-ha false --coordinator-v-cores 8 --coordinator-server-edition "GeneralPurpose" --coordinator-storage 131072 --enable-shards-on-coord false --node-count 3 --node-server-edition "MemoryOptimized" --node-v-cores 8 --node-storage 131072 --postgresql-version "15" --preferred-primary-zone "1" --login-password "password"
+        az cosmosdb postgres cluster create -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --enable-ha false --coordinator-v-cores 8 --coordinator-server-edition "GeneralPurpose" --coordinator-storage 131072 --enable-shards-on-coord false --node-count 3 --node-server-edition "MemoryOptimized" --node-v-cores 8 --node-storage 131072 --postgresql-version "15" --preferred-primary-zone "1" --admin-login-password "password"
 
     :example: Create a new single node Burstable 1 vCore cluster
-        az cosmosdb postgres cluster create -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --enable-ha false --coordinator-v-cores 1 --coordinator-server-edition "BurstableMemoryOptimized" --coord-public-ip-access true --coordinator-storage 131072 --enable-shards-on-coord true --node-count 0 --preferred-primary-zone "1" --login-password "password"
+        az cosmosdb postgres cluster create -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --enable-ha false --coordinator-v-cores 1 --coordinator-server-edition "BurstableMemoryOptimized" --coord-public-ip-access true --coordinator-storage 131072 --enable-shards-on-coord true --node-count 0 --preferred-primary-zone "1" --admin-login-password "password"
 
     :example: Create a new single node Burstable 2 vCores cluster
-        az cosmosdb postgres cluster create -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --enable-ha false --coordinator-v-cores 2 --coordinator-server-edition "BurstableGeneralPurpose" --coord-public-ip-access true --coordinator-storage 131072 --enable-shards-on-coord true --node-count 0 --preferred-primary-zone "1" --login-password "password"
+        az cosmosdb postgres cluster create -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --enable-ha false --coordinator-v-cores 2 --coordinator-server-edition "BurstableGeneralPurpose" --coord-public-ip-access true --coordinator-storage 131072 --enable-shards-on-coord true --node-count 0 --preferred-primary-zone "1" --admin-login-password "password"
     """
 
     _aaz_info = {
@@ -97,8 +99,8 @@ class Create(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.admin_login_password = AAZPasswordArg(
-            options=["--admin-login-password"],
+        _args_schema.administrator_login_password = AAZPasswordArg(
+            options=["--admin-login-password", "--administrator-login-password"],
             arg_group="Properties",
             help="The password of the administrator login. Required for creation.",
             blank=AAZPromptPasswordInput(
@@ -111,24 +113,24 @@ class Create(AAZCommand):
             help="The Citus extension version on all cluster servers.",
         )
         _args_schema.coordinator_enable_public_ip_access = AAZBoolArg(
-            options=["--coord-public-access", "--coordinator-enable-public-ip-access"],
+            options=["--coord-public-ip-access", "--coordinator-enable-public-ip-access"],
             arg_group="Properties",
             help="If public access is enabled on coordinator.",
         )
-        _args_schema.coordinator_edition = AAZStrArg(
-            options=["--coordinator-edition"],
+        _args_schema.coordinator_server_edition = AAZStrArg(
+            options=["--coordinator-edition", "--coordinator-server-edition"],
             arg_group="Properties",
             help="The edition of a coordinator server (default: GeneralPurpose). Required for creation.",
         )
-        _args_schema.coordinator_storage = AAZIntArg(
-            options=["--coordinator-storage"],
+        _args_schema.coordinator_storage_quota_in_mb = AAZIntArg(
+            options=["--coordinator-storage", "--coordinator-storage-quota-in-mb"],
             arg_group="Properties",
-            help="The storage of a server in MB. Required for creation. See https://learn.microsoft.com/azure/cosmos-db/postgresql/resources-compute for more information.",
+            help="The storage of a server in MB. Required for creation. See https://learn.microsoft.com/rest/api/postgresqlhsc/#values for more information.",
         )
         _args_schema.coordinator_v_cores = AAZIntArg(
             options=["--coordinator-v-cores"],
             arg_group="Properties",
-            help="The vCores count of a server (max: 96). Required for creation. See https://learn.microsoft.com/azure/cosmos-db/postgresql/resources-compute for more information.",
+            help="The vCores count of a server (max: 96). Required for creation. See https://learn.microsoft.com/rest/api/postgresqlhsc/#values for more information.",
         )
         _args_schema.enable_ha = AAZBoolArg(
             options=["--enable-ha"],
@@ -151,24 +153,24 @@ class Create(AAZCommand):
             help="Worker node count of the cluster. When node count is 0, it represents a single node configuration with the ability to create distributed tables on that node. 2 or more worker nodes represent multi-node configuration. Node count value cannot be 1. Required for creation.",
         )
         _args_schema.node_enable_public_ip_access = AAZBoolArg(
-            options=["--node-public-access", "--node-enable-public-ip-access"],
+            options=["--node-public-ip-access", "--node-enable-public-ip-access"],
             arg_group="Properties",
             help="If public access is enabled on worker nodes.",
         )
-        _args_schema.node_edition = AAZStrArg(
-            options=["--node-edition"],
+        _args_schema.node_server_edition = AAZStrArg(
+            options=["--node-edition", "--node-server-edition"],
             arg_group="Properties",
             help="The edition of a node server (default: MemoryOptimized).",
         )
-        _args_schema.node_storage = AAZIntArg(
-            options=["--node-storage"],
+        _args_schema.node_storage_quota_in_mb = AAZIntArg(
+            options=["--node-storage", "--node-storage-quota-in-mb"],
             arg_group="Properties",
-            help="The storage in MB on each worker node. See https://learn.microsoft.com/azure/cosmos-db/postgresql/resources-compute for more information.",
+            help="The storage in MB on each worker node. See https://learn.microsoft.com/rest/api/postgresqlhsc/#values for more information.",
         )
         _args_schema.node_v_cores = AAZIntArg(
             options=["--node-v-cores"],
             arg_group="Properties",
-            help="The compute in vCores on each worker node (max: 104). See https://learn.microsoft.com/azure/cosmos-db/postgresql/resources-compute for more information.",
+            help="The compute in vCores on each worker node (max: 104). See https://learn.microsoft.com/rest/api/postgresqlhsc/#values for more information.",
         )
         _args_schema.point_in_time_utc = AAZDateTimeArg(
             options=["--point-in-time-utc"],
@@ -327,19 +329,19 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("administratorLoginPassword", AAZStrType, ".admin_login_password", typ_kwargs={"flags": {"secret": True}})
+                properties.set_prop("administratorLoginPassword", AAZStrType, ".administrator_login_password", typ_kwargs={"flags": {"secret": True}})
                 properties.set_prop("citusVersion", AAZStrType, ".citus_version")
                 properties.set_prop("coordinatorEnablePublicIpAccess", AAZBoolType, ".coordinator_enable_public_ip_access")
-                properties.set_prop("coordinatorServerEdition", AAZStrType, ".coordinator_edition")
-                properties.set_prop("coordinatorStorageQuotaInMb", AAZIntType, ".coordinator_storage")
+                properties.set_prop("coordinatorServerEdition", AAZStrType, ".coordinator_server_edition")
+                properties.set_prop("coordinatorStorageQuotaInMb", AAZIntType, ".coordinator_storage_quota_in_mb")
                 properties.set_prop("coordinatorVCores", AAZIntType, ".coordinator_v_cores")
                 properties.set_prop("enableHa", AAZBoolType, ".enable_ha")
                 properties.set_prop("enableShardsOnCoordinator", AAZBoolType, ".enable_shards_on_coordinator")
                 properties.set_prop("maintenanceWindow", AAZObjectType, ".maintenance_window")
                 properties.set_prop("nodeCount", AAZIntType, ".node_count")
                 properties.set_prop("nodeEnablePublicIpAccess", AAZBoolType, ".node_enable_public_ip_access")
-                properties.set_prop("nodeServerEdition", AAZStrType, ".node_edition")
-                properties.set_prop("nodeStorageQuotaInMb", AAZIntType, ".node_storage")
+                properties.set_prop("nodeServerEdition", AAZStrType, ".node_server_edition")
+                properties.set_prop("nodeStorageQuotaInMb", AAZIntType, ".node_storage_quota_in_mb")
                 properties.set_prop("nodeVCores", AAZIntType, ".node_v_cores")
                 properties.set_prop("pointInTimeUTC", AAZStrType, ".point_in_time_utc")
                 properties.set_prop("postgresqlVersion", AAZStrType, ".postgresql_version")
