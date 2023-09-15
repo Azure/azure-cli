@@ -970,7 +970,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
                      '--nat-gateway-managed-outbound-ip-count 2 ' \
                      '--nat-gateway-idle-timeout 30 ' \
-                     '--outbound-type managedNATGateway ' 
+                     '--outbound-type managedNATGateway '
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('networkProfile.outboundType', 'managedNATGateway'),
@@ -1153,14 +1153,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # disable virtual-node add-on
         disable_addon_output = self.cmd('aks disable-addons -a virtual-node -g {resource_group} -n {name}').get_output_in_json()
         assert disable_addon_output["addonProfiles"]["aciConnectorLinux"]["enabled"] == False
-        # None for addon v1, {} for addon v2 
+        # None for addon v1, {} for addon v2
         assert bool(disable_addon_output["addonProfiles"]["aciConnectorLinux"]["config"]) == False
 
 
         # show again
         show_output = self.cmd('aks show -g {resource_group} -n {name}').get_output_in_json()
         assert show_output["addonProfiles"]["aciConnectorLinux"]["enabled"] == False
-        # None for addon v1, {} for addon v2 
+        # None for addon v1, {} for addon v2
         assert bool(show_output["addonProfiles"]["aciConnectorLinux"]["config"]) == False
 
         # enable virtual node add-on
@@ -9001,7 +9001,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'auto_upgrade_config_name': 'aksManagedAutoUpgradeSchedule',
             'node_os_upgrade_config_name': 'aksManagedNodeOSUpgradeSchedule',
             'ssh_key_value': self.generate_ssh_keys(),
-            'future_date': "2123-01-01" 
+            'future_date': "2123-01-01"
         })
 
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --ssh-key-value={ssh_key_value}'
@@ -9019,7 +9019,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             '--duration 8 ' \
             '--utc-offset +05:30 ' \
             '--start-date {future_date} ' \
-            '--start-time 00:00 ' 
+            '--start-time 00:00 '
 
         self.cmd(
             maintenance_configuration_add_cmd, checks=[
@@ -9074,7 +9074,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 self.check('maintenanceWindow.schedule.absoluteMonthly.intervalMonths', 3),
                 self.check('maintenanceWindow.durationHours', 4),
                 self.check('maintenanceWindow.utcOffset', '-08:00'),
-                self.check('maintenanceWindow.startTime', '09:00'), 
+                self.check('maintenanceWindow.startTime', '09:00'),
                 self.check('maintenanceWindow.notAllowedDates | length(@)', 2)]
         )
 
@@ -9097,7 +9097,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             '-g {resource_group} --cluster-name {name} ' \
             '-n {node_os_upgrade_config_name}'
         self.cmd(maintenance_configuration_delete_cmd, checks=[self.is_empty()])
-        
+
         # maintenanceconfiguration list
         maintenance_configuration_list_cmd = 'aks maintenanceconfiguration list ' \
             '-g {resource_group} --cluster-name {name}'
@@ -9158,6 +9158,58 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         maintenance_configuration_list_cmd = 'aks maintenanceconfiguration list -g {resource_group} --cluster-name {name}'
         self.cmd(
             maintenance_configuration_list_cmd, checks=[self.is_empty()])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_update_upgrade_settings(self, resource_group, resource_group_location):
+        """ This test case exercises enabling and disabling forceUpgrade override in cluster upgradeSettings.
+        """
+
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+        'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--enable-managed-identity ' \
+                     '--ssh-key-value={ssh_key_value}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.not_exists('upgradeSettings')
+        ])
+
+        # update upgrade settings
+        self.cmd('aks update --resource-group={resource_group} --name={name} --upgrade-override-until 2020-01-01T22:30:17+00:00', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.not_exists('upgradeSettings.overrideSettings.forceUpgrade'),
+            self.exists('upgradeSettings.overrideSettings.until')
+        ])
+        self.cmd('aks update --resource-group={resource_group} --name={name} --enable-force-upgrade', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('upgradeSettings.overrideSettings.forceUpgrade', True),
+            self.exists('upgradeSettings.overrideSettings.until')
+        ])
+        self.cmd('aks update --resource-group={resource_group} --name={name} --enable-force-upgrade --upgrade-override-until 2020-02-22T22:30:17+00:00', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('upgradeSettings.overrideSettings.forceUpgrade', True),
+            self.check('upgradeSettings.overrideSettings.until', '2020-02-22T22:30:17+00:00')
+        ])
+        self.cmd('aks update --resource-group={resource_group} --name={name} --disable-force-upgrade', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('upgradeSettings.overrideSettings.forceUpgrade', False),
+            self.check('upgradeSettings.overrideSettings.until', '2020-02-22T22:30:17+00:00')
+        ])
 
         # delete
         self.cmd(
