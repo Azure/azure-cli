@@ -380,9 +380,9 @@ jobs:
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
-        Azure Linux ${{ arch.name }}:
+        Mariner 2.0 ${{ arch.name }}:
           pool: ${{ arch.pool }}
-          artifactName: docker-azure-${{ arch.value }}
+          artifactName: docker-mariner2.0-${{ arch.value }}
           dockerfile: azure.dockerfile
           packageArtifactName: rpm-mariner2.0-${{ arch.value }}
   pool:
@@ -423,9 +423,9 @@ jobs:
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
-        Azure Linux ${{ arch.name }}:
+        Mariner 2.0 ${{ arch.name }}:
           pool: ${{ arch.pool }}
-          artifactName: docker-azure-${{ arch.value }}
+          artifactName: docker-mariner2.0-${{ arch.value }}
   pool:
     name: $(pool)
   steps:
