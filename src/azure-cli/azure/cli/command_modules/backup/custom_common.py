@@ -116,15 +116,18 @@ def show_item(cmd, client, resource_group_name, vault_name, container_name, name
                 --use-secondary-region flag is not supported for this backup management type.
                 Please either remove the flag or query for any other container type.
                 """)
-    else:
-        if custom_help.is_native_name(name) and custom_help.is_native_name(container_name):
-            client = protected_items_cf(cmd.cli_ctx)
-            return client.get(vault_name, resource_group_name, fabric_name, container_name, name)
+    # else:
+    #     if custom_help.is_native_name(name) and custom_help.is_native_name(container_name):
+    #         client = protected_items_cf(cmd.cli_ctx)
+    #         return client.get(vault_name, resource_group_name, fabric_name, container_name, name)
 
     items = list_items(cmd, client, resource_group_name, vault_name, workload_type, container_name,
                        container_type, use_secondary_region)
 
-    if custom_help.is_native_name(name):
+    if custom_help.is_native_name(name) and custom_help.is_native_name(container_name):
+        filtered_items = [item for item in items if item.name.lower()== name.lower() and 
+                          item.properties.container_name.lower() == container_name.lower()]
+    elif custom_help.is_native_name(name):
         filtered_items = [item for item in items if item.name.lower() == name.lower()]
     else:
         filtered_items = [item for item in items if item.properties.friendly_name.lower() == name.lower()]
