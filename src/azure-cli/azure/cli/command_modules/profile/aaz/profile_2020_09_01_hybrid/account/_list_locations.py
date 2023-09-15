@@ -19,9 +19,9 @@ class ListLocations(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-12-01",
+        "version": "2016-06-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/locations", "2022-12-01"],
+            ["mgmt-plane", "/subscriptions/{}/locations", "2016-06-01"],
         ]
     }
 
@@ -39,12 +39,6 @@ class ListLocations(AAZCommand):
         cls._args_schema = super()._build_arguments_schema(*args, **kwargs)
 
         # define Arg Group ""
-
-        _args_schema = cls._args_schema
-        _args_schema.include_extended_locations = AAZBoolArg(
-            options=["--include-extended-locations"],
-            help="Whether to include extended locations.",
-        )
         return cls._args_schema
 
     def _execute_operations(self):
@@ -104,10 +98,7 @@ class ListLocations(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "includeExtendedLocations", self.ctx.args.include_extended_locations,
-                ),
-                **self.serialize_query_param(
-                    "api-version", "2022-12-01",
+                    "api-version", "2016-06-01",
                     required=True,
                 ),
             }
@@ -146,9 +137,6 @@ class ListLocations(AAZCommand):
             value.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element
-            _element.availability_zone_mappings = AAZListType(
-                serialized_name="availabilityZoneMappings",
-            )
             _element.display_name = AAZStrType(
                 serialized_name="displayName",
                 flags={"read_only": True},
@@ -156,74 +144,10 @@ class ListLocations(AAZCommand):
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.metadata = AAZObjectType()
-            _element.name = AAZStrType(
+            _element.latitude = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.regional_display_name = AAZStrType(
-                serialized_name="regionalDisplayName",
-                flags={"read_only": True},
-            )
-            _element.subscription_id = AAZStrType(
-                serialized_name="subscriptionId",
-                flags={"read_only": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            availability_zone_mappings = cls._schema_on_200.value.Element.availability_zone_mappings
-            availability_zone_mappings.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.availability_zone_mappings.Element
-            _element.logical_zone = AAZStrType(
-                serialized_name="logicalZone",
-                flags={"read_only": True},
-            )
-            _element.physical_zone = AAZStrType(
-                serialized_name="physicalZone",
-                flags={"read_only": True},
-            )
-
-            metadata = cls._schema_on_200.value.Element.metadata
-            metadata.geography = AAZStrType(
-                flags={"read_only": True},
-            )
-            metadata.geography_group = AAZStrType(
-                serialized_name="geographyGroup",
-                flags={"read_only": True},
-            )
-            metadata.home_location = AAZStrType(
-                serialized_name="homeLocation",
-                flags={"read_only": True},
-            )
-            metadata.latitude = AAZStrType(
-                flags={"read_only": True},
-            )
-            metadata.longitude = AAZStrType(
-                flags={"read_only": True},
-            )
-            metadata.paired_region = AAZListType(
-                serialized_name="pairedRegion",
-            )
-            metadata.physical_location = AAZStrType(
-                serialized_name="physicalLocation",
-                flags={"read_only": True},
-            )
-            metadata.region_category = AAZStrType(
-                serialized_name="regionCategory",
-                flags={"read_only": True},
-            )
-            metadata.region_type = AAZStrType(
-                serialized_name="regionType",
-                flags={"read_only": True},
-            )
-
-            paired_region = cls._schema_on_200.value.Element.metadata.paired_region
-            paired_region.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.metadata.paired_region.Element
-            _element.id = AAZStrType(
+            _element.longitude = AAZStrType(
                 flags={"read_only": True},
             )
             _element.name = AAZStrType(
