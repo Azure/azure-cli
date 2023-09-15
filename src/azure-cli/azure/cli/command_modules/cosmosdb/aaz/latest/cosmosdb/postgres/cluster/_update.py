@@ -29,7 +29,7 @@ class Update(AAZCommand):
         az cosmosdb postgres cluster update -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --node-storage 2097152
 
     :example: Update multiple configuration settings of the cluster
-        az cosmosdb postgres cluster update -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --node-v-cores 16 --node-count 4 coordinator-v-cores 16 --admin-login-password "newPassword"
+        az cosmosdb postgres cluster update -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --node-v-cores 16 --node-count 4 coordinator-v-cores 16 --administrator-login-password "newPassword"
 
     :example: Update or define maintenance window
         az cosmosdb postgres cluster update -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --maintenance-window day-of-week=1 start-hour=2 --start-minute=0 custom-window="Enabled"
@@ -96,7 +96,7 @@ class Update(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.administrator_login_password = AAZPasswordArg(
-            options=["--admin-login-password", "--administrator-login-password"],
+            options=["--login-password", "--administrator-login-password"],
             arg_group="Properties",
             help="The password of the administrator login. Required for creation.",
             blank=AAZPromptPasswordInput(
@@ -114,7 +114,7 @@ class Update(AAZCommand):
             help="If public access is enabled on coordinator.",
         )
         _args_schema.coordinator_server_edition = AAZStrArg(
-            options=["--coordinator-edition", "--coordinator-server-edition"],
+            options=["--coord-server-edition", "--coordinator-server-edition"],
             arg_group="Properties",
             help="The edition of a coordinator server (default: GeneralPurpose). Required for creation.",
         )

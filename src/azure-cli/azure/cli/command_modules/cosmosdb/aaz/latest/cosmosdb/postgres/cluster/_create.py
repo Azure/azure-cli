@@ -20,7 +20,7 @@ class Create(AAZCommand):
     Use the following reference to determine supported values for various parameters for Azure Cosmos DB for PostgreSQL clusters and nodes CLI commands: https://learn.microsoft.com/rest/api/postgresqlhsc/#values
 
     :example: Create a new single node cluster
-        az cosmosdb postgres cluster create -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --enable-ha false --coordinator-v-cores 8 --coordinator-server-edition "GeneralPurpose" --coordinator-storage 131072 --enable-shards-on-coord true --node-count 0 --preferred-primary-zone "1" --admin-login-password "password"
+        az cosmosdb postgres cluster create -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --enable-ha false --coordinator-v-cores 8 --coordinator-server-edition "GeneralPurpose" --coordinator-storage 131072 --enable-shards-on-coord true --node-count 0 --preferred-primary-zone "1" --administrator-login-password "password"
 
     :example: Create a new cluster as a point in time restore
         az cosmosdb postgres cluster create -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --point-in-time-utc "2017-12-14T00:00:37.467Z" --source-location "eastus" --source-resource-id "/subscriptions/ffffffff-ffff-ffff-ffff-ffffffffffff/resourceGroups/testGroup/providers/Microsoft.DBforPostgreSQL/serverGroupsv2/source-cluster"
@@ -29,13 +29,13 @@ class Create(AAZCommand):
         az cosmosdb postgres cluster create -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --source-location "eastus" --source-resource-id "/subscriptions/ffffffff-ffff-ffff-ffff-ffffffffffff/resourceGroups/testGroup/providers/Microsoft.DBforPostgreSQL/serverGroupsv2/source-cluster"
 
     :example: Create a new multi-node cluster
-        az cosmosdb postgres cluster create -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --enable-ha false --coordinator-v-cores 8 --coordinator-server-edition "GeneralPurpose" --coordinator-storage 131072 --enable-shards-on-coord false --node-count 3 --node-server-edition "MemoryOptimized" --node-v-cores 8 --node-storage 131072 --postgresql-version "15" --preferred-primary-zone "1" --admin-login-password "password"
+        az cosmosdb postgres cluster create -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --enable-ha false --coordinator-v-cores 8 --coordinator-server-edition "GeneralPurpose" --coordinator-storage 131072 --enable-shards-on-coord false --node-count 3 --node-server-edition "MemoryOptimized" --node-v-cores 8 --node-storage 131072 --postgresql-version "15" --preferred-primary-zone "1" --administrator-login-password "password"
 
     :example: Create a new single node Burstable 1 vCore cluster
-        az cosmosdb postgres cluster create -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --enable-ha false --coordinator-v-cores 1 --coordinator-server-edition "BurstableMemoryOptimized" --coord-public-ip-access true --coordinator-storage 131072 --enable-shards-on-coord true --node-count 0 --preferred-primary-zone "1" --admin-login-password "password"
+        az cosmosdb postgres cluster create -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --enable-ha false --coordinator-v-cores 1 --coordinator-server-edition "BurstableMemoryOptimized" --coord-public-ip-access true --coordinator-storage 131072 --enable-shards-on-coord true --node-count 0 --preferred-primary-zone "1" --administrator-login-password "password"
 
     :example: Create a new single node Burstable 2 vCores cluster
-        az cosmosdb postgres cluster create -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --enable-ha false --coordinator-v-cores 2 --coordinator-server-edition "BurstableGeneralPurpose" --coord-public-ip-access true --coordinator-storage 131072 --enable-shards-on-coord true --node-count 0 --preferred-primary-zone "1" --admin-login-password "password"
+        az cosmosdb postgres cluster create -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --enable-ha false --coordinator-v-cores 2 --coordinator-server-edition "BurstableGeneralPurpose" --coord-public-ip-access true --coordinator-storage 131072 --enable-shards-on-coord true --node-count 0 --preferred-primary-zone "1" --administrator-login-password "password"
     """
 
     _aaz_info = {
@@ -100,7 +100,7 @@ class Create(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.administrator_login_password = AAZPasswordArg(
-            options=["--admin-login-password", "--administrator-login-password"],
+            options=["--login-password", "--administrator-login-password"],
             arg_group="Properties",
             help="The password of the administrator login. Required for creation.",
             blank=AAZPromptPasswordInput(
@@ -118,7 +118,7 @@ class Create(AAZCommand):
             help="If public access is enabled on coordinator.",
         )
         _args_schema.coordinator_server_edition = AAZStrArg(
-            options=["--coordinator-edition", "--coordinator-server-edition"],
+            options=["--coord-server-edition", "--coordinator-server-edition"],
             arg_group="Properties",
             help="The edition of a coordinator server (default: GeneralPurpose). Required for creation.",
         )
