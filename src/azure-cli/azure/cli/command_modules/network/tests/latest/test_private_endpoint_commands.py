@@ -4381,9 +4381,9 @@ class NetworkPrivateLinkCosmosDBPostgresScenarioTest(ScenarioTest):
 
         self.cmd('az cosmosdb postgres cluster create '
                 '--name {cluster_name} -g {rg} -l {loc} --coordinator-v-cores 4 '
-                '--coordinator-server-edition "GeneralPurpose" --node-count 0 '
-                '--coordinator-storage-quota-in-mb {storage} '
-                '--administrator-login-password {pass} '
+                '--coordinator-edition "GeneralPurpose" --node-count 0 '
+                '--coordinator-storage {storage} '
+                '--admin-login-password {pass} '
                 )
         
         self.cmd('az cosmosdb postgres cluster wait --created -n {cluster_name} -g {rg}')
@@ -4420,9 +4420,9 @@ class NetworkPrivateLinkCosmosDBPostgresScenarioTest(ScenarioTest):
 
         cluster = self.cmd('az cosmosdb postgres cluster create '
                 '--name {cluster_name} -g {rg} -l {loc} --coordinator-v-cores 4 '
-                '--coordinator-server-edition "GeneralPurpose" --node-count 0 '
-                '--coordinator-storage-quota-in-mb {storage} '
-                '--administrator-login-password {pass} '
+                '--coordinator-edition "GeneralPurpose" --node-count 0 '
+                '--coordinator-storage {storage} '
+                '--admin-login-password {pass} '
                 ).get_output_in_json()
         self.kwargs['cluster_id'] = cluster['id']
         
