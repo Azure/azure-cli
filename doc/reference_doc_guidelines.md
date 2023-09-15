@@ -270,7 +270,7 @@ Use these checklists for a quick review before publishing new reference content.
 > - Information has been added to `service-mapping.json`.
 > - A link has been added to **Reference** TOC node of the Azure service.
 
-#### Description checklist
+### Description checklist
 
 > [!div class="checklist"]
 >
