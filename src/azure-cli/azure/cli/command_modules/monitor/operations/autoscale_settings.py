@@ -2,13 +2,13 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+# pylint: disable=line-too-long, protected-access
 import json
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.aaz import has_value, AAZListArg, AAZStrArg, AAZIntArg, AAZBoolArg
 from azure.cli.command_modules.monitor.actions import AAZCustomListArg
-from azure.cli.command_modules.monitor._autoscale_util import build_autoscale_profile_from_instance
+from azure.cli.command_modules.monitor._autoscale_util import get_autoscale_default_profile
 from ..aaz.latest.monitor.autoscale import Create as _AutoScaleCreate, Update as _AutoScaleUpdate, \
     Show as _AutoScaleShow, List as _AutoScaleList
 from azure.cli.command_modules.network.custom import _convert_to_snake_case
@@ -53,7 +53,7 @@ def update_add_actions(args):
                     "custom_emails": add_action_item_arr[1:]
                 }
             })
-        if _type == "webhook":
+        elif _type == "webhook":
             uri = add_action_item_arr[1]
             try:
                 properties = dict(x.split('=', 1) for x in add_action_item_arr[2:])
@@ -66,7 +66,8 @@ def update_add_actions(args):
                     "properties": properties
                 }
             })
-        raise InvalidArgumentValueError('TYPE KEY [ARGS]')
+        else:
+            raise InvalidArgumentValueError('TYPE KEY [ARGS]')
     return add_actions
 
 
@@ -86,6 +87,10 @@ class AutoScaleUpdate(_AutoScaleUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.notifications._registered = False
+        args_schema.profiles._registered = False
+        args_schema.target_resource_location._registered = False
+        args_schema.target_resource_uri._registered = False
         args_schema.count = AAZIntArg(
             options=["--count"],
             help='The numer of instances to use. If used with --min/max-count, the default number of instances to use.',
@@ -117,7 +122,8 @@ class AutoScaleUpdate(_AutoScaleUpdate):
         args_schema.add_actions.Element.Element = AAZStrArg()
 
         args_schema.remove_actions = AAZCustomListArg(
-            options=['--remove-action', '-r'],
+            options=["--remove-actions"],
+            singular_options=['--remove-action', '-r'],
             help="Remove one or more actions." + '''
         Usage:   --remove-action TYPE KEY [KEY ...]
         Email:   --remove-action email bob@contoso.com ann@contoso.com
@@ -146,17 +152,17 @@ class AutoScaleUpdate(_AutoScaleUpdate):
         add_actions = update_add_actions(args)
         remove_actions = update_remove_actions(args)
         if has_value(args.count) or has_value(args.min_count) or has_value(args.max_count):
-            default_profile, _ = build_autoscale_profile_from_instance(instance)
-            curr_count = default_profile.capacity.default
-            curr_min = default_profile.capacity.minimum
-            curr_max = default_profile.capacity.maximum
+            default_profile = get_autoscale_default_profile(instance)
+            curr_count = default_profile["capacity"]["default"]
+            curr_min = default_profile["capacity"]["minimum"]
+            curr_max = default_profile["capacity"]["maximum"]
             is_fixed_count = curr_count == curr_min and curr_count == curr_max
 
             # check for special case where count is used to indicate fixed value and only
             # count is updated
             if has_value(args.count) and is_fixed_count and not has_value(args.min_count) and not has_value(args.max_count):
-                min_count = args.count.to_serialized_data()
-                max_count = args.count.to_serialized_data()
+                args.min_count = args.count.to_serialized_data()
+                args.max_count = args.count.to_serialized_data()
 
             count = curr_count if not has_value(args.count) else args.count.to_serialized_data()
             min_count = curr_min if not has_value(args.min_count) else args.min_count.to_serialized_data()
@@ -164,18 +170,18 @@ class AutoScaleUpdate(_AutoScaleUpdate):
 
             # There may be multiple "default" profiles. All need to updated.
             for profile in instance.properties.profiles:
-                if profile.fixed_date:
+                if has_value(profile.fixed_date):
                     continue
-                if profile.recurrence:
+                if has_value(profile.recurrence):
                     try:
                         # portal denotes the "default" pairs by using a JSON string for their name
                         # so if it can be decoded, we know this is a default profile
                         json.loads(profile.name)
                     except ValueError:
                         continue
-                profile.capacity.default = count
-                profile.capacity.minimum = min_count
-                profile.capacity.maximum = max_count
+                profile.capacity.default = str(count)
+                profile.capacity.minimum = str(min_count)
+                profile.capacity.maximum = str(max_count)
 
         if not instance.properties.notifications:
             return
@@ -202,7 +208,7 @@ class AutoScaleUpdate(_AutoScaleUpdate):
             notification.email.send_to_subscription_co_administrators = args.email_coadministrators.to_serialized_data()
 
         if has_value(args.scale_look_ahead_time) and not has_value(args.scale_mode) \
-                and instance.properties.predictiveAutoscalePolicy is None:
+                and not has_value(instance.properties.predictiveAutoscalePolicy):
             raise InvalidArgumentValueError('scale-mode is required for setting scale-look-ahead-time.')
 
     def _output(self, *args, **kwargs):
@@ -233,7 +239,6 @@ def autoscale_create(cmd, resource, count, autoscale_name=None, resource_group_n
                      actions=None, email_administrator=None, email_coadministrators=None,
                      scale_mode=None, scale_look_ahead_time=None):
 
-    from azure.cli.core.azclierror import InvalidArgumentValueError
     if not autoscale_name:
         from msrestazure.tools import parse_resource_id
         autoscale_name = parse_resource_id(resource)['name']
@@ -288,90 +293,6 @@ def autoscale_create(cmd, resource, count, autoscale_name=None, resource_group_n
     if not (min_count == count and max_count == count):
         logger.warning('Follow up with `az monitor autoscale rule create` to add scaling rules.')
     return AutoScaleCreate(cli_ctx=cmd.cli_ctx)(command_args=args)
-
-
-# pylint: disable=too-many-locals
-def autoscale_update(instance, count=None, min_count=None, max_count=None, tags=None, enabled=None,  # pylint:disable=too-many-statements,too-many-branches
-                     add_actions=None, remove_actions=None, email_administrator=None,
-                     email_coadministrators=None, scale_mode=None, scale_look_ahead_time=None):
-    from azure.mgmt.monitor.models import EmailNotification, WebhookNotification, PredictiveAutoscalePolicy
-    from azure.cli.command_modules.monitor._autoscale_util import build_autoscale_profile
-    from azure.cli.core.azclierror import InvalidArgumentValueError
-
-    if tags is not None:
-        instance.tags = tags
-    if enabled is not None:
-        instance.enabled = enabled
-
-    if count is not None or min_count is not None or max_count is not None:
-        # resolve the interrelated aspects of capacity
-        default_profile, _ = build_autoscale_profile(instance)
-        curr_count = default_profile.capacity.default
-        curr_min = default_profile.capacity.minimum
-        curr_max = default_profile.capacity.maximum
-        is_fixed_count = curr_count == curr_min and curr_count == curr_max
-
-        # check for special case where count is used to indicate fixed value and only
-        # count is updated
-        if count is not None and is_fixed_count and min_count is None and max_count is None:
-            min_count = count
-            max_count = count
-
-        count = curr_count if count is None else count
-        min_count = curr_min if min_count is None else min_count
-        max_count = curr_max if max_count is None else max_count
-
-        # There may be multiple "default" profiles. All need to updated.
-        for profile in instance.profiles:
-            if profile.fixed_date:
-                continue
-            if profile.recurrence:
-                try:
-                    # portal denotes the "default" pairs by using a JSON string for their name
-                    # so if it can be decoded, we know this is a default profile
-                    json.loads(profile.name)
-                except ValueError:
-                    continue
-            profile.capacity.default = count
-            profile.capacity.minimum = min_count
-            profile.capacity.maximum = max_count
-
-    if not instance.notifications:
-        return instance
-
-    notification = next(x for x in instance.notifications if x.operation.lower() == 'scale')
-
-    # process removals
-    if remove_actions is not None:
-        removed_emails, removed_webhooks = _parse_action_removals(remove_actions)
-        notification.email.custom_emails = \
-            [x for x in notification.email.custom_emails if x not in removed_emails]
-        notification.webhooks = \
-            [x for x in notification.webhooks if x.service_uri not in removed_webhooks]
-
-    # process additions
-    for action in add_actions or []:
-        if isinstance(action, EmailNotification):
-            for email in action.custom_emails:
-                notification.email.custom_emails.append(email)
-        elif isinstance(action, WebhookNotification):
-            notification.webhooks.append(action)
-
-    if email_administrator is not None:
-        notification.email.send_to_subscription_administrator = email_administrator
-    if email_coadministrators is not None:
-        notification.email.send_to_subscription_co_administrators = email_coadministrators
-    predictive_policy = instance.predictive_autoscale_policy
-    if scale_mode is not None:
-        if predictive_policy is None:
-            predictive_policy = PredictiveAutoscalePolicy(scale_mode=scale_mode)
-        else:
-            predictive_policy.scale_mode = scale_mode
-    if scale_look_ahead_time is not None and predictive_policy is not None:
-        predictive_policy.scale_look_ahead_time = scale_look_ahead_time
-    elif scale_look_ahead_time is not None and predictive_policy is None:
-        raise InvalidArgumentValueError('scale-mode is required for setting scale-look-ahead-time.')
-    return instance
 
 
 def _parse_action_removals(actions):
@@ -541,7 +462,7 @@ class AutoScaleProfileDelete(_AutoScaleUpdate):
     def pre_instance_update(self, instance):
         args = self.ctx.args
         profile_name = args.profile_name.to_serialized_data()
-        default_profile, _ = build_autoscale_profile_from_instance(instance)
+        default_profile = get_autoscale_default_profile(instance)
 
         def _should_retain_profile(profile):
             name = profile.name.to_serialized_data()
@@ -555,7 +476,7 @@ class AutoScaleProfileDelete(_AutoScaleUpdate):
         instance.properties.profiles = retained_profiles
 
         # if we removed the last "default" of a recurring pair, we need to preserve it
-        new_default, _ = build_autoscale_profile_from_instance(instance)
+        new_default = get_autoscale_default_profile(instance)
         if not new_default:
             instance.properties.profiles.append(default_profile)
 
