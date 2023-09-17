@@ -656,3 +656,51 @@ class TestLogProfileScenarios(ScenarioTest):
         from azure.cli.core.azclierror import InvalidArgumentValueError
         with self.assertRaisesRegex(InvalidArgumentValueError, "usage: The table name needs to end with _SRCH"):
             self.cmd('monitor log-analytics workspace table search-job cancel -n {table1_name} -g {rg} --workspace-name {ws_name}')
+
+
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_table_retention_validation', location='WestEurope')
+    @AllowLargeResponse()
+    def test_monitor_log_analytics_workspace_table_retention_validation(self, resource_group):
+        self.kwargs.update({
+            'ws_name': self.create_random_name('ws-', 10),
+            'table_name': self.create_random_name('TB', 10) + '_CL',
+        })
+
+        self.cmd('monitor log-analytics workspace create -g {rg} -n {ws_name}')
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaisesRegex(InvalidArgumentValueError, "usage error: --retention-time should between 4 and 730"):
+            self.cmd('monitor log-analytics workspace table create -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 3 --total-retention-time 3 --plan Analytics --columns col1=guid TimeGenerated=datetime')
+
+        with self.assertRaisesRegex(InvalidArgumentValueError, "usage error: --total-retention-time should between 4 and 2556"):
+            self.cmd('monitor log-analytics workspace table create -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time -1 --total-retention-time 3 --plan Analytics --columns col1=guid TimeGenerated=datetime')
+
+        self.cmd(
+            'monitor log-analytics workspace table create -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time -1 --total-retention-time -1 --plan Analytics --columns col1=guid TimeGenerated=datetime',
+            checks=[
+                self.check('name', '{table_name}'),
+                self.check('schema.columns[0].name', 'col1'),
+                self.check('schema.columns[0].type', 'guid'),
+                self.check('schema.columns[1].name', 'TimeGenerated'),
+                self.check('schema.columns[1].type', 'datetime'),
+            ])
+        with self.assertRaisesRegex(InvalidArgumentValueError, "usage error: --retention-time should between 4 and 730"):
+            self.cmd('monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 2 --total-retention-time 2')
+        with self.assertRaisesRegex(InvalidArgumentValueError, "usage error: --total-retention-time should between 4 and 2556"):
+            self.cmd('monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 4 --total-retention-time 2')
+        self.cmd(
+            'monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 4 --total-retention-time 2556 --columns col2=guid',
+            checks=[
+                self.check('name', '{table_name}'),
+                self.check('retentionInDays', 4),
+                self.check('totalRetentionInDays', 2556),
+                self.check('schema.columns[0].name', 'col2'),
+                self.check('schema.columns[0].type', 'guid'),
+            ])
+        self.cmd('monitor log-analytics workspace table show -g {rg} -n {table_name} --workspace-name {ws_name}',
+                 checks=[
+                     self.check('name', '{table_name}'),
+                     self.check('retentionInDays', 4),
+                     self.check('totalRetentionInDays', 2556),
+                 ])
+
+        self.cmd('monitor log-analytics workspace table delete -g {rg} -n {table_name} --workspace-name {ws_name} -y')
