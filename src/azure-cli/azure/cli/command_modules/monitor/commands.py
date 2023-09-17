@@ -175,14 +175,14 @@ def load_command_table(self, _):
         g.custom_command('update', 'update_log_analytics_workspace_table', supports_no_wait=True)
 
     with self.command_group('monitor log-analytics workspace table search-job',
-                            custom_command_type=log_analytics_workspace_custom, is_preview=True) as g:
+                            custom_command_type=log_analytics_workspace_custom) as g:
         g.custom_command('create', 'create_log_analytics_workspace_table_search_job', supports_no_wait=True)
         from .operations.log_analytics_workspace import WorkspaceTableSearchJobCancel
         self.command_table['monitor log-analytics workspace table search-job cancel'] = \
             WorkspaceTableSearchJobCancel(loader=self)
 
     with self.command_group('monitor log-analytics workspace table restore',
-                            custom_command_type=log_analytics_workspace_custom, is_preview=True) as g:
+                            custom_command_type=log_analytics_workspace_custom) as g:
         g.custom_command('create', 'create_log_analytics_workspace_table_restore', supports_no_wait=True)
 
     from .operations.log_analytics_workspace import WorkspaceDataExportCreate, WorkspaceDataExportUpdate
