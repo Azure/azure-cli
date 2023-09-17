@@ -176,7 +176,7 @@ class AutoScaleUpdate(_AutoScaleUpdate):
                     try:
                         # portal denotes the "default" pairs by using a JSON string for their name
                         # so if it can be decoded, we know this is a default profile
-                        json.loads(profile.name)
+                        json.loads(profile.name.to_serialized_data())
                     except ValueError:
                         continue
                 profile.capacity.default = str(count)
