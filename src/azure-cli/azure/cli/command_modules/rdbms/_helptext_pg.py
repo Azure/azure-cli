@@ -201,7 +201,7 @@ examples:
         --key $keyIdentifier --identity testIdentity --backup-key $geoKeyIdentifier --backup-identity geoIdentity
 
 
-      # create flexible server with storage auto-grow as Enabled
+      # create flexible server with storage auto-grow as Enabled. Accepted values Enabled / Disabled. Default value for storage auto-grow is "Disabled".
 
       az postgres flexible-server create -g testGroup -n testServer --location testLocation --storage-auto-grow Enabled
 """
