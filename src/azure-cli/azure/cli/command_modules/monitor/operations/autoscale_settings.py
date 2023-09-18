@@ -190,16 +190,16 @@ class AutoScaleUpdate(_AutoScaleUpdate):
         # process removals
         if len(remove_actions) > 0:
             removed_emails, removed_webhooks = _parse_action_removals(remove_actions)
-            notification.email.customEmails = \
-                [x for x in notification.email.customEmails if x not in removed_emails]
+            notification.email.custom_emails = \
+                [x for x in notification.email.custom_emails if x not in removed_emails]
             notification.webhooks = \
-                [x for x in notification.webhooks if x.serviceUri not in removed_webhooks]
+                [x for x in notification.webhooks if x.service_uri not in removed_webhooks]
 
         # process additions
         for action in add_actions:
             if action["key"] == "email":
                 for email in action["value"]["custom_emails"]:
-                    notification.email.customEmails.append(email)
+                    notification.email.custom_emails.append(email)
             elif action["key"] == "webhook":
                 notification.webhooks.append(action["value"])  # please check snake case key here
         if has_value(args.email_administrator):
@@ -208,7 +208,7 @@ class AutoScaleUpdate(_AutoScaleUpdate):
             notification.email.send_to_subscription_co_administrators = args.email_coadministrators.to_serialized_data()
 
         if has_value(args.scale_look_ahead_time) and not has_value(args.scale_mode) \
-                and not has_value(instance.properties.predictiveAutoscalePolicy):
+                and not has_value(instance.properties.predictive_autoscale_policy):
             raise InvalidArgumentValueError('scale-mode is required for setting scale-look-ahead-time.')
 
     def _output(self, *args, **kwargs):
