@@ -299,11 +299,9 @@ def load_arguments(self, _):
         c.ignore('disable_max_length')
 
     with self.argument_context('containerapp env dapr-component') as c:
-        c.argument('dapr_app_id', help="The Dapr app ID.")
-        c.argument('dapr_app_port', help="The port of your app.")
-        c.argument('dapr_app_protocol', help="Tell Dapr which protocol your application is using.  Allowed values: grpc, http.")
         c.argument('dapr_component_name', help="The Dapr component name.")
         c.argument('environment_name', options_list=['--name', '-n'], help="The environment name.")
+        c.argument('yaml', type=file_type, help='Path to a .yaml file with the configuration of a Dapr component. All other parameters will be ignored. For an example, see https://learn.microsoft.com/en-us/azure/container-apps/dapr-overview?tabs=bicep1%2Cyaml#component-schema')
 
     with self.argument_context('containerapp revision set-mode') as c:
         c.argument('mode', arg_type=get_enum_type(['single', 'multiple']), help="The active revisions mode for the container app.")

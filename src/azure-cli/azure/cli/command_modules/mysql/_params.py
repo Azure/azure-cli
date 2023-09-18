@@ -494,6 +494,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('subnet', arg_type=subnet_arg_type)
         c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
         c.argument('public_access', options_list=['--public-access'], arg_type=get_enum_type(['Enabled', 'Disabled']), help='Determines the public access. ')
+        c.argument('tier', arg_type=tier_arg_type)
+        c.argument('sku_name', arg_type=sku_name_arg_type)
+        c.argument('storage_gb', arg_type=storage_gb_arg_type)
+        c.argument('iops', arg_type=iops_arg_type)
+        c.argument('backup_retention', arg_type=mysql_backup_retention_arg_type)
+        c.argument('geo_redundant_backup', arg_type=geo_redundant_backup_arg_type)
 
     with self.argument_context('mysql flexible-server replica stop-replication') as c:
         c.argument('server_name', arg_type=server_name_arg_type)
