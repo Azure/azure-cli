@@ -500,6 +500,7 @@ def show_encryption(client, resource_group_name, vault_name):
     return encryption_config_response
 
 
+# pylint: disable=too-many-locals
 def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_storage_redundancy=None,
                           soft_delete_feature_state=None, cross_region_restore_flag=None,
                           hybrid_backup_security_features=None, tenant_id=None,
@@ -604,6 +605,7 @@ def show_policy(client, resource_group_name, vault_name, name):
     return client.get(vault_name, resource_group_name, name)
 
 
+# pylint: disable=redefined-builtin
 def list_deleted_protection_containers(client, resource_group_name, vault_name, backup_management_type):
     # backup_management_type should be made an optional field after the swagger is fixed
     filter = "backupManagementType eq '{}'".format(backup_management_type)
