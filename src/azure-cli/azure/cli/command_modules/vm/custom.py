@@ -2165,7 +2165,9 @@ def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publishe
                        'on a Red Hat based operating system.')
     if vm_extension_name == 'AHBForSLES':
         logger.warning('Please ensure that you are provisioning AHBForSLES extension on a SLES based operating system.')
-    if vm_extension_name == 'GuestAttestation' and enable_auto_upgrade is None:
+
+    auto_upgrade_extensions = ['GuestAttestation', 'CodeIntegrityAgent']
+    if vm_extension_name in auto_upgrade_extensions and enable_auto_upgrade is None:
         enable_auto_upgrade = True
 
     version = _normalize_extension_version(cmd.cli_ctx, publisher, vm_extension_name, version, vm.location)
@@ -4305,6 +4307,10 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
                        enable_auto_upgrade=None):
     if not extension_instance_name:
         extension_instance_name = extension_name
+
+    auto_upgrade_extensions = ['CodeIntegrityAgent']
+    if extension_name in auto_upgrade_extensions and enable_auto_upgrade is None:
+        enable_auto_upgrade = True
 
     client = _compute_client_factory(cmd.cli_ctx)
     vmss = client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name, vm_scale_set_name=vmss_name)
