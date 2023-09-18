@@ -21,17 +21,6 @@ class ProfileCommandsLoader(AzCommandsLoader):
         super(ProfileCommandsLoader, self).__init__(cli_ctx=cli_ctx)
 
     def load_command_table(self, args):
-        from azure.cli.core.aaz import load_aaz_command_table
-        try:
-            from . import aaz
-        except ImportError:
-            aaz = None
-        if aaz:
-            load_aaz_command_table(
-                loader=self,
-                aaz_pkg_name=aaz.__name__,
-                args=args
-            )
 
         profile_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.profile.custom#{}'
