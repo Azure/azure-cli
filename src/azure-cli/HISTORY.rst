@@ -3,6 +3,100 @@
 Release History
 ===============
 
+2.52.0
+++++++
+
+**AKS**
+
+* `az aks create/update`: Add new parameter `--enable-vpa` to support enabling vertical pod autoscaler for cluster (#27019)
+* `az aks update`: Add new parameter `--network-dataplane` to specify the network dataplane used in the Kubernetes cluster (#27060)
+* `az aks create/update`: Add new parameter `--node-os-upgrade-channel` to specify which OS on your nodes is updated (#27167)
+* `az aks update`: Retain value in network profile in mc object only when decorator is in update mode (#27050)
+* `az aks update`: Outbound ip/outbound ipprefix and managed outbound ip should be mutually exclusive (#27271)
+
+**App Config**
+
+* `az apponfig kv import`: Add new parameter `--import-mode` to specify whether to overwrite already existing key-values or ignore matching keys (#26098)
+* `az appconfig kv export`: Add new parameter `--snapshot` to support exporting all key values from a snapshot of the source configuration (#27043)
+* `az appconfig kv import`: Add new parameter `--src-snapshot` to support importing all key values from a snapshot of the source configuration (#27043)
+
+**App Service**
+
+* Fix #26736: `az logicapp create`: Add `--runtime-version` and `--functions-version` optional parameters (#26957)
+* `az webapp config connection-string set`: Allow users to use json file to set the connection string (#27216)
+
+**ARM**
+
+* Fix #26112: `az deployment group create`: Fix the warning log `mode is not a known attribute of class TemplateLink` (#26984)
+* `az bicep build-params`: Support generating `parameters.json` file from the given `bicepparam` file with the `--file` argument (#26781)
+* `az bicep decompile-params`: Support generating `parameters.bicepparam` file from the given `parameters.json` file with the `--file` argument (#26781)
+* `az bicep generate-params`: Support generating `main.parameters.json` with the parameters that doesn't have default values in the given `.bicep` file (#26781)
+* `az bicep generate-params`: Add new parameter `--output-format` to support generating parameter file in `bicepparam` and `json` formats (#26781)
+* `az bicep generate-params`: Add new parameter `--include-params` to support generating parameter file with all the parameters in the given `bicep` file, or with only parameters that doesn't have default values in the given `bicep` file (#26781)
+
+**ARO**
+
+* `az aro create`: Add new `--outbound-type` parameter, allowing users to select "Loadbalancer" (default) or "UserDefinedRouting" (#27212)
+* `az aro create`: Perform pre-flight validation of prerequisite permissions before creation (#27212)
+* `az aro validate`: New command to perform explicit validation of prerequisite permissions (#27212)
+
+**Backup**
+
+* `az backup restore restore-azurefileshare`: Add `--target-rg-name` parameter to specify the resource group of the destination storage account (#27130)
+
+**Batch**
+
+* `az batch`: Fix batch cloud console authentication issue (#26960)
+
+**Cognitive Services**
+
+* `az cognitiveservices account deployment create`: Add `--model-source` parameter (#27235)
+
+**Compute**
+
+* `az vmss create/update`: Add `--enable-hibernation` parameter to enable hibernation capability on VMSS (#27075)
+* `az vmss update`: Add `--security-type` parameter to enable Trusted Launch on existing VMSS (#27082)
+* `az vmss deallocate`: Add `--hibernate` parameter to support hibernating a VM while deallocating (#27106)
+* `az ppg update`: Add new parameter `--type` to support setting proximity placement group type (#27241)
+
+**Cosmos DB**
+
+* `az cosmosdb restore`: Support enabling/disabling public network access (#27175)
+
+**Key Vault**
+
+* Fix #27220: `az keyvault certificate import`: Fix invalid policy issue when no `content_type` provided (#27225)
+* `az keyvault storage`: Announce deprecation since keyvault service doesn't maintain this since long ago (#27249)
+
+**MySQL**
+
+* `az mysql flexible-server parameter set-batch`: Add new command to support updating multiple parameters (#27232)
+* `az mysql flexible-server export create`: Add Export Backup CLI implementation (#27261)
+
+**Network**
+
+* `az network private-endpoint-connection`: Add provider `Microsoft.EventGrid/namespaces` and `Microsoft.EventGrid/partnerNamespaces` (#27063)
+* Fix #27066: `az network vnet list`: Fix -o table cannot be used (#27076)
+* `az network express-route port delete`: Add confirmation while deleting (#27150)
+* `az network application-gateway waf-policy custom-rule`: Add an example of using `--group-by-user-session` (#27172)
+* `az network express-route update`: Fix `properties.SeriveProviderProperties` unexpected null (#27127)
+* Fix #26730: `az network public-ip update`: `--ip-tags` cannot be correctly parsed (#27187)
+* `az network application-gateway waf-policy managed-rule rule-set`: Support Microsoft_BotManagerRuleSet version 1.0 (#27184)
+* `az network vnet peering create`: Mark `--remote-vnet` as required (#27198)
+
+**Redis**
+
+* `az redis update`: Fix public network access default value issue (#27227)
+
+**Storage**
+
+* `az storage file upload-batch`: Allow uploading files in parallel to improve performance (#26940)
+* Fix #27202: `az storage entity insert`: Fix case when using sas token with only `add` permission (#27280)
+
+**Upgrade**
+
+* `az upgrade`: Support upgrading with 64-bit MSI (#27104)
+
 2.51.0
 ++++++
 
@@ -1568,6 +1662,15 @@ Release History
 
 * `az synapse workspace`: Add `--last-commit-id` for git repo config (#23257)
 * `az synapse ad-only-auth`: New command group for supporting synapse azure ad only authentication (#23227)
+
+2.38.1
+++++++
+
+This version is only available on CentOS 7 and RHEL 7.
+
+**App Service**
+
+* `az webapp ssh`: Backport #25141 to 2.38 (#26836)
 
 2.38.0
 ++++++
