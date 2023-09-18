@@ -1195,8 +1195,9 @@ def flexible_parameter_update_batch(client, server_name, resource_group_name, so
 
 # Replica commands
 # Custom functions for server replica, will add MySQL part after backend ready in future
-def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, location=None, tags=None,
-                            private_dns_zone_arguments=None, vnet=None, subnet=None, zone=None, public_access=None, no_wait=False):
+def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, location=None, tags=None, sku_name=None,
+                            private_dns_zone_arguments=None, vnet=None, subnet=None, zone=None, public_access=None, no_wait=False,
+                            storage_gb=None, iops=None, geo_redundant_backup=None, backup_retention=None, tier=None):
     provider = 'Microsoft.DBforMySQL'
     replica_name = replica_name.lower()
 
@@ -1223,14 +1224,39 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
     if not location:
         location = source_server_object.location
 
-    sku_name = source_server_object.sku.name
-    tier = source_server_object.sku.tier
+    if not sku_name:
+        sku_name = source_server_object.sku.name
+
+    if not tier:
+        tier = source_server_object.sku.tier
+
+    if not backup_retention:
+        backup_retention = source_server_object.backup.backup_retention_days
+
+    if not geo_redundant_backup:
+        geo_redundant_backup = source_server_object.backup.geo_redundant_backup
+
+    if not storage_gb:
+        storage_gb = source_server_object.storage.storage_size_gb
+
+    if not iops:
+        iops = source_server_object.storage.iops
 
     identity, data_encryption = get_identity_and_data_encryption(source_server_object)
+
+    storage = mysql_flexibleservers.models.Storage(storage_size_gb=storage_gb,
+                                                   iops=iops,
+                                                   auto_grow="Enabled",
+                                                   auto_io_scaling=source_server_object.storage.auto_io_scaling)
+
+    backup = mysql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
+                                                 geo_redundant_backup=geo_redundant_backup)
 
     parameters = mysql_flexibleservers.models.Server(
         sku=mysql_flexibleservers.models.Sku(name=sku_name, tier=tier),
         source_server_resource_id=source_server_id,
+        storage=storage,
+        backup=backup,
         location=location,
         tags=tags,
         availability_zone=zone,
