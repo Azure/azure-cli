@@ -594,7 +594,10 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     except ValueError:
         raise ResourceNotFoundError('Failed to fetch scm url for function app')
 
-    zip_url = scm_url + '/api/zipdeploy?isAsync=true'
+    client = web_client_factory(cmd.cli_ctx)
+    app = client.web_apps.get(resource_group_name, name)
+    deployer = '&Deployer=az_cli_functions' if is_functionapp(app) else ''
+    zip_url = scm_url + '/api/zipdeploy?isAsync=true' + deployer
     deployment_status_url = scm_url + '/api/deployments/latest'
 
     additional_headers = {"Content-Type": "application/octet-stream", "Cache-Control": "no-cache"}
