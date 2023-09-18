@@ -14,6 +14,7 @@ class ProfileTest(ScenarioTest):
 
     def test_account_show(self):
         # Force this test to generate a recording file so that this test can run in playback mode.
+        self.cmd('az rest -u /subscriptions/{{subscriptionId}}/locations?api-version=2019-11-01')
 
         result = self.cmd('account show').get_output_in_json()
 
