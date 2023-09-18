@@ -14,7 +14,6 @@ class ProfileTest(ScenarioTest):
 
     def test_account_show(self):
         # Force this test to generate a recording file so that this test can run in playback mode.
-        self.cmd('account list-locations')
 
         result = self.cmd('account show').get_output_in_json()
 
