@@ -17,7 +17,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuName, PatchVault, IdentityData, \
     CmkKeyVaultProperties, CmkKekIdentity, VaultPropertiesEncryption, UserIdentity, MonitoringSettings, \
     AzureMonitorAlertSettings, ClassicAlertSettings, SecuritySettings, ImmutabilitySettings, RestoreSettings, \
-    CrossSubscriptionRestoreSettings, SoftDeleteSettings
+    CrossSubscriptionRestoreSettings
 from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemResource, \
     AzureIaaSComputeVMProtectedItem, AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, \
     BackupRequestResource, IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, \
@@ -125,9 +125,10 @@ password_length = 15
 # pylint: disable=too-many-function-args
 
 
+# TODO: Re-add references to SoftDeleteSettings once SDK version is upgraded:
+# Import SoftDeleteSettings, args in create_vault and _get_vault_security_settings
 def create_vault(client, vault_name, resource_group_name, location, tags=None,
                  public_network_access=None, immutability_state=None, cross_subscription_restore_state=None,
-                 soft_delete_state=None, soft_delete_retention_period_in_days=None,
                  classic_alerts='Enable', azure_monitor_alerts_for_job_failures='Enable'):
     vault_sku = Sku(name=SkuName.standard)
 
@@ -135,8 +136,7 @@ def create_vault(client, vault_name, resource_group_name, location, tags=None,
         monitoring_settings=_get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures, classic_alerts),
         public_network_access=_get_vault_public_network_access(client, resource_group_name, vault_name,
                                                                public_network_access),
-        security_settings=_get_vault_security_settings(client, resource_group_name, vault_name, immutability_state,
-                                                       soft_delete_state, soft_delete_retention_period_in_days),
+        security_settings=_get_vault_security_settings(client, resource_group_name, vault_name, immutability_state),
         restore_settings=_get_vault_restore_settings(cross_subscription_restore_state)
     )
     vault = Vault(location=location, sku=vault_sku, properties=vault_properties, tags=tags)
@@ -155,48 +155,56 @@ def _get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures, classi
     return monitoring_settings
 
 
-def _get_vault_security_settings(client, resource_group_name, vault_name, immutability_state, soft_delete_state,
-                                 soft_delete_retention_period_in_days):
+# TODO Remove pylint supress once the new SDK is in place
+# pylint: disable=unused-argument
+def _get_vault_security_settings(client, resource_group_name, vault_name, immutability_state):
     security_settings = None
+    immutability_settings = None
+    if immutability_state is not None:
+        immutability_settings = ImmutabilitySettings(state=immutability_state)
+    security_settings = SecuritySettings(
+        immutability_settings=None if immutability_settings is None else immutability_settings)
 
-    if immutability_state is not None or soft_delete_state is not None or \
-            soft_delete_retention_period_in_days is not None:
-        immutability_settings = None
-        soft_delete_settings = None
+    # TODO Re-add once the new SDK is in place
+    # security_settings = None
+    # if immutability_state is not None or soft_delete_state is not None or \
+    #         soft_delete_retention_period_in_days is not None:
+    #     immutability_settings = None
+    #     soft_delete_settings = None
 
-        if immutability_state is not None:
-            immutability_settings = ImmutabilitySettings(state=immutability_state)
-            print("Immutability settings has been set to", immutability_settings)
+    #     if immutability_state is not None:
+    #         immutability_settings = ImmutabilitySettings(state=immutability_state)
 
-        if soft_delete_state is not None or soft_delete_retention_period_in_days is not None:
-            # Both soft delete state and retention period need to be passed, so we need to fetch the existing values
-            # if not provided in the input. If the vault does not exist, the default values are Enabled/14 days
-            if soft_delete_state is None:
-                try:
-                    existing_vault_if_any = client.get(resource_group_name, vault_name)
-                    existing_soft_delete_state = existing_vault_if_any.properties.security_settings.\
-                        soft_delete_settings.soft_delete_state
-                    soft_delete_state = cust_help.transform_enable_parameters(existing_soft_delete_state)
-                except CoreResourceNotFoundError:
-                    soft_delete_state = "Enable"
-            if soft_delete_retention_period_in_days is None:
-                try:
-                    existing_vault_if_any = client.get(resource_group_name, vault_name)
-                    existing_soft_delete_retention_period_in_days = existing_vault_if_any.properties.\
-                        security_settings.soft_delete_settings.soft_delete_retention_period_in_days
-                    soft_delete_retention_period_in_days = existing_soft_delete_retention_period_in_days
-                except CoreResourceNotFoundError:
-                    soft_delete_retention_period_in_days = 14
+    #     if soft_delete_state is not None or soft_delete_retention_period_in_days is not None:
+    #         # Both soft delete state and retention period need to be passed, so we need to fetch the existing values
+    #         # if not provided in the input. If the vault does not exist, the default values are Enabled/14 days
+    #         if soft_delete_state is None:
+    #             try:
+    #                 existing_vault_if_any = client.get(resource_group_name, vault_name)
+    #                 existing_soft_delete_state = existing_vault_if_any.properties.security_settings.\
+    #                     soft_delete_settings.soft_delete_state
+    #                 soft_delete_state = cust_help.transform_enable_parameters(existing_soft_delete_state)
+    #             except CoreResourceNotFoundError:
+    #                 soft_delete_state = "Enable"
+    #         if soft_delete_retention_period_in_days is None:
+    #             try:
+    #                 existing_vault_if_any = client.get(resource_group_name, vault_name)
+    #                 existing_soft_delete_retention_period_in_days = existing_vault_if_any.properties.\
+    #                     security_settings.soft_delete_settings.soft_delete_retention_period_in_days
+    #                 soft_delete_retention_period_in_days = existing_soft_delete_retention_period_in_days
+    #             except CoreResourceNotFoundError:
+    #                 soft_delete_retention_period_in_days = 14
 
-            soft_delete_settings = SoftDeleteSettings(
-                soft_delete_state=cust_help.transform_softdelete_parameters(soft_delete_state),
-                soft_delete_retention_period_in_days=soft_delete_retention_period_in_days
-            )
+    #         soft_delete_settings = SoftDeleteSettings(
+    #             soft_delete_state=cust_help.transform_softdelete_parameters(soft_delete_state),
+    #             soft_delete_retention_period_in_days=soft_delete_retention_period_in_days
+    #         )
 
-        security_settings = SecuritySettings(
-            immutability_settings=None if immutability_settings is None else immutability_settings,
-            soft_delete_settings=None if soft_delete_settings is None else soft_delete_settings
-        )
+    #     security_settings = SecuritySettings(
+    #         immutability_settings=None if immutability_settings is None else immutability_settings,
+    #         soft_delete_settings=None if soft_delete_settings is None else soft_delete_settings
+    #     )
+
     return security_settings
 
 
@@ -509,9 +517,12 @@ def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_s
     if soft_delete_feature_state or hybrid_backup_security_features or retention_duration_in_days:
         logger.warning('--backup-storage-redundancy, --cross-region-restore-flag, --classic-alerts and '
                        '--azure-monitor-alerts-for-job-failures parameters will be ignored if provided.')
-        if soft_delete_feature_state or retention_duration_in_days:
-            logger.warning("Modifying the soft delete properties of a vault via this command will soon be deprecated. "
-                           "Please use the 'az backup vault create' command to modify soft delete settings.")
+
+        # TODO Re-add once the new SDK is in place
+        # if soft_delete_feature_state or retention_duration_in_days:
+        #     logger.warning("Modifying the soft delete properties of a vault via this command will "
+        #                    "soon be deprecated. Please use the 'az backup vault create' command "
+        #                    "to modify soft delete settings.")
         vault_config_client = backup_resource_vault_config_cf(cmd.cli_ctx)
         if tenant_id is not None:
             vault_config_client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
