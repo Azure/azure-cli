@@ -50,6 +50,8 @@ def load_command_table(self, _):
     with self.command_group('eventhubs georecovery-alias', custom_command_type=eh_namespace_custom,
                             is_preview=True) as g:
         g.custom_command('set', 'set_georecovery_alias', supports_no_wait=True)
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.eventhub._update import Update
+    self.command_table['eventhubs georecovery-alias update'] = Update(loader=self, deprecate_info=self.deprecate())
 
 # NetworkRuleSet Region
     with self.command_group('eventhubs namespace network-rule-set ip-rule', custom_command_type=eh_network_custom,

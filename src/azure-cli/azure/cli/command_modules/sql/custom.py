@@ -1084,6 +1084,7 @@ def _db_dw_create(
         user_assigned_identity_id=None,
         keys=None,
         encryption_protector=None,
+        encryption_protector_auto_rotation=None,
         **kwargs):
     '''
     Creates a DB (with any create mode) or DW.
@@ -1137,6 +1138,8 @@ def _db_dw_create(
     kwargs['keys'] = _get_database_keys(keys)
     kwargs['encryption_protector'] = encryption_protector
 
+    kwargs['encryption_protector_auto_rotation'] = encryption_protector_auto_rotation
+
     # Create
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        server_name=dest_db.server_name,
@@ -1186,6 +1189,7 @@ def db_create(
         user_assigned_identity_id=None,
         keys=None,
         encryption_protector=None,
+        encryption_protector_auto_rotation=None,
         **kwargs):
     '''
     Creates a DB (with 'Default' create mode.)
@@ -1214,6 +1218,7 @@ def db_create(
         user_assigned_identity_id=user_assigned_identity_id,
         keys=keys,
         encryption_protector=encryption_protector,
+        encryption_protector_auto_rotation=encryption_protector_auto_rotation,
         **kwargs)
 
 
@@ -1246,6 +1251,7 @@ def db_copy(
         user_assigned_identity_id=None,
         keys=None,
         encryption_protector=None,
+        encryption_protector_auto_rotation=None,
         **kwargs):
     '''
     Copies a DB (i.e. create with 'Copy' create mode.)
@@ -1288,6 +1294,7 @@ def db_copy(
         user_assigned_identity_id=user_assigned_identity_id,
         keys=keys,
         encryption_protector=encryption_protector,
+        encryption_protector_auto_rotation=encryption_protector_auto_rotation,
         **kwargs)
 
 
@@ -1306,6 +1313,7 @@ def db_create_replica(
         user_assigned_identity_id=None,
         keys=None,
         encryption_protector=None,
+        encryption_protector_auto_rotation=None,
         **kwargs):
     '''
     Creates a secondary replica DB (i.e. create with 'Secondary' create mode.)
@@ -1351,6 +1359,7 @@ def db_create_replica(
         user_assigned_identity_id=user_assigned_identity_id,
         keys=keys,
         encryption_protector=encryption_protector,
+        encryption_protector_auto_rotation=encryption_protector_auto_rotation,
         **kwargs)
 
 
@@ -1399,6 +1408,7 @@ def db_restore(
         user_assigned_identity_id=None,
         keys=None,
         encryption_protector=None,
+        encryption_protector_auto_rotation=None,
         **kwargs):
     '''
     Restores an existing or deleted DB (i.e. create with 'Restore'
@@ -1436,6 +1446,7 @@ def db_restore(
         user_assigned_identity_id=user_assigned_identity_id,
         keys=keys,
         encryption_protector=encryption_protector,
+        encryption_protector_auto_rotation=encryption_protector_auto_rotation,
         **kwargs)
 
 
@@ -1717,7 +1728,8 @@ def db_update(  # pylint: disable=too-many-locals
         keys=None,
         encryption_protector=None,
         federated_client_id=None,
-        keys_to_remove=None):
+        keys_to_remove=None,
+        encryption_protector_auto_rotation=None):
     '''
     Applies requested parameters to a db resource instance for a DB update.
     '''
@@ -1836,6 +1848,9 @@ def db_update(  # pylint: disable=too-many-locals
         instance.federated_client_id = federated_client_id
 
     instance.availability_zone = None
+
+    if encryption_protector_auto_rotation is not None:
+        instance.encryption_protector_auto_rotation = encryption_protector_auto_rotation
 
     return instance
 
@@ -6339,7 +6354,8 @@ def failover_group_failover(
         resource_group_name,
         server_name,
         failover_group_name,
-        allow_data_loss=False):
+        allow_data_loss=False,
+        try_planned_before_forced_failover=False):
     '''
     Failover a failover group.
     '''
@@ -6353,7 +6369,9 @@ def failover_group_failover(
         return
 
     # Choose which failover method to use
-    if allow_data_loss:
+    if try_planned_before_forced_failover:
+        failover_func = client.begin_try_planned_before_forced_failover
+    elif allow_data_loss:
         failover_func = client.begin_force_failover_allow_data_loss
     else:
         failover_func = client.begin_failover
