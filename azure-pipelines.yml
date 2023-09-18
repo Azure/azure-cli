@@ -299,15 +299,14 @@ jobs:
         
         Get-Content .\install_logs.txt
 
-- job: BuildDockerImage
-  displayName: Build Docker Image
+- job: BuildDockerImageAlpine
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
         Alpine ${{ arch.name }}:
           pool: ${{ arch.pool }}
           artifactName: docker-${{ arch.value }}
-          dockerfile: Dockerfile
+          dockerfile: alpine.dockerfile
   pool:
     name: $(pool)
   steps:
@@ -331,10 +330,9 @@ jobs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: $(artifactName)
 
-- job: TestDockerImage
-  displayName: Test Docker Image
+- job: TestDockerImageAlpine
   dependsOn:
-    - BuildDockerImage
+    - BuildDockerImageAlpine
     - ExtractMetadata
   condition: succeeded()
   strategy:
@@ -374,7 +372,7 @@ jobs:
       docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && sleep 5"
     displayName: 'Bash Script'
 
-- job: BuildAzureDockerImage
+- job: BuildDockerImageAzureLinux
   displayName: Build Azure Docker Image
   dependsOn: BuildRpmPackageMariner
   strategy:
@@ -383,7 +381,7 @@ jobs:
         Mariner 2.0 ${{ arch.name }}:
           pool: ${{ arch.pool }}
           artifactName: docker-mariner2.0-${{ arch.value }}
-          dockerfile: azure.dockerfile
+          dockerfile: azure-linux.dockerfile
           packageArtifactName: rpm-mariner2.0-${{ arch.value }}
   pool:
     name: $(pool)
@@ -410,15 +408,13 @@ jobs:
         DockerImagesToScan: 'clibuild$BUILD_BUILDNUMBER:latest'
 
     - task: PublishPipelineArtifact@0
-      displayName: 'Publish Artifact: docker image'
       inputs:
         TargetPath: $(Build.ArtifactStagingDirectory)
         ArtifactName: $(artifactName)
 
-- job: TestAzureDockerImage
-  displayName: Test Azure Docker Image
+- job: TestDockerImageAzureLinux
   dependsOn:
-    - BuildAzureDockerImage
+    - BuildDockerImageAzureLinux
     - ExtractMetadata
   strategy:
     matrix:
