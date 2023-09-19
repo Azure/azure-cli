@@ -317,7 +317,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     if geo_redundant_backup is None and instance is not None:
         geo_redundant_backup = instance.backup.geo_redundant_backup
     _pg_georedundant_backup_validator(geo_redundant_backup, geo_backup_supported)
-    _pg_storage_validator(storage_gb, sku_info, tier, instance)    
+    _pg_storage_validator(storage_gb, sku_info, tier, instance)
     pg_auto_grow_validator(auto_grow, replication_role, high_availability, instance)
     _pg_sku_name_validator(sku_name, sku_info, tier, instance)
     _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance)
