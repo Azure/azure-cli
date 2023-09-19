@@ -1086,6 +1086,11 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                      JMESPathCheck('replicationRole', replica_role),
                      JMESPathCheck('sourceServerResourceId', result['id']),
                      JMESPathCheck('replicaCapacity', '0')] + replica_vnet_check[0] + public_access_check)
+        
+        # test storage auto-grow not allowed for replica server update
+        self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Enabled'
+                 .format(database_engine, resource_group, replicas[0]),
+                 expect_failure=True)
 
         # test replica list
         self.cmd('{} flexible-server replica list -g {} --name {}'
