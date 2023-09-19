@@ -91,7 +91,7 @@ def load_arguments(self, _):
         c.argument('enable_partition_merge', arg_type=get_three_state_flag(), help="Flag to enable partition merge on the account.")
         c.argument('enable_burst_capacity', arg_type=get_three_state_flag(), help="Flag to enable burst capacity on the account.")
         c.argument('key_uri', help="The URI of the key vault")
-        
+
     for scope in ['cosmosdb create', 'cosmosdb update']:
         with self.argument_context(scope) as c:
             c.ignore('resource_group_location')
@@ -126,7 +126,7 @@ def load_arguments(self, _):
 
     with self.argument_context('cosmosdb update') as c:
         c.argument('key_uri', help="The URI of the key vault", is_preview=True)
-        
+
     for scope in ['cosmosdb regenerate-key', 'cosmosdb keys regenerate']:
         with self.argument_context(scope) as c:
             c.argument('key_kind', arg_type=get_enum_type(KeyKind), help="The access key to regenerate.")
