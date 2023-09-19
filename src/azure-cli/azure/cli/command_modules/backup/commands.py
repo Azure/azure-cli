@@ -48,7 +48,7 @@ def load_command_table(self, _):
         g.show_command('delete', 'delete_resource_guard_mapping', confirmation=True)
 
     with self.command_group('backup vault', backup_custom, client_factory=deleted_protection_containers_cf, exception_handler=backup_exception_handler) as g:
-        g.show_command('soft-deleted-containers', 'list_deleted_protection_containers')
+        g.show_command('list-soft-deleted-containers', 'list_deleted_protection_containers')
 
     with self.command_group('backup container', backup_custom_base, client_factory=protection_containers_cf, exception_handler=backup_exception_handler) as g:
         g.show_command('show', 'show_container', client_factory=backup_protection_containers_cf, table_transformer=transform_container)

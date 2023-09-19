@@ -503,12 +503,12 @@ examples:
     crafted: true
 """
 
-helps['backup vault soft-deleted-containers'] = """
+helps['backup vault list-soft-deleted-containers'] = """
 type: command
 short-summary: List soft-deleted containers within a particular Recovery Services vault.
 examples:
   - name: List soft deleted containers
-    text: az backup vault soft-deleted-containers --name MyRecoveryServicesVault --resource-group MyResourceGroup --backup-management-type AzureIaasVM
+    text: az backup vault list-soft-deleted-containers --name MyRecoveryServicesVault --resource-group MyResourceGroup --backup-management-type AzureIaasVM
     crafted: true
 """
 
