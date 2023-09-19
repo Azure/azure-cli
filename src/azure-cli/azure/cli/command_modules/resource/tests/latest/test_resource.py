@@ -5633,5 +5633,18 @@ class PrivateLinkAssociationTest(ScenarioTest):
         self.cmd('resourcemanagement private-link delete -g {rg} -n {n} --yes', checks=self.is_empty())
         self.cmd('private-link association delete -m {mg} -n {pla} --yes', self.is_empty())
 
+
+class PrivateLinkAssociationTest(ScenarioTest):
+    def test_list_locations(self):
+        result = self.cmd('account list-locations').get_output_in_json()
+        extended_result = self.cmd('account list-locations --include-extended-locations').get_output_in_json()
+        assert isinstance(result, list)
+        assert len(extended_result) >= len(result)
+        # Verify there is an item with displayName 'East US'.
+        assert any('East US' == loc['displayName'] for loc in result)
+        assert any('geography' in loc['metadata'] for loc in result)
+        assert any('availabilityZoneMappings' in loc for loc in result)
+
+
 if __name__ == '__main__':
     unittest.main()
