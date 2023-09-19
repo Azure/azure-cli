@@ -65,7 +65,8 @@ from azure.cli.command_modules.acs._validators import (
     validate_registry_name, validate_sku_tier, validate_snapshot_id,
     validate_snapshot_name, validate_spot_max_price, validate_ssh_key,
     validate_nodepool_taints, validate_vm_set_type, validate_vnet_subnet_id, validate_k8s_support_plan,
-    validate_utc_offset, validate_start_date, validate_start_time)
+    validate_utc_offset, validate_start_date, validate_start_time,
+    validate_force_upgrade_disable_and_enable_parameters)
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
     get_resource_name_completion_list, get_three_state_flag, name_type,
@@ -397,6 +398,9 @@ def load_arguments(self, _):
         c.argument('disable_keda', action='store_true')
         c.argument('enable_vpa', action='store_true', help='enable vertical pod autoscaler for cluster')
         c.argument('disable_vpa', action='store_true', help='disable vertical pod autoscaler for cluster')
+        c.argument('enable_force_upgrade', action='store_true')
+        c.argument('disable_force_upgrade', action='store_true', validator=validate_force_upgrade_disable_and_enable_parameters)
+        c.argument('upgrade_override_until')
         # addons
         c.argument('enable_secret_rotation', action='store_true')
         c.argument('disable_secret_rotation', action='store_true', validator=validate_keyvault_secrets_provider_disable_and_enable_parameters)
