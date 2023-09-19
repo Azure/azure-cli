@@ -296,7 +296,8 @@ def _mysql_iops_validator(iops, auto_io_scaling, instance):
 def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, zone=None,
                            standby_availability_zone=None, high_availability=None, subnet=None, public_access=None,
                            version=None, instance=None, geo_redundant_backup=None,
-                           byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None, auto_grow=None, replication_role=None):
+                           byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
+                           auto_grow=None, replication_role=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
     if not instance:
         list_location_capability_info = get_postgres_location_capability_info(
