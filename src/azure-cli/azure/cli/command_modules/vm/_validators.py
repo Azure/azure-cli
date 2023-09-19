@@ -1307,7 +1307,7 @@ def _enable_msi_for_trusted_launch(namespace):
     # Enable system assigned msi by default when Trusted Launch configuration is met
     is_trusted_launch = namespace.security_type and namespace.security_type.lower() == 'trustedlaunch' \
         and namespace.enable_vtpm and namespace.enable_secure_boot
-    if is_trusted_launch and not namespace.disable_integrity_monitoring:
+    if is_trusted_launch and namespace.enable_integrity_monitoring:
         from ._vm_utils import MSI_LOCAL_ID
         logger.info('The MSI is enabled by default when Trusted Launch configuration is met')
         if namespace.assign_identity is None:
