@@ -42,9 +42,6 @@ Release History
 **Containerapp**
 
 * `az containerapp`: Move `containerapp` from CLI extension to core CLI (#27078)
-
-**containerapp**
-
 * `az containerapp env create`: Add `--enable-workload-profiles` to specify if the environment is enabled to have workload profiles (#27381)
 * `az containerapp env dapr-component create`: Fix the sample link for `--yaml` parameter (#27393)
 
