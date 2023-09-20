@@ -57,8 +57,8 @@ Release History
 **NetAppFiles**
 
 * `az netappfiles volume`: Add new command `get-groupid-list-for-ldapuser` to Get Group Id List for LDAP User (#27316)
-* `az netappfiles account update`: Add paramter `identity_type` (#27316)
-* `az netappfiles volume update`: Add paramter `snapshot-dir-visible`. If enabled (true) the volume will contain a read-only snapshot directory which provides access to each of the volume's snapshots (defaults to true) (#27316)
+* `az netappfiles account update`: Add parameter `--identity-type` (#27316)
+* `az netappfiles volume update`: Add parameter `--snapshot-dir-visible`. If enabled (true) the volume will contain a read-only snapshot directory which provides access to each of the volume's snapshots (defaults to true) (#27316)
 
 **Network**
 
