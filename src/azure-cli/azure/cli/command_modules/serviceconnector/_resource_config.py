@@ -208,7 +208,8 @@ SOURCE_RESOURCES_PARAMS = {
         'deployment': {
             'options': ['--deployment'],
             'help': 'The deployment name of the app',
-            'placeholder': 'MyDeployment'
+            'placeholder': 'MyDeployment',
+            'deprecate_info': ' Note: The default value of `--deployment` is deprecated and will be removed in a future release. Use `--deployment default` if you want stay in current behavior.',
         }
     },
     RESOURCE.SpringCloudDeprecated: {
@@ -230,7 +231,8 @@ SOURCE_RESOURCES_PARAMS = {
         'deployment': {
             'options': ['--deployment'],
             'help': 'The deployment name of the app',
-            'placeholder': 'MyDeployment'
+            'placeholder': 'MyDeployment',
+            'deprecate_info': ' Note: The default value of `--deployment` is deprecated and will be removed in a future release. Use `--deployment default` if you want stay in current behavior.',
         }
     },
     RESOURCE.KubernetesCluster: {

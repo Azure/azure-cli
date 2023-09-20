@@ -3326,17 +3326,17 @@ def show_dapr_component(cmd, resource_group_name, dapr_component_name, environme
 def create_or_update_dapr_component(cmd, resource_group_name, environment_name, dapr_component_name, yaml):
     _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
 
-    yaml_containerapp = load_yaml_file(yaml)
+    yaml_dapr_component = load_yaml_file(yaml)
     # check if the type is dict
-    if not isinstance(yaml_containerapp, dict):
-        raise ValidationError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-yaml for a valid containerapps YAML spec.')
+    if not isinstance(yaml_dapr_component, dict):
+        raise ValidationError('Invalid YAML provided. Please see https://learn.microsoft.com/en-us/azure/container-apps/dapr-overview?tabs=bicep1%2Cyaml#component-schema for a valid Dapr Component YAML spec.')
 
     # Deserialize the yaml into a DaprComponent object. Need this since we're not using SDK
     daprcomponent_def = None
     try:
         deserializer = create_deserializer()
 
-        daprcomponent_def = deserializer('DaprComponent', yaml_containerapp)
+        daprcomponent_def = deserializer('DaprComponent', yaml_dapr_component)
     except DeserializationError as ex:
         raise ValidationError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-yaml for a valid containerapps YAML spec.') from ex
 
