@@ -20,7 +20,7 @@ class IoTHubTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='westus2')
     @StorageAccountPreparer()
-    @unittest.skip('Need to try with passing SAS key in environment.')  # TODO
+    @unittest.skip('Hub needs to be migrated to Baltimore Certificate Authority and requires newer API.')
     def test_iot_hub(self, resource_group, resource_group_location, storage_account):
         hub = self.create_random_name(prefix='iot-hub-for-test-11', length=32)
         rg = resource_group

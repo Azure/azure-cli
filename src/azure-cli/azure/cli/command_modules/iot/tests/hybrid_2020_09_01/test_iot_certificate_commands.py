@@ -29,6 +29,7 @@ class IotHubCertificateTest(ScenarioTest):
         super(IotHubCertificateTest, self).tearDown()
 
     @ResourceGroupPreparer()
+    @unittest.skip('Hub needs to be migrated to Baltimore Certificate Authority and requires newer API.')
     def test_certificate_lifecycle(self, resource_group):
         hub = self._create_test_hub(resource_group)
         cert_name = self.create_random_name(prefix='certificate-', length=48)

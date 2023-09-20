@@ -6,6 +6,7 @@
 
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccountPreparer
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+import unittest
 
 
 class IoTHubTest(ScenarioTest):
@@ -13,6 +14,7 @@ class IoTHubTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='westus2')
     @StorageAccountPreparer()
+    @unittest.skip('Hub needs to be migrated to Baltimore Certificate Authority and requires newer API.')
     def test_iot_hub(self, resource_group, resource_group_location, storage_account):
         hub = 'iot-hub-for-test-20190301'
         rg = resource_group
