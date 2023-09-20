@@ -218,21 +218,17 @@ class IoTDpsTest(ScenarioTest):
         dps_name = self.create_random_name('dps', 20)
         hub_name = self.create_random_name('iot', 20)
         hub_host_name = '{}.azure-devices.net'.format(hub_name)
-        key_name = self.create_random_name('key', 20)
-        permission = 'RegistryWrite'
 
         # Create DPS
         self.cmd('az iot dps create -g {} -n {}'.format(group_name, dps_name),
                  checks=[self.check('name', dps_name),
                          self.check('location', group_location)])
 
-        # Create and set up Hub
+        # Create and set up Hub - the correct permission should be present in a newly created hub
         self.cmd('az iot hub create -n {} -g {} --sku S1'.format(hub_name, group_name),
                  checks=[self.check('resourcegroup', group_name),
                          self.check('name', hub_name),
                          self.check('sku.name', 'S1')])
-
-        self.cmd('az iot hub policy create --hub-name {} -n {} --permissions {}'.format(hub_name, key_name, permission))
 
         # Create linked-hub fails if there is no hub name or connection string
         self.cmd('az iot dps linked-hub create --dps-name {} -g {} --l {}'
