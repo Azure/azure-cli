@@ -90,7 +90,7 @@ Release History
 * Fix #26732: `az storage blob copy start-batch`: Add `--rehydrate-priority` to batch copy (#27325)
 * Fix #27052: `az storage blob delete-batch`: Use utc as default timezone to remove "Datetime with no tzinfo will be considered UTC." warning (#27366)
 
-**Storage auto-grow**
+**RDBMS**
 
 * `az postgres flexible-server create/update`: Add capability to enable/disable storage auto-grow during creation and update (#27417)
 
