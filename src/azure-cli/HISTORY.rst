@@ -50,12 +50,6 @@ Release History
 
 * `az cosmosdb postgres`: GA Cosmos DB for PostgreSQL (#27399)
 
-**Monitor**
-
-* `az monitor action-group`: Migrate from codegen V2 (#25324)
-* `az monitor autoscale`: Migrate from codegen V2 (#27171)
-* `az monitor autoscale update`: Migrate from codegen V2 (#27338)
-
 **MySQL**
 
 * `az mysql flexible-server replica create`: Add new parameters to support replica creation (#27386)
