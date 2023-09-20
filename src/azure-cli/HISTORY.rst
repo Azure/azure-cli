@@ -27,6 +27,7 @@ Release History
 **ARM**
 
 * `az deployment group create`: Make `--template-file` parameter optional when used with `.bicepparam` parameter file (#27311)
+* `az account list-locations`: Add new parameter `--include-extended-locations` to support listing extended locations (#27400)
 
 **Backup**
 
@@ -72,9 +73,9 @@ Release History
 * `az network public-ip create`: Add warning message for Basic option removal (#27408)
 * `az network lb create`: Add warning message for Basic option removal (#27408)
 
-**Resource**
+**RDBMS**
 
-* `az account list-locations`: Add new parameter `--include-extended-locations` to support listing extended locations (#27400)
+* `az postgres flexible-server create/update`: Add capability to enable/disable storage auto-grow during creation and update (#27417)
 
 **Service Connector**
 
@@ -89,10 +90,6 @@ Release History
 
 * Fix #26732: `az storage blob copy start-batch`: Add `--rehydrate-priority` to batch copy (#27325)
 * Fix #27052: `az storage blob delete-batch`: Use utc as default timezone to remove "Datetime with no tzinfo will be considered UTC." warning (#27366)
-
-**RDBMS**
-
-* `az postgres flexible-server create/update`: Add capability to enable/disable storage auto-grow during creation and update (#27417)
 
 2.52.0
 ++++++
