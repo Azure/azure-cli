@@ -35,7 +35,7 @@ Release History
 
 **Compute**
 
-* `az vm extension set`, `az vmss extension set`: Enable Autoupgrade by default for CodeIntegrityAgent extension (#27335)
+* `az vm/vmss extension set`: Enable auto upgrade by default for CodeIntegrityAgent extension (#27335)
 * `az vm create`: Add warning message for Basic option removal (#27408)
 * `az vmss create`: Add warning message for Basic option removal (#27408)
 
