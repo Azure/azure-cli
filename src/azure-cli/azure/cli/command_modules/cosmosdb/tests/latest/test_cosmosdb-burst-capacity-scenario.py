@@ -6,13 +6,15 @@
 import os
 
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer)
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 class CosmosdbBurstCapacityScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_burst_capacity', location='australiaeast')
-    def test_cosmosdb_burst_capacity(self):
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_burst_capacity', location='australiaeast')
+    def test_cosmosdb_burst_capacity(self, resource_group):
         # Assumption: There exists a cosmosTest rg.
         self.kwargs.update({
             'rg' : 'cosmosTest',
