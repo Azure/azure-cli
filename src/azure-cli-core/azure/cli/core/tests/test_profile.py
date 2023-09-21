@@ -278,7 +278,9 @@ class TestProfile(unittest.TestCase):
     @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
     @mock.patch('azure.cli.core.auth.identity.Identity.login_with_auth_code', autospec=True)
     @mock.patch('azure.cli.core._profile.can_launch_browser', autospec=True, return_value=True)
-    def test_login_with_auth_code(self, can_launch_browser_mock, login_with_auth_code_mock, get_user_credential_mock,
+    @mock.patch('azure.cli.core._profile.is_github_codespaces', autospec=True, return_value=False)
+    def test_login_with_auth_code(self, is_github_codespaces_mock, can_launch_browser_mock,
+                                  login_with_auth_code_mock, get_user_credential_mock,
                                   create_subscription_client_mock):
         login_with_auth_code_mock.return_value = self.user_identity_mock
 
@@ -417,6 +419,29 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(s['user']['type'], 'user')
         self.assertEqual(s['name'], self.display_name1)
         self.assertEqual(s['id'], self.id1.split('/')[-1])
+
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
+    @mock.patch('azure.cli.core._profile.can_launch_browser', autospec=True, return_value=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.login_with_device_code', autospec=True)
+    @mock.patch('azure.cli.core._profile.is_github_codespaces', autospec=True, return_value=True)
+    def test_login_in_codespaces(self, is_github_codespaces_mock, 
+                                 login_with_device_code_mock, can_launch_browser_mock,
+                                 get_user_credential_mock, create_subscription_client_mock):
+        login_with_device_code_mock.return_value = self.user_identity_mock
+
+        cli = DummyCli()
+        mock_subscription_client = mock.MagicMock()
+        mock_subscription_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
+        mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
+        create_subscription_client_mock.return_value = mock_subscription_client
+
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
+        subs = profile.login(True, None, None, False, None, use_device_code=False, allow_no_subscriptions=False)
+
+        # assert
+        self.assertEqual(self.subscription1_output, subs)
 
     @mock.patch('requests.get', autospec=True)
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
@@ -597,7 +622,8 @@ class TestProfile(unittest.TestCase):
     @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
     @mock.patch('azure.cli.core.auth.identity.Identity.login_with_auth_code', autospec=True)
     @mock.patch('azure.cli.core._profile.can_launch_browser', autospec=True, return_value=True)
-    def test_login_no_subscription(self, can_launch_browser_mock,
+    @mock.patch('azure.cli.core._profile.is_github_codespaces', autospec=True, return_value=False)
+    def test_login_no_subscription(self, is_github_codespaces_mock, can_launch_browser_mock,
                                    login_with_auth_code_mock, get_user_credential_mock,
                                    create_subscription_client_mock):
         login_with_auth_code_mock.return_value = self.user_identity_mock
@@ -623,7 +649,8 @@ class TestProfile(unittest.TestCase):
     @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
     @mock.patch('azure.cli.core.auth.identity.Identity.login_with_auth_code', autospec=True)
     @mock.patch('azure.cli.core._profile.can_launch_browser', autospec=True, return_value=True)
-    def test_login_no_tenant(self, can_launch_browser_mock,
+    @mock.patch('azure.cli.core._profile.is_github_codespaces', autospec=True, return_value=False)
+    def test_login_no_tenant(self, is_github_codespaces_mock, can_launch_browser_mock,
                              login_with_auth_code_mock, get_user_credential_mock,
                              create_subscription_client_mock):
         login_with_auth_code_mock.return_value = self.user_identity_mock
@@ -644,7 +671,8 @@ class TestProfile(unittest.TestCase):
     @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
     @mock.patch('azure.cli.core.auth.identity.Identity.login_with_auth_code', autospec=True)
     @mock.patch('azure.cli.core._profile.can_launch_browser', autospec=True, return_value=True)
-    def test_login_with_auth_code_adfs(self, can_launch_browser_mock,
+    @mock.patch('azure.cli.core._profile.is_github_codespaces', autospec=True, return_value=False)
+    def test_login_with_auth_code_adfs(self, is_github_codespaces_mock, can_launch_browser_mock,
                                        login_with_auth_code_mock, get_user_credential_mock,
                                        create_subscription_client_mock):
         cli = DummyCli()

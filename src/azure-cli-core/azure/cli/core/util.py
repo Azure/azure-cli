@@ -760,6 +760,10 @@ def is_windows():
     return platform_name == 'windows'
 
 
+def is_github_codespaces():
+    return os.environ.get('CODESPACES', None) == 'true'
+
+
 def can_launch_browser():
     import webbrowser
     platform_name, _ = _get_platform_info()
