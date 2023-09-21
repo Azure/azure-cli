@@ -11,6 +11,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 class CosmosdbBurstCapacityScenarioTest(ScenarioTest):
 
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_burst_capacity', location='australiaeast')
     def test_cosmosdb_burst_capacity(self):
         # Assumption: There exists a cosmosTest rg.
         self.kwargs.update({
