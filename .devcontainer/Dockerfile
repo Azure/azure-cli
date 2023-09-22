@@ -1,5 +1,11 @@
 FROM mcr.microsoft.com/devcontainers/python:3.11
 
-RUN python -m venv env \
+ARG HOME="/workspaces/azure-cli"
+
+RUN cd ${HOME} \
+    python -m venv env \
     && . env/bin/activate \
-    && python -m pip install --upgrade pip azdev
+    && python -m pip install --upgrade pip \
+    && python -m pip install --upgrade azdev
+
+ENV PATH="${HOME}/env/bin:$PATH"

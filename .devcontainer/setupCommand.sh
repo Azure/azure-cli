@@ -1,5 +1,5 @@
 #!/bin/bash
-source ./env/bin/activate
+source /workspaces/azure-cli/env/bin/activate
 
-azdev setup --cli .
+azdev setup --cli /workspaces/azure-cli
 az --version
