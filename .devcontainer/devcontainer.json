@@ -1,0 +1,23 @@
+{
+    "name": "Azure CLI Dev Environment",
+    "build": {
+      "dockerfile": "Dockerfile",
+      "context": ".."
+    },
+    "customizations": {
+      "vscode": {
+        "extensions": [
+          "editorconfig.editorconfig",
+          "github.vscode-pull-request-github",
+          "ms-azuretools.vscode-docker",
+          "ms-python.python",
+          "ms-python.pylint",
+          "ms-python.flake8"
+        ]
+      }
+    },
+    "features": {
+      "github-cli": "latest"
+    },
+    "postCreateCommand": ".devcontainer/setupCommand.sh"
+  }
