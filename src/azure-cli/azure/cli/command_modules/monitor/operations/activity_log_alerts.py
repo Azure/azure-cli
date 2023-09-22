@@ -285,33 +285,33 @@ class ActivityLogAlertActionGroupAdd(_ActivityLogAlertUpdate):
             action_groups = []
             for rid in rids:
                 action_groups.append({
-                    "actionGroupId": rid,
+                    "action_group_id": rid,
                     "webhook_properties_raw": webhook_properties
                 })
-            instance.properties.actions.actionGroups = action_groups
+            instance.properties.actions.action_groups = action_groups
         else:
             action_groups_map = {}
-            for item in instance.properties.actions.actionGroups:
+            for item in instance.properties.actions.action_groups:
                 ac_id = item.actionGroupId.to_serialized_data()
                 # service returned action group id can be uppercase
                 action_groups_map[ac_id.lower()] = {
-                    "actionGroupId": ac_id,
-                    "webhookProperties": dict(item.webhookProperties)
+                    "action_group_id": ac_id,
+                    "webhook_properties_raw": dict(item.webhookProperties)
                 }
 
             for rid in rids:
                 if args.strict:
                     for key, item in action_groups_map.items():
-                        if key.lower() == rid.lower() and webhook_properties != item["webhookProperties"]:
+                        if key.lower() == rid.lower() and webhook_properties != item["webhook_properties_raw"]:
                             raise ValueError(
                                 'Fails to override webhook properties of action group {} in strict mode.'.format(rid))
 
                 action_groups_map[rid.lower()] = {
-                    "actionGroupId": rid,
-                    "webhookProperties": webhook_properties
+                    "action_group_id": rid,
+                    "webhook_properties_raw": webhook_properties
                 }
             action_groups = list(action_groups_map.values())
-            instance.properties.actions.actionGroups = action_groups
+            instance.properties.actions.action_groups = action_groups
 
 
 @register_command("monitor activity-log alert action-group remove")
