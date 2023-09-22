@@ -865,6 +865,7 @@ def load_arguments(self, _):
 
     with self.argument_context('bicep lint') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep module file to lint in the file system.")
+        c.argument('no_restore', arg_type=bicep_no_restore_type, help="When set, generates the parameters file without restoring external modules.")
         c.argument('diagnostics_format', help="Set diagnostics format. Valid values are ( default | sarif ).")
 
     with self.argument_context('resourcemanagement private-link create') as c:

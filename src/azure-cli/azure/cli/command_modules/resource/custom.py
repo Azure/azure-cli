@@ -4405,24 +4405,6 @@ def list_bicep_cli_versions(cmd):
     return get_bicep_available_release_tags()
 
 
-def lint_params_file(cmd, file, no_restore=None, diagnostics_format=None):
-    ensure_bicep_installation(cmd.cli_ctx)
-
-    minimum_supported_version = "0.7.4"
-    if bicep_version_greater_than_or_equal_to(minimum_supported_version):
-        args = ["lint", file]
-        if no_restore:
-            args += ["--no-restore"]
-        if diagnostics_format:
-            args += ["--diagnostics-format", diagnostics_format]
-
-        output = run_bicep_command(cmd.cli_ctx, args)
-
-        print(output)
-    else:
-        logger.error("az bicep lint could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
-
-
 def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, stdout=None, output_format=None, include_params=None):
     ensure_bicep_installation(cmd.cli_ctx)
 
@@ -4461,7 +4443,9 @@ def lint_bicep_file(cmd, file, no_restore=None, diagnostics_format=None):
         if diagnostics_format:
             args += ["--diagnostics-format", diagnostics_format]
 
-        run_bicep_command(cmd.cli_ctx, args)
+        output = run_bicep_command(cmd.cli_ctx, args)
+
+        print(output)
     else:
         logger.error("az bicep lint could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
 
