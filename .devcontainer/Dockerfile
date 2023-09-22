@@ -1,6 +1,7 @@
 FROM mcr.microsoft.com/devcontainers/python:3.11
 
-ARG HOME="/workspaces/azure-cli"
+USER $USER
+ARG HOME="/home/$USER"
 
 RUN cd ${HOME} \
     python -m venv env \
