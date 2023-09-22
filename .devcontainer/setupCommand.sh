@@ -1,5 +1,5 @@
 #!/bin/bash
-source /home/codespace/env/bin/activate
+source /home/vscode/env/bin/activate
 
 azdev setup --cli /workspaces/azure-cli
 az --version
