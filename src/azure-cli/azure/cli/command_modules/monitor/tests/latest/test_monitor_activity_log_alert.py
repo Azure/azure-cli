@@ -161,23 +161,27 @@ class TestMonitorActivityLogAlert(ScenarioTest):
         self.assertEqual('Security', condition_dict['category'])
         self.assertEqual(resource_group, condition_dict['resourceGroup'])
 
-    @unittest.skip('(ScopeIsInvalid) The scope for this category can only be a subscription ID')
     @ResourceGroupPreparer(location='southcentralus')
     def test_monitor_activity_log_alert_update_scope(self, resource_group):
         name, scope, _ = self._create_and_test_default_alert(resource_group)
+        self.cmd('az monitor activity-log alert update -n {} -g {} -c level=Error and category=Security'.format(name, resource_group))
 
-        self.cmd('az monitor activity-log alert scope add -n {} -g {} -s {}'.format(name, resource_group, scope[:-1]),
+        resource_group_id = self.cmd("az group show -n {} --query id -otsv".format(resource_group)).output.strip()
+
+        action_group_id = self.cmd('az monitor action-group create -n {} -g {} --query id -otsv'.format(name, resource_group)).output.strip()
+
+        self.cmd('az monitor activity-log alert scope add -n {} -g {} -s {}'.format(name, resource_group, resource_group_id),
                  checks=[JMESPathCheck('length(scopes)', 2)])
 
-        self.cmd('az monitor activity-log alert scope add -n {} -g {} -s {}'.format(name, resource_group, scope[:-2]),
+        self.cmd('az monitor activity-log alert scope add -n {} -g {} -s {}'.format(name, resource_group, action_group_id),
                  checks=[JMESPathCheck('length(scopes)', 3)])
 
         self.cmd('az monitor activity-log alert scope add -n {} -g {} -s {} --reset'
-                 .format(name, resource_group, scope[:-2]),
+                 .format(name, resource_group, action_group_id),
                  checks=[JMESPathCheck('length(scopes)', 1)])
 
         self.cmd('az monitor activity-log alert scope add -n {} -g {} -s {} {} {} --reset'
-                 .format(name, resource_group, scope, scope[:-1], scope[:-2]),
+                 .format(name, resource_group, scope, resource_group_id, action_group_id),
                  checks=[JMESPathCheck('length(scopes)', 3)])
 
         self.cmd('az monitor activity-log alert scope remove -n {} -g {} -s {}'

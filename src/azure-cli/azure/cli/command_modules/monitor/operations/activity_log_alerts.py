@@ -3,7 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=protected-access, line-too-long
-from azure.cli.core.aaz import has_value, AAZStrArg, AAZListArg, AAZBoolArg, register_command
+from azure.cli.core.aaz import has_value, AAZStrArg, AAZListArg, AAZBoolArg, register_command, \
+    AAZResourceIdArg, AAZResourceIdArgFormat
 from azure.cli.command_modules.monitor.actions import AAZCustomListArg
 from azure.cli.core.azclierror import ValidationError
 from ..aaz.latest.monitor.activity_log.alert import Create as _ActivityLogAlertCreate, \
@@ -121,12 +122,16 @@ class ActivityLogAlertCreate(_ActivityLogAlertCreate):
         )
         args_schema.condition.Element = AAZStrArg()
 
-        args_schema.action_group_id = AAZListArg(
+        args_schema.action_group_ids = AAZListArg(
             options=["--action-group", "-a"],
             help="Add an action group. Accepts space-separated action group identifiers. "
                  "The identifier can be the action group's name or its resource ID.",
         )
-        args_schema.action_group_id.Element = AAZStrArg()
+        args_schema.action_group_ids.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/microsoft.insights/actionGroups/{}",
+            )
+        )
 
         args_schema.webhook_properties_list = AAZCustomListArg(
             options=['--webhook-properties', '-w'],
@@ -167,11 +172,8 @@ class ActivityLogAlertCreate(_ActivityLogAlertCreate):
             }]
         # Add action groups
         action_group_rids = set()
-        if has_value(args.action_group_id):
-            action_group_rids = _normalize_names_instance(self.cli_ctx, args.action_group_id.to_serialized_data(),
-                                                          args.resource_group.to_serialized_data(),
-                                                          'microsoft.insights', 'actionGroups')
-
+        if has_value(args.action_group_ids):
+            action_group_rids = set(args.action_group_ids.to_serialized_data())
         args.action_groups = []
         for i in action_group_rids:
             args.action_groups.append({
@@ -248,7 +250,11 @@ class ActivityLogAlertActionGroupAdd(_ActivityLogAlertUpdate):
             help="The names or the resource ids of the action groups to be added.",
             required=True
         )
-        args_schema.action_group_ids.Element = AAZStrArg()
+        args_schema.action_group_ids.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/microsoft.insights/actionGroups/{}",
+            )
+        )
 
         args_schema.webhook_properties_list = AAZCustomListArg(
             options=['--webhook-properties', '-w'],
@@ -277,16 +283,14 @@ class ActivityLogAlertActionGroupAdd(_ActivityLogAlertUpdate):
         args = self.ctx.args
         webhook_properties = process_webhook_properties(args)
 
-        # normalize the action group ids
-        rids = _normalize_names(self.cli_ctx, args.action_group_ids.to_serialized_data(), args.resource_group,
-                                'microsoft.insights', 'actionGroups')
+        rids = args.action_group_ids.to_serialized_data()
 
         if has_value(args.reset) and args.reset:
             action_groups = []
             for rid in rids:
                 action_groups.append({
                     "action_group_id": rid,
-                    "webhook_properties_raw": webhook_properties
+                    "webhook_properties": webhook_properties
                 })
             instance.properties.actions.action_groups = action_groups
         else:
@@ -296,20 +300,21 @@ class ActivityLogAlertActionGroupAdd(_ActivityLogAlertUpdate):
                 # service returned action group id can be uppercase
                 action_groups_map[ac_id.lower()] = {
                     "action_group_id": ac_id,
-                    "webhook_properties_raw": dict(item.webhookProperties)
+                    "webhook_properties": dict(item.webhookProperties)
                 }
 
             for rid in rids:
                 if args.strict:
                     for key, item in action_groups_map.items():
-                        if key.lower() == rid.lower() and webhook_properties != item["webhook_properties_raw"]:
+                        if key.lower() == rid.lower() and webhook_properties != item["webhook_properties"]:
                             raise ValueError(
                                 'Fails to override webhook properties of action group {} in strict mode.'.format(rid))
 
                 action_groups_map[rid.lower()] = {
                     "action_group_id": rid,
-                    "webhook_properties_raw": webhook_properties
+                    "webhook_properties": webhook_properties
                 }
+
             action_groups = list(action_groups_map.values())
             instance.properties.actions.action_groups = action_groups
 
@@ -338,8 +343,8 @@ class ActivityLogAlertActionGroupRemove(_ActivityLogAlertUpdate):
 
     def pre_instance_update(self, instance):
         args = self.ctx.args
-
-        if len(args.action_group_ids) == 1 and args.action_group_ids[0] == '*':
+        action_group_ids = args.action_group_ids.to_serialized_data()
+        if len(action_group_ids) == 1 and action_group_ids[0] == '*':
             instance.properties.actions.actionGroups = []
         else:
             # normalize the action group ids
@@ -436,30 +441,6 @@ class ActivityLogAlertScopeRemove(_ActivityLogAlertUpdate):
 
 
 def _normalize_names(cli_ctx, resource_names, resource_group, namespace, resource_type):
-    """Normalize a group of resource names. Returns a set of resource ids. Throws if any of the name can't be correctly
-    converted to a resource id."""
-    from msrestazure.tools import is_valid_resource_id, resource_id
-    from azure.cli.core.commands.client_factory import get_subscription_id
-
-    rids = set()
-    # normalize the action group ids
-    for name in resource_names:
-        if is_valid_resource_id(name):
-            rids.add(name)
-        else:
-            rid = resource_id(subscription=get_subscription_id(cli_ctx),
-                              resource_group=resource_group,
-                              namespace=namespace,
-                              type=resource_type,
-                              name=name)
-            if not is_valid_resource_id(rid):
-                raise ValueError('The resource name {} is not valid.'.format(name))
-            rids.add(rid)
-
-    return rids
-
-
-def _normalize_names_instance(cli_ctx, resource_names, resource_group, namespace, resource_type):
     """Normalize a group of resource names. Returns a set of resource ids. Throws if any of the name can't be correctly
     converted to a resource id."""
     from msrestazure.tools import is_valid_resource_id, resource_id
