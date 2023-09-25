@@ -253,8 +253,8 @@ parameters:
     short-summary: The Kubernetes network policy to use.
     long-summary: |
         Using together with "azure" network plugin.
-        Specify "azure" for Azure network policy manager and "calico" for calico network policy controller.
-        Defaults to "" (network policy disabled).
+        Specify "azure" for Azure network policy manager, "calico" for calico network policy controller, "cilium" for Azure CNI Overlay powered by Cilium, and "none" to uninstall "azure" network policy.
+        Defaults to "none" (network policy disabled).
   - name: --network-dataplane
     type: string
     short-summary: The network dataplane to use.
