@@ -2231,7 +2231,7 @@ def aks_agentpool_update(
     tags=None,
     node_taints=None,
     max_surge=None,
-    drain_timeout=None
+    drain_timeout=None,
     mode=None,
     scale_down_mode=None,
     no_wait=False,
