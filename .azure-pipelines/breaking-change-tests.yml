@@ -17,6 +17,10 @@ jobs:
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:
+  - checkout: self
+    fetchDepth: 0
+    fetchTags: true
+    persistCredentials: true
   - task: UsePythonVersion@0
     displayName: 'Use Python 3.10'
     inputs:
@@ -33,7 +37,8 @@ jobs:
       echo "##vso[task.setvariable variable=breakingChangeTest]$breakingChangeTest"
     displayName: "Breaking Change Test"
     env:
-      SRC_BRANCH: $(system.pullRequest.targetBranchName)
+      PR_SRC_BRANCH: $(System.PullRequest.SourceBranch)
+      PR_TARGET_BRANCH: $(System.PullRequest.TargetBranch)
       PULL_REQUEST_NUMBER: $(System.PullRequest.PullRequestNumber)
       JOB_NAME: "breaking_change_test"
   - task: PublishBuildArtifacts@1

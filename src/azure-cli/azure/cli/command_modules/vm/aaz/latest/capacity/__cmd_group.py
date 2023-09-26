@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "capacity",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage capacity resources.
+    """Manage capacity.
     """
     pass
 

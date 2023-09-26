@@ -1,0 +1,506 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack mg create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --management-group-id --location --template-file --deny-settings-mode
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-get-deployment-stack-subscription000001?api-version=2022-08-01-preview
+  response:
+    body:
+      string: '{"error":{"code":"ResourceNotFound","message":"The resource ''cli-test-get-deployment-stack-subscription000001''
+        was not found. For more details please go to https://aka.ms/ARMResourceNotFoundFix"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '196'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jul 2023 21:39:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: '{"location": "westus2", "tags": {}, "properties": {"template": {"$schema":
+      "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {"foo": {"type": "string", "defaultValue":
+      "foo", "metadata": {"description": "description"}}, "bar": {"type": "string",
+      "defaultValue": "bar", "metadata": {"description": "description"}}}, "functions":
+      [], "variables": {}, "resources": [], "outputs": {"foo": {"type": "string",
+      "value": "[parameters(''foo'')]"}, "bar": {"type": "string", "value": "[parameters(''bar'')]"}}},
+      "parameters": {}, "actionOnUnmanage": {"resources": "detach", "resourceGroups":
+      "detach"}, "deploymentScope": "/subscriptions/00000000-0000-0000-0000-000000000000",
+      "denySettings": {"mode": "None", "applyToChildScopes": false}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack mg create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '802'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name --management-group-id --location --template-file --deny-settings-mode
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-get-deployment-stack-subscription000001?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"westus2\",\r\n  \"tags\": {},\r\n  \"properties\":
+        {\r\n    \"actionOnUnmanage\": {\r\n      \"resources\": \"detach\",\r\n      \"resourceGroups\":
+        \"detach\",\r\n      \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentScope\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000\",\r\n    \"denySettings\":
+        {\r\n      \"mode\": \"none\",\r\n      \"applyToChildScopes\": false\r\n
+        \   },\r\n    \"parameters\": {},\r\n    \"resources\": [],\r\n    \"provisioningState\":
+        \"initializing\",\r\n    \"detachedResources\": [],\r\n    \"deletedResources\":
+        [],\r\n    \"failedResources\": []\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"harshpatel@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
+        \"2023-07-17T21:39:21.2463603Z\",\r\n    \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2023-07-17T21:39:21.2463603Z\"\r\n
+        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-get-deployment-stack-subscription000001\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-get-deployment-stack-subscription000001\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/7ffaa7af-2099-44ca-8254-5a82b8043a9c?api-version=2022-08-01-preview&t=2023-07-17T21%3a39%3a22&c=MIIHADCCBeigAwIBAgITHgKrh_MjOPKlJyI3cQAAAquH8zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMwNTAzMjMwMjI3WhcNMjQwNDI3MjMwMjI3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL0aEGiuaphgSuY5uOV2Vq0_eRkHBJqscdw27iqFhwraH1zb3mBkoUFiny-rrTyBBP3_bOrcZ_lLcbY9xgIxpT7zmZxRd3CjCOnqhX_Mu2c6G-yLOTEOcf9UT7H4fxtBr440gcpLopYy7mt3ypUGOaPFP-EO7qaBh0SCIeb-x5DPqdjLf2_f9i_vLuGfQWpz9jEsyWeFg3i00s5m52FdCkGVTyxr2XITKuv7ETVYww5ZP2jkCAvfFbjir_v66K6JNRThXGIG93Pn4f15mQRm3DNai4_a_ifWA1lGYuGRKzNakLghySxYnnAFUWzp1KryweBqfWL3hFrmnG8GAi_S4ukCAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBT-pF8vtDMyjw9lrgG37vafInn-qzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAI29kw4VOKOtMxg3qjOuEecung4Kg3KdF9GhZku1Bou1YlnJ0nHSypiq8m_JCm6IV0an3uP_TIcby1BfAaWGq7Ie3v6NWkMQoTE482bQxpak1Z4eIAYrJ0XcMalFjc3ArXgS2G0zV-xBNYjXUZ3ir6D1JPm4ocXJ5QTgZVGkw0xSTlwEDW-nnNkZzMqeGAKtAbEIwQpqfym3LgDK5uQyAYnE2pyDP0AwYWdrb-QAWkxfNfgQgzVgt9pOXvotmhLHmnUt0XRaQQlYkTCi25p1YIQ5nN9_uvRJ17N8E9sF0oRLO5QtIeearVpLaGTS4DAiPmUXMjS25OxMdLMu2E-JNq0&s=lNRqCyJpCOKrKKTil4Q9mTykAbqJQGmouUHBRLk9njJ-fW3tS4--yFYAC6YdnQBRvP9DYy-RKJBEz4G-P8GlOMGjYGZrYRVQZoECQO0VJgiGczcyIeTFQVy4EVBgpXpFQY7GYuexn-A8KyO_NK_I_YE30DpD9MtYRjpgpu_kYQ5MAggcEdzwDPk1RY5xfZg0Bpoy8yBOQ1Va4AXyiEnhqTB8k4h-cqSqWmxE40XcfG_ygnO7KSnVVuDCBRmS6p7dR38iOoDB9NeFTdDNid_NcWyp3mXGgI2hW920UAy_jD0a5jV-UAWpiXu-Fs1RFyAWue8K_WguXrp7zen-tMPZYA&h=ISLtn7G5bD4ok28h6hJd7aUmtD7HRq38txt5IEj7qsw
+      cache-control:
+      - no-cache
+      content-length:
+      - '1130'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jul 2023 21:39:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack mg create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --management-group-id --location --template-file --deny-settings-mode
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/7ffaa7af-2099-44ca-8254-5a82b8043a9c?api-version=2022-08-01-preview&t=2023-07-17T21%3A39%3A22&c=MIIHADCCBeigAwIBAgITHgKrh_MjOPKlJyI3cQAAAquH8zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMwNTAzMjMwMjI3WhcNMjQwNDI3MjMwMjI3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL0aEGiuaphgSuY5uOV2Vq0_eRkHBJqscdw27iqFhwraH1zb3mBkoUFiny-rrTyBBP3_bOrcZ_lLcbY9xgIxpT7zmZxRd3CjCOnqhX_Mu2c6G-yLOTEOcf9UT7H4fxtBr440gcpLopYy7mt3ypUGOaPFP-EO7qaBh0SCIeb-x5DPqdjLf2_f9i_vLuGfQWpz9jEsyWeFg3i00s5m52FdCkGVTyxr2XITKuv7ETVYww5ZP2jkCAvfFbjir_v66K6JNRThXGIG93Pn4f15mQRm3DNai4_a_ifWA1lGYuGRKzNakLghySxYnnAFUWzp1KryweBqfWL3hFrmnG8GAi_S4ukCAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBT-pF8vtDMyjw9lrgG37vafInn-qzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAI29kw4VOKOtMxg3qjOuEecung4Kg3KdF9GhZku1Bou1YlnJ0nHSypiq8m_JCm6IV0an3uP_TIcby1BfAaWGq7Ie3v6NWkMQoTE482bQxpak1Z4eIAYrJ0XcMalFjc3ArXgS2G0zV-xBNYjXUZ3ir6D1JPm4ocXJ5QTgZVGkw0xSTlwEDW-nnNkZzMqeGAKtAbEIwQpqfym3LgDK5uQyAYnE2pyDP0AwYWdrb-QAWkxfNfgQgzVgt9pOXvotmhLHmnUt0XRaQQlYkTCi25p1YIQ5nN9_uvRJ17N8E9sF0oRLO5QtIeearVpLaGTS4DAiPmUXMjS25OxMdLMu2E-JNq0&s=lNRqCyJpCOKrKKTil4Q9mTykAbqJQGmouUHBRLk9njJ-fW3tS4--yFYAC6YdnQBRvP9DYy-RKJBEz4G-P8GlOMGjYGZrYRVQZoECQO0VJgiGczcyIeTFQVy4EVBgpXpFQY7GYuexn-A8KyO_NK_I_YE30DpD9MtYRjpgpu_kYQ5MAggcEdzwDPk1RY5xfZg0Bpoy8yBOQ1Va4AXyiEnhqTB8k4h-cqSqWmxE40XcfG_ygnO7KSnVVuDCBRmS6p7dR38iOoDB9NeFTdDNid_NcWyp3mXGgI2hW920UAy_jD0a5jV-UAWpiXu-Fs1RFyAWue8K_WguXrp7zen-tMPZYA&h=ISLtn7G5bD4ok28h6hJd7aUmtD7HRq38txt5IEj7qsw
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/7ffaa7af-2099-44ca-8254-5a82b8043a9c\",\r\n
+        \ \"name\": \"7ffaa7af-2099-44ca-8254-5a82b8043a9c\",\r\n  \"status\": \"initializing\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '212'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jul 2023 21:39:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack mg create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --management-group-id --location --template-file --deny-settings-mode
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/7ffaa7af-2099-44ca-8254-5a82b8043a9c?api-version=2022-08-01-preview&t=2023-07-17T21%3A39%3A22&c=MIIHADCCBeigAwIBAgITHgKrh_MjOPKlJyI3cQAAAquH8zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjMwNTAzMjMwMjI3WhcNMjQwNDI3MjMwMjI3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL0aEGiuaphgSuY5uOV2Vq0_eRkHBJqscdw27iqFhwraH1zb3mBkoUFiny-rrTyBBP3_bOrcZ_lLcbY9xgIxpT7zmZxRd3CjCOnqhX_Mu2c6G-yLOTEOcf9UT7H4fxtBr440gcpLopYy7mt3ypUGOaPFP-EO7qaBh0SCIeb-x5DPqdjLf2_f9i_vLuGfQWpz9jEsyWeFg3i00s5m52FdCkGVTyxr2XITKuv7ETVYww5ZP2jkCAvfFbjir_v66K6JNRThXGIG93Pn4f15mQRm3DNai4_a_ifWA1lGYuGRKzNakLghySxYnnAFUWzp1KryweBqfWL3hFrmnG8GAi_S4ukCAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBT-pF8vtDMyjw9lrgG37vafInn-qzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAI29kw4VOKOtMxg3qjOuEecung4Kg3KdF9GhZku1Bou1YlnJ0nHSypiq8m_JCm6IV0an3uP_TIcby1BfAaWGq7Ie3v6NWkMQoTE482bQxpak1Z4eIAYrJ0XcMalFjc3ArXgS2G0zV-xBNYjXUZ3ir6D1JPm4ocXJ5QTgZVGkw0xSTlwEDW-nnNkZzMqeGAKtAbEIwQpqfym3LgDK5uQyAYnE2pyDP0AwYWdrb-QAWkxfNfgQgzVgt9pOXvotmhLHmnUt0XRaQQlYkTCi25p1YIQ5nN9_uvRJ17N8E9sF0oRLO5QtIeearVpLaGTS4DAiPmUXMjS25OxMdLMu2E-JNq0&s=lNRqCyJpCOKrKKTil4Q9mTykAbqJQGmouUHBRLk9njJ-fW3tS4--yFYAC6YdnQBRvP9DYy-RKJBEz4G-P8GlOMGjYGZrYRVQZoECQO0VJgiGczcyIeTFQVy4EVBgpXpFQY7GYuexn-A8KyO_NK_I_YE30DpD9MtYRjpgpu_kYQ5MAggcEdzwDPk1RY5xfZg0Bpoy8yBOQ1Va4AXyiEnhqTB8k4h-cqSqWmxE40XcfG_ygnO7KSnVVuDCBRmS6p7dR38iOoDB9NeFTdDNid_NcWyp3mXGgI2hW920UAy_jD0a5jV-UAWpiXu-Fs1RFyAWue8K_WguXrp7zen-tMPZYA&h=ISLtn7G5bD4ok28h6hJd7aUmtD7HRq38txt5IEj7qsw
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/7ffaa7af-2099-44ca-8254-5a82b8043a9c\",\r\n
+        \ \"name\": \"7ffaa7af-2099-44ca-8254-5a82b8043a9c\",\r\n  \"status\": \"succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '209'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jul 2023 21:39:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack mg create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --management-group-id --location --template-file --deny-settings-mode
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-get-deployment-stack-subscription000001?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"westus2\",\r\n  \"tags\": {},\r\n  \"properties\":
+        {\r\n    \"actionOnUnmanage\": {\r\n      \"resources\": \"detach\",\r\n      \"resourceGroups\":
+        \"detach\",\r\n      \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-get-deployment-stack-subscrip-2023-07-17-21-39-21-c9c98\",\r\n
+        \   \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000\",\r\n
+        \   \"duration\": \"PT5.3306552S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"outputs\":
+        {\r\n      \"foo\": {\r\n        \"type\": \"String\",\r\n        \"value\":
+        \"foo\"\r\n      },\r\n      \"bar\": {\r\n        \"type\": \"String\",\r\n
+        \       \"value\": \"bar\"\r\n      }\r\n    },\r\n    \"parameters\": {},\r\n
+        \   \"resources\": [],\r\n    \"provisioningState\": \"succeeded\",\r\n    \"detachedResources\":
+        [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
+        \ \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-07-17T21:39:21.2463603Z\",\r\n
+        \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-07-17T21:39:21.2463603Z\"\r\n
+        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-get-deployment-stack-subscription000001\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-get-deployment-stack-subscription000001\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1522'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jul 2023 21:39:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack mg show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --management-group-id
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-get-deployment-stack-subscription000001?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"westus2\",\r\n  \"tags\": {},\r\n  \"properties\":
+        {\r\n    \"actionOnUnmanage\": {\r\n      \"resources\": \"detach\",\r\n      \"resourceGroups\":
+        \"detach\",\r\n      \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-get-deployment-stack-subscrip-2023-07-17-21-39-21-c9c98\",\r\n
+        \   \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000\",\r\n
+        \   \"duration\": \"PT5.3306552S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"outputs\":
+        {\r\n      \"foo\": {\r\n        \"type\": \"String\",\r\n        \"value\":
+        \"foo\"\r\n      },\r\n      \"bar\": {\r\n        \"type\": \"String\",\r\n
+        \       \"value\": \"bar\"\r\n      }\r\n    },\r\n    \"parameters\": {},\r\n
+        \   \"resources\": [],\r\n    \"provisioningState\": \"succeeded\",\r\n    \"detachedResources\":
+        [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
+        \ \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-07-17T21:39:21.2463603Z\",\r\n
+        \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-07-17T21:39:21.2463603Z\"\r\n
+        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-get-deployment-stack-subscription000001\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-get-deployment-stack-subscription000001\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1522'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jul 2023 21:39:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack mg show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --management-group-id
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-get-deployment-stack-subscription000001?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"westus2\",\r\n  \"tags\": {},\r\n  \"properties\":
+        {\r\n    \"actionOnUnmanage\": {\r\n      \"resources\": \"detach\",\r\n      \"resourceGroups\":
+        \"detach\",\r\n      \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-get-deployment-stack-subscrip-2023-07-17-21-39-21-c9c98\",\r\n
+        \   \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000\",\r\n
+        \   \"duration\": \"PT5.3306552S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"outputs\":
+        {\r\n      \"foo\": {\r\n        \"type\": \"String\",\r\n        \"value\":
+        \"foo\"\r\n      },\r\n      \"bar\": {\r\n        \"type\": \"String\",\r\n
+        \       \"value\": \"bar\"\r\n      }\r\n    },\r\n    \"parameters\": {},\r\n
+        \   \"resources\": [],\r\n    \"provisioningState\": \"succeeded\",\r\n    \"detachedResources\":
+        [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
+        \ \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-07-17T21:39:21.2463603Z\",\r\n
+        \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-07-17T21:39:21.2463603Z\"\r\n
+        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-get-deployment-stack-subscription000001\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-get-deployment-stack-subscription000001\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1522'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jul 2023 21:39:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack mg delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --management-group-id --yes
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-get-deployment-stack-subscription000001?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"westus2\",\r\n  \"tags\": {},\r\n  \"properties\":
+        {\r\n    \"actionOnUnmanage\": {\r\n      \"resources\": \"detach\",\r\n      \"resourceGroups\":
+        \"detach\",\r\n      \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-get-deployment-stack-subscrip-2023-07-17-21-39-21-c9c98\",\r\n
+        \   \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000\",\r\n
+        \   \"duration\": \"PT5.3306552S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"outputs\":
+        {\r\n      \"foo\": {\r\n        \"type\": \"String\",\r\n        \"value\":
+        \"foo\"\r\n      },\r\n      \"bar\": {\r\n        \"type\": \"String\",\r\n
+        \       \"value\": \"bar\"\r\n      }\r\n    },\r\n    \"parameters\": {},\r\n
+        \   \"resources\": [],\r\n    \"provisioningState\": \"succeeded\",\r\n    \"detachedResources\":
+        [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
+        \ \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-07-17T21:39:21.2463603Z\",\r\n
+        \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-07-17T21:39:21.2463603Z\"\r\n
+        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-get-deployment-stack-subscription000001\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-get-deployment-stack-subscription000001\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1522'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jul 2023 21:39:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack mg delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name --management-group-id --yes
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+    method: DELETE
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-get-deployment-stack-subscription000001?unmanageAction.Resources=detach&unmanageAction.ResourceGroups=detach&api-version=2022-08-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 17 Jul 2023 21:39:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+version: 1

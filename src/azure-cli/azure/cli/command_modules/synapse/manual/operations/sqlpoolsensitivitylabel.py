@@ -70,7 +70,7 @@ def sqlpool_sensitivity_label_update(
         sensitivity_label.information_type_id = current_label.information_type_id
 
     except CloudError as ex:
-        if not(ex.error and ex.error.error and 'SensitivityLabelsLabelNotFound' in ex.error.error):
+        if not (ex.error and ex.error.error and 'SensitivityLabelsLabelNotFound' in ex.error.error):
             raise ex
 
     # Find the label id and information type id in the policy by the label name provided

@@ -234,17 +234,6 @@ type: group
 short-summary: Manage Batch jobs.
 """
 
-helps['batch job all-statistics'] = """
-type: group
-short-summary: View statistics of all jobs under a Batch account.
-"""
-
-helps['batch job all-statistics show'] = """
-type: command
-short-summary: Get lifetime summary statistics for all of the jobs in a Batch account.
-long-summary: Statistics are aggregated across all jobs that have ever existed in the account, from account creation to the last update time of the statistics.
-"""
-
 helps['batch job create'] = """
 type: command
 short-summary: Add a job to a Batch account.
@@ -406,17 +395,6 @@ short-summary: Update the properties of a user account on a Batch compute node. 
 helps['batch pool'] = """
 type: group
 short-summary: Manage Batch pools.
-"""
-
-helps['batch pool all-statistics'] = """
-type: group
-short-summary: View statistics of all pools under a Batch account.
-"""
-
-helps['batch pool all-statistics show'] = """
-type: command
-short-summary: Get lifetime summary statistics for all of the pools in a Batch account.
-long-summary: Statistics are aggregated across all pools that have ever existed in the account, from account creation to the last update time of the statistics.
 """
 
 helps['batch pool autoscale'] = """

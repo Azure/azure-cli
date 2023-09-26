@@ -9,9 +9,11 @@ from azure.cli.command_modules.backup import custom_help
 import azure.cli.command_modules.backup.custom_common as common
 from azure.cli.command_modules.backup import custom_wl
 from azure.cli.command_modules.backup._client_factory import protection_policies_cf, backup_protected_items_cf, \
-    backup_protection_containers_cf, backup_protectable_items_cf, registered_identities_cf
+    backup_protection_containers_cf, backup_protectable_items_cf, registered_identities_cf, vaults_cf
 from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError, InvalidArgumentValueError, \
     MutuallyExclusiveArgumentError, ArgumentUsageError
+from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
+from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 # pylint: disable=import-error
 
 fabric_name = "Azure"
@@ -303,10 +305,12 @@ def show_protectable_item(cmd, client, resource_group_name, vault_name, name, se
 
 
 def show_protectable_instance(cmd, client, resource_group_name, vault_name, server_name, protectable_item_type,
-                              workload_type, container_name=None, backup_management_type="AzureWorkload"):
-    items = list_protectable_items(cmd, client, resource_group_name, vault_name, workload_type, backup_management_type,
-                                   container_name)
-    return custom_wl.show_protectable_instance(items, server_name, protectable_item_type)
+                              workload_type, container_name=None, subscription_id=None, instance_name=None,
+                              backup_management_type="AzureWorkload"):
+    items = list_protectable_items_in_subscription(cmd, client, resource_group_name, vault_name, workload_type,
+                                                   backup_management_type, container_name,
+                                                   subscription_id=subscription_id)
+    return custom_wl.show_protectable_instance(items, server_name, protectable_item_type, instance_name=instance_name)
 
 
 def initialize_protectable_items(client, resource_group_name, vault_name, container_name, workload_type):
@@ -444,7 +448,7 @@ def enable_for_azurefileshare(cmd, client, resource_group_name, vault_name, poli
 
 def restore_azurefileshare(cmd, client, resource_group_name, vault_name, rp_name, container_name, item_name,
                            restore_mode, resolve_conflict, target_storage_account=None, target_file_share=None,
-                           target_folder=None):
+                           target_folder=None, target_resource_group_name=None):
     backup_management_type = "AzureStorage"
     workload_type = "AzureFileShare"
     items_client = backup_protected_items_cf(cmd.cli_ctx)
@@ -458,12 +462,13 @@ def restore_azurefileshare(cmd, client, resource_group_name, vault_name, rp_name
     return custom_afs.restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name, item, restore_mode,
                                              resolve_conflict, "FullShareRestore",
                                              target_storage_account_name=target_storage_account,
-                                             target_file_share_name=target_file_share, target_folder=target_folder)
+                                             target_file_share_name=target_file_share, target_folder=target_folder,
+                                             target_resource_group_name=target_resource_group_name)
 
 
 def restore_azurefiles(cmd, client, resource_group_name, vault_name, rp_name, container_name, item_name, restore_mode,
                        resolve_conflict, target_storage_account=None, target_file_share=None, target_folder=None,
-                       source_file_type=None, source_file_path=None,):
+                       source_file_type=None, source_file_path=None):
     backup_management_type = "AzureStorage"
     workload_type = "AzureFileShare"
     items_client = backup_protected_items_cf(cmd.cli_ctx)
@@ -517,20 +522,34 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
                          rp_name=None, target_item_name=None, log_point_in_time=None, target_server_type=None,
                          target_server_name=None, workload_type=None, backup_management_type="AzureWorkload",
                          from_full_rp_name=None, filepath=None, target_container_name=None, target_resource_group=None,
-                         target_vault_name=None):
+                         target_vault_name=None, target_subscription_id=None, target_instance_name=None):
+    target_subscription = get_subscription_id(cmd.cli_ctx)
+    if target_subscription_id is not None:
+        vault_csr_state = custom.get_vault_csr_state(vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name))
+        if vault_csr_state is None or vault_csr_state == "Enabled":
+            target_subscription = target_subscription_id
+        else:
+            raise ArgumentUsageError(
+                """
+                Cross Subscription Restore is not allowed on this Vault. Please either enable CSR on the vault or
+                try restoring in the same subscription.
+                """)
     target_resource_group = resource_group_name if target_resource_group is None else target_resource_group
     target_vault_name = vault_name if target_vault_name is None else target_vault_name
     target_container_name = container_name if target_container_name is None else target_container_name
     target_item = None
     if target_item_name is not None:
-        protectable_items_client = backup_protectable_items_cf(cmd.cli_ctx)
+        protectable_items_client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
+                                                           subscription_id=target_subscription).backup_protectable_items
         target_item = show_protectable_instance(
             cmd, protectable_items_client, target_resource_group, target_vault_name,
-            target_server_name, target_server_type, workload_type, target_container_name)
+            target_server_name, target_server_type, workload_type, target_container_name,
+            target_subscription, target_instance_name, "AzureWorkload")
 
     target_container = None
     if target_container_name is not None:
-        container_client = backup_protection_containers_cf(cmd.cli_ctx)
+        container_client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
+                                                   subscription_id=target_subscription).backup_protection_containers
         target_container = common.show_container(cmd, container_client, target_container_name, target_resource_group,
                                                  target_vault_name, backup_management_type)
 
@@ -542,7 +561,7 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
     return custom_wl.show_recovery_config(cmd, client, resource_group_name, vault_name, restore_mode, container_name,
                                           item_name, rp_name, target_item, target_item_name, log_point_in_time,
                                           from_full_rp_name, filepath, target_container, target_resource_group,
-                                          target_vault_name)
+                                          target_vault_name, target_subscription)
 
 
 def undelete_protection(cmd, client, resource_group_name, vault_name, container_name, item_name,
@@ -563,6 +582,36 @@ def undelete_protection(cmd, client, resource_group_name, vault_name, container_
         return custom_wl.undelete_protection(cmd, client, resource_group_name, vault_name, item)
 
     return None
+
+
+def list_protectable_items_in_subscription(cmd, client, resource_group_name, vault_name, workload_type,
+                                           backup_management_type="AzureWorkload", container_name=None,
+                                           protectable_item_type=None, server_name=None, subscription_id=None):
+
+    if backup_management_type != "AzureWorkload":
+        raise ValidationError("""
+        Only supported value of backup-management-type is 'AzureWorkload' for this command.
+        """)
+
+    container_uri = None
+    if container_name:
+        if custom_help.is_native_name(container_name):
+            container_uri = container_name
+        else:
+            container_client = (backup_protection_containers_cf(cmd.cli_ctx) if subscription_id is None else
+                                get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
+                                                        subscription_id=subscription_id).backup_protection_containers)
+            container = show_container(cmd, container_client, container_name, resource_group_name, vault_name,
+                                       backup_management_type)
+            custom_help.validate_container(container)
+            if isinstance(container, list):
+                raise ValidationError("""
+                Multiple containers with same Friendly Name found. Please give native names instead.
+                """)
+            container_uri = container.name
+    return custom_wl.list_protectable_items(cmd, client, resource_group_name, vault_name, workload_type,
+                                            backup_management_type, container_uri, protectable_item_type, server_name,
+                                            subscription_id)
 
 
 def _get_containers(client, container_type, status, resource_group_name, vault_name, container_name=None):

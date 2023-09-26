@@ -107,11 +107,7 @@ def _get_resource_group_from_resource_name(cli_ctx, vault_name, hsm_name=None):
 
     if vault_name:
         client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
-        if cli_ctx.cloud.profile == 'latest':
-            vaults = client.list()
-        else:
-            vaults = client.list(filter="resourceType eq 'Microsoft.KeyVault/vaults'", api_version='2015-11-01')
-        for vault in vaults:
+        for vault in client.list(filter=f"resourceType eq 'Microsoft.KeyVault/vaults' and name eq '{vault_name}'"):
             id_comps = parse_resource_id(vault.id)
             if id_comps.get('name', None) and id_comps['name'].lower() == vault_name.lower():
                 return id_comps['resource_group']
@@ -635,7 +631,7 @@ def set_vault_base_url(ns):
 
 def validate_key_id(entity_type):
     def _validate(ns):
-        from azure.keyvault.key_vault_id import KeyVaultIdentifier
+        from .vendored_sdks.azure_keyvault_t1.key_vault_id import KeyVaultIdentifier
 
         pure_entity_type = entity_type.replace('deleted', '')
         name = getattr(ns, pure_entity_type + '_name', None)
@@ -666,7 +662,7 @@ def validate_key_id(entity_type):
 
 def validate_keyvault_resource_id(entity_type):
     def _validate(ns):
-        from azure.keyvault.key_vault_id import KeyVaultIdentifier
+        from .vendored_sdks.azure_keyvault_t1.key_vault_id import KeyVaultIdentifier
 
         pure_entity_type = entity_type.replace('deleted', '')
         name = getattr(ns, pure_entity_type + '_name', None) or getattr(ns, 'name', None)
@@ -701,7 +697,7 @@ def validate_keyvault_resource_id(entity_type):
 
 
 def validate_sas_definition_id(ns):
-    from azure.keyvault import StorageSasDefinitionId
+    from .vendored_sdks.azure_keyvault_t1 import StorageSasDefinitionId
     acct_name = getattr(ns, 'storage_account_name', None)
     sas_name = getattr(ns, 'sas_definition_name', None)
     vault = getattr(ns, 'vault_base_url', None)
@@ -717,7 +713,7 @@ def validate_sas_definition_id(ns):
 
 
 def validate_storage_account_id(ns):
-    from azure.keyvault import StorageAccountId
+    from .vendored_sdks.azure_keyvault_t1 import StorageAccountId
     acct_name = getattr(ns, 'storage_account_name', None)
     vault = getattr(ns, 'vault_base_url', None)
     identifier = getattr(ns, 'identifier', None)
@@ -804,6 +800,16 @@ def process_certificate_policy(cmd, ns):
     secret_properties = policy.get('secret_properties')
     if secret_properties:
         content_type = secret_properties.get('content_type')
+
+    if not content_type and hasattr(ns, 'certificate_bytes') and ns.certificate_bytes:
+        from OpenSSL import crypto
+        try:
+            crypto.load_certificate(crypto.FILETYPE_PEM, ns.certificate_bytes)
+            # if we get here, we know it was a PEM file
+            content_type = 'application/x-pem-file'
+        except (ValueError, crypto.Error):
+            # else it should be a pfx file
+            content_type = 'application/x-pkcs12'
 
     x509_certificate_properties = policy.get('x509_certificate_properties')
     if x509_certificate_properties:

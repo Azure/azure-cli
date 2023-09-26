@@ -36,7 +36,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'config_store': 'servicelinker-app-configuration'
         })
 
-        # prepare params
+        # prepare params        
         name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.AppConfig).format(**self.kwargs)
@@ -1428,3 +1428,51 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
         for conn in self.cmd('webapp connection list --source-id {}'.format(source_id)).get_output_in_json():
             self.cmd('webapp connection delete --id {} --yes'.format(conn.get('id')))
+
+    @record_only()
+    def test_webappslot_storageblob_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'site': 'servicelinker-storageblob-app',
+            'slot': 'slot1',
+            'account': 'servicelinkerstorage'
+        })
+
+        # prepare params
+        webAppSlotResourceIdFormat = '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.Web/sites/{site}/slots/{slot}'
+        name = 'testconnslot1'
+        source_id = webAppSlotResourceIdFormat.format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.StorageBlob).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create storage-blob --connection {} --source-id {} --target-id {} '
+                 '--system-identity --client-type python'.format(name, source_id, target_id))
+
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
+                self.check('[0].clientType', 'python')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update storage-blob --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ self.check('clientType', 'dotnet') ])
+
+        # list configuration
+        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('webapp connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))

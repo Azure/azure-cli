@@ -2,15 +2,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.core.local_context import AzCLILocalContext, ALL, LOCAL_CONTEXT_FILE
-from azure.cli.core.util import CLIError
 from azure.cli.testsdk import (
     JMESPathCheck,
-    NoneCheck,
-    ResourceGroupPreparer,
     StringContainCheck,
-    ScenarioTest,
     LocalContextScenarioTest)
 
 # Constants
@@ -22,10 +16,7 @@ class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
 
     def _test_flexible_server_local_context(self, database_engine, resource_group):
         self.cmd('config param-persist on')
-        if database_engine == 'mysql':
-            location = self.mysql_location
-        else:
-            location = self.postgres_location
+        location = self.postgres_location
 
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
 

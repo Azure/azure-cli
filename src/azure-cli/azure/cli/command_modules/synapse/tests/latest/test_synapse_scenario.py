@@ -1102,7 +1102,6 @@ class SynapseScenarioTests(ScenarioTest):
         time.sleep(20)
         self.cmd('az synapse kql-script show --workspace-name {workspace} --name {scriptName}', expect_failure=True)
 
-    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_workspaces(self, resource_group, storage_account):
@@ -1212,6 +1211,12 @@ class SynapseScenarioTests(ScenarioTest):
                     self.check('sparkConfigProperties.filename','sparkconfigfile'),
                     self.check('dynamicExecutorAllocation.maxExecutors',2)
                  ])
+        
+        # create a existing spark pool
+        spark_pool = self.cmd('az synapse spark pool create --name {spark-pool} --spark-version {spark-version}'
+                              ' --workspace {workspace} --resource-group {rg} --node-count 3 --node-size Medium'
+                              ' --spark-config-file-path "{file}"',
+                              expect_failure=True)
 
         # delete spark pool with spark pool name
         self.cmd(
@@ -3111,4 +3116,64 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd(
             'az synapse link-connection show --workspace-name {workspace_name} --name {link_connection_name}',
             expect_failure=True)
+        
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
+    def test_user_assigned_identity_id_workspace(self):
+        self.kwargs.update({
+            'uami_name1': 'autotestuami1',
+            'uami_name2': 'autotestuami2',
+            'workspace': self.create_random_name(prefix='clitest', length=16),
+            'location': self.location,
+            'file-system': 'testfilesystem',
+            'login-user': 'cliuser1',
+            'login-password': self.create_random_name(prefix='Pswd1', length=16)
+        })
+
+        # create identity
+        self.cmd('az identity create --name {uami_name1} --resource-group {rg}')
+        self.cmd('az identity create --name {uami_name2} --resource-group {rg}')
+        uami1 = self.cmd('az identity show --name {uami_name1} --resource-group {rg}').get_output_in_json()
+        uami2 = self.cmd('az identity show --name {uami_name2} --resource-group {rg}').get_output_in_json()
+        self.kwargs['uami_id1'] = uami1['id']
+        self.kwargs['uami_id2'] = uami2['id']
+        
+        # create synapse workspace
+        self.cmd(
+            'az synapse workspace create --name {workspace} --resource-group {rg} --storage-account {storage-account} '
+            '--file-system {file-system} --sql-admin-login-user {login-user} '
+            '--sql-admin-login-password {login-password} '
+            '--location {location} --uami-id "{uami_id1}" "{uami_id2}"', checks=[
+                self.check('name', self.kwargs['workspace']),
+                self.check('type', 'Microsoft.Synapse/workspaces'),
+                self.check('provisioningState', 'Succeeded'),
+                self.check('identity.type','SystemAssigned,UserAssigned'),
+                self.check('keys(identity.userAssignedIdentities)[0]', '{uami_id1}'),
+                self.check('keys(identity.userAssignedIdentities)[1]', '{uami_id2}')
+            ])
+
+        self.cmd('az synapse workspace update --name {workspace} --resource-group {rg} '
+                 '--uami-action Remove --uami-id "{uami_id2}" "{uami_id1}"', checks=[
+            self.check('name', self.kwargs['workspace']),
+            self.check('type', 'Microsoft.Synapse/workspaces'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('identity.userAssignedIdentities', None)
+        ])
+
+        self.cmd('az synapse workspace update --name {workspace} --resource-group {rg} '
+                 '--uami-action Add --uami-id "{uami_id2}"', checks=[
+            self.check('name', self.kwargs['workspace']),
+            self.check('type', 'Microsoft.Synapse/workspaces'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('keys(identity.userAssignedIdentities)[0]', '{uami_id2}')
+        ])
+
+        self.cmd('az synapse workspace update --name {workspace} --resource-group {rg} '
+                 '--uami-action Set --uami-id "{uami_id1}"', checks=[
+            self.check('name', self.kwargs['workspace']),
+            self.check('type', 'Microsoft.Synapse/workspaces'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('keys(identity.userAssignedIdentities)[0]', '{uami_id1}'),
+            self.not_exists('identity.userAssignedIdentities[1]')
+        ])
 

@@ -71,6 +71,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.poll_start_time = None
         self.poll_end_time = None
         self.allow_broker = None
+        self.msal_telemetry = None
 
     def add_event(self, name, properties):
         for key in self.instrumentation_key:
@@ -217,6 +218,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'RegionInput', self.region_input)
         set_custom_properties(result, 'RegionIdentified', self.region_identified)
         set_custom_properties(result, 'AllowBroker', str(self.allow_broker))
+        set_custom_properties(result, 'MsalTelemetry', self.msal_telemetry)
 
         return result
 
@@ -408,8 +410,9 @@ def set_feedback(feedback):
 def set_cli_recommendation(api_version, feedback):
     # This function returns the user's selection and feedback on the cli-recommendation results
     # Please refer to feedback_design.md of cli-recommendation for detailed information
-    _session.cli_recommendation = {"api_version": api_version,
-                                   "feedback": feedback}
+    # json.dumps converts the JSON-formatted feedback into a string format before storing it in the telemetry database.
+    # Telemetry property only accepts string inputs, and it cannot directly upload JSON content.
+    _session.cli_recommendation = json.dumps({"api_version": api_version, "feedback": feedback})
 
 
 @decorators.suppress_all_exceptions()
@@ -456,6 +459,12 @@ def set_region_identified(region_input, region_identified):
 def set_broker_info(allow_broker):
     # whether customer has configured `allow_broker` to enable WAM(Web Account Manager) login for authentication
     _session.allow_broker = allow_broker
+
+
+@decorators.suppress_all_exceptions()
+def set_msal_telemetry(msal_telemetry):
+    if not _session.msal_telemetry:
+        _session.msal_telemetry = msal_telemetry
 
 
 @decorators.suppress_all_exceptions()

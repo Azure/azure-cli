@@ -388,6 +388,9 @@ def load_arguments(self, _):
         c.argument('databases_to_restore', nargs='+', action=CreateDatabaseRestoreResource)
         c.argument('gremlin_databases_to_restore', nargs='+', action=CreateGremlinDatabaseRestoreResource)
         c.argument('tables_to_restore', nargs='+', action=CreateTableRestoreResource)
+        c.argument('assign_identity', nargs='*', help="Assign system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity.")
+        c.argument('default_identity', help="The primary identity to access key vault in CMK related features. e.g. 'FirstPartyIdentity', 'SystemAssignedIdentity' and more.")
+        c.argument('public_network_access', options_list=['--public-network-access', '-p'], arg_type=get_enum_type(['ENABLED', 'DISABLED']), help="Sets public network access in server to either Enabled or Disabled.")
 
     # Mongo role definition
     with self.argument_context('cosmosdb mongodb role definition') as c:

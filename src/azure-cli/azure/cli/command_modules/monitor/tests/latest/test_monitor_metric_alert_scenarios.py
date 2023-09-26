@@ -579,6 +579,7 @@ class MonitorTests(ScenarioTest):
         from azure.mgmt.core.tools import resource_id
         self.kwargs.update({
             'alert': 'alert1',
+            'alert2': 'alert2',
             'sa_id': resource_id(
                 resource_group=resource_group,
                 subscription=self.get_subscription_id(),
@@ -594,6 +595,16 @@ class MonitorTests(ScenarioTest):
                 self.check('length(criteria.allOf)', 1),
                 self.check('criteria.allOf[0].metricNamespace', 'My-Ns'),
                 self.check('criteria.allOf[0].metricName', 'UnemittedMetric'),
+                self.check('criteria.allOf[0].skipMetricValidation', True)
+            ])
+        self.cmd(
+            'monitor metrics alert create -g {rg} -n {alert2} --scopes {sa_id} --region westus --description "Test"'
+            ' --condition "avg My-Ns.\\LogicalDisk(C:)\% Free Space = 1 with skipMetricValidation"',
+            checks=[
+                self.check('description', 'Test'),
+                self.check('length(criteria.allOf)', 1),
+                self.check('criteria.allOf[0].metricNamespace', 'My-Ns'),
+                self.check('criteria.allOf[0].metricName', '\\LogicalDisk(C:)\% Free Space'),
                 self.check('criteria.allOf[0].skipMetricValidation', True)
             ])
 

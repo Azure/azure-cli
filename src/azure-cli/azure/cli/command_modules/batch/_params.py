@@ -19,12 +19,13 @@ from azure.batch.models import (
     NodeCommunicationMode)
 
 from azure.cli.core.commands.parameters import (
-    tags_type,
-    get_location_type,
-    resource_group_name_type,
-    get_resource_name_completion_list,
     file_type,
-    get_enum_type)
+    get_enum_type,
+    get_location_type,
+    get_resource_name_completion_list,
+    get_three_state_flag,
+    resource_group_name_type,
+    tags_type)
 
 from azure.cli.command_modules.batch._completers import load_supported_images
 from azure.cli.command_modules.batch._validators import (
@@ -243,6 +244,8 @@ def load_arguments(self, _):
         c.argument('target_node_communication_mode', options_list=['--target-communication'],
                    help="The desired node communication mode for the pool. If this element is present, it replaces the existing targetNodeCommunicationMode configured on the Pool. If omitted, any existing metadata is left unchanged.",
                    arg_type=get_enum_type(NodeCommunicationMode))
+        c.extra('enable_accelerated_networking', arg_type=get_three_state_flag(), options_list=['--accelerated-networking'], arg_group="Pool: Network Configuration",
+                help='Whether this pool should enable accelerated networking. Accelerated networking enables single root I/O virtualization (SR-IOV) to a VM, which may lead to improved networking performance. For more details, see: https://learn.microsoft.com/azure/virtual- network/accelerated-networking-overview. Set true to enable.')
 
     with self.argument_context('batch pool set') as c:
         c.argument('target_node_communication_mode', options_list=['--target-communication'],

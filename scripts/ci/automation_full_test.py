@@ -36,6 +36,7 @@ job_name = os.environ.get('JOB_NAME', None)
 pull_request_number = os.environ.get('PULL_REQUEST_NUMBER', None)
 enable_pipeline_result = bool(job_name and python_version)
 unique_job_name = ' '.join([job_name, python_version, profile, str(instance_idx)]) if enable_pipeline_result else None
+enable_traceback = True if (os.environ.get('ENABLE_TRACEBACK') is not None and os.environ.get('ENABLE_TRACEBACK').lower() == 'true') else False
 cli_jobs = {
             'acr': 45,
             'acs': 62,
@@ -270,6 +271,19 @@ def remove_extension(extension_module):
     return error_flag
 
 
+def rerun_setup(cli_repo_path, extension_repo_path):
+    try:
+        if extension_repo_path:
+            cmd = ['azdev', 'setup', '-c', cli_repo_path, '-r', extension_repo_path, '--debug']
+        else:
+            cmd = ['azdev', 'setup', '-c', cli_repo_path, '--debug']
+        error_flag = run_command(cmd, check_return_code=True)
+    except Exception:
+        error_flag = True
+
+    return error_flag
+
+
 def git_restore(file_path):
     if not file_path:
         return
@@ -444,7 +458,7 @@ def get_pipeline_result(test_result_fp, pipeline_result):
                 line = testcase.attrib['file'] + ':' + testcase.attrib['line']
                 # only get first failure
                 for failure in failures:
-                    message = failure.attrib['message'].replace('\n', '<br>')
+                    message = failure.attrib['message'].replace('\n', '<br>').replace(' ', '&nbsp;')
                     break
                 for i in pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details'][0]['Details']:
                     if i['Module'] == module:
@@ -568,18 +582,27 @@ class AutomaticScheduling(object):
                 serial_tests.append(k)
             else:
                 parallel_tests.append(k)
+        # Put the cloud module at the end of the serial execution
+        # Since it will cause the test_get_docker_credentials test to fail
+        # TODO: Find the root cause of the failure and modify the test code.
+        if 'cloud' in serial_tests:
+            serial_tests.remove('cloud')
+            serial_tests.append('cloud')
         pipeline_result = build_pipeline_result() if enable_pipeline_result else None
-        if serial_tests:
-            azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{python_version}_{profile}_{instance_idx}.serial.xml")
-            cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', '--series'] + serial_tests + \
-                  ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '-o junit_family=xunit1 --durations=10 --tb=no']
-            serial_error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
-            pipeline_result = get_pipeline_result(azdev_test_result_fp, pipeline_result) if enable_pipeline_result else None
+        pytest_args = '-o junit_family=xunit1 --durations=10'
+        if not enable_traceback:
+            pytest_args += ' --tb=no'
         if parallel_tests:
             azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{python_version}_{profile}_{instance_idx}.parallel.xml")
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose'] + parallel_tests + \
-                  ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '-o junit_family=xunit1 --durations=10 --tb=no']
+                  ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', pytest_args]
             parallel_error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
+            pipeline_result = get_pipeline_result(azdev_test_result_fp, pipeline_result) if enable_pipeline_result else None
+        if serial_tests:
+            azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{python_version}_{profile}_{instance_idx}.serial.xml")
+            cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', '--series'] + serial_tests + \
+                  ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', pytest_args]
+            serial_error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
             pipeline_result = get_pipeline_result(azdev_test_result_fp, pipeline_result) if enable_pipeline_result else None
         save_pipeline_result(pipeline_result) if enable_pipeline_result else None
         return serial_error_flag or parallel_error_flag
@@ -589,12 +612,17 @@ class AutomaticScheduling(object):
         for module, path in instance_modules.items():
             run_command(["git", "checkout", f"regression_test_{os.getenv('BUILD_BUILDID')}"], check_return_code=True)
             error_flag = install_extension(module)
+            logger.info(f"Finish installing extension {module}, error_flag: {error_flag}")
             if not error_flag:
                 azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{module}.xml")
                 cmd = ['azdev', 'test', module, '--discover', '--no-exitfirst', '--verbose',
                        '--xml-path', azdev_test_result_fp, '--pytest-args', '"--durations=10"']
                 error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests, modules=[module])
+                logger.info(f"Finish testing extension {module}, error_flag: {error_flag}")
             remove_extension(module)
+            logger.info(f"Finish removing extension {module}, error_flag: {error_flag}")
+            if error_flag:
+                rerun_setup(cli_repo_path=os.getenv('BUILD_SOURCESDIRECTORY'), extension_repo_path=working_directory)
             global_error_flag = global_error_flag or error_flag
         return global_error_flag
 

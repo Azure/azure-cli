@@ -109,6 +109,14 @@ class CosmosDBTests(ScenarioTest):
 
         connection_strings = self.cmd('az cosmosdb keys list --type connection-strings -n {acc} -g {rg}').get_output_in_json()
         assert len(connection_strings['connectionStrings']) == 4
+        for i in range(4):
+            curr_conn_string = connection_strings['connectionStrings'][i]
+            curr_conn_string_keys = curr_conn_string.keys()
+            assert len(curr_conn_string) == 4
+            assert 'connectionString' in curr_conn_string_keys
+            assert 'description' in curr_conn_string_keys
+            assert 'keyKind' in curr_conn_string_keys
+            assert 'type' in curr_conn_string_keys
 
         self.cmd('az cosmosdb update -n {acc} -g {rg} --backup-interval 120 --backup-retention 8', checks=[
             self.check('backupPolicy.periodicModeProperties.backupIntervalInMinutes', '120'),
@@ -2771,6 +2779,9 @@ class CosmosDBTests(ScenarioTest):
             assert location_val['properties']['backupStorageRedundancies'] != None
             assert location_val['properties']['isResidencyRestricted'] != None
             assert location_val['properties']['supportsAvailabilityZone'] != None
+            assert location_val['properties']['isSubscriptionRegionAccessAllowedForRegular'] != None
+            assert location_val['properties']['isSubscriptionRegionAccessAllowedForAz'] != None
+            assert location_val['properties']['status'] != None
 
         locations_show = self.cmd('az cosmosdb locations show --location {loc}').get_output_in_json()
         assert locations_show['id'] != None
@@ -2779,6 +2790,9 @@ class CosmosDBTests(ScenarioTest):
         assert locations_show['properties']['backupStorageRedundancies'] != None
         assert locations_show['properties']['isResidencyRestricted'] != None
         assert locations_show['properties']['supportsAvailabilityZone'] != None
+        assert locations_show['properties']['isSubscriptionRegionAccessAllowedForRegular'] != None
+        assert locations_show['properties']['isSubscriptionRegionAccessAllowedForAz'] != None
+        assert locations_show['properties']['status'] != None
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_service', location='eastus2')
     def test_cosmosdb_service(self, resource_group):

@@ -1,0 +1,1568 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --template-file --deny-settings-mode --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"error\": {\r\n    \"code\": \"DeploymentStackResourceNotFound\",\r\n
+        \   \"message\": \"The deployment stack '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002'
+        could not be found.\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '333'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 09 Sep 2023 19:41:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: '{"tags": {}, "properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "metadata": {"_generator": {"name": "bicep", "version":
+      "0.21.6.26884", "templateHash": "12279955842548902226"}}, "parameters": {"location":
+      {"type": "string", "defaultValue": "centralus"}, "storageAccountName": {"type":
+      "string", "defaultValue": "uniquestorage001", "minLength": 3, "maxLength": 24}},
+      "resources": [{"type": "Providers.Test/statefulResources", "apiVersion": "2014-04-01",
+      "name": "[parameters(''storageAccountName'')]", "location": "[parameters(''location'')]"}],
+      "outputs": {"storageId": {"type": "string", "value": "[resourceId(''Providers.Test/statefulResources'',
+      parameters(''storageAccountName''))]"}}}, "parameters": {}, "actionOnUnmanage":
+      {"resources": "detach", "resourceGroups": "detach"}, "denySettings": {"mode":
+      "none", "applyToChildScopes": false}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '937'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name --resource-group --template-file --deny-settings-mode --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
+        {\r\n      \"resources\": \"detach\",\r\n      \"resourceGroups\": \"detach\",\r\n
+        \     \"managementGroups\": \"detach\"\r\n    },\r\n    \"denySettings\":
+        {\r\n      \"mode\": \"none\",\r\n      \"applyToChildScopes\": false\r\n
+        \   },\r\n    \"parameters\": {},\r\n    \"resources\": [],\r\n    \"provisioningState\":
+        \"initializing\",\r\n    \"detachedResources\": [],\r\n    \"deletedResources\":
+        [],\r\n    \"failedResources\": []\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"antmarti@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
+        \"2023-09-09T19:41:10.7154344Z\",\r\n    \"lastModifiedBy\": \"antmarti@microsoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2023-09-09T19:41:10.7154344Z\"\r\n
+        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-create-deployment-stack-resource-group000002\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/481d03a0-0d3f-49fe-80ed-0de21341156f?api-version=2022-08-01-preview&t=2023-09-09T19%3a41%3a10&c=MIIHADCCBeigAwIBAgITfAOt9JON98CjYPdc9QAAA630kzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjMwODAzMDE0MDQxWhcNMjQwNzI4MDE0MDQxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKipopHvwrhlzUyEj8K9SzP-KaE4JxtdBJXyUTvKIkSiKKo5ed4nZoS8_lU5seMfZyXygEoF28j21995G21eW8pECHtdlucHibosuXyLYB0uLggka2khgGgRwjX1fj-Y2QE-kRjtmHLfZd9dBTNi8RumIZ_O_0rK4iFT8JtFu3uo6ug9fiLfTQoRJGf_2H9oXDvu9pToaiwHOD9iIn7hyTp074WUEfQEGPxJcSOLBMSnRwwjd8oj1jEuxP8e78qyh5inv9jbf8KLHT76QL8_Ih-I2hUoqmtLbaTTBUk9FZi-19Fy4Hdt6NZwwmwWzATFSjhQrIKYhpwYtxlqFdMl4YECAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBT6IQjGEFUZArd1dil8gnUkbgwjtjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJJDo9KyjKG4aDx14yKEmJ1XRvp_un1CwNEW6KgHKM-Tm9vuaH6LGfmO_idOwmXeJmwf7s6SphXwqlPgz0TJ1AizxH1ZyMtKcWUuT_z5YimmsrZTYI3meB_pNAZ1A-RrE7qhjkQuY2jtehE5y100y_IBy_NXCUns26MYl8O86cFtcEAROXCHbDZ7ZeTsKyMsIvYpLpt5oxm3JjrSdn6__RTe91cku07ep_oU01UxjWPZO4ikfSlZX2VsLr7ve1KKttmvg0QUWscKlRMiX8wz5vFh8scKWq84WRESj2e89n6oNVvtb2Pxy8hu_9U2FgU1euzED-f7Y4omjwQ6gGGouEs&s=k4IOtwjg9Ws9Bhi-VBfLpqW8hZUr_OYPm8pHtk7MUfzAOmIiepbhanBzqBLllqTrcH7ewpH5hIGd7MPoUiQDjynEkwloPqS5xACCWj4r-PjoAkVn7mKWQlpMaE9-0OfG5lJRz9C9geYlKzIzTAw6liFKq8KetbDBCkkRCXX1e17yTTigxmFQIkTS8BXkW_kBid17g5-nDME1EzX7A2n2clr3IcxrMcU5iB2HtWBWPhfK6GSv6Si40n8G4t-pS5b0lepJd1jz8_JxIkSkfGdo2C7BJ3firDQMD_Y1j7RDxyDyzsx2oGA41ljE5sbWO96OidDjKinUH4eBc1mPoECW0g&h=GveJuyJXs1kZhyAjdJFPL9I2kqBdyCSK0n9Y5jziT2M
+      cache-control:
+      - no-cache
+      content-length:
+      - '1060'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 09 Sep 2023 19:41:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1194'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --template-file --deny-settings-mode --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/481d03a0-0d3f-49fe-80ed-0de21341156f?api-version=2022-08-01-preview&t=2023-09-09T19%3A41%3A10&c=MIIHADCCBeigAwIBAgITfAOt9JON98CjYPdc9QAAA630kzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjMwODAzMDE0MDQxWhcNMjQwNzI4MDE0MDQxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKipopHvwrhlzUyEj8K9SzP-KaE4JxtdBJXyUTvKIkSiKKo5ed4nZoS8_lU5seMfZyXygEoF28j21995G21eW8pECHtdlucHibosuXyLYB0uLggka2khgGgRwjX1fj-Y2QE-kRjtmHLfZd9dBTNi8RumIZ_O_0rK4iFT8JtFu3uo6ug9fiLfTQoRJGf_2H9oXDvu9pToaiwHOD9iIn7hyTp074WUEfQEGPxJcSOLBMSnRwwjd8oj1jEuxP8e78qyh5inv9jbf8KLHT76QL8_Ih-I2hUoqmtLbaTTBUk9FZi-19Fy4Hdt6NZwwmwWzATFSjhQrIKYhpwYtxlqFdMl4YECAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBT6IQjGEFUZArd1dil8gnUkbgwjtjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJJDo9KyjKG4aDx14yKEmJ1XRvp_un1CwNEW6KgHKM-Tm9vuaH6LGfmO_idOwmXeJmwf7s6SphXwqlPgz0TJ1AizxH1ZyMtKcWUuT_z5YimmsrZTYI3meB_pNAZ1A-RrE7qhjkQuY2jtehE5y100y_IBy_NXCUns26MYl8O86cFtcEAROXCHbDZ7ZeTsKyMsIvYpLpt5oxm3JjrSdn6__RTe91cku07ep_oU01UxjWPZO4ikfSlZX2VsLr7ve1KKttmvg0QUWscKlRMiX8wz5vFh8scKWq84WRESj2e89n6oNVvtb2Pxy8hu_9U2FgU1euzED-f7Y4omjwQ6gGGouEs&s=k4IOtwjg9Ws9Bhi-VBfLpqW8hZUr_OYPm8pHtk7MUfzAOmIiepbhanBzqBLllqTrcH7ewpH5hIGd7MPoUiQDjynEkwloPqS5xACCWj4r-PjoAkVn7mKWQlpMaE9-0OfG5lJRz9C9geYlKzIzTAw6liFKq8KetbDBCkkRCXX1e17yTTigxmFQIkTS8BXkW_kBid17g5-nDME1EzX7A2n2clr3IcxrMcU5iB2HtWBWPhfK6GSv6Si40n8G4t-pS5b0lepJd1jz8_JxIkSkfGdo2C7BJ3firDQMD_Y1j7RDxyDyzsx2oGA41ljE5sbWO96OidDjKinUH4eBc1mPoECW0g&h=GveJuyJXs1kZhyAjdJFPL9I2kqBdyCSK0n9Y5jziT2M
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/481d03a0-0d3f-49fe-80ed-0de21341156f\",\r\n
+        \ \"name\": \"481d03a0-0d3f-49fe-80ed-0de21341156f\",\r\n  \"status\": \"initializing\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '263'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 09 Sep 2023 19:41:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --template-file --deny-settings-mode --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/481d03a0-0d3f-49fe-80ed-0de21341156f?api-version=2022-08-01-preview&t=2023-09-09T19%3A41%3A10&c=MIIHADCCBeigAwIBAgITfAOt9JON98CjYPdc9QAAA630kzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjMwODAzMDE0MDQxWhcNMjQwNzI4MDE0MDQxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKipopHvwrhlzUyEj8K9SzP-KaE4JxtdBJXyUTvKIkSiKKo5ed4nZoS8_lU5seMfZyXygEoF28j21995G21eW8pECHtdlucHibosuXyLYB0uLggka2khgGgRwjX1fj-Y2QE-kRjtmHLfZd9dBTNi8RumIZ_O_0rK4iFT8JtFu3uo6ug9fiLfTQoRJGf_2H9oXDvu9pToaiwHOD9iIn7hyTp074WUEfQEGPxJcSOLBMSnRwwjd8oj1jEuxP8e78qyh5inv9jbf8KLHT76QL8_Ih-I2hUoqmtLbaTTBUk9FZi-19Fy4Hdt6NZwwmwWzATFSjhQrIKYhpwYtxlqFdMl4YECAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBT6IQjGEFUZArd1dil8gnUkbgwjtjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJJDo9KyjKG4aDx14yKEmJ1XRvp_un1CwNEW6KgHKM-Tm9vuaH6LGfmO_idOwmXeJmwf7s6SphXwqlPgz0TJ1AizxH1ZyMtKcWUuT_z5YimmsrZTYI3meB_pNAZ1A-RrE7qhjkQuY2jtehE5y100y_IBy_NXCUns26MYl8O86cFtcEAROXCHbDZ7ZeTsKyMsIvYpLpt5oxm3JjrSdn6__RTe91cku07ep_oU01UxjWPZO4ikfSlZX2VsLr7ve1KKttmvg0QUWscKlRMiX8wz5vFh8scKWq84WRESj2e89n6oNVvtb2Pxy8hu_9U2FgU1euzED-f7Y4omjwQ6gGGouEs&s=k4IOtwjg9Ws9Bhi-VBfLpqW8hZUr_OYPm8pHtk7MUfzAOmIiepbhanBzqBLllqTrcH7ewpH5hIGd7MPoUiQDjynEkwloPqS5xACCWj4r-PjoAkVn7mKWQlpMaE9-0OfG5lJRz9C9geYlKzIzTAw6liFKq8KetbDBCkkRCXX1e17yTTigxmFQIkTS8BXkW_kBid17g5-nDME1EzX7A2n2clr3IcxrMcU5iB2HtWBWPhfK6GSv6Si40n8G4t-pS5b0lepJd1jz8_JxIkSkfGdo2C7BJ3firDQMD_Y1j7RDxyDyzsx2oGA41ljE5sbWO96OidDjKinUH4eBc1mPoECW0g&h=GveJuyJXs1kZhyAjdJFPL9I2kqBdyCSK0n9Y5jziT2M
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/481d03a0-0d3f-49fe-80ed-0de21341156f\",\r\n
+        \ \"name\": \"481d03a0-0d3f-49fe-80ed-0de21341156f\",\r\n  \"status\": \"succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '260'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 09 Sep 2023 19:41:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --template-file --deny-settings-mode --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
+        {\r\n      \"resources\": \"detach\",\r\n      \"resourceGroups\": \"detach\",\r\n
+        \     \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-create-deployment-stack-resou-2023-09-09-19-41-10-06f38\",\r\n
+        \   \"duration\": \"PT6.9471933S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"outputs\":
+        {\r\n      \"storageId\": {\r\n        \"type\": \"String\",\r\n        \"value\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Providers.Test/statefulResources/uniquestorage001\"\r\n
+        \     }\r\n    },\r\n    \"parameters\": {},\r\n    \"resources\": [\r\n      {\r\n
+        \       \"status\": \"managed\",\r\n        \"denyStatus\": \"none\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Providers.Test/statefulResources/uniquestorage001\"\r\n
+        \     }\r\n    ],\r\n    \"provisioningState\": \"succeeded\",\r\n    \"detachedResources\":
+        [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
+        \ \"systemData\": {\r\n    \"createdBy\": \"antmarti@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-09-09T19:41:10.7154344Z\",\r\n
+        \   \"lastModifiedBy\": \"antmarti@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-09-09T19:41:10.7154344Z\"\r\n
+        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-create-deployment-stack-resource-group000002\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1847'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 09 Sep 2023 19:41:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
+        {\r\n      \"resources\": \"detach\",\r\n      \"resourceGroups\": \"detach\",\r\n
+        \     \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-create-deployment-stack-resou-2023-09-09-19-41-10-06f38\",\r\n
+        \   \"duration\": \"PT6.9471933S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"outputs\":
+        {\r\n      \"storageId\": {\r\n        \"type\": \"String\",\r\n        \"value\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Providers.Test/statefulResources/uniquestorage001\"\r\n
+        \     }\r\n    },\r\n    \"parameters\": {},\r\n    \"resources\": [\r\n      {\r\n
+        \       \"status\": \"managed\",\r\n        \"denyStatus\": \"none\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Providers.Test/statefulResources/uniquestorage001\"\r\n
+        \     }\r\n    ],\r\n    \"provisioningState\": \"succeeded\",\r\n    \"detachedResources\":
+        [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
+        \ \"systemData\": {\r\n    \"createdBy\": \"antmarti@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-09-09T19:41:10.7154344Z\",\r\n
+        \   \"lastModifiedBy\": \"antmarti@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-09-09T19:41:10.7154344Z\"\r\n
+        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-create-deployment-stack-resource-group000002\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1847'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 09 Sep 2023 19:41:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name --resource-group --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002?unmanageAction.Resources=detach&unmanageAction.ResourceGroups=detach&api-version=2022-08-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Sat, 09 Sep 2023 19:41:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14997'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -p --deny-settings-mode --delete-all --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"error\": {\r\n    \"code\": \"DeploymentStackResourceNotFound\",\r\n
+        \   \"message\": \"The deployment stack '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002'
+        could not be found.\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '333'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 09 Sep 2023 19:41:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: '{"tags": {}, "properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "metadata": {"_generator": {"name": "bicep", "version":
+      "0.21.6.26884", "templateHash": "7974310390702075225"}}, "parameters": {"location":
+      {"type": "string"}, "kind": {"type": "string"}}, "variables": {"storageAccountName":
+      "[format(''store{0}'', uniqueString(resourceGroup().id))]"}, "resources": [{"type":
+      "Microsoft.Storage/storageAccounts", "apiVersion": "2019-04-01", "name": "[variables(''storageAccountName'')]",
+      "location": "[parameters(''location'')]", "sku": {"name": "Standard_LRS"}, "kind":
+      "[parameters(''kind'')]", "properties": {}}]}, "parameters": {"location": {"value":
+      "westus2"}, "kind": {"value": "StorageV2"}}, "actionOnUnmanage": {"resources":
+      "delete", "resourceGroups": "delete"}, "denySettings": {"mode": "none", "applyToChildScopes":
+      false}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '925'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name -g -p --deny-settings-mode --delete-all --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
+        {\r\n      \"resources\": \"delete\",\r\n      \"resourceGroups\": \"delete\",\r\n
+        \     \"managementGroups\": \"detach\"\r\n    },\r\n    \"denySettings\":
+        {\r\n      \"mode\": \"none\",\r\n      \"applyToChildScopes\": false\r\n
+        \   },\r\n    \"parameters\": {\r\n      \"location\": {\r\n        \"value\":
+        \"westus2\",\r\n        \"type\": \"string\"\r\n      },\r\n      \"kind\":
+        {\r\n        \"value\": \"StorageV2\",\r\n        \"type\": \"string\"\r\n
+        \     }\r\n    },\r\n    \"resources\": [],\r\n    \"provisioningState\":
+        \"initializing\",\r\n    \"detachedResources\": [],\r\n    \"deletedResources\":
+        [],\r\n    \"failedResources\": []\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"antmarti@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
+        \"2023-09-09T19:41:46.830578Z\",\r\n    \"lastModifiedBy\": \"antmarti@microsoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2023-09-09T19:41:46.830578Z\"\r\n
+        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-create-deployment-stack-resource-group000002\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/a77fc442-e5cd-44b4-a0fd-69bc233a3605?api-version=2022-08-01-preview&t=2023-09-09T19%3a41%3a47&c=MIIHADCCBeigAwIBAgITfAOt9JON98CjYPdc9QAAA630kzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjMwODAzMDE0MDQxWhcNMjQwNzI4MDE0MDQxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKipopHvwrhlzUyEj8K9SzP-KaE4JxtdBJXyUTvKIkSiKKo5ed4nZoS8_lU5seMfZyXygEoF28j21995G21eW8pECHtdlucHibosuXyLYB0uLggka2khgGgRwjX1fj-Y2QE-kRjtmHLfZd9dBTNi8RumIZ_O_0rK4iFT8JtFu3uo6ug9fiLfTQoRJGf_2H9oXDvu9pToaiwHOD9iIn7hyTp074WUEfQEGPxJcSOLBMSnRwwjd8oj1jEuxP8e78qyh5inv9jbf8KLHT76QL8_Ih-I2hUoqmtLbaTTBUk9FZi-19Fy4Hdt6NZwwmwWzATFSjhQrIKYhpwYtxlqFdMl4YECAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBT6IQjGEFUZArd1dil8gnUkbgwjtjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJJDo9KyjKG4aDx14yKEmJ1XRvp_un1CwNEW6KgHKM-Tm9vuaH6LGfmO_idOwmXeJmwf7s6SphXwqlPgz0TJ1AizxH1ZyMtKcWUuT_z5YimmsrZTYI3meB_pNAZ1A-RrE7qhjkQuY2jtehE5y100y_IBy_NXCUns26MYl8O86cFtcEAROXCHbDZ7ZeTsKyMsIvYpLpt5oxm3JjrSdn6__RTe91cku07ep_oU01UxjWPZO4ikfSlZX2VsLr7ve1KKttmvg0QUWscKlRMiX8wz5vFh8scKWq84WRESj2e89n6oNVvtb2Pxy8hu_9U2FgU1euzED-f7Y4omjwQ6gGGouEs&s=Rk8aI7hDJgpdOGnW_xd7dE76dTGcGreDxbBjbD7qhwWtFVtznK7w8NSoRefCUS_Gla_o7lXONAOQZiLXdTa1ayCLNlxkH8bnXKRAWIJvyeDCD30TmtvAyFjqXrLxhMRJ6xIqMZwb-jYsl0olmlJnaFbHiTpoKu3ipONsxS19xszGMKltzNlc2FS9tQ8zlk4_LJxsQaOJHT3Rk9cTWZ2jfV57krYAEnTU2XecmIgQHAhsNsiDYM-WaEapdCUu4MNvPXlwm72p7GBvmU5PpqXcpS3PfPL_lgSGISw9PRM_3ZfbAKK2o5lJZKmPFIG_S3cZIeO7MI041bqRHzaaf_fwOQ&h=edBkgZSvtF_RQqYRI2W46j8hqJ1lE6E7tt2H2_4j3cQ
+      cache-control:
+      - no-cache
+      content-length:
+      - '1233'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 09 Sep 2023 19:41:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -p --deny-settings-mode --delete-all --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/a77fc442-e5cd-44b4-a0fd-69bc233a3605?api-version=2022-08-01-preview&t=2023-09-09T19%3A41%3A47&c=MIIHADCCBeigAwIBAgITfAOt9JON98CjYPdc9QAAA630kzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjMwODAzMDE0MDQxWhcNMjQwNzI4MDE0MDQxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKipopHvwrhlzUyEj8K9SzP-KaE4JxtdBJXyUTvKIkSiKKo5ed4nZoS8_lU5seMfZyXygEoF28j21995G21eW8pECHtdlucHibosuXyLYB0uLggka2khgGgRwjX1fj-Y2QE-kRjtmHLfZd9dBTNi8RumIZ_O_0rK4iFT8JtFu3uo6ug9fiLfTQoRJGf_2H9oXDvu9pToaiwHOD9iIn7hyTp074WUEfQEGPxJcSOLBMSnRwwjd8oj1jEuxP8e78qyh5inv9jbf8KLHT76QL8_Ih-I2hUoqmtLbaTTBUk9FZi-19Fy4Hdt6NZwwmwWzATFSjhQrIKYhpwYtxlqFdMl4YECAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBT6IQjGEFUZArd1dil8gnUkbgwjtjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJJDo9KyjKG4aDx14yKEmJ1XRvp_un1CwNEW6KgHKM-Tm9vuaH6LGfmO_idOwmXeJmwf7s6SphXwqlPgz0TJ1AizxH1ZyMtKcWUuT_z5YimmsrZTYI3meB_pNAZ1A-RrE7qhjkQuY2jtehE5y100y_IBy_NXCUns26MYl8O86cFtcEAROXCHbDZ7ZeTsKyMsIvYpLpt5oxm3JjrSdn6__RTe91cku07ep_oU01UxjWPZO4ikfSlZX2VsLr7ve1KKttmvg0QUWscKlRMiX8wz5vFh8scKWq84WRESj2e89n6oNVvtb2Pxy8hu_9U2FgU1euzED-f7Y4omjwQ6gGGouEs&s=Rk8aI7hDJgpdOGnW_xd7dE76dTGcGreDxbBjbD7qhwWtFVtznK7w8NSoRefCUS_Gla_o7lXONAOQZiLXdTa1ayCLNlxkH8bnXKRAWIJvyeDCD30TmtvAyFjqXrLxhMRJ6xIqMZwb-jYsl0olmlJnaFbHiTpoKu3ipONsxS19xszGMKltzNlc2FS9tQ8zlk4_LJxsQaOJHT3Rk9cTWZ2jfV57krYAEnTU2XecmIgQHAhsNsiDYM-WaEapdCUu4MNvPXlwm72p7GBvmU5PpqXcpS3PfPL_lgSGISw9PRM_3ZfbAKK2o5lJZKmPFIG_S3cZIeO7MI041bqRHzaaf_fwOQ&h=edBkgZSvtF_RQqYRI2W46j8hqJ1lE6E7tt2H2_4j3cQ
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/a77fc442-e5cd-44b4-a0fd-69bc233a3605\",\r\n
+        \ \"name\": \"a77fc442-e5cd-44b4-a0fd-69bc233a3605\",\r\n  \"status\": \"initializing\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '263'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 09 Sep 2023 19:41:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -p --deny-settings-mode --delete-all --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/a77fc442-e5cd-44b4-a0fd-69bc233a3605?api-version=2022-08-01-preview&t=2023-09-09T19%3A41%3A47&c=MIIHADCCBeigAwIBAgITfAOt9JON98CjYPdc9QAAA630kzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjMwODAzMDE0MDQxWhcNMjQwNzI4MDE0MDQxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKipopHvwrhlzUyEj8K9SzP-KaE4JxtdBJXyUTvKIkSiKKo5ed4nZoS8_lU5seMfZyXygEoF28j21995G21eW8pECHtdlucHibosuXyLYB0uLggka2khgGgRwjX1fj-Y2QE-kRjtmHLfZd9dBTNi8RumIZ_O_0rK4iFT8JtFu3uo6ug9fiLfTQoRJGf_2H9oXDvu9pToaiwHOD9iIn7hyTp074WUEfQEGPxJcSOLBMSnRwwjd8oj1jEuxP8e78qyh5inv9jbf8KLHT76QL8_Ih-I2hUoqmtLbaTTBUk9FZi-19Fy4Hdt6NZwwmwWzATFSjhQrIKYhpwYtxlqFdMl4YECAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBT6IQjGEFUZArd1dil8gnUkbgwjtjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJJDo9KyjKG4aDx14yKEmJ1XRvp_un1CwNEW6KgHKM-Tm9vuaH6LGfmO_idOwmXeJmwf7s6SphXwqlPgz0TJ1AizxH1ZyMtKcWUuT_z5YimmsrZTYI3meB_pNAZ1A-RrE7qhjkQuY2jtehE5y100y_IBy_NXCUns26MYl8O86cFtcEAROXCHbDZ7ZeTsKyMsIvYpLpt5oxm3JjrSdn6__RTe91cku07ep_oU01UxjWPZO4ikfSlZX2VsLr7ve1KKttmvg0QUWscKlRMiX8wz5vFh8scKWq84WRESj2e89n6oNVvtb2Pxy8hu_9U2FgU1euzED-f7Y4omjwQ6gGGouEs&s=Rk8aI7hDJgpdOGnW_xd7dE76dTGcGreDxbBjbD7qhwWtFVtznK7w8NSoRefCUS_Gla_o7lXONAOQZiLXdTa1ayCLNlxkH8bnXKRAWIJvyeDCD30TmtvAyFjqXrLxhMRJ6xIqMZwb-jYsl0olmlJnaFbHiTpoKu3ipONsxS19xszGMKltzNlc2FS9tQ8zlk4_LJxsQaOJHT3Rk9cTWZ2jfV57krYAEnTU2XecmIgQHAhsNsiDYM-WaEapdCUu4MNvPXlwm72p7GBvmU5PpqXcpS3PfPL_lgSGISw9PRM_3ZfbAKK2o5lJZKmPFIG_S3cZIeO7MI041bqRHzaaf_fwOQ&h=edBkgZSvtF_RQqYRI2W46j8hqJ1lE6E7tt2H2_4j3cQ
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/a77fc442-e5cd-44b4-a0fd-69bc233a3605\",\r\n
+        \ \"name\": \"a77fc442-e5cd-44b4-a0fd-69bc233a3605\",\r\n  \"status\": \"succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '260'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 09 Sep 2023 19:42:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -p --deny-settings-mode --delete-all --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
+        {\r\n      \"resources\": \"delete\",\r\n      \"resourceGroups\": \"delete\",\r\n
+        \     \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-create-deployment-stack-resou-2023-09-09-19-41-46-0d909\",\r\n
+        \   \"duration\": \"PT30.4289694S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"parameters\":
+        {\r\n      \"location\": {\r\n        \"value\": \"westus2\",\r\n        \"type\":
+        \"string\"\r\n      },\r\n      \"kind\": {\r\n        \"value\": \"StorageV2\",\r\n
+        \       \"type\": \"string\"\r\n      }\r\n    },\r\n    \"resources\": [\r\n
+        \     {\r\n        \"status\": \"managed\",\r\n        \"denyStatus\": \"none\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Storage/storageAccounts/storehgbramygs44z2\"\r\n
+        \     }\r\n    ],\r\n    \"provisioningState\": \"succeeded\",\r\n    \"detachedResources\":
+        [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
+        \ \"systemData\": {\r\n    \"createdBy\": \"antmarti@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-09-09T19:41:46.830578Z\",\r\n
+        \   \"lastModifiedBy\": \"antmarti@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-09-09T19:41:46.830578Z\"\r\n  },\r\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-create-deployment-stack-resource-group000002\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1760'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 09 Sep 2023 19:42:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
+        {\r\n      \"resources\": \"delete\",\r\n      \"resourceGroups\": \"delete\",\r\n
+        \     \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-create-deployment-stack-resou-2023-09-09-19-41-46-0d909\",\r\n
+        \   \"duration\": \"PT30.4289694S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"parameters\":
+        {\r\n      \"location\": {\r\n        \"value\": \"westus2\",\r\n        \"type\":
+        \"string\"\r\n      },\r\n      \"kind\": {\r\n        \"value\": \"StorageV2\",\r\n
+        \       \"type\": \"string\"\r\n      }\r\n    },\r\n    \"resources\": [\r\n
+        \     {\r\n        \"status\": \"managed\",\r\n        \"denyStatus\": \"none\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Storage/storageAccounts/storehgbramygs44z2\"\r\n
+        \     }\r\n    ],\r\n    \"provisioningState\": \"succeeded\",\r\n    \"detachedResources\":
+        [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
+        \ \"systemData\": {\r\n    \"createdBy\": \"antmarti@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-09-09T19:41:46.830578Z\",\r\n
+        \   \"lastModifiedBy\": \"antmarti@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-09-09T19:41:46.830578Z\"\r\n  },\r\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-create-deployment-stack-resource-group000002\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1760'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 09 Sep 2023 19:42:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g --name --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002?unmanageAction.Resources=detach&unmanageAction.ResourceGroups=detach&api-version=2022-08-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Sat, 09 Sep 2023 19:42:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -p --deny-settings-mode --delete-all --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"error\": {\r\n    \"code\": \"DeploymentStackResourceNotFound\",\r\n
+        \   \"message\": \"The deployment stack '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002'
+        could not be found.\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '333'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 09 Sep 2023 19:42:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: '{"tags": {}, "properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "metadata": {"_generator": {"name": "bicep", "version":
+      "0.19.5.34762", "templateHash": "2905255484229578890"}, "name": "Hello World",
+      "description": "A \"\u05e9\u05b8\u05c1\u05dc\u05d5\u05b9\u05dd \u05e2\u05d5\u05b9\u05dc\u05b8\u05dd\"
+      sample Bicep registry module", "owner": "bicep-admins"}, "parameters": {"name":
+      {"type": "string", "metadata": {"description": "The name of someone to say hi
+      to."}}}, "resources": [], "outputs": {"greeting": {"type": "string", "metadata":
+      {"description": "The hello message."}, "value": "[format(''Hello from Bicep
+      registry - Hi {0}!'', parameters(''name''))]"}}}, "parameters": {"name": {"value":
+      "Anthony"}}, "actionOnUnmanage": {"resources": "delete", "resourceGroups": "delete"},
+      "denySettings": {"mode": "none", "applyToChildScopes": false}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '944'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name -g -p --deny-settings-mode --delete-all --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
+        {\r\n      \"resources\": \"delete\",\r\n      \"resourceGroups\": \"delete\",\r\n
+        \     \"managementGroups\": \"detach\"\r\n    },\r\n    \"denySettings\":
+        {\r\n      \"mode\": \"none\",\r\n      \"applyToChildScopes\": false\r\n
+        \   },\r\n    \"parameters\": {\r\n      \"name\": {\r\n        \"value\":
+        \"Anthony\",\r\n        \"type\": \"string\"\r\n      }\r\n    },\r\n    \"resources\":
+        [],\r\n    \"provisioningState\": \"initializing\",\r\n    \"detachedResources\":
+        [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
+        \ \"systemData\": {\r\n    \"createdBy\": \"antmarti@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-09-09T19:42:22.5593087Z\",\r\n
+        \   \"lastModifiedBy\": \"antmarti@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-09-09T19:42:22.5593087Z\"\r\n
+        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-create-deployment-stack-resource-group000002\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/2c343e49-9a96-4473-a5f1-787496ad9aab?api-version=2022-08-01-preview&t=2023-09-09T19%3a42%3a22&c=MIIHADCCBeigAwIBAgITfAOt9JON98CjYPdc9QAAA630kzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjMwODAzMDE0MDQxWhcNMjQwNzI4MDE0MDQxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKipopHvwrhlzUyEj8K9SzP-KaE4JxtdBJXyUTvKIkSiKKo5ed4nZoS8_lU5seMfZyXygEoF28j21995G21eW8pECHtdlucHibosuXyLYB0uLggka2khgGgRwjX1fj-Y2QE-kRjtmHLfZd9dBTNi8RumIZ_O_0rK4iFT8JtFu3uo6ug9fiLfTQoRJGf_2H9oXDvu9pToaiwHOD9iIn7hyTp074WUEfQEGPxJcSOLBMSnRwwjd8oj1jEuxP8e78qyh5inv9jbf8KLHT76QL8_Ih-I2hUoqmtLbaTTBUk9FZi-19Fy4Hdt6NZwwmwWzATFSjhQrIKYhpwYtxlqFdMl4YECAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBT6IQjGEFUZArd1dil8gnUkbgwjtjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJJDo9KyjKG4aDx14yKEmJ1XRvp_un1CwNEW6KgHKM-Tm9vuaH6LGfmO_idOwmXeJmwf7s6SphXwqlPgz0TJ1AizxH1ZyMtKcWUuT_z5YimmsrZTYI3meB_pNAZ1A-RrE7qhjkQuY2jtehE5y100y_IBy_NXCUns26MYl8O86cFtcEAROXCHbDZ7ZeTsKyMsIvYpLpt5oxm3JjrSdn6__RTe91cku07ep_oU01UxjWPZO4ikfSlZX2VsLr7ve1KKttmvg0QUWscKlRMiX8wz5vFh8scKWq84WRESj2e89n6oNVvtb2Pxy8hu_9U2FgU1euzED-f7Y4omjwQ6gGGouEs&s=BRpryaHpFjVv0l4aj94Otn0lA5x94hQWb-sRDYU7RhXmaeMNRKrHZJE29skqzlt8TGDYWKLrk439l_qC3s3g5GLbUcmLmqIKVgHFDrDBqb3JKWiQkZHAOY0LhtJu-FfEoyEMe-9-T9BqOwxtVYMDtjV7CJ8CYi6ZbUH4eA7HpTRYCmgEhRIno0DCr2nkjqsrcnpN_szb9P3KKsaQS2NnXvqVHE8WR4jFamABfAjo_FxZ4J0n2krU20xR9eN5tSx-LaIAD2HgHdMZVz-RaICZkwDzZpQq5lPT1rBngB2GW-0w8_gT_Z1j51LUVgttWK_yaqpB3A5asDJvOINgrT-Blw&h=kbZb1uDFGwb-uxHGjh4VjyDNyRAn8Y-CkdU0_9UFwC8
+      cache-control:
+      - no-cache
+      content-length:
+      - '1147'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 09 Sep 2023 19:42:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -p --deny-settings-mode --delete-all --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/2c343e49-9a96-4473-a5f1-787496ad9aab?api-version=2022-08-01-preview&t=2023-09-09T19%3A42%3A22&c=MIIHADCCBeigAwIBAgITfAOt9JON98CjYPdc9QAAA630kzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjMwODAzMDE0MDQxWhcNMjQwNzI4MDE0MDQxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKipopHvwrhlzUyEj8K9SzP-KaE4JxtdBJXyUTvKIkSiKKo5ed4nZoS8_lU5seMfZyXygEoF28j21995G21eW8pECHtdlucHibosuXyLYB0uLggka2khgGgRwjX1fj-Y2QE-kRjtmHLfZd9dBTNi8RumIZ_O_0rK4iFT8JtFu3uo6ug9fiLfTQoRJGf_2H9oXDvu9pToaiwHOD9iIn7hyTp074WUEfQEGPxJcSOLBMSnRwwjd8oj1jEuxP8e78qyh5inv9jbf8KLHT76QL8_Ih-I2hUoqmtLbaTTBUk9FZi-19Fy4Hdt6NZwwmwWzATFSjhQrIKYhpwYtxlqFdMl4YECAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBT6IQjGEFUZArd1dil8gnUkbgwjtjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJJDo9KyjKG4aDx14yKEmJ1XRvp_un1CwNEW6KgHKM-Tm9vuaH6LGfmO_idOwmXeJmwf7s6SphXwqlPgz0TJ1AizxH1ZyMtKcWUuT_z5YimmsrZTYI3meB_pNAZ1A-RrE7qhjkQuY2jtehE5y100y_IBy_NXCUns26MYl8O86cFtcEAROXCHbDZ7ZeTsKyMsIvYpLpt5oxm3JjrSdn6__RTe91cku07ep_oU01UxjWPZO4ikfSlZX2VsLr7ve1KKttmvg0QUWscKlRMiX8wz5vFh8scKWq84WRESj2e89n6oNVvtb2Pxy8hu_9U2FgU1euzED-f7Y4omjwQ6gGGouEs&s=BRpryaHpFjVv0l4aj94Otn0lA5x94hQWb-sRDYU7RhXmaeMNRKrHZJE29skqzlt8TGDYWKLrk439l_qC3s3g5GLbUcmLmqIKVgHFDrDBqb3JKWiQkZHAOY0LhtJu-FfEoyEMe-9-T9BqOwxtVYMDtjV7CJ8CYi6ZbUH4eA7HpTRYCmgEhRIno0DCr2nkjqsrcnpN_szb9P3KKsaQS2NnXvqVHE8WR4jFamABfAjo_FxZ4J0n2krU20xR9eN5tSx-LaIAD2HgHdMZVz-RaICZkwDzZpQq5lPT1rBngB2GW-0w8_gT_Z1j51LUVgttWK_yaqpB3A5asDJvOINgrT-Blw&h=kbZb1uDFGwb-uxHGjh4VjyDNyRAn8Y-CkdU0_9UFwC8
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/2c343e49-9a96-4473-a5f1-787496ad9aab\",\r\n
+        \ \"name\": \"2c343e49-9a96-4473-a5f1-787496ad9aab\",\r\n  \"status\": \"initializing\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '263'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 09 Sep 2023 19:42:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -p --deny-settings-mode --delete-all --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/2c343e49-9a96-4473-a5f1-787496ad9aab?api-version=2022-08-01-preview&t=2023-09-09T19%3A42%3A22&c=MIIHADCCBeigAwIBAgITfAOt9JON98CjYPdc9QAAA630kzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjMwODAzMDE0MDQxWhcNMjQwNzI4MDE0MDQxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKipopHvwrhlzUyEj8K9SzP-KaE4JxtdBJXyUTvKIkSiKKo5ed4nZoS8_lU5seMfZyXygEoF28j21995G21eW8pECHtdlucHibosuXyLYB0uLggka2khgGgRwjX1fj-Y2QE-kRjtmHLfZd9dBTNi8RumIZ_O_0rK4iFT8JtFu3uo6ug9fiLfTQoRJGf_2H9oXDvu9pToaiwHOD9iIn7hyTp074WUEfQEGPxJcSOLBMSnRwwjd8oj1jEuxP8e78qyh5inv9jbf8KLHT76QL8_Ih-I2hUoqmtLbaTTBUk9FZi-19Fy4Hdt6NZwwmwWzATFSjhQrIKYhpwYtxlqFdMl4YECAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBT6IQjGEFUZArd1dil8gnUkbgwjtjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJJDo9KyjKG4aDx14yKEmJ1XRvp_un1CwNEW6KgHKM-Tm9vuaH6LGfmO_idOwmXeJmwf7s6SphXwqlPgz0TJ1AizxH1ZyMtKcWUuT_z5YimmsrZTYI3meB_pNAZ1A-RrE7qhjkQuY2jtehE5y100y_IBy_NXCUns26MYl8O86cFtcEAROXCHbDZ7ZeTsKyMsIvYpLpt5oxm3JjrSdn6__RTe91cku07ep_oU01UxjWPZO4ikfSlZX2VsLr7ve1KKttmvg0QUWscKlRMiX8wz5vFh8scKWq84WRESj2e89n6oNVvtb2Pxy8hu_9U2FgU1euzED-f7Y4omjwQ6gGGouEs&s=BRpryaHpFjVv0l4aj94Otn0lA5x94hQWb-sRDYU7RhXmaeMNRKrHZJE29skqzlt8TGDYWKLrk439l_qC3s3g5GLbUcmLmqIKVgHFDrDBqb3JKWiQkZHAOY0LhtJu-FfEoyEMe-9-T9BqOwxtVYMDtjV7CJ8CYi6ZbUH4eA7HpTRYCmgEhRIno0DCr2nkjqsrcnpN_szb9P3KKsaQS2NnXvqVHE8WR4jFamABfAjo_FxZ4J0n2krU20xR9eN5tSx-LaIAD2HgHdMZVz-RaICZkwDzZpQq5lPT1rBngB2GW-0w8_gT_Z1j51LUVgttWK_yaqpB3A5asDJvOINgrT-Blw&h=kbZb1uDFGwb-uxHGjh4VjyDNyRAn8Y-CkdU0_9UFwC8
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/2c343e49-9a96-4473-a5f1-787496ad9aab\",\r\n
+        \ \"name\": \"2c343e49-9a96-4473-a5f1-787496ad9aab\",\r\n  \"status\": \"succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '260'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 09 Sep 2023 19:42:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -p --deny-settings-mode --delete-all --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
+        {\r\n      \"resources\": \"delete\",\r\n      \"resourceGroups\": \"delete\",\r\n
+        \     \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-create-deployment-stack-resou-2023-09-09-19-42-22-d0395\",\r\n
+        \   \"duration\": \"PT6.5193248S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"outputs\":
+        {\r\n      \"greeting\": {\r\n        \"type\": \"String\",\r\n        \"value\":
+        \"Hello from Bicep registry - Hi Anthony!\"\r\n      }\r\n    },\r\n    \"parameters\":
+        {\r\n      \"name\": {\r\n        \"value\": \"Anthony\",\r\n        \"type\":
+        \"string\"\r\n      }\r\n    },\r\n    \"resources\": [],\r\n    \"provisioningState\":
+        \"succeeded\",\r\n    \"detachedResources\": [],\r\n    \"deletedResources\":
+        [],\r\n    \"failedResources\": []\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"antmarti@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
+        \"2023-09-09T19:42:22.5593087Z\",\r\n    \"lastModifiedBy\": \"antmarti@microsoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2023-09-09T19:42:22.5593087Z\"\r\n
+        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-create-deployment-stack-resource-group000002\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1551'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 09 Sep 2023 19:42:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
+        {\r\n      \"resources\": \"delete\",\r\n      \"resourceGroups\": \"delete\",\r\n
+        \     \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-create-deployment-stack-resou-2023-09-09-19-42-22-d0395\",\r\n
+        \   \"duration\": \"PT6.5193248S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"outputs\":
+        {\r\n      \"greeting\": {\r\n        \"type\": \"String\",\r\n        \"value\":
+        \"Hello from Bicep registry - Hi Anthony!\"\r\n      }\r\n    },\r\n    \"parameters\":
+        {\r\n      \"name\": {\r\n        \"value\": \"Anthony\",\r\n        \"type\":
+        \"string\"\r\n      }\r\n    },\r\n    \"resources\": [],\r\n    \"provisioningState\":
+        \"succeeded\",\r\n    \"detachedResources\": [],\r\n    \"deletedResources\":
+        [],\r\n    \"failedResources\": []\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"antmarti@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
+        \"2023-09-09T19:42:22.5593087Z\",\r\n    \"lastModifiedBy\": \"antmarti@microsoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2023-09-09T19:42:22.5593087Z\"\r\n
+        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-create-deployment-stack-resource-group000002\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1551'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 09 Sep 2023 19:42:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g --name --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002?unmanageAction.Resources=detach&unmanageAction.ResourceGroups=detach&api-version=2022-08-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Sat, 09 Sep 2023 19:42:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -p --deny-settings-mode --delete-all --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"error\": {\r\n    \"code\": \"DeploymentStackResourceNotFound\",\r\n
+        \   \"message\": \"The deployment stack '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002'
+        could not be found.\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '333'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 09 Sep 2023 19:42:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -p --deny-settings-mode --delete-all --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/stuartko_rg/providers/Microsoft.Resources/templateSpecs/anotherSpec/versions/v2?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"location\": \"westus2\",\r\n  \"tags\": {},\r\n  \"properties\":
+        {\r\n    \"mainTemplate\": {\r\n      \"$schema\": \"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+        \     \"contentVersion\": \"1.0.0.2\",\r\n      \"parameters\": {},\r\n      \"resources\":
+        []\r\n    }\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\": \"stuartko@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2022-03-31T07:38:36.6587736Z\",\r\n
+        \   \"lastModifiedBy\": \"stuartko@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2022-03-31T07:38:36.6587736Z\"\r\n
+        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/stuartko_rg/providers/Microsoft.Resources/templateSpecs/anotherSpec/versions/v2\",\r\n
+        \ \"type\": \"Microsoft.Resources/templateSpecs/versions\",\r\n  \"name\":
+        \"v2\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '803'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 09 Sep 2023 19:43:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"tags": {}, "properties": {"templateLink": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/stuartko_rg/providers/Microsoft.Resources/templateSpecs/anotherSpec/versions/v2"},
+      "parameters": {}, "actionOnUnmanage": {"resources": "delete", "resourceGroups":
+      "delete"}, "denySettings": {"mode": "none", "applyToChildScopes": false}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '356'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name -g -p --deny-settings-mode --delete-all --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
+        {\r\n      \"resources\": \"delete\",\r\n      \"resourceGroups\": \"delete\",\r\n
+        \     \"managementGroups\": \"detach\"\r\n    },\r\n    \"denySettings\":
+        {\r\n      \"mode\": \"none\",\r\n      \"applyToChildScopes\": false\r\n
+        \   },\r\n    \"parameters\": {},\r\n    \"templateLink\": {\r\n      \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/stuartko_rg/providers/Microsoft.Resources/templateSpecs/anotherSpec/versions/v2\"\r\n
+        \   },\r\n    \"resources\": [],\r\n    \"provisioningState\": \"initializing\",\r\n
+        \   \"detachedResources\": [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\":
+        []\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\": \"antmarti@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-09-09T19:43:02.7186784Z\",\r\n
+        \   \"lastModifiedBy\": \"antmarti@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-09-09T19:43:02.7186784Z\"\r\n
+        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-create-deployment-stack-resource-group000002\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/1d7dd89c-b7e5-4d27-8a8c-e148185f2559?api-version=2022-08-01-preview&t=2023-09-09T19%3a43%3a03&c=MIIHADCCBeigAwIBAgITfAOt9JON98CjYPdc9QAAA630kzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjMwODAzMDE0MDQxWhcNMjQwNzI4MDE0MDQxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKipopHvwrhlzUyEj8K9SzP-KaE4JxtdBJXyUTvKIkSiKKo5ed4nZoS8_lU5seMfZyXygEoF28j21995G21eW8pECHtdlucHibosuXyLYB0uLggka2khgGgRwjX1fj-Y2QE-kRjtmHLfZd9dBTNi8RumIZ_O_0rK4iFT8JtFu3uo6ug9fiLfTQoRJGf_2H9oXDvu9pToaiwHOD9iIn7hyTp074WUEfQEGPxJcSOLBMSnRwwjd8oj1jEuxP8e78qyh5inv9jbf8KLHT76QL8_Ih-I2hUoqmtLbaTTBUk9FZi-19Fy4Hdt6NZwwmwWzATFSjhQrIKYhpwYtxlqFdMl4YECAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBT6IQjGEFUZArd1dil8gnUkbgwjtjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJJDo9KyjKG4aDx14yKEmJ1XRvp_un1CwNEW6KgHKM-Tm9vuaH6LGfmO_idOwmXeJmwf7s6SphXwqlPgz0TJ1AizxH1ZyMtKcWUuT_z5YimmsrZTYI3meB_pNAZ1A-RrE7qhjkQuY2jtehE5y100y_IBy_NXCUns26MYl8O86cFtcEAROXCHbDZ7ZeTsKyMsIvYpLpt5oxm3JjrSdn6__RTe91cku07ep_oU01UxjWPZO4ikfSlZX2VsLr7ve1KKttmvg0QUWscKlRMiX8wz5vFh8scKWq84WRESj2e89n6oNVvtb2Pxy8hu_9U2FgU1euzED-f7Y4omjwQ6gGGouEs&s=jEhoMSbAO0fhQlSiFp77-pF_vwDrqcoFiv7mh8NBbABYmGuPSZoNa628gnMhCOmmJeOlKtNdqC59eJf57qmMGLdrfIotAGVFwZkXn5_UOelhCZDkE875ydlunkw8j13ADEHfwY6JlejcIdsiLSgLJsEy5xqDlfLTCOY9yN_jz-AoGnz8cI30lE8LX5hZd7OFJR6lN1rRAX3YmYKTwfDszyMKX0Qb1cIfWVT1A0mWAG1L_oi3S3DFBFKqyFToz3uUOYC0-h8A4FLFWPHpOnvHb9zweeCLRUcYEZohsa74RXW_WDmmGRIA2j42TeZuj-NVP3fRU8UGNSRM9zIRvErTQw&h=zZYgF0AGPZnPcjdm1dkSLdl_7jh3B8hgm45CojA4C64
+      cache-control:
+      - no-cache
+      content-length:
+      - '1253'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 09 Sep 2023 19:43:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -p --deny-settings-mode --delete-all --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/1d7dd89c-b7e5-4d27-8a8c-e148185f2559?api-version=2022-08-01-preview&t=2023-09-09T19%3A43%3A03&c=MIIHADCCBeigAwIBAgITfAOt9JON98CjYPdc9QAAA630kzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjMwODAzMDE0MDQxWhcNMjQwNzI4MDE0MDQxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKipopHvwrhlzUyEj8K9SzP-KaE4JxtdBJXyUTvKIkSiKKo5ed4nZoS8_lU5seMfZyXygEoF28j21995G21eW8pECHtdlucHibosuXyLYB0uLggka2khgGgRwjX1fj-Y2QE-kRjtmHLfZd9dBTNi8RumIZ_O_0rK4iFT8JtFu3uo6ug9fiLfTQoRJGf_2H9oXDvu9pToaiwHOD9iIn7hyTp074WUEfQEGPxJcSOLBMSnRwwjd8oj1jEuxP8e78qyh5inv9jbf8KLHT76QL8_Ih-I2hUoqmtLbaTTBUk9FZi-19Fy4Hdt6NZwwmwWzATFSjhQrIKYhpwYtxlqFdMl4YECAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBT6IQjGEFUZArd1dil8gnUkbgwjtjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJJDo9KyjKG4aDx14yKEmJ1XRvp_un1CwNEW6KgHKM-Tm9vuaH6LGfmO_idOwmXeJmwf7s6SphXwqlPgz0TJ1AizxH1ZyMtKcWUuT_z5YimmsrZTYI3meB_pNAZ1A-RrE7qhjkQuY2jtehE5y100y_IBy_NXCUns26MYl8O86cFtcEAROXCHbDZ7ZeTsKyMsIvYpLpt5oxm3JjrSdn6__RTe91cku07ep_oU01UxjWPZO4ikfSlZX2VsLr7ve1KKttmvg0QUWscKlRMiX8wz5vFh8scKWq84WRESj2e89n6oNVvtb2Pxy8hu_9U2FgU1euzED-f7Y4omjwQ6gGGouEs&s=jEhoMSbAO0fhQlSiFp77-pF_vwDrqcoFiv7mh8NBbABYmGuPSZoNa628gnMhCOmmJeOlKtNdqC59eJf57qmMGLdrfIotAGVFwZkXn5_UOelhCZDkE875ydlunkw8j13ADEHfwY6JlejcIdsiLSgLJsEy5xqDlfLTCOY9yN_jz-AoGnz8cI30lE8LX5hZd7OFJR6lN1rRAX3YmYKTwfDszyMKX0Qb1cIfWVT1A0mWAG1L_oi3S3DFBFKqyFToz3uUOYC0-h8A4FLFWPHpOnvHb9zweeCLRUcYEZohsa74RXW_WDmmGRIA2j42TeZuj-NVP3fRU8UGNSRM9zIRvErTQw&h=zZYgF0AGPZnPcjdm1dkSLdl_7jh3B8hgm45CojA4C64
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/1d7dd89c-b7e5-4d27-8a8c-e148185f2559\",\r\n
+        \ \"name\": \"1d7dd89c-b7e5-4d27-8a8c-e148185f2559\",\r\n  \"status\": \"initializing\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '263'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 09 Sep 2023 19:43:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -p --deny-settings-mode --delete-all --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/1d7dd89c-b7e5-4d27-8a8c-e148185f2559?api-version=2022-08-01-preview&t=2023-09-09T19%3A43%3A03&c=MIIHADCCBeigAwIBAgITfAOt9JON98CjYPdc9QAAA630kzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjMwODAzMDE0MDQxWhcNMjQwNzI4MDE0MDQxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKipopHvwrhlzUyEj8K9SzP-KaE4JxtdBJXyUTvKIkSiKKo5ed4nZoS8_lU5seMfZyXygEoF28j21995G21eW8pECHtdlucHibosuXyLYB0uLggka2khgGgRwjX1fj-Y2QE-kRjtmHLfZd9dBTNi8RumIZ_O_0rK4iFT8JtFu3uo6ug9fiLfTQoRJGf_2H9oXDvu9pToaiwHOD9iIn7hyTp074WUEfQEGPxJcSOLBMSnRwwjd8oj1jEuxP8e78qyh5inv9jbf8KLHT76QL8_Ih-I2hUoqmtLbaTTBUk9FZi-19Fy4Hdt6NZwwmwWzATFSjhQrIKYhpwYtxlqFdMl4YECAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBT6IQjGEFUZArd1dil8gnUkbgwjtjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJJDo9KyjKG4aDx14yKEmJ1XRvp_un1CwNEW6KgHKM-Tm9vuaH6LGfmO_idOwmXeJmwf7s6SphXwqlPgz0TJ1AizxH1ZyMtKcWUuT_z5YimmsrZTYI3meB_pNAZ1A-RrE7qhjkQuY2jtehE5y100y_IBy_NXCUns26MYl8O86cFtcEAROXCHbDZ7ZeTsKyMsIvYpLpt5oxm3JjrSdn6__RTe91cku07ep_oU01UxjWPZO4ikfSlZX2VsLr7ve1KKttmvg0QUWscKlRMiX8wz5vFh8scKWq84WRESj2e89n6oNVvtb2Pxy8hu_9U2FgU1euzED-f7Y4omjwQ6gGGouEs&s=jEhoMSbAO0fhQlSiFp77-pF_vwDrqcoFiv7mh8NBbABYmGuPSZoNa628gnMhCOmmJeOlKtNdqC59eJf57qmMGLdrfIotAGVFwZkXn5_UOelhCZDkE875ydlunkw8j13ADEHfwY6JlejcIdsiLSgLJsEy5xqDlfLTCOY9yN_jz-AoGnz8cI30lE8LX5hZd7OFJR6lN1rRAX3YmYKTwfDszyMKX0Qb1cIfWVT1A0mWAG1L_oi3S3DFBFKqyFToz3uUOYC0-h8A4FLFWPHpOnvHb9zweeCLRUcYEZohsa74RXW_WDmmGRIA2j42TeZuj-NVP3fRU8UGNSRM9zIRvErTQw&h=zZYgF0AGPZnPcjdm1dkSLdl_7jh3B8hgm45CojA4C64
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/1d7dd89c-b7e5-4d27-8a8c-e148185f2559\",\r\n
+        \ \"name\": \"1d7dd89c-b7e5-4d27-8a8c-e148185f2559\",\r\n  \"status\": \"succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '260'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 09 Sep 2023 19:43:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -p --deny-settings-mode --delete-all --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
+        {\r\n      \"resources\": \"delete\",\r\n      \"resourceGroups\": \"delete\",\r\n
+        \     \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-create-deployment-stack-resou-2023-09-09-19-43-02-2fb9d\",\r\n
+        \   \"duration\": \"PT6.4751532S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"parameters\":
+        {},\r\n    \"templateLink\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/stuartko_rg/providers/Microsoft.Resources/templateSpecs/anotherSpec/versions/v2\"\r\n
+        \   },\r\n    \"resources\": [],\r\n    \"provisioningState\": \"succeeded\",\r\n
+        \   \"detachedResources\": [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\":
+        []\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\": \"antmarti@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-09-09T19:43:02.7186784Z\",\r\n
+        \   \"lastModifiedBy\": \"antmarti@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-09-09T19:43:02.7186784Z\"\r\n
+        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-create-deployment-stack-resource-group000002\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1514'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 09 Sep 2023 19:43:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
+        {\r\n      \"resources\": \"delete\",\r\n      \"resourceGroups\": \"delete\",\r\n
+        \     \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-create-deployment-stack-resou-2023-09-09-19-43-02-2fb9d\",\r\n
+        \   \"duration\": \"PT6.4751532S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"parameters\":
+        {},\r\n    \"templateLink\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/stuartko_rg/providers/Microsoft.Resources/templateSpecs/anotherSpec/versions/v2\"\r\n
+        \   },\r\n    \"resources\": [],\r\n    \"provisioningState\": \"succeeded\",\r\n
+        \   \"detachedResources\": [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\":
+        []\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\": \"antmarti@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-09-09T19:43:02.7186784Z\",\r\n
+        \   \"lastModifiedBy\": \"antmarti@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-09-09T19:43:02.7186784Z\"\r\n
+        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-create-deployment-stack-resource-group000002\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1514'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 09 Sep 2023 19:43:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack group delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g --name --yes
+      User-Agent:
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.8 (Linux-5.15.0-1041-azure-x86_64-with-glibc2.31)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-create-deployment-stack-resource-group000002?unmanageAction.Resources=detach&unmanageAction.ResourceGroups=detach&api-version=2022-08-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Sat, 09 Sep 2023 19:43:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14998'
+    status:
+      code: 200
+      message: OK
+version: 1

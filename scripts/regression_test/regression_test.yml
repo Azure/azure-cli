@@ -110,7 +110,7 @@ jobs:
           git config --global user.email "AzPyCLI@microsoft.com"
           git config --global user.name "Azure CLI Team"
           git remote add ${GITHUB_REPO} https://${GITHUB_REPO}:${GITHUB_TOKEN}@github.com/${GITHUB_REPO}/azure-cli.git
-          git fetch ${GITHUB_REPO}
+          git fetch ${GITHUB_REPO} ${GITHUB_BRANCH}
 
           git checkout -b ${GITHUB_BRANCH} ${GITHUB_REPO}/${GITHUB_BRANCH}
     - template: ../../.azure-pipelines/templates/azdev_setup.yml
@@ -118,6 +118,10 @@ jobs:
         set -ev
 
         source env/bin/activate
+
+        if [[ -n "$(CUSTOM_WHL_URL)" ]]; then
+          pip install $(CUSTOM_WHL_URL) --force-reinstall
+        fi
 
         az login -u $(CLI_LIVE_TEST_ACCOUNT) -p "$(CLI_LIVE_TEST_PASSWORD)"
         az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
@@ -133,6 +137,7 @@ jobs:
 - job: CreatePR
   displayName: CLI Regression Test Create PR
   dependsOn: RerunTests
+  condition: in(dependencies.RerunTests.result, 'Succeeded', 'Skipped')
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:

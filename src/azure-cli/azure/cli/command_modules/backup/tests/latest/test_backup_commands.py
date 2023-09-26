@@ -93,17 +93,19 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('properties.publicNetworkAccess', 'Enabled'),
             self.check('properties.monitoringSettings.azureMonitorAlertSettings.alertsForAllJobFailures', 'Enabled'),
-            self.check('properties.monitoringSettings.classicAlertSettings.alertsForCriticalOperations', 'Enabled')
+            self.check('properties.monitoringSettings.classicAlertSettings.alertsForCriticalOperations', 'Enabled'),
+            self.check('properties.restoreSettings.crossSubscriptionRestoreSettings.crossSubscriptionRestoreState', 'Enabled')
         ])
 
         self.kwargs['vault4'] = self.create_random_name('clitest-vault', 50)
-        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --public-network-access Disable --immutability-state Unlocked', checks=[
+        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --public-network-access Disable --immutability-state Unlocked --cross-subscription-restore-state Disable', checks=[
             self.check('name', '{vault4}'),
             self.check('resourceGroup', '{rg}'),
             self.check('location', '{loc}'),
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('properties.publicNetworkAccess', 'Disabled'),
             self.check('properties.securitySettings.immutabilitySettings.state', 'Unlocked'),
+            self.check('properties.restoreSettings.crossSubscriptionRestoreSettings.crossSubscriptionRestoreState', 'Disabled')
         ])
 
         self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --public-network-access Enable', checks=[
@@ -178,8 +180,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # self.kwargs['policy_json']['properties']['retentionPolicy']['dailySchedule']['retentionDuration'] = {"count": 20, "durationType": "Days"}
 
         # Immutable vault testing.
-        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --immutability-state Disabled', checks=[
-            self.check('properties.securitySettings.immutabilitySettings.state', 'Disabled')
+        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --immutability-state Disabled --cross-subscription-restore-state Enable', checks=[
+            self.check('properties.securitySettings.immutabilitySettings.state', 'Disabled'),
+            self.check('properties.restoreSettings.crossSubscriptionRestoreSettings.crossSubscriptionRestoreState', 'Enabled')
         ])
 
         # self.cmd('backup policy set -g {rg} -v {vault4} --policy {policy_json}', checks=[
@@ -188,8 +191,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         # self.kwargs['policy_json']['properties']['retentionPolicy']['dailySchedule']['retentionDuration']['count'] = 10
 
-        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --immutability-state Unlocked', checks=[
-            self.check('properties.securitySettings.immutabilitySettings.state', 'Unlocked')
+        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --immutability-state Unlocked --cross-subscription-restore-state PermanentlyDisable', checks=[
+            self.check('properties.securitySettings.immutabilitySettings.state', 'Unlocked'),
+            self.check('properties.restoreSettings.crossSubscriptionRestoreSettings.crossSubscriptionRestoreState', 'PermanentlyDisabled')
         ])
 
         # self.cmd('backup policy set -g {rg} -v {vault4} --policy {policy_json}', expect_failure=True)
@@ -520,6 +524,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @ItemPreparer()
     @RPPreparer()
     @live_only()
+    @unittest.skip("Test temporarily skipped as the Resource appears to be deleted")
     def test_backup_csr(self, resource_group, vault_name, vm_name):
         self.kwargs.update({
             'vault': vault_name,
@@ -742,6 +747,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('storage blob exists --account-name {sa} -c {container} -n {blob}', checks=self.check("exists", True))
 
+    # @unittest.skip("Test skipped due to temporary test infrastructure issues")
     @AllowLargeResponse()
     @ResourceGroupPreparer(location="centraluseuap")
     @ResourceGroupPreparer(parameter_name="target_resource_group", location="centraluseuap")
@@ -872,7 +878,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup job stop -g {rg} -v {vault} -n {job}')
 
-    @ResourceGroupPreparer(location="eastus2euap")
+    @ResourceGroupPreparer(location="centraluseuap")
     @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
@@ -897,6 +903,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("properties.isScheduledForDeferredDelete", True)
         ])
 
+        self.cmd('backup vault list-soft-deleted-containers --backup-management-type AzureIaasVM -g {rg} -n {vault}', checks=[
+            self.check("length(@)", 1),
+            self.check("[0].properties.friendlyName", "{vm}")
+        ])
+
         self.cmd('backup protection undelete -g {rg} -v {vault} -c {vm} -i {vm} --workload-type VM --backup-management-type AzureIaasVM ', checks=[
             self.check("properties.entityFriendlyName", '{vm}'),
             self.check("properties.operation", "Undelete"),
@@ -905,6 +916,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
         self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
+        # TODO: once the soft delete feature move is enabled across the board, use the following lines instead 
+        # self.cmd('backup vault create -g {rg} -v {vault} -l {location} --soft-delete-state Disable')
 
         self.cmd('backup item show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -n {vm}', checks=[
             self.check("properties.friendlyName", '{vm}'),
@@ -926,6 +939,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         })
 
         self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
+        # TODO: once the soft delete feature move is enabled across the board, use the following lines instead 
+        # self.cmd('backup vault create -g {rg} -v {vault} -l {location} --soft-delete-state Disable')
 
         self.cmd('vm disk attach -g {rg} --vm-name {vm} --name mydisk1 --new --size-gb 10')
         self.cmd('vm disk attach -g {rg} --vm-name {vm} --name mydisk2 --new --size-gb 10')
@@ -1397,6 +1412,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable', checks=[
             self.check('properties.softDeleteFeatureState', 'Disabled')
         ])
+        # TODO: once the soft delete feature move is enabled across the board, use the following lines instead 
+        # self.cmd('backup vault create -g {rg} -v {vault} -l {location} --soft-delete-state Disable', checks=[
+        #     self.check('properties.securitySettings.softDeleteSettings.softDeleteState', 'Disabled')
+        # ])
 
         time.sleep(300)
 

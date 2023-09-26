@@ -272,9 +272,10 @@ class ImageTemplateTest(ScenarioTest):
         # create image template in local cache
         self.cmd('image builder create -n {tmpl_02} -g {rg} --scripts {script} --image-source {img_src} '
                  '--managed-image-destinations {image_def}={loc} --identity {ide} --defer '
-                 '--staging-resource-group {staging_resource_group2}',
+                 '--staging-resource-group {staging_resource_group2} --validator shell',
                  checks=[
-                     self.check('properties.stagingResourceGroup', '{staging_resource_group2}')
+                     self.check('properties.stagingResourceGroup', '{staging_resource_group2}'),
+                     self.check('properties.validate.inVMValidations[0].type', 'shell')
                  ])
 
         # add validate to template
@@ -322,6 +323,63 @@ class ImageTemplateTest(ScenarioTest):
         # delete resource group
         self.cmd('group delete -n {staging_resource_group_name1} --yes')
         self.cmd('group delete -n {staging_resource_group_name2} --yes')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_image_builder_template_optimizer_', location='westus')
+    def test_image_builder_template_optimizer(self, resource_group):
+        self._identity_role(resource_group)
+
+        self.kwargs.update({
+            'loc': 'westus',
+            'tmpl': 'template',
+            'img_src': LINUX_IMAGE_SOURCE,
+            'script': TEST_SHELL_SCRIPT_URL,
+            'image_def': 'def',
+        })
+
+        # create image template in local cache
+        self.cmd('image builder create -n {tmpl} -g {rg} --scripts {script} --image-source {img_src} '
+                 '--managed-image-destinations {image_def}={loc} --identity {ide} --defer')
+
+        # add optimizer to template
+        self.cmd('image builder optimizer add -n {tmpl} -g {rg} --defer',
+                 checks=[
+                     self.check('properties.optimize.vmBoot', 'None')
+                 ])
+
+        # add optimizer to template
+        self.cmd('image builder optimizer add -n {tmpl} -g {rg} --enable-vm-boot false --defer',
+                 checks=[
+                     self.check('properties.optimize.vmBoot.state', 'Disabled')
+                 ])
+
+        # update optimizer with enabling VM boot
+        self.cmd('image builder optimizer update -n {tmpl} -g {rg} --enable-vm-boot true --defer',
+                 checks=[
+                     self.check('properties.optimize.vmBoot.state', 'Enabled')
+                 ])
+
+        # clear all optimizers from template
+        self.cmd('image builder optimizer remove -n {tmpl} -g {rg} --defer',
+                 checks=[
+                     self.check('properties.optimize', 'None')
+                 ])
+
+        # add optimizer with enabling VM boot to template
+        self.cmd('image builder optimizer add -n {tmpl} -g {rg} --enable-vm-boot --defer',
+                 checks=[
+                     self.check('properties.optimize.vmBoot.state', 'Enabled')
+                 ])
+
+        # show optimizer of template
+        self.cmd('image builder optimizer show -n {tmpl} -g {rg} --defer',
+                 checks=[
+                     self.check('vmBoot.state', 'Enabled')
+                 ])
+
+        # create image template from cache
+        self.cmd('image builder update -n {tmpl} -g {rg}', checks=[
+            self.check('optimize.vmBoot.state', 'Enabled')
+        ])
 
     @ResourceGroupPreparer(name_prefix='img_tmpl_basic_2', location="westus2")
     def test_image_builder_basic_sig(self, resource_group):

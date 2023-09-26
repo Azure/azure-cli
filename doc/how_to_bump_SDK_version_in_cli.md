@@ -26,13 +26,13 @@ The [Regression Test Pipeline](https://dev.azure.com/azclitools/internal/_build?
 
 Follow below steps to trigger a new execution of Regression Test Pipeline:
 
-Step 1. Click `Run pipeline` button, leave the `Branch/tag` and `Commit` as it is, open `Variables`
+**Step 1.** Click `Run pipeline` button, leave the `Branch/tag` and `Commit` as it is, open `Variables`
 
 ![](assets/regression_test_new_pipeline.jpg)
 
 ![](assets/regression_test_pipeline_branch.jpg)
 
-Step 2. Fulfill the variables and run
+**Step 2.** Fulfill the variables and run
 
 ![](assets/regression_test_variables.jpg)
 
@@ -42,11 +42,12 @@ Step 2. Fulfill the variables and run
 
 Developers can a) update code in your own repo&branch and then leverage this pipeline to do regression test or b) fully rely on pipeline to update versions and then do regression test
 
-For scenario a, variables `CUSTOM_REPO`, `CUSTOM_BRANCH` and `CUSTOM_GITHUB_TOKEN` are used.
+For scenario a, variables `CUSTOM_REPO`, `CUSTOM_BRANCH`, `CUSTOM_GITHUB_TOKEN` and `CUSTOM_WHL_URL` are used.
 For scenario b, variables `PACKAGE`, `TARGET_PACKAGE_VERSION`, `RESOURCE_TYPE` and `TARGET_API_VERSION` are used.
 - CUSTOM_REPO: The forked repo name: `https://github.com/{CUSTOM_REPO}/azure-cli/`, eg. `azclibot`, `evelyn-ys`, etc. **Required for scenario a**. Leave it as empty for scenario b.
 - CUSTOM_BRANCH: The branch you used in your forked repo to develop features, eg. `dev`, `fix_XXX`, etc. **Required for scenario a**. Leave it as empty for scenario b.
 - CUSTOM_GITHUB_TOKEN: Github personal access token which allows commit changes to your repo and branch. See [creating a personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token). **Required for scenario a**. Leave it as empty for scenario b.
+- CUSTOM_WHL_URL: A download url for SDK whl file if you want to test based on private package
 - PACKAGE: The SDK package name, eg. `azure-mgmt-network`. **Required for scenario b**. Leave it as empty for scenario a.
 - TARGET_PACKAGE_VERSION: The SDK new version, eg. `19.3.0`. **Required for scenario b**. Leave it as empty for scenario a.
 - RESOURCE_TYPE: The resource type enum name define in [CLI Core](https://github.com/Azure/azure-cli/blob/ce74ae358b51aedfdfb6c32042b515d949618e33/src/azure-cli-core/azure/cli/core/profiles/_shared.py#L38), eg. `MGMT_NETWORK`. Required if you want to update the API version definition in CLI Core. Usually used for multi-api SDKs. Leave it as empty for scenario a.

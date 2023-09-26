@@ -480,6 +480,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                  'A GTID is represented as a pair of coordinates, separated by a colon character (:), as shown: source_id:transaction_id'
         )
 
+        pg_bouncer_arg_type = CLIArgumentType(
+            options_list=['--pg-bouncer'],
+            action='store_true',
+            help='Show connection strings for PgBouncer.'
+        )
+
         with self.argument_context('{} flexible-server'.format(command_group)) as c:
             c.argument('resource_group_name', arg_type=resource_group_name_type)
             c.argument('server_name', arg_type=server_name_arg_type)
@@ -494,6 +500,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('backup_retention', default=7, arg_type=pg_backup_retention_arg_type)
                 c.argument('active_directory_auth', default='Disabled', arg_type=active_directory_auth_arg_type)
                 c.argument('password_auth', default='Enabled', arg_type=password_auth_arg_type)
+                c.argument('auto_grow', default='Disabled', arg_type=auto_grow_arg_type)
             elif command_group == 'mysql':
                 c.argument('tier', default='Burstable', arg_type=tier_arg_type)
                 c.argument('sku_name', default='Standard_B1ms', arg_type=sku_name_arg_type)
@@ -503,10 +510,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('auto_grow', default='Enabled', arg_type=auto_grow_arg_type)
                 c.argument('auto_scale_iops', default='Disabled', arg_type=auto_scale_iops_arg_type)
                 c.argument('backup_retention', default=7, arg_type=mysql_backup_retention_arg_type)
-                c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
-                c.argument('backup_byok_key', arg_type=backup_key_arg_type)
             c.argument('byok_identity', arg_type=identity_arg_type)
             c.argument('byok_key', arg_type=key_arg_type)
+            c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
+            c.argument('backup_byok_key', arg_type=backup_key_arg_type)
             c.argument('geo_redundant_backup', default='Disabled', arg_type=geo_redundant_backup_arg_type)
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
             c.argument('administrator_login', default=generate_username(), arg_type=administrator_login_arg_type)
@@ -550,6 +557,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('byok_key', arg_type=key_arg_type)
                 c.argument('byok_identity', arg_type=identity_arg_type)
                 c.argument('geo_redundant_backup', default='Disabled', arg_type=geo_redundant_backup_arg_type)
+                c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
+                c.argument('backup_byok_key', arg_type=backup_key_arg_type)
 
         with self.argument_context('{} flexible-server geo-restore'. format(command_group)) as c:
             c.argument('location', arg_type=get_location_type(self.cli_ctx), required=True)
@@ -573,6 +582,27 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                            help='Determines the public access. ')
             elif command_group == 'postgres':
                 c.argument('geo_redundant_backup', default='Disabled', arg_type=geo_redundant_backup_arg_type)
+                c.argument('byok_key', arg_type=key_arg_type)
+                c.argument('byok_identity', arg_type=identity_arg_type)
+                c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
+                c.argument('backup_byok_key', arg_type=backup_key_arg_type)
+
+        with self.argument_context('{} flexible-server revive-dropped'. format(command_group)) as c:
+            c.argument('location', arg_type=get_location_type(self.cli_ctx), required=True)
+            c.argument('sku_name', arg_type=sku_name_arg_type)
+            c.argument('source_server', arg_type=source_server_arg_type)
+            c.argument('vnet', arg_type=vnet_arg_type)
+            c.argument('vnet_address_prefix', arg_type=vnet_address_prefix_arg_type)
+            c.argument('subnet', arg_type=subnet_arg_type)
+            c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
+            c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
+            c.argument('zone', arg_type=zone_arg_type)
+            c.argument('yes', arg_type=yes_arg_type)
+            c.argument('geo_redundant_backup', default='Disabled', arg_type=geo_redundant_backup_arg_type)
+            c.argument('byok_key', arg_type=key_arg_type)
+            c.argument('byok_identity', arg_type=identity_arg_type)
+            c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
+            c.argument('backup_byok_key', arg_type=backup_key_arg_type)
 
         with self.argument_context('{} flexible-server update'.format(command_group)) as c:
             c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
@@ -586,6 +616,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('high_availability', arg_type=high_availability_arg_type)
             c.argument('byok_key', arg_type=key_arg_type)
             c.argument('byok_identity', arg_type=identity_arg_type)
+            c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
+            c.argument('backup_byok_key', arg_type=backup_key_arg_type)
             if command_group == 'mysql':
                 c.argument('auto_grow', arg_type=auto_grow_arg_type)
                 c.argument('auto_scale_iops', arg_type=auto_scale_iops_arg_type)
@@ -594,14 +626,15 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('iops', arg_type=iops_arg_type)
                 c.argument('backup_retention', arg_type=mysql_backup_retention_arg_type)
                 c.argument('geo_redundant_backup', arg_type=geo_redundant_backup_arg_type)
-                c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
-                c.argument('backup_byok_key', arg_type=backup_key_arg_type)
                 c.argument('disable_data_encryption', arg_type=disable_data_encryption_arg_type)
                 c.argument('public_access', arg_type=public_access_update_arg_type)
             elif command_group == 'postgres':
+                c.argument('auto_grow', arg_type=auto_grow_arg_type)
                 c.argument('backup_retention', arg_type=pg_backup_retention_arg_type)
                 c.argument('active_directory_auth', arg_type=active_directory_auth_arg_type)
                 c.argument('password_auth', arg_type=password_auth_arg_type)
+                c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
+                c.argument('yes', arg_type=yes_arg_type)
 
         with self.argument_context('{} flexible-server upgrade'.format(command_group)) as c:
             c.argument('version', arg_type=mysql_version_upgrade_arg_type if command_group == 'mysql' else pg_version_upgrade_arg_type)
@@ -684,6 +717,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('administrator_login', arg_type=administrator_login_arg_type,)
             c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
             c.argument('database_name', arg_type=database_name_arg_type)
+            c.argument('show_pg_bouncer', arg_type=pg_bouncer_arg_type)
 
         with self.argument_context('{} flexible-server replica list'.format(command_group)) as c:
             c.argument('server_name', id_part=None, options_list=['--name', '-n'], help='Name of the source server.')
@@ -786,7 +820,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type)
 
     def handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type):
-        for scope in ['create', 'show', 'list', 'update', 'delete', 'check-name-availability']:
+        for scope in ['create', 'show', 'list', 'update', 'check-name-availability']:
             argument_context_string = '{} flexible-server migration {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('resource_group_name', arg_type=resource_group_name_type,
@@ -795,11 +829,13 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                            help='Migration target server name.')
                 if scope == "create":
                     c.argument('properties', type=file_type, completer=FilesCompleter(), options_list=['--properties', '-b'],
-                               help='Request properties. Use double or no quotes to pass in filepath as argument.')
+                               help='Request properties. Use double or no quotes to pass in json filepath as argument.')
                     c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                                help='Name of the migration.')
                     c.argument('migration_mode', arg_type=migration_id_arg_type, options_list=['--migration-mode'], required=False,
                                help='Either offline or online(with CDC) migration', choices=['offline', 'online'], default='offline')
+                    c.argument('tags', tags_type)
+                    c.argument('location', arg_type=get_location_type(self.cli_ctx))
                 elif scope == "show":
                     c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                                help='Name of the migration.')
@@ -812,10 +848,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                                help='Name of the migration.')
                     c.argument('setup_logical_replication', options_list=['--setup-replication'], action='store_true', required=False,
                                help='Allow the migration workflow to setup logical replication on the source. Note that this command will restart the source server.')
-                    c.argument('db_names', nargs='+', options_list=['--db-names', '--dbs'], required=False,
-                               help='Space-separated list of DBs to migrate. Note that each additional DB affects the performance of the source server.')
-                    c.argument('overwrite_dbs', options_list=['--overwrite-dbs'], action='store_true', required=False,
-                               help='Allow the migration workflow to overwrite the DB on the target.')
                     c.argument('cutover', options_list=['--cutover'], required=False, action='store_true',
                                help='Cut-over the data migration for all the databases in the migration. After this is complete, subsequent updates to all databases will not be migrated to the target.')
                     c.argument('cancel', options_list=['--cancel'], required=False, action='store_true',
@@ -825,4 +857,3 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                                help='Name of the migration.')
 
     _flexible_server_params('postgres')
-    _flexible_server_params('mysql')

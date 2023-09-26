@@ -1,14 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <!-- Local WiX -->
-  <PropertyGroup>
-    <LocalWixRoot>artifacts\wix\</LocalWixRoot>
-    <WixToolPath>$(LocalWixRoot)</WixToolPath>
-    <WixTargetsPath>$(WixToolPath)Wix.targets</WixTargetsPath>
-    <WixTasksPath>wixtasks.dll</WixTasksPath>
-    <AzureCliSource>artifacts\cli</AzureCliSource>
-    <LinkerAdditionalOptions>-fv</LinkerAdditionalOptions>
-  </PropertyGroup>
   <!-- Project -->
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -21,12 +12,31 @@
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
   </PropertyGroup>
+  <!-- Local WiX -->
+  <PropertyGroup>
+    <LocalWixRoot>artifacts\wix</LocalWixRoot>
+    <WixToolPath>$(MSBuildThisFileDirectory)$(LocalWixRoot)</WixToolPath>
+    <WixTargetsPath Condition="Exists('$(WixToolPath)\Wix.targets')">$(WixToolPath)\Wix.targets</WixTargetsPath>
+    <WixTasksPath Condition="Exists('$(WixToolPath)\wixtasks.dll')">$(WixToolPath)\wixtasks.dll</WixTasksPath>
+    <AzureCliSource>artifacts\cli</AzureCliSource>
+    <LinkerAdditionalOptions>-fv</LinkerAdditionalOptions>
+  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <OutputPath>out\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>out\obj\$(Configuration)\</IntermediateOutputPath>
     <DefineConstants>Debug;AzureCliSource=$(AzureCliSource)</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <OutputPath>out\</OutputPath>
+    <IntermediateOutputPath>out\obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>AzureCliSource=$(AzureCliSource)</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <OutputPath>out\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>out\obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>Debug;AzureCliSource=$(AzureCliSource)</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
     <OutputPath>out\</OutputPath>
     <IntermediateOutputPath>out\obj\$(Configuration)\</IntermediateOutputPath>
     <DefineConstants>AzureCliSource=$(AzureCliSource)</DefineConstants>

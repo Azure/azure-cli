@@ -13,22 +13,21 @@ interactions:
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_nic_lb_address_pools000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001","name":"cli_test_nic_lb_address_pools000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2023-02-07T20:32:47Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001","name":"cli_test_nic_lb_address_pools000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","test":"test_network_nic_lb_address_pools","date":"2023-07-18T09:42:11Z","module":"network"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '349'
+      - '411'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:32:49 GMT
+      - Tue, 18 Jul 2023 09:42:17 GMT
       expires:
       - '-1'
       pragma:
@@ -62,31 +61,32 @@ interactions:
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
-        \ \"etag\": \"W/\\\"a4704793-9c06-434b-af43-17e5e0588203\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
-        \"6253e511-9f0c-4ed1-8ef7-eda3314d3402\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
-        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [\r\n
-        \     {\r\n        \"name\": \"subnet1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\",\r\n
-        \       \"etag\": \"W/\\\"a4704793-9c06-434b-af43-17e5e0588203\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
-        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
-        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
-        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1\"\
+        ,\r\n  \"etag\": \"W/\\\"7f5de6ea-1078-4627-a418-f2db49dc92f4\\\"\",\r\n \
+        \ \"type\": \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus2\"\
+        ,\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n \
+        \   \"resourceGuid\": \"2f033ac3-8d11-4a9e-9dc8-b68822bde68b\",\r\n    \"\
+        addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\
+        \r\n      ]\r\n    },\r\n    \"subnets\": [\r\n      {\r\n        \"name\"\
+        : \"subnet1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
+        ,\r\n        \"etag\": \"W/\\\"7f5de6ea-1078-4627-a418-f2db49dc92f4\\\"\"\
+        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
+        ,\r\n          \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\"\
+        : [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n \
+        \         \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n        },\r\
+        \n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n    \
+        \  }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\"\
+        : false\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/b18e8545-36de-455b-8d93-424b8c13c427?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/e52f4c07-86d9-4241-89e6-bb1528d1eb99?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
@@ -94,7 +94,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:32:50 GMT
+      - Tue, 18 Jul 2023 09:42:22 GMT
       expires:
       - '-1'
       pragma:
@@ -107,7 +107,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 304fccbc-9f22-405d-91bb-d93ad782694e
+      - f1e20429-cf07-4adb-9a71-e545b2e8efb0
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -127,22 +127,21 @@ interactions:
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/b18e8545-36de-455b-8d93-424b8c13c427?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/e52f4c07-86d9-4241-89e6-bb1528d1eb99?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '29'
+      - '30'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:32:53 GMT
+      - Tue, 18 Jul 2023 09:42:22 GMT
       expires:
       - '-1'
       pragma:
@@ -152,10 +151,14 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 664a0239-7252-45b6-8147-a692a4844895
+      - 817844bb-2cfc-4d90-8042-96750bbb602c
     status:
       code: 200
       message: OK
@@ -173,37 +176,21 @@ interactions:
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/e52f4c07-86d9-4241-89e6-bb1528d1eb99?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
-        \ \"etag\": \"W/\\\"cdbe63fd-f20a-41ac-8f57-654a03012846\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"6253e511-9f0c-4ed1-8ef7-eda3314d3402\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
-        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [\r\n
-        \     {\r\n        \"name\": \"subnet1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\",\r\n
-        \       \"etag\": \"W/\\\"cdbe63fd-f20a-41ac-8f57-654a03012846\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
-        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
-        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1258'
+      - '29'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:32:53 GMT
-      etag:
-      - W/"cdbe63fd-f20a-41ac-8f57-654a03012846"
+      - Tue, 18 Jul 2023 09:42:33 GMT
       expires:
       - '-1'
       pragma:
@@ -213,10 +200,80 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e26e567f-e60b-41d7-bfb0-92dd0ab3d5bf
+      - 34c43036-9a03-4b3b-9e5e-4335ef3e316a
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet-name
+      User-Agent:
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1\"\
+        ,\r\n  \"etag\": \"W/\\\"95dce65e-c12e-453f-8a05-35b39e89a8d4\\\"\",\r\n \
+        \ \"type\": \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus2\"\
+        ,\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n\
+        \    \"resourceGuid\": \"2f033ac3-8d11-4a9e-9dc8-b68822bde68b\",\r\n    \"\
+        addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\
+        \r\n      ]\r\n    },\r\n    \"subnets\": [\r\n      {\r\n        \"name\"\
+        : \"subnet1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
+        ,\r\n        \"etag\": \"W/\\\"95dce65e-c12e-453f-8a05-35b39e89a8d4\\\"\"\
+        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
+        ,\r\n          \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\"\
+        : [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n \
+        \         \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n        },\r\
+        \n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n    \
+        \  }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\"\
+        : false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1258'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 18 Jul 2023 09:42:34 GMT
+      etag:
+      - W/"95dce65e-c12e-453f-8a05-35b39e89a8d4"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 933433d7-967d-492b-8d74-57fba2ebf3f1
     status:
       code: 200
       message: OK
@@ -234,22 +291,21 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --vnet-name
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_nic_lb_address_pools000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001","name":"cli_test_nic_lb_address_pools000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2023-02-07T20:32:47Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001","name":"cli_test_nic_lb_address_pools000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","test":"test_network_nic_lb_address_pools","date":"2023-07-18T09:42:11Z","module":"network"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '349'
+      - '411'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:32:53 GMT
+      - Tue, 18 Jul 2023 09:42:35 GMT
       expires:
       - '-1'
       pragma:
@@ -265,10 +321,8 @@ interactions:
       message: OK
 - request:
     body: '{"location": "eastus2", "properties": {"ipConfigurations": [{"name": "ipconfig1",
-      "properties": {"privateIPAllocationMethod": "Dynamic", "privateIPAddressVersion":
-      "IPv4", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1",
-      "properties": {"privateEndpointNetworkPolicies": "Disabled", "privateLinkServiceNetworkPolicies":
-      "Enabled"}}}}], "dnsSettings": {"dnsServers": []}, "enableIPForwarding": false}}'
+      "properties": {"privateIPAddressVersion": "IPv4", "privateIPAllocationMethod":
+      "Dynamic", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"}}}]}}'
     headers:
       Accept:
       - application/json
@@ -279,50 +333,31 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '539'
+      - '365'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --subnet --vnet-name
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
-        \ \"etag\": \"W/\\\"086008e9-426c-4469-99d7-6235c4452970\\\"\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"2098fd4c-c049-4402-8d03-c7baa342deed\",\r\n
-        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
-        \       \"etag\": \"W/\\\"086008e9-426c-4469-99d7-6235c4452970\\\"\",\r\n
-        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
-        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
-        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
-        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
-        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"chsvgyqmt5iu3dxx3wrtctjuac.cx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
-        false,\r\n    \"vnetEncryptionSupported\": false,\r\n    \"enableIPForwarding\":
-        false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\n
-        \   \"nicType\": \"Standard\",\r\n    \"allowPort25Out\": true\r\n  },\r\n
-        \ \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"kind\": \"Regular\"\r\n}"
+      string: '{"name":"nic1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1","etag":"W/\"e90fdd9f-f232-4444-baca-45bc16b1b64b\"","properties":{"provisioningState":"Succeeded","resourceGuid":"c0c9ba93-ca62-403e-b314-91fe7c43a5e2","ipConfigurations":[{"name":"ipconfig1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1","etag":"W/\"e90fdd9f-f232-4444-baca-45bc16b1b64b\"","type":"Microsoft.Network/networkInterfaces/ipConfigurations","properties":{"provisioningState":"Succeeded","privateIPAddress":"10.0.0.4","privateIPAllocationMethod":"Dynamic","subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"},"primary":true,"privateIPAddressVersion":"IPv4"}}],"dnsSettings":{"dnsServers":[],"appliedDnsServers":[],"internalDomainNameSuffix":"ym3aglyrrwpevhoiw0ecfppgrd.cx.internal.cloudapp.net"},"enableAcceleratedNetworking":false,"vnetEncryptionSupported":false,"enableIPForwarding":false,"disableTcpStateTracking":false,"hostedWorkloads":[],"tapConfigurations":[],"nicType":"Standard","allowPort25Out":true,"nicAuxiliarySkuBillingNotificationType":"NoOp"},"type":"Microsoft.Network/networkInterfaces","location":"eastus2","kind":"Regular"}'
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/5f4f39f3-6b8c-4db7-b04f-1eb5a6d83b5e?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/a1a39003-573a-401f-a17d-05433c6af274?api-version=2022-11-01
       cache-control:
       - no-cache
       content-length:
-      - '1767'
+      - '1504'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:32:54 GMT
+      - Tue, 18 Jul 2023 09:42:37 GMT
       expires:
       - '-1'
       pragma:
@@ -335,7 +370,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 6fd57968-e7ca-455e-8ddd-2835dae29f52
+      - a587f9fc-6ffd-40c1-a943-1fe4c939cfa3
       x-ms-ratelimit-remaining-subscription-writes:
       - '1198'
     status:
@@ -355,22 +390,21 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --vnet-name
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/5f4f39f3-6b8c-4db7-b04f-1eb5a6d83b5e?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/a1a39003-573a-401f-a17d-05433c6af274?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+      string: '{"status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '29'
+      - '22'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:33:24 GMT
+      - Tue, 18 Jul 2023 09:42:38 GMT
       expires:
       - '-1'
       pragma:
@@ -387,7 +421,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 434c0efa-4623-4ee6-8cc4-3e709b6a24d7
+      - e71badf5-eafa-45c2-b73b-e698e4c44a1b
     status:
       code: 200
       message: OK
@@ -405,42 +439,23 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --vnet-name
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2022-11-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
-        \ \"etag\": \"W/\\\"086008e9-426c-4469-99d7-6235c4452970\\\"\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"2098fd4c-c049-4402-8d03-c7baa342deed\",\r\n
-        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
-        \       \"etag\": \"W/\\\"086008e9-426c-4469-99d7-6235c4452970\\\"\",\r\n
-        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
-        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
-        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
-        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
-        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"chsvgyqmt5iu3dxx3wrtctjuac.cx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
-        false,\r\n    \"vnetEncryptionSupported\": false,\r\n    \"enableIPForwarding\":
-        false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\n
-        \   \"nicType\": \"Standard\",\r\n    \"allowPort25Out\": true\r\n  },\r\n
-        \ \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"kind\": \"Regular\"\r\n}"
+      string: '{"name":"nic1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1","etag":"W/\"e90fdd9f-f232-4444-baca-45bc16b1b64b\"","properties":{"provisioningState":"Succeeded","resourceGuid":"c0c9ba93-ca62-403e-b314-91fe7c43a5e2","ipConfigurations":[{"name":"ipconfig1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1","etag":"W/\"e90fdd9f-f232-4444-baca-45bc16b1b64b\"","type":"Microsoft.Network/networkInterfaces/ipConfigurations","properties":{"provisioningState":"Succeeded","privateIPAddress":"10.0.0.4","privateIPAllocationMethod":"Dynamic","subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"},"primary":true,"privateIPAddressVersion":"IPv4"}}],"dnsSettings":{"dnsServers":[],"appliedDnsServers":[],"internalDomainNameSuffix":"ym3aglyrrwpevhoiw0ecfppgrd.cx.internal.cloudapp.net"},"enableAcceleratedNetworking":false,"vnetEncryptionSupported":false,"enableIPForwarding":false,"disableTcpStateTracking":false,"hostedWorkloads":[],"tapConfigurations":[],"nicType":"Standard","allowPort25Out":true,"nicAuxiliarySkuBillingNotificationType":"NoOp"},"type":"Microsoft.Network/networkInterfaces","location":"eastus2","kind":"Regular"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1767'
+      - '1504'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:33:24 GMT
+      - Tue, 18 Jul 2023 09:42:38 GMT
       etag:
-      - W/"086008e9-426c-4469-99d7-6235c4452970"
+      - W/"e90fdd9f-f232-4444-baca-45bc16b1b64b"
       expires:
       - '-1'
       pragma:
@@ -457,7 +472,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0e7b5925-a5ae-4f37-b9a4-b9c3175e703e
+      - ceeeb30d-1418-4d38-a2e3-8647c32eefad
     status:
       code: 200
       message: OK
@@ -475,22 +490,21 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_nic_lb_address_pools000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001","name":"cli_test_nic_lb_address_pools000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2023-02-07T20:32:47Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001","name":"cli_test_nic_lb_address_pools000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","test":"test_network_nic_lb_address_pools","date":"2023-07-18T09:42:11Z","module":"network"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '349'
+      - '411'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:33:25 GMT
+      - Tue, 18 Jul 2023 09:42:40 GMT
       expires:
       - '-1'
       pragma:
@@ -518,53 +532,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27cli_test_nic_lb_address_pools000001%27%20and%20name%20eq%20%27None%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FpublicIPAddresses%27&api-version=2022-09-01
-  response:
-    body:
-      string: '{"value":[],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=resourceGroup+eq+%27cli_test_nic_lb_address_pools000001%27+and+name+eq+%27None%27+and+resourceType+eq+%27Microsoft.Network%2fpublicIPAddresses%27&api-version=2022-09-01&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU9FTTVOa1UtIiwibmV4dFJvd0tleSI6IjEhMTYwIU1FSXhSalkwTnpFeFFrWXdORVJFUVVGRlF6TkRRamt5TnpKR01EazFPVEJmUjFKTUxWTlpUa0ZRVTBVNk1rUkRURWxUUmt0SVVpMU5TVU5TVDFOUFJsUTZNa1ZGVmtWT1ZFaFZRam95Ums1QlRVVlRVRUZEUlZNNk1rWkZTRTVCVFVWVFVFRkRSVlUwVmpRMlJrZFFVQzFGUVZOVVZWTS0ifQ%3d%3d"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '604'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 07 Feb 2023 20:33:25 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network lb create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27cli_test_nic_lb_address_pools000001%27%20and%20name%20eq%20%27None%27%20and%20resourceType%20eq%20%27Microsoft.Network/publicIPAddresses%27&api-version=2022-09-01&$skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU9FTTVOa1UtIiwibmV4dFJvd0tleSI6IjEhMTYwIU1FSXhSalkwTnpFeFFrWXdORVJFUVVGRlF6TkRRamt5TnpKR01EazFPVEJmUjFKTUxWTlpUa0ZRVTBVNk1rUkRURWxUUmt0SVVpMU5TVU5TVDFOUFJsUTZNa1ZGVmtWT1ZFaFZRam95Ums1QlRVVlRVRUZEUlZNNk1rWkZTRTVCVFVWVFVFRkRSVlUwVmpRMlJrZFFVQzFGUVZOVVZWTS0ifQ%3D%3D
   response:
     body:
       string: '{"value":[]}'
@@ -576,7 +546,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:33:25 GMT
+      - Tue, 18 Jul 2023 09:42:40 GMT
       expires:
       - '-1'
       pragma:
@@ -593,11 +563,11 @@ interactions:
 - request:
     body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
       "contentVersion": "1.0.0.0", "parameters": {}, "variables": {}, "resources":
-      [{"apiVersion": "2022-01-01", "type": "Microsoft.Network/publicIPAddresses",
+      [{"apiVersion": "2022-05-01", "type": "Microsoft.Network/publicIPAddresses",
       "name": "PublicIPlb1", "location": "eastus2", "tags": {}, "dependsOn": [], "properties":
       {"publicIPAllocationMethod": "Dynamic"}, "sku": {"name": "Basic"}}, {"type":
       "Microsoft.Network/loadBalancers", "name": "lb1", "location": "eastus2", "tags":
-      {}, "apiVersion": "2022-01-01", "dependsOn": ["Microsoft.Network/publicIpAddresses/PublicIPlb1"],
+      {}, "apiVersion": "2022-05-01", "dependsOn": ["Microsoft.Network/publicIpAddresses/PublicIPlb1"],
       "properties": {"backendAddressPools": [{"name": "lb1bepool"}], "frontendIPConfigurations":
       [{"name": "LoadBalancerFrontEnd", "properties": {"publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1"},
       "privateIPAddressVersion": "IPv4"}}]}, "sku": {"name": "Basic"}}], "outputs":
@@ -619,24 +589,23 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Resources/deployments/lb_deploy_NLrRwa7VlZZxJkOIz8PQ90UAlGIpDBhQ","name":"lb_deploy_NLrRwa7VlZZxJkOIz8PQ90UAlGIpDBhQ","type":"Microsoft.Resources/deployments","properties":{"templateHash":"11479814523597587747","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2023-02-07T20:33:26.9856046Z","duration":"PT0.0004891S","correlationId":"ccc01646-d52d-480d-abec-e66dbb891c1b","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"publicIPAddresses","locations":["eastus2"]},{"resourceType":"loadBalancers","locations":["eastus2"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"PublicIPlb1"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1","resourceType":"Microsoft.Network/loadBalancers","resourceName":"lb1"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Resources/deployments/lb_deploy_WlIX3BsqKzRrtDeWLXKpr3KQS9i31epZ","name":"lb_deploy_WlIX3BsqKzRrtDeWLXKpr3KQS9i31epZ","type":"Microsoft.Resources/deployments","properties":{"templateHash":"12712489111698651776","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2023-07-18T09:42:46.667223Z","duration":"PT0.0003907S","correlationId":"118da3a5-5081-43a7-9300-791cbe087427","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"publicIPAddresses","locations":["eastus2"]},{"resourceType":"loadBalancers","locations":["eastus2"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"PublicIPlb1"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1","resourceType":"Microsoft.Network/loadBalancers","resourceName":"lb1"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Resources/deployments/lb_deploy_NLrRwa7VlZZxJkOIz8PQ90UAlGIpDBhQ/operationStatuses/08585258048790808657?api-version=2022-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Resources/deployments/lb_deploy_WlIX3BsqKzRrtDeWLXKpr3KQS9i31epZ/operationStatuses/08585119335215028774?api-version=2022-09-01
       cache-control:
       - no-cache
       content-length:
-      - '1229'
+      - '1228'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:33:27 GMT
+      - Tue, 18 Jul 2023 09:42:47 GMT
       expires:
       - '-1'
       pragma:
@@ -646,7 +615,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1195'
     status:
       code: 201
       message: Created
@@ -664,22 +633,21 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258048790808657?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585119335215028774?api-version=2022-09-01
   response:
     body:
-      string: '{"status":"Succeeded"}'
+      string: '{"status":"Accepted"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '22'
+      - '21'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:33:56 GMT
+      - Tue, 18 Jul 2023 09:42:48 GMT
       expires:
       - '-1'
       pragma:
@@ -707,22 +675,63 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585119335215028774?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Resources/deployments/lb_deploy_NLrRwa7VlZZxJkOIz8PQ90UAlGIpDBhQ","name":"lb_deploy_NLrRwa7VlZZxJkOIz8PQ90UAlGIpDBhQ","type":"Microsoft.Resources/deployments","properties":{"templateHash":"11479814523597587747","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2023-02-07T20:33:33.0720191Z","duration":"PT6.0869036S","correlationId":"ccc01646-d52d-480d-abec-e66dbb891c1b","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"publicIPAddresses","locations":["eastus2"]},{"resourceType":"loadBalancers","locations":["eastus2"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"PublicIPlb1"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1","resourceType":"Microsoft.Network/loadBalancers","resourceName":"lb1"}],"outputs":{"loadBalancer":{"type":"Object","value":{"provisioningState":"Succeeded","resourceGuid":"989165ef-cde1-40c8-9dae-5154ee11b449","frontendIPConfigurations":[{"name":"LoadBalancerFrontEnd","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/frontendIPConfigurations/LoadBalancerFrontEnd","etag":"W/\"fae117ca-50d5-47f3-a356-e4ed93b20f6c\"","type":"Microsoft.Network/loadBalancers/frontendIPConfigurations","properties":{"provisioningState":"Succeeded","privateIPAllocationMethod":"Dynamic","publicIPAddress":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1"}}}],"backendAddressPools":[{"name":"lb1bepool","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/lb1bepool","etag":"W/\"fae117ca-50d5-47f3-a356-e4ed93b20f6c\"","properties":{"provisioningState":"Succeeded"},"type":"Microsoft.Network/loadBalancers/backendAddressPools"}],"loadBalancingRules":[],"probes":[],"inboundNatRules":[],"inboundNatPools":[]}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1"}]}}'
+      string: '{"status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2842'
+      - '22'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:33:56 GMT
+      - Tue, 18 Jul 2023 09:43:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Resources/deployments/lb_deploy_WlIX3BsqKzRrtDeWLXKpr3KQS9i31epZ","name":"lb_deploy_WlIX3BsqKzRrtDeWLXKpr3KQS9i31epZ","type":"Microsoft.Resources/deployments","properties":{"templateHash":"12712489111698651776","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2023-07-18T09:43:03.7968136Z","duration":"PT17.1299813S","correlationId":"118da3a5-5081-43a7-9300-791cbe087427","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"publicIPAddresses","locations":["eastus2"]},{"resourceType":"loadBalancers","locations":["eastus2"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"PublicIPlb1"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1","resourceType":"Microsoft.Network/loadBalancers","resourceName":"lb1"}],"outputs":{"loadBalancer":{"type":"Object","value":{"provisioningState":"Succeeded","resourceGuid":"4138efca-90e8-4ba5-9dd7-581dc5a8322b","frontendIPConfigurations":[{"name":"LoadBalancerFrontEnd","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/frontendIPConfigurations/LoadBalancerFrontEnd","etag":"W/\"8fdaf68d-760b-46b3-b53c-e20cbdf19e05\"","type":"Microsoft.Network/loadBalancers/frontendIPConfigurations","properties":{"provisioningState":"Succeeded","privateIPAllocationMethod":"Dynamic","publicIPAddress":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1"}}}],"backendAddressPools":[{"name":"lb1bepool","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/lb1bepool","etag":"W/\"8fdaf68d-760b-46b3-b53c-e20cbdf19e05\"","properties":{"provisioningState":"Succeeded"},"type":"Microsoft.Network/loadBalancers/backendAddressPools"}],"loadBalancingRules":[],"probes":[],"inboundNatRules":[],"inboundNatPools":[]}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2843'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 18 Jul 2023 09:43:18 GMT
       expires:
       - '-1'
       pragma:
@@ -750,32 +759,32 @@ interactions:
       ParameterSetName:
       - -g --lb-name -n
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1?api-version=2022-05-01
   response:
     body:
-      string: "{\r\n  \"name\": \"lb1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1\",\r\n
-        \ \"etag\": \"W/\\\"fae117ca-50d5-47f3-a356-e4ed93b20f6c\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/loadBalancers\",\r\n  \"location\": \"eastus2\",\r\n  \"tags\":
-        {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"989165ef-cde1-40c8-9dae-5154ee11b449\",\r\n    \"frontendIPConfigurations\":
-        [\r\n      {\r\n        \"name\": \"LoadBalancerFrontEnd\",\r\n        \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/frontendIPConfigurations/LoadBalancerFrontEnd\",\r\n
-        \       \"etag\": \"W/\\\"fae117ca-50d5-47f3-a356-e4ed93b20f6c\\\"\",\r\n
-        \       \"type\": \"Microsoft.Network/loadBalancers/frontendIPConfigurations\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"publicIPAddress\":
-        {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1\"\r\n
-        \         }\r\n        }\r\n      }\r\n    ],\r\n    \"backendAddressPools\":
-        [\r\n      {\r\n        \"name\": \"lb1bepool\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/lb1bepool\",\r\n
-        \       \"etag\": \"W/\\\"fae117ca-50d5-47f3-a356-e4ed93b20f6c\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\r\n
-        \       },\r\n        \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\r\n
-        \     }\r\n    ],\r\n    \"loadBalancingRules\": [],\r\n    \"probes\": [],\r\n
-        \   \"inboundNatRules\": [],\r\n    \"inboundNatPools\": []\r\n  },\r\n  \"sku\":
-        {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"lb1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1\"\
+        ,\r\n  \"etag\": \"W/\\\"8fdaf68d-760b-46b3-b53c-e20cbdf19e05\\\"\",\r\n \
+        \ \"type\": \"Microsoft.Network/loadBalancers\",\r\n  \"location\": \"eastus2\"\
+        ,\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":\
+        \ \"Succeeded\",\r\n    \"resourceGuid\": \"4138efca-90e8-4ba5-9dd7-581dc5a8322b\"\
+        ,\r\n    \"frontendIPConfigurations\": [\r\n      {\r\n        \"name\": \"\
+        LoadBalancerFrontEnd\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/frontendIPConfigurations/LoadBalancerFrontEnd\"\
+        ,\r\n        \"etag\": \"W/\\\"8fdaf68d-760b-46b3-b53c-e20cbdf19e05\\\"\"\
+        ,\r\n        \"type\": \"Microsoft.Network/loadBalancers/frontendIPConfigurations\"\
+        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
+        ,\r\n          \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"\
+        publicIPAddress\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1\"\
+        \r\n          }\r\n        }\r\n      }\r\n    ],\r\n    \"backendAddressPools\"\
+        : [\r\n      {\r\n        \"name\": \"lb1bepool\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/lb1bepool\"\
+        ,\r\n        \"etag\": \"W/\\\"8fdaf68d-760b-46b3-b53c-e20cbdf19e05\\\"\"\
+        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
+        \r\n        },\r\n        \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\
+        \r\n      }\r\n    ],\r\n    \"loadBalancingRules\": [],\r\n    \"probes\"\
+        : [],\r\n    \"inboundNatRules\": [],\r\n    \"inboundNatPools\": []\r\n \
+        \ },\r\n  \"sku\": {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\
+        \r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -784,9 +793,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:33:57 GMT
+      - Tue, 18 Jul 2023 09:43:21 GMT
       etag:
-      - W/"fae117ca-50d5-47f3-a356-e4ed93b20f6c"
+      - W/"8fdaf68d-760b-46b3-b53c-e20cbdf19e05"
       expires:
       - '-1'
       pragma:
@@ -803,7 +812,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7102a5b9-e266-44ed-adaf-d9775f401d53
+      - b7ac9751-1f80-48b7-ab5d-19a70b619e5a
     status:
       code: 200
       message: OK
@@ -832,41 +841,42 @@ interactions:
       ParameterSetName:
       - -g --lb-name -n
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1?api-version=2022-05-01
   response:
     body:
-      string: "{\r\n  \"name\": \"lb1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1\",\r\n
-        \ \"etag\": \"W/\\\"df688134-64d4-48e1-8a57-3258b0e557b4\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/loadBalancers\",\r\n  \"location\": \"eastus2\",\r\n  \"tags\":
-        {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"989165ef-cde1-40c8-9dae-5154ee11b449\",\r\n    \"frontendIPConfigurations\":
-        [\r\n      {\r\n        \"name\": \"LoadBalancerFrontEnd\",\r\n        \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/frontendIPConfigurations/LoadBalancerFrontEnd\",\r\n
-        \       \"etag\": \"W/\\\"df688134-64d4-48e1-8a57-3258b0e557b4\\\"\",\r\n
-        \       \"type\": \"Microsoft.Network/loadBalancers/frontendIPConfigurations\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"publicIPAddress\":
-        {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1\"\r\n
-        \         }\r\n        }\r\n      }\r\n    ],\r\n    \"backendAddressPools\":
-        [\r\n      {\r\n        \"name\": \"lb1bepool\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/lb1bepool\",\r\n
-        \       \"etag\": \"W/\\\"df688134-64d4-48e1-8a57-3258b0e557b4\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\r\n
-        \       },\r\n        \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\r\n
-        \     },\r\n      {\r\n        \"name\": \"pool1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\",\r\n
-        \       \"etag\": \"W/\\\"df688134-64d4-48e1-8a57-3258b0e557b4\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\r\n
-        \       },\r\n        \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\r\n
-        \     }\r\n    ],\r\n    \"loadBalancingRules\": [],\r\n    \"probes\": [],\r\n
-        \   \"inboundNatRules\": [],\r\n    \"inboundNatPools\": []\r\n  },\r\n  \"sku\":
-        {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"lb1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1\"\
+        ,\r\n  \"etag\": \"W/\\\"1ddd30b4-6e80-4a52-a5e0-9019c62c856f\\\"\",\r\n \
+        \ \"type\": \"Microsoft.Network/loadBalancers\",\r\n  \"location\": \"eastus2\"\
+        ,\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":\
+        \ \"Succeeded\",\r\n    \"resourceGuid\": \"4138efca-90e8-4ba5-9dd7-581dc5a8322b\"\
+        ,\r\n    \"frontendIPConfigurations\": [\r\n      {\r\n        \"name\": \"\
+        LoadBalancerFrontEnd\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/frontendIPConfigurations/LoadBalancerFrontEnd\"\
+        ,\r\n        \"etag\": \"W/\\\"1ddd30b4-6e80-4a52-a5e0-9019c62c856f\\\"\"\
+        ,\r\n        \"type\": \"Microsoft.Network/loadBalancers/frontendIPConfigurations\"\
+        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
+        ,\r\n          \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"\
+        publicIPAddress\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1\"\
+        \r\n          }\r\n        }\r\n      }\r\n    ],\r\n    \"backendAddressPools\"\
+        : [\r\n      {\r\n        \"name\": \"lb1bepool\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/lb1bepool\"\
+        ,\r\n        \"etag\": \"W/\\\"1ddd30b4-6e80-4a52-a5e0-9019c62c856f\\\"\"\
+        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
+        \r\n        },\r\n        \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\
+        \r\n      },\r\n      {\r\n        \"name\": \"pool1\",\r\n        \"id\"\
+        : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\
+        ,\r\n        \"etag\": \"W/\\\"1ddd30b4-6e80-4a52-a5e0-9019c62c856f\\\"\"\
+        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
+        \r\n        },\r\n        \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\
+        \r\n      }\r\n    ],\r\n    \"loadBalancingRules\": [],\r\n    \"probes\"\
+        : [],\r\n    \"inboundNatRules\": [],\r\n    \"inboundNatPools\": []\r\n \
+        \ },\r\n  \"sku\": {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\
+        \r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/a31fd1b5-6823-4d2a-bcf0-82ceb75618d8?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/68dc0593-ad5d-441b-a15f-687ebc1f44ca?api-version=2022-05-01
       cache-control:
       - no-cache
       content-length:
@@ -874,7 +884,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:34:00 GMT
+      - Tue, 18 Jul 2023 09:43:25 GMT
       expires:
       - '-1'
       pragma:
@@ -891,7 +901,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d79376e0-3593-4810-8a85-aae49eaf87e4
+      - 93e372ae-450d-4457-95ef-ef412327d34f
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -911,10 +921,9 @@ interactions:
       ParameterSetName:
       - -g --lb-name -n
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/a31fd1b5-6823-4d2a-bcf0-82ceb75618d8?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/68dc0593-ad5d-441b-a15f-687ebc1f44ca?api-version=2022-05-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -926,7 +935,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:34:30 GMT
+      - Tue, 18 Jul 2023 09:43:26 GMT
       expires:
       - '-1'
       pragma:
@@ -943,7 +952,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f9a347d8-f009-4599-927f-68505c7ea8be
+      - 16248888-1cd0-4526-b8df-61c8d903ec92
     status:
       code: 200
       message: OK
@@ -961,36 +970,37 @@ interactions:
       ParameterSetName:
       - -g --lb-name -n
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1?api-version=2022-05-01
   response:
     body:
-      string: "{\r\n  \"name\": \"lb1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1\",\r\n
-        \ \"etag\": \"W/\\\"df688134-64d4-48e1-8a57-3258b0e557b4\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/loadBalancers\",\r\n  \"location\": \"eastus2\",\r\n  \"tags\":
-        {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"989165ef-cde1-40c8-9dae-5154ee11b449\",\r\n    \"frontendIPConfigurations\":
-        [\r\n      {\r\n        \"name\": \"LoadBalancerFrontEnd\",\r\n        \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/frontendIPConfigurations/LoadBalancerFrontEnd\",\r\n
-        \       \"etag\": \"W/\\\"df688134-64d4-48e1-8a57-3258b0e557b4\\\"\",\r\n
-        \       \"type\": \"Microsoft.Network/loadBalancers/frontendIPConfigurations\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"publicIPAddress\":
-        {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1\"\r\n
-        \         }\r\n        }\r\n      }\r\n    ],\r\n    \"backendAddressPools\":
-        [\r\n      {\r\n        \"name\": \"lb1bepool\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/lb1bepool\",\r\n
-        \       \"etag\": \"W/\\\"df688134-64d4-48e1-8a57-3258b0e557b4\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\r\n
-        \       },\r\n        \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\r\n
-        \     },\r\n      {\r\n        \"name\": \"pool1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\",\r\n
-        \       \"etag\": \"W/\\\"df688134-64d4-48e1-8a57-3258b0e557b4\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\r\n
-        \       },\r\n        \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\r\n
-        \     }\r\n    ],\r\n    \"loadBalancingRules\": [],\r\n    \"probes\": [],\r\n
-        \   \"inboundNatRules\": [],\r\n    \"inboundNatPools\": []\r\n  },\r\n  \"sku\":
-        {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"lb1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1\"\
+        ,\r\n  \"etag\": \"W/\\\"1ddd30b4-6e80-4a52-a5e0-9019c62c856f\\\"\",\r\n \
+        \ \"type\": \"Microsoft.Network/loadBalancers\",\r\n  \"location\": \"eastus2\"\
+        ,\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":\
+        \ \"Succeeded\",\r\n    \"resourceGuid\": \"4138efca-90e8-4ba5-9dd7-581dc5a8322b\"\
+        ,\r\n    \"frontendIPConfigurations\": [\r\n      {\r\n        \"name\": \"\
+        LoadBalancerFrontEnd\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/frontendIPConfigurations/LoadBalancerFrontEnd\"\
+        ,\r\n        \"etag\": \"W/\\\"1ddd30b4-6e80-4a52-a5e0-9019c62c856f\\\"\"\
+        ,\r\n        \"type\": \"Microsoft.Network/loadBalancers/frontendIPConfigurations\"\
+        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
+        ,\r\n          \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"\
+        publicIPAddress\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1\"\
+        \r\n          }\r\n        }\r\n      }\r\n    ],\r\n    \"backendAddressPools\"\
+        : [\r\n      {\r\n        \"name\": \"lb1bepool\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/lb1bepool\"\
+        ,\r\n        \"etag\": \"W/\\\"1ddd30b4-6e80-4a52-a5e0-9019c62c856f\\\"\"\
+        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
+        \r\n        },\r\n        \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\
+        \r\n      },\r\n      {\r\n        \"name\": \"pool1\",\r\n        \"id\"\
+        : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\
+        ,\r\n        \"etag\": \"W/\\\"1ddd30b4-6e80-4a52-a5e0-9019c62c856f\\\"\"\
+        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
+        \r\n        },\r\n        \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\
+        \r\n      }\r\n    ],\r\n    \"loadBalancingRules\": [],\r\n    \"probes\"\
+        : [],\r\n    \"inboundNatRules\": [],\r\n    \"inboundNatPools\": []\r\n \
+        \ },\r\n  \"sku\": {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\
+        \r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -999,9 +1009,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:34:30 GMT
+      - Tue, 18 Jul 2023 09:43:26 GMT
       etag:
-      - W/"df688134-64d4-48e1-8a57-3258b0e557b4"
+      - W/"1ddd30b4-6e80-4a52-a5e0-9019c62c856f"
       expires:
       - '-1'
       pragma:
@@ -1018,7 +1028,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 47e7caec-276f-487d-960a-4e8e531a070c
+      - d43bde50-2f28-4228-8678-570ccfe2930a
     status:
       code: 200
       message: OK
@@ -1036,15 +1046,15 @@ interactions:
       ParameterSetName:
       - -g --lb-name -n
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1?api-version=2022-05-01
   response:
     body:
-      string: "{\r\n  \"name\": \"pool1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\",\r\n
-        \ \"etag\": \"W/\\\"df688134-64d4-48e1-8a57-3258b0e557b4\\\"\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\"\r\n  },\r\n  \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\r\n}"
+      string: "{\r\n  \"name\": \"pool1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\
+        ,\r\n  \"etag\": \"W/\\\"1ddd30b4-6e80-4a52-a5e0-9019c62c856f\\\"\",\r\n \
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\"\r\n  },\r\n\
+        \  \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1053,9 +1063,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:34:31 GMT
+      - Tue, 18 Jul 2023 09:43:29 GMT
       etag:
-      - W/"df688134-64d4-48e1-8a57-3258b0e557b4"
+      - W/"1ddd30b4-6e80-4a52-a5e0-9019c62c856f"
       expires:
       - '-1'
       pragma:
@@ -1072,7 +1082,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4f9cb585-6731-4c43-84a6-585b23a7d89c
+      - a0a883ea-2a90-4177-925d-36c3a6a29759
     status:
       code: 200
       message: OK
@@ -1090,31 +1100,30 @@ interactions:
       ParameterSetName:
       - -g --lb-name --nic-name --ip-config-name --address-pool
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
-        \ \"etag\": \"W/\\\"086008e9-426c-4469-99d7-6235c4452970\\\"\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"2098fd4c-c049-4402-8d03-c7baa342deed\",\r\n
-        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
-        \       \"etag\": \"W/\\\"086008e9-426c-4469-99d7-6235c4452970\\\"\",\r\n
-        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
-        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
-        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
-        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
-        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"chsvgyqmt5iu3dxx3wrtctjuac.cx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
-        false,\r\n    \"vnetEncryptionSupported\": false,\r\n    \"enableIPForwarding\":
-        false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\n
-        \   \"nicType\": \"Standard\",\r\n    \"allowPort25Out\": true\r\n  },\r\n
-        \ \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"kind\": \"Regular\"\r\n}"
+      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\"\
+        ,\r\n  \"etag\": \"W/\\\"e90fdd9f-f232-4444-baca-45bc16b1b64b\\\"\",\r\n \
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"\
+        resourceGuid\": \"c0c9ba93-ca62-403e-b314-91fe7c43a5e2\",\r\n    \"ipConfigurations\"\
+        : [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\"\
+        ,\r\n        \"etag\": \"W/\\\"e90fdd9f-f232-4444-baca-45bc16b1b64b\\\"\"\
+        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
+        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
+        ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
+        : \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
+        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
+        : \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n\
+        \      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"\
+        internalDomainNameSuffix\": \"ym3aglyrrwpevhoiw0ecfppgrd.cx.internal.cloudapp.net\"\
+        \r\n    },\r\n    \"enableAcceleratedNetworking\": false,\r\n    \"vnetEncryptionSupported\"\
+        : false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\"\
+        : [],\r\n    \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\
+        \n    \"allowPort25Out\": true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\
+        ,\r\n  \"location\": \"eastus2\",\r\n  \"kind\": \"Regular\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1123,9 +1132,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:34:32 GMT
+      - Tue, 18 Jul 2023 09:43:29 GMT
       etag:
-      - W/"086008e9-426c-4469-99d7-6235c4452970"
+      - W/"e90fdd9f-f232-4444-baca-45bc16b1b64b"
       expires:
       - '-1'
       pragma:
@@ -1135,22 +1144,27 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f0c93cd9-bc15-485c-a4ef-6b886b71b585
+      - a2b5a743-5b5c-4ae0-b311-f37aa354a8be
     status:
       code: 200
       message: OK
 - request:
     body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1",
-      "location": "eastus2", "properties": {"ipConfigurations": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1",
-      "name": "ipconfig1", "type": "Microsoft.Network/networkInterfaces/ipConfigurations",
-      "properties": {"loadBalancerBackendAddressPools": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1"}],
-      "privateIPAddress": "10.0.0.4", "privateIPAllocationMethod": "Dynamic", "privateIPAddressVersion":
-      "IPv4", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"},
-      "primary": true}}], "dnsSettings": {"dnsServers": []}, "enableAcceleratedNetworking":
-      false, "enableIPForwarding": false, "nicType": "Standard"}}'
+      "location": "eastus2", "properties": {"dnsSettings": {"dnsServers": []}, "enableAcceleratedNetworking":
+      false, "enableIPForwarding": false, "ipConfigurations": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1",
+      "name": "ipconfig1", "properties": {"loadBalancerBackendAddressPools": [{"id":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1"}],
+      "primary": true, "privateIPAddress": "10.0.0.4", "privateIPAddressVersion":
+      "IPv4", "privateIPAllocationMethod": "Dynamic", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"}},
+      "type": "Microsoft.Network/networkInterfaces/ipConfigurations"}], "nicType":
+      "Standard"}}'
     headers:
       Accept:
       - application/json
@@ -1167,38 +1181,37 @@ interactions:
       ParameterSetName:
       - -g --lb-name --nic-name --ip-config-name --address-pool
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
-        \ \"etag\": \"W/\\\"3252d046-95be-47ba-88e2-ad86ceea1942\\\"\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"2098fd4c-c049-4402-8d03-c7baa342deed\",\r\n
-        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
-        \       \"etag\": \"W/\\\"3252d046-95be-47ba-88e2-ad86ceea1942\\\"\",\r\n
-        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
-        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
-        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
-        \"IPv4\",\r\n          \"loadBalancerBackendAddressPools\": [\r\n            {\r\n
-        \             \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\r\n
-        \           }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\":
-        {\r\n      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"chsvgyqmt5iu3dxx3wrtctjuac.cx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
-        false,\r\n    \"vnetEncryptionSupported\": false,\r\n    \"enableIPForwarding\":
-        false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\n
-        \   \"nicType\": \"Standard\",\r\n    \"allowPort25Out\": true\r\n  },\r\n
-        \ \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"kind\": \"Regular\"\r\n}"
+      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\"\
+        ,\r\n  \"etag\": \"W/\\\"8cb00d69-8b6e-4d5c-9b63-3c24ba3c6c65\\\"\",\r\n \
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"\
+        resourceGuid\": \"c0c9ba93-ca62-403e-b314-91fe7c43a5e2\",\r\n    \"ipConfigurations\"\
+        : [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\"\
+        ,\r\n        \"etag\": \"W/\\\"8cb00d69-8b6e-4d5c-9b63-3c24ba3c6c65\\\"\"\
+        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
+        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
+        ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
+        : \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
+        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
+        : \"IPv4\",\r\n          \"loadBalancerBackendAddressPools\": [\r\n      \
+        \      {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\
+        \r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n   \
+        \ \"dnsSettings\": {\r\n      \"dnsServers\": [],\r\n      \"appliedDnsServers\"\
+        : [],\r\n      \"internalDomainNameSuffix\": \"ym3aglyrrwpevhoiw0ecfppgrd.cx.internal.cloudapp.net\"\
+        \r\n    },\r\n    \"enableAcceleratedNetworking\": false,\r\n    \"vnetEncryptionSupported\"\
+        : false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\"\
+        : [],\r\n    \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\
+        \n    \"allowPort25Out\": true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\
+        ,\r\n  \"location\": \"eastus2\",\r\n  \"kind\": \"Regular\"\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/c3126e53-2f71-4ce4-a35b-7a813a438280?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/436618b4-6eec-4c61-9bc7-fd7ead9563cb?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
@@ -1206,7 +1219,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:34:33 GMT
+      - Tue, 18 Jul 2023 09:43:32 GMT
       expires:
       - '-1'
       pragma:
@@ -1216,12 +1229,16 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 188b49a0-59fd-4e3e-9ffb-d3731ee89b95
+      - 4465c02a-64f1-45cb-9a54-39a296ba1b50
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -1239,10 +1256,9 @@ interactions:
       ParameterSetName:
       - -g --lb-name --nic-name --ip-config-name --address-pool
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/c3126e53-2f71-4ce4-a35b-7a813a438280?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/436618b4-6eec-4c61-9bc7-fd7ead9563cb?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1254,7 +1270,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:35:03 GMT
+      - Tue, 18 Jul 2023 09:43:33 GMT
       expires:
       - '-1'
       pragma:
@@ -1264,10 +1280,14 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 8bb9b65e-8218-48a5-a3d6-b11efdba2c42
+      - 2c693aa1-e2b9-4122-890d-4ad519910e30
     status:
       code: 200
       message: OK
@@ -1285,33 +1305,32 @@ interactions:
       ParameterSetName:
       - -g --lb-name --nic-name --ip-config-name --address-pool
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
-        \ \"etag\": \"W/\\\"3252d046-95be-47ba-88e2-ad86ceea1942\\\"\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"2098fd4c-c049-4402-8d03-c7baa342deed\",\r\n
-        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
-        \       \"etag\": \"W/\\\"3252d046-95be-47ba-88e2-ad86ceea1942\\\"\",\r\n
-        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
-        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
-        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
-        \"IPv4\",\r\n          \"loadBalancerBackendAddressPools\": [\r\n            {\r\n
-        \             \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\r\n
-        \           }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\":
-        {\r\n      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"chsvgyqmt5iu3dxx3wrtctjuac.cx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
-        false,\r\n    \"vnetEncryptionSupported\": false,\r\n    \"enableIPForwarding\":
-        false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\n
-        \   \"nicType\": \"Standard\",\r\n    \"allowPort25Out\": true\r\n  },\r\n
-        \ \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"kind\": \"Regular\"\r\n}"
+      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\"\
+        ,\r\n  \"etag\": \"W/\\\"8cb00d69-8b6e-4d5c-9b63-3c24ba3c6c65\\\"\",\r\n \
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"\
+        resourceGuid\": \"c0c9ba93-ca62-403e-b314-91fe7c43a5e2\",\r\n    \"ipConfigurations\"\
+        : [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\"\
+        ,\r\n        \"etag\": \"W/\\\"8cb00d69-8b6e-4d5c-9b63-3c24ba3c6c65\\\"\"\
+        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
+        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
+        ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
+        : \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
+        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
+        : \"IPv4\",\r\n          \"loadBalancerBackendAddressPools\": [\r\n      \
+        \      {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\
+        \r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n   \
+        \ \"dnsSettings\": {\r\n      \"dnsServers\": [],\r\n      \"appliedDnsServers\"\
+        : [],\r\n      \"internalDomainNameSuffix\": \"ym3aglyrrwpevhoiw0ecfppgrd.cx.internal.cloudapp.net\"\
+        \r\n    },\r\n    \"enableAcceleratedNetworking\": false,\r\n    \"vnetEncryptionSupported\"\
+        : false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\"\
+        : [],\r\n    \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\
+        \n    \"allowPort25Out\": true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\
+        ,\r\n  \"location\": \"eastus2\",\r\n  \"kind\": \"Regular\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1320,9 +1339,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:35:03 GMT
+      - Tue, 18 Jul 2023 09:43:33 GMT
       etag:
-      - W/"3252d046-95be-47ba-88e2-ad86ceea1942"
+      - W/"8cb00d69-8b6e-4d5c-9b63-3c24ba3c6c65"
       expires:
       - '-1'
       pragma:
@@ -1332,10 +1351,14 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 50ea48d9-7833-46ff-be7d-b36854c31265
+      - 0cdca5ba-56f2-4e76-941c-aac02f90ed8e
     status:
       code: 200
       message: OK
@@ -1353,33 +1376,32 @@ interactions:
       ParameterSetName:
       - -g --lb-name --nic-name --ip-config-name --address-pool
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
-        \ \"etag\": \"W/\\\"3252d046-95be-47ba-88e2-ad86ceea1942\\\"\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"2098fd4c-c049-4402-8d03-c7baa342deed\",\r\n
-        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
-        \       \"etag\": \"W/\\\"3252d046-95be-47ba-88e2-ad86ceea1942\\\"\",\r\n
-        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
-        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
-        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
-        \"IPv4\",\r\n          \"loadBalancerBackendAddressPools\": [\r\n            {\r\n
-        \             \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\r\n
-        \           }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\":
-        {\r\n      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"chsvgyqmt5iu3dxx3wrtctjuac.cx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
-        false,\r\n    \"vnetEncryptionSupported\": false,\r\n    \"enableIPForwarding\":
-        false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\n
-        \   \"nicType\": \"Standard\",\r\n    \"allowPort25Out\": true\r\n  },\r\n
-        \ \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"kind\": \"Regular\"\r\n}"
+      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\"\
+        ,\r\n  \"etag\": \"W/\\\"8cb00d69-8b6e-4d5c-9b63-3c24ba3c6c65\\\"\",\r\n \
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"\
+        resourceGuid\": \"c0c9ba93-ca62-403e-b314-91fe7c43a5e2\",\r\n    \"ipConfigurations\"\
+        : [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\"\
+        ,\r\n        \"etag\": \"W/\\\"8cb00d69-8b6e-4d5c-9b63-3c24ba3c6c65\\\"\"\
+        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
+        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
+        ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
+        : \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
+        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
+        : \"IPv4\",\r\n          \"loadBalancerBackendAddressPools\": [\r\n      \
+        \      {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\
+        \r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n   \
+        \ \"dnsSettings\": {\r\n      \"dnsServers\": [],\r\n      \"appliedDnsServers\"\
+        : [],\r\n      \"internalDomainNameSuffix\": \"ym3aglyrrwpevhoiw0ecfppgrd.cx.internal.cloudapp.net\"\
+        \r\n    },\r\n    \"enableAcceleratedNetworking\": false,\r\n    \"vnetEncryptionSupported\"\
+        : false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\"\
+        : [],\r\n    \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\
+        \n    \"allowPort25Out\": true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\
+        ,\r\n  \"location\": \"eastus2\",\r\n  \"kind\": \"Regular\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1388,9 +1410,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:35:04 GMT
+      - Tue, 18 Jul 2023 09:43:36 GMT
       etag:
-      - W/"3252d046-95be-47ba-88e2-ad86ceea1942"
+      - W/"8cb00d69-8b6e-4d5c-9b63-3c24ba3c6c65"
       expires:
       - '-1'
       pragma:
@@ -1407,19 +1429,19 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - bd69dcdb-4609-428a-9820-bd0d3dacddb5
+      - aeccc6ef-f134-4863-9caa-24bade2e2417
     status:
       code: 200
       message: OK
 - request:
     body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1",
-      "location": "eastus2", "properties": {"ipConfigurations": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1",
-      "name": "ipconfig1", "type": "Microsoft.Network/networkInterfaces/ipConfigurations",
-      "properties": {"loadBalancerBackendAddressPools": [], "privateIPAddress": "10.0.0.4",
-      "privateIPAllocationMethod": "Dynamic", "privateIPAddressVersion": "IPv4", "subnet":
-      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"},
-      "primary": true}}], "dnsSettings": {"dnsServers": []}, "enableAcceleratedNetworking":
-      false, "enableIPForwarding": false, "nicType": "Standard"}}'
+      "location": "eastus2", "properties": {"dnsSettings": {"dnsServers": []}, "enableAcceleratedNetworking":
+      false, "enableIPForwarding": false, "ipConfigurations": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1",
+      "name": "ipconfig1", "properties": {"loadBalancerBackendAddressPools": [], "primary":
+      true, "privateIPAddress": "10.0.0.4", "privateIPAddressVersion": "IPv4", "privateIPAllocationMethod":
+      "Dynamic", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"}},
+      "type": "Microsoft.Network/networkInterfaces/ipConfigurations"}], "nicType":
+      "Standard"}}'
     headers:
       Accept:
       - application/json
@@ -1436,36 +1458,35 @@ interactions:
       ParameterSetName:
       - -g --lb-name --nic-name --ip-config-name --address-pool
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
-        \ \"etag\": \"W/\\\"6a5850b0-2657-4925-bc26-06244ad37447\\\"\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"2098fd4c-c049-4402-8d03-c7baa342deed\",\r\n
-        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
-        \       \"etag\": \"W/\\\"6a5850b0-2657-4925-bc26-06244ad37447\\\"\",\r\n
-        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
-        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
-        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
-        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
-        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"chsvgyqmt5iu3dxx3wrtctjuac.cx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
-        false,\r\n    \"vnetEncryptionSupported\": false,\r\n    \"enableIPForwarding\":
-        false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\n
-        \   \"nicType\": \"Standard\",\r\n    \"allowPort25Out\": true\r\n  },\r\n
-        \ \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"kind\": \"Regular\"\r\n}"
+      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\"\
+        ,\r\n  \"etag\": \"W/\\\"6d0677fd-43c3-4c0b-a0f4-333396347cec\\\"\",\r\n \
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"\
+        resourceGuid\": \"c0c9ba93-ca62-403e-b314-91fe7c43a5e2\",\r\n    \"ipConfigurations\"\
+        : [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\"\
+        ,\r\n        \"etag\": \"W/\\\"6d0677fd-43c3-4c0b-a0f4-333396347cec\\\"\"\
+        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
+        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
+        ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
+        : \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
+        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
+        : \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n\
+        \      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"\
+        internalDomainNameSuffix\": \"ym3aglyrrwpevhoiw0ecfppgrd.cx.internal.cloudapp.net\"\
+        \r\n    },\r\n    \"enableAcceleratedNetworking\": false,\r\n    \"vnetEncryptionSupported\"\
+        : false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\"\
+        : [],\r\n    \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\
+        \n    \"allowPort25Out\": true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\
+        ,\r\n  \"location\": \"eastus2\",\r\n  \"kind\": \"Regular\"\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/c8d977d3-e4db-4286-b7d9-91f358230374?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/f7ec9177-2d4e-408a-a83b-79cd0d5076b1?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
@@ -1473,7 +1494,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:35:04 GMT
+      - Tue, 18 Jul 2023 09:43:39 GMT
       expires:
       - '-1'
       pragma:
@@ -1490,7 +1511,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f4417f93-64ed-4604-bd3c-05a46b563fde
+      - 12862955-c613-49fa-9c63-dbfbb984c0b0
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -1510,10 +1531,9 @@ interactions:
       ParameterSetName:
       - -g --lb-name --nic-name --ip-config-name --address-pool
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/c8d977d3-e4db-4286-b7d9-91f358230374?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/f7ec9177-2d4e-408a-a83b-79cd0d5076b1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1525,7 +1545,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:35:34 GMT
+      - Tue, 18 Jul 2023 09:43:40 GMT
       expires:
       - '-1'
       pragma:
@@ -1542,7 +1562,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 1cd9dabc-849b-4e58-9ad0-7e97a24afa48
+      - 516a950e-e7cd-4931-91ab-959454bc0366
     status:
       code: 200
       message: OK
@@ -1560,31 +1580,30 @@ interactions:
       ParameterSetName:
       - -g --lb-name --nic-name --ip-config-name --address-pool
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
-        \ \"etag\": \"W/\\\"6a5850b0-2657-4925-bc26-06244ad37447\\\"\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"2098fd4c-c049-4402-8d03-c7baa342deed\",\r\n
-        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
-        \       \"etag\": \"W/\\\"6a5850b0-2657-4925-bc26-06244ad37447\\\"\",\r\n
-        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
-        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
-        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
-        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
-        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"chsvgyqmt5iu3dxx3wrtctjuac.cx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
-        false,\r\n    \"vnetEncryptionSupported\": false,\r\n    \"enableIPForwarding\":
-        false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\n
-        \   \"nicType\": \"Standard\",\r\n    \"allowPort25Out\": true\r\n  },\r\n
-        \ \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"kind\": \"Regular\"\r\n}"
+      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\"\
+        ,\r\n  \"etag\": \"W/\\\"6d0677fd-43c3-4c0b-a0f4-333396347cec\\\"\",\r\n \
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"\
+        resourceGuid\": \"c0c9ba93-ca62-403e-b314-91fe7c43a5e2\",\r\n    \"ipConfigurations\"\
+        : [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\"\
+        ,\r\n        \"etag\": \"W/\\\"6d0677fd-43c3-4c0b-a0f4-333396347cec\\\"\"\
+        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
+        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
+        ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
+        : \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
+        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
+        : \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n\
+        \      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"\
+        internalDomainNameSuffix\": \"ym3aglyrrwpevhoiw0ecfppgrd.cx.internal.cloudapp.net\"\
+        \r\n    },\r\n    \"enableAcceleratedNetworking\": false,\r\n    \"vnetEncryptionSupported\"\
+        : false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\"\
+        : [],\r\n    \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\
+        \n    \"allowPort25Out\": true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\
+        ,\r\n  \"location\": \"eastus2\",\r\n  \"kind\": \"Regular\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1593,9 +1612,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:35:34 GMT
+      - Tue, 18 Jul 2023 09:43:40 GMT
       etag:
-      - W/"6a5850b0-2657-4925-bc26-06244ad37447"
+      - W/"6d0677fd-43c3-4c0b-a0f4-333396347cec"
       expires:
       - '-1'
       pragma:
@@ -1612,7 +1631,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 2e57c560-44c5-4d59-8bbd-6e6e6519041c
+      - e5ef90ea-264a-42ae-a2ff-aeb29c908b66
     status:
       code: 200
       message: OK
@@ -1630,31 +1649,30 @@ interactions:
       ParameterSetName:
       - -g --nic-name --ip-config-name --address-pool
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
-        \ \"etag\": \"W/\\\"6a5850b0-2657-4925-bc26-06244ad37447\\\"\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"2098fd4c-c049-4402-8d03-c7baa342deed\",\r\n
-        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
-        \       \"etag\": \"W/\\\"6a5850b0-2657-4925-bc26-06244ad37447\\\"\",\r\n
-        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
-        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
-        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
-        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
-        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"chsvgyqmt5iu3dxx3wrtctjuac.cx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
-        false,\r\n    \"vnetEncryptionSupported\": false,\r\n    \"enableIPForwarding\":
-        false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\n
-        \   \"nicType\": \"Standard\",\r\n    \"allowPort25Out\": true\r\n  },\r\n
-        \ \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"kind\": \"Regular\"\r\n}"
+      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\"\
+        ,\r\n  \"etag\": \"W/\\\"6d0677fd-43c3-4c0b-a0f4-333396347cec\\\"\",\r\n \
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"\
+        resourceGuid\": \"c0c9ba93-ca62-403e-b314-91fe7c43a5e2\",\r\n    \"ipConfigurations\"\
+        : [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\"\
+        ,\r\n        \"etag\": \"W/\\\"6d0677fd-43c3-4c0b-a0f4-333396347cec\\\"\"\
+        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
+        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
+        ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
+        : \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
+        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
+        : \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n\
+        \      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"\
+        internalDomainNameSuffix\": \"ym3aglyrrwpevhoiw0ecfppgrd.cx.internal.cloudapp.net\"\
+        \r\n    },\r\n    \"enableAcceleratedNetworking\": false,\r\n    \"vnetEncryptionSupported\"\
+        : false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\"\
+        : [],\r\n    \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\
+        \n    \"allowPort25Out\": true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\
+        ,\r\n  \"location\": \"eastus2\",\r\n  \"kind\": \"Regular\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1663,9 +1681,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:35:34 GMT
+      - Tue, 18 Jul 2023 09:43:42 GMT
       etag:
-      - W/"6a5850b0-2657-4925-bc26-06244ad37447"
+      - W/"6d0677fd-43c3-4c0b-a0f4-333396347cec"
       expires:
       - '-1'
       pragma:
@@ -1682,19 +1700,20 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b3feafaf-4bd2-47f1-9fa4-832593491571
+      - 8380f5d2-202d-45e8-bbe3-a530430fc249
     status:
       code: 200
       message: OK
 - request:
     body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1",
-      "location": "eastus2", "properties": {"ipConfigurations": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1",
-      "name": "ipconfig1", "type": "Microsoft.Network/networkInterfaces/ipConfigurations",
-      "properties": {"loadBalancerBackendAddressPools": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1"}],
-      "privateIPAddress": "10.0.0.4", "privateIPAllocationMethod": "Dynamic", "privateIPAddressVersion":
-      "IPv4", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"},
-      "primary": true}}], "dnsSettings": {"dnsServers": []}, "enableAcceleratedNetworking":
-      false, "enableIPForwarding": false, "nicType": "Standard"}}'
+      "location": "eastus2", "properties": {"dnsSettings": {"dnsServers": []}, "enableAcceleratedNetworking":
+      false, "enableIPForwarding": false, "ipConfigurations": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1",
+      "name": "ipconfig1", "properties": {"loadBalancerBackendAddressPools": [{"id":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1"}],
+      "primary": true, "privateIPAddress": "10.0.0.4", "privateIPAddressVersion":
+      "IPv4", "privateIPAllocationMethod": "Dynamic", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"}},
+      "type": "Microsoft.Network/networkInterfaces/ipConfigurations"}], "nicType":
+      "Standard"}}'
     headers:
       Accept:
       - application/json
@@ -1711,38 +1730,37 @@ interactions:
       ParameterSetName:
       - -g --nic-name --ip-config-name --address-pool
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
-        \ \"etag\": \"W/\\\"192a67fd-ce0f-4e28-8b2a-95459d3a4719\\\"\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"2098fd4c-c049-4402-8d03-c7baa342deed\",\r\n
-        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
-        \       \"etag\": \"W/\\\"192a67fd-ce0f-4e28-8b2a-95459d3a4719\\\"\",\r\n
-        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
-        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
-        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
-        \"IPv4\",\r\n          \"loadBalancerBackendAddressPools\": [\r\n            {\r\n
-        \             \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\r\n
-        \           }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\":
-        {\r\n      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"chsvgyqmt5iu3dxx3wrtctjuac.cx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
-        false,\r\n    \"vnetEncryptionSupported\": false,\r\n    \"enableIPForwarding\":
-        false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\n
-        \   \"nicType\": \"Standard\",\r\n    \"allowPort25Out\": true\r\n  },\r\n
-        \ \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"kind\": \"Regular\"\r\n}"
+      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\"\
+        ,\r\n  \"etag\": \"W/\\\"5906fe4f-709a-4492-b87c-53e57d92b95b\\\"\",\r\n \
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"\
+        resourceGuid\": \"c0c9ba93-ca62-403e-b314-91fe7c43a5e2\",\r\n    \"ipConfigurations\"\
+        : [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\"\
+        ,\r\n        \"etag\": \"W/\\\"5906fe4f-709a-4492-b87c-53e57d92b95b\\\"\"\
+        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
+        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
+        ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
+        : \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
+        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
+        : \"IPv4\",\r\n          \"loadBalancerBackendAddressPools\": [\r\n      \
+        \      {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\
+        \r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n   \
+        \ \"dnsSettings\": {\r\n      \"dnsServers\": [],\r\n      \"appliedDnsServers\"\
+        : [],\r\n      \"internalDomainNameSuffix\": \"ym3aglyrrwpevhoiw0ecfppgrd.cx.internal.cloudapp.net\"\
+        \r\n    },\r\n    \"enableAcceleratedNetworking\": false,\r\n    \"vnetEncryptionSupported\"\
+        : false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\"\
+        : [],\r\n    \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\
+        \n    \"allowPort25Out\": true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\
+        ,\r\n  \"location\": \"eastus2\",\r\n  \"kind\": \"Regular\"\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/a959532a-9f5c-440f-b165-9dac22436dfb?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/4bbd96d5-4419-4e67-b4bf-ce1b12a58159?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
@@ -1750,7 +1768,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:35:34 GMT
+      - Tue, 18 Jul 2023 09:43:47 GMT
       expires:
       - '-1'
       pragma:
@@ -1767,7 +1785,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - dd209ec5-8be1-41db-b2cc-fcaad22a6629
+      - 264d641a-7de0-43ad-9a8c-faa40d49faf0
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -1787,10 +1805,9 @@ interactions:
       ParameterSetName:
       - -g --nic-name --ip-config-name --address-pool
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/a959532a-9f5c-440f-b165-9dac22436dfb?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/4bbd96d5-4419-4e67-b4bf-ce1b12a58159?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1802,7 +1819,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:36:04 GMT
+      - Tue, 18 Jul 2023 09:43:47 GMT
       expires:
       - '-1'
       pragma:
@@ -1819,7 +1836,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 712d74dc-f3c4-4ff7-892a-150760e5bb71
+      - 75dadef7-6aa9-4da0-af6a-ac5f92e3c3df
     status:
       code: 200
       message: OK
@@ -1837,33 +1854,32 @@ interactions:
       ParameterSetName:
       - -g --nic-name --ip-config-name --address-pool
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
-        \ \"etag\": \"W/\\\"192a67fd-ce0f-4e28-8b2a-95459d3a4719\\\"\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"2098fd4c-c049-4402-8d03-c7baa342deed\",\r\n
-        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
-        \       \"etag\": \"W/\\\"192a67fd-ce0f-4e28-8b2a-95459d3a4719\\\"\",\r\n
-        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
-        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
-        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
-        \"IPv4\",\r\n          \"loadBalancerBackendAddressPools\": [\r\n            {\r\n
-        \             \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\r\n
-        \           }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\":
-        {\r\n      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"chsvgyqmt5iu3dxx3wrtctjuac.cx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
-        false,\r\n    \"vnetEncryptionSupported\": false,\r\n    \"enableIPForwarding\":
-        false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\n
-        \   \"nicType\": \"Standard\",\r\n    \"allowPort25Out\": true\r\n  },\r\n
-        \ \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"kind\": \"Regular\"\r\n}"
+      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\"\
+        ,\r\n  \"etag\": \"W/\\\"5906fe4f-709a-4492-b87c-53e57d92b95b\\\"\",\r\n \
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"\
+        resourceGuid\": \"c0c9ba93-ca62-403e-b314-91fe7c43a5e2\",\r\n    \"ipConfigurations\"\
+        : [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\"\
+        ,\r\n        \"etag\": \"W/\\\"5906fe4f-709a-4492-b87c-53e57d92b95b\\\"\"\
+        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
+        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
+        ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
+        : \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
+        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
+        : \"IPv4\",\r\n          \"loadBalancerBackendAddressPools\": [\r\n      \
+        \      {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\
+        \r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n   \
+        \ \"dnsSettings\": {\r\n      \"dnsServers\": [],\r\n      \"appliedDnsServers\"\
+        : [],\r\n      \"internalDomainNameSuffix\": \"ym3aglyrrwpevhoiw0ecfppgrd.cx.internal.cloudapp.net\"\
+        \r\n    },\r\n    \"enableAcceleratedNetworking\": false,\r\n    \"vnetEncryptionSupported\"\
+        : false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\"\
+        : [],\r\n    \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\
+        \n    \"allowPort25Out\": true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\
+        ,\r\n  \"location\": \"eastus2\",\r\n  \"kind\": \"Regular\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1872,9 +1888,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:36:04 GMT
+      - Tue, 18 Jul 2023 09:43:48 GMT
       etag:
-      - W/"192a67fd-ce0f-4e28-8b2a-95459d3a4719"
+      - W/"5906fe4f-709a-4492-b87c-53e57d92b95b"
       expires:
       - '-1'
       pragma:
@@ -1891,7 +1907,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d806cfdb-bdbb-4df8-a232-7cbecb088851
+      - 69439185-3e13-4b9c-ac4c-20d6acc31de1
     status:
       code: 200
       message: OK
@@ -1909,33 +1925,32 @@ interactions:
       ParameterSetName:
       - -g --nic-name --ip-config-name --address-pool
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
-        \ \"etag\": \"W/\\\"192a67fd-ce0f-4e28-8b2a-95459d3a4719\\\"\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"2098fd4c-c049-4402-8d03-c7baa342deed\",\r\n
-        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
-        \       \"etag\": \"W/\\\"192a67fd-ce0f-4e28-8b2a-95459d3a4719\\\"\",\r\n
-        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
-        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
-        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
-        \"IPv4\",\r\n          \"loadBalancerBackendAddressPools\": [\r\n            {\r\n
-        \             \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\r\n
-        \           }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\":
-        {\r\n      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"chsvgyqmt5iu3dxx3wrtctjuac.cx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
-        false,\r\n    \"vnetEncryptionSupported\": false,\r\n    \"enableIPForwarding\":
-        false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\n
-        \   \"nicType\": \"Standard\",\r\n    \"allowPort25Out\": true\r\n  },\r\n
-        \ \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"kind\": \"Regular\"\r\n}"
+      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\"\
+        ,\r\n  \"etag\": \"W/\\\"5906fe4f-709a-4492-b87c-53e57d92b95b\\\"\",\r\n \
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"\
+        resourceGuid\": \"c0c9ba93-ca62-403e-b314-91fe7c43a5e2\",\r\n    \"ipConfigurations\"\
+        : [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\"\
+        ,\r\n        \"etag\": \"W/\\\"5906fe4f-709a-4492-b87c-53e57d92b95b\\\"\"\
+        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
+        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
+        ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
+        : \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
+        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
+        : \"IPv4\",\r\n          \"loadBalancerBackendAddressPools\": [\r\n      \
+        \      {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\
+        \r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n   \
+        \ \"dnsSettings\": {\r\n      \"dnsServers\": [],\r\n      \"appliedDnsServers\"\
+        : [],\r\n      \"internalDomainNameSuffix\": \"ym3aglyrrwpevhoiw0ecfppgrd.cx.internal.cloudapp.net\"\
+        \r\n    },\r\n    \"enableAcceleratedNetworking\": false,\r\n    \"vnetEncryptionSupported\"\
+        : false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\"\
+        : [],\r\n    \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\
+        \n    \"allowPort25Out\": true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\
+        ,\r\n  \"location\": \"eastus2\",\r\n  \"kind\": \"Regular\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1944,9 +1959,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:36:06 GMT
+      - Tue, 18 Jul 2023 09:43:50 GMT
       etag:
-      - W/"192a67fd-ce0f-4e28-8b2a-95459d3a4719"
+      - W/"5906fe4f-709a-4492-b87c-53e57d92b95b"
       expires:
       - '-1'
       pragma:
@@ -1963,19 +1978,19 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0b145444-2e43-41af-934a-20bb561c0146
+      - 2b87beb8-4f42-42c0-a680-92c55c61e05c
     status:
       code: 200
       message: OK
 - request:
     body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1",
-      "location": "eastus2", "properties": {"ipConfigurations": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1",
-      "name": "ipconfig1", "type": "Microsoft.Network/networkInterfaces/ipConfigurations",
-      "properties": {"loadBalancerBackendAddressPools": [], "privateIPAddress": "10.0.0.4",
-      "privateIPAllocationMethod": "Dynamic", "privateIPAddressVersion": "IPv4", "subnet":
-      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"},
-      "primary": true}}], "dnsSettings": {"dnsServers": []}, "enableAcceleratedNetworking":
-      false, "enableIPForwarding": false, "nicType": "Standard"}}'
+      "location": "eastus2", "properties": {"dnsSettings": {"dnsServers": []}, "enableAcceleratedNetworking":
+      false, "enableIPForwarding": false, "ipConfigurations": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1",
+      "name": "ipconfig1", "properties": {"loadBalancerBackendAddressPools": [], "primary":
+      true, "privateIPAddress": "10.0.0.4", "privateIPAddressVersion": "IPv4", "privateIPAllocationMethod":
+      "Dynamic", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"}},
+      "type": "Microsoft.Network/networkInterfaces/ipConfigurations"}], "nicType":
+      "Standard"}}'
     headers:
       Accept:
       - application/json
@@ -1992,36 +2007,35 @@ interactions:
       ParameterSetName:
       - -g --nic-name --ip-config-name --address-pool
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
-        \ \"etag\": \"W/\\\"a279af08-107d-48d8-862b-73f5ec19994c\\\"\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"2098fd4c-c049-4402-8d03-c7baa342deed\",\r\n
-        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
-        \       \"etag\": \"W/\\\"a279af08-107d-48d8-862b-73f5ec19994c\\\"\",\r\n
-        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
-        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
-        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
-        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
-        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"chsvgyqmt5iu3dxx3wrtctjuac.cx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
-        false,\r\n    \"vnetEncryptionSupported\": false,\r\n    \"enableIPForwarding\":
-        false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\n
-        \   \"nicType\": \"Standard\",\r\n    \"allowPort25Out\": true\r\n  },\r\n
-        \ \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"kind\": \"Regular\"\r\n}"
+      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\"\
+        ,\r\n  \"etag\": \"W/\\\"518644f7-1113-4337-9ec3-8f9b3a159a5e\\\"\",\r\n \
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"\
+        resourceGuid\": \"c0c9ba93-ca62-403e-b314-91fe7c43a5e2\",\r\n    \"ipConfigurations\"\
+        : [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\"\
+        ,\r\n        \"etag\": \"W/\\\"518644f7-1113-4337-9ec3-8f9b3a159a5e\\\"\"\
+        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
+        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
+        ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
+        : \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
+        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
+        : \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n\
+        \      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"\
+        internalDomainNameSuffix\": \"ym3aglyrrwpevhoiw0ecfppgrd.cx.internal.cloudapp.net\"\
+        \r\n    },\r\n    \"enableAcceleratedNetworking\": false,\r\n    \"vnetEncryptionSupported\"\
+        : false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\"\
+        : [],\r\n    \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\
+        \n    \"allowPort25Out\": true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\
+        ,\r\n  \"location\": \"eastus2\",\r\n  \"kind\": \"Regular\"\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/f1b2e415-e830-4475-9cb2-cbad55a944a4?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/d341c131-3efa-487f-b6e2-636fa311df00?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
@@ -2029,7 +2043,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:36:06 GMT
+      - Tue, 18 Jul 2023 09:43:54 GMT
       expires:
       - '-1'
       pragma:
@@ -2046,7 +2060,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - eac5d795-f22a-4752-8851-1db4add0c703
+      - 28a6b144-1f7b-4404-9798-358a7523cb7d
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -2066,10 +2080,9 @@ interactions:
       ParameterSetName:
       - -g --nic-name --ip-config-name --address-pool
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/f1b2e415-e830-4475-9cb2-cbad55a944a4?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/d341c131-3efa-487f-b6e2-636fa311df00?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -2081,7 +2094,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:36:36 GMT
+      - Tue, 18 Jul 2023 09:43:55 GMT
       expires:
       - '-1'
       pragma:
@@ -2098,7 +2111,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 009625d9-acad-4e7b-838b-cd96eb9c7e03
+      - 4508596a-099d-42f6-89e2-c7261a9f920b
     status:
       code: 200
       message: OK
@@ -2116,31 +2129,30 @@ interactions:
       ParameterSetName:
       - -g --nic-name --ip-config-name --address-pool
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
-        \ \"etag\": \"W/\\\"a279af08-107d-48d8-862b-73f5ec19994c\\\"\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"2098fd4c-c049-4402-8d03-c7baa342deed\",\r\n
-        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
-        \       \"etag\": \"W/\\\"a279af08-107d-48d8-862b-73f5ec19994c\\\"\",\r\n
-        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
-        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
-        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
-        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
-        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"chsvgyqmt5iu3dxx3wrtctjuac.cx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
-        false,\r\n    \"vnetEncryptionSupported\": false,\r\n    \"enableIPForwarding\":
-        false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\n
-        \   \"nicType\": \"Standard\",\r\n    \"allowPort25Out\": true\r\n  },\r\n
-        \ \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"kind\": \"Regular\"\r\n}"
+      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\"\
+        ,\r\n  \"etag\": \"W/\\\"518644f7-1113-4337-9ec3-8f9b3a159a5e\\\"\",\r\n \
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"\
+        resourceGuid\": \"c0c9ba93-ca62-403e-b314-91fe7c43a5e2\",\r\n    \"ipConfigurations\"\
+        : [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\"\
+        ,\r\n        \"etag\": \"W/\\\"518644f7-1113-4337-9ec3-8f9b3a159a5e\\\"\"\
+        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
+        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
+        ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
+        : \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
+        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
+        : \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n\
+        \      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"\
+        internalDomainNameSuffix\": \"ym3aglyrrwpevhoiw0ecfppgrd.cx.internal.cloudapp.net\"\
+        \r\n    },\r\n    \"enableAcceleratedNetworking\": false,\r\n    \"vnetEncryptionSupported\"\
+        : false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\"\
+        : [],\r\n    \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\
+        \n    \"allowPort25Out\": true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\
+        ,\r\n  \"location\": \"eastus2\",\r\n  \"kind\": \"Regular\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -2149,9 +2161,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 20:36:36 GMT
+      - Tue, 18 Jul 2023 09:43:55 GMT
       etag:
-      - W/"a279af08-107d-48d8-862b-73f5ec19994c"
+      - W/"518644f7-1113-4337-9ec3-8f9b3a159a5e"
       expires:
       - '-1'
       pragma:
@@ -2168,7 +2180,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 683afbff-a3ff-4d6c-9979-e6781745006c
+      - 18d8cb1b-049f-4c2a-83a9-ea64e73fa76c
     status:
       code: 200
       message: OK

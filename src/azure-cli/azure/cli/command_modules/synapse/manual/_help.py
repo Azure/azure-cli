@@ -37,7 +37,8 @@ examples:
         az synapse workspace create --name testworkspace --resource-group rg \\
           --storage-account testadlsgen2 --file-system testfilesystem \\
           --sql-admin-login-user cliuser1 --sql-admin-login-password Password123! --location "East US" \\
-          --key-identifier https://{keyvaultname}.vault.azure.net/keys/{keyname} --key-name testcmk
+          --key-identifier https://{keyvaultname}.vault.azure.net/keys/{keyname} --key-name testcmk \\
+          --use-sami-in-encrypt True
   - name: Create a Synapse workspace connecting to azure devops
     text: |-
         az synapse workspace create --name testworkspace --resource-group rg \\
@@ -51,6 +52,12 @@ examples:
           --managed-rg-name managedrg \\
           --storage-account testadlsgen2 --file-system testfilesystem \\
           --sql-admin-login-user cliuser1 --sql-admin-login-password Password123! --location "East US"
+  - name: Create a Synapse workspace with user assigned managed identity
+    text: |-
+        az synapse workspace create --name testworkspace --resource-group rg \\
+          --storage-account testadlsgen2 --file-system testfilesystem \\
+          --sql-admin-login-user cliuser1 --sql-admin-login-password Password123! --location "East US" \\
+          --uami-id "{your-first-uami-resourceid}" "{your-second-uami-resourceid}"
 """
 
 helps['synapse workspace list'] = """
@@ -82,6 +89,22 @@ examples:
     text: |-
         az synapse workspace update --name fromcli4 --resource-group rg \\
           --tags key1=value1
+  - name: Update a Synapse workspace, add user assigned managed identity
+    text: |-
+        az synapse workspace update --name fromcli4 --resource-group rg \\
+        --uami-action Add --uami-id "{your-first-uami-resourceid}" "{your-second-uami-resourceid}"
+  - name: Update a Synapse workspace, remove user assigned managed identity
+    text: |-
+        az synapse workspace update --name fromcli4 --resource-group rg \\
+        --uami-action Remove --uami-id "{your-first-uami-resourceid}" "{your-second-uami-resourceid}"
+  - name: Update a Synapse workspace, rewrite user assigned managed identity
+    text: |-
+        az synapse workspace update --name fromcli4 --resource-group rg \\
+        --uami-action Set --uami-id "{your-first-uami-resourceid}" "{your-second-uami-resourceid}"
+  - name: Update a Synapse workspace, set workspace encryption uami
+    text: |-
+        az synapse workspace update --name fromcli4 --resource-group rg \\
+        --uami-id-in-encrypt "{your-encrytion-uami-resourceid}" --use-sami-in-encrypt False
 """
 
 helps['synapse workspace delete'] = """

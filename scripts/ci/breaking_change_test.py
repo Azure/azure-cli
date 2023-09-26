@@ -21,22 +21,30 @@ logger.addHandler(ch)
 pull_request_number = os.environ.get('PULL_REQUEST_NUMBER', None)
 job_name = os.environ.get('JOB_NAME', None)
 azdev_test_result_dir = os.path.expanduser("~/.azdev/env_config/mnt/vss/_work/1/s/env")
-src_branch = os.environ.get('SRC_BRANCH', None)
-# refs/remotes/pull/24765/merge
-target_branch = f'refs/remotes/pull/{pull_request_number}/merge'
+src_branch = os.environ.get('PR_TARGET_BRANCH', None)
+target_branch = 'merged_pr'
 base_meta_path = '~/_work/1/base_meta'
 diff_meta_path = '~/_work/1/diff_meta'
 output_path = '~/_work/1/output_meta'
 
 
 def get_diff_meta_files():
+    cmd = ['git', 'checkout', '-b', target_branch]
+    print(cmd)
+    subprocess.run(cmd)
     cmd = ['git', 'checkout', src_branch]
     print(cmd)
     subprocess.run(cmd)
     cmd = ['git', 'checkout', target_branch]
     print(cmd)
     subprocess.run(cmd)
+    cmd = ['git', 'rev-parse', 'HEAD']
+    print(cmd)
+    subprocess.run(cmd)
     cmd = ['azdev', 'command-change', 'meta-export', '--src', src_branch, '--tgt', target_branch, '--repo', get_cli_repo_path(), '--meta-output-path', diff_meta_path]
+    print(cmd)
+    subprocess.run(cmd)
+    cmd = ['ls', '-al', diff_meta_path]
     print(cmd)
     subprocess.run(cmd)
 
@@ -45,10 +53,16 @@ def get_base_meta_files():
     cmd = ['git', 'checkout', src_branch]
     print(cmd)
     subprocess.run(cmd)
+    cmd = ['git', 'rev-parse', 'HEAD']
+    print(cmd)
+    subprocess.run(cmd)
     cmd = ['azdev', 'setup', '--cli', get_cli_repo_path()]
     print(cmd)
     subprocess.run(cmd)
     cmd = ['azdev', 'command-change', 'meta-export', 'CLI', '--meta-output-path', base_meta_path]
+    print(cmd)
+    subprocess.run(cmd)
+    cmd = ['ls', '-al', base_meta_path]
     print(cmd)
     subprocess.run(cmd)
 
@@ -118,12 +132,13 @@ def sort_by_content(item):
 
 def build_markdown_content(item, content):
     if content == "":
-        content = f'|is_break|cmd_name|rule_message|suggest_message|\n|---|---|---|---|\n'
-    is_break = '❌True' if item['is_break'] else '⚠️False'
+        content = f'|rule|cmd_name|rule_message|suggest_message|\n|---|---|---|---|\n'
+    rule_link = f'[{item["rule_id"]} - {item["rule_name"]}]({item["rule_link_url"]})'
+    rule = f'❌ {rule_link} ' if item['is_break'] else f'⚠️ {rule_link}'
     cmd_name = item['cmd_name'] if 'cmd_name' in item else item['subgroup_name']
     rule_message = item['rule_message']
     suggest_message = item['suggest_message']
-    content += f'|{is_break}|{cmd_name}|{rule_message}|{suggest_message}|\n'
+    content += f'|{rule}|{cmd_name}|{rule_message}|{suggest_message}|\n'
     return content
 
 

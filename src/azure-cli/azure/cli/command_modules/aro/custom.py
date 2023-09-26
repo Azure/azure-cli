@@ -3,7 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import collections
 import random
+from base64 import b64decode
+import textwrap
 
 import azure.mgmt.redhatopenshift.models as openshiftcluster
 
@@ -11,12 +14,15 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import sdk_no_wait
-from azure.cli.core.azclierror import ResourceNotFoundError, UnauthorizedError
+from azure.cli.core.azclierror import FileOperationError, ResourceNotFoundError, \
+    UnauthorizedError, ValidationError
 from azure.cli.command_modules.aro._aad import AADManager
 from azure.cli.command_modules.aro._rbac import assign_role_to_resource, \
     has_role_assignment_on_resource
 from azure.cli.command_modules.aro._rbac import ROLE_NETWORK_CONTRIBUTOR, ROLE_READER
 from azure.cli.command_modules.aro._validators import validate_subnets
+from azure.cli.command_modules.aro._dynamic_validators import validate_cluster_create
+from azure.cli.command_modules.aro.aaz.latest.network.vnet.subnet import Show as subnet_show
 from azure.cli.command_modules.role import GraphError
 
 from knack.log import get_logger
@@ -24,6 +30,8 @@ from knack.log import get_logger
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, parse_resource_id
 from msrest.exceptions import HttpOperationError
+
+from tabulate import tabulate
 
 logger = get_logger(__name__)
 
@@ -47,6 +55,7 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
                client_secret=None,
                pod_cidr=None,
                service_cidr=None,
+               outbound_type=None,
                disk_encryption_set=None,
                master_encryption_at_host=False,
                master_vm_size=None,
@@ -68,6 +77,24 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
                                 'Run `az provider register -n Microsoft.RedHatOpenShift --wait`.')
 
     validate_subnets(master_subnet, worker_subnet)
+
+    validate(cmd,
+             client,
+             resource_group_name,
+             resource_name,
+             master_subnet,
+             worker_subnet,
+             vnet=vnet,
+             cluster_resource_group=cluster_resource_group,
+             client_id=client_id,
+             client_secret=client_secret,
+             vnet_resource_group_name=vnet_resource_group_name,
+             disk_encryption_set=disk_encryption_set,
+             location=location,
+             version=version,
+             pod_cidr=pod_cidr,
+             service_cidr=service_cidr,
+             warnings_as_text=True)
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
@@ -111,6 +138,7 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
         network_profile=openshiftcluster.NetworkProfile(
             pod_cidr=pod_cidr or '10.128.0.0/14',
             service_cidr=service_cidr or '172.30.0.0/16',
+            outbound_type=outbound_type or '',
         ),
         master_profile=openshiftcluster.MasterProfile(
             vm_size=master_vm_size or 'Standard_D8s_v3',
@@ -147,6 +175,150 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
                        resource_group_name=resource_group_name,
                        resource_name=resource_name,
                        parameters=oc)
+
+
+def validate(cmd,  # pylint: disable=too-many-locals,too-many-statements
+             client,  # pylint: disable=unused-argument
+             resource_group_name,  # pylint: disable=unused-argument
+             resource_name,  # pylint: disable=unused-argument
+             master_subnet,
+             worker_subnet,
+             vnet=None,
+             cluster_resource_group=None,  # pylint: disable=unused-argument
+             client_id=None,
+             client_secret=None,  # pylint: disable=unused-argument
+             vnet_resource_group_name=None,  # pylint: disable=unused-argument
+             disk_encryption_set=None,
+             location=None,  # pylint: disable=unused-argument
+             version=None,
+             pod_cidr=None,  # pylint: disable=unused-argument
+             service_cidr=None,  # pylint: disable=unused-argument
+             warnings_as_text=False):
+
+    class mockoc:  # pylint: disable=too-few-public-methods
+        def __init__(self, disk_encryption_id, master_subnet_id, worker_subnet_id):
+            self.master_profile = openshiftcluster.MasterProfile(
+                subnet_id=master_subnet_id,
+                disk_encryption_set_id=disk_encryption_id
+            )
+            self.worker_profiles = [openshiftcluster.WorkerProfile(
+                subnet_id=worker_subnet_id
+            )]
+
+    aad = AADManager(cmd.cli_ctx)
+
+    rp_client_sp_id = aad.get_service_principal_id(resolve_rp_client_id())
+    if not rp_client_sp_id:
+        raise ResourceNotFoundError("RP service principal not found.")
+
+    sp_obj_ids = [rp_client_sp_id]
+
+    if client_id is not None:
+        sp_obj_ids.append(aad.get_service_principal_id(client_id))
+
+    cluster = mockoc(disk_encryption_set, master_subnet, worker_subnet)
+    try:
+        # Get cluster resources we need to assign permissions on, sort to ensure the same order of operations
+        resources = {ROLE_NETWORK_CONTRIBUTOR: sorted(get_cluster_network_resources(cmd.cli_ctx, cluster, True)),
+                     ROLE_READER: sorted(get_disk_encryption_resources(cluster))}
+    except (CloudError, HttpOperationError) as e:
+        logger.error(e.message)
+        raise
+
+    if vnet is None:
+        master_parts = parse_resource_id(master_subnet)
+        vnet = resource_id(
+            subscription=master_parts['subscription'],
+            resource_group=master_parts['resource_group'],
+            namespace='Microsoft.Network',
+            type='virtualNetworks',
+            name=master_parts['name'],
+        )
+
+    error_objects = validate_cluster_create(version,
+                                            resources,
+                                            sp_obj_ids)
+    errors_and_warnings = []
+    for error_func in error_objects:
+        namespace = collections.namedtuple("Namespace", locals().keys())(*locals().values())
+        error_obj = error_func(cmd, namespace)
+        if error_obj != []:
+            for err in error_obj:
+                # Wrap text so tabulate returns a pretty table
+                new_err = []
+                for txt in err:
+                    new_err.append(textwrap.fill(txt, width=160))
+                errors_and_warnings.append(new_err)
+
+    warnings = []
+    errors = []
+    if len(errors_and_warnings) > 0:
+        # Separate errors and warnings into separate arrays
+        for issue in errors_and_warnings:
+            if issue[2] == "Warning":
+                warnings.append(issue)
+            else:
+                errors.append(issue)
+    else:
+        logger.info("No validation errors or warnings")
+
+    if len(warnings) > 0:
+        if len(errors) == 0 and warnings_as_text:
+            full_msg = ""
+            for warning in warnings:
+                full_msg = full_msg + f"{warning[3]}\n"
+        else:
+            headers = ["Type", "Name", "Severity", "Description"]
+            table = tabulate(warnings, headers=headers, tablefmt="grid")
+            full_msg = f"The following issues will have a minor impact on cluster creation:\n{table}"
+        logger.warning(full_msg)
+
+    if len(errors) > 0:
+        if len(warnings) > 0:
+            full_msg = "\n"
+        else:
+            full_msg = ""
+        headers = ["Type", "Name", "Severity", "Description"]
+        table = tabulate(errors, headers=headers, tablefmt="grid")
+        full_msg = full_msg + f"The following errors are fatal and will block cluster creation:\n{table}"
+        raise ValidationError(full_msg)
+
+
+def aro_validate(cmd,  # pylint: disable=too-many-locals,too-many-statements
+                 client,  # pylint: disable=unused-argument
+                 resource_group_name,  # pylint: disable=unused-argument
+                 resource_name,  # pylint: disable=unused-argument
+                 master_subnet,
+                 worker_subnet,
+                 vnet=None,
+                 cluster_resource_group=None,  # pylint: disable=unused-argument
+                 client_id=None,
+                 client_secret=None,  # pylint: disable=unused-argument
+                 vnet_resource_group_name=None,  # pylint: disable=unused-argument
+                 disk_encryption_set=None,
+                 location=None,  # pylint: disable=unused-argument
+                 version=None,
+                 pod_cidr=None,  # pylint: disable=unused-argument
+                 service_cidr=None,  # pylint: disable=unused-argument
+                 ):
+
+    validate(cmd,
+             client,
+             resource_group_name,
+             resource_name,
+             master_subnet,
+             worker_subnet,
+             vnet=vnet,
+             cluster_resource_group=cluster_resource_group,
+             client_id=client_id,
+             client_secret=client_secret,
+             vnet_resource_group_name=vnet_resource_group_name,
+             disk_encryption_set=disk_encryption_set,
+             location=location,
+             version=version,
+             pod_cidr=pod_cidr,
+             service_cidr=service_cidr,
+             warnings_as_text=False)
 
 
 def aro_delete(cmd, client, resource_group_name, resource_name, no_wait=False):
@@ -196,6 +368,18 @@ def aro_list_credentials(client, resource_group_name, resource_name):
     return client.open_shift_clusters.list_credentials(resource_group_name, resource_name)
 
 
+def aro_get_admin_kubeconfig(client, resource_group_name, resource_name, file="kubeconfig"):
+    query_result = client.open_shift_clusters.list_admin_credentials(resource_group_name, resource_name)
+    file_mode = "x"
+    yaml_data = b64decode(query_result.kubeconfig).decode('UTF-8')
+    try:
+        with open(file, file_mode, encoding="utf-8") as f:
+            f.write(yaml_data)
+    except FileExistsError as e:
+        raise FileOperationError(f"File {file} already exists.") from e
+    logger.info("Kubeconfig written to file: %s", file)
+
+
 def aro_get_versions(client, location):
     items = client.open_shift_versions.list(location)
     versions = []
@@ -242,14 +426,19 @@ def generate_random_id():
     return random_id
 
 
-def get_network_resources_from_subnets(cli_ctx, subnets):
-    from .aaz.latest.network.vnet.subnet import Show
+def get_network_resources_from_subnets(cli_ctx, subnets, fail):
 
     subnet_resources = set()
     for sn in subnets:
         sid = parse_resource_id(sn)
 
-        subnet = Show(cli_ctx=cli_ctx)(command_args={
+        if 'resource_group' not in sid or 'name' not in sid or 'resource_name' not in sid:
+            if fail:
+                raise ValidationError(f"""(ValidationError) Failed to validate subnet '{sn}'.
+                    Please retry, if issue persists: raise azure support ticket""")
+            logger.info("Failed to validate subnet '%s'", sn)
+
+        subnet = subnet_show(cli_ctx=cli_ctx)(command_args={
             "name": sid['resource_name'],
             "vnet_name": sid['name'],
             "resource_group": sid['resource_group']
@@ -264,7 +453,7 @@ def get_network_resources_from_subnets(cli_ctx, subnets):
     return subnet_resources
 
 
-def get_cluster_network_resources(cli_ctx, oc):
+def get_cluster_network_resources(cli_ctx, oc, fail):
     master_subnet = oc.master_profile.subnet_id
     worker_subnets = set()
 
@@ -282,11 +471,11 @@ def get_cluster_network_resources(cli_ctx, oc):
         name=master_parts['name'],
     )
 
-    return get_network_resources(cli_ctx, worker_subnets | {master_subnet}, vnet)
+    return get_network_resources(cli_ctx, worker_subnets | {master_subnet}, vnet, fail)
 
 
-def get_network_resources(cli_ctx, subnets, vnet):
-    subnet_resources = get_network_resources_from_subnets(cli_ctx, subnets)
+def get_network_resources(cli_ctx, subnets, vnet, fail):
+    subnet_resources = get_network_resources_from_subnets(cli_ctx, subnets, fail)
 
     resources = set()
     resources.add(vnet)
@@ -384,7 +573,7 @@ def resolve_rp_client_id():
 def ensure_resource_permissions(cli_ctx, oc, fail, sp_obj_ids):
     try:
         # Get cluster resources we need to assign permissions on, sort to ensure the same order of operations
-        resources = {ROLE_NETWORK_CONTRIBUTOR: sorted(get_cluster_network_resources(cli_ctx, oc)),
+        resources = {ROLE_NETWORK_CONTRIBUTOR: sorted(get_cluster_network_resources(cli_ctx, oc, fail)),
                      ROLE_READER: sorted(get_disk_encryption_resources(oc))}
     except (CloudError, HttpOperationError) as e:
         if fail:
