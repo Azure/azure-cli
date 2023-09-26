@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.52.0"
+VERSION = "2.53.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -106,8 +106,8 @@ DEPENDENCIES = [
     'azure-mgmt-policyinsights==1.1.0b4',
     'azure-mgmt-privatedns~=1.0.0',
     'azure-mgmt-rdbms~=10.2.0b10',
-    'azure-mgmt-recoveryservicesbackup~=6.0.0',
-    'azure-mgmt-recoveryservices~=2.4.0',
+    'azure-mgmt-recoveryservicesbackup~=7.0.0',
+    'azure-mgmt-recoveryservices~=2.5.0',
     'azure-mgmt-redhatopenshift~=1.3.0',
     'azure-mgmt-redis~=14.1.0',
     'azure-mgmt-resource==23.1.0b2',
@@ -138,6 +138,7 @@ DEPENDENCIES = [
     'javaproperties~=0.5.1',
     'jsondiff~=2.0.0',
     'packaging>=20.9',
+    'pycomposefile>=0.0.29',
     'PyGithub~=1.38',
     'PyNaCl~=1.5.0',
     'scp~=0.13.2',

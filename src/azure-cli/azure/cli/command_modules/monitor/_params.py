@@ -10,7 +10,7 @@ from azure.cli.core.commands.parameters import (
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
 from azure.cli.command_modules.monitor.actions import (
-    AlertAddAction, AlertRemoveAction, ConditionAction, AutoscaleAddAction, AutoscaleRemoveAction,
+    AlertAddAction, AlertRemoveAction, ConditionAction,
     AutoscaleScaleAction, AutoscaleConditionAction, get_period_type, AutoscaleCreateAction,
     timezone_offset_type, timezone_name_type, MetricAlertConditionAction, MetricAlertAddAction)
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
@@ -200,8 +200,6 @@ def load_arguments(self, _):
         c.argument('actions', options_list=['--action', '-a'], action=AutoscaleCreateAction, nargs='+')
 
     with self.argument_context('monitor autoscale', arg_group='Notification') as c:
-        c.argument('add_actions', options_list=['--add-action', '-a'], action=AutoscaleAddAction, nargs='+')
-        c.argument('remove_actions', options_list=['--remove-action', '-r'], action=AutoscaleRemoveAction, nargs='+')
         c.argument('email_administrator', arg_type=get_three_state_flag(), help='Send email to subscription administrator on scaling.')
         c.argument('email_coadministrators', arg_type=get_three_state_flag(), help='Send email to subscription co-administrators on scaling.')
 

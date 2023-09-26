@@ -8,7 +8,8 @@ from azure.cli.command_modules.backup._client_factory import vaults_cf, backup_p
     protection_policies_cf, backup_policies_cf, protected_items_cf, backups_cf, backup_jobs_cf, \
     job_details_cf, job_cancellations_cf, recovery_points_cf, restores_cf, backup_storage_configs_non_crr_cf, \
     item_level_recovery_connections_cf, backup_protected_items_cf, backup_protectable_items_cf, \
-    protection_containers_cf, protection_intent_cf, backup_resource_encryption_config_cf, resource_guard_proxy_cf  # pylint: disable=unused-variable
+    protection_containers_cf, protection_intent_cf, backup_resource_encryption_config_cf, resource_guard_proxy_cf, \
+    deleted_protection_containers_cf  # pylint: disable=unused-variable
 from azure.cli.command_modules.backup._exception_handler import backup_exception_handler
 from azure.cli.command_modules.backup._format import (
     transform_container_list, transform_policy_list, transform_item_list, transform_job_list,
@@ -45,6 +46,9 @@ def load_command_table(self, _):
         g.show_command('update', 'update_resource_guard_mapping')
         g.show_command('show', 'show_resource_guard_mapping')
         g.show_command('delete', 'delete_resource_guard_mapping', confirmation=True)
+
+    with self.command_group('backup vault', backup_custom, client_factory=deleted_protection_containers_cf, exception_handler=backup_exception_handler) as g:
+        g.show_command('list-soft-deleted-containers', 'list_deleted_protection_containers')
 
     with self.command_group('backup container', backup_custom_base, client_factory=protection_containers_cf, exception_handler=backup_exception_handler) as g:
         g.show_command('show', 'show_container', client_factory=backup_protection_containers_cf, table_transformer=transform_container)

@@ -142,6 +142,10 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server_name),
                  checks=[JMESPathCheck('storage.storageSizeGb', 256 )])
 
+        self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Enabled'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('storage.autoGrow', "Enabled" )])
+
         self.cmd('{} flexible-server update -g {} -n {} --backup-retention {}'
                  .format(database_engine, resource_group, server_name, backup_retention + 10),
                  checks=[JMESPathCheck('backup.backupRetentionDays', backup_retention + 10)])
@@ -173,6 +177,10 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server restore -g {} --name {} --source-server {}'
                  .format(database_engine, resource_group, restore_server_name, server_name),
                  checks=[JMESPathCheck('name', restore_server_name)])
+
+        self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Disabled'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('storage.autoGrow', "Disabled" )])
 
         connection_string = self.cmd('{} flexible-server show-connection-string -s {}'
                                      .format(database_engine, server_name)).get_output_in_json()
@@ -1010,6 +1018,32 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         self._test_flexible_server_replica_mgmt('postgres', resource_group, True)
         self._test_flexible_server_replica_mgmt('postgres', resource_group, False)
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_auto_grow_replica_validator(self, resource_group):
+        self._test_flexible_server_replica_validator('postgres', resource_group, "Enabled")
+
+    def _test_flexible_server_replica_validator(self, database_engine, resource_group, source_server_auto_grow):
+        location = self.postgres_location
+        primary_role = 'Primary'
+        public_access_arg = ''
+        master_server = self.create_random_name(SERVER_NAME_PREFIX, 32)
+        replicas = [self.create_random_name(F'azuredbclirep{i+1}', SERVER_NAME_MAX_LENGTH) for i in range(2)]
+
+        # create a server
+        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --public-access none --tier GeneralPurpose --sku-name Standard_D2s_v3 --yes --storage-auto-grow {}'
+                 .format(database_engine, resource_group, master_server, location, 256, source_server_auto_grow))
+        result = self.cmd('{} flexible-server show -g {} --name {} '
+                          .format(database_engine, resource_group, master_server),
+                          checks=[
+                              JMESPathCheck('replicationRole', primary_role),
+                              JMESPathCheck('storage.autoGrow', source_server_auto_grow)]).get_output_in_json()
+        
+        # test replica create
+        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} --zone 2 {}'
+                 .format(database_engine, resource_group, replicas[0], result['id'], public_access_arg),
+                 expect_failure=True)
+        
     def _test_flexible_server_replica_mgmt(self, database_engine, resource_group, vnet_enabled):
         location = self.postgres_location
         primary_role = 'Primary'
@@ -1052,6 +1086,11 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                      JMESPathCheck('replicationRole', replica_role),
                      JMESPathCheck('sourceServerResourceId', result['id']),
                      JMESPathCheck('replicaCapacity', '0')] + replica_vnet_check[0] + public_access_check)
+        
+        # test storage auto-grow not allowed for replica server update
+        self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Enabled'
+                 .format(database_engine, resource_group, replicas[0]),
+                 expect_failure=True)
 
         # test replica list
         self.cmd('{} flexible-server replica list -g {} --name {}'
