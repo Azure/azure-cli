@@ -24,6 +24,7 @@ import invoke
 from nacl import encoding, public
 
 import OpenSSL.crypto
+import urllib3
 from fabric import Connection
 
 from knack.prompting import prompt_pass, NoTTYException, prompt_y_n
@@ -4783,7 +4784,17 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
 
     if logs:
         _configure_default_logging(cmd, rg_name, name)
-        return get_streaming_log(cmd, rg_name, name)
+        # ping the site so that the site container is ready
+        # logsteam does not work if the site container has not started
+        # required for https://github.com/Azure/azure-cli/issues/23058
+        _url = _get_url(cmd, rg_name, name)
+        logger.warning("Waiting for the app to be ready ...")
+        http = urllib3.PoolManager(timeout=urllib3.Timeout(connect=230, read=230))
+        try:
+            r = http.request('GET', _url)
+            return get_streaming_log(cmd, rg_name, name)
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.warning("Unable to reach the app. Please run 'az webapp log tail' to view the logs.")
 
     _set_webapp_up_default_args(cmd, rg_name, sku, plan, loc, name)
 
