@@ -1691,10 +1691,13 @@ class VMExtensionScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'vm': 'myvm',
+            'vm2': 'myvm2',
             'pub': 'Microsoft.OSTCExtensions',
             'ext': 'VMAccessForLinux',
             'pub2': 'Microsoft.Azure.Security.LinuxAttestation',
             'ext2': 'GuestAttestation',
+            'pub3': 'Microsoft.Azure.Security.WindowsCodeIntegrity',
+            'ext3': 'CodeIntegrityAgent',
             'config': config_file,
             'user': user_name
         })
@@ -1733,6 +1736,18 @@ class VMExtensionScenarioTest(ScenarioTest):
             self.check('enableAutomaticUpgrade', True)
         ])
         self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext2}')
+
+        self.cmd(
+            'vm create -g {rg} -n {vm2} --image Win2022Datacenter --admin-username AzureUser --admin-password testPassword0 --nsg-rule NONE')
+
+        self.cmd('vm extension set -n {ext3} --publisher {pub3} --vm-name {vm2} --resource-group {rg} --force-update')
+        self.cmd('vm extension show --resource-group {rg} --vm-name {vm2} --name {ext3}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{ext3}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('enableAutomaticUpgrade', True)
+        ])
+        self.cmd('vm extension delete --resource-group {rg} --vm-name {vm2} --name {ext3}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_extension_debian')
     def test_vm_extension_debian(self, resource_group):
@@ -2446,6 +2461,7 @@ class VMBootDiagnostics(ScenarioTest):
 
 class VMSSExtensionInstallTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_extension')
     def test_vmss_extension(self):
 
@@ -2455,7 +2471,9 @@ class VMSSExtensionInstallTest(ScenarioTest):
         self.kwargs.update({
             'vmss': 'vmss1',
             'net-pub': 'Microsoft.Azure.NetworkWatcher', 'script-pub': 'Microsoft.Azure.Extensions', 'access-pub': 'Microsoft.OSTCExtensions',
+            'code-pub': 'Microsoft.Azure.Security.WindowsCodeIntegrity',
             'net-ext': 'NetworkWatcherAgentLinux', 'script-ext': 'customScript', 'access-ext': 'VMAccessForLinux',
+            'code-ext': 'CodeIntegrityAgent',
             'username': username,
             'config_file': config_file
         })
@@ -2496,9 +2514,17 @@ class VMSSExtensionInstallTest(ScenarioTest):
             self.check('provisionAfterExtensions[1]', '{script-ext}'),
         ])
 
+        self.cmd('vmss extension set -g {rg} --vmss-name {vmss} -n {code-ext} --publisher {code-pub} '
+                 '--protected-settings "{config_file}"')
+
+        self.cmd('vmss extension show -g {rg} --vmss-name {vmss} --name {code-ext}', checks=[
+            self.check('enableAutomaticUpgrade', True)
+        ])
+
         self.cmd('vmss extension upgrade -g {rg} -n {vmss}')
 
         # delete all the extensions
+        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {code-ext}')
         self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {access-ext}')
         self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {script-ext}')
         self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {net-ext}')
@@ -3412,6 +3438,8 @@ class VMSSCreateAndModify(ScenarioTest):
             self.check('name', '{vmss}'),
             self.check('resourceGroup', '{rg}')
         ])
+
+        self.cmd('vmss get-os-upgrade-history --resource-group {rg} --name {vmss}', checks=self.is_empty())
         result = self.cmd('vmss list-instances --resource-group {rg} --name {vmss} --query "[].instanceId"').get_output_in_json()
         self.kwargs['instance_ids'] = result[3] + ' ' + result[4]
         self.cmd('vmss update-instances --resource-group {rg} --name {vmss} --instance-ids {instance_ids}')
@@ -3522,6 +3550,9 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].lun', 0),
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].diskSizeGb', 1)
         ])
+        result = self.cmd('vmss list -g {rg} -otable')
+        table_output = set(result.output.splitlines()[2].split())
+        self.assertTrue({self.kwargs['vmss']}.issubset(table_output))
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_with_policy_setting')
     def test_vmss_create_with_policy_setting(self, resource_group):
@@ -3974,14 +4005,16 @@ class VMSSUpdateTests(ScenarioTest):
         with self.assertRaisesRegex(HttpResponseError, 'UEFI settings are not supported for VMs and VM Scale Sets using Generation 1 Image\.'):
             self.cmd('vmss update -g {rg} -n {vmss} --security-type TrustedLaunch')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_security_type_', location='westus')
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_security_type_', location='NorthEurope')
     def test_vmss_update_security_type(self):
         self.kwargs.update({
             'vmss2': self.create_random_name('vmss', 10),
             'img2': 'microsoftwindowsserver:windowsserver:2019-datacenter-zhcn:latest',
             'img2_sku_gen2': '2022-datacenter-azure-edition',
             'vmss3': self.create_random_name('vmss', 10),
-            'img3': 'OpenLogic:CentOS:8_5-gen2:latest'
+            'img3': 'OpenLogic:CentOS:8_5-gen2:latest',
+            'vmss4': self.create_random_name('vmss', 10),
+            'img4': 'MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest',
         })
         self.cmd('vmss create -n {vmss2} -g {rg} --image {img2} --admin-username vmtest --admin-password Test123456789#')
         self.cmd('vmss update -g {rg} -n {vmss2} --set virtualMachineProfile.storageProfile.imageReference.sku={img2_sku_gen2} --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm true', checks=[
@@ -3992,13 +4025,26 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True),
         ])
 
-        self.cmd('vmss create -n {vmss3} -g {rg} --image {img3} --admin-username vmtest')
+        self.cmd('vmss create -n {vmss3} -g {rg} --image {img3} --admin-username vmtest --generate-ssh-keys', checks=[
+            self.check('vmss.virtualMachineProfile.securityProfile', None),
+        ])
         self.cmd('vmss update -g {rg} -n {vmss3} --security-type TrustedLaunch', checks=[
             self.check('virtualMachineProfile.storageProfile.imageReference.offer', 'CentOS'),
             self.check('virtualMachineProfile.securityProfile.securityType', 'TrustedLaunch'),
             self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', False),
             self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True),
         ])
+        self.cmd('vmss update -g {rg} -n {vmss3} --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm false', checks=[
+            self.check('virtualMachineProfile.securityProfile.securityType', 'TrustedLaunch'),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', False),
+        ])
+
+        self.cmd('vmss create -n {vmss4} -g {rg} --image {img4} --admin-username vmtest --admin-password Test123456789# --vm-sku Standard_DC2as_v5 --security-type ConfidentialVM --enable-vtpm true --enable-secure-boot true --os-disk-security-encryption-type VMGuestStateOnly', checks=[
+            self.check('vmss.virtualMachineProfile.securityProfile.securityType', 'ConfidentialVM'),
+        ])
+        with self.assertRaisesRegex(InvalidArgumentValueError, r'vmss.* is already configured with ConfidentialVM\..*'):
+            self.cmd('vmss update -g {rg} -n {vmss4} --security-type TrustedLaunch')
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_vm_sku_', location='westus2')
@@ -5988,6 +6034,7 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}')
         time.sleep(60)  # service end latency
         self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
+        time.sleep(60)
         self.cmd('sig delete -g {rg} --gallery-name {gallery}')
 
     @ResourceGroupPreparer(location='CentralUSEUAP')
@@ -6716,9 +6763,6 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
             'loc': resource_group_location
         })
 
-        # fails because not a valid type
-        self.cmd('ppg create -n fail_ppg -g {rg} -t notAvalidType', expect_failure=True)
-
         self.cmd('ppg create -n {ppg1} -t StandarD -g {rg}', checks=[
             self.check('name', '{ppg1}'),
             self.check('location', '{loc}'),
@@ -6741,6 +6785,12 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
         self.cmd('ppg create -n {ppg3} -g {rg}', checks=[
             self.check('name', '{ppg3}'),
             self.check('location', '{loc}'),
+        ])
+
+        self.cmd('ppg update -n {ppg3} -g {rg} -t Standard', checks=[
+            self.check('name', '{ppg3}'),
+            self.check('location', '{loc}'),
+            self.check('proximityPlacementGroupType', 'Standard')
         ])
 
         self.cmd('ppg list -g {rg}', checks=[
@@ -8847,6 +8897,9 @@ class VMAutoUpdateScenarioTest(ScenarioTest):
         self.cmd('vm create -g {rg} -n vm1 --image Canonical:UbuntuServer:18.04-LTS:latest --enable-agent --patch-mode AutomaticByPlatform --generate-ssh-keys --nsg-rule NONE --admin-username vmtest')
         self.cmd('vm show -g {rg} -n vm1', checks=[
             self.check('osProfile.linuxConfiguration.patchSettings.patchMode', 'AutomaticByPlatform')
+        ])
+        self.cmd('vm assess-patches -g {rg} -n vm1', checks=[
+            self.check('status', 'Succeeded')
         ])
 
 

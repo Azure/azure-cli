@@ -492,18 +492,33 @@ class VnetNicPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 
 class LogAnalyticsWorkspacePreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='laworkspace', location='eastus2euap', parameter_name='laworkspace',
-                 resource_group_parameter_name='resource_group', skip_delete=False):
+                 resource_group_parameter_name='resource_group', skip_delete=False, get_shared_key=False):
         super(LogAnalyticsWorkspacePreparer, self).__init__(name_prefix, 15)
         self.cli_ctx = get_dummy_cli()
         self.location = location
         self.parameter_name = parameter_name
         self.resource_group_parameter_name = resource_group_parameter_name
         self.skip_delete = skip_delete
+        self.get_shared_key = get_shared_key
 
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
         template = ('az monitor log-analytics workspace create -l {} -g {} -n {}')
-        self.live_only_execute(self.cli_ctx, template.format(self.location, group, name))
+        try:
+            customer_id = self.live_only_execute(self.cli_ctx, template.format(self.location, group, name)).get_output_in_json()["customerId"]
+        except AttributeError:  # live only execute returns None if playing from record
+            customer_id = None
+        if self.get_shared_key:
+            get_share_key_template = ('az monitor log-analytics workspace get-shared-keys -g {} -n {}')
+            try:
+                log_shared_key = self.live_only_execute(self.cli_ctx, get_share_key_template.format(group, name)).get_output_in_json()["primarySharedKey"]
+            except AttributeError:  # live only execute returns None if playing from record
+                log_shared_key = None
+
+            return {self.parameter_name: name,
+                    self.parameter_name + '_customer_id': (customer_id or 'veryFakedCustomerId=='),
+                    self.parameter_name + '_shared_key': (log_shared_key or 'veryFakedPrivateSharedKey==')}
+
         return {self.parameter_name: name}
 
     def remove_resource(self, name, **kwargs):

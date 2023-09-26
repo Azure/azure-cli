@@ -769,6 +769,12 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
                               if_none_match=None, timeout=None, dryrun=False):
     container_client = client.get_container_client(source_container_name)
 
+    from datetime import timezone
+    if if_modified_since and not if_modified_since.tzinfo:
+        if_modified_since = if_modified_since.replace(tzinfo=timezone.utc)
+    if if_unmodified_since and not if_unmodified_since.tzinfo:
+        if_unmodified_since = if_unmodified_since.replace(tzinfo=timezone.utc)
+
     @check_precondition_success
     def _delete_blob(blob_name):
         delete_blob_args = {
@@ -791,13 +797,10 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
     source_blobs = list(collect_blob_objects(client, source_container_name, pattern))
 
     if dryrun:
-        from datetime import timezone
         delete_blobs = []
-        if_modified_since_utc = if_modified_since.replace(tzinfo=timezone.utc) if if_modified_since else None
-        if_unmodified_since_utc = if_unmodified_since.replace(tzinfo=timezone.utc) if if_unmodified_since else None
         for blob in source_blobs:
-            if not if_modified_since or blob[1].last_modified >= if_modified_since_utc:
-                if not if_unmodified_since or blob[1].last_modified <= if_unmodified_since_utc:
+            if not if_modified_since or blob[1].last_modified >= if_modified_since:
+                if not if_unmodified_since or blob[1].last_modified <= if_unmodified_since:
                     delete_blobs.append(blob[0])
         logger.warning('delete action: from %s', source)
         logger.warning('    pattern %s', pattern)

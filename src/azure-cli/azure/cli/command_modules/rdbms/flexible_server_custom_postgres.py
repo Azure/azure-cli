@@ -51,7 +51,7 @@ def flexible_server_create(cmd, client,
                            private_dns_zone_arguments=None, public_access=None,
                            high_availability=None, zone=None, standby_availability_zone=None,
                            geo_redundant_backup=None, byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
-                           active_directory_auth=None, password_auth=None, yes=False):
+                           active_directory_auth=None, password_auth=None, auto_grow=None, yes=False):
 
     # Generate missing parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
@@ -72,6 +72,7 @@ def flexible_server_create(cmd, client,
                            tier=tier,
                            sku_name=sku_name,
                            storage_gb=storage_gb,
+                           auto_grow=auto_grow,
                            high_availability=high_availability,
                            standby_availability_zone=standby_availability_zone,
                            zone=zone,
@@ -99,7 +100,7 @@ def flexible_server_create(cmd, client,
                                                                            subnet_address_prefix=subnet_address_prefix,
                                                                            yes=yes)
 
-    storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb)
+    storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb, auto_grow=auto_grow)
 
     backup = postgresql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
                                                       geo_redundant_backup=geo_redundant_backup)
@@ -261,6 +262,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        active_directory_auth=None, password_auth=None,
                                        private_dns_zone_arguments=None,
                                        tags=None,
+                                       auto_grow=None,
                                        yes=False):
 
     # validator
@@ -276,6 +278,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
                            tier=tier,
                            sku_name=sku_name,
                            storage_gb=storage_gb,
+                           auto_grow=auto_grow,
+                           replication_role=instance.replication_role if auto_grow is not None else None,
                            high_availability=high_availability,
                            zone=instance.availability_zone,
                            standby_availability_zone=standby_availability_zone,
@@ -311,6 +315,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     if storage_gb:
         instance.storage.storage_size_gb = storage_gb
+
+    if auto_grow:
+        instance.storage.auto_grow = auto_grow
 
     if backup_retention:
         instance.backup.backup_retention_days = backup_retention
@@ -471,7 +478,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
 
     list_location_capability_info = get_postgres_location_capability_info(cmd, location)
 
-    validate_postgres_replica(cmd, source_server_object.sku.tier, location, list_location_capability_info)
+    validate_postgres_replica(cmd, source_server_object.sku.tier, location, source_server_object, list_location_capability_info)
 
     if not zone:
         zone = _get_pg_replica_zone(list_location_capability_info['zones'],
