@@ -295,6 +295,18 @@ for source in SOURCE_RESOURCES:
             source_id=source_id,
             source_display_name=source_display_name) if target in AddonFactory else ''
 
+        webappslot_example = '''
+            - name: Create a connection between {source_display_name} slot and {target} with resource name
+              text: |-
+                     az {source} connection create {target} {source_params} --slot MySlot {target_params} {auth_params}
+        '''.format(
+            source=source.value,
+            target=target.value,
+            source_params=source_params,
+            target_params=target_params,
+            auth_params=auth_params,
+            source_display_name=source_display_name) if source is RESOURCE.WebApp else ''
+
         helps['{source} connection create {target}'.format(source=source.value, target=target.value)] = """
           type: command
           short-summary: Create a {source_display_name} connection to {target}.
@@ -311,6 +323,7 @@ for source in SOURCE_RESOURCES:
             - name: Create a connection between {source_display_name} and {target} with resource name
               text: |-
                      az {source} connection create {target} {source_params} {target_params} {auth_params}
+            {webappslot_example}
             - name: Create a connection between {source_display_name} and {target} with resource id
               text: |-
                      az {source} connection create {target} --source-id {source_id} --target-id {target_id} {auth_params}
@@ -329,6 +342,7 @@ for source in SOURCE_RESOURCES:
             target_params=target_params,
             auth_params=auth_params,
             provision_example=provision_example,
+            webappslot_example=webappslot_example,
             source_display_name=source_display_name)
 
         helps['{source} connection update {target}'.format(source=source.value, target=target.value)] = """

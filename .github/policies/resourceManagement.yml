@@ -2820,6 +2820,48 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
+            pattern: 'az webapp connection'
+            isRegex: True
+        - bodyContains:
+            pattern: 'az webapp connection'
+            isRegex: True
+        - titleContains:
+            pattern: 'az functionapp connection'
+            isRegex: True
+        - bodyContains:
+            pattern: 'az functionapp connection'
+            isRegex: True
+        - titleContains:
+            pattern: 'az springapp connection'
+            isRegex: True
+        - bodyContains:
+            pattern: 'az springapp connection'
+            isRegex: True
+        - titleContains:
+            pattern: 'az containerapp connection'
+            isRegex: True
+        - bodyContains:
+            pattern: 'az containerapp connection'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Service Connector
+      - addLabel:
+          label: CXP Attention
+      - addLabel:
+          label: Auto-Assign
+      - assignTo:
+          users:
+          - yungezz
+          - houk-ms
+      description: '[Service Connector] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
             pattern: '\b([Ii][Oo][Tt])\b'
             isRegex: True
         - bodyContains:
@@ -3551,6 +3593,7 @@ configuration:
       - assignTo:
           users:
           - zhoxing-ms
+          - yanzhudd
       - addLabel:
           label: Auto-Assign
       - requestReview:
@@ -5620,5 +5663,29 @@ configuration:
       - addLabel:
           label: CXP Attention
       description: '[ARO] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: az aro
+            isRegex: True
+        - bodyContains:
+            pattern: az aro
+            isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: ARO
+      - requestReview:
+          reviewer: kairu-ms
+      - requestReview:
+          reviewer: yonzhan
+      - assignTo:
+          users:
+          - kairu-ms
+      description: '[ARO] Auto assign labels and reviewers based on PR title/description.'
 onFailure: 
 onSuccess: 

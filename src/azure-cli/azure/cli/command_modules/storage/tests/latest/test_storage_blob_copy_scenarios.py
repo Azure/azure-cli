@@ -492,3 +492,31 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
                 assert_with_checks([JMESPathCheck('properties.blobTier', tier)])
             self.storage_cmd('storage blob show -c {} -n srcPrePageBlob', accountpremium_info, dst_container). \
                 assert_with_checks([JMESPathCheck('properties.blobTier', tier)])
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind='storageV2')
+    def test_storage_blob_copy_batch_rehydrate_priority(self, resource_group, storage_account):
+        source_file_1 = self.create_temp_file(16)
+        source_file_2 = self.create_temp_file(16)
+        account_info = self.get_account_info(resource_group, storage_account)
+        src_name_1 = self.create_random_name('blob', 16)
+        src_name_2 = self.create_random_name('blob', 16)
+
+        source_container = self.create_container(account_info)
+        target_container = self.create_container(account_info)
+
+        for src in [(source_file_1, src_name_1), (source_file_2, src_name_2)]:
+            self.storage_cmd('storage blob upload -c {} -f "{}" -n {} ', account_info,
+                             source_container, src[0], src[1])
+            self.storage_cmd('storage blob set-tier -c {} -n {} --tier Archive', account_info,
+                             source_container, src[1])
+            self.storage_cmd('az storage blob show -c {} -n {} ', account_info, source_container, src[1]) \
+                .assert_with_checks(JMESPathCheck('properties.blobTier', 'Archive'))
+
+        self.storage_cmd('storage blob copy start-batch --destination-container {} --source-container {} '
+                         '--source-account-name {} --source-account-key {} --tier Cool -r High', account_info,
+                         target_container, source_container, account_info[0], account_info[1])
+        for src in [src_name_1, src_name_2]:
+            self.storage_cmd('storage blob show -c {} -n {} ', account_info, target_container, src) \
+                .assert_with_checks(JMESPathCheck('properties.blobTier', 'Archive'),
+                                    JMESPathCheck('properties.rehydrationStatus', 'rehydrate-pending-to-cool'))

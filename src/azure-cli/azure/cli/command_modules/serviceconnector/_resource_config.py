@@ -110,6 +110,7 @@ SOURCE_RESOURCES = {
     RESOURCE.ContainerApp: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.App/containerApps/{app}'
 }
 
+WEB_APP_SLOT_RESOURCE = '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.Web/sites/{site}/slots/{slot}'
 LOCAL_CONNECTION_RESOURCE = '/subscriptions/{subscriptionId}/resourceGroups/{resource_group}/providers/Microsoft.ServiceLinker/locations/{location}/connectors/{connection_name}'
 
 # The dict defines the resource id pattern of target resources.
@@ -207,7 +208,8 @@ SOURCE_RESOURCES_PARAMS = {
         'deployment': {
             'options': ['--deployment'],
             'help': 'The deployment name of the app',
-            'placeholder': 'MyDeployment'
+            'placeholder': 'MyDeployment',
+            'deprecate_info': ' Note: The default value of `--deployment` is deprecated and will be removed in a future release. Use `--deployment default` if you want stay in current behavior.',
         }
     },
     RESOURCE.SpringCloudDeprecated: {
@@ -229,7 +231,8 @@ SOURCE_RESOURCES_PARAMS = {
         'deployment': {
             'options': ['--deployment'],
             'help': 'The deployment name of the app',
-            'placeholder': 'MyDeployment'
+            'placeholder': 'MyDeployment',
+            'deprecate_info': ' Note: The default value of `--deployment` is deprecated and will be removed in a future release. Use `--deployment default` if you want stay in current behavior.',
         }
     },
     RESOURCE.KubernetesCluster: {
@@ -270,6 +273,16 @@ SOURCE_RESOURCES_CREATE_PARAMS = {
     },
 }
 
+# The dict defines the optional parameters used in the source resources for WebApp creation.
+SOURCE_RESOURCES_OPTIONAL_PARAMS = {
+    RESOURCE.WebApp: {
+        'slot': {
+            'options': ['--slot'],
+            'help': 'The name of the slot. Default to the production slot if not specified.',
+            'placeholder': 'WebAppSlot'
+        },
+    },
+}
 
 # The dict defines the parameters used to position the target resources.
 # The parmaters should include all variables defined in target resource id expect

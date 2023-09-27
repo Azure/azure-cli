@@ -5377,7 +5377,7 @@ class NetworkSubnetScenarioTests(ScenarioTest):
                  checks=self.check('addressPrefix', '123.0.0.0/24'))
 
         # Test we can get rid of the nsg.
-        self.cmd('network vnet subnet update --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefix {subnet_prefix2} --network-security-group \"\"',
+        self.cmd('network vnet subnet update --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefix {subnet_prefix2} --network-security-group null',
                  checks=self.check('networkSecurityGroup', None))
 
         self.cmd('network vnet delete --resource-group {rg} --name {vnet}')
@@ -5408,7 +5408,7 @@ class NetworkSubnetScenarioTests(ScenarioTest):
 
         self.cmd('network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefixes {subnet_prefix} --nat-gateway {nat}',
                  checks=self.check('ends_with(@.natGateway.id, `/{nat}`)', True))
-        self.cmd('network vnet subnet update --resource-group {rg} --vnet-name {vnet} --name {subnet} --nat-gateway \"\"',
+        self.cmd('network vnet subnet update --resource-group {rg} --vnet-name {vnet} --name {subnet} --nat-gateway null',
                  checks=self.check('natGateway', None))
 
 
@@ -5424,7 +5424,7 @@ class NetworkSubnetScenarioTests(ScenarioTest):
         self.cmd('network vnet create -g {rg} -n {vnet}')
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.1.0/24 --service-endpoints Microsoft.Storage',
                  checks=self.check('serviceEndpoints[0].service', 'Microsoft.Storage'))
-        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints ""',
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints null',
                  checks=self.check('serviceEndpoints', None))
 
     @ResourceGroupPreparer(name_prefix='cli_subnet_delegation')
@@ -5484,6 +5484,27 @@ class NetworkSubnetScenarioTests(ScenarioTest):
                      self.check('privateEndpointNetworkPolicies', 'Disabled'),
                      self.check('privateLinkServiceNetworkPolicies', 'Disabled')
                  ])
+
+    @ResourceGroupPreparer(name_prefix='cli_subnet_default_outbound_access')
+    def test_network_subnet_default_outbound_access(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'subnet1': 'subnet1',
+            'subnet2': 'subnet2',
+        })
+        self.cmd('network vnet create -g {rg} -n {vnet} -l westcentralus')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet1} --address-prefixes 10.0.3.0/24 --default-outbound-access false',
+                 self.check('defaultOutboundAccess', False))
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet1} --default-outbound-access true',
+                 self.check('defaultOutboundAccess', True))
+
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefixes 10.0.4.0/24',
+                 self.check('defaultOutboundAccess', True))
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet2} --default-outbound-access false',
+                 self.check('defaultOutboundAccess', False))
+
+        self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet} -n {subnet2}',
+                 self.check('defaultOutboundAccess', False))
 
 
 class NetworkActiveActiveCrossPremiseScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
