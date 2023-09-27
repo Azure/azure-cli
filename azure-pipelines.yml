@@ -351,12 +351,12 @@ jobs:
     - task: DownloadPipelineArtifact@1
       displayName: 'Download Build Artifacts'
       inputs:
-        TargetPath: '$(Build.ArtifactStagingDirectory)/docker-temp'
+        TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
         artifactName: $(packageArtifactName)
     - bash: |
         set -ex
-        mkdir docker
-        mv $(Build.ArtifactStagingDirectory)/docker-temp/*.rpm ./docker/azure-cli.rpm
+        mkdir docker-temp
+        mv $(Build.ArtifactStagingDirectory)/docker/*.rpm ./docker-temp/azure-cli.rpm
         
         bash scripts/release/docker/pipeline.sh
       displayName: 'Build Docker'
