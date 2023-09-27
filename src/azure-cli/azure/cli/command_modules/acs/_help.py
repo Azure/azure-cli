@@ -1481,7 +1481,7 @@ parameters:
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
   - name: --drain-timeout
-    type: string
+    type: int
     short-summary: When nodes are drain how many minutes to wait for all pods to be evicted  
   - name: --enable-encryption-at-host
     type: bool
