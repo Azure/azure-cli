@@ -19,7 +19,7 @@ def get_recording_rules_template(cmd, azure_monitor_workspace_resource_id):
 
 
 # pylint: disable=line-too-long
-def put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, enable_rules, i):
+def put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, cluster_resource_id, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, enable_rules, i):
     from azure.cli.core.util import send_raw_request
     body = json.dumps({
         "id": default_rule_group_id,
@@ -28,7 +28,8 @@ def put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, a
         "location": mac_region,
         "properties": {
             "scopes": [
-                azure_monitor_workspace_resource_id
+                azure_monitor_workspace_resource_id,
+                cluster_resource_id
             ],
             "enabled": enable_rules,
             "clusterName": cluster_name,
@@ -59,12 +60,18 @@ def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
         cluster_resource_group_name,
         default_rule_group_name
     )
+    cluster_resource_id = \
+        "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.ContainerService/managedClusters/{2}".format(
+            cluster_subscription,
+            cluster_resource_group_name,
+            cluster_name
+        )
     url = "{0}{1}?api-version={2}".format(
         cmd.cli_ctx.cloud.endpoints.resource_manager,
         default_rule_group_id,
         RULES_API
     )
-    put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, True, 0)
+    put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, cluster_resource_id, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, True, 0)
 
     default_rule_group_name = "KubernetesRecordingRulesRuleGroup-{0}".format(cluster_name)
     default_rule_group_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{2}".format(
@@ -77,7 +84,7 @@ def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
         default_rule_group_id,
         RULES_API
     )
-    put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, True, 1)
+    put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, cluster_resource_id, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, True, 1)
 
     enable_windows_recording_rules = raw_parameters.get("enable_windows_recording_rules")
 
@@ -95,7 +102,7 @@ def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
         default_rule_group_id,
         RULES_API
     )
-    put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, enable_windows_recording_rules, 2)
+    put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, cluster_resource_id, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, enable_windows_recording_rules, 2)
 
     default_rule_group_name = "NodeAndKubernetesRecordingRulesRuleGroup-Win-{0}".format(cluster_name)
     default_rule_group_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{2}".format(
@@ -108,4 +115,4 @@ def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
         default_rule_group_id,
         RULES_API
     )
-    put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, enable_windows_recording_rules, 3)
+    put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, cluster_resource_id, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, enable_windows_recording_rules, 3)
