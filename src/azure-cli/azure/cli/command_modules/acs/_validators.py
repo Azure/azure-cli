@@ -464,7 +464,7 @@ def validate_max_surge(namespace):
             raise CLIError("--max-surge must be positive")
     except ValueError:
         raise CLIError("--max-surge should be an int or percentage")
-    
+
 
 def validate_assign_identity(namespace):
     if namespace.assign_identity is not None:
