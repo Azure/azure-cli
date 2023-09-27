@@ -381,7 +381,7 @@ examples:
 
 helps['postgres flexible-server firewall-rule list'] = """
 type: command
-short-summary: List all firewall rules for a flexible server.
+short-summary: List all firewall rules for a flexible server. Run the command with `--debug` switch to identify the REST API that is invoked underneath and the response received from the service.
 example:
   - name: List all firewall rules for a server.
     text: az postgres server firewall-rule list --resource-group testGroup --name testserver
