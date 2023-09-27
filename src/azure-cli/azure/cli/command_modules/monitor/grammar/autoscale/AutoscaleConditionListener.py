@@ -1,3 +1,7 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
 # Generated from AutoscaleCondition.g4 by ANTLR 4.13.1
 # pylint: disable=all
 from antlr4 import *
