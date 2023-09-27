@@ -294,6 +294,9 @@ parameters:
   - name: --ppg
     type: string
     short-summary: The ID of a PPG.
+  - name: --enable-network-observability
+    type: bool
+    short-summary: Enable network observability on a cluster.
   - name: --enable-node-public-ip
     type: bool
     short-summary: Enable VMSS node public IP.
@@ -894,6 +897,12 @@ parameters:
   - name: --upgrade-override-until
     type: string
     short-summary: Until when the cluster upgradeSettings overrides are effective. It needs to be in a valid date-time format that's within the next 30 days. For example, 2023-04-01T13:00:00Z. Note that if --force-upgrade is set to true and --upgrade-override-until is not set, by default it will be set to 3 days from now.
+  - name: --enable-network-observability
+    type: bool
+    short-summary: Enable network observability on a cluster.
+  - name: --disable-network-observability
+    type: bool
+    short-summary: Disable network observability on a cluster.
 
 examples:
   - name: Reconcile the cluster back to its current state.

@@ -764,6 +764,13 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         return disable_keda
 
+    def get_enable_network_observability(self) -> Optional[bool]:
+        """Get the value of enable_network_observability
+
+        :return: bool or None
+        """
+        return self.raw_param.get("enable_network_observability")
+
     def get_snapshot_controller(self) -> Optional[ManagedClusterStorageProfileSnapshotController]:
         """Obtain the value of storage_profile.snapshot_controller
 
@@ -5380,6 +5387,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         network_dataplane = self.context.get_network_dataplane()
 
+        network_observability = self.context.get_enable_network_observability()
+
         if any(
             [
                 network_plugin,
@@ -5393,6 +5402,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 docker_bridge_address,
                 network_policy,
                 network_dataplane,
+                network_observability,
             ]
         ):
             # Attention: RP would return UnexpectedLoadBalancerSkuForCurrentOutboundConfiguration internal server error
@@ -5414,6 +5424,9 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 load_balancer_sku=load_balancer_sku,
                 load_balancer_profile=load_balancer_profile,
                 outbound_type=outbound_type,
+                monitoring=self.models.NetworkMonitoring(
+                    enabled=network_observability
+                )
             )
         else:
             if load_balancer_sku == CONST_LOAD_BALANCER_SKU_STANDARD or load_balancer_profile:
@@ -7265,6 +7278,20 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def update_enable_network_observability_in_network_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update enable network observability of network profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        network_observability = self.context.get_enable_network_observability()
+        if network_observability is not None:
+            mc.network_profile.monitoring = self.models.NetworkMonitoring(
+                enabled=network_observability
+            )
+        return mc
+
     def update_mc_profile_default(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
@@ -7334,6 +7361,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_azure_monitor_profile(mc)
         # update cluster upgrade settings
         mc = self.update_upgrade_settings(mc)
+        # update network_observability in network_profile
+        mc = self.update_enable_network_observability_in_network_profile(mc)
         return mc
 
     def check_is_postprocessing_required(self, mc: ManagedCluster) -> bool:

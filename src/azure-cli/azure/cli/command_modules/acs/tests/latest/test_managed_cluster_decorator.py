@@ -1958,6 +1958,55 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         )
         self.assertEqual(ctx_3.get_network_dataplane(), "azure")
 
+    def test_mc_get_enable_network_observability(self):
+        # Default, not set.
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_enable_network_observability(), None)
+
+        # Flag set to True.
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_network_observability": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_2.get_enable_network_observability(), True)
+
+        # Flag set to True.
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_network_observability": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_3.get_enable_network_observability(), True)
+
+        # Flag set to False.
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_network_observability": False,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_3.get_enable_network_observability(), False)
+
     def test_get_pod_cidrs(self):
         # default
         ctx_1 = AKSManagedClusterContext(
