@@ -937,7 +937,7 @@ class AKSAgentPoolContext(BaseAKSContext):
         :return: int
         """
         # read the original value passed by the command
-        max_surge = self.raw_param.get("drain_timeout")
+        drain_timeout = self.raw_param.get("drain_timeout")
         # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
         if self.decorator_mode == DecoratorMode.CREATE:
             if (
@@ -1753,6 +1753,7 @@ class AKSAgentPoolUpdateDecorator:
             upgrade_settings.max_surge = max_surge
             agentpool.upgrade_settings = upgrade_settings #why not always set this? so we don't wipe out a preview feaure in upgrade settigns like NodeSoakDuration?
 
+        drain_timeout = self.context.get_drain_timeout()
         if drain_timeout:
             upgrade_settings.drain_timeout = drain_timeout
             agentpool.upgrade_settings = upgrade_settings
