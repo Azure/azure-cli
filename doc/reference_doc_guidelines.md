@@ -161,8 +161,6 @@ examples:
     text: |
 ```
 
-  For more information on `_help.py` see [Azure CLI Help System](https://github.com/Azure/azure-cli/blob/dev/doc/authoring_help.md).
-
 - Create diverse, not repetitive examples.
 
   ```azurecli
@@ -188,11 +186,7 @@ examples:
                --ssh-key-values @key-file
   ```
 
-- Not all examples can be shell agnostic due to the quoting differences between Bash and PowerShell. For examples that only run in Bash, provide a second example for PowerShell. If you are testing examples in PowerShell, here are some considerations:
-  - [Quoting issues with PowerShell](https://github.com/Azure/azure-cli/blob/dev/doc/quoting-issues-with-powershell.md)
-  - [Use quotation marks in Azure CLI parameters](./use-cli-effectively.md#use-quotation-marks-in-parameters)
-  - Compare syntax differences between PowerShell and Bash in [Query command output using JMESPath](./query-azure-cli.md)
-  - [Error handling for the Azure CLI in PowerShell](./use-cli-effectively.md#error-handling-for-azure-cli-in-powershell)
+- Not all examples can be shell agnostic due to the quoting differences between Bash and PowerShell. For examples that only run in Bash, provide a second example for PowerShell. If you are testing Bash scripts in PowerShell and getting errors, see [General guidelines](#general-guidelines) for links with information on quoting and error handling differences.
 
 ### Parameters used in examples
 
@@ -265,27 +259,27 @@ Use these checklists for a quick review before publishing new reference content.
 
 ### TOC checklist
 
-<kbd> </kbd> Information has been added to `service-mapping.json`.
-<kbd> </kbd> A link has been added to **Reference** TOC node of the Azure service.
+<kbd> </kbd> Information has been added to `service-mapping.json`.<br>
+<kbd> </kbd> A link has been added to **Reference** TOC node of the Azure service.<br>
 
 ### Description checklist
 
-<kbd> </kbd> The `short-summary` is a single complete sentence in active voice.
-<kbd> </kbd> The `short-summary` provides useful information and is not repetitive.
-<kbd> </kbd> The `long-summary` gives useful tips and tells customers what to expect when they run the command.
-<kbd> </kbd> Embedded URLs are in Markdown format.
-<kbd> </kbd> Embedded URLs do not contain locale or unnecessary monikers.
+<kbd> </kbd> The `short-summary` is a single complete sentence in active voice.<br>
+<kbd> </kbd> The `short-summary` provides useful information and is not repetitive.<br>
+<kbd> </kbd> The `long-summary` gives useful tips and tells customers what to expect when they run the command.<br>
+<kbd> </kbd> Embedded URLs are in Markdown format.<br>
+<kbd> </kbd> Embedded URLs do not contain locale or unnecessary monikers.<br>
 
 ### Example checklist
 
-<kbd> </kbd> Examples have been tested in both Bash and PowerShell environments
-<kbd> </kbd> At least two examples have been given for each command.
-<kbd> </kbd> Bash line continuation characters have been used for improved readability.
-<kbd> </kbd> HTML tags have not been used in examples.
+<kbd> </kbd> Examples have been tested in both Bash and PowerShell environments.<br>
+<kbd> </kbd> At least two examples have been given for each command.<br>
+<kbd> </kbd> Bash line continuation characters have been used for improved readability.<br>
+<kbd> </kbd> HTML tags have not been used in examples.<br>
 
 ### Parameter checklist
 
-<kbd> </kbd> Every parameter is included in at least one example.
-<kbd> </kbd> Get/list operation examples have been provided that show the use of the `--query` parameter.
-<kbd> </kbd> Parameter accepted values, default values (including for true/false), and example values have been created.
-<kbd> </kbd> Additional examples have been provided for parameter pairs and groups.
+<kbd> </kbd> Every parameter is included in at least one example.<br>
+<kbd> </kbd> Get/list operation examples have been provided that show the use of the `--query` parameter.<br>
+<kbd> </kbd> Parameter accepted values, default values (including for true/false), and example values have been created.<br>
+<kbd> </kbd> Additional examples have been provided for parameter pairs and groups.<br>
