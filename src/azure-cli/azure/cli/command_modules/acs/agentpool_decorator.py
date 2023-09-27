@@ -945,7 +945,7 @@ class AKSAgentPoolContext(BaseAKSContext):
                 self.agentpool.upgrade_settings and
                 self.agentpool.upgrade_settings.drain_timeout is not None
             ):
-                drain_timeout = self.agentpool.upgrade_settings.drain_timeout
+                drain_timeout = self.agentpool.upgrade_settings.drain_timeout_in_minutes
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -1491,7 +1491,7 @@ class AKSAgentPoolAddDecorator:
         
         drain_timeout = self.context.get_drain_timeout()
         if drain_timeout:
-            upgrade_settings.drain_timeout = drain_timeout
+            upgrade_settings.drain_timeout_in_minutes = drain_timeout
 
         agentpool.upgrade_settings = upgrade_settings
         return agentpool
@@ -1755,7 +1755,7 @@ class AKSAgentPoolUpdateDecorator:
 
         drain_timeout = self.context.get_drain_timeout()
         if drain_timeout:
-            upgrade_settings.drain_timeout = drain_timeout
+            upgrade_settings.drain_timeout_in_minutes = drain_timeout
             agentpool.upgrade_settings = upgrade_settings
         
         return agentpool
