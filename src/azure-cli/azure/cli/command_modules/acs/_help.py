@@ -1590,7 +1590,7 @@ parameters:
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
   - name: --drain-timeout
-    type: string
+    type: int
     short-summary: When nodes are drain how many minutes to wait for all pods to be evicted
   - name: --node-taints
     type: string
@@ -1626,7 +1626,7 @@ parameters:
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33% (mutually exclusive with "--node-image-only". See "az aks nodepool update --max-surge" to update max surge before upgrading with "--node-image-only")
   - name: --drain-timeout
-    type: string
+    type: int
     short-summary: When nodes are drain how long to wait for all pods to be evicted
   - name: --snapshot-id
     type: string
