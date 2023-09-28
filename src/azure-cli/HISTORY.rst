@@ -3,6 +3,88 @@
 Release History
 ===============
 
+2.53.0
+++++++
+
+**ACR**
+
+* `az acr token create`: Fix random order of repo valid actions and gateway valid actions in the help message (#27263)
+
+**AKS**
+
+* `az aks update`: Add new parameter `--private-dns-zone` to support private DNS zone for AKS private cluster (#27313)
+* `az aks update`: Add new parameter `--disable-windows-gmsa` to support disabling Windows gMSA in an AKS cluster (#27337)
+* `az aks update`: Add forceupgrade settings to aks stable cli (#27258)
+
+**App Config**
+
+* `az appconfig kv import/export`: Remove `skip-features` and `skip-keyvault` restriction for snapshots (#27308)
+
+**App Service**
+
+* `az functionapp create`: Enable distributed tracing for non consumption apps (#27350)
+
+**ARM**
+
+* `az deployment group create`: Make `--template-file` parameter optional when used with `.bicepparam` parameter file (#27311)
+* `az account list-locations`: Add new parameter `--include-extended-locations` to support listing extended locations (#27400)
+
+**Backup**
+
+* `az backup backup-properties`: Add option for setting `--soft-delete-feature-state` to "AlwaysOn", and `--soft-delete-duration` with values between 14 to 180 (inclusive) (#27329)
+* `az backup vault list-soft-deleted-containers`: List all soft-deleted containers in a backup vault (#27329)
+
+**Compute**
+
+* `az vm/vmss extension set`: Enable auto upgrade by default for CodeIntegrityAgent extension (#27335)
+* `az vm create`: Add warning message for Basic option removal (#27408)
+* `az vmss create`: Add warning message for Basic option removal (#27408)
+
+**Containerapp**
+
+* `az containerapp`: Move `containerapp` from CLI extension to core CLI (#27078)
+* `az containerapp env create`: Add `--enable-workload-profiles` to specify if the environment is enabled to have workload profiles (#27381)
+* `az containerapp env dapr-component create`: Fix the sample link for `--yaml` parameter (#27393)
+
+**Cosmos DB**
+
+* `az cosmosdb postgres`: GA Cosmos DB for PostgreSQL (#27399)
+
+**MySQL**
+
+* `az mysql flexible-server replica create`: Add new parameters to support replica creation (#27386)
+
+**NetAppFiles**
+
+* `az netappfiles volume`: Add new command `get-groupid-list-for-ldapuser` to Get Group Id List for LDAP User (#27316)
+* `az netappfiles account update`: Add parameter `--identity-type` (#27316)
+* `az netappfiles volume update`: Add parameter `--snapshot-dir-visible`. If enabled (true) the volume will contain a read-only snapshot directory which provides access to each of the volume's snapshots (defaults to true) (#27316)
+
+**Network**
+
+* `az network virtual-appliance`: Add parameter `--additional-nics` (#27373)
+* `az network vnet subnet`: Add parameter `--default-outbound-access` (#27334)
+* `az network public-ip create`: Add warning message for Basic option removal (#27408)
+* `az network lb create`: Add warning message for Basic option removal (#27408)
+
+**RDBMS**
+
+* `az postgres flexible-server create/update`: Add capability to enable/disable storage auto-grow during creation and update (#27417)
+
+**Service Connector**
+
+* `az spring connection`: Add deprecated message for `--deployment` breaking change (#27384)
+* `az webapp connection`: Add new parameter `--slot` to support webapp slot connection (#27037)
+
+**SQL**
+
+* `az sql failover-group set-primary`: Add parameter `--try-planned-before-forced-failover` to support hybrid geo-failover (#27298)
+
+**Storage**
+
+* Fix #26732: `az storage blob copy start-batch`: Add `--rehydrate-priority` to batch copy (#27325)
+* Fix #27052: `az storage blob delete-batch`: Use utc as default timezone to remove "Datetime with no tzinfo will be considered UTC." warning (#27366)
+
 2.52.0
 ++++++
 

@@ -469,7 +469,7 @@ class ActionGroupReceiverParameterAction(MultiObjectsDeserializeAction):
         return receiver
 
 
-class AAZActionGroupReceiverArgAction(AAZCompoundTypeArgAction):
+class AAZCustomListArgAction(AAZCompoundTypeArgAction):
 
     def __call__(self, parser, namespace, values, option_string=None):
         if not isinstance(getattr(namespace, self.dest), AAZArgActionOperations):
@@ -559,7 +559,6 @@ class AAZActionGroupReceiverArgAction(AAZCompoundTypeArgAction):
 
 
 class AAZCustomListArg(AAZCompoundTypeArg, AAZListType):
-    # refer to ActionGroupReceiverParameterAction
 
     def __init__(self, fmt=None, singular_options=None, **kwargs):
         fmt = fmt or AAZListArgFormat()
@@ -579,7 +578,7 @@ class AAZCustomListArg(AAZCompoundTypeArg, AAZListType):
         return arg
 
     def _build_cmd_action(self):
-        class Action(AAZActionGroupReceiverArgAction):
+        class Action(AAZCustomListArgAction):
             _schema = self  # bind action class with current schema
 
         return Action

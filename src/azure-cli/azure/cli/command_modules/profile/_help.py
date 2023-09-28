@@ -48,11 +48,6 @@ short-summary: >-
     cloud is shown.
 """
 
-helps['account list-locations'] = """
-type: command
-short-summary: List supported regions for the current subscription.
-"""
-
 helps['account show'] = """
 type: command
 short-summary: Get the details of a subscription.

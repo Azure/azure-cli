@@ -20,6 +20,9 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class ContainerAppWorkloadProfilesTest(ScenarioTest):
+    def __init__(self, *arg, **kwargs):
+        super().__init__(*arg, random_config_dir=True, **kwargs)
+
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="eastus")
     @live_only()  # encounters 'CannotOverwriteExistingCassetteException' only when run from recording (passes when run live)
@@ -31,7 +34,7 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
         app1 = self.create_random_name(prefix='app1', length=24)
         app2 = self.create_random_name(prefix='app2', length=24)
 
-        self.cmd('containerapp env create -g {} -n {} --location {}  --logs-destination none'.format(resource_group, env, TEST_LOCATION))
+        self.cmd('containerapp env create -g {} -n {} --location {}  --logs-destination none --enable-workload-profiles'.format(resource_group, env, TEST_LOCATION))
 
         containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env)).get_output_in_json()
 
@@ -93,6 +96,52 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="eastus")
+    def test_containerapp_create_enable_workload_profiles_three_state_flag(self, resource_group):
+        self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
+
+        env = self.create_random_name(prefix='env4', length=24)
+        self.cmd('containerapp env create -g {} -n {} --logs-destination none'.format(
+            resource_group, env), expect_failure=False, checks=[
+            JMESPathCheck("name", env),
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck("properties.workloadProfiles", None)
+        ])
+        self.cmd('containerapp env delete -g {} -n {} --yes --no-wait'.format(resource_group, env), expect_failure=False)
+
+        env1 = self.create_random_name(prefix='env', length=24)
+        self.cmd('containerapp env create -g {} -n {} --logs-destination none --enable-workload-profiles false'.format(
+            resource_group, env1), expect_failure=False, checks=[
+            JMESPathCheck("name", env1),
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck("properties.workloadProfiles", None),
+        ])
+        self.cmd('containerapp env delete -g {} -n {} --yes --no-wait'.format(resource_group, env1), expect_failure=False)
+
+        env2 = self.create_random_name(prefix='env2', length=24)
+        self.cmd('containerapp env create -g {} -n {} --logs-destination none --enable-workload-profiles'.format(
+            resource_group, env2), expect_failure=False, checks=[
+            JMESPathCheck("name", env2),
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck("length(properties.workloadProfiles)", 1),
+            JMESPathCheck('properties.workloadProfiles[0].name', "Consumption", case_sensitive=False),
+            JMESPathCheck('properties.workloadProfiles[0].workloadProfileType', "Consumption", case_sensitive=False),
+        ])
+        self.cmd('containerapp env delete -g {} -n {} --yes --no-wait'.format(resource_group, env2),
+                 expect_failure=False)
+
+        env3 = self.create_random_name(prefix='env3', length=24)
+        self.cmd('containerapp env create -g {} -n {} --logs-destination none --enable-workload-profiles true'.format(
+            resource_group, env3), expect_failure=False, checks=[
+            JMESPathCheck("name", env3),
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck("length(properties.workloadProfiles)", 1),
+            JMESPathCheck('properties.workloadProfiles[0].name', "Consumption", case_sensitive=False),
+            JMESPathCheck('properties.workloadProfiles[0].workloadProfileType', "Consumption", case_sensitive=False),
+        ])
+        self.cmd('containerapp env delete -g {} -n {} --yes --no-wait'.format(resource_group, env3), expect_failure=False)
+
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location="eastus")
     @live_only()  # encounters 'CannotOverwriteExistingCassetteException' only when run from recording (passes when run live)
     def test_containerapp_env_workload_profiles_delete(self, resource_group):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
@@ -103,7 +152,7 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
         self.cmd("az network vnet create -l {} --address-prefixes '14.0.0.0/16' -g {} -n {}".format(TEST_LOCATION, resource_group, vnet))
         sub_id = self.cmd("az network vnet subnet create --address-prefixes '14.0.0.0/22' --delegations Microsoft.App/environments -n sub -g {} --vnet-name {}".format(resource_group, vnet)).get_output_in_json()["id"]
 
-        self.cmd('containerapp env create -g {} -n {} -s {} --location {}  --logs-destination none'.format(resource_group, env, sub_id, TEST_LOCATION))
+        self.cmd('containerapp env create -g {} -n {} -s {} --location {}  --logs-destination none --enable-workload-profiles'.format(resource_group, env, sub_id, TEST_LOCATION))
 
         containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env)).get_output_in_json()
 
@@ -151,7 +200,7 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
         env = self.create_random_name(prefix='env', length=24)
         app = self.create_random_name(prefix='yaml', length=24)
 
-        self.cmd('containerapp env create -g {} -n {} --location {}  --logs-destination none'.format(resource_group, env, TEST_LOCATION))
+        self.cmd('containerapp env create -g {} -n {} --location {}  --logs-destination none --enable-workload-profiles'.format(resource_group, env, TEST_LOCATION))
 
         containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env)).get_output_in_json()
 
@@ -256,7 +305,7 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
         app1 = self.create_random_name(prefix='app1', length=24)
         app2 = self.create_random_name(prefix='app2', length=24)
 
-        self.cmd('containerapp env create -g {} -n {} --location {}  --logs-destination none'.format(resource_group, env, TEST_LOCATION))
+        self.cmd('containerapp env create -g {} -n {} --location {}  --logs-destination none --enable-workload-profiles'.format(resource_group, env, TEST_LOCATION))
 
         containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env)).get_output_in_json()
 

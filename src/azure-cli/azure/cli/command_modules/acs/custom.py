@@ -720,6 +720,9 @@ def aks_update(
     disable_keda=False,
     enable_vpa=False,
     disable_vpa=False,
+    enable_force_upgrade=False,
+    disable_force_upgrade=False,
+    upgrade_override_until=None,
     # addons
     enable_secret_rotation=False,
     disable_secret_rotation=False,

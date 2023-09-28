@@ -22,11 +22,10 @@ from azure.mgmt.rdbms import mysql_flexibleservers
 from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError, ValidationError
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, cf_mysql_flexible_db, \
     cf_mysql_check_resource_availability, cf_mysql_check_resource_availability_without_location, cf_mysql_flexible_config, \
-    cf_mysql_flexible_servers, cf_mysql_flexible_replica, cf_mysql_flexible_adadmin, cf_mysql_flexible_private_dns_zone_suffix_operations, \
-    cf_mysql_servers, cf_mysql_firewall_rules
+    cf_mysql_flexible_servers, cf_mysql_flexible_replica, cf_mysql_flexible_adadmin, cf_mysql_flexible_private_dns_zone_suffix_operations, cf_mysql_servers
 from ._util import resolve_poller, generate_missing_parameters, get_mysql_list_skus_info, generate_password, parse_maintenance_window, \
     replace_memory_optimized_tier, build_identity_and_data_encryption, get_identity_and_data_encryption, get_tenant_id, run_subprocess, \
-    run_subprocess_get_output, fill_action_template, get_git_root_dir, get_single_to_flex_sku_mapping, get_firewall_rules_from_paged_response, GITHUB_ACTION_PATH
+    run_subprocess_get_output, fill_action_template, get_git_root_dir, get_single_to_flex_sku_mapping, GITHUB_ACTION_PATH
 from ._network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_private_network, prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from ._validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, mysql_restore_tier_validator, \
     mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, validate_mysql_replica, validate_server_name, \
@@ -167,7 +166,7 @@ def database_delete_func(client, resource_group_name=None, server_name=None, dat
     return result
 
 
-def create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip, firewall_rule_name=None):
+def create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip):
     # allow access to azure ip addresses
     cf_firewall = db_context.cf_firewall  # NOQA pylint: disable=unused-variable
     firewall_client = cf_firewall(cmd.cli_ctx, None)
@@ -175,8 +174,7 @@ def create_firewall_rule(db_context, cmd, resource_group_name, server_name, star
                                          client=firewall_client,
                                          resource_group_name=resource_group_name,
                                          server_name=server_name,
-                                         start_ip_address=start_ip, end_ip_address=end_ip,
-                                         firewall_rule_name=firewall_rule_name)
+                                         start_ip_address=start_ip, end_ip_address=end_ip)
     return firewall.result().name
 
 
@@ -498,9 +496,9 @@ def flexible_server_import_create(cmd, client,
                                                                                                                         version=version,
                                                                                                                         tags=tags,
                                                                                                                         public_access=public_access,
+                                                                                                                        subnet=subnet,
                                                                                                                         administrator_login=administrator_login,
-                                                                                                                        administrator_login_password=administrator_login_password,
-                                                                                                                        subnet=subnet)
+                                                                                                                        administrator_login_password=administrator_login_password)
     db_context = DbContext(
         cmd=cmd, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
         cf_availability=cf_mysql_check_resource_availability,
@@ -606,13 +604,6 @@ def flexible_server_import_create(cmd, client,
     # Adding firewall rule
     if start_ip != -1 and end_ip != -1:
         firewall_name = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
-
-    # Migrating firewall rules from single server to flexible server
-    if data_source_type.lower() == 'mysql_single' and create_mode.lower() == 'migrate':
-        if network.public_network_access.lower() == 'disabled':
-            logger.warning('Firewall rules cannot be migrated for private access enabled server.')
-        else:
-            migrate_firewall_rules_from_single_to_flex(db_context=db_context, cmd=cmd, source_server_id=source_server_id, target_server_name=server_name)
 
     user = server_result.administrator_login
     server_id = server_result.id
@@ -1195,8 +1186,9 @@ def flexible_parameter_update_batch(client, server_name, resource_group_name, so
 
 # Replica commands
 # Custom functions for server replica, will add MySQL part after backend ready in future
-def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, location=None, tags=None,
-                            private_dns_zone_arguments=None, vnet=None, subnet=None, zone=None, public_access=None, no_wait=False):
+def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, location=None, tags=None, sku_name=None,
+                            private_dns_zone_arguments=None, vnet=None, subnet=None, zone=None, public_access=None, no_wait=False,
+                            storage_gb=None, iops=None, geo_redundant_backup=None, backup_retention=None, tier=None):
     provider = 'Microsoft.DBforMySQL'
     replica_name = replica_name.lower()
 
@@ -1223,14 +1215,39 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
     if not location:
         location = source_server_object.location
 
-    sku_name = source_server_object.sku.name
-    tier = source_server_object.sku.tier
+    if not sku_name:
+        sku_name = source_server_object.sku.name
+
+    if not tier:
+        tier = source_server_object.sku.tier
+
+    if not backup_retention:
+        backup_retention = source_server_object.backup.backup_retention_days
+
+    if not geo_redundant_backup:
+        geo_redundant_backup = source_server_object.backup.geo_redundant_backup
+
+    if not storage_gb:
+        storage_gb = source_server_object.storage.storage_size_gb
+
+    if not iops:
+        iops = source_server_object.storage.iops
 
     identity, data_encryption = get_identity_and_data_encryption(source_server_object)
+
+    storage = mysql_flexibleservers.models.Storage(storage_size_gb=storage_gb,
+                                                   iops=iops,
+                                                   auto_grow="Enabled",
+                                                   auto_io_scaling=source_server_object.storage.auto_io_scaling)
+
+    backup = mysql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
+                                                 geo_redundant_backup=geo_redundant_backup)
 
     parameters = mysql_flexibleservers.models.Server(
         sku=mysql_flexibleservers.models.Sku(name=sku_name, tier=tier),
         source_server_resource_id=source_server_id,
+        storage=storage,
+        backup=backup,
         location=location,
         tags=tags,
         availability_zone=zone,
@@ -1742,7 +1759,7 @@ def flexible_gtid_reset(client, resource_group_name, server_name, gtid_set, no_w
 
 
 def map_single_server_configuration(single_server_client, source_server_id, tier, sku_name, location, storage_gb, auto_grow, backup_retention,
-                                    geo_redundant_backup, version, tags, public_access, administrator_login, administrator_login_password, subnet):
+                                    geo_redundant_backup, version, tags, public_access, subnet, administrator_login, administrator_login_password):
     try:
         id_parts = parse_resource_id(source_server_id)
         source_single_server = single_server_client.get(id_parts['resource_group'], id_parts['name'])
@@ -1793,20 +1810,6 @@ def map_single_server_configuration(single_server_client, source_server_id, tier
     except Exception as e:
         raise ResourceNotFoundError(e)
     return tier, sku_name, location, storage_gb, auto_grow, backup_retention, geo_redundant_backup, version, tags, public_access, administrator_login
-
-
-def migrate_firewall_rules_from_single_to_flex(db_context, cmd, source_server_id, target_server_name):
-    id_parts = parse_resource_id(source_server_id)
-    firewall_client = cf_mysql_firewall_rules(cmd.cli_ctx, _=None)
-    firewall_rules = get_firewall_rules_from_paged_response(firewall_client.list_by_server(id_parts['resource_group'], id_parts['name']))
-    for rule in firewall_rules:
-        create_firewall_rule(db_context=db_context,
-                             cmd=cmd,
-                             resource_group_name=id_parts['resource_group'],
-                             server_name=target_server_name,
-                             start_ip=rule.start_ip_address,
-                             end_ip=rule.end_ip_address,
-                             firewall_rule_name=rule.name)
 
 
 def flexible_server_export_create(cmd, client, resource_group_name, server_name, backup_name, sas_uri):

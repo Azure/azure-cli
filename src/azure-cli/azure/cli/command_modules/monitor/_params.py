@@ -10,12 +10,12 @@ from azure.cli.core.commands.parameters import (
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
 from azure.cli.command_modules.monitor.actions import (
-    AlertAddAction, AlertRemoveAction, ConditionAction, AutoscaleAddAction, AutoscaleRemoveAction,
+    AlertAddAction, AlertRemoveAction, ConditionAction,
     AutoscaleScaleAction, AutoscaleConditionAction, get_period_type, AutoscaleCreateAction,
     timezone_offset_type, timezone_name_type, MetricAlertConditionAction, MetricAlertAddAction)
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
 from azure.cli.command_modules.monitor.validators import (
-    process_webhook_prop, validate_autoscale_recurrence, validate_autoscale_timegrain, get_action_group_validator,
+    validate_autoscale_recurrence, validate_autoscale_timegrain, get_action_group_validator,
     get_action_group_id_validator, validate_metric_dimension, validate_storage_accounts_name_or_id)
 
 from knack.arguments import CLIArgumentType
@@ -26,7 +26,6 @@ def load_arguments(self, _):
     from azure.mgmt.monitor.models import ConditionOperator, TimeAggregationOperator, EventData, PredictiveAutoscalePolicyScaleMode
     from .grammar.metric_alert.MetricAlertConditionValidator import dim_op_conversion, agg_conversion, op_conversion, sens_conversion
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
-    webhook_prop_type = CLIArgumentType(validator=process_webhook_prop, nargs='*')
 
     autoscale_name_type = CLIArgumentType(options_list=['--autoscale-name'], help='Name of the autoscale settings.', id_part='name')
     autoscale_profile_name_type = CLIArgumentType(options_list=['--profile-name'], help='Name of the autoscale profile.')
@@ -200,8 +199,6 @@ def load_arguments(self, _):
         c.argument('actions', options_list=['--action', '-a'], action=AutoscaleCreateAction, nargs='+')
 
     with self.argument_context('monitor autoscale', arg_group='Notification') as c:
-        c.argument('add_actions', options_list=['--add-action', '-a'], action=AutoscaleAddAction, nargs='+')
-        c.argument('remove_actions', options_list=['--remove-action', '-r'], action=AutoscaleRemoveAction, nargs='+')
         c.argument('email_administrator', arg_type=get_three_state_flag(), help='Send email to subscription administrator on scaling.')
         c.argument('email_coadministrators', arg_type=get_three_state_flag(), help='Send email to subscription co-administrators on scaling.')
 
@@ -301,39 +298,6 @@ def load_arguments(self, _):
     # region ActivityLog Alerts
     with self.argument_context('monitor activity-log alert') as c:
         c.argument('activity_log_alert_name', options_list=['--name', '-n'], id_part='name')
-
-    with self.argument_context('monitor activity-log alert create') as c:
-        from .operations.activity_log_alerts import process_condition_parameter
-        c.argument('disable', action='store_true')
-        c.argument('scopes', options_list=['--scope', '-s'], nargs='+')
-        c.argument('condition', options_list=['--condition', '-c'], nargs='+', validator=process_condition_parameter)
-        c.argument('action_groups', options_list=['--action-group', '-a'], nargs='+')
-        c.argument('webhook_properties', options_list=['--webhook-properties', '-w'], arg_type=webhook_prop_type)
-
-    with self.argument_context('monitor activity-log alert update-condition') as c:
-        c.argument('reset', action='store_true')
-        c.argument('add_conditions', options_list=['--add-condition', '-a'], nargs='+')
-        c.argument('remove_conditions', options_list=['--remove-condition', '-r'], nargs='+')
-
-    with self.argument_context('monitor activity-log alert update') as c:
-        from .operations.activity_log_alerts import process_condition_parameter
-        c.argument('condition', options_list=['--condition', '-c'], nargs='+', validator=process_condition_parameter)
-        c.argument('enabled', arg_type=get_three_state_flag())
-
-    with self.argument_context('monitor activity-log alert action-group add') as c:
-        c.argument('reset', action='store_true')
-        c.argument('action_group_ids', options_list=['--action-group', '-a'], nargs='+')
-        c.argument('webhook_properties', options_list=['--webhook-properties', '-w'], arg_type=webhook_prop_type)
-
-    with self.argument_context('monitor activity-log alert action-group remove') as c:
-        c.argument('action_group_ids', options_list=['--action-group', '-a'], nargs='+')
-
-    with self.argument_context('monitor activity-log alert scope add') as c:
-        c.argument('scopes', options_list=['--scope', '-s'], nargs='+')
-        c.argument('reset', action='store_true')
-
-    with self.argument_context('monitor activity-log alert scope remove') as c:
-        c.argument('scopes', options_list=['--scope', '-s'], nargs='+')
     # endregion
 
     # region Log Analytics Workspace
