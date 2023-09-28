@@ -70,7 +70,7 @@ from azure.cli.command_modules.acs._validators import (
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
     get_resource_name_completion_list, get_three_state_flag, name_type,
-    tags_type, zones_type)
+    tags_type)
 from azure.cli.core.profiles import ResourceType
 from knack.arguments import CLIArgumentType
 
