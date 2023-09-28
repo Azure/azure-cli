@@ -930,7 +930,7 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return max_surge
-    
+
     def get_drain_timeout(self):
         """Obtain the value of drain_timeout.
 
@@ -1488,7 +1488,7 @@ class AKSAgentPoolAddDecorator:
         max_surge = self.context.get_max_surge()
         if max_surge:
             upgrade_settings.max_surge = max_surge
-        
+
         drain_timeout = self.context.get_drain_timeout()
         if drain_timeout:
             upgrade_settings.drain_timeout_in_minutes = drain_timeout
@@ -1751,13 +1751,14 @@ class AKSAgentPoolUpdateDecorator:
         max_surge = self.context.get_max_surge()
         if max_surge:
             upgrade_settings.max_surge = max_surge
-            agentpool.upgrade_settings = upgrade_settings #why not always set this? so we don't wipe out a preview feaure in upgrade settigns like NodeSoakDuration?
+            #why not always set this? so we don't wipe out a preview feaure in upgrade settigns like NodeSoakDuration?
+            agentpool.upgrade_settings = upgrade_settings
 
         drain_timeout = self.context.get_drain_timeout()
         if drain_timeout:
             upgrade_settings.drain_timeout_in_minutes = drain_timeout
             agentpool.upgrade_settings = upgrade_settings
-        
+
         return agentpool
 
     def update_vm_properties(self, agentpool: AgentPool) -> AgentPool:
