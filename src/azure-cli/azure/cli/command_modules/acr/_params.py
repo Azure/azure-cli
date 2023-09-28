@@ -430,8 +430,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('description', options_list=['--description'], help='Description for the scope map. Maximum 256 characters are allowed.', required=False)
         c.argument('scope_map_name', options_list=['--name', '-n'], help='The name of the scope map.', required=True)
 
-    repo_valid_actions = "Valid actions are {}".format({action.value for action in RepoScopeMapActions})
-    gateway_valid_actions = "Valid actions are {}".format({action.value for action in GatewayScopeMapActions})
+    # Action strings generated this way to ensure consistent ordering each time the help text is generated.
+    repo_valid_actions = "Valid actions are {}".format(sorted(action.value for action in RepoScopeMapActions))
+    gateway_valid_actions = "Valid actions are {}".format(sorted(action.value for action in GatewayScopeMapActions))
     with self.argument_context('acr scope-map update') as c:
         c.argument('add_repository', options_list=['--add-repository', c.deprecate(target='--add', redirect='--add-repository', hide=True)], nargs='+', action='append', required=False,
                    help='repository permissions to be added. Use the format "--add-repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)

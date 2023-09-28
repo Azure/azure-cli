@@ -165,11 +165,6 @@ def logout(cmd, username=None):
     profile.logout(username)
 
 
-def list_locations(cmd):
-    from azure.cli.core.commands.parameters import get_subscription_locations
-    return get_subscription_locations(cmd.cli_ctx)
-
-
 def check_cli(cmd):
     from azure.cli.core.file_util import (
         create_invoker_and_load_cmds_and_args, get_all_help)

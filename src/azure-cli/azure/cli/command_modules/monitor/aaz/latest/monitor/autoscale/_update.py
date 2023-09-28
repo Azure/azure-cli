@@ -11,6 +11,9 @@
 from azure.cli.core.aaz import *
 
 
+@register_command(
+    "monitor autoscale update",
+)
 class Update(AAZCommand):
     """Update an autoscale setting.
 

@@ -14,7 +14,7 @@ class ProfileTest(ScenarioTest):
 
     def test_account_show(self):
         # Force this test to generate a recording file so that this test can run in playback mode.
-        self.cmd('account list-locations')
+        self.cmd('az rest -u /subscriptions/{{subscriptionId}}/locations?api-version=2019-11-01')
 
         result = self.cmd('account show').get_output_in_json()
 
@@ -26,12 +26,6 @@ class ProfileTest(ScenarioTest):
             assert result['id'] == MOCKED_SUBSCRIPTION_ID
             assert result['tenantId'] == MOCKED_TENANT_ID
             assert result['user']['name'] == MOCKED_USER_NAME
-
-    def test_list_locations(self):
-        result = self.cmd('account list-locations').get_output_in_json()
-        assert isinstance(result, list)
-        # Verify there is an item with displayName 'East US'.
-        assert any('East US' == loc['displayName'] for loc in result)
 
 
 if __name__ == '__main__':
