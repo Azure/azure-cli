@@ -52,7 +52,7 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.generic_update_command('update', setter_name='custom_update_setter', setter_type=redis_operations_custom, custom_func_name='cli_redis_update')
 
-    with self.command_group('redis patch-schedule', redis_patch, custom_command_typ e=redis_patch_schedules_custom) as g:
+    with self.command_group('redis patch-schedule', redis_patch, custom_command_type=redis_patch_schedules_custom) as g:
         g.custom_command('create', 'cli_redis_patch_schedule_create_or_update')
         g.custom_command('update', 'cli_redis_patch_schedule_create_or_update')
         g.custom_command('delete', 'cli_redis_patch_schedule_delete')

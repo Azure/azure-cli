@@ -15,7 +15,7 @@ premium_size = 'P1'
 basic_size = 'C0'
 name_prefix = 'cliredis'
 # These tests rely on an already existing user assigned managed identity. You will need to create it and paste the id below:
-user_identity = '/subscriptions/3919658b-68ae-4509-8c17-6a2238340ae7/resourcegroups/tolani-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/test-uami'
+user_identity = '/subscriptions/7c4785eb-d3cf-4349-b811-8d756312d1ff/resourcegroups/aj-tiwari/providers/Microsoft.ManagedIdentity/userAssignedIdentities/aj-ui'
 
 class RedisCacheTests(ScenarioTest):
 
@@ -134,7 +134,7 @@ class RedisCacheTests(ScenarioTest):
         self.kwargs = {
             'rg': resource_group,
             'name': self.create_random_name(prefix=name_prefix, length=24),
-            'location': location,
+            'location': 'eastus',
             'sku': premium_sku,
             'size': premium_size,
             'schedule_entries_one': "[{\\\"dayOfWeek\\\":\\\"Monday\\\",\\\"startHourUtc\\\":\\\"00\\\",\\\"maintenanceWindow\\\":\\\"PT5H\\\"}]",
@@ -163,7 +163,7 @@ class RedisCacheTests(ScenarioTest):
         self.kwargs = {
             'rg': resource_group,
             'name': self.create_random_name(prefix=name_prefix, length=24),
-            'location': location,
+            'location': 'eastus',
             'sku': premium_sku,
             'size': premium_size
         }
@@ -177,7 +177,7 @@ class RedisCacheTests(ScenarioTest):
         self.kwargs = {
             'rg': resource_group,
             'name': randName,
-            'location': location,
+            'location': 'westus',
             'sku': premium_sku,
             'size': premium_size,
             'prefix': "redistest",
