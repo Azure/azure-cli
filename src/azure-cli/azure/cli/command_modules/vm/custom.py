@@ -2894,13 +2894,13 @@ def get_vm_format_secret(cmd, secrets, certificate_store=None, keyvault=None, re
 
 def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, certificate_store=None):
     from msrestazure.tools import parse_resource_id
-    from ._vm_utils import create_keyvault_data_plane_client, get_key_vault_base_url
+    from ._vm_utils import create_data_plane_keyvault_certificate_client, get_key_vault_base_url
     VaultSecretGroup, SubResource, VaultCertificate = cmd.get_models(
         'VaultSecretGroup', 'SubResource', 'VaultCertificate')
     vm = get_vm_to_update(cmd, resource_group_name, vm_name)
 
     if '://' not in certificate:  # has a cert name rather a full url?
-        keyvault_client = create_keyvault_data_plane_client(
+        keyvault_client = create_data_plane_keyvault_certificate_client(
             cmd.cli_ctx, get_key_vault_base_url(cmd.cli_ctx, parse_resource_id(keyvault)['name']))
         cert_info = keyvault_client.get_certificate(certificate)
         certificate = cert_info.secret_id
