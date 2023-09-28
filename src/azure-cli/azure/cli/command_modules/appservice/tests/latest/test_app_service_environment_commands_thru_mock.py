@@ -128,6 +128,41 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         self.assertEqual(call_args[0][0], rg_name)
         self.assertEqual(call_args[0][1], deployment_name)
 
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_unique_deployment_name', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_resource_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment.Subnet.Show', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
+    def test_app_service_environment_create_asev3(self, ase_client_factory_mock, subnet_show_mock,
+                                            resource_client_factory_mock, deployment_name_mock):
+        ase_name = 'mock_ase_name'
+        rg_name = 'mock_rg_name'
+        vnet_name = 'mock_vnet_name'
+        subnet_name = 'mock_subnet_name'
+        deployment_name = 'mock_deployment_name'
+
+        ase_client = mock.MagicMock()
+        ase_client_factory_mock.return_value = ase_client
+
+        resource_client_mock = mock.MagicMock()
+        resource_client_factory_mock.return_value = resource_client_mock
+
+        deployment_name_mock.return_value = deployment_name
+
+        show = mock.MagicMock()
+        subnet_show_mock.return_value = show
+
+        fake_data = {"id": "1", "addressPrefix": "10.10.10.10/24"}
+        show.return_value = fake_data
+        create_appserviceenvironment_arm(self.mock_cmd, resource_group_name=rg_name, name=ase_name,
+                                         subnet=subnet_name, vnet_name=vnet_name, kind='ASEv3'
+                                         location='westeurope')
+
+        # Assert begin_create_or_update is called with correct rg and deployment name
+        resource_client_mock.deployments.begin_create_or_update.assert_called_once()
+        call_args = resource_client_mock.deployments.begin_create_or_update.call_args
+        self.assertEqual(call_args[0][0], rg_name)
+        self.assertEqual(call_args[0][1], deployment_name)
+
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_location_from_resource_group', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
     def test_app_service_environment_update(self, ase_client_factory_mock, resource_group_mock):
