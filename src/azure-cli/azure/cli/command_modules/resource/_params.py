@@ -108,7 +108,7 @@ def load_arguments(self, _):
     stacks_delete_resources_type = CLIArgumentType(arg_type=get_three_state_flag(), options_list=['--delete-resources'], help='Flag to indicate delete rather than detach for the resources.')
     stacks_delete_resource_groups_type = CLIArgumentType(arg_type=get_three_state_flag(), options_list=['--delete-resource-groups'], help='Flag to indicate delete rather than detach for the resource groups.')
     stacks_delete_all_type = CLIArgumentType(arg_type=get_three_state_flag(), options_list=['--delete-all'], help='Flag to indicate delete rather than detach for the resources and resource groups.')
-    stacks_deny_settings_mode = CLIArgumentType(arg_type=get_enum_type(DenySettingsMode), help='Define which operations are denied on resources managed by the stack.')
+    stacks_deny_settings_mode = CLIArgumentType(arg_type=get_enum_type(DenySettingsMode), options_list=['--deny-settings-mode', '--dm'], help='Define which operations are denied on resources managed by the stack.')
     stacks_excluded_principals = CLIArgumentType(options_list=['--deny-settings-excluded-principals', '--ep'], help='List of AAD principal IDs excluded from the lock. Up to 5 principals are permitted.')
     stacks_excluded_actions = CLIArgumentType(options_list=['--deny-settings-excluded-actions', '--ea'], help="List of role-based management operations that are excluded from the denySettings. Up to 200 actions are permitted.")
     stacks_apply_to_child_scopes = CLIArgumentType(options_list=['--deny-settings-apply-to-child-scopes', '--cs'], help='DenySettings will be applied to child scopes.')
@@ -806,6 +806,13 @@ def load_arguments(self, _):
         c.argument('stdout', arg_type=bicep_stdout_type)
         c.argument('no_restore', arg_type=bicep_no_restore_type, help="When set, builds the bicep file without restoring external modules.")
 
+    with self.argument_context('bicep build-params') as c:
+        c.argument('file', arg_type=bicep_file_type, help="The path to the .bicepparam file to build in the file system.")
+        c.argument('outdir', arg_type=bicep_outdir_type)
+        c.argument('outfile', arg_type=bicep_outfile_type)
+        c.argument('stdout', arg_type=bicep_stdout_type)
+        c.argument('no_restore', arg_type=bicep_no_restore_type, help="When set, builds the .bicepparam file without restoring external modules.")
+
     with self.argument_context('bicep format') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep file to format in the file system.")
         c.argument('outdir', arg_type=bicep_outdir_type)
@@ -818,6 +825,14 @@ def load_arguments(self, _):
 
     with self.argument_context('bicep decompile') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the ARM template to decompile in the file system.")
+        c.argument('force', arg_type=bicep_force_type, help="Allows overwriting the output file if it exists.")
+
+    with self.argument_context('bicep decompile-params') as c:
+        c.argument('file', arg_type=bicep_file_type, help="The path to the parameters file to build in the file system.")
+        c.argument('bicep_file', completer=FilesCompleter(), type=file_type, help="Path to the bicep template file (relative to the .bicepparam file) that will be referenced in the using declaration.")
+        c.argument('outdir', arg_type=bicep_outdir_type)
+        c.argument('outfile', arg_type=bicep_outfile_type)
+        c.argument('stdout', arg_type=bicep_stdout_type)
         c.argument('force', arg_type=bicep_force_type, help="Allows overwriting the output file if it exists.")
 
     with self.argument_context('bicep restore') as c:
@@ -845,6 +860,8 @@ def load_arguments(self, _):
         c.argument('outfile', arg_type=bicep_outfile_type)
         c.argument('stdout', arg_type=bicep_stdout_type)
         c.argument('no_restore', arg_type=bicep_no_restore_type, help="When set, generates the parameters file without restoring external modules.")
+        c.argument('output_format', help="Set output format. Valid values are ( json | bicepparam ).")
+        c.argument('include_params', help="Set include params. Valid values are ( all | required-only ).")
 
     with self.argument_context('resourcemanagement private-link create') as c:
         c.argument('resource_group', arg_type=resource_group_name_type,

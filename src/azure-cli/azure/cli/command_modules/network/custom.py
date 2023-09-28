@@ -136,6 +136,11 @@ from .operations.dns import (RecordSetADelete as DNSRecordSetADelete, RecordSetA
                              RecordSetCNAMEDelete as DNSRecordSetCNAMEDelete)
 
 logger = get_logger(__name__)
+RULESET_VERSION = {"0.1": "0.1", "1.0": "1.0", "2.2.9": "2.2.9", "3.0": "3.0", "3.1": "3.1", "3.2": "3.2"}
+
+remove_basic_option_msg = "It's recommended to create with `%s`. " \
+                          "Please be aware that the default %s will be changed from Basic to Standard " \
+                          "in the next release. Also note that Basic option will be removed in the future."
 
 
 # region Utility methods
@@ -1897,9 +1902,10 @@ class WAFCreate(_WAFCreate):
         )
         args_schema.rule_set_version = AAZStrArg(
             options=["--version"],
-            help="Version of the web application firewall rule set type, 0.1 is used for Microsoft_BotManagerRuleSet",
+            help="Version of the web application firewall rule set type. "
+                 "0.1 and 1.0 are used for Microsoft_BotManagerRuleSet",
             default="3.0",
-            enum={"0.1": "0.1", "2.2.9": "2.2.9", "3.0": "3.0", "3.1": "3.1", "3.2": "3.2"},
+            enum=RULESET_VERSION
         )
         return args_schema
 
@@ -3251,7 +3257,6 @@ class ExpressRouteCreate(_ExpressRouteCreate):
 
 
 class ExpressRouteUpdate(_ExpressRouteUpdate):
-
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArgFormat
@@ -3259,31 +3264,37 @@ class ExpressRouteUpdate(_ExpressRouteUpdate):
         args_schema.bandwidth = AAZListArg(
             options=["--bandwidth"],
             help="Bandwidth of the circuit. Usage: INT {Mbps,Gbps}. Defaults to Mbps.",
-            nullable=True,
+            nullable=True
         )
         args_schema.bandwidth.Element = AAZStrArg(nullable=True)
         args_schema.bandwidth_in_mbps._registered = False
         args_schema.bandwidth_in_gbps._registered = False
         args_schema.sku_name._registered = False
         args_schema.express_route_port._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRoutePorts/{}",
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/expressRoutePorts/{}"
         )
+
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
         if has_value(args.sku_tier) and has_value(args.sku_family):
-            args.sku_name = '{}_{}'.format(args.sku_tier, args.sku_family)
+            args.sku_name = f"{args.sku_tier}_{args.sku_family}"
+
         if has_value(args.bandwidth):
             converted_bandwidth = _validate_bandwidth(args.bandwidth)
-            args.bandwidth_in_gbps = (converted_bandwidth / 1000.0)
+            args.bandwidth_in_gbps = converted_bandwidth / 1000
             args.bandwidth_in_mbps = int(converted_bandwidth)
 
     def post_instance_update(self, instance):
-        if instance.properties.expressRoutePort is not None:
-            instance.properties.serviceProviderProperties = None
+        if not has_value(instance.properties.express_route_port.id):
+            instance.properties.express_route_port = None
+
+        if has_value(instance.properties.express_route_port):
+            instance.properties.service_provider_properties = None
         else:
-            instance.properties.bandwidthInGbps = None
+            instance.properties.bandwidth_in_gbps = None
 
 
 def _validate_ipv6_address_prefixes(prefixes):
@@ -3948,6 +3959,9 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
             "Please note that the default public IP used for creation will be changed from Basic to Standard "
             "in the future."
         )
+
+    if sku is None or sku.lower() == "basic":
+        logger.warning(remove_basic_option_msg, "--sku standard", "LB SKU")
 
     tags = tags or {}
     public_ip_address = public_ip_address or 'PublicIP{}'.format(load_balancer_name)
@@ -5112,7 +5126,7 @@ def update_nw_flow_log_setter(client, watcher_rg, watcher_name, flow_log_name, p
 
 # region PublicIPAddresses
 def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
-                     allocation_method=None, dns_name=None,
+                     allocation_method=None, dns_name=None, dns_name_scope=None,
                      idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
                      public_ip_prefix=None, edge_zone=None, ip_address=None,
                      protection_mode=None, ddos_protection_plan=None):
@@ -5141,11 +5155,8 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         tier = pip_obj['sku']['tier']
         zone = pip_obj['zones'] if 'zones' in pip_obj else None
 
-    if sku is None:
-        logger.warning(
-            "Please note that the default public IP used for creation will be changed from Basic to Standard "
-            "in the future."
-        )
+    if sku is None or sku.lower() == "basic":
+        logger.warning(remove_basic_option_msg, "--sku standard", "Public IP SKU")
 
     if not allocation_method:
         if sku and sku.lower() == 'standard':
@@ -5163,8 +5174,9 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
             public_ip_args['sku'] = 'Basic'
         public_ip_args['tier'] = tier
 
-    if dns_name or reverse_fqdn:
+    if dns_name or dns_name_scope or reverse_fqdn:
         public_ip_args['dns_name'] = dns_name
+        public_ip_args['dns_name_scope'] = dns_name_scope
         public_ip_args['reverse_fqdn'] = reverse_fqdn
 
     if edge_zone:
@@ -5197,7 +5209,7 @@ class PublicIPCreate(_PublicIPCreate):
 class PublicIPUpdate(_PublicIPUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        from azure.cli.core.aaz import AAZStrArg, AAZDictArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.public_ip_prefix._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
@@ -5207,7 +5219,23 @@ class PublicIPUpdate(_PublicIPUpdate):
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/ddosProtectionPlans/{}",
         )
+        args_schema.ip_tags = AAZDictArg(
+            options=["--ip-tags"],
+            help="Space-separated list of IP tags in `TYPE=VAL` format.",
+            nullable=True
+        )
+        args_schema.ip_tags.Element = AAZStrArg()
+        args_schema.ip_tags_list._registered = False
+
         return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.ip_tags):
+            if ip_tags := args.ip_tags.to_serialized_data() is None:
+                args.ip_tags_list = []
+            else:
+                args.ip_tags_list = [{"ip_tag_type": k, "tag": v} for k, v in ip_tags.items()]
 
     def post_instance_update(self, instance):
         if not has_value(instance.properties.ddos_settings.ddos_protection_plan.id):
@@ -5725,6 +5753,7 @@ class VNetPeeringCreate(_VNetPeeringCreate):
         from azure.cli.core.aaz import AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.sync_remote._registered = False
+        args_schema.remote_vnet._required = True
         args_schema.remote_vnet._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}",
         )

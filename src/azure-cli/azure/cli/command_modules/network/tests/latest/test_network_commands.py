@@ -746,6 +746,7 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
             self.check('frontendIPConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
             self.check("frontendIPConfigurations[0].subnet.contains(id, 'default')", True),
             self.check("enableHttp2", False),
+            self.check("contains(defaultPredefinedSslPolicy, 'AppGwSslPolicy')", True),
         ])
         self.cmd('network application-gateway show-backend-health -g {rg} -n ag1')
 
@@ -832,6 +833,7 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
 
 class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
 
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_ag_identity')
     @KeyVaultPreparer(name_prefix='cli-test-keyvault-', sku='premium')
     def test_network_app_gateway_with_identity(self, resource_group):
@@ -2167,26 +2169,6 @@ class NetworkAppGatewayWafConfigScenarioTest20170301(ScenarioTest):
         ])
 
 
-class NetworkAppGatewayWafV2ConfigScenarioTest(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_v2_config')
-    def test_network_app_gateway_waf_v2_config(self, resource_group):
-
-        self.kwargs.update({
-            'ip': 'pip1',
-            'ag': 'ag1'
-        })
-        self.cmd('network public-ip create -g {rg} -n {ip} --sku standard')
-        self.cmd('network application-gateway waf-policy create -n waf1 -g {rg}')
-        self.cmd('network application-gateway create -g {rg} -n {ag} --subnet subnet1 --vnet-name vnet1 --public-ip-address {ip} --sku WAF_v2 --priority 1001 --waf-policy waf1 --no-wait')
-        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
-        self.cmd('network application-gateway waf-config set -g {rg} --gateway-name ag1 --enabled true --firewall-mode prevention --rule-set-version 3.0 --exclusion RequestHeaderNames StartsWith abc --exclusion RequestArgNames Equals def')
-        self.cmd('network application-gateway waf-config show -g {rg} --gateway-name ag1', checks=[
-            self.check('enabled', True),
-            self.check('length(exclusions)', 2)
-        ])
-
-
 class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_')
@@ -2254,10 +2236,10 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         ])
 
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
-                 '--type Microsoft_BotManagerRuleSet --version 0.1',
+                 '--type Microsoft_BotManagerRuleSet --version 1.0',
                  checks=[
                      self.check('managedRules.managedRuleSets[1].ruleSetType', 'Microsoft_BotManagerRuleSet'),
-                     self.check('managedRules.managedRuleSets[1].ruleSetVersion', '0.1')
+                     self.check('managedRules.managedRuleSets[1].ruleSetVersion', '1.0')
                  ])
 
         # add one exclusion rule to the managed rules of this waf-policy
@@ -2276,7 +2258,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[1].ruleGroupName', self.kwargs['csr_grp2']),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[1].rules[0].ruleId', '913100'),
             self.check('managedRules.managedRuleSets[1].ruleSetType', 'Microsoft_BotManagerRuleSet'),
-            self.check('managedRules.managedRuleSets[1].ruleSetVersion', '0.1'),
+            self.check('managedRules.managedRuleSets[1].ruleSetVersion', '1.0'),
             self.check('policySettings.fileUploadLimitInMb', 64),
             self.check('policySettings.maxRequestBodySizeInKb', 128),
             self.check('policySettings.mode', 'Prevention'),
@@ -2894,7 +2876,7 @@ class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
 
 class NetworkPublicIpScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_public_ip')
+    @ResourceGroupPreparer(name_prefix='cli_test_public_ip', location="eastus2euap")
     def test_network_public_ip(self, resource_group):
         self.kwargs.update({
             'ip1': 'pubipdns',
@@ -2907,10 +2889,11 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
             'version': 'ipv4',
             'sku': 'standard'
         })
-        self.cmd('network public-ip create -g {rg} -n {ip1} --dns-name {dns} --allocation-method static', checks=[
+        self.cmd('network public-ip create -g {rg} -n {ip1} --dns-name {dns} --dns-name-scope TenantReuse --allocation-method static', checks=[
             self.check('publicIp.provisioningState', 'Succeeded'),
             self.check('publicIp.publicIPAllocationMethod', 'Static'),
-            self.check('publicIp.dnsSettings.domainNameLabel', '{dns}')
+            self.check('publicIp.dnsSettings.domainNameLabel', '{dns}'),
+            self.check('publicIp.dnsSettings.domainNameLabelScope', 'TenantReuse')
         ])
         self.cmd('network public-ip create -g {rg} -n {ip2}', checks=[
             self.check('publicIp.provisioningState', 'Succeeded'),
@@ -2933,12 +2916,13 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
         ])
 
         self.cmd(
-            'network public-ip update -g {rg} -n {ip2} --allocation-method static --dns-name wowza2 --idle-timeout 10 --tags foo=doo',
+            'network public-ip update -g {rg} -n {ip2} --allocation-method static --dns-name wowza2 --idle-timeout 10 --ip-tags null --tags foo=doo',
             checks=[
                 self.check('publicIPAllocationMethod', 'Static'),
                 self.check('dnsSettings.domainNameLabel', 'wowza2'),
                 self.check('idleTimeoutInMinutes', 10),
-                self.check('tags.foo', 'doo')
+                self.check('tags.foo', 'doo'),
+                self.check("ipTags", [])
             ])
 
         self.cmd('network public-ip list -g {rg}', checks=[
@@ -3261,7 +3245,7 @@ class NetworkExpressRoutePortScenarioTest(ScenarioTest):
         self.kwargs['CAK_id'] = self.cmd('keyvault secret set --name {CAK_name} --vault-name {kv} --value {CAK_value}').get_output_in_json()['id']
         self.kwargs['CKN_id'] = self.cmd('keyvault secret set --name {CKN_name} --vault-name {kv} --value {CKN_value}').get_output_in_json()['id']
         identity = self.cmd('identity create -g {rg} -n {name}').get_output_in_json()
-        self.cmd('keyvault set-policy -n {kv} --secret-permissions get --object-id ' + identity['principalId'])
+        self.cmd('keyvault set-policy -n {kv} -g {rg} --secret-permissions get --object-id ' + identity['principalId'])
 
         self.cmd('network express-route port location list')
 
@@ -4181,7 +4165,7 @@ class NetworkNicScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{rg}'),
             self.check('name', '{nic}')
         ])
-        self.cmd('network nic update -g {rg} -n {nic} --internal-dns-name noodle --ip-forwarding true --accelerated-networking false --dns-servers "" --network-security-group {nsg2}', checks=[
+        self.cmd('network nic update -g {rg} -n {nic} --internal-dns-name noodle --ip-forwarding true --accelerated-networking false --dns-servers "[]" --network-security-group {nsg2}', checks=[
             self.check('enableIPForwarding', True),
             self.check('enableAcceleratedNetworking', False),
             self.check('dnsSettings.internalDnsNameLabel', 'noodle'),
@@ -4196,6 +4180,27 @@ class NetworkNicScenarioTest(ScenarioTest):
 
         self.cmd('network nic delete --resource-group {rg} --name {nic}')
         self.cmd('network nic list -g {rg}', checks=self.is_empty())
+
+    @ResourceGroupPreparer(name_prefix='test_network_nic_auxiliary', location='eastus')
+    def test_network_nic_auxiliary(self, resource_group):
+        self.kwargs.update({
+            'vnet': self.create_random_name('vnet', 10),
+            'subnet': self.create_random_name('subnet', 10),
+            'nic': self.create_random_name('nic', 10),
+        })
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}')
+        self.cmd('network nic create -g {rg} -n {nic} --vnet-name {vnet} --subnet {subnet} --auxiliary-mode MaxConnections --auxiliary-sku A1 --accelerated-networking true --tags fastpathenabled=true', checks=[
+            self.check('NewNIC.auxiliaryMode', 'MaxConnections'),
+            self.check('NewNIC.auxiliarySku', 'A1'),
+            self.check('NewNIC.enableAcceleratedNetworking', True),
+            self.check('NewNIC.tags.fastpathenabled', 'true')
+        ])
+        self.cmd('network nic update -g {rg} -n {nic} --auxiliary-mode AcceleratedConnections --auxiliary-sku A2', checks=[
+            self.check('auxiliaryMode', 'AcceleratedConnections'),
+            self.check('auxiliarySku', 'A2'),
+            self.check('enableAcceleratedNetworking', True),
+            self.check('tags.fastpathenabled', 'true')
+        ])
 
 
 class NetworkNicAppGatewayScenarioTest(ScenarioTest):
@@ -4652,6 +4657,7 @@ class NetworkVNetScenarioTest(ScenarioTest):
             self.check('type(@)', 'array'),
             self.check("length([?type == '{rt}']) == length(@)", True),
         ])
+        self.cmd("network vnet list -o table")
         self.cmd('network vnet show --resource-group {rg} --name {vnet}', checks=[
             self.check('type(@)', 'object'),
             self.check('name', '{vnet}'),
@@ -4662,7 +4668,7 @@ class NetworkVNetScenarioTest(ScenarioTest):
             self.check('length(addressSpace.addressPrefixes)', 2),
             self.check('dhcpOptions.dnsServers[0]', '1.2.3.4')
         ])
-        self.cmd('network vnet update -g {rg} -n {vnet} --dns-servers ""', checks=[
+        self.cmd('network vnet update -g {rg} -n {vnet} --dns-servers null', checks=[
             self.check('length(addressSpace.addressPrefixes)', 2),
             self.check('dhcpOptions.dnsServers', [])
         ])
@@ -5371,7 +5377,7 @@ class NetworkSubnetScenarioTests(ScenarioTest):
                  checks=self.check('addressPrefix', '123.0.0.0/24'))
 
         # Test we can get rid of the nsg.
-        self.cmd('network vnet subnet update --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefix {subnet_prefix2} --network-security-group \"\"',
+        self.cmd('network vnet subnet update --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefix {subnet_prefix2} --network-security-group null',
                  checks=self.check('networkSecurityGroup', None))
 
         self.cmd('network vnet delete --resource-group {rg} --name {vnet}')
@@ -5402,7 +5408,7 @@ class NetworkSubnetScenarioTests(ScenarioTest):
 
         self.cmd('network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefixes {subnet_prefix} --nat-gateway {nat}',
                  checks=self.check('ends_with(@.natGateway.id, `/{nat}`)', True))
-        self.cmd('network vnet subnet update --resource-group {rg} --vnet-name {vnet} --name {subnet} --nat-gateway \"\"',
+        self.cmd('network vnet subnet update --resource-group {rg} --vnet-name {vnet} --name {subnet} --nat-gateway null',
                  checks=self.check('natGateway', None))
 
 
@@ -5418,7 +5424,7 @@ class NetworkSubnetScenarioTests(ScenarioTest):
         self.cmd('network vnet create -g {rg} -n {vnet}')
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.1.0/24 --service-endpoints Microsoft.Storage',
                  checks=self.check('serviceEndpoints[0].service', 'Microsoft.Storage'))
-        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints ""',
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints null',
                  checks=self.check('serviceEndpoints', None))
 
     @ResourceGroupPreparer(name_prefix='cli_subnet_delegation')
@@ -5478,6 +5484,27 @@ class NetworkSubnetScenarioTests(ScenarioTest):
                      self.check('privateEndpointNetworkPolicies', 'Disabled'),
                      self.check('privateLinkServiceNetworkPolicies', 'Disabled')
                  ])
+
+    @ResourceGroupPreparer(name_prefix='cli_subnet_default_outbound_access')
+    def test_network_subnet_default_outbound_access(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'subnet1': 'subnet1',
+            'subnet2': 'subnet2',
+        })
+        self.cmd('network vnet create -g {rg} -n {vnet} -l westcentralus')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet1} --address-prefixes 10.0.3.0/24 --default-outbound-access false',
+                 self.check('defaultOutboundAccess', False))
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet1} --default-outbound-access true',
+                 self.check('defaultOutboundAccess', True))
+
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefixes 10.0.4.0/24',
+                 self.check('defaultOutboundAccess', True))
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet2} --default-outbound-access false',
+                 self.check('defaultOutboundAccess', False))
+
+        self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet} -n {subnet2}',
+                 self.check('defaultOutboundAccess', False))
 
 
 class NetworkActiveActiveCrossPremiseScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
@@ -5962,10 +5989,9 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
             self.check('subnets[0].last', '11.0.0.0')
         ])
 
-    @record_only()
-    def test_network_traffi_manager_always_serve(self):
+    @ResourceGroupPreparer('cli_test_traffic_manager_always_serve')
+    def test_network_traffic_manager_always_serve(self, resource_group):
         self.kwargs.update({
-            "rg": "external_az_cli_testing",
             "profile": self.create_random_name("profile-", 12),
             "endpoint": self.create_random_name("endpoint-", 16),
             "dns": "mytrafficmanager001100a1",
@@ -6429,7 +6455,7 @@ class NetworkExtendedLocation(ScenarioTest):
             'edge_name': 'microsoftrrdclab1'
         })
 
-        self.cmd('network public-ip create -g {rg} -n {ip1} --edge-zone {edge_name}',
+        self.cmd('network public-ip create -g {rg} -n {ip1} --edge-zone {edge_name} --sku Standard',
                  checks=self.check('publicIp.extendedLocation.name', '{edge_name}'))
 
     @ResourceGroupPreparer(name_prefix='test_network_public_ip_prefix_edge_zone', location='eastus2euap')

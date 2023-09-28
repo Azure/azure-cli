@@ -485,14 +485,10 @@ class _UpdateHelper:
         custom_bgp_ip_addresses.Element = AAZStrType()
 
         default_bgp_ip_addresses = _schema_local_network_gateway_read.properties.bgp_settings.bgp_peering_addresses.Element.default_bgp_ip_addresses
-        default_bgp_ip_addresses.Element = AAZStrType(
-            flags={"read_only": True},
-        )
+        default_bgp_ip_addresses.Element = AAZStrType()
 
         tunnel_ip_addresses = _schema_local_network_gateway_read.properties.bgp_settings.bgp_peering_addresses.Element.tunnel_ip_addresses
-        tunnel_ip_addresses.Element = AAZStrType(
-            flags={"read_only": True},
-        )
+        tunnel_ip_addresses.Element = AAZStrType()
 
         local_network_address_space = _schema_local_network_gateway_read.properties.local_network_address_space
         local_network_address_space.address_prefixes = AAZListType(

@@ -44,6 +44,9 @@ def get_diff_meta_files():
     cmd = ['azdev', 'command-change', 'meta-export', '--src', src_branch, '--tgt', target_branch, '--repo', get_cli_repo_path(), '--meta-output-path', diff_meta_path]
     print(cmd)
     subprocess.run(cmd)
+    cmd = ['ls', '-al', diff_meta_path]
+    print(cmd)
+    subprocess.run(cmd)
 
 
 def get_base_meta_files():
@@ -57,6 +60,9 @@ def get_base_meta_files():
     print(cmd)
     subprocess.run(cmd)
     cmd = ['azdev', 'command-change', 'meta-export', 'CLI', '--meta-output-path', base_meta_path]
+    print(cmd)
+    subprocess.run(cmd)
+    cmd = ['ls', '-al', base_meta_path]
     print(cmd)
     subprocess.run(cmd)
 
@@ -126,12 +132,13 @@ def sort_by_content(item):
 
 def build_markdown_content(item, content):
     if content == "":
-        content = f'|is_break|cmd_name|rule_message|suggest_message|\n|---|---|---|---|\n'
-    is_break = '❌True' if item['is_break'] else '⚠️False'
+        content = f'|rule|cmd_name|rule_message|suggest_message|\n|---|---|---|---|\n'
+    rule_link = f'[{item["rule_id"]} - {item["rule_name"]}]({item["rule_link_url"]})'
+    rule = f'❌ {rule_link} ' if item['is_break'] else f'⚠️ {rule_link}'
     cmd_name = item['cmd_name'] if 'cmd_name' in item else item['subgroup_name']
     rule_message = item['rule_message']
     suggest_message = item['suggest_message']
-    content += f'|{is_break}|{cmd_name}|{rule_message}|{suggest_message}|\n'
+    content += f'|{rule}|{cmd_name}|{rule_message}|{suggest_message}|\n'
     return content
 
 

@@ -896,6 +896,12 @@ class TestAAZArg(unittest.TestCase):
             nullable=True,
             blank="a blank value"
         )
+        schema.user_assigned = AAZListArg(
+            options=["--user-assigned"],
+            blank=["1", "2"],
+        )
+        schema.user_assigned.Element = AAZStrArg(
+        )
         schema.objs = AAZListArg(
             options=["--objs"],
             singular_options=["--obj"]
@@ -993,6 +999,18 @@ class TestAAZArg(unittest.TestCase):
         dest_ops.apply(v, "objs")
         self.assertEqual(v.objs, [{"attr": "a", "prop": "b"}])
 
+        dest_ops = AAZArgActionOperations()
+        self.assertEqual(len(dest_ops._ops), 0)
+        action = schema.user_assigned._build_cmd_action()
+        action.setup_operations(dest_ops, [])
+        dest_ops.apply(v, "user_assigned")
+        self.assertEqual(v.user_assigned, ["1", "2"])
+
+        action.setup_operations(dest_ops, None)
+        self.assertEqual(len(dest_ops._ops), 2)
+        dest_ops.apply(v, "user_assigned")
+        self.assertEqual(v.user_assigned, ["1", "2"])
+
     def test_aaz_dict_arg(self):
         from azure.cli.core.aaz._arg import AAZDictArg, AAZStrArg, AAZArgumentsSchema
         from azure.cli.core.aaz._arg_action import AAZArgActionOperations
@@ -1002,6 +1020,7 @@ class TestAAZArg(unittest.TestCase):
 
         schema.tags = AAZDictArg(
             options=["--tags", "-t"],
+            blank={"ab": '1', "bc": '2'},
         )
         schema.tags.Element = AAZStrArg(
             nullable=True,
@@ -1036,6 +1055,17 @@ class TestAAZArg(unittest.TestCase):
         self.assertEqual(len(dest_ops._ops), 6)
         dest_ops.apply(v, "tags")
         self.assertEqual(v.tags, {})
+
+        # blank value
+        action.setup_operations(dest_ops, [])
+        self.assertEqual(len(dest_ops._ops), 7)
+        dest_ops.apply(v, "tags")
+        self.assertEqual(v.tags, {"ab": '1', "bc": '2'})
+
+        action.setup_operations(dest_ops, None)
+        self.assertEqual(len(dest_ops._ops), 8)
+        dest_ops.apply(v, "tags")
+        self.assertEqual(v.tags, {"ab": '1', "bc": '2'})
 
         with self.assertRaises(aazerror.AAZInvalidValueError):
             action.setup_operations(dest_ops, ["=1"])
@@ -1338,6 +1368,25 @@ class TestAAZArg(unittest.TestCase):
         schema.properties._registered = False
         with self.assertRaises(AAZUnregisteredArg):
             schema.properties.to_cmd_arg("properties")
+
+    def test_aaz_configured_default_arg(self):
+        from azure.cli.core.aaz._arg import AAZResourceGroupNameArg, AAZResourceLocationArg, AAZStrArg, AAZIntArg,\
+            AAZArgumentsSchema
+        schema = AAZArgumentsSchema()
+        v = schema()
+
+        schema.resource_group = AAZResourceGroupNameArg()
+        schema.location = AAZResourceLocationArg()
+        schema.name = AAZStrArg(configured_default="specialname")
+        schema.count = AAZIntArg(configured_default="specialcount")
+        arg = schema.resource_group.to_cmd_arg("resource_group")
+        self.assertEqual(arg.type.settings['configured_default'], 'group')
+        arg = schema.location.to_cmd_arg("location")
+        self.assertEqual(arg.type.settings['configured_default'], 'location')
+        arg = schema.name.to_cmd_arg("name")
+        self.assertEqual(arg.type.settings['configured_default'], 'specialname')
+        arg = schema.count.to_cmd_arg("count")
+        self.assertEqual(arg.type.settings['configured_default'], 'specialcount')
 
 
 class TestAAZArgUtils(unittest.TestCase):

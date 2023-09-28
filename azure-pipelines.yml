@@ -29,7 +29,7 @@ parameters:
 jobs:
 - job: CheckPullRequest
   displayName: "Check the Format of Pull Request Title and Content"
-  condition: and(succeeded(), in(variables['System.PullRequest.TargetBranch'], 'dev', 'release'))
+  condition: and(succeeded(), in(variables['System.PullRequest.TargetBranch'], 'dev', 'release', 'main'))
 
   pool:
     name: ${{ variables.ubuntu_pool }}
@@ -42,6 +42,10 @@ jobs:
       echo $body
       if [ "$(System.PullRequest.TargetBranch)" != "release" ] && echo $title | grep -iqF hotfix:; then
         echo "Hotfix PR should target release branch."
+        exit 1
+      fi
+      if [ "$(System.PullRequest.TargetBranch)" == "main" ]; then
+        echo "Feature PR should target dev branch."
         exit 1
       fi
       python scripts/ci/check_pull_request.py "$title" "$body"
@@ -186,6 +190,12 @@ jobs:
 
 - job: BuildWindowsMSI
   displayName: Build Windows MSI
+  strategy:
+    matrix:
+      x86:
+        Platform: x86
+      x64:
+        Platform: x64
 
   dependsOn: ExtractMetadata
   condition: succeeded()
@@ -200,6 +210,7 @@ jobs:
 
 
   - script: |
+      set ARCH=$(Platform)
       set /p CLI_VERSION=<$(System.ArtifactsDirectory)/metadata/version
       set
       
@@ -215,10 +226,16 @@ jobs:
     displayName: 'Publish Artifact: MSI'
     inputs:
       TargetPath: 'build_scripts/windows/out/'
-      ArtifactName: msi
+      ArtifactName: msi-$(Platform)
 
-- job: TestWindowsMSI
-  displayName: Test Windows MSI
+- job: TestMsiInstallation
+  displayName: Test MSI Installation
+  strategy:
+    matrix:
+      x86:
+        Platform: x86
+      x64:
+        Platform: x64
 
   dependsOn: BuildWindowsMSI
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
@@ -235,52 +252,12 @@ jobs:
     displayName: 'Download Build Artifacts'
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/msi'
-      artifactName: msi
+      artifactName: msi-$(Platform)
 
   - task: PowerShell@2
     displayName: Install and Load CLI
     inputs:
-      targetType: inline
-      script: |
-        if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-          # Start another Powershell process as Admin and execute this script again
-          $arguments = "& '" +$myinvocation.mycommand.definition + "'"
-          Start-Process powershell -Verb runAs -ArgumentList $arguments
-          # Stop if the PowerShell is not run as Admin
-          Break
-        }
-        # The following are executed by elevated PowerShell
-        az --version
-        
-        $InstallArgs = @(
-          "/i"
-          "`"$env:SYSTEM_ARTIFACTSDIRECTORY\msi\Microsoft Azure CLI.msi`""
-          "/q"
-          "/norestart"
-          "/l*v"
-          ".\install_logs.txt"
-        )
-        $pre_installed_version=az version --query '\"azure-cli\"' -o tsv
-        $to_be_installed_version=Get-Content $(System.ArtifactsDirectory)/metadata/version
-        if ($pre_installed_version -eq $to_be_installed_version){
-          # See https://docs.microsoft.com/windows/win32/msi/reinstallmode about options of REINSTALLMODE
-          $reinstall_option="REINSTALL=ALL REINSTALLMODE=emus"
-          $InstallArgs += $reinstall_option
-        }
-        Start-Process "msiexec.exe" -ArgumentList $InstallArgs -Wait -NoNewWindow
-        $install_time=Measure-Command {Start-Process "msiexec.exe" -ArgumentList $InstallArgs -Wait -NoNewWindow} | select -expand TotalSeconds
-        $installed_version=az version --query '\"azure-cli\"' -o tsv
-        if ($installed_version -ne $to_be_installed_version){
-          echo "The MSI failed to install."
-          Exit 1
-        }
-        echo 'Install time(seconds):' $install_time
-        az --version
-        # Test bundled pip with extension installation
-        az extension add -n rdbms-connect
-        az self-test
-        
-        Get-Content .\install_logs.txt
+      filePath: build_scripts\windows\scripts\test_msi_installation.ps1
 
 - job: BuildDockerImage
   displayName: Build Docker Image
@@ -429,20 +406,15 @@ jobs:
       CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
       PYPI_FILES=$(cd $BUILD_ARTIFACTSTAGINGDIRECTORY/pypi; pwd)
       
-      echo "== Testing pip install on Python 3.7 =="
-      docker run \
-        --rm -v $PYPI_FILES:/mnt/pypi python:3.7 \
-        /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
-      
       echo "== Testing pip install on Python 3.9 =="
       docker run \
         --rm -v $PYPI_FILES:/mnt/pypi python:3.9 \
-        /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
+        /bin/bash -c "cd /mnt/pypi && ls && pip install --find-links ./ azure_cli-$CLI_VERSION*whl && az self-test && az --version && sleep 5"
       
       echo "== Testing pip install on Python 3.10 =="
       docker run \
         --rm -v $PYPI_FILES:/mnt/pypi python:3.10 \
-        /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
+        /bin/bash -c "cd /mnt/pypi && ls && pip install --find-links ./ azure_cli-$CLI_VERSION*whl && az self-test && az --version && sleep 5"
 
     displayName: 'Test pip Install'
 
@@ -1061,6 +1033,7 @@ jobs:
       fi
 
 - job: CodegenCoverage
+  condition: and(succeededOrFailed(), in(variables['Build.Reason'], 'BatchedCI'))
   displayName: "Codegen Coverage"
   pool:
     name: ${{ variables.ubuntu_pool }}
@@ -1083,7 +1056,20 @@ jobs:
       # CLI repo only
       azdev statistics list-command-table CLI --statistics-only
       # CLI + EXT repos
-      azdev statistics list-command-table --statistics-only
+      azdev statistics list-command-table --statistics-only > /tmp/codegen_report.json
+      # azure-kusto is not compatible with azure-cli
+      # so we need run azdev statistics before installing azure-kusto to avoid the error `No module named azure.cli`
+      pip install azure-kusto-data azure-kusto-ingest
+      python s/scripts/ci/codegen_report.py
+    env:
+      BUILD_ID: $(Build.BuildId)
+      BUILD_BRANCH: $(Build.SourceBranchName)
+      KUSTO_CLIENT_ID: $(KUSTO_CLIENT_ID)
+      KUSTO_CLIENT_SECRET: $(KUSTO_CLIENT_SECRET)
+      KUSTO_CLUSTER: $(KUSTO_CLUSTER)
+      KUSTO_DATABASE: $(KUSTO_DATABASE)
+      KUSTO_TABLE: $(KUSTO_TABLE)
+      KUSTO_TENANT_ID: $(KUSTO_TENANT_ID)
 
 - job: VerifySphinxDocumentGenerator
   displayName: "Verify Sphinx Document Generator"
@@ -1111,7 +1097,7 @@ jobs:
     - VerifyWindowsRequirements
     - VerifyVersions
     - BuildWindowsMSI
-    - TestWindowsMSI
+    - TestMsiInstallation
     - BuildDockerImage
     - TestDockerImage
     - BuildPythonWheel

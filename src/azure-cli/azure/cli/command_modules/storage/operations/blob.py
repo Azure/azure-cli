@@ -91,6 +91,16 @@ def update_container_rm(cmd, instance, metadata=None, public_access=None,
                         default_encryption_scope=None, deny_encryption_scope_override=None,
                         enable_nfs_v3_root_squash=None, enable_nfs_v3_all_squash=None):
     BlobContainer = cmd.get_models('BlobContainer', resource_type=ResourceType.MGMT_STORAGE)
+
+    # # TODO will remove warning as well as the parameters in November 2023
+    if default_encryption_scope is not None:
+        logger.warning('--default-encryption-scope cannot be updated after container is created. '
+                       'When it is provided, it will be ignored by the server. '
+                       'This parameter will be removed for the update command in November 2023.')
+    if deny_encryption_scope_override is not None:
+        logger.warning('--deny-encryption-scope-override cannot be updated after container is created. '
+                       'When it is provided, it will be ignored by the server. '
+                       'This parameter will be removed for the update command in November 2023.')
     blob_container = BlobContainer(
         metadata=metadata if metadata is not None else instance.metadata,
         public_access=public_access if public_access is not None else instance.public_access,
@@ -759,6 +769,12 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
                               if_none_match=None, timeout=None, dryrun=False):
     container_client = client.get_container_client(source_container_name)
 
+    from datetime import timezone
+    if if_modified_since and not if_modified_since.tzinfo:
+        if_modified_since = if_modified_since.replace(tzinfo=timezone.utc)
+    if if_unmodified_since and not if_unmodified_since.tzinfo:
+        if_unmodified_since = if_unmodified_since.replace(tzinfo=timezone.utc)
+
     @check_precondition_success
     def _delete_blob(blob_name):
         delete_blob_args = {
@@ -781,13 +797,10 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
     source_blobs = list(collect_blob_objects(client, source_container_name, pattern))
 
     if dryrun:
-        from datetime import timezone
         delete_blobs = []
-        if_modified_since_utc = if_modified_since.replace(tzinfo=timezone.utc) if if_modified_since else None
-        if_unmodified_since_utc = if_unmodified_since.replace(tzinfo=timezone.utc) if if_unmodified_since else None
         for blob in source_blobs:
-            if not if_modified_since or blob[1].last_modified >= if_modified_since_utc:
-                if not if_unmodified_since or blob[1].last_modified <= if_unmodified_since_utc:
+            if not if_modified_since or blob[1].last_modified >= if_modified_since:
+                if not if_unmodified_since or blob[1].last_modified <= if_unmodified_since:
                     delete_blobs.append(blob[0])
         logger.warning('delete action: from %s', source)
         logger.warning('    pattern %s', pattern)

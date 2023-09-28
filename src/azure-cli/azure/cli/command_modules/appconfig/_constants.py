@@ -82,3 +82,26 @@ class JsonDiff:
     ADD = "add"
     DELETE = "delete"
     UPDATE = "update"
+
+
+class CompareFields:
+    KEY = "key"
+    LABEL = "label"
+    VALUE = "value"
+    CONTENT_TYPE = "content_type"
+    LOCKED = "locked"
+    TAGS = "tags"
+
+
+CompareFieldsMap = {
+    "appconfig": (CompareFields.CONTENT_TYPE, CompareFields.VALUE, CompareFields.TAGS),
+    "appservice": (CompareFields.VALUE, CompareFields.TAGS),
+    "file": (CompareFields.CONTENT_TYPE, CompareFields.VALUE),
+    "kvset": (CompareFields.CONTENT_TYPE, CompareFields.VALUE, CompareFields.TAGS),
+    "restore": (CompareFields.VALUE, CompareFields.CONTENT_TYPE, CompareFields.LOCKED, CompareFields.TAGS)
+}
+
+
+class ImportMode:
+    ALL = "all"
+    IGNORE_MATCH = "ignore-match"

@@ -5,7 +5,7 @@
 # pylint: disable=line-too-long
 # pylint: disable=too-many-statements
 
-from azure.cli.core.commands.parameters import tags_type, get_enum_type, resource_group_name_type, name_type,\
+from azure.cli.core.commands.parameters import tags_type, get_enum_type, resource_group_name_type, name_type, \
     get_location_type, get_three_state_flag, get_resource_name_completion_list
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.command_modules.servicebus.action import AlertAddEncryption, AlertAddIpRule, AlertAddVirtualNetwork

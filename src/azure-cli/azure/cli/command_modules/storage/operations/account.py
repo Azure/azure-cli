@@ -205,14 +205,22 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     if encryption_key_type_for_table is not None or encryption_key_type_for_queue is not None:
         EncryptionServices = cmd.get_models('EncryptionServices')
         EncryptionService = cmd.get_models('EncryptionService')
-        params.encryption = Encryption()
-        params.encryption.services = EncryptionServices()
+        if params.encryption is None:
+            params.encryption = Encryption()
+        if params.encryption.services is None:
+            params.encryption.services = EncryptionServices()
         if encryption_key_type_for_table is not None:
             table_encryption_service = EncryptionService(enabled=True, key_type=encryption_key_type_for_table)
-            params.encryption.services.table = table_encryption_service
+            if isinstance(params.encryption.services, dict):
+                params.encryption.services["table"] = table_encryption_service
+            else:
+                params.encryption.services.table = table_encryption_service
         if encryption_key_type_for_queue is not None:
             queue_encryption_service = EncryptionService(enabled=True, key_type=encryption_key_type_for_queue)
-            params.encryption.services.queue = queue_encryption_service
+            if isinstance(params.encryption.services, dict):
+                params.encryption.services["queue"] = queue_encryption_service
+            else:
+                params.encryption.services.queue = queue_encryption_service
 
     if any([routing_choice, publish_microsoft_endpoints, publish_internet_endpoints]):
         RoutingPreference = cmd.get_models('RoutingPreference')
@@ -497,8 +505,8 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     if enable_files_adds is not None:
         ActiveDirectoryProperties = cmd.get_models('ActiveDirectoryProperties')
         if enable_files_adds:  # enable AD
-            if not(domain_name and net_bios_domain_name and forest_name and domain_guid and domain_sid and
-                   azure_storage_sid):
+            if not (domain_name and net_bios_domain_name and forest_name and domain_guid and domain_sid and
+                    azure_storage_sid):
                 raise CLIError("To enable ActiveDirectoryDomainServicesForFile, user must specify all of: "
                                "--domain-name, --net-bios-domain-name, --forest-name, --domain-guid, --domain-sid and "
                                "--azure_storage_sid arguments in Azure Active Directory Properties Argument group.")

@@ -14,7 +14,7 @@ from azure.cli.core.commands.parameters import (get_enum_type,
                                                 resource_group_name_type)
 from azure.cli.core.commands.validators import \
     get_default_location_from_resource_group
-from ._constants import ImportExportProfiles
+from ._constants import ImportExportProfiles, ImportMode
 
 from ._validators import (validate_appservice_name_or_id, validate_snapshot_query_fields,
                           validate_connection_string, validate_datetime,
@@ -25,7 +25,8 @@ from ._validators import (validate_appservice_name_or_id, validate_snapshot_quer
                           validate_key, validate_feature, validate_feature_key,
                           validate_identity, validate_auth_mode,
                           validate_resolve_keyvault, validate_export_profile, validate_import_profile,
-                          validate_strict_import, validate_export_as_reference, validate_snapshot_filters)
+                          validate_strict_import, validate_export_as_reference, validate_snapshot_filters,
+                          validate_snapshot_export, validate_snapshot_import)
 
 
 def load_arguments(self, _):
@@ -47,7 +48,7 @@ def load_arguments(self, _):
         nargs='+',
         help='Customize output fields for Snapshots',
         validator=validate_snapshot_query_fields,
-        arg_type=get_enum_type(['name', 'etag', 'status_code', 'retention_period', 'filters', 'status', 'created', 'expires', 'size', 'items_count', 'composition_type', 'tags'])
+        arg_type=get_enum_type(['name', 'etag', 'retention_period', 'filters', 'status', 'created', 'expires', 'size', 'items_count', 'composition_type', 'tags'])
     )
     filter_parameters_arg_type = CLIArgumentType(
         validator=validate_filter_parameters,
@@ -97,6 +98,12 @@ def load_arguments(self, _):
         validator=validate_snapshot_filters,
         nargs='+',
         help='Space-separated list of escaped JSON objects that represent the key and label filters used to build an App Configuration snapshot.'
+    )
+    snapshot_status_arg_type = CLIArgumentType(
+        options_list=['--status'],
+        arg_type=get_enum_type(['archived', 'failed', 'provisioning', 'ready']),
+        nargs='+',
+        help='Filter snapshots by their status. If no status specified, return all snapshots by default.'
     )
 
     # Used with data plane commands. These take either a store name or connection string argument.
@@ -180,6 +187,7 @@ def load_arguments(self, _):
         c.argument('yes', help="Do not prompt for preview.")
         c.argument('skip_features', help="Import only key values and exclude all feature flags. By default, all feature flags will be imported from file or appconfig. Not applicable for appservice.", arg_type=get_three_state_flag())
         c.argument('content_type', help='Content type of all imported items.')
+        c.argument('import_mode', arg_type=get_enum_type([ImportMode.ALL, ImportMode.IGNORE_MATCH]), help='If import mode is "ignore-match", source key-values that already exist at the destination will not be overwritten. Import mode "all" writes all key-values to the destination regardless of whether they exist or not.')
 
     with self.argument_context('appconfig kv import', arg_group='File') as c:
         c.argument('path', help='Local configuration file path. Required for file arguments.')
@@ -199,6 +207,8 @@ def load_arguments(self, _):
         c.argument('src_endpoint', help='If --src-auth-mode is "login", provide endpoint URL of the source App Configuration.')
         c.argument('src_auth_mode', arg_type=get_enum_type(['login', 'key']),
                    help='Auth mode for connecting to source App Configuration. For details, refer to "--auth-mode" argument.')
+        c.argument('src_snapshot', validator=validate_snapshot_import,
+                   help='Import all keys in a given snapshot of the source App Configuration store. If no snapshot is specified, the keys currently in the store are imported based on the specified key and label filters.', is_preview=True)
 
     with self.argument_context('appconfig kv import', arg_group='AppService') as c:
         c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration. Required for AppService arguments')
@@ -211,6 +221,8 @@ def load_arguments(self, _):
         c.argument('yes', help="Do not prompt for preview.")
         c.argument('skip_features', help="Export items excluding all feature flags. By default, all features with the specified label will be exported to file or appconfig. Not applicable for appservice.", arg_type=get_three_state_flag())
         c.argument('skip_keyvault', help="Export items excluding all key vault references. By default, all key vault references with the specified label will be exported.", arg_type=get_three_state_flag())
+        c.argument('snapshot', validator=validate_snapshot_export,
+                   help="Export all keys in a given snapshot of the App Configuration store. If no snapshot is specified, the keys currently in the store are exported based on the specified key and label filters.", is_preview=True)
 
     with self.argument_context('appconfig kv export', arg_group='File') as c:
         c.argument('path', help='Local configuration file path. Required for file arguments.')
@@ -250,7 +262,7 @@ def load_arguments(self, _):
         c.argument('secret_identifier', validator=validate_secret_identifier, help="ID of the Key Vault object. Can be found using 'az keyvault {collection} show' command, where collection is key, secret or certificate. To set reference to the latest version of your secret, remove version information from secret identifier.")
 
     with self.argument_context('appconfig kv delete') as c:
-        c.argument('key', help='Support star sign as filters, for instance * means all key and abc* means keys with abc as prefix.')
+        c.argument('key', validator=validate_key, help='Support star sign as filters, for instance * means all key and abc* means keys with abc as prefix.')
         c.argument('label', help="If no label specified, delete entry with null label. Support star sign as filters, for instance * means all label and abc* means labels with abc as prefix.")
 
     with self.argument_context('appconfig kv show') as c:
@@ -376,5 +388,5 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig snapshot list') as c:
         c.argument('snapshot_name', options_list=['--snapshot-name', '-s'], help='If no name specified, return all snapshots by default. Support star sign as filters, for instance abc* means snapshots with abc as prefix to the name.')
-        c.argument('status', help='Value used to filter snapshots by their status.')
+        c.argument('status', arg_type=snapshot_status_arg_type)
         c.argument('fields', arg_type=snapshot_fields_arg_type)

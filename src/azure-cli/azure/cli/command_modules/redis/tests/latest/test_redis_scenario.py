@@ -309,6 +309,10 @@ class RedisCacheTests(ScenarioTest):
             self.check('length(identity.userAssignedIdentities)', 1)
         ])
 
+        self.cmd('az redis update -n {name} -g {rg} --set "publicNetworkAccess=Disabled"')
+        if self.is_live:
+            time.sleep(5*60)
+
         self.cmd('az redis identity remove -n {name} -g {rg} --mi-system-assigned --mi-user-assigned "{userIdentity}"',checks=[
             self.check('type', 'None')
         ])

@@ -13,7 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network route-filter rule delete",
-    is_preview=True
+    is_preview=True,
 )
 class Delete(AAZCommand):
     """Delete a rule from a route filter.

@@ -227,7 +227,7 @@ def validate_identity(namespace):
 
 def validate_secret_identifier(namespace):
     """ Validate the format of keyvault reference secret identifier """
-    from azure.keyvault.key_vault_id import KeyVaultIdentifier
+    from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1.key_vault_id import KeyVaultIdentifier
 
     identifier = getattr(namespace, 'secret_identifier', None)
     try:
@@ -238,12 +238,12 @@ def validate_secret_identifier(namespace):
 
 
 def validate_key(namespace):
-    if namespace.key:
-        input_key = str(namespace.key).lower()
-        if input_key == '.' or input_key == '..' or '%' in input_key:
-            raise InvalidArgumentValueError("Key is invalid. Key cannot be a '.' or '..', or contain the '%' character.")
-    else:
+    if not namespace.key or str(namespace.key).isspace():
         raise RequiredArgumentMissingError("Key cannot be empty.")
+
+    input_key = str(namespace.key).lower()
+    if input_key == '.' or input_key == '..' or '%' in input_key:
+        raise InvalidArgumentValueError("Key is invalid. Key cannot be a '.' or '..', or contain the '%' character.")
 
 
 def validate_resolve_keyvault(namespace):
@@ -354,3 +354,17 @@ def validate_snapshot_filters(namespace):
                 raise InvalidArgumentValueError("Parameter must be an escaped JSON object. {} is not a valid JSON object.".format(filter_param))
 
         namespace.filters = filter_parameters
+
+
+def validate_snapshot_export(namespace):
+    if namespace.snapshot:
+        if any([namespace.key, namespace.label]):
+            raise MutuallyExclusiveArgumentError("'--snapshot' cannot be specified with '--key' or '--label' arguments.")
+
+
+def validate_snapshot_import(namespace):
+    if namespace.src_snapshot:
+        if namespace.source != 'appconfig':
+            raise InvalidArgumentValueError("--src-snapshot is only applicable when importing from a configuration store.")
+        if any([namespace.src_key, namespace.src_label]):
+            raise MutuallyExclusiveArgumentError("'--src-snapshot' cannot be specified with '--src-key' or '--src-label' arguments.")

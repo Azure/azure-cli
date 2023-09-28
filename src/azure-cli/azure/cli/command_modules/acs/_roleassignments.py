@@ -309,11 +309,11 @@ def ensure_aks_acr_role_assignment(cmd, assignee, registry_id, detach=False, is_
         if not delete_role_assignments(
             cmd.cli_ctx, "acrpull", assignee, scope=registry_id, is_service_principal=is_service_principal
         ):
-            raise AzCLIError("Could not delete role assignments for ACR. " "Are you an Owner on this subscription?")
+            raise AzCLIError("Could not delete role assignments for ACR. Are you an Owner on this subscription?")
         return
 
     if not add_role_assignment(cmd, "acrpull", assignee, scope=registry_id, is_service_principal=is_service_principal):
-        raise AzCLIError("Could not create a role assignment for ACR. " "Are you an Owner on this subscription?")
+        raise AzCLIError("Could not create a role assignment for ACR. Are you an Owner on this subscription?")
     return
 
 

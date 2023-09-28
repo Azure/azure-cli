@@ -153,7 +153,7 @@ def add_client_cert(cmd,
                 issuer_thumbprint = ','.join(issuer_thumbprint)
             cluster.clients.append(ClientCertificate(is_admin=is_admin, common_name=common_name, issuer_thumbprint=issuer_thumbprint))
         else:
-            CLIError("Thumbprint and Common name are empty")
+            raise CLIError("Thumbprint and Common name are empty")
 
         poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
         return LongRunningOperation(cmd.cli_ctx)(poller)

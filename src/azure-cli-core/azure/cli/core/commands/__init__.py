@@ -724,7 +724,7 @@ class AzCliCommandInvoker(CommandInvoker):
             expanded_arg, cmd_copy = job
             try:
                 results.append(self._run_job(expanded_arg, cmd_copy))
-            except(Exception, SystemExit) as ex:  # pylint: disable=broad-except
+            except (Exception, SystemExit) as ex:  # pylint: disable=broad-except
                 exceptions.append((ex, id_arg))
         return results, exceptions
 

@@ -500,6 +500,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('backup_retention', default=7, arg_type=pg_backup_retention_arg_type)
                 c.argument('active_directory_auth', default='Disabled', arg_type=active_directory_auth_arg_type)
                 c.argument('password_auth', default='Enabled', arg_type=password_auth_arg_type)
+                c.argument('auto_grow', default='Disabled', arg_type=auto_grow_arg_type)
             elif command_group == 'mysql':
                 c.argument('tier', default='Burstable', arg_type=tier_arg_type)
                 c.argument('sku_name', default='Standard_B1ms', arg_type=sku_name_arg_type)
@@ -628,6 +629,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('disable_data_encryption', arg_type=disable_data_encryption_arg_type)
                 c.argument('public_access', arg_type=public_access_update_arg_type)
             elif command_group == 'postgres':
+                c.argument('auto_grow', arg_type=auto_grow_arg_type)
                 c.argument('backup_retention', arg_type=pg_backup_retention_arg_type)
                 c.argument('active_directory_auth', arg_type=active_directory_auth_arg_type)
                 c.argument('password_auth', arg_type=password_auth_arg_type)

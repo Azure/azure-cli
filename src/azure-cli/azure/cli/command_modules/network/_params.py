@@ -34,6 +34,7 @@ from azure.cli.command_modules.network._completers import (
 from azure.cli.command_modules.network._actions import (
     TrustedClientCertificateCreate,
     SslProfilesCreate, AddMappingRequest, WAFRulesCreate)
+from azure.cli.command_modules.network.custom import RULESET_VERSION
 from azure.cli.core.profiles import ResourceType
 
 
@@ -228,9 +229,9 @@ def load_arguments(self, _):
                    help='The type of the web application firewall rule set.')
         c.argument('rule_set_version',
                    options_list='--version',
-                   arg_type=get_enum_type(['0.1', '2.2.9', '3.0', '3.1', '3.2']),
+                   arg_type=get_enum_type(RULESET_VERSION.values()),
                    help='The version of the web application firewall rule set type. '
-                        '0.1 is used for Microsoft_BotManagerRuleSet')
+                        '0.1 and 1.0 are used for Microsoft_BotManagerRuleSet.')
 
     with self.argument_context('network application-gateway waf-policy policy-setting') as c:
         c.argument('policy_name', options_list='--policy-name', id_part=None,
@@ -614,6 +615,7 @@ def load_arguments(self, _):
         c.argument('name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), help='The name of the public IP address.')
         c.argument('reverse_fqdn', help='Reverse FQDN (fully qualified domain name).')
         c.argument('dns_name', help='Globally unique DNS entry.')
+        c.argument('dns_name_scope', help='The domain name label scope. If a domain name label and a domain name label scope are specified, an A DNS record is created for the public IP in the Microsoft Azure DNS system with a hashed value includes in FQDN.', arg_type=get_enum_type(["NoReuse", "ResourceGroupReuse", "SubscriptionReuse", "TenantReuse"]))
         c.argument('idle_timeout', type=int, help='Idle timeout in minutes.')
         c.argument('zone', zone_type)
         c.argument('zone', zone_compatible_type)

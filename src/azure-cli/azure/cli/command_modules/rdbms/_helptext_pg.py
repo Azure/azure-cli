@@ -199,6 +199,11 @@ examples:
 
       az postgres flexible-server create -g testGroup -n testServer --location testLocation --geo-redundant-backup Enabled \\
         --key $keyIdentifier --identity testIdentity --backup-key $geoKeyIdentifier --backup-identity geoIdentity
+
+
+      # create flexible server with storage auto-grow as Enabled. Accepted values Enabled / Disabled. Default value for storage auto-grow is "Disabled".
+
+      az postgres flexible-server create -g testGroup -n testServer --location testLocation --storage-auto-grow Enabled
 """
 
 helps['postgres flexible-server show'] = """
@@ -249,6 +254,8 @@ examples:
     text: az postgres flexible-server update --resource-group testGroup --name testserver --private-dns-zone testDNS2.postgres.database.azure.com
   - name: Update a flexible server to update private DNS zone for a VNET enabled server, using private DNS zone in the different resource group and subscription. Private DNS zone will be linked to the VNET if not already linked.
     text: az postgres flexible-server update --resource-group testGroup --name testserver --private-dns-zone /subscriptions/{SubId2}/resourceGroups/{testGroup2}/providers/Microsoft.Network/privateDnsZones/testDNS.postgres.database.azure.com
+  - name: Update a flexible server's storage to enable / disable storage auto-grow.
+    text: az postgres flexible-server update --resource-group testGroup --name testserver --storage-auto-grow Enabled
 """
 
 helps['postgres flexible-server restore'] = """

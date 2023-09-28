@@ -152,7 +152,6 @@ def _snapshot_output_format_group(item):
         ('RETENTION PERIOD', _get_value_by_names(item, ['retentionPeriod', 'retention_period'])),
         ('SIZE', _get_value(item, 'size')),
         ('STATUS', _get_value(item, 'status')),
-        ('STATUS CODE', _get_value_by_names(item, ['statusCode', 'status_code'])),
         ('ITEMS COUNT', _get_value_by_names(item, ['itemsCount', 'items_count'])),
         ('TAGS', _get_value(item, 'tags')),
     ])
