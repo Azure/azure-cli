@@ -508,7 +508,7 @@ def build_identity_and_data_encryption(db_engine, byok_identity=None, backup_byo
 
         if db_engine == 'mysql':
             identity = mysql_flexibleservers.models.MySQLServerIdentity(user_assigned_identities=identities,
-                                                             type="UserAssigned")
+                                                                        type="UserAssigned")
 
             data_encryption = mysql_flexibleservers.models.DataEncryption(
                 primary_user_assigned_identity_id=byok_identity,
