@@ -1751,7 +1751,7 @@ class AKSAgentPoolUpdateDecorator:
         max_surge = self.context.get_max_surge()
         if max_surge:
             upgrade_settings.max_surge = max_surge
-            #why not always set this? so we don't wipe out a preview feaure in upgrade settigns like NodeSoakDuration?
+            # why not always set this? so we don't wipe out a preview feaure in upgrade settigns like NodeSoakDuration?
             agentpool.upgrade_settings = upgrade_settings
 
         drain_timeout = self.context.get_drain_timeout()

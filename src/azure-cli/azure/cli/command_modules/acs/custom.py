@@ -2341,7 +2341,6 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
     if drain_timeout:
         instance.upgrade_settings.drain_timeout_in_minutes = drain_timeout
 
-
     # custom headers
     aks_custom_headers = extract_comma_separated_string(
         aks_custom_headers,
