@@ -977,8 +977,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location="eastus2euap")
-    @ServerPreparer(engine_type='mysql', location="eastus2euap")
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    @ServerPreparer(engine_type='mysql', location=DEFAULT_LOCATION)
     def test_mysql_flexible_server_proxy_resource(self, resource_group, server):
         self._test_firewall_rule_mgmt('mysql', resource_group, server)
         self._test_parameter_mgmt('mysql', resource_group, server)
@@ -1992,8 +1992,8 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
 class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location="eastus")
-    @ServerPreparer(engine_type='mysql', location="eastus")
+    @ResourceGroupPreparer(location="eastus2")
+    @ServerPreparer(engine_type='mysql', location="eastus2")
     def test_mysql_flexible_server_backups_mgmt(self, resource_group, server):
         self._test_backups_mgmt('mysql', resource_group, server)
 
