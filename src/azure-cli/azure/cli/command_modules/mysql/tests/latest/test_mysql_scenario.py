@@ -927,12 +927,13 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
 
     def _test_flexible_server_gtid_reset(self, database_engine, resource_group):
-        location = DEFAULT_LOCATION
+        location = "eastus"
+        general_purpose_sku = "Standard_D2ds_v4"
 
         source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
 
         self.cmd('{} flexible-server create -g {} -n {} -l {} --public-access none --tier {} --sku-name {}'
-                 .format(database_engine, resource_group, source_server, location, 'GeneralPurpose', DEFAULT_GENERAL_PURPOSE_SKU))
+                 .format(database_engine, resource_group, source_server, location, 'GeneralPurpose', general_purpose_sku))
         
         self.cmd('{} flexible-server show -g {} -n {}'
                  .format(database_engine, resource_group, source_server),
@@ -976,8 +977,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location="eastus")
-    @ServerPreparer(engine_type='mysql', location="eastus")
+    @ResourceGroupPreparer(location="eastus2euap")
+    @ServerPreparer(engine_type='mysql', location="eastus2euap")
     def test_mysql_flexible_server_proxy_resource(self, resource_group, server):
         self._test_firewall_rule_mgmt('mysql', resource_group, server)
         self._test_parameter_mgmt('mysql', resource_group, server)
@@ -1991,8 +1992,8 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
 class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
-    @ServerPreparer(engine_type='mysql', location=DEFAULT_LOCATION)
+    @ResourceGroupPreparer(location="eastus")
+    @ServerPreparer(engine_type='mysql', location="eastus")
     def test_mysql_flexible_server_backups_mgmt(self, resource_group, server):
         self._test_backups_mgmt('mysql', resource_group, server)
 
