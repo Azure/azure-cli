@@ -32,6 +32,8 @@ class ListAvailableDelegations(AAZCommand):
         ]
     }
 
+    AZ_SUPPORT_PAGINATION = True
+
     def _handler(self, command_args):
         super()._handler(command_args)
         return self.build_paging(self._execute_operations, self._output)
