@@ -71,6 +71,37 @@ def _build_resource_id(**kwargs):
     except KeyError:
         return None
 
+def _try_parse_key_value_object(template_param_defs, parameters, value):
+        # support situation where empty JSON "{}" is provided
+        if value == '{}' and not parameters:
+            return True
+
+        try:
+            key, value = value.split('=', 1)
+        except ValueError:
+            return False
+
+        param = template_param_defs.get(key, None)
+        if param is None:
+            raise CLIError("unrecognized template parameter '{}'. Allowed parameters: {}"
+                           .format(key, ', '.join(sorted(template_param_defs.keys()))))
+
+        param_type = param.get('type', None)
+        if param_type:
+            param_type = param_type.lower()
+        if param_type in ['object', 'array', 'secureobject']:
+            parameters[key] = {'value': shell_safe_json_parse(value)}
+        elif param_type in ['string', 'securestring']:
+            parameters[key] = {'value': value}
+        elif param_type == 'bool':
+            parameters[key] = {'value': value.lower() == 'true'}
+        elif param_type == 'int':
+            parameters[key] = {'value': int(value)}
+        else:
+            logger.warning("Unrecognized type '%s' for parameter '%s'. Interpretting as string.", param_type, key)
+            parameters[key] = {'value': value}
+
+        return True
 
 def _process_parameters(template_param_defs, parameter_lists):  # pylint: disable=too-many-statements
 
@@ -106,38 +137,6 @@ def _process_parameters(template_param_defs, parameter_lists):  # pylint: disabl
             except Exception:  # pylint: disable=broad-except
                 pass
         return None
-
-    def _try_parse_key_value_object(template_param_defs, parameters, value):
-        # support situation where empty JSON "{}" is provided
-        if value == '{}' and not parameters:
-            return True
-
-        try:
-            key, value = value.split('=', 1)
-        except ValueError:
-            return False
-
-        param = template_param_defs.get(key, None)
-        if param is None:
-            raise CLIError("unrecognized template parameter '{}'. Allowed parameters: {}"
-                           .format(key, ', '.join(sorted(template_param_defs.keys()))))
-
-        param_type = param.get('type', None)
-        if param_type:
-            param_type = param_type.lower()
-        if param_type in ['object', 'array', 'secureobject']:
-            parameters[key] = {'value': shell_safe_json_parse(value)}
-        elif param_type in ['string', 'securestring']:
-            parameters[key] = {'value': value}
-        elif param_type == 'bool':
-            parameters[key] = {'value': value.lower() == 'true'}
-        elif param_type == 'int':
-            parameters[key] = {'value': int(value)}
-        else:
-            logger.warning("Unrecognized type '%s' for parameter '%s'. Interpretting as string.", param_type, key)
-            parameters[key] = {'value': value}
-
-        return True
 
     parameters = {}
     for params in parameter_lists or []:
@@ -271,12 +270,13 @@ def _get_missing_parameters(parameters, template, prompt_fn, no_prompt=False):
 
 
 def _is_bicepparam_file_provided(parameters):
-    if not parameters or len(parameters) < 1:
+    if not parameters:
         return False
 
-    for parameter in parameters:
-        if is_bicepparam_file(parameter[0]):
-            return True
+    for parameter_list in parameters:
+        for parameter_item in parameter_list:
+            if is_bicepparam_file(parameter_item):
+                return True
     return False
 
 
@@ -938,18 +938,51 @@ def _prepare_template_uri_with_query_string(template_uri, input_query_string):
     except Exception:  # pylint: disable=broad-except
         raise InvalidArgumentValueError('Unable to parse parameter: {} .Make sure the value is formed correctly.'.format(input_query_string))
 
+def _get_bicepparam_file_path(parameters):
+    bicepparam_file_path = None
+
+    for parameter_list in parameters:
+        for parameter_item in parameter_list:
+            if is_bicepparam_file(parameter_item): 
+                if not bicepparam_file_path:
+                    bicepparam_file_path = parameter_item
+                else:
+                    raise ArgumentUsageError("Only one .bicepparam file can be provided with --parameters argument")
+                
+    return bicepparam_file_path
+
+def _parse_inline_params_for_bicepparam(parameters, template_param_defs):
+    parsed_inline_params = {}
+
+    for parameter_list in parameters:
+        for parameter_item in parameter_list:
+            if is_bicepparam_file(parameter_item):
+                continue
+            
+            if not _try_parse_key_value_object(template_param_defs, parsed_inline_params, parameter_item):
+                raise CLIError('Unable to parse parameter: {}. Only correctly formatted in-line parameters are allowed with a .bicepparam file'.format(parameter_item))
+    
+    name_value_obj = {}
+    for param in parsed_inline_params.keys():
+        name_value_obj[param] = parsed_inline_params[param]['value']
+
+    return name_value_obj
 
 def _parse_bicepparam_file(cli_ctx, template_file, parameters):
     ensure_bicep_installation(cli_ctx)
 
-    minimum_supported_version = "0.14.85"
-    if not bicep_version_greater_than_or_equal_to(minimum_supported_version):
-        raise ArgumentUsageError(f"Unable to compile .bicepparam file with the current version of Bicep CLI. Please upgrade Bicep CLI to {minimum_supported_version} or later.")
-    if len(parameters) > 1:
-        raise ArgumentUsageError("Can not use --parameters argument more than once when using a .bicepparam file")
+    minimum_supported_version_bicepparam_compilation = "0.14.85"
+    if not bicep_version_greater_than_or_equal_to(minimum_supported_version_bicepparam_compilation):
+        raise ArgumentUsageError(f"Unable to compile .bicepparam file with the current version of Bicep CLI. Please upgrade Bicep CLI to {minimum_supported_version_bicepparam_compilation} or later.")
+
+    minimum_supported_version_supplemental_param = "0.22.5"
+    if len(parameters) > 1 and not bicep_version_greater_than_or_equal_to(minimum_supported_version_supplemental_param):
+        raise ArgumentUsageError(f"Current version of Bicep CLI does not support supplemental parameters with .bicepparam file. Please upgrade Bicep CLI to {minimum_supported_version_supplemental_param} or later.")
+    
+    bicepparam_file = _get_bicepparam_file_path(parameters)
+
     if template_file and not is_bicep_file(template_file):
         raise ArgumentUsageError("Only a .bicep template is allowed with a .bicepparam file")
-    bicepparam_file = parameters[0][0]
 
     if template_file:
         build_bicepparam_output = run_bicep_command(cli_ctx, ["build-params", bicepparam_file, "--bicep-file", template_file, "--stdout"])
@@ -966,6 +999,23 @@ def _parse_bicepparam_file(cli_ctx, template_file, parameters):
     if "templateSpecId" in build_bicepparam_output_json:
         template_spec_id = build_bicepparam_output_json["templateSpecId"]
     parameters_content = build_bicepparam_output_json["parametersJson"]
+
+    #re-invoke build-params to process inline parameters 
+    if len(parameters) > 1:
+        template_obj = _remove_comments_from_json(template_content)
+        template_param_defs = template_obj.get('parameters', {})
+        inline_params = _parse_inline_params_for_bicepparam(parameters, template_param_defs)
+        json_params = json.dumps(inline_params)
+        process_env = os.environ.copy()
+        process_env["BICEP_PARAMETERS_OVERRIDES"] = json_params
+
+        if template_file:
+            build_bicepparam_output = run_bicep_command(cli_ctx, ["build-params", bicepparam_file, "--bicep-file", template_file, "--stdout"])
+        else:
+            build_bicepparam_output = run_bicep_command(cli_ctx, ["build-params", bicepparam_file, "--stdout"])
+
+        build_bicepparam_output_json = json.loads(build_bicepparam_output)
+        parameters_content = build_bicepparam_output_json["parametersJson"]
 
     return template_content, template_spec_id, parameters_content
 
