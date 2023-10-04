@@ -5329,6 +5329,28 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
         self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params}', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
+    
+    def test_resource_group_level_deployment_with_bicepparams_and_inline_params(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'rg' : "exampleGroup",
+            'tf': os.path.join(curr_dir, 'data\\bicepparam\\storage_account_template.bicep').replace('\\', '\\\\'),
+            'params': os.path.join(curr_dir, 'data\\bicepparam\\storage_account_params.bicepparam').replace('\\', '\\\\'),
+            'params2': "location='eastus'"
+        })
+
+        #also check if deployment parameters were correctly updated
+        self.cmd('deployment group validate --resource-group {rg} --template-file "{tf}" --parameters {params}', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment group what-if --resource-group {rg} --template-file "{tf}" --parameters {params} --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+        ])
+
+        self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params}', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
 
     def test_resource_deployment_with_bicepparam_and_incompatible_version(self):
         self.kwargs.update({
@@ -5343,6 +5365,21 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
         with self.assertRaisesRegex(CLIError, f"Unable to compile .bicepparam file with the current version of Bicep CLI. Please upgrade Bicep CLI to { minimum_supported_version} or later."):
             self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params}')
 
+    def test_resource_deployment_with_bicepparam_and_incompatible_version_for_inline_params(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'rg' : "exampleGroup",
+            'tf': os.path.join(curr_dir, 'data\\bicepparam\\storage_account_template.bicep').replace('\\', '\\\\'),
+            'params1': os.path.join(curr_dir, 'data\\bicepparam\\storage_account_params.bicepparam').replace('\\', '\\\\'),
+            'params2': "location='eastus'"
+        })
+
+        self.cmd('az bicep install --version v0.20.4')
+
+        minimum_supported_version = "0.22.5"
+        with self.assertRaisesRegex(CLIError, f"Current version of Bicep CLI does not support supplemental parameters with .bicepparam file. Please upgrade Bicep CLI to {minimum_supported_version} or later."):
+            self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params1} --parameters {params2}')
+
     def test_resource_deployment_with_bicepparam_and_json_template(self):
         self.kwargs.update({
             'rg' : "exampleGroup",
@@ -5353,8 +5390,20 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
         with self.assertRaisesRegex(CLIError, "Only a .bicep template is allowed with a .bicepparam file"):
             self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params}')
 
+    def test_resource_deployment_with_multiple_bicepparam_files(self):
+        self.kwargs.update({
+            'rg' : "exampleGroup",
+            'tf': "./main.bicepparam",
+            'params1' : "./param1.bicepparam",
+            'params2' : "./param2.bicepparam",
+        })
 
-    def test_resource_deployment_with_bicepparam_and_other_parameter_sources(self):
+        self.cmd('az bicep install --version v0.22.5') #will work after release 
+
+        with self.assertRaisesRegex(CLIError, "Can not use --parameters argument more than once when using a .bicepparam file"):
+            self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params1} --parameters {params2}')
+
+    def test_resource_deployment_with_bicepparam_and_json_parameters(self):
         self.kwargs.update({
             'rg' : "exampleGroup",
             'tf': "./main.bicepparam",
