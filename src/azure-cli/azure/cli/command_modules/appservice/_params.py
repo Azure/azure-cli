@@ -93,6 +93,8 @@ def load_arguments(self, _):
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
 
     with self.argument_context('appservice list-locations') as c:
+        c.argument('hyperv_workers_enabled', action='store_true',
+                   help='get regions which support hosting web apps on Windows Container workers')
         c.argument('linux_workers_enabled', action='store_true',
                    help='get regions which support hosting web apps on Linux workers')
         c.argument('sku', arg_type=sku_arg_type)
