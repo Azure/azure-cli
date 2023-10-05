@@ -241,7 +241,6 @@ def update_active_directory_custom(cmd, client, resource_group_name, account_nam
     LongRunningOperation(cmd.cli_ctx)(poller)
     return client.get(resource_group_name, account_name)
 
-
 # list all active directories
 def list_active_directories(client, account_name, resource_group_name):
     return client.get(resource_group_name, account_name).active_directories
@@ -374,14 +373,14 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
         export_policy = ExportPolicyRule(rule_index=rule_index, unix_read_only=unix_read_only,
                                          unix_read_write=unix_read_write, cifs=cifs,
                                          nfsv3=isNfs3, nfsv41=isNfs41, allowed_clients=allowed_clients,
-                                         kerberos5_read_only=kerberos5_r,
-                                         kerberos5_read_write=kerberos5_rw,
-                                         kerberos5_i_read_only=kerberos5i_r,
-                                         kerberos5_i_read_write=kerberos5i_rw,
-                                         kerberos5_p_read_only=kerberos5p_r,
-                                         kerberos5_p_read_write=kerberos5p_rw,
-                                         has_root_access=has_root_access,
-                                         chown_mode=chown_mode)
+                                            kerberos5_read_only=kerberos5_r,
+                                            kerberos5_read_write=kerberos5_rw,
+                                            kerberos5_i_read_only=kerberos5i_r,
+                                            kerberos5_i_read_write=kerberos5i_rw,
+                                            kerberos5_p_read_only=kerberos5p_r,
+                                            kerberos5_p_read_write=kerberos5p_rw,
+                                            has_root_access=has_root_access,
+                                            chown_mode=chown_mode)
         rules.append(export_policy)
 
         volume_export_policy = VolumePropertiesExportPolicy(rules=rules)
