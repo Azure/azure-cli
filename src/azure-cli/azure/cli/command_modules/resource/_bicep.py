@@ -302,7 +302,11 @@ def _extract_version(text):
 
 
 def _run_command(bicep_installation_path, args, custom_env=None):
-    process = subprocess.run([rf"{bicep_installation_path}"] + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=custom_env)
+    process = subprocess.run(
+        [rf"{bicep_installation_path}"] + args,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        env=custom_env)
 
     try:
         process.check_returncode()
