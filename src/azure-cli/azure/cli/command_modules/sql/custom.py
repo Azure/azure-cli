@@ -676,6 +676,10 @@ class ComputeModelType(str, Enum):
     provisioned = "Provisioned"
     serverless = "Serverless"
 
+class FreeLimitExhaustionBehavior(str, Enum):
+    auto_pause = "AutoPause"
+    bill_over_usage = "BillOverUsage"
+
 
 class AlwaysEncryptedEnclaveType(str, Enum):
 

@@ -110,7 +110,7 @@ examples:
 
 helps['sql db create'] = """
 type: command
-short-summary: Create a database.
+short-summary: Create a database. 
 long-summary: A full list of performance level options can be seen by executing `az sql db list-editions -a -o table -l LOCATION`.
 examples:
   - name: Create a Standard S0 database.
@@ -129,6 +129,8 @@ examples:
     text: az sql db create -g mygroup -s myserver -n mydb -e GeneralPurpose --backup-storage-redundancy Local
   - name: Create a database with VBS enclave enabled.
     text: az sql db create -g mygroup -s myserver -n mydb --preferred-enclave-type VBS
+  - name: Create a database with free limit applied
+    text: az sql db create -g mygroup -s myserver -n mydb --e GeneralPurpose -f Gen5 -c 2 --compute-model Serverless --use-free-limit --free-limit-exhaustion-behavior AutoPause
 """
 
 helps['sql db delete'] = """
