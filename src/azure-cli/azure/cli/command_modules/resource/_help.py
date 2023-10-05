@@ -3104,13 +3104,13 @@ examples:
 
 helps['bicep lint'] = """
 type: command
-short-summary: Lints a Bicep file.
+short-summary: Lint a Bicep file.
 examples:
-  - name: Lints a Bicep file.
+  - name: Lint a Bicep file.
     text: az bicep lint --file {bicep_file}
-  - name: Lints a Bicep file without restoring external modules.
+  - name: Lint a Bicep file without restoring external modules.
     text: az bicep lint --file {bicep_file} --no-restore
-  - name: Lints a Bicep file with specified diagnostics format. Valid values are ( default | sarif ).
+  - name: Lint a Bicep file with specified diagnostics format. Valid values are ( default | sarif ).
     text: az bicep lint --file {bicep_file} --diagnostics-format {diagnostics_format}
 """
 
