@@ -4849,9 +4849,9 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         logger.warning("Waiting for the app to be ready ...")
         http = urllib3.PoolManager(timeout=urllib3.Timeout(connect=230, read=230))
         try:
-            r = http.request('GET', _url)
+            http.request('GET', _url)
             return get_streaming_log(cmd, rg_name, name)
-        except Exception as ex:  # pylint: disable=broad-except
+        except Exception:  # pylint: disable=broad-except
             logger.warning("Unable to reach the app. Please run 'az webapp log tail' to view the logs.")
 
     _set_webapp_up_default_args(cmd, rg_name, sku, plan, loc, name)
