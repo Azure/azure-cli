@@ -92,12 +92,6 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="An array of gateway load balancer tunnel interfaces.",
         )
-        _args_schema.virtual_network = AAZObjectArg(
-            options=["--virtual-network"],
-            arg_group="Properties",
-            help="A reference to a virtual network.",
-        )
-        cls._build_args_sub_resource_update(_args_schema.virtual_network)
 
         backend_addresses = cls._args_schema.backend_addresses
         backend_addresses.Element = AAZObjectArg()
@@ -439,7 +433,6 @@ class Create(AAZCommand):
                 properties.set_prop("location", AAZStrType, ".location")
                 properties.set_prop("syncMode", AAZStrType, ".sync_mode")
                 properties.set_prop("tunnelInterfaces", AAZListType, ".tunnel_interfaces")
-                _CreateHelper._build_schema_sub_resource_update(properties.set_prop("virtualNetwork", AAZObjectType, ".virtual_network"))
 
             load_balancer_backend_addresses = _builder.get(".properties.loadBalancerBackendAddresses")
             if load_balancer_backend_addresses is not None:

@@ -3654,7 +3654,7 @@ examples:
   - name: Create an address pool.
     text: az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool
   - name: Create an address pool with several backend addresses using key-value arguments.
-    text: az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --vnet {VnetResourceId} --backend-address name=addr1 ip-address=10.0.0.1 --backend-address name=addr2 ip-address=10.0.0.3
+    text: az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --vnet VnetResourceId --backend-address name=addr1 ip-address=10.0.0.1 --backend-address name=addr2 ip-address=10.0.0.3
 """
 
 helps['network lb address-pool update'] = """
