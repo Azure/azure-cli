@@ -24,7 +24,6 @@ import invoke
 from nacl import encoding, public
 
 import OpenSSL.crypto
-import urllib3
 from fabric import Connection
 
 from knack.prompting import prompt_pass, NoTTYException, prompt_y_n
