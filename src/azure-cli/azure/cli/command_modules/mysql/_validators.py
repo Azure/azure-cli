@@ -146,7 +146,7 @@ def _mysql_import_data_source_type_validator(data_source_type, data_source_backu
         if data_source_backup_dir is not None or data_source_sas_token is not None:
             raise CLIError('Incorrect usage: --data-source-backup-dir and --data-source-sas-token. '
                            'These parameters are not valid for data_source_type mysql_single. '
-                           'Meke sure to provide correct parameters. Read more at help section. ')
+                           'Make sure to provide correct parameters. Read more at help section. ')
 
 
 def _mysql_import_mode_validator(mode):
