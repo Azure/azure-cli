@@ -270,7 +270,8 @@ database_free_limit_exhaustion_behavior = CLIArgumentType(
     option_list=['--free-limit-exhaustion-behavior', '--exhaustion-behavior'],
     help='Specifies the behavior when monthly free limits are exhausted for the free database.'
     'AutoPause: The database will be auto paused upon exhaustion of free limits for remainder of the month.'
-    'BillForUsage: The database will continue to be online upon exhaustion of free limits and any overage will be billed.',
+    'BillForUsage: The database will continue to be online upon exhaustion of free limits'
+    'and any overage will be billed.',
     arg_type=get_enum_type(FreeLimitExhaustionBehavior))
 
 managed_instance_param_type = CLIArgumentType(
@@ -498,10 +499,10 @@ def _configure_db_dw_params(arg_ctx):
 
     arg_ctx.argument('availability_zone',
                      arg_type=database_availability_zone_param_type)
-    
+
     arg_ctx.argument('use_free_limit',
                      arg_type=database_use_free_limit)
-    
+
     arg_ctx.argument('free_limit_exhaustion_behavior',
                      arg_type=database_free_limit_exhaustion_behavior)
 
@@ -744,7 +745,7 @@ def _configure_db_dw_create_params(
         # therefore is hidden using `deprecate_info` instead of `ignore`
         arg_ctx.ignore('read_scale')
         arg_ctx.ignore('high_availability_replica_count')
-        
+
         arg_ctx.argument('read_replica_count',
                          options_list=['--read-replica-count'],
                          deprecate_info=arg_ctx.deprecate(hide=True))

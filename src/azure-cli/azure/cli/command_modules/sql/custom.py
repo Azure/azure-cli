@@ -676,6 +676,7 @@ class ComputeModelType(str, Enum):
     provisioned = "Provisioned"
     serverless = "Serverless"
 
+
 class FreeLimitExhaustionBehavior(str, Enum):
     auto_pause = "AutoPause"
     bill_over_usage = "BillOverUsage"
@@ -1840,9 +1841,8 @@ def db_update(  # pylint: disable=too-many-locals
     #####
     # Per DB CMK properties
     #####
-    if assign_identity:
-        if user_assigned_identity_id is not None:
-            instance.identity = _get_database_identity(user_assigned_identity_id)
+    if assign_identity and (user_assigned_identity_id is not None):
+        instance.identity = _get_database_identity(user_assigned_identity_id)
 
     if keys is not None or keys_to_remove is not None:
         instance.keys = _get_database_keys_for_update(keys, keys_to_remove)

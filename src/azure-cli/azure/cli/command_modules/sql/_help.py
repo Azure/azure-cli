@@ -110,7 +110,7 @@ examples:
 
 helps['sql db create'] = """
 type: command
-short-summary: Create a database. 
+short-summary: Create a database.
 long-summary: A full list of performance level options can be seen by executing `az sql db list-editions -a -o table -l LOCATION`.
 examples:
   - name: Create a Standard S0 database.
@@ -537,6 +537,8 @@ examples:
     text: az sql db update -g mygroup -s myserver -n mydb --backup-storage-redundancy Local
   - name: Update database with VBS enclave enabled.
     text: az sql db update -g mygroup -s myserver -n mydb --preferred-enclave-type VBS
+  - name: Update exhaustion behavior of free limit database to BillOverUsage
+    text: az sql db update -g mygroup -s myserver -n mydb --free-limit-exhaustion-behavior BillOverUsage
 
 """
 
