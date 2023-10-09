@@ -235,7 +235,7 @@ examples:
     text: >
         az mysql flexible-server import create --data-source-type "azure_blob" \\
           --data-source "https://teststorage.blob.windows.net/backupcontainer" \\
-          --data-source-backup-path "backupdata/data/" \\
+          --data-source-backup-dir "backupdata/data/" \\
           --resource-group test-rg --name testserver --version 5.7 --location northeurope \\
           --admin-user "username" --admin-password "password" \\
           --sku-name Standard_D2ds_v4 --tier GeneralPurpose --public-access 0.0.0.0 \\
@@ -244,7 +244,7 @@ examples:
   - name: >
       Trigger import from source backup stored in azure blob container. (Backup files present in container root and blob storage accessible through sas token with Read and List permissions.)
     text: >
-        az mysql flexible-server import create --% --data-source-type "azure_blob" \\
+        az mysql flexible-server import create --data-source-type "azure_blob" \\
           --data-source "https://teststorage.blob.windows.net/backupcontainer" \\
           --% --data-source-sas-token "sp=r&st=2023-07-20T10:30:07Z..."  \\
           --resource-group test-rg --name testserver --version 5.7 --location northeurope \\
