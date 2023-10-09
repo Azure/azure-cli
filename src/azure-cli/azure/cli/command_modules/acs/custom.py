@@ -2289,9 +2289,9 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
     # Note: we exclude this option because node image upgrade can't accept nodepool put fields like max surge
     if (max_surge or drain_timeout) and node_image_only:
         raise MutuallyExclusiveArgumentError(
-            'Conflicting flags. Unable to specify max-surge/drain_timeout with node-image-only.'
-            'If you want to use max-surge/drain_timeout with a node image upgrade, please first '
-            'update max-surge/drain_timeout using "az aks nodepool update --max-surge".'
+            'Conflicting flags. Unable to specify max-surge/drain-timeout with node-image-only.'
+            'If you want to use max-surge/drain-timeout with a node image upgrade, please first '
+            'update max-surge/drain-timeout using "az aks nodepool update --max-surge/--drain-timeout".'
         )
 
     if node_image_only:
