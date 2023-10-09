@@ -389,7 +389,7 @@ def flexible_server_create(cmd, client,
     backup = mysql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
                                                  geo_redundant_backup=geo_redundant_backup)
 
-    sku = mysql_flexibleservers.models.Sku(name=sku_name, tier=tier)
+    sku = mysql_flexibleservers.models.MySQLServerSku(name=sku_name, tier=tier)
 
     high_availability = mysql_flexibleservers.models.HighAvailability(mode=high_availability,
                                                                       standby_availability_zone=standby_availability_zone)
@@ -568,7 +568,7 @@ def flexible_server_import_create(cmd, client,
     backup = mysql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
                                                  geo_redundant_backup=geo_redundant_backup)
 
-    sku = mysql_flexibleservers.models.Sku(name=sku_name, tier=tier)
+    sku = mysql_flexibleservers.models.MySQLServerSku(name=sku_name, tier=tier)
 
     high_availability = mysql_flexibleservers.models.HighAvailability(mode=high_availability,
                                                                       standby_availability_zone=standby_availability_zone)
@@ -702,7 +702,7 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
         backup = mysql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
                                                      geo_redundant_backup=geo_redundant_backup)
 
-        sku = mysql_flexibleservers.models.Sku(name=sku_name, tier=tier)
+        sku = mysql_flexibleservers.models.MySQLServerSku(name=sku_name, tier=tier)
 
         parameters = mysql_flexibleservers.models.Server(
             tags=tags,
@@ -832,7 +832,7 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
         backup = mysql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
                                                      geo_redundant_backup=geo_redundant_backup)
 
-        sku = mysql_flexibleservers.models.Sku(name=sku_name, tier=tier)
+        sku = mysql_flexibleservers.models.MySQLServerSku(name=sku_name, tier=tier)
 
         parameters = mysql_flexibleservers.models.Server(
             tags=tags,
@@ -1244,7 +1244,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
                                                  geo_redundant_backup=geo_redundant_backup)
 
     parameters = mysql_flexibleservers.models.Server(
-        sku=mysql_flexibleservers.models.Sku(name=sku_name, tier=tier),
+        sku=mysql_flexibleservers.models.MySQLServerSku(name=sku_name, tier=tier),
         source_server_resource_id=source_server_id,
         storage=storage,
         backup=backup,
@@ -1525,7 +1525,7 @@ def flexible_server_identity_assign(cmd, client, resource_group_name, server_nam
         identities_map[identity] = {}
 
     parameters = {
-        'identity': mysql_flexibleservers.models.Identity(
+        'identity': mysql_flexibleservers.models.MySQLServerIdentity(
             user_assigned_identities=identities_map,
             type="UserAssigned")}
 
@@ -1582,11 +1582,11 @@ def flexible_server_identity_remove(cmd, client, resource_group_name, server_nam
     if not (instance.identity and instance.identity.user_assigned_identities) or \
        all(key.lower() in [identity.lower() for identity in identities] for key in instance.identity.user_assigned_identities.keys()):
         parameters = {
-            'identity': mysql_flexibleservers.models.Identity(
+            'identity': mysql_flexibleservers.models.MySQLServerIdentity(
                 type="None")}
     else:
         parameters = {
-            'identity': mysql_flexibleservers.models.Identity(
+            'identity': mysql_flexibleservers.models.MySQLServerIdentity(
                 user_assigned_identities=identities_map,
                 type="UserAssigned")}
 
@@ -1610,12 +1610,12 @@ def flexible_server_identity_remove(cmd, client, resource_group_name, server_nam
         cmd.cli_ctx, 'Removing identities from server {}'.format(server_name)
     )
 
-    return result.identity or mysql_flexibleservers.models.Identity()
+    return result.identity or mysql_flexibleservers.models.MySQLServerIdentity()
 
 
 def flexible_server_identity_list(client, resource_group_name, server_name):
     server = client.get(resource_group_name, server_name)
-    return server.identity or mysql_flexibleservers.models.Identity()
+    return server.identity or mysql_flexibleservers.models.MySQLServerIdentity()
 
 
 def flexible_server_identity_show(client, resource_group_name, server_name, identity):
@@ -1639,7 +1639,7 @@ def flexible_server_ad_admin_set(cmd, client, resource_group_name, server_name, 
         raise CLIError("Cannot create an AD admin on a server with replication role. Use the primary server instead.")
 
     parameters = {
-        'identity': mysql_flexibleservers.models.Identity(
+        'identity': mysql_flexibleservers.models.MySQLServerIdentity(
             user_assigned_identities={identity: {}},
             type="UserAssigned")}
 
