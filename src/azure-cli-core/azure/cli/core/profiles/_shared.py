@@ -187,6 +187,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_NETWORK_PRIVATEDNS: None,
         ResourceType.MGMT_KEYVAULT: SDKProfile('2023-07-01', {
             'vaults': '2023-02-01',
+            'managed_hsms': '2023-07-01'
         }),
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2022-04-01', {
             'classic_administrators': '2015-06-01',
