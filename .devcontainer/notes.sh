@@ -1,8 +1,8 @@
 #!/bin/bash
-echo "azdev (/workspaces/azdev) and azcli (/workspaces/azure-cli) have been setup and configured."
+echo "azdev (venv: /workspaces/azdev) and azcli (/workspaces/azure-cli) have been setup and configured."
 echo "Extra manual config steps:"
 echo "  - config vscode python interpreter to '/workspaces/azdev/bin/python'"
-echo "  - run 'source /workspaces/azdev/bin/activate', so you have azdev venv loaded."
+echo "  - run 'source /workspaces/azdev/bin/activate' (if its not loaded by default), so you have azdev/az fully setup."
 echo "==============="
 echo "Debug:"
 echo "  - modify .vscode/launch.json 'args' in 'Azure CLI Debug (Integrated Console)' with your own command in string array (not include az itself) "
