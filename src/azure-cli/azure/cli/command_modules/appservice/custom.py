@@ -4176,6 +4176,46 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, slot
                        is still on-going. Navigate to your scm site to check the deployment status""")
     return res_dict
 
+def _get_latest_deployment_id(cmd, rg_name, name, deployment_status_url, slot):
+    import requests
+    from azure.cli.core.util import should_disable_connection_verify
+
+    headers = get_scm_site_headers(cmd.cli_ctx, name, rg_name, slot)
+    total_trials = 30
+    num_trials = 0
+    while num_trials < total_trials:
+        time.sleep(2)
+        response = requests.get(deployment_status_url, headers=headers,
+                                verify=not should_disable_connection_verify())
+        try:
+            res_dict = response.json()
+        except json.decoder.JSONDecodeError:
+            logger.warning("Deployment status endpoint %s returned malformed data. Retrying...", deployment_status_url)
+        finally:
+            num_trials = num_trials + 1
+        if 'id' in res_dict and 'temp' not in res_dict['id']:
+            return res_dict['id']
+    return None
+
+def _track_deployment_using_deploymentstatus_api(cmd, deploymentstatusapi_url, timeout=None):
+    total_trials = (int(timeout) // 2) if timeout else 450
+    num_trials = 0
+    runtime_successful = False
+    while num_trials < total_trials:
+        time.sleep(2)
+        response_body = send_raw_request(cmd.cli_ctx, "GET", deploymentstatusapi_url, log_request_response=False)
+        deployment_status = response_body.json().get('properties').get('status')
+        logger.info(deployment_status + "...")
+        if deployment_status == "RuntimeSuccessful":
+            runtime_successful = True
+            break
+        elif deployment_status == "RuntimeFailed":
+            raise CLIError("Deployment Failed: Runtime failed to start, check the deployment logs for more info")
+        elif deployment_status == "BuildFailed":
+            raise CLIError("Deployment Failed: Build failed, check the deployment logs for more info")
+    if not runtime_successful:
+        raise CLIError("Timeout reached while tracking deployment status, however, the deployment operation is still on-going. Navigate to your scm site to check the deployment status")
+    return response_body
 
 def list_continuous_webjobs(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_continuous_web_jobs', slot)
@@ -5028,7 +5068,8 @@ def perform_onedeploy(cmd,
                       clean=None,
                       ignore_stack=None,
                       timeout=None,
-                      slot=None):
+                      slot=None,
+                      track_deployment=None):
     params = OneDeployParams()
 
     params.cmd = cmd
@@ -5044,6 +5085,7 @@ def perform_onedeploy(cmd,
     params.should_ignore_stack = ignore_stack
     params.timeout = timeout
     params.slot = slot
+    params.track_deployment = track_deployment
 
     return _perform_onedeploy_internal(params)
 
@@ -5065,6 +5107,7 @@ class OneDeployParams:
         self.should_ignore_stack = None
         self.timeout = None
         self.slot = None
+        self.track_deployment = None
 # pylint: enable=too-many-instance-attributes,too-few-public-methods
 
 
@@ -5113,6 +5156,22 @@ def _build_onedeploy_arm_url(params):
         )
     return params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
 
+def _build_deploymentstatus_url(params, deployment_id):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    client = web_client_factory(params.cmd.cli_ctx)
+    sub_id = get_subscription_id(params.cmd.cli_ctx)
+    if not params.slot:
+        base_url = (
+            f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
+            f"{params.webapp_name}/deploymentStatus/{deployment_id}?api-version={client.DEFAULT_API_VERSION}"
+        )
+    else:
+        base_url = (
+            f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
+            f"{params.webapp_name}/slots/{params.slot}/deploymentStatus/{deployment_id}"
+            f"?api-version={client.DEFAULT_API_VERSION}"
+        )
+    return params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
 
 def _get_ondeploy_headers(params):
     if params.src_path:
@@ -5208,8 +5267,15 @@ def _make_onedeploy_request(params):
         response_body = None
         if poll_async_deployment_for_debugging:
             logger.info('Polling the status of async deployment')
+            if params.track_deployment.lower() == 'true':
+                # once deploymentstatus/latest is available, we can use it to track the deployment
+                deployment_id = _get_latest_deployment_id(params.cmd, params.resource_group_name, params.webapp_name, deployment_status_url, params.slot)
+                if deployment_id is None:
+                    raise CLIError("Unable to fetch deployment id for this deployment")
+                deploymentstatusapi_url = _build_deploymentstatus_url(params, deployment_id)
+                _track_deployment_using_deploymentstatus_api(params.cmd, deploymentstatusapi_url, params.timeout)
             response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
-                                                         deployment_status_url, params.slot, params.timeout)
+                                                        deployment_status_url, params.slot, params.timeout)
             logger.info('Async deployment complete. Server response: %s', response_body)
         else:
             if 'application/json' in response.headers.get('content-type', ""):
