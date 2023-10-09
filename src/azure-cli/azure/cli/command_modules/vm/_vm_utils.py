@@ -105,9 +105,14 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
         return False
 
 
-def create_keyvault_data_plane_client(cli_ctx):
-    from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
-    return keyvault_data_plane_factory(cli_ctx)
+def create_data_plane_keyvault_certificate_client(cli_ctx, vault_base_url):
+    from azure.cli.command_modules.keyvault._client_factory import data_plane_azure_keyvault_certificate_client
+    return data_plane_azure_keyvault_certificate_client(cli_ctx, {"vault_base_url": vault_base_url})
+
+
+def create_data_plane_keyvault_key_client(cli_ctx, vault_base_url):
+    from azure.cli.command_modules.keyvault._client_factory import data_plane_azure_keyvault_key_client
+    return data_plane_azure_keyvault_key_client(cli_ctx, {"vault_base_url": vault_base_url})
 
 
 def get_key_vault_base_url(cli_ctx, vault_name):
@@ -451,6 +456,18 @@ def is_valid_image_version_id(image_version_id):
     return False
 
 
+def is_valid_vm_image_id(image_image_id):
+    if not image_image_id:
+        return False
+
+    image_version_id_pattern = re.compile(r'^/subscriptions/[^/]*/resourceGroups/[^/]*/providers/Microsoft.Compute/'
+                                          r'images/.*$', re.IGNORECASE)
+    if image_version_id_pattern.match(image_image_id):
+        return True
+
+    return False
+
+
 def parse_gallery_image_id(image_reference):
     from azure.cli.core.azclierror import InvalidArgumentValueError
 
@@ -485,6 +502,20 @@ def parse_shared_gallery_image_id(image_reference):
 
     # Return the gallery unique name and gallery image name parsed from shared gallery image id
     return image_info.group(1), image_info.group(2)
+
+
+def parse_vm_image_id(image_id):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+
+    image_info = re.search(r'^/subscriptions/([^/]*)/resourceGroups/([^/]*)/providers/Microsoft.Compute/'
+                           r'images/(.*$)', image_id, re.IGNORECASE)
+    if not image_info or len(image_info.groups()) < 2:
+        raise InvalidArgumentValueError(
+            'The gallery image id is invalid. The valid format should be "/subscriptions/{sub_id}'
+            '/resourceGroups/{rg}/providers/Microsoft.Compute/images/{image_name}"')
+
+    # Return the gallery subscription id, resource group name and image name.
+    return image_info.group(1), image_info.group(2), image_info.group(3)
 
 
 def is_compute_gallery_image_id(image_reference):
@@ -554,16 +585,21 @@ def trusted_launch_warning_log(namespace, generation_version, features):
     if not generation_version:
         return
 
-    log_message = 'Ignite (November) 2023 onwards "az vm/vmss create" command will deploy Gen2-Trusted ' \
-                  'Launch VM by default. To know more about the default change and Trusted Launch, ' \
-                  'please visit https://aka.ms/TLaD'
+    from ._constants import TLAD_DEFAULT_CHANGE_MSG
+    log_message = TLAD_DEFAULT_CHANGE_MSG.format('az vm/vmss create')
 
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE, UPGRADE_SECURITY_HINT
     if generation_version == 'V1':
-        logger.warning(log_message)
-
-    if generation_version == 'V2':
-        if is_trusted_launch_supported(features) and not namespace.security_type:
+        if namespace.security_type and namespace.security_type == COMPATIBLE_SECURITY_TYPE_VALUE:
+            logger.warning(UPGRADE_SECURITY_HINT)
+        else:
             logger.warning(log_message)
+
+    if generation_version == 'V2' and is_trusted_launch_supported(features):
+        if not namespace.security_type:
+            logger.warning(log_message)
+        elif namespace.security_type == COMPATIBLE_SECURITY_TYPE_VALUE:
+            logger.warning(UPGRADE_SECURITY_HINT)
 
 
 def validate_update_vm_trusted_launch_supported(cmd, vm, os_disk_resource_group, os_disk_name):
@@ -607,5 +643,6 @@ def display_region_recommendation(cmd, namespace):
 
 
 def import_aaz_by_profile(profile, module_name):
-    profile_module_name = profile.lower().replace('-', '_')
+    from azure.cli.core.aaz.utils import get_aaz_profile_module_name
+    profile_module_name = get_aaz_profile_module_name(profile_name=profile)
     return importlib.import_module(f"azure.cli.command_modules.vm.aaz.{profile_module_name}.{module_name}")

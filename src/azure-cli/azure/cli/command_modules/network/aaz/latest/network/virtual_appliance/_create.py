@@ -23,9 +23,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2021-08-01",
+        "version": "2023-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkvirtualappliances/{}", "2021-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkvirtualappliances/{}", "2023-05-01"],
         ]
     }
 
@@ -54,29 +54,34 @@ class Create(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
+
+        # define Arg Group "Parameters"
+
+        _args_schema = cls._args_schema
         _args_schema.location = AAZResourceLocationArg(
+            arg_group="Parameters",
             help="Location. Values from: `az account list-locations`. You can configure the default location using `az configure --defaults location=<location>`.",
             fmt=AAZResourceLocationArgFormat(
                 resource_group_arg="resource_group",
             ),
         )
-        _args_schema.vhub = AAZStrArg(
-            options=["--vhub"],
-            help="Name or ID of the virtual hub to which the Security Partner Provider belongs.",
-        )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
+            arg_group="Parameters",
             help="Space-separated tags: key[=value] [key[=value] ...]. Use \"\" to clear existing tags.",
         )
 
         tags = cls._args_schema.tags
         tags.Element = AAZStrArg()
 
-        # define Arg Group "Parameters"
-
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.additional_nics = AAZListArg(
+            options=["--additional-nics"],
+            arg_group="Properties",
+            help="Details required for Additional Network Interface.",
+        )
         _args_schema.boot_strap_config_blobs = AAZListArg(
             options=["--boot-blobs", "--boot-strap-config-blobs"],
             arg_group="Properties",
@@ -92,6 +97,11 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="Space-separated list of CloudInitConfigurationBlob storage URLs.",
         )
+        _args_schema.delegation = AAZObjectArg(
+            options=["--delegation"],
+            arg_group="Properties",
+            help="The delegation for the Virtual Appliance",
+        )
         _args_schema.asn = AAZIntArg(
             options=["--asn"],
             arg_group="Properties",
@@ -102,11 +112,30 @@ class Create(AAZCommand):
             ),
         )
 
+        additional_nics = cls._args_schema.additional_nics
+        additional_nics.Element = AAZObjectArg()
+
+        _element = cls._args_schema.additional_nics.Element
+        _element.has_public_ip = AAZBoolArg(
+            options=["has-public-ip"],
+            help="Flag (true or false) for Intent for Public Ip on additional nic",
+        )
+        _element.name = AAZStrArg(
+            options=["name"],
+            help="Name of additional nic",
+        )
+
         boot_strap_config_blobs = cls._args_schema.boot_strap_config_blobs
         boot_strap_config_blobs.Element = AAZStrArg()
 
         cloud_init_config_blobs = cls._args_schema.cloud_init_config_blobs
         cloud_init_config_blobs.Element = AAZStrArg()
+
+        delegation = cls._args_schema.delegation
+        delegation.service_name = AAZStrArg(
+            options=["service-name"],
+            help="The service name to which the NVA is delegated.",
+        )
 
         # define Arg Group "Sku"
 
@@ -125,6 +154,15 @@ class Create(AAZCommand):
             options=["--vendor"],
             arg_group="Sku",
             help="Virtual Appliance Vendor.",
+        )
+
+        # define Arg Group "VirtualHub"
+
+        _args_schema = cls._args_schema
+        _args_schema.vhub = AAZStrArg(
+            options=["--vhub"],
+            arg_group="VirtualHub",
+            help="Name or ID of the virtual hub to which the Security Partner Provider belongs.",
         )
         return cls._args_schema
 
@@ -209,7 +247,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-08-01",
+                    "api-version", "2023-05-01",
                     required=True,
                 ),
             }
@@ -240,12 +278,23 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
+                properties.set_prop("additionalNics", AAZListType, ".additional_nics")
                 properties.set_prop("bootStrapConfigurationBlobs", AAZListType, ".boot_strap_config_blobs")
                 properties.set_prop("cloudInitConfiguration", AAZStrType, ".cloud_init_config")
                 properties.set_prop("cloudInitConfigurationBlobs", AAZListType, ".cloud_init_config_blobs")
+                properties.set_prop("delegation", AAZObjectType, ".delegation")
                 properties.set_prop("nvaSku", AAZObjectType)
                 properties.set_prop("virtualApplianceAsn", AAZIntType, ".asn")
                 properties.set_prop("virtualHub", AAZObjectType)
+
+            additional_nics = _builder.get(".properties.additionalNics")
+            if additional_nics is not None:
+                additional_nics.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.additionalNics[]")
+            if _elements is not None:
+                _elements.set_prop("hasPublicIp", AAZBoolType, ".has_public_ip")
+                _elements.set_prop("name", AAZStrType, ".name")
 
             boot_strap_configuration_blobs = _builder.get(".properties.bootStrapConfigurationBlobs")
             if boot_strap_configuration_blobs is not None:
@@ -254,6 +303,10 @@ class Create(AAZCommand):
             cloud_init_configuration_blobs = _builder.get(".properties.cloudInitConfigurationBlobs")
             if cloud_init_configuration_blobs is not None:
                 cloud_init_configuration_blobs.set_elements(AAZStrType, ".")
+
+            delegation = _builder.get(".properties.delegation")
+            if delegation is not None:
+                delegation.set_prop("serviceName", AAZStrType, ".service_name")
 
             nva_sku = _builder.get(".properties.nvaSku")
             if nva_sku is not None:
@@ -334,6 +387,9 @@ class Create(AAZCommand):
             )
 
             properties = cls._schema_on_200_201.properties
+            properties.additional_nics = AAZListType(
+                serialized_name="additionalNics",
+            )
             properties.address_prefix = AAZStrType(
                 serialized_name="addressPrefix",
                 flags={"read_only": True},
@@ -347,12 +403,20 @@ class Create(AAZCommand):
             properties.cloud_init_configuration_blobs = AAZListType(
                 serialized_name="cloudInitConfigurationBlobs",
             )
+            properties.delegation = AAZObjectType()
+            properties.deployment_type = AAZStrType(
+                serialized_name="deploymentType",
+                flags={"read_only": True},
+            )
             properties.inbound_security_rules = AAZListType(
                 serialized_name="inboundSecurityRules",
                 flags={"read_only": True},
             )
             properties.nva_sku = AAZObjectType(
                 serialized_name="nvaSku",
+            )
+            properties.partner_managed_resource = AAZObjectType(
+                serialized_name="partnerManagedResource",
             )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -363,6 +427,10 @@ class Create(AAZCommand):
             )
             properties.virtual_appliance_asn = AAZIntType(
                 serialized_name="virtualApplianceAsn",
+            )
+            properties.virtual_appliance_connections = AAZListType(
+                serialized_name="virtualApplianceConnections",
+                flags={"read_only": True},
             )
             properties.virtual_appliance_nics = AAZListType(
                 serialized_name="virtualApplianceNics",
@@ -377,11 +445,29 @@ class Create(AAZCommand):
             )
             _CreateHelper._build_schema_sub_resource_read(properties.virtual_hub)
 
+            additional_nics = cls._schema_on_200_201.properties.additional_nics
+            additional_nics.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.properties.additional_nics.Element
+            _element.has_public_ip = AAZBoolType(
+                serialized_name="hasPublicIp",
+            )
+            _element.name = AAZStrType()
+
             boot_strap_configuration_blobs = cls._schema_on_200_201.properties.boot_strap_configuration_blobs
             boot_strap_configuration_blobs.Element = AAZStrType()
 
             cloud_init_configuration_blobs = cls._schema_on_200_201.properties.cloud_init_configuration_blobs
             cloud_init_configuration_blobs.Element = AAZStrType()
+
+            delegation = cls._schema_on_200_201.properties.delegation
+            delegation.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+            delegation.service_name = AAZStrType(
+                serialized_name="serviceName",
+            )
 
             inbound_security_rules = cls._schema_on_200_201.properties.inbound_security_rules
             inbound_security_rules.Element = AAZObjectType()
@@ -396,12 +482,31 @@ class Create(AAZCommand):
             )
             nva_sku.vendor = AAZStrType()
 
-            virtual_appliance_nics = cls._schema_on_200_201.properties.virtual_appliance_nics
-            virtual_appliance_nics.Element = AAZObjectType(
+            partner_managed_resource = cls._schema_on_200_201.properties.partner_managed_resource
+            partner_managed_resource.id = AAZStrType(
+                flags={"read_only": True},
+            )
+            partner_managed_resource.internal_load_balancer_id = AAZStrType(
+                serialized_name="internalLoadBalancerId",
+                flags={"read_only": True},
+            )
+            partner_managed_resource.standard_load_balancer_id = AAZStrType(
+                serialized_name="standardLoadBalancerId",
                 flags={"read_only": True},
             )
 
+            virtual_appliance_connections = cls._schema_on_200_201.properties.virtual_appliance_connections
+            virtual_appliance_connections.Element = AAZObjectType()
+            _CreateHelper._build_schema_sub_resource_read(virtual_appliance_connections.Element)
+
+            virtual_appliance_nics = cls._schema_on_200_201.properties.virtual_appliance_nics
+            virtual_appliance_nics.Element = AAZObjectType()
+
             _element = cls._schema_on_200_201.properties.virtual_appliance_nics.Element
+            _element.instance_name = AAZStrType(
+                serialized_name="instanceName",
+                flags={"read_only": True},
+            )
             _element.name = AAZStrType(
                 flags={"read_only": True},
             )

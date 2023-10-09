@@ -59,7 +59,7 @@ MapToClosestMACRegion = {
     "germanynorth": "westeurope",
     "uaecentral": "westeurope",
     "eastus2euap": "eastus2euap",
-    "centraluseuap": "westeurope",
+    "centraluseuap": "eastus2euap",
     "brazilsoutheast": "eastus",
     "jioindiacentral": "centralindia",
     "swedencentral": "westeurope",

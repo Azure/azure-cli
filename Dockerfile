@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-ARG PYTHON_VERSION="3.10"
+ARG PYTHON_VERSION="3.11"
 
 FROM python:${PYTHON_VERSION}-alpine
 
@@ -42,9 +42,9 @@ RUN apk add --no-cache bash openssh ca-certificates jq curl openssl perl git zip
  && apk add --no-cache bash-completion \
  && update-ca-certificates
 
-ARG JP_VERSION="0.1.3"
+ARG JP_VERSION="0.2.1"
 
-RUN curl -L https://github.com/jmespath/jp/releases/download/${JP_VERSION}/jp-linux-amd64 -o /usr/local/bin/jp \
+RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && curl -L https://github.com/jmespath/jp/releases/download/${JP_VERSION}/jp-linux-$arch -o /usr/local/bin/jp \
  && chmod +x /usr/local/bin/jp
 
 WORKDIR azure-cli

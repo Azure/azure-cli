@@ -8,11 +8,11 @@ import json
 from knack.util import CLIError
 from knack.log import get_logger
 
-from azure.mgmt.cognitiveservices.models import Account as CognitiveServicesAccount, Sku,\
-    VirtualNetworkRule, IpRule, NetworkRuleSet, NetworkRuleAction,\
-    AccountProperties as CognitiveServicesAccountProperties, ApiProperties as CognitiveServicesAccountApiProperties,\
-    Identity, ResourceIdentityType as IdentityType,\
-    Deployment, DeploymentModel, DeploymentScaleSettings, DeploymentProperties,\
+from azure.mgmt.cognitiveservices.models import Account as CognitiveServicesAccount, Sku, \
+    VirtualNetworkRule, IpRule, NetworkRuleSet, NetworkRuleAction, \
+    AccountProperties as CognitiveServicesAccountProperties, ApiProperties as CognitiveServicesAccountApiProperties, \
+    Identity, ResourceIdentityType as IdentityType, \
+    Deployment, DeploymentModel, DeploymentScaleSettings, DeploymentProperties, \
     CommitmentPlan, CommitmentPlanProperties, CommitmentPeriod
 from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus
 
@@ -246,8 +246,9 @@ def identity_show(client, resource_group_name, account_name):
 
 def deployment_begin_create_or_update(
         client, resource_group_name, account_name, deployment_name,
-        model_format, model_name, model_version,
-        scale_settings_scale_type, scale_settings_capacity=None):
+        model_format, model_name, model_version, model_source=None,
+        sku_name=None, sku_capacity=None,
+        scale_settings_scale_type=None, scale_settings_capacity=None):
     """
     Create a deployment for Azure Cognitive Services account.
     """
@@ -257,9 +258,14 @@ def deployment_begin_create_or_update(
     dpy.properties.model.format = model_format
     dpy.properties.model.name = model_name
     dpy.properties.model.version = model_version
-    dpy.properties.scale_settings = DeploymentScaleSettings()
-    dpy.properties.scale_settings.scale_type = scale_settings_scale_type
-    if scale_settings_capacity is not None:
+    if model_source is not None:
+        dpy.properties.model.source = model_source
+    if sku_name is not None:
+        dpy.sku = Sku(name=sku_name)
+        dpy.sku.capacity = sku_capacity
+    if scale_settings_scale_type is not None:
+        dpy.properties.scale_settings = DeploymentScaleSettings()
+        dpy.properties.scale_settings.scale_type = scale_settings_scale_type
         dpy.properties.scale_settings.capacity = scale_settings_capacity
 
     return client.begin_create_or_update(resource_group_name, account_name, deployment_name, dpy, polling=False)

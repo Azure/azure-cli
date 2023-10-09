@@ -172,7 +172,7 @@ def custom_serialize_conditions(conditions_dict):
     for key, value in conditions_dict.items():
         featurefilters = []
         for featurefilter in value:
-            featurefilters.append(str(featurefilter))
+            featurefilters.append(featurefilter.__dict__)
         featurefilterdict[key] = featurefilters
     return featurefilterdict
 
@@ -214,7 +214,7 @@ def map_featureflag_to_keyvalue(featureflag):
 
     except Exception as exception:
         error_msg = "Exception while converting feature flag to key value: {0}\n{1}".format(featureflag.key, exception)
-        raise Exception(error_msg)
+        raise Exception(error_msg)  # pylint: disable=broad-exception-raised
 
     return set_kv
 
@@ -325,3 +325,13 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
         raise
 
     return feature_flag_value
+
+
+def is_feature_flag(kv):
+    # pylint: disable=line-too-long
+    '''
+    Helper function used to determine if a key-value is a feature flag
+    '''
+    if kv and kv.key and isinstance(kv.key, str) and kv.content_type and isinstance(kv.content_type, str):
+        return kv.key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX) and kv.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE
+    return False

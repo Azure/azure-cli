@@ -10,12 +10,12 @@ from azure.cli.core.commands.parameters import (
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
 from azure.cli.command_modules.monitor.actions import (
-    AlertAddAction, AlertRemoveAction, ConditionAction, AutoscaleAddAction, AutoscaleRemoveAction,
-    AutoscaleScaleAction, AutoscaleConditionAction, get_period_type,
+    AlertAddAction, AlertRemoveAction, ConditionAction,
+    AutoscaleScaleAction, AutoscaleConditionAction, get_period_type, AutoscaleCreateAction,
     timezone_offset_type, timezone_name_type, MetricAlertConditionAction, MetricAlertAddAction)
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
 from azure.cli.command_modules.monitor.validators import (
-    process_webhook_prop, validate_autoscale_recurrence, validate_autoscale_timegrain, get_action_group_validator,
+    validate_autoscale_recurrence, validate_autoscale_timegrain, get_action_group_validator,
     get_action_group_id_validator, validate_metric_dimension, validate_storage_accounts_name_or_id)
 
 from knack.arguments import CLIArgumentType
@@ -26,12 +26,10 @@ def load_arguments(self, _):
     from azure.mgmt.monitor.models import ConditionOperator, TimeAggregationOperator, EventData, PredictiveAutoscalePolicyScaleMode
     from .grammar.metric_alert.MetricAlertConditionValidator import dim_op_conversion, agg_conversion, op_conversion, sens_conversion
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
-    webhook_prop_type = CLIArgumentType(validator=process_webhook_prop, nargs='*')
 
     autoscale_name_type = CLIArgumentType(options_list=['--autoscale-name'], help='Name of the autoscale settings.', id_part='name')
     autoscale_profile_name_type = CLIArgumentType(options_list=['--profile-name'], help='Name of the autoscale profile.')
     autoscale_rule_name_type = CLIArgumentType(options_list=['--rule-name'], help='Name of the autoscale rule.')
-    scope_name_type = CLIArgumentType(help='Name of the Azure Monitor Private Link Scope.')
 
     with self.argument_context('monitor') as c:
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
@@ -100,7 +98,7 @@ def load_arguments(self, _):
         c.argument('aggregation', arg_type=get_enum_type(t for t in AggregationType if t.name != 'none'), nargs='*')
         c.argument('metrics', nargs='+')
         c.argument('orderby', help='Aggregation to use for sorting results and the direction of the sort. Only one order can be specificed. Examples: sum asc')
-        c.argument('top', help='Max number of records to retrieve. Valid only if --filter used.')
+        c.argument('top', type=int, help='Max number of records to retrieve. Valid only if --filter used.')
         c.argument('filters', options_list='--filter')
         c.argument('metric_namespace', options_list='--namespace')
 
@@ -110,8 +108,9 @@ def load_arguments(self, _):
         c.argument('offset', type=get_period_type(as_timedelta=True))
         c.argument('interval', arg_group='Time', type=get_period_type())
 
-    with self.argument_context('monitor metrics list-namespaces', arg_group='Time') as c:
-        c.argument('start_time', arg_type=get_datetime_type(help='Start time of the query.'))
+    with self.argument_context('monitor metrics list-namespaces') as c:
+        c.argument("resource_uri", help="The identifier of the resource.")
+        c.argument('start_time', arg_type=get_datetime_type(help='Start time of the query.'), arg_group='Time')
     # endregion
 
     # region MetricAlerts
@@ -196,10 +195,10 @@ def load_arguments(self, _):
         c.argument('rule_name', arg_type=autoscale_rule_name_type)
         c.argument('enabled', arg_type=get_three_state_flag(), help='Autoscale settings enabled status.')
 
+    with self.argument_context('monitor autoscale create', arg_group='Notification') as c:
+        c.argument('actions', options_list=['--action', '-a'], action=AutoscaleCreateAction, nargs='+')
+
     with self.argument_context('monitor autoscale', arg_group='Notification') as c:
-        c.argument('actions', options_list=['--action', '-a'], action=AutoscaleAddAction, nargs='+')
-        c.argument('add_actions', options_list=['--add-action', '-a'], action=AutoscaleAddAction, nargs='+')
-        c.argument('remove_actions', options_list=['--remove-action', '-r'], action=AutoscaleRemoveAction, nargs='+')
         c.argument('email_administrator', arg_type=get_three_state_flag(), help='Send email to subscription administrator on scaling.')
         c.argument('email_coadministrators', arg_type=get_three_state_flag(), help='Send email to subscription co-administrators on scaling.')
 
@@ -294,66 +293,11 @@ def load_arguments(self, _):
     with self.argument_context('monitor action-group') as c:
         c.argument('action_group_name', options_list=['--name', '-n'], id_part='name')
         c.argument('location', get_location_type(self.cli_ctx), validator=None)
-
-    with self.argument_context('monitor action-group create') as c:
-        from .actions import ActionGroupReceiverParameterAction
-        c.extra('receivers', options_list=['--action', '-a'], nargs='+', arg_group='Actions', action=ActionGroupReceiverParameterAction)
-        c.extra('short_name')
-        c.extra('tags')
-        c.extra('location', get_location_type(self.cli_ctx))
-        c.ignore('action_group')
-
-    with self.argument_context('monitor action-group update', arg_group='Actions') as c:
-        c.extra('add_receivers', options_list=['--add-action', '-a'], nargs='+', action=ActionGroupReceiverParameterAction)
-        c.extra('remove_receivers', options_list=['--remove-action', '-r'], nargs='+')
-        c.ignore('action_group')
-
-    with self.argument_context('monitor action-group enable-receiver') as c:
-        c.argument('receiver_name', options_list=['--name', '-n'], help='The name of the receiver to resubscribe.')
-        c.argument('action_group_name', options_list=['--action-group'], help='The name of the action group.')
-
-    with self.argument_context('monitor action-group test-notifications create') as c:
-        c.argument('add_receivers', options_list=['--add-action', '-a'], nargs='+', action=ActionGroupReceiverParameterAction)
-        c.argument('alert_type', type=str, help='The name of the supported alert type.')
-        c.argument('action_group_name', options_list=['--action-group'], help='The name of the action group.')
     # endregion
 
     # region ActivityLog Alerts
     with self.argument_context('monitor activity-log alert') as c:
         c.argument('activity_log_alert_name', options_list=['--name', '-n'], id_part='name')
-
-    with self.argument_context('monitor activity-log alert create') as c:
-        from .operations.activity_log_alerts import process_condition_parameter
-        c.argument('disable', action='store_true')
-        c.argument('scopes', options_list=['--scope', '-s'], nargs='+')
-        c.argument('condition', options_list=['--condition', '-c'], nargs='+', validator=process_condition_parameter)
-        c.argument('action_groups', options_list=['--action-group', '-a'], nargs='+')
-        c.argument('webhook_properties', options_list=['--webhook-properties', '-w'], arg_type=webhook_prop_type)
-
-    with self.argument_context('monitor activity-log alert update-condition') as c:
-        c.argument('reset', action='store_true')
-        c.argument('add_conditions', options_list=['--add-condition', '-a'], nargs='+')
-        c.argument('remove_conditions', options_list=['--remove-condition', '-r'], nargs='+')
-
-    with self.argument_context('monitor activity-log alert update') as c:
-        from .operations.activity_log_alerts import process_condition_parameter
-        c.argument('condition', options_list=['--condition', '-c'], nargs='+', validator=process_condition_parameter)
-        c.argument('enabled', arg_type=get_three_state_flag())
-
-    with self.argument_context('monitor activity-log alert action-group add') as c:
-        c.argument('reset', action='store_true')
-        c.argument('action_group_ids', options_list=['--action-group', '-a'], nargs='+')
-        c.argument('webhook_properties', options_list=['--webhook-properties', '-w'], arg_type=webhook_prop_type)
-
-    with self.argument_context('monitor activity-log alert action-group remove') as c:
-        c.argument('action_group_ids', options_list=['--action-group', '-a'], nargs='+')
-
-    with self.argument_context('monitor activity-log alert scope add') as c:
-        c.argument('scopes', options_list=['--scope', '-s'], nargs='+')
-        c.argument('reset', action='store_true')
-
-    with self.argument_context('monitor activity-log alert scope remove') as c:
-        c.argument('scopes', options_list=['--scope', '-s'], nargs='+')
     # endregion
 
     # region Log Analytics Workspace
@@ -440,36 +384,4 @@ def load_arguments(self, _):
                         "all monitor settings would be cloned instead of expanding its scope.")
         c.argument('monitor_types', options_list=['--types', '-t'], arg_type=get_enum_type(['metricsAlert']),
                    nargs='+', help='List of types of monitor settings which would be cloned.', default=['metricsAlert'])
-
-    # region Private Link Resources
-    for item in ['create', 'update', 'show', 'delete', 'list']:
-        with self.argument_context('monitor private-link-scope {}'.format(item)) as c:
-            c.argument('scope_name', scope_name_type, options_list=['--name', '-n'])
-    with self.argument_context('monitor private-link-scope create') as c:
-        c.ignore('location')
-
-    with self.argument_context('monitor private-link-scope scoped-resource') as c:
-        c.argument('scope_name', scope_name_type)
-        c.argument('resource_name', options_list=['--name', '-n'], help='Name of the assigned resource.')
-        c.argument('linked_resource_id', options_list=['--linked-resource'], help='ARM resource ID of the linked resource. It should be one of log analytics workspace or application insights component.')
-
-    with self.argument_context('monitor private-link-scope private-link-resource') as c:
-        c.argument('scope_name', scope_name_type)
-        c.argument('group_name', options_list=['--name', '-n'], help='Name of the private link resource.')
-
-    with self.argument_context('monitor private-link-scope private-endpoint-connection') as c:
-        c.argument('scope_name', scope_name_type)
-        c.argument('private_endpoint_connection_name', options_list=['--name', '-n'],
-                   help='The name of the private endpoint connection associated with the private link scope.')
-    for item in ['approve', 'reject', 'show', 'delete']:
-        with self.argument_context('monitor private-link-scope private-endpoint-connection {}'.format(item)) as c:
-            c.argument('private_endpoint_connection_name', options_list=['--name', '-n'], required=False,
-                       help='The name of the private endpoint connection associated with the private link scope.')
-            c.extra('connection_id', options_list=['--id'],
-                    help='The ID of the private endpoint connection associated with the private link scope. You can get '
-                    'it using `az monitor private-link-scope show`.')
-            c.argument('scope_name', help='Name of the Azure Monitor Private Link Scope.', required=False)
-            c.argument('resource_group_name', help='The resource group name of specified private link scope.',
-                       required=False)
-            c.argument('description', help='Comments for {} operation.'.format(item))
     # endregion

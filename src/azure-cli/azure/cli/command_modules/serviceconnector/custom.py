@@ -19,6 +19,7 @@ from ._resource_config import (
     SUPPORTED_AUTH_TYPE,
     SUPPORTED_CLIENT_TYPE,
     TARGET_RESOURCES,
+    AUTH_TYPE,
     RESOURCE
 )
 from ._validators import (
@@ -35,7 +36,9 @@ from ._utils import (
     get_cloud_conn_auth_info,
     get_local_conn_auth_info,
     _get_azext_module,
-    _get_or_add_extension
+    _get_or_add_extension,
+    springboot_migration_warning,
+    decorate_springboot_cosmossql_config
 )
 from ._credential_free import is_passwordless_command
 # pylint: disable=unused-argument,unsubscriptable-object,unsupported-membership-test,too-many-statements,too-many-locals
@@ -51,7 +54,7 @@ def connection_list(client,
                     source_resource_group=None,
                     source_id=None,
                     cluster=None,
-                    site=None,
+                    site=None, slot=None,
                     spring=None, app=None, deployment='default'):
     if not source_id:
         raise RequiredArgumentMissingError(err_msg.format('--source-id'))
@@ -105,7 +108,7 @@ def connection_show(client,
                     source_id=None,
                     indentifier=None,
                     cluster=None,
-                    site=None,
+                    site=None, slot=None,
                     spring=None, app=None, deployment='default'):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(
@@ -135,7 +138,7 @@ def connection_delete(client,
                       source_id=None,
                       indentifier=None,
                       cluster=None,
-                      site=None,
+                      site=None, slot=None,
                       spring=None, app=None, deployment='default',
                       no_wait=False):
     if not source_id or not connection_name:
@@ -171,13 +174,17 @@ def connection_list_configuration(client,
                                   source_id=None,
                                   indentifier=None,
                                   cluster=None,
-                                  site=None,
+                                  site=None, slot=None,
                                   spring=None, app=None, deployment='default'):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
-    return auto_register(client.list_configurations,
-                         resource_uri=source_id,
-                         linker_name=connection_name)
+    configurations = auto_register(client.list_configurations,
+                                   resource_uri=source_id,
+                                   linker_name=connection_name)
+
+    decorate_springboot_cosmossql_config(configurations)
+
+    return configurations
 
 
 def local_connection_generate_configuration(cmd, client,
@@ -245,7 +252,7 @@ def connection_validate(cmd, client,
                         source_id=None,
                         indentifier=None,
                         cluster=None,
-                        site=None,
+                        site=None, slot=None,
                         spring=None, app=None, deployment='default'):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
@@ -292,7 +299,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       customized_keys=None,
                       new_addon=False, no_wait=False,
                       cluster=None, scope=None, enable_csi=False,            # Resource.KubernetesCluster
-                      site=None,                                             # Resource.WebApp
+                      site=None, slot=None,                                  # Resource.WebApp
                       spring=None, app=None, deployment='default',           # Resource.SpringCloud
                       server=None, database=None,                            # Resource.*Postgres, Resource.*Sql*
                       vault=None,                                            # Resource.KeyVault
@@ -357,7 +364,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
                            store_in_connection_string=False,
                            new_addon=False, no_wait=False,
                            cluster=None, scope=None, enable_csi=False,            # Resource.KubernetesCluster
-                           site=None,                                             # Resource.WebApp
+                           site=None, slot=None,                                  # Resource.WebApp
                            spring=None, app=None, deployment='default',           # Resource.SpringCloud
                            # Resource.*Postgres, Resource.*Sql*
                            server=None, database=None,
@@ -459,6 +466,15 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
         new_auth_info = enable_mi_for_db_linker(
             cmd, source_id, target_id, auth_info, client_type, connection_name)
         parameters['auth_info'] = new_auth_info or parameters['auth_info']
+
+    # migration warning for Spring Azure Cloud
+    if client_type == CLIENT_TYPE.SpringBoot.value and target_type == RESOURCE.CosmosSql:
+        isSecretType = (auth_info['auth_type'] == AUTH_TYPE.SecretAuto.value or
+                        auth_info['auth_type'] == AUTH_TYPE.Secret.value)
+        logger.warning(springboot_migration_warning(require_update=False,
+                                                    check_version=(not isSecretType),
+                                                    both_version=isSecretType))
+
     return auto_register(sdk_no_wait, no_wait,
                          client.begin_create_or_update,
                          resource_uri=source_id,
@@ -594,7 +610,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
                       no_wait=False,
                       scope=None,
                       cluster=None, enable_csi=False,                         # Resource.Kubernetes
-                      site=None,                                              # Resource.WebApp
+                      site=None, slot=None,                                   # Resource.WebApp
                       spring=None, app=None, deployment='default',            # Resource.SpringCloud
                       customized_keys=None,
                       ):
@@ -683,6 +699,14 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
         parameters['v_net_solution'] = None
     elif private_endpoint is False and linker.get('vNetSolution').get('type') == 'privateLink':
         parameters['v_net_solution'] = None
+
+    # migration warning for Spring Azure Cloud
+    if client_type == CLIENT_TYPE.SpringBoot.value and target_type == RESOURCE.CosmosSql:
+        isSecretType = (auth_info['auth_type'] == AUTH_TYPE.SecretAuto.value or
+                        auth_info['auth_type'] == AUTH_TYPE.Secret.value)
+        logger.warning(springboot_migration_warning(require_update=False,
+                                                    check_version=(not isSecretType),
+                                                    both_version=isSecretType))
 
     return auto_register(sdk_no_wait, no_wait,
                          client.begin_create_or_update,
@@ -972,7 +996,7 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
                             source_id=None,
                             customized_keys=None,
                             cluster=None, scope=None,          # Resource.Kubernetes
-                            site=None,                         # Resource.WebApp
+                            site=None, slot=None,              # Resource.WebApp
                             deployment='default',
                             spring=None, app=None):            # Resource.SpringCloud
 
@@ -1067,7 +1091,7 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
                             source_id=None,
                             customized_keys=None,
                             cluster=None,
-                            site=None,                         # Resource.WebApp
+                            site=None, slot=None,              # Resource.WebApp
                             deployment='default',
                             spring=None, app=None):            # Resource.SpringCloud
 

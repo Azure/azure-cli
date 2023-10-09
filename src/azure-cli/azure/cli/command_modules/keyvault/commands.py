@@ -53,7 +53,7 @@ def load_command_table(self, _):
     if not is_azure_stack_profile(self):
         mgmt_hsms_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)
         mgmt_hsms_regions_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.mhsm_regions)
-        private_data_entity = get_client(self.cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT)
+        private_data_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT, Clients.private_7_2)
         data_backup_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)
         data_access_control_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL)
         data_setting_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING)
@@ -198,6 +198,8 @@ def load_command_table(self, _):
         with self.command_group('keyvault key', data_key_entity.command_type) as g:
             g.keyvault_command('random', 'get_random_bytes', transform=transform_key_random_output)
             g.keyvault_command('rotate', 'rotate_key', transform=transform_key_output)
+            g.keyvault_custom('sign', 'sign_key')
+            g.keyvault_custom('verify', 'verify_key')
 
         with self.command_group('keyvault key rotation-policy', data_key_entity.command_type) as g:
             g.keyvault_command('show', 'get_key_rotation_policy', )
@@ -333,7 +335,7 @@ def load_command_table(self, _):
         replace('.', '_').replace('-', '_')
 
     if data_api_version != '2016_10_01':
-        with self.command_group('keyvault storage', data_entity.command_type) as g:
+        with self.command_group('keyvault storage', data_entity.command_type, deprecate_info=self.deprecate()) as g:
             g.keyvault_command('add', 'set_storage_account')
             g.keyvault_command('list', 'get_storage_accounts', transform=keep_max_results)
             g.keyvault_command('show', 'get_storage_account')

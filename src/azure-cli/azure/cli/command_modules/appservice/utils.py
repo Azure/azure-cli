@@ -163,7 +163,7 @@ def _get_location_from_resource_group(cli_ctx, resource_group_name):
 
 def show_raw_functionapp(cmd, resource_group_name, name):
     client = web_client_factory(cmd.cli_ctx)
-    site_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'
+    site_url_base = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'
     subscription_id = get_subscription_id(cmd.cli_ctx)
     site_url = site_url_base.format(subscription_id, resource_group_name, name, client.DEFAULT_API_VERSION)
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + site_url

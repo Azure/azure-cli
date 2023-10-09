@@ -28,7 +28,7 @@ def _gen_metrics_alert_rules_clone_list(monitor_client, source_resource, target_
 
 def _add_into_existing_scopes(monitor_client, alert_rule, target_resource):
     alert_rule.scopes.append(target_resource)
-    resource_group_name, name = _parse_id(alert_rule.id).values()
+    resource_group_name, name = _parse_id(alert_rule.id).values()  # pylint: disable=unbalanced-dict-unpacking
     return monitor_client.metric_alerts.create_or_update(resource_group_name=resource_group_name,
                                                          rule_name=name,
                                                          parameters=alert_rule)
@@ -40,10 +40,10 @@ def _clone_and_replace_action_group(source_monitor_client, target_monitor_client
         if action.action_group_id in action_group_mapping:
             alert_rule.actions[index] = action_group_mapping[action.action_group_id][1]
         else:
-            resource_group_name, name = _parse_id(action.action_group_id).values()
+            resource_group_name, name = _parse_id(action.action_group_id).values()  # pylint: disable=unbalanced-dict-unpacking
             action_group = source_monitor_client.action_groups.get(resource_group_name, name)
             name = CLONED_NAME.format(name, gen_guid())
-            resource_group_name, _ = _parse_id(target_resource).values()
+            resource_group_name, _ = _parse_id(target_resource).values()  # pylint: disable=unbalanced-dict-unpacking
             new_action_group = target_monitor_client.action_groups.create_or_update(resource_group_name,
                                                                                     name,
                                                                                     action_group)
@@ -57,7 +57,7 @@ def _clone_and_replace_action_group(source_monitor_client, target_monitor_client
 
 def _clone_alert_rule(monitor_client, alert_rule, target_resource):
     alert_rule.scopes = [target_resource]
-    resource_group_name, name = _parse_id(target_resource).values()
+    resource_group_name, name = _parse_id(target_resource).values()  # pylint: disable=unbalanced-dict-unpacking
     name = CLONED_NAME.format(name, gen_guid())
     return monitor_client.metric_alerts.create_or_update(resource_group_name=resource_group_name,
                                                          rule_name=name,

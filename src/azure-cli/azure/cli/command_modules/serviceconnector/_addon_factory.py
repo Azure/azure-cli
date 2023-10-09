@@ -9,6 +9,7 @@ from msrestazure.tools import (
     parse_resource_id,
     is_valid_resource_id
 )
+from azure.cli.core import telemetry
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import (
     CLIInternalError,
@@ -174,7 +175,9 @@ class AddonBase:
         '''Retrieve the resource group name in source resource id
         '''
         if not is_valid_resource_id(self._source_id):
-            raise InvalidArgumentValueError('The source resource id is invalid: {}'.format(self._source_id))
+            e = InvalidArgumentValueError('The source resource id is invalid: {}'.format(self._source_id))
+            telemetry.set_exception(e, "source-id-invalid")
+            raise e
 
         segments = parse_resource_id(self._source_id)
         return segments.get('resource_group')
@@ -195,7 +198,9 @@ class AddonBase:
             matched = re.match(get_resource_regex(resource), self._source_id)
             if matched:
                 return _type
-        raise InvalidArgumentValueError('The source resource id is invalid: {}'.format(self._source_id))
+        e = InvalidArgumentValueError('The source resource id is invalid: {}'.format(self._source_id))
+        telemetry.set_exception(e, "source-id-invalid")
+        raise e
 
     def _get_target_type(self):
         '''Get target resource type

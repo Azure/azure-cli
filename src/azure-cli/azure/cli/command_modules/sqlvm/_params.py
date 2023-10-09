@@ -368,6 +368,10 @@ def load_arguments(self, _):
                    help='Name of the Log Analytics workspace to associate with VM.')
         c.argument('workspace_rg',
                    help='Resource group containing the Log Analytics workspace.')
+        c.argument('workspace_sub',
+                   help='Subscription containing the Log Analytics workspace.')
+        c.argument('agent_rg',
+                   help='Resource group containing the AMA resources DCE and DCR.')
 
     with self.argument_context('sql vm enable-azure-ad-auth') as c:
         c.argument('msi_client_id',

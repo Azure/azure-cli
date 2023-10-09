@@ -34,6 +34,11 @@ WINDOWS_ASP_LOCATION_WEBAPP = 'westeurope'
 WINDOWS_ASP_LOCATION_FUNCTIONAPP = 'francecentral'
 LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
 LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
+# During the 'webapp vnet-integration remove' call
+# Will enter 20s wait for hit geo and 45s wait on app service side in order for NCs to be deleted successfully on machines.
+# So add time.sleep(65) for all az webapp vnet-integration related commands.
+# This can avoid resource residue caused by appservice related tests.
+TIME_SLEEP_FOR_VNET_INTEGRATION = 65
 
 
 class WebappBasicE2ETest(ScenarioTest):
@@ -153,7 +158,7 @@ class WebappQuickCreateTest(ScenarioTest):
         webapp_name_2 = self.create_random_name(prefix='webapp-quick', length=24)
         plan = self.create_random_name(prefix='plan-quick', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|14LTS"'.format(
+        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|16LTS"'.format(
             resource_group, webapp_name, plan)).get_output_in_json()
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name), checks=[
@@ -221,7 +226,7 @@ class WebappQuickCreateTest(ScenarioTest):
         plan = 'plan-quick-linux-cd'
         self.cmd(
             'appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "NODE|14-lts"'.format(resource_group, webapp_name,
+        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "NODE|16-lts"'.format(resource_group, webapp_name,
                                                                                     plan, TEST_REPO_URL))
         # 45 seconds should be enough for the deployment finished(Skipped under playback mode)
         time.sleep(45)
@@ -657,7 +662,7 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck('use32BitWorkerProcess', True),
             JMESPathCheck('webSocketsEnabled', False),
             JMESPathCheck('minTlsVersion', '1.2'),
-            JMESPathCheck('ftpsState', 'AllAllowed')])
+            JMESPathCheck('ftpsState', 'FtpsOnly')])
 
         # update and verify
         checks = [
@@ -712,7 +717,7 @@ class WebappConfigureTest(ScenarioTest):
                      JMESPathCheck('[0].name', '{0}.azurewebsites.net'.format(webapp_name))])
 
         # site azure storage account configurations tests
-        runtime = 'NODE|14-lts'
+        runtime = 'NODE|16-lts'
         linux_plan = self.create_random_name(
             prefix='webapp-linux-plan', length=24)
         linux_webapp = self.create_random_name(
@@ -773,7 +778,19 @@ class WebappConfigureTest(ScenarioTest):
                      JMESPathCheck('length([])', 1),
                      JMESPathCheck('[0].slotSetting', False),
                      JMESPathCheck('[0].name', 'c2')])
-
+        # site connection string test with json input
+        test_json = os.path.join(TEST_DIR, 'test.json')
+        print(test_json)
+        self.cmd('webapp config connection-string set -g {} -n {} --settings "@{}"'
+                 .format(resource_group, linux_webapp, test_json))
+        self.cmd('webapp config connection-string list -g {} -n {}'
+                 .format(resource_group, linux_webapp)).assert_with_checks([
+                     JMESPathCheck('length([])', 4),
+                     JMESPathCheck("[?name=='c4']|[0].slotSetting", False),
+                     JMESPathCheck("[?name=='c4']|[0].type", 'SQLServer'),
+                     JMESPathCheck("[?name=='c4']|[0].value", 'conn4'),
+                     JMESPathCheck("[?name=='c5']|[0].slotSetting", False),
+                     JMESPathCheck("[?name=='c6']|[0].slotSetting", True)])
         # see deployment user; just make sure the command does return something
         self.assertTrue(
             self.cmd('webapp deployment user show').get_output_in_json()['type'])
@@ -1050,7 +1067,7 @@ class AppServiceBadErrorPolishTest(ScenarioTest):
 class LinuxWebappScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
     def test_linux_webapp(self, resource_group):
-        runtime = 'NODE|14-lts'
+        runtime = 'NODE|16-lts'
         plan = self.create_random_name(prefix='webapp-linux-plan', length=24)
         webapp = self.create_random_name(prefix='webapp-linux', length=24)
         self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan), checks=[
@@ -1216,7 +1233,7 @@ class WebappACRScenarioTest(ScenarioTest):
     def test_acr_integration(self, resource_group):
         plan = self.create_random_name(prefix='acrtestplan', length=24)
         webapp = self.create_random_name(prefix='webappacrtest', length=24)
-        runtime = 'NODE|14-lts'
+        runtime = 'NODE|16-lts'
         acr_registry_name = webapp
         self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(
             resource_group, acr_registry_name))
@@ -2094,7 +2111,7 @@ class WebappWindowsContainerBasicE2ETest(ScenarioTest):
             # this weird field means it is a linux
             JMESPathCheck('reserved', True),
             JMESPathCheck('sku.tier', 'LinuxFree')])
-        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "NODE|14-lts"'.format(resource_group, webapp_name, plan,
+        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "NODE|16-lts"'.format(resource_group, webapp_name, plan,
                                                                                     TEST_REPO_URL))
         # verify alwaysOn
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
@@ -2206,11 +2223,13 @@ class WebappNetworkConnectionTests(ScenarioTest):
         ])
         self.cmd(
             'webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
+        time.sleep(TIME_SLEEP_FOR_VNET_INTEGRATION)
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
         self.cmd(
             'webapp vnet-integration remove -g {} -n {} --slot {}'.format(resource_group, webapp_name, slot_webapp_name))
+        time.sleep(TIME_SLEEP_FOR_VNET_INTEGRATION)
         self.cmd('webapp vnet-integration list -g {} -n {} --slot {}'.format(resource_group, webapp_name, slot_webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
@@ -2237,6 +2256,7 @@ class WebappNetworkConnectionTests(ScenarioTest):
         ])
         self.cmd(
             'webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
+        time.sleep(TIME_SLEEP_FOR_VNET_INTEGRATION)
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
@@ -2262,6 +2282,7 @@ class WebappNetworkConnectionTests(ScenarioTest):
         ])
         self.cmd(
             'webapp vnet-integration remove -g {} -n {}'.format(webapp_rg, webapp_name))
+        time.sleep(TIME_SLEEP_FOR_VNET_INTEGRATION)
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(webapp_rg, webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
@@ -2287,6 +2308,7 @@ class WebappNetworkConnectionTests(ScenarioTest):
         ])
         self.cmd(
             'webapp vnet-integration remove -g {} -n {}'.format(webapp_rg, webapp_name))
+        time.sleep(TIME_SLEEP_FOR_VNET_INTEGRATION)
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(webapp_rg, webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
@@ -2405,6 +2427,7 @@ class WebappNetworkConnectionTests(ScenarioTest):
         ])
         self.cmd(
             'webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
+        time.sleep(TIME_SLEEP_FOR_VNET_INTEGRATION)
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
@@ -2432,14 +2455,14 @@ class WebappNetworkConnectionTests(ScenarioTest):
         # Add vnet integration where theres two vnets of the same name. Chosen vnet should default to the one in the same RG
         self.cmd('webapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(
             resource_group, webapp_name, vnet_name, subnet_name))
-        time.sleep(5)
+        time.sleep(TIME_SLEEP_FOR_VNET_INTEGRATION)
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', subnet_name)
         ])
         self.cmd(
             'webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
-        time.sleep(5)
+        time.sleep(TIME_SLEEP_FOR_VNET_INTEGRATION)
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
@@ -2447,13 +2470,14 @@ class WebappNetworkConnectionTests(ScenarioTest):
         # Add vnet integration using vnet resource ID
         self.cmd('webapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(
             resource_group, webapp_name, vnet['newVNet']['id'], subnet_name_2))
-        time.sleep(5)
+        time.sleep(TIME_SLEEP_FOR_VNET_INTEGRATION)
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', subnet_name_2)
         ])
         # self.cmd(
         #     'webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
+        # time.sleep(TIME_SLEEP_FOR_VNET_INTEGRATION)
         # self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
         #     JMESPathCheck('length(@)', 0)
         # ])
@@ -2482,6 +2506,7 @@ class WebappNetworkConnectionTests(ScenarioTest):
         ])
         self.cmd(
             'webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
+        time.sleep(TIME_SLEEP_FOR_VNET_INTEGRATION)
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
@@ -2507,7 +2532,7 @@ class WebappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('[0].name', subnet_name)
         ])
         self.cmd('webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
-
+        time.sleep(TIME_SLEEP_FOR_VNET_INTEGRATION)
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])

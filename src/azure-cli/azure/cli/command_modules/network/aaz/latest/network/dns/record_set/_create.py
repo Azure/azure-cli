@@ -16,9 +16,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2018-05-01",
+        "version": "2023-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/dnszones/{}/{}/{}", "2018-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/dnszones/{}/{}/{}", "2023-07-01-preview"],
         ]
     }
 
@@ -50,7 +50,7 @@ class Create(AAZCommand):
             options=["--record-type"],
             help="The type of DNS record in this record set. Record sets of type SOA can be updated but not created (they are created when the DNS zone is created).",
             required=True,
-            enum={"A": "A", "AAAA": "AAAA", "CAA": "CAA", "CNAME": "CNAME", "MX": "MX", "NS": "NS", "PTR": "PTR", "SOA": "SOA", "SRV": "SRV", "TXT": "TXT"},
+            enum={"A": "A", "AAAA": "AAAA", "CAA": "CAA", "CNAME": "CNAME", "DS": "DS", "MX": "MX", "NAPTR": "NAPTR", "NS": "NS", "PTR": "PTR", "SOA": "SOA", "SRV": "SRV", "TLSA": "TLSA", "TXT": "TXT"},
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
@@ -61,9 +61,13 @@ class Create(AAZCommand):
             required=True,
         )
         _args_schema.zone_name = AAZStrArg(
-            options=["--zone-name"],
+            options=["-z", "--zone-name"],
             help="The name of the DNS zone (without a terminating dot).",
             required=True,
+        )
+        _args_schema.target_resource = AAZStrArg(
+            options=["--target-resource"],
+            help="ID of an Azure resource from which the DNS resource value is taken.",
         )
 
         # define Arg Group "Parameters"
@@ -86,10 +90,22 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="The CNAME record in the  record set.",
         )
+        _args_schema.ds_records = AAZListArg(
+            options=["--ds-records"],
+            arg_group="Properties",
+            help="The list of DS records in the record set.",
+            is_experimental=True,
+        )
         _args_schema.mx_records = AAZListArg(
             options=["--mx-records"],
             arg_group="Properties",
             help="The list of MX records in the record set.",
+        )
+        _args_schema.naptr_records = AAZListArg(
+            options=["--naptr-records"],
+            arg_group="Properties",
+            help="The list of NAPTR records in the record set.",
+            is_experimental=True,
         )
         _args_schema.ns_records = AAZListArg(
             options=["--ns-records"],
@@ -111,10 +127,17 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="The list of SRV records in the record set.",
         )
+        _args_schema.tlsa_records = AAZListArg(
+            options=["--tlsa-records"],
+            arg_group="Properties",
+            help="The list of TLSA records in the record set.",
+            is_experimental=True,
+        )
         _args_schema.ttl = AAZIntArg(
             options=["--ttl"],
             arg_group="Properties",
             help="The TTL (time-to-live) of the records in the record set.",
+            default=3600,
         )
         _args_schema.txt_records = AAZListArg(
             options=["--txt-records"],
@@ -130,11 +153,6 @@ class Create(AAZCommand):
             options=["--metadata"],
             arg_group="Properties",
             help="The metadata attached to the record set.",
-        )
-        _args_schema.target_resource = AAZObjectArg(
-            options=["--target-resource"],
-            arg_group="Properties",
-            help="A reference to an azure resource from where the dns resource value is taken.",
         )
 
         aaaa_records = cls._args_schema.aaaa_records
@@ -161,6 +179,33 @@ class Create(AAZCommand):
             help="The canonical name for this CNAME record.",
         )
 
+        ds_records = cls._args_schema.ds_records
+        ds_records.Element = AAZObjectArg()
+
+        _element = cls._args_schema.ds_records.Element
+        _element.algorithm = AAZIntArg(
+            options=["algorithm"],
+            help="The security algorithm type represents the standard security algorithm number of the DNSKEY Resource Record. See: https://www.iana.org/assignments/dns-sec-alg-numbers/dns-sec-alg-numbers.xhtml",
+        )
+        _element.digest = AAZObjectArg(
+            options=["digest"],
+            help="The digest entity.",
+        )
+        _element.key_tag = AAZIntArg(
+            options=["key-tag"],
+            help="The key tag value is used to determine which DNSKEY Resource Record is used for signature verification.",
+        )
+
+        digest = cls._args_schema.ds_records.Element.digest
+        digest.algorithm_type = AAZIntArg(
+            options=["algorithm-type"],
+            help="The digest algorithm type represents the standard digest algorithm number used to construct the digest. See: https://www.iana.org/assignments/ds-rr-types/ds-rr-types.xhtml",
+        )
+        digest.value = AAZStrArg(
+            options=["value"],
+            help="The digest value is a cryptographic hash value of the referenced DNSKEY Resource Record.",
+        )
+
         mx_records = cls._args_schema.mx_records
         mx_records.Element = AAZObjectArg()
 
@@ -172,6 +217,35 @@ class Create(AAZCommand):
         _element.preference = AAZIntArg(
             options=["preference"],
             help="The preference value for this MX record.",
+        )
+
+        naptr_records = cls._args_schema.naptr_records
+        naptr_records.Element = AAZObjectArg()
+
+        _element = cls._args_schema.naptr_records.Element
+        _element.flags = AAZStrArg(
+            options=["flags"],
+            help="The flags specific to DDDS applications. Values currently defined in RFC 3404 are uppercase and lowercase letters \"A\", \"P\", \"S\", and \"U\", and the empty string, \"\". Enclose Flags in quotation marks.",
+        )
+        _element.order = AAZIntArg(
+            options=["order"],
+            help="The order in which the NAPTR records MUST be processed in order to accurately represent the ordered list of rules. The ordering is from lowest to highest. Valid values: 0-65535.",
+        )
+        _element.preference = AAZIntArg(
+            options=["preference"],
+            help="The preference specifies the order in which NAPTR records with equal 'order' values should be processed, low numbers being processed before high numbers. Valid values: 0-65535.",
+        )
+        _element.regexp = AAZStrArg(
+            options=["regexp"],
+            help="The regular expression that the DDDS application uses to convert an input value into an output value. For example: an IP phone system might use a regular expression to convert a phone number that is entered by a user into a SIP URI. Enclose the regular expression in quotation marks. Specify either a value for 'regexp' or a value for 'replacement'.",
+        )
+        _element.replacement = AAZStrArg(
+            options=["replacement"],
+            help="The replacement is a fully qualified domain name (FQDN) of the next domain name that you want the DDDS application to submit a DNS query for. The DDDS application replaces the input value with the value specified for replacement. Specify either a value for 'regexp' or a value for 'replacement'. If you specify a value for 'regexp', specify a dot (.) for 'replacement'.",
+        )
+        _element.services = AAZStrArg(
+            options=["services"],
+            help="The services specific to DDDS applications. Enclose Services in quotation marks.",
         )
 
         ns_records = cls._args_schema.ns_records
@@ -243,6 +317,27 @@ class Create(AAZCommand):
             help="The weight value for this SRV record.",
         )
 
+        tlsa_records = cls._args_schema.tlsa_records
+        tlsa_records.Element = AAZObjectArg()
+
+        _element = cls._args_schema.tlsa_records.Element
+        _element.cert_association_data = AAZStrArg(
+            options=["cert-association-data"],
+            help="This specifies the certificate association data to be matched.",
+        )
+        _element.matching_type = AAZIntArg(
+            options=["matching-type"],
+            help="The matching type specifies how the certificate association is presented.",
+        )
+        _element.selector = AAZIntArg(
+            options=["selector"],
+            help="The selector specifies which part of the TLS certificate presented by the server will be matched against the association data.",
+        )
+        _element.usage = AAZIntArg(
+            options=["usage"],
+            help="The usage specifies the provided association that will be used to match the certificate presented in the TLS handshake.",
+        )
+
         txt_records = cls._args_schema.txt_records
         txt_records.Element = AAZObjectArg()
 
@@ -274,12 +369,6 @@ class Create(AAZCommand):
 
         metadata = cls._args_schema.metadata
         metadata.Element = AAZStrArg()
-
-        target_resource = cls._args_schema.target_resource
-        target_resource.id = AAZStrArg(
-            options=["id"],
-            help="Resource Id.",
-        )
         return cls._args_schema
 
     def _execute_operations(self):
@@ -356,7 +445,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2018-05-01",
+                    "api-version", "2023-07-01-preview",
                     required=True,
                 ),
             }
@@ -394,16 +483,19 @@ class Create(AAZCommand):
                 properties.set_prop("AAAARecords", AAZListType, ".aaaa_records")
                 properties.set_prop("ARecords", AAZListType, ".a_records")
                 properties.set_prop("CNAMERecord", AAZObjectType, ".cname_record")
+                properties.set_prop("DSRecords", AAZListType, ".ds_records")
                 properties.set_prop("MXRecords", AAZListType, ".mx_records")
+                properties.set_prop("NAPTRRecords", AAZListType, ".naptr_records")
                 properties.set_prop("NSRecords", AAZListType, ".ns_records")
                 properties.set_prop("PTRRecords", AAZListType, ".ptr_records")
                 properties.set_prop("SOARecord", AAZObjectType, ".soa_record")
                 properties.set_prop("SRVRecords", AAZListType, ".srv_records")
+                properties.set_prop("TLSARecords", AAZListType, ".tlsa_records")
                 properties.set_prop("TTL", AAZIntType, ".ttl")
                 properties.set_prop("TXTRecords", AAZListType, ".txt_records")
                 properties.set_prop("caaRecords", AAZListType, ".caa_records")
                 properties.set_prop("metadata", AAZDictType, ".metadata")
-                properties.set_prop("targetResource", AAZObjectType, ".target_resource")
+                properties.set_prop("targetResource", AAZObjectType)
 
             aaaa_records = _builder.get(".properties.AAAARecords")
             if aaaa_records is not None:
@@ -425,6 +517,21 @@ class Create(AAZCommand):
             if cname_record is not None:
                 cname_record.set_prop("cname", AAZStrType, ".cname")
 
+            ds_records = _builder.get(".properties.DSRecords")
+            if ds_records is not None:
+                ds_records.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.DSRecords[]")
+            if _elements is not None:
+                _elements.set_prop("algorithm", AAZIntType, ".algorithm")
+                _elements.set_prop("digest", AAZObjectType, ".digest")
+                _elements.set_prop("keyTag", AAZIntType, ".key_tag")
+
+            digest = _builder.get(".properties.DSRecords[].digest")
+            if digest is not None:
+                digest.set_prop("algorithmType", AAZIntType, ".algorithm_type")
+                digest.set_prop("value", AAZStrType, ".value")
+
             mx_records = _builder.get(".properties.MXRecords")
             if mx_records is not None:
                 mx_records.set_elements(AAZObjectType, ".")
@@ -433,6 +540,19 @@ class Create(AAZCommand):
             if _elements is not None:
                 _elements.set_prop("exchange", AAZStrType, ".exchange")
                 _elements.set_prop("preference", AAZIntType, ".preference")
+
+            naptr_records = _builder.get(".properties.NAPTRRecords")
+            if naptr_records is not None:
+                naptr_records.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.NAPTRRecords[]")
+            if _elements is not None:
+                _elements.set_prop("flags", AAZStrType, ".flags")
+                _elements.set_prop("order", AAZIntType, ".order")
+                _elements.set_prop("preference", AAZIntType, ".preference")
+                _elements.set_prop("regexp", AAZStrType, ".regexp")
+                _elements.set_prop("replacement", AAZStrType, ".replacement")
+                _elements.set_prop("services", AAZStrType, ".services")
 
             ns_records = _builder.get(".properties.NSRecords")
             if ns_records is not None:
@@ -471,6 +591,17 @@ class Create(AAZCommand):
                 _elements.set_prop("target", AAZStrType, ".target")
                 _elements.set_prop("weight", AAZIntType, ".weight")
 
+            tlsa_records = _builder.get(".properties.TLSARecords")
+            if tlsa_records is not None:
+                tlsa_records.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.TLSARecords[]")
+            if _elements is not None:
+                _elements.set_prop("certAssociationData", AAZStrType, ".cert_association_data")
+                _elements.set_prop("matchingType", AAZIntType, ".matching_type")
+                _elements.set_prop("selector", AAZIntType, ".selector")
+                _elements.set_prop("usage", AAZIntType, ".usage")
+
             txt_records = _builder.get(".properties.TXTRecords")
             if txt_records is not None:
                 txt_records.set_elements(AAZObjectType, ".")
@@ -499,7 +630,7 @@ class Create(AAZCommand):
 
             target_resource = _builder.get(".properties.targetResource")
             if target_resource is not None:
-                target_resource.set_prop("id", AAZStrType, ".id")
+                target_resource.set_prop("id", AAZStrType, ".target_resource")
 
             return self.serialize_content(_content_value)
 
@@ -545,8 +676,14 @@ class Create(AAZCommand):
             properties.cname_record = AAZObjectType(
                 serialized_name="CNAMERecord",
             )
+            properties.ds_records = AAZListType(
+                serialized_name="DSRecords",
+            )
             properties.mx_records = AAZListType(
                 serialized_name="MXRecords",
+            )
+            properties.naptr_records = AAZListType(
+                serialized_name="NAPTRRecords",
             )
             properties.ns_records = AAZListType(
                 serialized_name="NSRecords",
@@ -559,6 +696,9 @@ class Create(AAZCommand):
             )
             properties.srv_records = AAZListType(
                 serialized_name="SRVRecords",
+            )
+            properties.tlsa_records = AAZListType(
+                serialized_name="TLSARecords",
             )
             properties.ttl = AAZIntType(
                 serialized_name="TTL",
@@ -600,12 +740,39 @@ class Create(AAZCommand):
             cname_record = cls._schema_on_200_201.properties.cname_record
             cname_record.cname = AAZStrType()
 
+            ds_records = cls._schema_on_200_201.properties.ds_records
+            ds_records.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.properties.ds_records.Element
+            _element.algorithm = AAZIntType()
+            _element.digest = AAZObjectType()
+            _element.key_tag = AAZIntType(
+                serialized_name="keyTag",
+            )
+
+            digest = cls._schema_on_200_201.properties.ds_records.Element.digest
+            digest.algorithm_type = AAZIntType(
+                serialized_name="algorithmType",
+            )
+            digest.value = AAZStrType()
+
             mx_records = cls._schema_on_200_201.properties.mx_records
             mx_records.Element = AAZObjectType()
 
             _element = cls._schema_on_200_201.properties.mx_records.Element
             _element.exchange = AAZStrType()
             _element.preference = AAZIntType()
+
+            naptr_records = cls._schema_on_200_201.properties.naptr_records
+            naptr_records.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.properties.naptr_records.Element
+            _element.flags = AAZStrType()
+            _element.order = AAZIntType()
+            _element.preference = AAZIntType()
+            _element.regexp = AAZStrType()
+            _element.replacement = AAZStrType()
+            _element.services = AAZStrType()
 
             ns_records = cls._schema_on_200_201.properties.ns_records
             ns_records.Element = AAZObjectType()
@@ -646,6 +813,19 @@ class Create(AAZCommand):
             _element.priority = AAZIntType()
             _element.target = AAZStrType()
             _element.weight = AAZIntType()
+
+            tlsa_records = cls._schema_on_200_201.properties.tlsa_records
+            tlsa_records.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.properties.tlsa_records.Element
+            _element.cert_association_data = AAZStrType(
+                serialized_name="certAssociationData",
+            )
+            _element.matching_type = AAZIntType(
+                serialized_name="matchingType",
+            )
+            _element.selector = AAZIntType()
+            _element.usage = AAZIntType()
 
             txt_records = cls._schema_on_200_201.properties.txt_records
             txt_records.Element = AAZObjectType()

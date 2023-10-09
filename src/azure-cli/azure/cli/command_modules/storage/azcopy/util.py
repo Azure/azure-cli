@@ -110,7 +110,7 @@ def login_auth_for_azcopy(cmd):
     try:
         token_info = _unserialize_non_msi_token_payload(token_info)
     except KeyError:  # unserialized MSI token payload
-        raise Exception('MSI auth not yet supported.')
+        raise Exception('MSI auth not yet supported.')  # pylint: disable=broad-exception-raised
     return AzCopyCredentials(token_info=token_info)
 
 
@@ -134,7 +134,7 @@ def client_auth_for_azcopy(cmd, client, service='blob'):
 
 def storage_client_auth_for_azcopy(client, service):
     if service not in SERVICES:
-        raise Exception('{} not one of: {}'.format(service, str(SERVICES)))
+        raise Exception('{} not one of: {}'.format(service, str(SERVICES)))  # pylint: disable=broad-exception-raised
 
     if client.sas_token:
         return AzCopyCredentials(sas_token=client.sas_token)

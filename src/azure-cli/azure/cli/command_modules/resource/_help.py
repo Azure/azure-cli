@@ -775,8 +775,7 @@ parameters:
     short-summary: Supply deployment parameter values.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax. Also note if you are providing a bicepparam file with a bicep template then you can use this
-        argument only once.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax. Also note if you are providing a bicepparam file then you can use this argument only once.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -812,9 +811,9 @@ examples:
   - name: Create a deployment at resource group scope from a template-spec
     text: >
         az deployment group create --resource-group testrg --template-spec "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Resources/templateSpecs/myTemplateSpec/versions/1.0"
-  - name: Create a deployment at resource group scope from a bicep template and a bicepparam parameter file
+  - name: Create a deployment at resource group scope from a bicepparam parameter file
     text: >
-        az deployment group create --resource-group testrg --template-file azuredeploy.bicep --parameters parameters.bicepparam
+        az deployment group create --resource-group testrg --parameters parameters.bicepparam
   - name: Create a deployment at resource group across tenants
     text: >
         az deployment group create --resource-group testrg --name rollout01 \\
@@ -2787,6 +2786,18 @@ examples:
     text: az bicep build --file {bicep_file} --no-restore
 """
 
+helps['bicep build-params'] = """
+type: command
+short-summary: Build .bicepparam file.
+examples:
+  - name: Build a .bicepparam file.
+    text: az bicep build-params --file {bicepparam_file}
+  - name: Build a .bicepparam file and print all output to stdout.
+    text: az bicep build-params --file {bicepparam_file} --stdout
+  - name: Build a .bicepparam file and save the result to the specified file.
+    text: az bicep build-params --file {bicepparam_file} --outfile {out_file}
+"""
+
 helps['bicep format'] = """
 type: command
 short-summary: Format a Bicep file.
@@ -2815,6 +2826,22 @@ examples:
     text: az bicep decompile --file {json_template_file}
   - name: Decompile an ARM template file and overwrite existing Bicep file.
     text: az bicep decompile --file {json_template_file} --force
+"""
+
+helps['bicep decompile-params'] = """
+type: command
+short-summary: Decompile a parameters .json file to .bicepparam.
+examples:
+  - name: Attempts to decompile a parameters .json file to .bicepparam.
+    text: az bicep decompile-params --file {json_template_file}
+  - name: Attempts to decompile a parameters .json file to .bicepparam using the bicep file given.
+    text: az bicep decompile-params --file {json_template_file} --bicep-file {bicep_file}
+  - name: Attempts to decompile a parameters .json file to .bicepparam and print all output to stdout.
+    text: az bicep decompile-params --file {json_template_file} --stdout
+  - name: Attempts to decompile a parameters .json file to .bicepparam and print all output to stdout and save the result to the specified directory.
+    text: az bicep decompile-params --file {json_template_file} --outdir {out_dir}
+  - name: Attempts to decompile a parameters .json file to .bicepparam and print all output to stdout and save the result to the specified file.
+    text: az bicep decompile-params --file {json_template_file} --outfile {out_file}
 """
 
 helps['bicep publish'] = """
@@ -2849,6 +2876,213 @@ type: command
 short-summary: List out all available versions of Bicep CLI.
 """
 
+helps['stack'] = """
+type: group
+short-summary: A deployment stack is a native Azure resource type that enables you to perform operations on a resource collection as an atomic unit.
+long-summary: Deployment stacks are defined in ARM as the type Microsoft.Resources/deploymentStacks.
+"""
+
+helps['stack mg'] = """
+type: group
+short-summary: Manage Deployment Stacks at management group.
+"""
+
+helps['stack mg create'] = """
+type: command
+short-summary: Create or update a deployment stack at management group scope
+examples:
+  - name: Create a deployment stack using template file.
+    text: az stack mg create --name StackName --management-group-id myMg --template-file simpleTemplate.json --location westus2 --description description --deny-settings-mode None
+  - name: Create a deployment stack with parameter file and delete resources.
+    text: az stack mg create --name StackName --management-group-id myMg --delete-resources --template-file simpleTemplate.json --parameters simpleTemplateParams.json --location westus2 --description description --deny-settings-mode None
+  - name: Create a deployment stack with template spec and delete resource groups
+    text: az stack mg create --name StackName --management-group-id myMg --delete-resource-groups --template-spec TemplateSpecResourceIDWithVersion --location westus2 --description description --deny-settings-mode None
+  - name: Create a deployment stack using bicep file and delete all resources.
+    text: az stack mg create --name StackName --management-group-id myMg --delete-all --template-file simple.bicep --location westus2 --description description --deny-settings-mode None
+  - name: Create a deployment stack using parameters from key/value pairs
+    text: az stack mg create --name StackName --management-group-id myMg --template-file simpleTemplate.json --location westus --description description --parameters simpleTemplateParams.json value1=foo value2=bar --deny-settings-mode None
+  - name: Create a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
+    text: az stack mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location westus --deny-settings-mode None
+  - name: Create a deployment stack from a local template, using deny settings.
+    text: az stack mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --location westus --deny-settings-mode None
+  - name: Create a deployment stack from a local template, apply deny settings to child scope.
+    text: az stack mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes --location westus
+"""
+
+helps['stack mg list'] = """
+type: command
+short-summary: List all deployment stacks in management group
+examples:
+  - name: List all stacks
+    text: az stack mg list --management-group-id myMg
+"""
+
+helps['stack mg show'] = """
+type: command
+short-summary: Get specified deployment stack from management group scope
+examples:
+  - name: Get stack by name.
+    text: az stack mg show --name StackName --management-group-id myMg
+  - name: Get stack by stack resource id.
+    text: az stack mg show --id /providers/Microsoft.Management/managementGroups/myMg/providers/Microsoft.Resources/deploymentStacks/StackName --management-group-id myMg
+"""
+
+helps['stack mg export'] = """
+type: command
+short-summary: Export the template used to create the deployment stack
+examples:
+  - name: Export template by name.
+    text: az stack mg export --name StackName --management-group-id myMg
+  - name: Export template by stack resource id.
+    text: az stack mg export --id /providers/Microsoft.Management/managementGroups/myMg/providers/Microsoft.Resources/deploymentStacks/StackName --management-group-id myMg
+"""
+
+helps['stack mg delete'] = """
+type: command
+short-summary: Delete specified deployment stack from management group scope
+examples:
+  - name: Delete stack by name.
+    text: az stack mg delete --name StackName --management-group-id myMg
+  - name: Delete stack by stack resource id.
+    text: az stack mg delete --id /providers/Microsoft.Management/managementGroups/myMg/providers/Microsoft.Resources/deploymentStacks/StackName --management-group-id myMg
+"""
+
+helps['stack sub'] = """
+type: group
+short-summary: Manage Deployment Stacks at subscription.
+"""
+
+helps['stack sub create'] = """
+type: command
+short-summary: Create or update a deployment stack at subscription scope
+examples:
+  - name: Create a deployment stack using template file.
+    text: az stack sub create --name StackName --template-file simpleTemplate.json --location westus2 --description description --deny-settings-mode None
+  - name: Create a deployment stack with parameter file and delete resources.
+    text: az stack sub create --name StackName --delete-resources --template-file simpleTemplate.json --parameters simpleTemplateParams.json --location westus2 --description description --deny-settings-mode None
+  - name: Create a deployment stack with template spec and delete resource groups
+    text: az stack sub create --name StackName --delete-resource-groups --template-spec TemplateSpecResourceIDWithVersion --location westus2 --description description --deny-settings-mode None
+  - name: Create a deployment stack using bicep file and delete all resources.
+    text: az stack sub create --name StackName --delete-all --template-file simple.bicep --location westus2 --description description --deny-settings-mode None
+  - name: Create a deployment stack at a different subscription.
+    text: az stack sub create --name StackName --template-file simpleTemplate.json --location westus2 --description description --subscription subscriptionId --deny-settings-mode None
+  - name: Create a deployment stack and deploy at the resource group scope.
+    text: az stack sub create --name StackName --template-file simpleTemplate.json --location westus --deployment-resource-group ResourceGroup --description description --deny-settings-mode None
+  - name: Create a deployment stack using parameters from key/value pairs
+    text: az stack sub create --name StackName --template-file simpleTemplate.json --location westus --description description --parameters simpleTemplateParams.json value1=foo value2=bar --deny-settings-mode None
+  - name: Create a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
+    text: az stack sub create --name StackName --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location westus --deny-settings-mode None
+  - name: Create a deployment stack from a local template, using deny settings.
+    text: az stack sub create --name StackName --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --location westus --deny-settings-mode None
+  - name: Create a deployment stack from a local template, apply deny settings to child scopes.
+    text: az stack sub create --name StackName --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes --location westus --deny-settings-mode None
+"""
+
+helps['stack sub list'] = """
+type: command
+short-summary: List all deployment stacks in subscription
+examples:
+  - name: List all stacks
+    text: az stack sub list
+"""
+
+helps['stack sub show'] = """
+type: command
+short-summary: Get specified deployment stack from subscription scope
+examples:
+  - name: Get stack by name.
+    text: az stack sub show --name StackName
+  - name: Get stack by stack resource id.
+    text: az stack sub show --id /subscriptions/111111111111/providers/Microsoft.Resources/deploymentStacks/StackName
+"""
+
+helps['stack sub export'] = """
+type: command
+short-summary: Export the template used to create the deployment stack
+examples:
+  - name: Export template by name.
+    text: az stack sub export --name StackName
+  - name: Export template by stack resource id.
+    text: az stack sub export --id /subscriptions/111111111111/providers/Microsoft.Resources/deploymentStacks/StackName
+"""
+
+helps['stack sub delete'] = """
+type: command
+short-summary: Delete specified deployment stack from subscription scope
+examples:
+  - name: Delete stack by name.
+    text: az stack sub delete --name StackName
+  - name: Delete stack by stack resource id.
+    text: az stack sub delete --id /subscriptions/111111111111/providers/Microsoft.Resources/deploymentStacks/StackName
+"""
+
+helps['stack group'] = """
+type: group
+short-summary: Manage Deployment Stacks at resource group.
+"""
+
+helps['stack group create'] = """
+type: command
+short-summary: Create or update a deployment stack at resource group scope
+examples:
+  - name: Create a deployment stack using template file and delete resources.
+    text: az stack group create --name StackName --resource-group ResourceGroup --delete-resources --template-file simpleTemplate.json --description description --deny-settings-mode None
+  - name: Create a deployment stack with parameter file and delete resource groups.
+    text: az stack group create --name StackName --resource-group ResourceGroup --delete-resource-groups --template-file simpleTemplate.json --parameters simpleTemplateParams.json --description description --deny-settings-mode None
+  - name: Create a deployment stack with template spec and delete all resources
+    text: az stack group create --name StackName --resource-group ResourceGroup --delete-all --template-spec TemplateSpecResourceIDWithVersion --description description --deny-settings-mode None
+  - name: Create a deployment stack using bicep file.
+    text: az stack group create --name StackName --resource-group ResourceGroup --template-file simple.bicep --description description --deny-settings-mode None
+  - name: Create a deployment stack at a different subscription
+    text: az stack group create --name StackName --resource-group ResourceGroup --template-file simpleTemplate.json --description description --subscription subscriptionId --deny-settings-mode None
+  - name: Create a deployment stack using parameters from key/value pairs
+    text: az stack group create --name StackName --template-file simpleTemplate.json --resource-group ResourceGroup --description description --parameters simpleTemplateParams.json value1=foo value2=bar --deny-settings-mode None
+  - name: Create a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
+    text: az stack group create --name StackName --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --resource-group ResourceGroup --deny-settings-mode None
+  - name: Create a deployment stack from a local template, using deny settings.
+    text: az stack group create --name StackName --resource-group ResourceGroup --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --deny-settings-mode None
+  - name: Create a deployment stack from a local template, apply deny setting to child scopes.
+    text: az stack group create --name StackName --resource-group ResourceGroup --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes
+"""
+
+helps['stack group list'] = """
+type: command
+short-summary: List all deployment stacks in resource group
+examples:
+  - name: List all stacks in resource group
+    text: az stack group list --resource-group ResourceGroup
+"""
+
+helps['stack group show'] = """
+type: command
+short-summary: Get specified deployment stack from resource group scope
+examples:
+  - name: Get stack by name.
+    text: az stack group show --name StackName --resource-group ResourceGroup
+  - name: Get stack by stack resource id.
+    text: az stack group show --id /subscriptions/111111111111/resourceGroups/ResourceGroup/providers/Microsoft.Resources/deploymentStacks/StackName
+"""
+
+helps['stack group export'] = """
+type: command
+short-summary: Export the template used to create the deployment stack from resource group scope
+examples:
+  - name: Export template by name.
+    text: az stack group export --name StackName --resource-group ResourceGroup
+  - name: Export template by stack resource id.
+    text: az stack group export --id /subscriptions/111111111111/resourceGroups/ResourceGroup/providers/Microsoft.Resources/deploymentStacks/StackName
+"""
+
+helps['stack group delete'] = """
+type: command
+short-summary: Delete specified deployment stack from resource group scope
+examples:
+  - name: Delete stack by name.
+    text: az stack group delete --name StackName --resource-group ResourceGroup
+  - name: Delete stack by stack resource id.
+    text: az stack group delete --id /subscriptions/111111111111/resourceGroups/ResourceGroup/providers/Microsoft.Resources/deploymentStacks/StackName
+"""
+
 helps['bicep generate-params'] = """
 type: command
 short-summary: Generate parameters file for a Bicep file.
@@ -2863,6 +3097,8 @@ examples:
     text: az bicep generate-params --file {bicep_file} --outfile {out_file}
   - name: Generate parameters file for a Bicep file without restoring external modules.
     text: az bicep generate-params --file {bicep_file} --no-restore
+  - name: Generate parameters file for a Bicep file with specified output format. Valid values are ( json | bicepparam ).
+    text: az bicep generate-params --file {bicep_file} --output-format {output_format} --include-params {include_params}
 """
 
 helps['resourcemanagement'] = """
