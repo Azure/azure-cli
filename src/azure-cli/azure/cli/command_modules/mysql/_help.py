@@ -251,7 +251,7 @@ examples:
           --admin-user "username" --admin-password "password" \\
           --sku-name Standard_D2ds_v4 --tier GeneralPurpose --public-access 0.0.0.0 \\
           --storage-size 32 --tags "key=value" --high-availability ZoneRedundant \\
-          --zone 1 --standby-zone 3 --storage-auto-grow Enabled --iops 500   
+          --zone 1 --standby-zone 3 --storage-auto-grow Enabled --iops 500
 """
 
 helps['mysql flexible-server show'] = """
