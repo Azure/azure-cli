@@ -260,6 +260,7 @@ jobs:
       filePath: build_scripts\windows\scripts\test_msi_installation.ps1
 
 - job: BuildDockerImageAlpine
+  displayName: Build Docker Image Alpine
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
@@ -291,6 +292,7 @@ jobs:
       ArtifactName: $(artifactName)
 
 - job: TestDockerImageAlpine
+  displayName: Test Docker Image Alpine
   dependsOn:
     - BuildDockerImageAlpine
     - ExtractMetadata
@@ -333,7 +335,7 @@ jobs:
     displayName: 'Bash Script'
 
 - job: BuildDockerImageAzureLinux
-  displayName: Build Azure Docker Image
+  displayName: Build Docker Image Azure Linux
   dependsOn: BuildRpmPackageMariner
   strategy:
     matrix:
@@ -373,6 +375,7 @@ jobs:
         ArtifactName: $(artifactName)
 
 - job: TestDockerImageAzureLinux
+  displayName: Test Docker Image Azure Linux
   dependsOn:
     - BuildDockerImageAzureLinux
     - ExtractMetadata
