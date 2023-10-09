@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "network lb address-pool basic create",
-)
 class Create(AAZCommand):
     """Create an address pool.
 
