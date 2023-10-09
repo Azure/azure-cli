@@ -792,6 +792,15 @@ class PrivateDnsRecordSetsTests(BaseScenarioTests):
         recordset = self._Delete_ARecord(recordset['name'], zone['name'], '10.0.0.4')
         self._Delete_RecordSet(recordset['name'], 'a', zone['name'])
 
+    @ResourceGroupPreparer(name_prefix="cli_test_private_dns_", location="westus")
+    def test_add_record_when_record_set_is_empty(self):
+        zone = self._Create_PrivateZone()
+        recordset_name = self.create_random_name("clitestprivatednsrecordset", length=35)
+        recordset = self._Create_ARecord(recordset_name, zone["name"], "10.0.0.4")
+        recordsetResult = self._Show_RecordSet(recordset_name, "a", zone["name"])
+        self.assertTrue(all(record in recordsetResult.get("aRecords") for record in recordset.get("aRecords")))
+        recordset = self._Delete_ARecord(recordset_name, zone["name"], "10.0.0.4")
+
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_CrudRecordSet_AAAARecord_ExpectCrudSuccessful(self, resource_group):
         zone = self._Create_PrivateZone()
