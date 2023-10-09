@@ -397,7 +397,7 @@ def parse_docker_image_name(deployment_container_image_name, environment=None):
     return "https://{}".format(hostname)
 
 
-def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
+def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None, show_values=False):
     if not settings and not slot_settings:
         raise MutuallyExclusiveArgumentError('Usage Error: --settings |--slot-settings')
 
@@ -430,8 +430,10 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
         app_settings.properties[setting_name] = value
     client = web_client_factory(cmd.cli_ctx)
 
+    if show_values:
+        Console.log("hello")
 
-# TODO: Centauri currently return wrong payload for update appsettings, remove this once backend has the fix.
+    # TODO: Centauri currently return wrong payload for update appsettings, remove this once backend has the fix.
     if is_centauri_functionapp(cmd, resource_group_name, name):
         update_application_settings_polling(cmd, resource_group_name, name, app_settings, slot, client)
         result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
@@ -453,7 +455,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
         app_settings_slot_cfg_names = slot_cfg_names.app_setting_names
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
-    return _build_app_settings_output(result.properties, app_settings_slot_cfg_names)
+    return _build_app_settings_output(result.properties, app_settings_slot_cfg_names, show_values)
 
 
 # TODO: Update manual polling to use LongRunningOperation once backend API & new SDK supports polling
@@ -1536,7 +1538,7 @@ def update_configuration_polling(cmd, resource_group_name, name, slot, configs):
             raise CLIError(ex)
 
 
-def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None):
+def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None, show_values=False):
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory(cmd.cli_ctx)
     centauri_functionapp = is_centauri_functionapp(cmd, resource_group_name, name)
@@ -1561,7 +1563,9 @@ def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None
         result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
                                              'update_application_settings',
                                              app_settings, slot, client)
-    return _build_app_settings_output(result.properties, slot_cfg_names.app_setting_names if slot_cfg_names else [])
+    return _build_app_settings_output(result.properties, 
+                                      slot_cfg_names.app_setting_names if slot_cfg_names else [], 
+                                      show_values)
 
 
 def delete_azure_storage_accounts(cmd, resource_group_name, name, custom_id, slot=None):
@@ -1597,11 +1601,12 @@ def _ssl_context():
     return ssl.create_default_context()
 
 
-def _build_app_settings_output(app_settings, slot_cfg_names):
+def _build_app_settings_output(app_settings, slot_cfg_names, show_values=True):
     slot_cfg_names = slot_cfg_names or []
+    app_settings = _mask_creds_related_appsettings(app_settings)
     return [{'name': p,
              'value': app_settings[p],
-             'slotSetting': p in slot_cfg_names} for p in _mask_creds_related_appsettings(app_settings)]
+             'slotSetting': p in slot_cfg_names} for p in (app_settings if show_values else _redact_appsettings(app_settings))]
 
 
 def _build_app_settings_input(settings, connection_string_type):
@@ -1807,6 +1812,12 @@ def _filter_for_container_settings(cmd, resource_group_name, name, settings,
 # TODO: remove this when #3660(service tracking issue) is resolved
 def _mask_creds_related_appsettings(settings):
     for x in [x1 for x1 in settings if x1 in APPSETTINGS_TO_MASK]:
+        settings[x] = None
+    return settings
+
+
+def _redact_appsettings(settings):
+    for x in settings:
         settings[x] = None
     return settings
 
