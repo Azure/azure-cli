@@ -1733,7 +1733,9 @@ def db_update(  # pylint: disable=too-many-locals
         encryption_protector=None,
         federated_client_id=None,
         keys_to_remove=None,
-        encryption_protector_auto_rotation=None):
+        encryption_protector_auto_rotation=None,
+        use_free_limit=None,
+        free_limit_exhaustion_behavior=None):
     '''
     Applies requested parameters to a db resource instance for a DB update.
     '''
@@ -1855,6 +1857,12 @@ def db_update(  # pylint: disable=too-many-locals
 
     if encryption_protector_auto_rotation is not None:
         instance.encryption_protector_auto_rotation = encryption_protector_auto_rotation
+
+    if use_free_limit is not None:
+        instance.use_free_limit = use_free_limit
+
+    if free_limit_exhaustion_behavior:
+        instance.free_limit_exhaustion_behavior = free_limit_exhaustion_behavior
 
     return instance
 

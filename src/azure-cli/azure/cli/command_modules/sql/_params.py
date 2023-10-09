@@ -933,6 +933,12 @@ def load_arguments(self, _):
         c.argument('availability_zone',
                    arg_type=database_availability_zone_param_type)
 
+        c.argument('use_free_limit',
+                   arg_type=database_use_free_limit)
+
+        c.argument('free_limit_exhaustion_behavior',
+                   arg_type=database_free_limit_exhaustion_behavior)
+
     with self.argument_context('sql db export') as c:
         # Create args that will be used to build up the ExportDatabaseDefinition object
         create_args_for_complex_type(
