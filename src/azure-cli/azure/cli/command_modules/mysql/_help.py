@@ -196,7 +196,7 @@ long-summary: >
 
     To Migrate an external MySQL server to Azure MySQL Flexible server whose backup is stored on an Azure Blob Container.
 
-    To Migrate a MySQL single server to flexible server. For more information for network configuration, see
+    To Migrate a Azure MySQL single server to Azure MySQL Flexible server. For more information for network configuration, see
 
     - Migrate Azure Database for MySQL - Single Server to Flexible Server using Azure MySQL Import CLI
 
