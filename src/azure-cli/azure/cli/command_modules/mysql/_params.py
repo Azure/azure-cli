@@ -256,7 +256,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
     data_source_type_arg_type = CLIArgumentType(
         options_list=['--data-source-type'],
-        arg_type=get_enum_type(['mysql_single']),
+        arg_type=get_enum_type(['mysql_single', 'azure_blob']),
         help='Data source type. e.g., mysql_single: Azure Database for MySQL Servers. '
     )
 
@@ -264,6 +264,18 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         options_list=['--data-source'],
         help='Data source for importing to Flexible Server. Based on the data source type provide the data source as mentioned below. '
              'e.g., mysql_single: The name or resource ID of the Azure MySQL single server. '
+    )
+
+    data_source_backup_dir_arg_type = CLIArgumentType(
+        options_list=['--data-source-backup-dir'],
+        help='Relative path of the directory in which source backup is stored. '
+             'By default, the backup files will be read from the root of storage. '
+             'This parameter is valid for storage based data source. Example: azure_blob. '
+    )
+
+    data_source_sas_token_arg_type = CLIArgumentType(
+        options_list=['--data-source-sas-token'],
+        help='Sas token for accessing the data source. This parameter is valid for storage based data source. Example: azure_blob. '
     )
 
     mode_arg_type = CLIArgumentType(
@@ -336,6 +348,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('yes', arg_type=yes_arg_type)
         c.argument('data_source_type', arg_type=data_source_type_arg_type)
         c.argument('data_source', arg_type=data_source_arg_type)
+        c.argument('data_source_backup_dir', arg_type=data_source_backup_dir_arg_type)
+        c.argument('data_source_sas_token', arg_type=data_source_sas_token_arg_type)
         c.argument('mode', default='Offline', arg_type=mode_arg_type)
 
     with self.argument_context('mysql flexible-server delete') as c:
