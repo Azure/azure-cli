@@ -170,7 +170,7 @@ class LogicappBasicE2ETest(ScenarioTest):
         )
 
         # update through key value pairs
-        self.cmd('logicapp config appsettings set -g {} -n {} --settings s1=foo s2=bar s3=bar2'.format(resource_group, logicapp_name)).assert_with_checks([
+        self.cmd('logicapp config appsettings set -g {} -n {} --settings s1=foo s2=bar s3=bar2 --show-values'.format(resource_group, logicapp_name)).assert_with_checks([
             JMESPathCheck("length([?name=='s1'])", 1),
             JMESPathCheck("length([?name=='s2'])", 1),
             JMESPathCheck("length([?name=='s3'])", 1),
