@@ -295,7 +295,8 @@ def create_containerapp(cmd,
                         registry_identity=None,
                         workload_profile_name=None,
                         termination_grace_period=None,
-                        secret_volume_mount=None):
+                        secret_volume_mount=None,
+                        service_registry=None):
     raw_parameters = locals()
 
     containerapp_create_decorator = ContainerAppCreateDecorator(
@@ -311,6 +312,28 @@ def create_containerapp(cmd,
     r = containerapp_create_decorator.create()
     containerapp_create_decorator.construct_for_post_process(r)
     r = containerapp_create_decorator.post_process(r)
+    
+    if service_registry is not None:
+        from knack.log import get_logger
+        logger = get_logger(__name__)
+
+        fqdn = r.get('properties').get('latestRevisionFqdn')
+        
+        url = 'https://servicediscoverymvp.azurewebsites.net{}/instances/{}'.format(service_registry, name)
+        payload = {
+            'description': 'Container app auto registered fqdn',
+            'metadatas': {
+                'fqdn': fqdn
+            },
+            'address': '',
+            'port': target_port
+        }
+
+        response = requests.put(url, json=payload)
+        if response.status_code == 200:
+            logger.warning('Registering FQDN to service regsitery succeeds.')
+        else:
+            logger.warning('Registering FQDN to service regsitery fails.')
     return r
 
 

@@ -27,6 +27,7 @@ def load_arguments(self, _):
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.ignore('disable_warnings')
+        c.argument('service_registry', help="Service registry id to register the application url", options_list=["--service-registry"])
 
     with self.argument_context('containerapp') as c:
         c.argument('tags', arg_type=tags_type)
