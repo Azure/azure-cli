@@ -1107,7 +1107,7 @@ class SqlServerFreeDbMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_sql_db_free_params(self, resource_group, resource_group_location, server):
         database_name = "freeDb1"
-        compute_model_serverless = ComputeModelType.serverless
+        compute_model_serverless = "Serverless"
 
         # Create database with vcore edition
         vcore_edition = 'GeneralPurpose'
