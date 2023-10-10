@@ -99,9 +99,12 @@ def import_zone(cmd, resource_group_name, private_zone_name, file_name):
         "name": private_zone_name,
         "resource_group": resource_group_name
     })
-    result = LongRunningOperation(cmd.cli_ctx)(poller)
-    if result["provisioningState"] != 'Succeeded':
-        raise CLIError('Error occured while creating or updating private dns zone.')
+    try:
+        result = LongRunningOperation(cmd.cli_ctx)(poller)
+        if result["provisioningState"] != 'Succeeded':
+            raise CLIError('Error occured while creating or updating private dns zone.')
+    except HttpResponseError:
+        logger.warning("Zone %s already exists in resource group %s.", private_zone_name, resource_group_name)
 
     for key, rs in record_sets.items():
 
