@@ -210,7 +210,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_KEYVAULT_SECRETS: None,
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING: None,
         ResourceType.DATA_KEYVAULT: '7.0',
-        ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP: '7.4',
+        ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP: '7.5-preview.1',
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL: '7.4',
         ResourceType.DATA_STORAGE: '2018-11-09',
         ResourceType.DATA_STORAGE_BLOB: '2022-11-02',
