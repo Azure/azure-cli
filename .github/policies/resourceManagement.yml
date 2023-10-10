@@ -186,7 +186,7 @@ configuration:
       - or:
         - payloadType: Issues
       - isAction:
-          action: Opened
+          action: Labeled
       then:
       - if:
         - hasLabel:
@@ -2639,6 +2639,7 @@ configuration:
       - assignTo:
           users:
           - zhoxing-ms
+          - yanzhudd
       - addLabel:
           label: Auto-Assign
       - addLabel:
@@ -2720,10 +2721,11 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - requestReview:
-          reviewer: wangzelin007
+          reviewer: yanzhudd
       - assignTo:
           users:
           - zhoxing-ms
+          - yanzhudd
       - addLabel:
           label: Compute
       description: '[Compute] Auto assign labels and reviewers based on PR title/description.'
@@ -2814,6 +2816,48 @@ configuration:
       - addLabel:
           label: Auto-Assign
       description: '[webapp] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: 'az webapp connection'
+            isRegex: True
+        - bodyContains:
+            pattern: 'az webapp connection'
+            isRegex: True
+        - titleContains:
+            pattern: 'az functionapp connection'
+            isRegex: True
+        - bodyContains:
+            pattern: 'az functionapp connection'
+            isRegex: True
+        - titleContains:
+            pattern: 'az springapp connection'
+            isRegex: True
+        - bodyContains:
+            pattern: 'az springapp connection'
+            isRegex: True
+        - titleContains:
+            pattern: 'az containerapp connection'
+            isRegex: True
+        - bodyContains:
+            pattern: 'az containerapp connection'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Service Connector
+      - addLabel:
+          label: CXP Attention
+      - addLabel:
+          label: Auto-Assign
+      - assignTo:
+          users:
+          - yungezz
+          - houk-ms
+      description: '[Service Connector] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
       - or:
@@ -3549,6 +3593,7 @@ configuration:
       - assignTo:
           users:
           - zhoxing-ms
+          - yanzhudd
       - addLabel:
           label: Auto-Assign
       - requestReview:
@@ -4608,25 +4653,55 @@ configuration:
           action: Opened
       - or:
         - titleContains:
-            pattern: '\b([Cc]ontainer ?[Aa]pp)\b '
+            pattern: '\b([Cc]ontainer ?[Aa]pps?)\b'
             isRegex: True
         - bodyContains:
-            pattern: '\b([Cc]ontainer ?[Aa]pp)\b '
+            pattern: '\b([Cc]ontainer ?[Aa]pps?)\b'
             isRegex: True
       then:
+      - requestReview:
+          reviewer: yonzhan
       - addLabel:
           label: Auto-Assign
       - requestReview:
           reviewer: wangzelin007
+      - requestReview:
+          reviewer: yanzhudd
       - assignTo:
           users:
-          - jsntcy
+          - zhoxing-ms
       - addLabel:
           label: ContainerApp
       - requestReview:
+          reviewer: zhoxing-ms
+      - requestReview:
           reviewer: jsntcy
       - requestReview:
-          reviewer: yonzhan
+          reviewer: ruslany
+      - requestReview:
+          reviewer: sanchitmehta
+      - requestReview:
+          reviewer: ebencarek
+      - requestReview:
+          reviewer: JennyLawrance
+      - requestReview:
+          reviewer: howang-ms
+      - requestReview:
+          reviewer: vinisoto
+      - requestReview:
+          reviewer: chinadragon0515
+      - requestReview:
+          reviewer: vturecek
+      - requestReview:
+          reviewer: torosent
+      - requestReview:
+          reviewer: pagariyaalok
+      - requestReview:
+          reviewer: Juliehzl
+      - requestReview:
+          reviewer: jijohn14
+      - requestReview:
+          reviewer: Greedygre
       description: '[container app] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Issues
@@ -4932,6 +5007,9 @@ configuration:
         - titleContains:
             pattern: '[Aa]z cognitiveservices'
             isRegex: True
+        - titleContains:
+            pattern: '[Cognitive Services]'
+            isRegex: False
         - bodyContains:
             pattern: '[Aa]z cognitiveservices'
             isRegex: True
@@ -5545,5 +5623,69 @@ configuration:
       - addLabel:
           label: CXP Attention
       description: '[Reservations] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az stack
+            isRegex: True
+        - bodyContains:
+            pattern: az stack
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: ARM
+      - addLabel:
+          label: CXP Attention
+      description: '[ARM-stack] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: az aro
+            isRegex: True
+        - bodyContains:
+            pattern: az aro
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: ARO
+      - addLabel:
+          label: CXP Attention
+      description: '[ARO] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      - or:
+        - titleContains:
+            pattern: az aro
+            isRegex: True
+        - bodyContains:
+            pattern: az aro
+            isRegex: True
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: ARO
+      - requestReview:
+          reviewer: kairu-ms
+      - requestReview:
+          reviewer: yonzhan
+      - assignTo:
+          users:
+          - kairu-ms
+      description: '[ARO] Auto assign labels and reviewers based on PR title/description.'
 onFailure: 
 onSuccess: 

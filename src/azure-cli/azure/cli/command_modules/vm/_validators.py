@@ -1333,7 +1333,7 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
         return
     from ._vm_utils import trusted_launch_warning_log
     if namespace.image is not None:
-        from ._vm_utils import parse_shared_gallery_image_id, parse_community_gallery_image_id,\
+        from ._vm_utils import parse_shared_gallery_image_id, parse_community_gallery_image_id, \
             is_valid_image_version_id, parse_gallery_image_id
         if is_valid_image_version_id(namespace.image):
             image_info = parse_gallery_image_id(namespace.image)

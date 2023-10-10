@@ -10,7 +10,7 @@ import subprocess
 root_dir = '/opt/az/lib/python3.10/site-packages/azure/cli/command_modules'
 mod_list = [mod for mod in sorted(os.listdir(root_dir)) if os.path.isdir(os.path.join(root_dir, mod)) and mod != '__pycache__']
 
-pytest_base_cmd = '/opt/az/bin/python3 -m pytest -x -v --forked -p no:warnings --log-level=WARN'
+pytest_base_cmd = '/opt/az/bin/python3 -m pytest -v --forked -p no:warnings --log-level=WARN'
 pytest_parallel_cmd = '{} -n auto'.format(pytest_base_cmd)
 serial_test_modules = ['botservice', 'network', 'cloud', 'appservice', 'iot', 'resource']
 

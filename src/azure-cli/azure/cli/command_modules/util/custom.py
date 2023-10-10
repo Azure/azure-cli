@@ -51,15 +51,17 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
 
     update_cli = True
     from azure.cli.core.util import get_latest_from_github
-    try:
-        latest_version = get_latest_from_github()
-        if latest_version and parse(latest_version) <= parse(local_version):
-            logger.warning("You already have the latest azure-cli version: %s", local_version)
-            update_cli = False
-            if not update_all:
-                return
-    except Exception as ex:  # pylint: disable=broad-except
-        logger.debug("Failed to get the latest version. %s", str(ex))
+    latest_version = get_latest_from_github()
+    if not latest_version:
+        logger.warning("Failed to get the latest azure-cli version.")
+        update_cli = False
+        if not update_all:
+            return
+    elif parse(latest_version) <= parse(local_version):
+        logger.warning("You already have the latest azure-cli version: %s", local_version)
+        update_cli = False
+        if not update_all:
+            return
     exts = [ext.name for ext in get_extensions(ext_type=WheelExtension)] if update_all else []
 
     exit_code = 0
@@ -185,8 +187,14 @@ def _upgrade_on_windows():
     Directly installing from URL may be blocked by policy: https://github.com/Azure/azure-cli/issues/19171
     This also gives the user a chance to manually install the MSI in case of msiexec.exe failure.
     """
-    logger.warning("Updating Azure CLI with MSI from https://aka.ms/installazurecliwindows")
-    tmp_dir, msi_path = _download_from_url('https://aka.ms/installazurecliwindows')
+    import platform
+
+    if platform.architecture()[0] == '32bit':
+        msi_url = 'https://aka.ms/installazurecliwindows'
+    else:
+        msi_url = 'https://aka.ms/installazurecliwindowsx64'
+    logger.warning("Updating Azure CLI with MSI from %s", msi_url)
+    tmp_dir, msi_path = _download_from_url(msi_url)
 
     logger.warning("Installing MSI")
     import subprocess

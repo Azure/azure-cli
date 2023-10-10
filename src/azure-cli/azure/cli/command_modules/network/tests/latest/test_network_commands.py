@@ -2236,10 +2236,10 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         ])
 
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
-                 '--type Microsoft_BotManagerRuleSet --version 0.1',
+                 '--type Microsoft_BotManagerRuleSet --version 1.0',
                  checks=[
                      self.check('managedRules.managedRuleSets[1].ruleSetType', 'Microsoft_BotManagerRuleSet'),
-                     self.check('managedRules.managedRuleSets[1].ruleSetVersion', '0.1')
+                     self.check('managedRules.managedRuleSets[1].ruleSetVersion', '1.0')
                  ])
 
         # add one exclusion rule to the managed rules of this waf-policy
@@ -2258,7 +2258,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[1].ruleGroupName', self.kwargs['csr_grp2']),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[1].rules[0].ruleId', '913100'),
             self.check('managedRules.managedRuleSets[1].ruleSetType', 'Microsoft_BotManagerRuleSet'),
-            self.check('managedRules.managedRuleSets[1].ruleSetVersion', '0.1'),
+            self.check('managedRules.managedRuleSets[1].ruleSetVersion', '1.0'),
             self.check('policySettings.fileUploadLimitInMb', 64),
             self.check('policySettings.maxRequestBodySizeInKb', 128),
             self.check('policySettings.mode', 'Prevention'),
@@ -2916,12 +2916,13 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
         ])
 
         self.cmd(
-            'network public-ip update -g {rg} -n {ip2} --allocation-method static --dns-name wowza2 --idle-timeout 10 --tags foo=doo',
+            'network public-ip update -g {rg} -n {ip2} --allocation-method static --dns-name wowza2 --idle-timeout 10 --ip-tags null --tags foo=doo',
             checks=[
                 self.check('publicIPAllocationMethod', 'Static'),
                 self.check('dnsSettings.domainNameLabel', 'wowza2'),
                 self.check('idleTimeoutInMinutes', 10),
-                self.check('tags.foo', 'doo')
+                self.check('tags.foo', 'doo'),
+                self.check("ipTags", [])
             ])
 
         self.cmd('network public-ip list -g {rg}', checks=[
@@ -4656,6 +4657,7 @@ class NetworkVNetScenarioTest(ScenarioTest):
             self.check('type(@)', 'array'),
             self.check("length([?type == '{rt}']) == length(@)", True),
         ])
+        self.cmd("network vnet list -o table")
         self.cmd('network vnet show --resource-group {rg} --name {vnet}', checks=[
             self.check('type(@)', 'object'),
             self.check('name', '{vnet}'),
@@ -4666,7 +4668,7 @@ class NetworkVNetScenarioTest(ScenarioTest):
             self.check('length(addressSpace.addressPrefixes)', 2),
             self.check('dhcpOptions.dnsServers[0]', '1.2.3.4')
         ])
-        self.cmd('network vnet update -g {rg} -n {vnet} --dns-servers ""', checks=[
+        self.cmd('network vnet update -g {rg} -n {vnet} --dns-servers null', checks=[
             self.check('length(addressSpace.addressPrefixes)', 2),
             self.check('dhcpOptions.dnsServers', [])
         ])
@@ -5375,7 +5377,7 @@ class NetworkSubnetScenarioTests(ScenarioTest):
                  checks=self.check('addressPrefix', '123.0.0.0/24'))
 
         # Test we can get rid of the nsg.
-        self.cmd('network vnet subnet update --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefix {subnet_prefix2} --network-security-group \"\"',
+        self.cmd('network vnet subnet update --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefix {subnet_prefix2} --network-security-group null',
                  checks=self.check('networkSecurityGroup', None))
 
         self.cmd('network vnet delete --resource-group {rg} --name {vnet}')
@@ -5406,7 +5408,7 @@ class NetworkSubnetScenarioTests(ScenarioTest):
 
         self.cmd('network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefixes {subnet_prefix} --nat-gateway {nat}',
                  checks=self.check('ends_with(@.natGateway.id, `/{nat}`)', True))
-        self.cmd('network vnet subnet update --resource-group {rg} --vnet-name {vnet} --name {subnet} --nat-gateway \"\"',
+        self.cmd('network vnet subnet update --resource-group {rg} --vnet-name {vnet} --name {subnet} --nat-gateway null',
                  checks=self.check('natGateway', None))
 
 
@@ -5422,7 +5424,7 @@ class NetworkSubnetScenarioTests(ScenarioTest):
         self.cmd('network vnet create -g {rg} -n {vnet}')
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.1.0/24 --service-endpoints Microsoft.Storage',
                  checks=self.check('serviceEndpoints[0].service', 'Microsoft.Storage'))
-        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints ""',
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints null',
                  checks=self.check('serviceEndpoints', None))
 
     @ResourceGroupPreparer(name_prefix='cli_subnet_delegation')
@@ -5482,6 +5484,27 @@ class NetworkSubnetScenarioTests(ScenarioTest):
                      self.check('privateEndpointNetworkPolicies', 'Disabled'),
                      self.check('privateLinkServiceNetworkPolicies', 'Disabled')
                  ])
+
+    @ResourceGroupPreparer(name_prefix='cli_subnet_default_outbound_access')
+    def test_network_subnet_default_outbound_access(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'subnet1': 'subnet1',
+            'subnet2': 'subnet2',
+        })
+        self.cmd('network vnet create -g {rg} -n {vnet} -l westcentralus')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet1} --address-prefixes 10.0.3.0/24 --default-outbound-access false',
+                 self.check('defaultOutboundAccess', False))
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet1} --default-outbound-access true',
+                 self.check('defaultOutboundAccess', True))
+
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefixes 10.0.4.0/24',
+                 self.check('defaultOutboundAccess', True))
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet2} --default-outbound-access false',
+                 self.check('defaultOutboundAccess', False))
+
+        self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet} -n {subnet2}',
+                 self.check('defaultOutboundAccess', False))
 
 
 class NetworkActiveActiveCrossPremiseScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
