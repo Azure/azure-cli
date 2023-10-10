@@ -245,7 +245,8 @@ subscription than the app service environment, please use the resource ID for --
     for scope in ['webapp', 'functionapp', 'logicapp']:
         for cmd in ['set', 'delete']:
             with self.argument_context(scope + ' config appsettings ' + cmd) as c:
-                c.argument('show_values', action='store_true', options_list=['--show-values'])
+                c.argument('show_values', action='store_true', options_list=['--show-values'],
+                           help='Show unredacted appsetting values. WARNING: this may contain secrets -- use with caution in non-interactive CI contexts.')
 
     for scope in ['webapp', 'functionapp']:
         with self.argument_context(scope) as c:
