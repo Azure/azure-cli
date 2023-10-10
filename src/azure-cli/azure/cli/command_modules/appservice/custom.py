@@ -430,9 +430,6 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
         app_settings.properties[setting_name] = value
     client = web_client_factory(cmd.cli_ctx)
 
-    if show_values:
-        Console.log("hello")
-
     # TODO: Centauri currently return wrong payload for update appsettings, remove this once backend has the fix.
     if is_centauri_functionapp(cmd, resource_group_name, name):
         update_application_settings_polling(cmd, resource_group_name, name, app_settings, slot, client)
@@ -1631,7 +1628,7 @@ def _build_app_settings_input(settings, connection_string_type):
         results = []
         for name_value in settings:
             conn_string_name, value = name_value.split('=', 1)
-            if value[0] in ["'", '"']:  # strip away the quots used as separators
+            if value[0] in ["'", '"']:  # strip away the quotes used as separators
                 value = value[1:-1]
             results.append({'name': conn_string_name, 'value': value, 'type': connection_string_type})
         return results
