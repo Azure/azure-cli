@@ -45,6 +45,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
     'License :: OSI Approved :: MIT License',
 ]
 
@@ -105,7 +106,7 @@ DEPENDENCIES = [
     'azure-mgmt-netapp~=10.1.0',
     'azure-mgmt-policyinsights==1.1.0b4',
     'azure-mgmt-privatedns~=1.0.0',
-    'azure-mgmt-rdbms~=10.2.0b10',
+    'azure-mgmt-rdbms~=10.2.0b11',
     'azure-mgmt-recoveryservicesbackup~=7.0.0',
     'azure-mgmt-recoveryservices~=2.5.0',
     'azure-mgmt-redhatopenshift~=1.3.0',
@@ -117,7 +118,7 @@ DEPENDENCIES = [
     'azure-mgmt-servicefabricmanagedclusters~=1.0.0',
     'azure-mgmt-servicelinker==1.2.0b1',
     'azure-mgmt-servicefabric~=1.0.0',
-    'azure-mgmt-signalr==1.1.0',
+    'azure-mgmt-signalr==2.0.0b1',
     'azure-mgmt-sqlvirtualmachine==1.0.0b5',
     'azure-mgmt-sql==4.0.0b12',
     'azure-mgmt-storage~=21.0.0',
