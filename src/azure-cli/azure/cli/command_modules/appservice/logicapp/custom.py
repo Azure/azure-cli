@@ -236,7 +236,8 @@ def get_logicapp_app_settings(cmd, resource_group_name, name, slot=None):
     return get_app_settings(cmd, resource_group_name, name, slot)
 
 
-def update_logicapp_app_settings(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None, show_values=False):
+def update_logicapp_app_settings(cmd, resource_group_name, name, settings=None,
+                                 slot=None, slot_settings=None, show_values=False):
     return update_app_settings(cmd, resource_group_name, name, settings, slot, slot_settings, show_values)
 
 

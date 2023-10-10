@@ -397,7 +397,8 @@ def parse_docker_image_name(deployment_container_image_name, environment=None):
     return "https://{}".format(hostname)
 
 
-def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None, show_values=False):
+def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None,
+                        slot_settings=None, show_values=False):
     if not settings and not slot_settings:
         raise MutuallyExclusiveArgumentError('Usage Error: --settings |--slot-settings')
 
@@ -1560,8 +1561,8 @@ def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None
         result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
                                              'update_application_settings',
                                              app_settings, slot, client)
-    return _build_app_settings_output(result.properties, 
-                                      slot_cfg_names.app_setting_names if slot_cfg_names else [], 
+    return _build_app_settings_output(result.properties,
+                                      slot_cfg_names.app_setting_names if slot_cfg_names else [],
                                       show_values)
 
 
@@ -1603,7 +1604,8 @@ def _build_app_settings_output(app_settings, slot_cfg_names, show_values=True):
     app_settings = _mask_creds_related_appsettings(app_settings)
     return [{'name': p,
              'value': app_settings[p],
-             'slotSetting': p in slot_cfg_names} for p in (app_settings if show_values else _redact_appsettings(app_settings))]
+             'slotSetting': p in slot_cfg_names} for p in
+            (app_settings if show_values else _redact_appsettings(app_settings))]
 
 
 def _build_app_settings_input(settings, connection_string_type):
