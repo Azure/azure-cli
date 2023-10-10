@@ -685,7 +685,7 @@ class WebappConfigureTest(ScenarioTest):
 
         # site appsettings testing
         # update through key value pairs
-        self.cmd('webapp config appsettings set -g {} -n {} --settings s1=foo s2=bar s3=bar2'.format(resource_group, webapp_name)).assert_with_checks([
+        self.cmd('webapp config appsettings set -g {} -n {} --settings s1=foo s2=bar s3=bar2 --show-values'.format(resource_group, webapp_name)).assert_with_checks([
             JMESPathCheck("length([?name=='s1'])", 1),
             JMESPathCheck("length([?name=='s2'])", 1),
             JMESPathCheck("length([?name=='s3'])", 1),
@@ -835,7 +835,7 @@ class WebappConfigureTest(ScenarioTest):
 
         # site appsettings testing
         # update through key value pairs
-        self.cmd('webapp config appsettings set -g {} -n {} --settings s1=foo s2=bar s3=bar2'.format(resource_group, webapp_name)).assert_with_checks([
+        self.cmd('webapp config appsettings set -g {} -n {} --settings s1=foo s2=bar s3=bar2 --show-values'.format(resource_group, webapp_name)).assert_with_checks([
             JMESPathCheck("length([?name=='s1'])", 1),
             JMESPathCheck("length([?name=='s2'])", 1),
             JMESPathCheck("length([?name=='s3'])", 1),
@@ -874,7 +874,7 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck('name', slot)
         ])
 
-        output = self.cmd('webapp config appsettings set -g {} -n {} --settings s=value "@{}"'.format(
+        output = self.cmd('webapp config appsettings set -g {} -n {} --settings s=value "@{}" --show-values'.format(
             resource_group, webapp_name, settings_file)).get_output_in_json()
         output = [s for s in output if s['name'] in ['s', 's2']]
         output.sort(key=lambda s: s['name'])
@@ -898,7 +898,7 @@ class WebappConfigureTest(ScenarioTest):
         with open(settings_file, 'w') as file:
             file.write(json.dumps(output))
 
-        output = self.cmd('webapp config appsettings set -g {} -n {} --settings "@{}"'.format(
+        output = self.cmd('webapp config appsettings set -g {} -n {} --settings "@{}" --show-values'.format(
             resource_group, webapp_name, settings_file)).get_output_in_json()
         output = [s for s in output if s['name'] in ['s', 's2', 's3']]
         output.sort(key=lambda s: s['name'])
@@ -921,7 +921,7 @@ class WebappConfigureTest(ScenarioTest):
         with open(settings_file, 'w') as file:
             file.write(json.dumps(output))
 
-        output = self.cmd('webapp config appsettings set -g {} -n {} --slot {} --settings "@{}"'.format(
+        output = self.cmd('webapp config appsettings set -g {} -n {} --slot {} --settings "@{}" --show-values'.format(
             resource_group, webapp_name, slot, settings_file)).get_output_in_json()
         output = [s for s in output if s['name'] in ['s', 's2', 's3']]
         output.sort(key=lambda s: s['name'])
@@ -943,7 +943,7 @@ class WebappConfigureTest(ScenarioTest):
         })
 
         # app settings set with --slot-settings
-        output = self.cmd('webapp config appsettings set -g {} -n {} --slot-settings "@{}"'.format(
+        output = self.cmd('webapp config appsettings set -g {} -n {} --slot-settings "@{}" --show-values'.format(
             resource_group, webapp_name, settings_file)).get_output_in_json()
         output = [s for s in output if s['name'] in ['s', 's2', 's3']]
         output.sort(key=lambda s: s['name'])
@@ -964,7 +964,7 @@ class WebappConfigureTest(ScenarioTest):
             'slotSetting': True
         })
 
-        output = self.cmd('webapp config appsettings set -g {} -n {} --slot {} --slot-settings "@{}"'.format(
+        output = self.cmd('webapp config appsettings set -g {} -n {} --slot {} --slot-settings "@{}" --show-values'.format(
             resource_group, webapp_name, slot, settings_file)).get_output_in_json()
         output = [s for s in output if s['name'] in ['s', 's2', 's3']]
         output.sort(key=lambda s: s['name'])
