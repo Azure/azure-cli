@@ -242,7 +242,7 @@ subscription than the app service environment, please use the resource ID for --
             c.argument('https_only', help="Redirect all traffic made to an app using HTTP to HTTPS.",
                        arg_type=get_three_state_flag())
             
-    for scope in ['webapp', 'functionapp']:
+    for scope in ['webapp', 'functionapp', 'logicapp']:
         for cmd in ['set', 'delete']:
             with self.argument_context(scope + ' config appsettings ' + cmd) as c:
                 c.argument('show_values', action='store_true', options_list=['--show-values'])
