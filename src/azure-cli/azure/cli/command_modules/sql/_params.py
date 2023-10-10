@@ -267,7 +267,7 @@ database_use_free_limit = CLIArgumentType(
     arg_type=get_three_state_flag())
 
 database_free_limit_exhaustion_behavior = CLIArgumentType(
-    option_list=['--free-limit-exhaustion-behavior', '--exhaustion-behavior', '--fleb'],
+    options_list=['--free-limit-exhaustion-behavior', '--exhaustion-behavior', '--fleb'],
     help='Specifies the behavior when monthly free limits are exhausted for the free database.'
     'AutoPause: The database will be auto paused upon exhaustion of free limits for remainder of the month.'
     'BillForUsage: The database will continue to be online upon exhaustion of free limits'
