@@ -255,7 +255,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Java|8')])
+            JMESPathCheck('linuxFxVersion', 'Java|11')])
 
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -917,7 +917,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'java')])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
-            JMESPathCheck('javaVersion', '1.8')])
+            JMESPathCheck('javaVersion', '11')])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1069,6 +1069,38 @@ class FunctionAppASPZoneRedundant(ScenarioTest):
         self.cmd('functionapp plan create -g {} -n {} -l {} --sku FREE'.format(resource_group, plan, LINUX_ASP_LOCATION_WEBAPP))
 
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[JMESPathCheck('properties.zoneRedundant', False)])
+
+class FunctionAppWithDistributedTracing(ScenarioTest):
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_with_default_distributed_tracing(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionappwithdistribtracing', 40)
+        plan = self.create_random_name('plan', 24)
+        self.cmd('functionapp plan create -g {} -n {} -l {} --sku P1V2'.format(resource_group, plan, "eastus"))
+
+        self.cmd('functionapp create -g {} -n {} -p {} -s {} --runtime java --functions-version 4'
+                 .format(resource_group, functionapp_name, plan, storage_account))
+
+        app_set = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group,
+                                                                                    functionapp_name)).get_output_in_json()
+        self.assertTrue('APPLICATIONINSIGHTS_ENABLE_AGENT' in [
+                        kp['name'] for kp in app_set])
+
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_without_default_distributed_tracing(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionappwithoutdistribtracing', 40)
+
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --runtime java --functions-version 4'
+                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
+
+        app_set = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group,
+                                                                                    functionapp_name)).get_output_in_json()
+        self.assertTrue('APPLICATIONINSIGHTS_ENABLE_AGENT' not in [
+                        kp['name'] for kp in app_set])
 
 
 class FunctionAppWithAppInsightsDefault(ScenarioTest):

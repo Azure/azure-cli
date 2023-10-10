@@ -299,14 +299,12 @@ no_wait_type = CLIArgumentType(
 zones_type = CLIArgumentType(
     options_list=['--zones', '-z'],
     nargs='+',
-    help='Space-separated list of availability zones into which to provision the resource.',
-    choices=['1', '2', '3']
+    help='Space-separated list of availability zones into which to provision the resource.'
 )
 
 zone_type = CLIArgumentType(
     options_list=['--zone', '-z'],
     help='Availability zone into which to provision the resource.',
-    choices=['1', '2', '3'],
     nargs=1
 )
 

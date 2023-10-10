@@ -35,9 +35,7 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_
 
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
-from azure.mgmt.relay.models import AccessRights
 from azure.mgmt.web.models import KeyInfo
-from azure.cli.command_modules.relay._client_factory import hycos_mgmt_client_factory, namespaces_mgmt_client_factory
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
@@ -84,6 +82,10 @@ from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
 
 from .aaz.latest.network.vnet import List as VNetList, Show as VNetShow
 from .aaz.latest.network.vnet.subnet import Show as SubnetShow, Update as SubnetUpdate
+from .aaz.latest.relay.hyco import Show as HyCoShow
+from .aaz.latest.relay.hyco.authorization_rule import List as HycoAuthoList, Create as HycoAuthoCreate
+from .aaz.latest.relay.hyco.authorization_rule.keys import List as HycoAuthoKeysList
+from .aaz.latest.relay.namespace import List as NamespaceList
 
 logger = get_logger(__name__)
 
@@ -3680,6 +3682,12 @@ def is_plan_elastic_premium(cmd, plan_info):
     return False
 
 
+def should_enable_distributed_tracing(consumption_plan_location, matched_runtime, image):
+    return consumption_plan_location is None \
+        and matched_runtime.name.lower() == "java" \
+        and image is None
+
+
 def create_functionapp(cmd, resource_group_name, name, storage_account, plan=None,
                        os_type=None, functions_version=None, runtime=None, runtime_version=None,
                        consumption_plan_location=None, app_insights=None, app_insights_key=None,
@@ -3960,6 +3968,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if create_app_insights:
         try:
             try_create_application_insights(cmd, functionapp)
+            if should_enable_distributed_tracing(consumption_plan_location, matched_runtime, image):
+                update_app_settings(cmd, functionapp.resource_group, functionapp.name,
+                                    ["APPLICATIONINSIGHTS_ENABLE_AGENT=true"])
+
         except Exception:  # pylint: disable=broad-except
             logger.warning('Error while trying to create and configure an Application Insights for the Function App. '
                            'Please use the Azure Portal to create and configure the Application Insights, if needed.')
@@ -4249,14 +4261,12 @@ def add_hc(cmd, name, resource_group_name, namespace, hybrid_connection, slot=No
     HybridConnection = cmd.get_models('HybridConnection')
 
     web_client = web_client_factory(cmd.cli_ctx)
-    hy_co_client = hycos_mgmt_client_factory(cmd.cli_ctx, cmd.cli_ctx)
-    namespace_client = namespaces_mgmt_client_factory(cmd.cli_ctx, cmd.cli_ctx)
 
     hy_co_id = ''
-    for n in namespace_client.list():
-        logger.warning(n.name)
-        if n.name == namespace:
-            hy_co_id = n.id
+    for n in NamespaceList(cli_ctx=cmd.cli_ctx)(command_args={}):
+        logger.warning(n['name'])
+        if n['name'] == namespace:
+            hy_co_id = n['id']
 
     if hy_co_id == '':
         raise ResourceNotFoundError('Azure Service Bus Relay namespace {} was not found.'.format(namespace))
@@ -4270,26 +4280,33 @@ def add_hc(cmd, name, resource_group_name, namespace, hybrid_connection, slot=No
         i = i + 1
 
     # calling the relay API to get information about the hybrid connection
-    hy_co = hy_co_client.get(hy_co_resource_group, namespace, hybrid_connection)
+    hy_co = HyCoShow(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": hy_co_resource_group,
+                                                        "namespace_name": namespace,
+                                                        "name": hybrid_connection})
 
     # if the hybrid connection does not have a default sender authorization
     # rule, create it
-    hy_co_rules = hy_co_client.list_authorization_rules(hy_co_resource_group, namespace, hybrid_connection)
+    hy_co_rules = HycoAuthoList(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": hy_co_resource_group,
+                                                                   "namespace_name": namespace,
+                                                                   "hybrid_connection_name": hybrid_connection})
     has_default_sender_key = False
     for r in hy_co_rules:
-        if r.name.lower() == "defaultsender":
-            for z in r.rights:
-                if z == z.send:
+        if r['name'].lower() == "defaultsender":
+            for z in r['rights']:
+                if z[0].lower() == 'send' and len(z) == 1:
                     has_default_sender_key = True
 
     if not has_default_sender_key:
-        rights = [AccessRights.send]
-        hy_co_client.create_or_update_authorization_rule(hy_co_resource_group, namespace, hybrid_connection,
-                                                         "defaultSender", rights)
-
-    hy_co_keys = hy_co_client.list_keys(hy_co_resource_group, namespace, hybrid_connection, "defaultSender")
-    hy_co_info = hy_co.id
-    hy_co_metadata = ast.literal_eval(hy_co.user_metadata)
+        rights = ["Send"]
+        args = {"resource_group": hy_co_resource_group, "namespace_name": namespace,
+                "hybrid_connection_name": hybrid_connection, "name": "defaultSender", "rights": rights}
+        HycoAuthoCreate(cli_ctx=cmd.cli_ctx)(command_args=args)
+    hy_co_keys = HycoAuthoKeysList(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": hy_co_resource_group,
+                                                                      "namespace_name": namespace,
+                                                                      "hybrid_connection_name": hybrid_connection,
+                                                                      "name": "defaultSender"})
+    hy_co_info = hy_co['id']
+    hy_co_metadata = ast.literal_eval(hy_co['userMetadata'])
     hy_co_hostname = ''
     for x in hy_co_metadata:
         if x["key"] == "endpoint":
@@ -4309,7 +4326,7 @@ def add_hc(cmd, name, resource_group_name, namespace, hybrid_connection, slot=No
                           hostname=hostname,
                           port=port,
                           send_key_name="defaultSender",
-                          send_key_value=hy_co_keys.primary_key,
+                          send_key_value=hy_co_keys['primaryKey'],
                           service_bus_suffix=".servicebus.windows.net")
 
     if slot is None:
@@ -4348,26 +4365,34 @@ def set_hc_key(cmd, plan, resource_group_name, namespace, hybrid_connection, key
     resource_group_strings = split_uri[1].split('/')
     relay_resource_group = resource_group_strings[0]
 
-    hy_co_client = hycos_mgmt_client_factory(cmd.cli_ctx, cmd.cli_ctx)
     # calling the relay function to obtain information about the hc in question
-    hy_co = hy_co_client.get(relay_resource_group, namespace, hybrid_connection)
+    hy_co = HyCoShow(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": relay_resource_group,
+                                                        "namespace_name": namespace,
+                                                        "name": hybrid_connection})
 
     # if the hybrid connection does not have a default sender authorization
     # rule, create it
-    hy_co_rules = hy_co_client.list_authorization_rules(relay_resource_group, namespace, hybrid_connection)
+    hy_co_rules = HycoAuthoList(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": relay_resource_group,
+                                                                   "namespace_name": namespace,
+                                                                   "hybrid_connection_name": hybrid_connection})
+
     has_default_sender_key = False
     for r in hy_co_rules:
-        if r.name.lower() == "defaultsender":
-            for z in r.rights:
-                if z == z.send:
+        if r['name'].lower() == "defaultsender":
+            for z in r['rights']:
+                if z[0].lower() == 'send' and len(z) == 1:
                     has_default_sender_key = True
 
     if not has_default_sender_key:
-        rights = [AccessRights.send]
-        hy_co_client.create_or_update_authorization_rule(relay_resource_group, namespace, hybrid_connection,
-                                                         "defaultSender", rights)
+        rights = ["Send"]
+        args = {"resource_group": relay_resource_group, "namespace_name": namespace,
+                "hybrid_connection_name": hybrid_connection, "name": "defaultSender", "rights": rights}
+        HycoAuthoCreate(cli_ctx=cmd.cli_ctx)(command_args=args)
 
-    hy_co_keys = hy_co_client.list_keys(relay_resource_group, namespace, hybrid_connection, "defaultSender")
+    hy_co_keys = HycoAuthoKeysList(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": relay_resource_group,
+                                                                      "namespace_name": namespace,
+                                                                      "hybrid_connection_name": hybrid_connection,
+                                                                      "name": "defaultSender"})
     hy_co_metadata = ast.literal_eval(hy_co.user_metadata)
     hy_co_hostname = 0
     for x in hy_co_metadata:
@@ -4380,9 +4405,9 @@ def set_hc_key(cmd, plan, resource_group_name, namespace, hybrid_connection, key
 
     key = "empty"
     if key_type.lower() == "primary":
-        key = hy_co_keys.primary_key
+        key = hy_co_keys['primaryKey']
     elif key_type.lower() == "secondary":
-        key = hy_co_keys.secondary_key
+        key = hy_co_keys['secondaryKey']
     # enures input is correct
     if key == "empty":
         logger.warning("Key type is invalid - must be primary or secondary")
@@ -4753,7 +4778,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         create_resource_group(cmd, rg_name, loc)
         logger.warning("Resource group creation complete")
     # create ASP
-    logger.warning("Creating AppServicePlan '%s' ...", plan)
+    logger.warning("Creating AppServicePlan '%s' or Updating if already exists", plan)
     # we will always call the ASP create or update API so that in case of re-deployment, if the SKU or plan setting are
     # updated we update those
     try:

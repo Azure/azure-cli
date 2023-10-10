@@ -14,7 +14,7 @@ class CosmosDBPostgresScenarioTest(ScenarioTest):
     def test_cosmosdb_postgres_create_cluster_with_configurations(self, resource_group):
         self.kwargs.update({
             'cluster_name': self.create_random_name(prefix='cli', length=10),
-            'loc': 'eastus2',
+            'loc': 'westus',
             'storage': 131072,
             'pass': 'aBcD1234!@#$',
             'config_name': 'array_nulls'
@@ -23,10 +23,10 @@ class CosmosDBPostgresScenarioTest(ScenarioTest):
         self.cmd('az cosmosdb postgres cluster create '
                 '--name {cluster_name} -g {rg} -l {loc} --coordinator-v-cores 4 '
                 '--coordinator-server-edition "GeneralPurpose" --node-count "2" '
-                '--node-v-cores 2 --coordinator-storage-quota-in-mb {storage} '
+                '--node-v-cores 2 --coordinator-storage {storage} '
                 '--administrator-login-password {pass} '
                 '--node-server-edition "MemoryOptimized" '
-                '--node-storage-quota-in-mb {storage}', checks=[
+                '--node-storage {storage}', checks=[
                     self.check('name', "{cluster_name}"),
                     self.check('provisioningState', 'Succeeded')
                 ])
@@ -73,7 +73,7 @@ class CosmosDBPostgresScenarioTest(ScenarioTest):
     def test_cosmosdb_postgres_create_cluster_with_roles(self, resource_group):
         self.kwargs.update({
             'cluster_name': self.create_random_name(prefix='cli', length=10),
-            'loc': 'eastus2',
+            'loc': 'westus',
             'storage': 131072,
             'pass': 'aBcD1234!@#$',
             'new_pass': 'aBcD1234!@#$',
@@ -83,10 +83,10 @@ class CosmosDBPostgresScenarioTest(ScenarioTest):
         self.cmd('az cosmosdb postgres cluster create '
                 '--name {cluster_name} -g {rg} -l {loc} --coordinator-v-cores 4 '
                 '--coordinator-server-edition "GeneralPurpose" --node-count "2" '
-                '--node-v-cores 2 --coordinator-storage-quota-in-mb {storage} '
+                '--node-v-cores 2 --coordinator-storage {storage} '
                 '--administrator-login-password {pass} '
                 '--node-server-edition "MemoryOptimized" '
-                '--node-storage-quota-in-mb {storage}', checks=[
+                '--node-storage {storage}', checks=[
                     self.check('name', "{cluster_name}"),
                     self.check('provisioningState', 'Succeeded')
                 ])
@@ -119,7 +119,7 @@ class CosmosDBPostgresScenarioTest(ScenarioTest):
     def test_cosmosdb_postgres_create_cluster_with_firewall_rules(self, resource_group):
         self.kwargs.update({
             'cluster_name': self.create_random_name(prefix='cli', length=10),
-            'loc': 'eastus2',
+            'loc': 'westus',
             'storage': 131072,
             'pass': 'aBcD1234!@#$',
             'fw_name': 'fw_rule'
@@ -128,10 +128,10 @@ class CosmosDBPostgresScenarioTest(ScenarioTest):
         self.cmd('az cosmosdb postgres cluster create '
                 '--name {cluster_name} -g {rg} -l {loc} --coordinator-v-cores 4 '
                 '--coordinator-server-edition "GeneralPurpose" --node-count "2" '
-                '--node-v-cores 2 --coordinator-storage-quota-in-mb {storage} '
+                '--node-v-cores 2 --coordinator-storage {storage} '
                 '--administrator-login-password {pass} '
                 '--node-server-edition "MemoryOptimized" '
-                '--node-storage-quota-in-mb {storage}', checks=[
+                '--node-storage {storage}', checks=[
                     self.check('name', "{cluster_name}"),
                     self.check('provisioningState', 'Succeeded')
                 ])
@@ -163,7 +163,7 @@ class CosmosDBPostgresScenarioTest(ScenarioTest):
     def test_cosmosdb_postgres_create_cluster(self, resource_group):
         self.kwargs.update({
             'cluster_name': self.create_random_name(prefix='cli', length=10),
-            'loc': 'eastus2',
+            'loc': 'westus',
             'storage': 131072,
             'pass': 'aBcD1234!@#$',
             'new_pass': 'aBcD1234!@#$'
@@ -172,10 +172,10 @@ class CosmosDBPostgresScenarioTest(ScenarioTest):
         self.cmd('az cosmosdb postgres cluster create '
                 '--name {cluster_name} -g {rg} -l {loc} --coordinator-v-cores 4 '
                 '--coordinator-server-edition "GeneralPurpose" --node-count "2" '
-                '--node-v-cores 2 --coordinator-storage-quota-in-mb {storage} '
+                '--node-v-cores 2 --coordinator-storage {storage} '
                 '--administrator-login-password {pass} '
                 '--node-server-edition "MemoryOptimized" '
-                '--node-storage-quota-in-mb {storage}'
+                '--node-storage {storage}'
                 )
         
         self.cmd('az cosmosdb postgres cluster wait --created -n {cluster_name} -g {rg}')

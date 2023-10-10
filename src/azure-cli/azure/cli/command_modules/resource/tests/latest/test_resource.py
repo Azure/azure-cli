@@ -2181,7 +2181,12 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack sub delete --name {name} --yes')
 
         #create deployment stack with template spec and parameter file
-        self.cmd('stack sub create --name {name} --location {location} --template-spec "{template-spec-id}" --deny-settings-mode "none" --parameters "{parameter-file}" --yes', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack sub create --name {name} --location {location} --template-spec "{template-spec-id}" --deny-settings-mode "none" --parameters "{parameter-file}" --no-wait', checks=self.is_empty())
+
+        time.sleep(20)
+
+        # check if the stack was created successfully
+        self.cmd('stack sub show --name {name}', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup
         self.cmd('stack sub delete --name {name} --yes')
@@ -2289,7 +2294,6 @@ class DeploymentStacksTest(ScenarioTest):
             'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
             'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
             'bicep-file': os.path.join(curr_dir, 'data', 'bicep_simple_template.bicep').replace('\\', '\\\\'),
-            'bicep-file-storage':os.path.join(curr_dir, 'data', 'bicepparam', 'storage_account_template.bicep').replace('\\', '\\\\'),
             'bicep-param-file':os.path.join(curr_dir, 'data', 'bicepparam', 'storage_account_params.bicepparam').replace('\\', '\\\\'),
             'resource-group': resource_group,
         })
@@ -2301,7 +2305,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack sub delete --name {name} --yes')
 
         # test bicep param file
-        self.cmd('stack sub create --name {name} --location {location} --deployment-resource-group {resource-group} --template-file "{bicep-file-storage}" -p "{bicep-param-file}" --deny-settings-mode "none" --delete-all --yes', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack sub create --name {name} --location {location} --deployment-resource-group {resource-group} -p "{bicep-param-file}" --deny-settings-mode "none" --delete-all --yes', checks=self.check('provisioningState', 'succeeded'))
 
         self.cmd('stack sub delete --name {name} --yes')
 
@@ -2551,7 +2555,12 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack group delete --name {name} --resource-group {resource-group} --yes')
 
         # create deployment stack with template spec and parameter file
-        self.cmd('stack group create --name {name} --resource-group {resource-group}  --template-spec "{template-spec-id}" --deny-settings-mode "none" --parameters "{parameter-file}" --yes', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack group create --name {name} --resource-group {resource-group}  --template-spec "{template-spec-id}" --deny-settings-mode "none" --parameters "{parameter-file}" --yes --no-wait', checks=self.is_empty())
+
+        time.sleep(20)
+
+        # check if the stack was created successfully
+        self.cmd('stack group show --name {name} -g {resource-group}', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup
         self.cmd('stack group delete --name {name} --resource-group {resource-group} --yes')
@@ -2636,8 +2645,9 @@ class DeploymentStacksTest(ScenarioTest):
             'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
             'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
             'bicep-file': os.path.join(curr_dir, 'data', 'bicep_simple_template.bicep').replace('\\', '\\\\'),
-            'bicep-file-storage':os.path.join(curr_dir, 'data', 'bicepparam', 'storage_account_template.bicep').replace('\\', '\\\\'),
             'bicep-param-file':os.path.join(curr_dir, 'data', 'bicepparam', 'storage_account_params.bicepparam').replace('\\', '\\\\'),
+            'bicep-param-file-registry':os.path.join(curr_dir, 'data', 'bicepparam', 'params_registry.bicepparam').replace('\\', '\\\\'),
+            'bicep-param-file-templatespec':os.path.join(curr_dir, 'data', 'bicepparam', 'params_templatespec.bicepparam').replace('\\', '\\\\'),
             'resource-group': resource_group,
         })
 
@@ -2648,7 +2658,17 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack group delete --name {name} --resource-group {resource-group} --yes')
 
         #test bicep param file
-        self.cmd('stack group create --name {name} -g {resource-group} --template-file "{bicep-file-storage}" -p "{bicep-param-file}" --deny-settings-mode "none" --delete-all --yes', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack group create --name {name} -g {resource-group} -p "{bicep-param-file}" --deny-settings-mode "none" --delete-all --yes', checks=self.check('provisioningState', 'succeeded'))
+
+        self.cmd('stack group delete -g {resource-group} --name {name} --yes')
+
+        # test bicep param file with registry
+        self.cmd('stack group create --name {name} -g {resource-group} -p "{bicep-param-file-registry}" --deny-settings-mode "none" --delete-all --yes', checks=self.check('provisioningState', 'succeeded'))
+
+        self.cmd('stack group delete -g {resource-group} --name {name} --yes')
+
+        # test bicep param file with template spec
+        self.cmd('stack group create --name {name} -g {resource-group} -p "{bicep-param-file-templatespec}" --deny-settings-mode "none" --delete-all --yes', checks=self.check('provisioningState', 'succeeded'))
 
         self.cmd('stack group delete -g {resource-group} --name {name} --yes')
 
@@ -2868,7 +2888,6 @@ class DeploymentStacksTest(ScenarioTest):
             'template-file-spec': os.path.join(curr_dir, 'simple_template_spec.json').replace('\\', '\\\\'),
             'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
             'bicep-file': os.path.join(curr_dir, 'data', 'bicep_simple_template.bicep').replace('\\', '\\\\'),
-            'bicep-file-storage':os.path.join(curr_dir, 'data', 'bicepparam', 'storage_account_template.bicep').replace('\\', '\\\\'),
             'bicep-param-file':os.path.join(curr_dir, 'data', 'bicepparam', 'storage_account_params.bicepparam').replace('\\', '\\\\'),
             'template-file-rg': os.path.join(curr_dir, 'simple_template_resource_group.json').replace('\\', '\\\\'),
             'track-rg-file': os.path.join(curr_dir, 'tracked_resource_group.json').replace('\\', '\\\\'),
@@ -2896,7 +2915,12 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack mg delete --name {name} --management-group-id {mg} --yes')
 
         # create deployment stack with template file and parameter file
-        self.cmd('stack mg create --name {name} --management-group-id {mg} --location {location} --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file}" --description "MG stack deployment" --delete-all --deny-settings-excluded-principals "principal1 principal2" --deny-settings-excluded-actions "action1 action2" --deny-settings-apply-to-child-scopes', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack mg create --name {name} --management-group-id {mg} --location {location} --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file}" --description "MG stack deployment" --delete-all --deny-settings-excluded-principals "principal1 principal2" --deny-settings-excluded-actions "action1 action2" --deny-settings-apply-to-child-scopes --no-wait', checks=self.is_empty())
+
+        time.sleep(20)
+
+        # check if the stack was created successfully
+        self.cmd('stack mg show --name {name} --management-group-id {mg}', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup
         self.cmd('stack mg delete --name {name} --management-group-id {mg} --yes')
@@ -4991,6 +5015,66 @@ class BicepScenarioTest(ScenarioTest):
             self.greater_than('length(@)', 0)
         ])
 
+class BicepDecompileParamsTest(LiveScenarioTest):
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
+    def test_bicep_decompile_params_file(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'test-params.json').replace('\\', '\\\\')
+        params_path = os.path.join(curr_dir, 'test-params.bicepparam').replace('\\', '\\\\')
+        self.kwargs.update({
+            'tf': tf,
+            'params_path': params_path,
+        })
+
+        self.cmd('az bicep decompile-params --file {tf}')
+
+        if os.path.exists(params_path):
+            os.remove(params_path)
+
+class BicepBuildParamsTest(LiveScenarioTest):
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
+    def test_bicep_build_params_file(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'sample_params.bicepparam').replace('\\', '\\\\')
+        params_path = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
+        self.kwargs.update({
+            'tf': tf,
+            'params_path': params_path,
+        })
+
+        self.cmd('az bicep build-params --file {tf}')
+
+        if os.path.exists(params_path):
+            os.remove(params_path)
+
+    def test_bicep_build_params_file_outfile(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'sample_params.bicepparam').replace('\\', '\\\\')
+        params_path = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
+        self.kwargs.update({
+            'tf': tf,
+            'params_path': params_path,
+        })
+
+        self.cmd('az bicep build-params --file {tf} --outfile {params_path}')
+
+        if os.path.exists(params_path):
+            os.remove(params_path)
+
 # Because don't want to record bicep cli binary
 class BicepBuildTest(LiveScenarioTest):
 
@@ -5023,7 +5107,6 @@ class BicepBuildTest(LiveScenarioTest):
             os.remove(decompile_path)
 
 class BicepGenerateParamsTest(LiveScenarioTest):
-
     def setup(self):
         super().setup()
         self.cmd('az bicep uninstall')
@@ -5031,6 +5114,34 @@ class BicepGenerateParamsTest(LiveScenarioTest):
     def tearDown(self):
         super().tearDown()
         self.cmd('az bicep uninstall')
+
+    def test_bicep_generate_params_output_format_only(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+        params_path = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
+        self.kwargs.update({
+            'tf': tf,
+            'params_path': params_path,
+        })
+
+        self.cmd('az bicep generate-params -f {tf} --outfile {params_path} --output-format json')
+
+        if os.path.exists(params_path):
+            os.remove(params_path)
+
+    def test_bicep_generate_params_include_params_only(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+        params_path = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
+        self.kwargs.update({
+            'tf': tf,
+            'params_path': params_path,
+        })
+
+        self.cmd('az bicep generate-params -f {tf} --outfile {params_path} --include-params all')
+
+        if os.path.exists(params_path):
+            os.remove(params_path)
 
     def test_bicep_generate_params(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -5162,6 +5273,62 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
     def test_resource_group_level_deployment_with_bicepparams(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
+            'params': os.path.join(curr_dir, 'data\\bicepparam\\storage_account_params.bicepparam').replace('\\', '\\\\')
+        })
+
+        self.cmd('deployment group validate --resource-group {rg} --parameters {params}', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment group what-if --resource-group {rg} --parameters {params} --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+        ])
+
+        self.cmd('deployment group create --resource-group {rg} --parameters {params}', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_with_bicepparam_registry')
+    def test_resource_group_level_deployment_with_bicepparam_registry(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'params': os.path.join(curr_dir, 'data\\bicepparam\\params_registry.bicepparam').replace('\\', '\\\\')
+        })
+
+        self.cmd('deployment group validate --resource-group {rg} --parameters {params}', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment group what-if --resource-group {rg} --parameters {params} --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+        ])
+
+        self.cmd('deployment group create --resource-group {rg} --parameters {params}', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_with_bicepparam_templatespec')
+    def test_resource_group_level_deployment_with_bicepparam_templatespec(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'params': os.path.join(curr_dir, 'data\\bicepparam\\params_templatespec.bicepparam').replace('\\', '\\\\')
+        })
+
+        self.cmd('deployment group validate --resource-group {rg} --parameters {params}', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment group what-if --resource-group {rg} --parameters {params} --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+        ])
+
+        self.cmd('deployment group create --resource-group {rg} --parameters {params}', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+    def test_resource_group_level_deployment_with_bicepparams_and_template_file(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
             'tf': os.path.join(curr_dir, 'data\\bicepparam\\storage_account_template.bicep').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'data\\bicepparam\\storage_account_params.bicepparam').replace('\\', '\\\\')
         })
@@ -5198,7 +5365,7 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
             'params' : "./param.bicepparam"
         })
 
-        with self.assertRaisesRegex(CLIError, "Only a .bicep template is allowed with a .bicepparam parameter file"):
+        with self.assertRaisesRegex(CLIError, "Only a .bicep template is allowed with a .bicepparam file"):
             self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params}')
 
 
@@ -5210,7 +5377,7 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
             'params2' : "./param2.json",
         })
 
-        with self.assertRaisesRegex(CLIError, "Can"):
+        with self.assertRaisesRegex(CLIError, "Can not use --parameters argument more than once when using a .bicepparam file"):
             self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params1} --parameters {params2}')
 
     def test_subscription_level_deployment_with_bicep(self):
@@ -5480,6 +5647,19 @@ class PrivateLinkAssociationTest(ScenarioTest):
         # clean
         self.cmd('resourcemanagement private-link delete -g {rg} -n {n} --yes', checks=self.is_empty())
         self.cmd('private-link association delete -m {mg} -n {pla} --yes', self.is_empty())
+
+
+class PrivateLinkAssociationTest(ScenarioTest):
+    def test_list_locations(self):
+        result = self.cmd('account list-locations').get_output_in_json()
+        extended_result = self.cmd('account list-locations --include-extended-locations').get_output_in_json()
+        assert isinstance(result, list)
+        assert len(extended_result) >= len(result)
+        # Verify there is an item with displayName 'East US'.
+        assert any('East US' == loc['displayName'] for loc in result)
+        assert any('geography' in loc['metadata'] for loc in result)
+        assert any('availabilityZoneMappings' in loc for loc in result)
+
 
 if __name__ == '__main__':
     unittest.main()

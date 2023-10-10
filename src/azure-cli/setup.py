@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.51.0"
+VERSION = "2.53.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -45,6 +45,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
     'License :: OSI Approved :: MIT License',
 ]
 
@@ -67,7 +68,7 @@ DEPENDENCIES = [
     'azure-mgmt-appconfiguration==3.0.0',
     'azure-mgmt-appcontainers==2.0.0',
     'azure-mgmt-applicationinsights~=1.0.0',
-    'azure-mgmt-authorization~=3.0.0',
+    'azure-mgmt-authorization~=4.0.0',
     'azure-mgmt-batchai==7.0.0b1',
     'azure-mgmt-batch~=17.0.0',
     'azure-mgmt-billing==6.0.0',
@@ -75,11 +76,10 @@ DEPENDENCIES = [
     'azure-mgmt-cdn==12.0.0',
     'azure-mgmt-cognitiveservices~=13.5.0',
     'azure-mgmt-compute~=30.0.0',
-    'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance==10.1.0',
     'azure-mgmt-containerregistry==10.1.0',
     'azure-mgmt-containerservice~=26.0.0',
-    'azure-mgmt-cosmosdb==9.2.0',
+    'azure-mgmt-cosmosdb==9.3.0',
     'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datalake-store~=0.5.0',
     'azure-mgmt-datamigration~=10.0.0',
@@ -103,15 +103,14 @@ DEPENDENCIES = [
     'azure-mgmt-media~=9.0',
     'azure-mgmt-monitor~=5.0.0',
     'azure-mgmt-msi~=7.0.0',
-    'azure-mgmt-netapp~=10.0.0',
+    'azure-mgmt-netapp~=10.1.0',
     'azure-mgmt-policyinsights==1.1.0b4',
     'azure-mgmt-privatedns~=1.0.0',
-    'azure-mgmt-rdbms~=10.2.0b10',
-    'azure-mgmt-recoveryservicesbackup~=6.0.0',
-    'azure-mgmt-recoveryservices~=2.4.0',
+    'azure-mgmt-rdbms~=10.2.0b11',
+    'azure-mgmt-recoveryservicesbackup~=7.0.0',
+    'azure-mgmt-recoveryservices~=2.5.0',
     'azure-mgmt-redhatopenshift~=1.3.0',
     'azure-mgmt-redis~=14.1.0',
-    'azure-mgmt-relay~=0.1.0',
     'azure-mgmt-resource==23.1.0b2',
     'azure-mgmt-search~=9.0',
     'azure-mgmt-security==5.0.0',
@@ -119,9 +118,9 @@ DEPENDENCIES = [
     'azure-mgmt-servicefabricmanagedclusters~=1.0.0',
     'azure-mgmt-servicelinker==1.2.0b1',
     'azure-mgmt-servicefabric~=1.0.0',
-    'azure-mgmt-signalr==1.1.0',
+    'azure-mgmt-signalr==2.0.0b1',
     'azure-mgmt-sqlvirtualmachine==1.0.0b5',
-    'azure-mgmt-sql==4.0.0b10',
+    'azure-mgmt-sql==4.0.0b12',
     'azure-mgmt-storage~=21.0.0',
     'azure-mgmt-synapse==2.1.0b5',
     'azure-mgmt-trafficmanager~=1.0.0',
@@ -140,6 +139,7 @@ DEPENDENCIES = [
     'javaproperties~=0.5.1',
     'jsondiff~=2.0.0',
     'packaging>=20.9',
+    'pycomposefile>=0.0.29',
     'PyGithub~=1.38',
     'PyNaCl~=1.5.0',
     'scp~=0.13.2',
