@@ -4,6 +4,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=bare-except
+from azure.cli.command_modules.containerapp._utils import safe_get
 
 
 def transform_containerapp_output(app):
@@ -16,6 +17,41 @@ def transform_containerapp_output(app):
         result['fqdn'] = None
 
     return result
+
+
+def clean_up_sensitive_values(response_json):
+    for container in safe_get(response_json, "properties", "template", "containers", default=[]):
+        if "env" in container:
+            for env in container["env"]:
+                del env["value"]
+
+    if "scale" in response_json["properties"]["template"]:
+        for rule in safe_get(response_json, "properties", "template", "scale", "rules", default=[]):
+            for (key, val) in rule.items():
+                if key != "name":
+                    val["metadata"] = dict((k, "") for k, v in val["metadata"].items())
+    return response_json
+
+
+def transform_sensitive_values_wrapper(args):
+    def transform_sensitive_values(response_json):
+        if '--show-sensitive-values' in args:
+            return response_json
+
+        return clean_up_sensitive_values(response_json)
+
+    return transform_sensitive_values
+
+
+def transform_sensitive_values_list_output_wrapper(args):
+
+    def transform_sensitive_values_list_output(apps):
+        if '--show-sensitive-values' in args:
+            return apps
+
+        return [clean_up_sensitive_values(a) for a in apps]
+
+    return transform_sensitive_values_list_output
 
 
 def transform_containerapp_list_output(apps):

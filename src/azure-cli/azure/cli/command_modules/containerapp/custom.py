@@ -295,7 +295,8 @@ def create_containerapp(cmd,
                         registry_identity=None,
                         workload_profile_name=None,
                         termination_grace_period=None,
-                        secret_volume_mount=None):
+                        secret_volume_mount=None,
+                        show_sensitive_values=False):
     raw_parameters = locals()
 
     containerapp_create_decorator = ContainerAppCreateDecorator(
@@ -728,7 +729,8 @@ def update_containerapp(cmd,
                         workload_profile_name=None,
                         termination_grace_period=None,
                         no_wait=False,
-                        secret_volume_mount=None):
+                        secret_volume_mount=None,
+                        show_sensitive_values=False):
     _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
 
     return update_containerapp_logic(cmd=cmd,
@@ -760,7 +762,7 @@ def update_containerapp(cmd,
                                      secret_volume_mount=secret_volume_mount)
 
 
-def show_containerapp(cmd, name, resource_group_name, show_secrets=False):
+def show_containerapp(cmd, name, resource_group_name, show_secrets=False, show_sensitive_values=False):
     raw_parameters = locals()
     containerapp_base_decorator = BaseContainerAppDecorator(
         cmd=cmd,
@@ -773,7 +775,7 @@ def show_containerapp(cmd, name, resource_group_name, show_secrets=False):
     return containerapp_base_decorator.show()
 
 
-def list_containerapp(cmd, resource_group_name=None, managed_env=None):
+def list_containerapp(cmd, resource_group_name=None, managed_env=None, show_sensitive_values=False):
     raw_parameters = locals()
     containerapp_list_decorator = BaseContainerAppDecorator(
         cmd=cmd,
@@ -945,7 +947,8 @@ def create_containerappsjob(cmd,
                             disable_warnings=False,
                             user_assigned=None,
                             registry_identity=None,
-                            workload_profile_name=None):
+                            workload_profile_name=None,
+                            show_sensitive_values=False):
     raw_parameters = locals()
     containerapp_job_create_decorator = ContainerAppJobCreateDecorator(
         cmd=cmd,
@@ -964,7 +967,7 @@ def create_containerappsjob(cmd,
     return r
 
 
-def show_containerappsjob(cmd, name, resource_group_name):
+def show_containerappsjob(cmd, name, resource_group_name, show_sensitive_values=False):
     raw_parameters = locals()
     containerapp_job_decorator = ContainerAppJobDecorator(
         cmd=cmd,
@@ -977,7 +980,7 @@ def show_containerappsjob(cmd, name, resource_group_name):
     return containerapp_job_decorator.show()
 
 
-def list_containerappsjob(cmd, resource_group_name=None):
+def list_containerappsjob(cmd, resource_group_name=None, show_sensitive_values=False):
     raw_parameters = locals()
     containerapp_job_decorator = ContainerAppJobDecorator(
         cmd=cmd,
@@ -1031,7 +1034,8 @@ def update_containerappsjob(cmd,
                             max_executions=None,
                             tags=None,
                             workload_profile_name=None,
-                            no_wait=False):
+                            no_wait=False,
+                            show_sensitive_values=False):
     _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
 
     return update_containerappsjob_logic(cmd=cmd,
@@ -3540,7 +3544,8 @@ def containerapp_up(cmd,
                     workload_profile_name=None,
                     service_principal_client_id=None,
                     service_principal_client_secret=None,
-                    service_principal_tenant_id=None):
+                    service_principal_tenant_id=None,
+                    show_sensitive_values=False):
     from ._up_utils import (_validate_up_args, _reformat_image, _get_dockerfile_content, _get_ingress_and_target_port,
                             ResourceGroup, ContainerAppEnvironment, ContainerApp, _get_registry_from_app,
                             _get_registry_details, _create_github_action, _set_up_defaults, up_output,
