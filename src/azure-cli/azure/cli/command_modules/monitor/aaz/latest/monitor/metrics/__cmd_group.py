@@ -11,6 +11,9 @@
 from azure.cli.core.aaz import *
 
 
+@register_command_group(
+    "monitor metrics",
+)
 class __CMDGroup(AAZCommandGroup):
     """View Azure resource metrics.
     """

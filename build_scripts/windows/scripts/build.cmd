@@ -25,7 +25,7 @@ if "%ARCH%"=="x86" (
     echo Please set ARCH to "x86" or "x64"
     goto ERROR
 )
-set PYTHON_VERSION=3.10.10
+set PYTHON_VERSION=3.11.5
 
 set WIX_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/msi/wix310-binaries-mirror.zip"
 set PYTHON_DOWNLOAD_URL="https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%-embed-%PYTHON_ARCH%.zip"

@@ -130,9 +130,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
+    displayName: 'Use Python 3.11'
     inputs:
-      versionSpec: 3.10
+      versionSpec: 3.11
 
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Linux.txt'
@@ -145,9 +145,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
+    displayName: 'Use Python 3.11'
     inputs:
-      versionSpec: 3.10
+      versionSpec: 3.11
 
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Darwin.txt'
@@ -160,9 +160,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
+    displayName: 'Use Python 3.11'
     inputs:
-      versionSpec: 3.10
+      versionSpec: 3.11
 
   - task: BatchScript@1
     inputs:
@@ -177,9 +177,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
+    displayName: 'Use Python 3.11'
     inputs:
-      versionSpec: 3.10
+      versionSpec: 3.11
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -349,9 +349,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
+    displayName: 'Use Python 3.11'
     inputs:
-      versionSpec: 3.10
+      versionSpec: 3.11
 
 
   - script: |
@@ -411,9 +411,9 @@ jobs:
         --rm -v $PYPI_FILES:/mnt/pypi python:3.9 \
         /bin/bash -c "cd /mnt/pypi && ls && pip install --find-links ./ azure_cli-$CLI_VERSION*whl && az self-test && az --version && sleep 5"
       
-      echo "== Testing pip install on Python 3.10 =="
+      echo "== Testing pip install on Python 3.11 =="
       docker run \
-        --rm -v $PYPI_FILES:/mnt/pypi python:3.10 \
+        --rm -v $PYPI_FILES:/mnt/pypi python:3.11 \
         /bin/bash -c "cd /mnt/pypi && ls && pip install --find-links ./ azure_cli-$CLI_VERSION*whl && az self-test && az --version && sleep 5"
 
     displayName: 'Test pip Install'
@@ -427,8 +427,8 @@ jobs:
     matrix:
       Python39:
         python.version: '3.9'
-      Python310:
-        python.version: '3.10'
+      Python311:
+        python.version: '3.11'
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
@@ -444,8 +444,8 @@ jobs:
     matrix:
       Python39:
         python.version: '3.9'
-      Python310:
-        python.version: '3.10'
+      Python311:
+        python.version: '3.11'
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
@@ -464,8 +464,8 @@ jobs:
     matrix:
       Python39:
         python.version: '3.9'
-      Python310:
-        python.version: '3.10'
+      Python311:
+        python.version: '3.11'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python $(python.version)'
@@ -485,8 +485,8 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
-      Python310:
-        python.version: '3.10'
+      Python311:
+        python.version: '3.11'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python $(python.version)'
@@ -530,7 +530,7 @@ jobs:
                  -e CLI_VERSION=$CLI_VERSION \
                  -e HOMEBREW_UPSTREAM_URL=$HOMEBREW_UPSTREAM_URL \
                  --name azurecli \
-                 python:3.10 \
+                 python:3.11 \
                  /mnt/scripts/run.sh
       
       # clean up
@@ -954,9 +954,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
+    displayName: 'Use Python 3.11'
     inputs:
-      versionSpec: 3.10
+      versionSpec: 3.11
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -970,9 +970,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
+    displayName: 'Use Python 3.11'
     inputs:
-      versionSpec: 3.10
+      versionSpec: 3.11
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -987,8 +987,8 @@ jobs:
     matrix:
       Python39:
         python.version: '3.9'
-      Python310:
-        python.version: '3.10'
+      Python311:
+        python.version: '3.11'
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:
@@ -1016,9 +1016,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
+    displayName: 'Use Python 3.11'
     inputs:
-      versionSpec: 3.10
+      versionSpec: 3.11
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1039,9 +1039,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
+    displayName: 'Use Python 3.11'
     inputs:
-      versionSpec: 3.10
+      versionSpec: 3.11
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1126,9 +1126,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
+    displayName: 'Use Python 3.11'
     inputs:
-      versionSpec: 3.10
+      versionSpec: 3.11
   - task: AzureCLI@2
     inputs:
       azureSubscription: 'Azure CLI'

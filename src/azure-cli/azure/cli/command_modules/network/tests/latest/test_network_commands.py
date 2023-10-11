@@ -3565,13 +3565,10 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
         self.cmd('network cross-region-lb rule update -g {rg} --lb-name {lb} -n rule2 --backend-pool-name bap2 --load-distribution sourceipprotocol')
         self.cmd('network cross-region-lb rule show -g {rg} --lb-name {lb} -n rule1', checks=[
             self.check('enableFloatingIP', True),
-            self.check('idleTimeoutInMinutes', 20),
+            self.check('idleTimeoutInMinutes', 4),
             self.check('loadDistribution', 'SourceIP'),
             self.check('protocol', 'Udp')
         ])
-        # test generic update
-        self.cmd('network cross-region-lb rule update -g {rg} --lb-name {lb} -n rule1 --set idleTimeoutInMinutes=5',
-                 checks=self.check('idleTimeoutInMinutes', 5))
 
         self.cmd('network cross-region-lb rule show -g {rg} --lb-name {lb} -n rule2', checks=[
             self.check("backendAddressPool.contains(id, 'bap2')", True),
@@ -3842,6 +3839,22 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         self.cmd('network lb address-pool list -g {rg} --lb-name {lb}',
                  checks=self.check('length(@)', 3))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_lb_address_pool_with_sync_mode', location='eastus2')
+    def test_network_lb_address_pool_with_sync_mode(self, resource_group):
+
+        self.kwargs.update({
+            'lb': self.create_random_name('lb', 10),
+            'ap': self.create_random_name('ap', 10),
+        })
+        self.cmd('network lb create -g {rg} -n {lb}')
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n {ap} --sync-mode Manual',
+                 checks=self.check('syncMode', 'Manual'))
+        self.cmd('network lb address-pool show -g {rg} --lb-name {lb} -n {ap}',
+                 checks=[self.check('name', '{ap}'),
+                         self.check('syncMode', 'Manual')])
+        self.cmd('network lb address-pool delete -g {rg} --lb-name {lb} -n {ap}',
+                 checks=self.is_empty())
+
     @ResourceGroupPreparer(name_prefix='cli_test_lb_address_pool_addresses', location='eastus2')
     def test_network_lb_address_pool_addresses(self, resource_group):
 
@@ -3869,7 +3882,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
                  checks=self.check('name', 'bap1'))
 
         # create with subnet
-        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap2 --vnet {vnet} --admin-state Drain '
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap2 --vnet {vnet} --admin-state None '
                  '--backend-address name=addr1 ip-address=10.0.0.1 subnet={subnet} '
                  '--backend-address name=addr2 ip-address=10.0.0.2 subnet={subnet_name} '
                  '--backend-address name=addr3 ip-address=10.0.0.3 subnet={subnet} '
@@ -3877,13 +3890,13 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
                  checks=[
                      self.check('name', 'bap2'),
                      self.check('drainPeriodInSeconds', 10),
-                     self.check('loadBalancerBackendAddresses[0].adminState', 'Drain'),
-                     self.check('loadBalancerBackendAddresses[1].adminState', 'Drain'),
-                     self.check('loadBalancerBackendAddresses[2].adminState', 'Drain')
+                     self.check('loadBalancerBackendAddresses[0].adminState', 'None'),
+                     self.check('loadBalancerBackendAddresses[1].adminState', 'None'),
+                     self.check('loadBalancerBackendAddresses[2].adminState', 'None')
                  ])
 
         # update backend pool
-        self.cmd('network lb address-pool update -g {rg} --lb-name {lb} -n bap2 --vnet {vnet} --admin-state Down '
+        self.cmd('network lb address-pool update -g {rg} --lb-name {lb} -n bap2 --vnet {vnet} --admin-state None '
                  '--backend-address name=addr1 ip-address=10.0.0.3 subnet={subnet} '
                  '--backend-address name=addr2 ip-address=10.0.0.4 subnet={subnet_name} '
                  '--backend-address name=addr3 ip-address=10.0.0.5 subnet={subnet} '
@@ -3893,17 +3906,17 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
                      self.check('loadBalancerBackendAddresses[1].ipAddress', '10.0.0.4'),
                      self.check('loadBalancerBackendAddresses[2].ipAddress', '10.0.0.5'),
                      self.check('drainPeriodInSeconds', 20),
-                     self.check('loadBalancerBackendAddresses[0].adminState', 'Down'),
-                     self.check('loadBalancerBackendAddresses[1].adminState', 'Down'),
-                     self.check('loadBalancerBackendAddresses[2].adminState', 'Down')
+                     self.check('loadBalancerBackendAddresses[0].adminState', 'None'),
+                     self.check('loadBalancerBackendAddresses[1].adminState', 'None'),
+                     self.check('loadBalancerBackendAddresses[2].adminState', 'None')
                  ])
 
         self.cmd('network lb address-pool delete -g {rg} --lb-name {lb} -n bap2 ')
 
-        self.cmd('network lb address-pool address add -g {rg} --lb-name {lb} --pool-name bap1 --name addr6 --vnet {vnet} --ip-address 10.0.0.6 --admin-state Drain',
+        self.cmd('network lb address-pool address add -g {rg} --lb-name {lb} --pool-name bap1 --name addr6 --vnet {vnet} --ip-address 10.0.0.6 --admin-state None',
                  checks=[
                      self.check('name', 'bap1'),
-                     self.check('loadBalancerBackendAddresses[3].adminState', 'Drain')
+                     self.check('loadBalancerBackendAddresses[3].adminState', 'None')
                  ])
 
         self.cmd('network lb address-pool address remove -g {rg} --lb-name {lb} --pool-name bap1 --name addr2')

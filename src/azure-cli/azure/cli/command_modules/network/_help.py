@@ -3647,48 +3647,6 @@ type: group
 short-summary: Manage address pools of a load balancer.
 """
 
-helps['network lb address-pool create'] = """
-type: command
-short-summary: Create an address pool.
-examples:
-  - name: Create an address pool.
-    text: az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool
-  - name: Create an address pool with several backend addresses using key-value arguments.
-    text: az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --vnet {VnetResourceId} --backend-address name=addr1 ip-address=10.0.0.1 --backend-address name=addr2 ip-address=10.0.0.3
-"""
-
-helps['network lb address-pool update'] = """
-type: command
-short-summary: Update an address pool.
-examples:
-  - name: Update an address pool with several backend addresses using key-value arguments.
-    text: az network lb address-pool update -g MyResourceGroup --lb-name MyLb -n MyAddressPool --vnet {VnetResourceId} --backend-address name=addr1 ip-address=10.0.0.1 --backend-address name=addr2 ip-address=10.0.0.3
-"""
-
-helps['network lb address-pool delete'] = """
-type: command
-short-summary: Delete an address pool.
-examples:
-  - name: Delete an address pool.
-    text: az network lb address-pool delete -g MyResourceGroup --lb-name MyLb -n MyAddressPool
-"""
-
-helps['network lb address-pool list'] = """
-type: command
-short-summary: List address pools.
-examples:
-  - name: List address pools.
-    text: az network lb address-pool list -g MyResourceGroup --lb-name MyLb -o table
-"""
-
-helps['network lb address-pool show'] = """
-type: command
-short-summary: Get the details of an address pool.
-examples:
-  - name: Get the details of an address pool.
-    text: az network lb address-pool show -g MyResourceGroup --lb-name MyLb -n MyAddressPool
-"""
-
 helps['network lb address-pool address'] = """
 type: group
 short-summary: Manage backend addresses of the load balance backend address pool.

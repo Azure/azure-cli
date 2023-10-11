@@ -35,7 +35,7 @@ from azure.cli.command_modules.cosmosdb.actions import (
 from azure.cli.command_modules.cosmosdb.custom import (
     CosmosKeyTypes)
 from azure.mgmt.cosmosdb.models import (
-    ContinuousTier)
+    ContinuousTier, MinimalTlsVersion)
 
 SQL_GREMLIN_INDEXING_POLICY_EXAMPLE = """--idx "{\\"indexingMode\\": \\"consistent\\", \\"automatic\\": true, \\"includedPaths\\": [{\\"path\\": \\"/*\\"}], \\"excludedPaths\\": [{ \\"path\\": \\"/headquarters/employees/?\\"}, { \\"path\\": \\"/\\\\"_etag\\\\"/?\\"}]}"
 """
@@ -81,7 +81,7 @@ def load_arguments(self, _):
     with self.argument_context('cosmosdb create') as c:
         c.argument('account_name', completer=None)
         c.argument('enable_free_tier', arg_type=get_three_state_flag(), help="If enabled the account is free-tier.", is_preview=True)
-        c.argument('assign_identity', nargs='*', help="Assign system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity.", is_preview=True)
+        c.argument('assign_identity', nargs='*', help="Assign system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity.")
         c.argument('is_restore_request', options_list=['--is-restore-request', '-r'], arg_type=get_three_state_flag(), help="Restore from an existing/deleted account.", arg_group='Restore')
         c.argument('restore_source', help="The restorable-database-account Id of the source account from which the account has to be restored. Required if --is-restore-request is set to true.", arg_group='Restore')
         c.argument('restore_timestamp', action=UtcDatetimeAction, help="The timestamp to which the account has to be restored to. Required if --is-restore-request is set to true.", arg_group='Restore')
@@ -89,6 +89,8 @@ def load_arguments(self, _):
         c.argument('gremlin_databases_to_restore', nargs='+', action=CreateGremlinDatabaseRestoreResource, arg_group='Restore')
         c.argument('tables_to_restore', nargs='+', action=CreateTableRestoreResource, arg_group='Restore')
         c.argument('enable_partition_merge', arg_type=get_three_state_flag(), help="Flag to enable partition merge on the account.")
+        c.argument('enable_burst_capacity', arg_type=get_three_state_flag(), help="Flag to enable burst capacity on the account.")
+        c.argument('key_uri', help="The URI of the key vault")
 
     for scope in ['cosmosdb create', 'cosmosdb update']:
         with self.argument_context(scope) as c:
@@ -106,7 +108,6 @@ def load_arguments(self, _):
             c.argument('virtual_network_rules', nargs='+', validator=validate_virtual_network_rules, help='ACL\'s for virtual network')
             c.argument('enable_multiple_write_locations', arg_type=get_three_state_flag(), help="Enable Multiple Write Locations")
             c.argument('disable_key_based_metadata_write_access', arg_type=get_three_state_flag(), help="Disable write operations on metadata resources (databases, containers, throughput) via account keys")
-            c.argument('key_uri', help="The URI of the key vault", is_preview=True)
             c.argument('public_network_access', options_list=['--public-network-access', '-p'], arg_type=get_enum_type(['ENABLED', 'DISABLED', 'SECUREDBYPERIMETER']), help="Sets public network access in server to either Enabled, Disabled, or SecuredByPerimeter.")
             c.argument('enable_analytical_storage', arg_type=get_three_state_flag(), help="Flag to enable log storage on the account.")
             c.argument('network_acl_bypass', arg_type=get_enum_type(NetworkAclBypass), options_list=['--network-acl-bypass'], help="Flag to enable or disable Network Acl Bypass.")
@@ -115,11 +116,16 @@ def load_arguments(self, _):
             c.argument('backup_retention', type=int, help="the time(in hours) for which each backup is retained (only for accounts with periodic mode backups)", arg_group='Backup Policy')
             c.argument('backup_redundancy', arg_type=get_enum_type(BackupStorageRedundancy), help="The redundancy type of the backup Storage account", arg_group='Backup Policy')
             c.argument('server_version', arg_type=get_enum_type(ServerVersion), help="Valid only for MongoDB accounts.")
-            c.argument('default_identity', help="The primary identity to access key vault in CMK related features. e.g. 'FirstPartyIdentity', 'SystemAssignedIdentity' and more. User-assigned identities are specified in format 'UserAssignedIdentity=<resource ID of the user-assigned identity>'.", is_preview=True)
+            c.argument('default_identity', help="The primary identity to access key vault in CMK related features. e.g. 'FirstPartyIdentity', 'SystemAssignedIdentity' and more. User-assigned identities are specified in format 'UserAssignedIdentity=<resource ID of the user-assigned identity>'.")
             c.argument('analytical_storage_schema_type', options_list=['--analytical-storage-schema-type', '--as-schema'], arg_type=get_enum_type(AnalyticalStorageSchemaType), help="Schema type for analytical storage.", arg_group='Analytical Storage Configuration')
             c.argument('backup_policy_type', arg_type=get_enum_type(BackupPolicyType), help="The type of backup policy of the account to create", arg_group='Backup Policy')
             c.argument('enable_partition_merge', arg_type=get_three_state_flag(), help="Flag to enable partition merge on the account.")
+            c.argument('enable_burst_capacity', arg_type=get_three_state_flag(), help="Flag to enable burst capacity on the account.")
             c.argument('continuous_tier', arg_type=get_enum_type(ContinuousTier), help="The tier of Continuous backup", arg_group='Backup Policy')
+            c.argument('minimal_tls_version', arg_type=get_enum_type(MinimalTlsVersion), help="Indicates the minimum allowed TLS version")
+
+    with self.argument_context('cosmosdb update') as c:
+        c.argument('key_uri', help="The URI of the key vault", is_preview=True)
 
     for scope in ['cosmosdb regenerate-key', 'cosmosdb keys regenerate']:
         with self.argument_context(scope) as c:
