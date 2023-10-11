@@ -22,11 +22,11 @@ class MonitorCloneVMScenarios(ScenarioTest):
             'rg': resource_group
         })
 
-        vm1_json = self.cmd('vm create -g {rg} -n {vm1} --image UbuntuLTS --admin-password TestPassword11!! '
+        vm1_json = self.cmd('vm create -g {rg} -n {vm1} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-password TestPassword11!! '
                             '--admin-username testadmin --authentication-type password').get_output_in_json()
-        vm2_json = self.cmd('vm create -g {rg} -n {vm2} --image UbuntuLTS --admin-password TestPassword11!! '
+        vm2_json = self.cmd('vm create -g {rg} -n {vm2} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-password TestPassword11!! '
                             '--admin-username testadmin --authentication-type password').get_output_in_json()
-        vm3_json = self.cmd('vm create -g {rg} -n {vm3} --image UbuntuLTS --admin-password TestPassword11!! '
+        vm3_json = self.cmd('vm create -g {rg} -n {vm3} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-password TestPassword11!! '
                             '--admin-username testadmin --authentication-type password').get_output_in_json()
         self.kwargs.update({
             'vm1_id': vm1_json['id'],

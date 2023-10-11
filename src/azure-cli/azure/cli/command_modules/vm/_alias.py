@@ -18,25 +18,11 @@ alias_json = """
       "type": "object",
       "value": {
         "Linux": {
-          "CentOS": {
-            "publisher": "OpenLogic",
-            "offer": "CentOS",
-            "sku": "7.5",
-            "version": "latest",
-            "architecture": "x64"
-          },
           "CentOS85Gen2":  {
             "publisher":  "OpenLogic",
             "offer":  "CentOS",
             "sku":  "8_5-gen2",
             "version":  "latest",
-            "architecture": "x64"
-          },
-          "Debian": {
-            "publisher": "Debian",
-            "offer": "debian-10",
-            "sku": "10",
-            "version": "latest",
             "architecture": "x64"
           },
           "Debian11":  {
@@ -46,25 +32,11 @@ alias_json = """
              "version":  "latest",
             "architecture": "x64"
           },
-          "Flatcar": {
-            "publisher": "kinvolk",
-            "offer": "flatcar-container-linux-free",
-            "sku": "stable",
-            "version": "latest",
-            "architecture": "x64"
-          },
           "FlatcarLinuxFreeGen2":  {
             "publisher":  "kinvolk",
              "offer":  "flatcar-container-linux-free",
              "sku":  "stable-gen2",
              "version":  "latest",
-            "architecture": "x64"
-          },
-          "openSUSE-Leap": {
-            "publisher": "SUSE",
-            "offer": "opensuse-leap-15-3",
-            "sku": "gen2",
-            "version": "latest",
             "architecture": "x64"
           },
           "OpenSuseLeap154Gen2":  {
@@ -74,13 +46,6 @@ alias_json = """
             "version":  "latest",
             "architecture": "x64"
           },
-          "RHEL": {
-            "publisher": "RedHat",
-            "offer": "RHEL",
-            "sku": "7-LVM",
-            "version": "latest",
-            "architecture": "x64"
-          },
           "RHELRaw8LVMGen2":  {
             "publisher":  "RedHat",
             "offer":  "RHEL",
@@ -88,24 +53,10 @@ alias_json = """
             "version":  "latest",
             "architecture": "x64"
           },
-          "SLES": {
-            "publisher": "SUSE",
-            "offer": "sles-15-sp3",
-            "sku": "gen2",
-            "version": "latest",
-            "architecture": "x64"
-          },
           "SuseSles15SP3": {
             "publisher": "SUSE",
             "offer": "sles-15-sp3",
             "sku": "gen2",
-            "version": "latest",
-            "architecture": "x64"
-          },
-          "UbuntuLTS": {
-            "publisher": "Canonical",
-            "offer": "UbuntuServer",
-            "sku": "18.04-LTS",
             "version": "latest",
             "architecture": "x64"
           },
