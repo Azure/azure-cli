@@ -27,33 +27,22 @@ LABEL maintainer="Microsoft" \
 
 
 # ca-certificates bash bash-completion - for convenience
-# libintl and icu-libs - required by azure-devops https://github.com/Azure/azure-cli/pull/9683
+# libintl icu-libs - required by azure-devops https://github.com/Azure/azure-cli/pull/9683
 # libc6-compat - required by az storage blob sync https://github.com/Azure/azure-cli/issues/10381
-
-# We don't use openssl (3.0) for now. We only install it so that users can use it.
-RUN apk add --no-cache ca-certificates bash bash-completion libintl icu-libs libc6-compat && update-ca-certificates
+# gcc python3-dev musl-dev linux-headers libffi-dev - temporarily required by psutil
 
 WORKDIR azure-cli
 COPY . /azure-cli
+RUN apk add --no-cache ca-certificates bash bash-completion libintl icu-libs libc6-compat \
+    && apk add --no-cache --virtual .build-deps gcc python3-dev musl-dev linux-headers libffi-dev \
+    && update-ca-certificates && ./scripts/install_full.sh && python ./scripts/trim_sdk.py \
+    && cat /azure-cli/az.completion > ~/.bashrc \
+    && dos2unix /root/.bashrc /usr/local/bin/az \
+    && apk del .build-deps
 
-# 1. Build packages and store in tmp dir
-# 2. Install the cli and the other command modules that weren't included
-RUN ./scripts/install_full.sh && python ./scripts/trim_sdk.py \
- && cat /azure-cli/az.completion > ~/.bashrc \
- && runDeps="$( \
-    scanelf --needed --nobanner --recursive /usr/local \
-        | awk '{ gsub(/,/, "\nso:", $2); print "so:" $2 }' \
-        | sort -u \
-        | xargs -r apk info --installed \
-        | sort -u \
-    )" \
- && apk add --virtual .rundeps $runDeps
+RUN rm -rf /azure-cli
 
 WORKDIR /
-
-# Remove CLI source code from the final image and normalize line endings.
-RUN rm -rf ./azure-cli && \
-    dos2unix /root/.bashrc /usr/local/bin/az
 
 ENV AZ_INSTALLER=DOCKER
 CMD bash
