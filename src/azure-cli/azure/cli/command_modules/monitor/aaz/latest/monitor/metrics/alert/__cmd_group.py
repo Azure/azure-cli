@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "monitor metrics",
+    "monitor metrics alert",
 )
 class __CMDGroup(AAZCommandGroup):
-    """View Azure resource metrics.
+    """Manage near-realtime metric alert rules.
     """
     pass
 

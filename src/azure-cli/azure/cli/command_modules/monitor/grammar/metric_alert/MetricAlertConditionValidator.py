@@ -63,7 +63,7 @@ class MetricAlertConditionValidator(MetricAlertConditionListener):
 
     # Exit a parse tree produced by MetricAlertConditionParser#threshold.
     def exitThreshold(self, ctx):
-        self.parameters['threshold'] = ctx.getText().strip()
+        self.parameters['threshold'] = float(ctx.getText().strip())
 
     def exitDynamic(self, ctx):
         self.parameters['failing_periods'] = {}
@@ -132,20 +132,18 @@ class MetricAlertConditionValidator(MetricAlertConditionListener):
             self.parameters['skip_metric_validation'] = True
 
     def result(self):
-        from azure.mgmt.monitor.models import MetricCriteria, MetricDimension, DynamicMetricCriteria, \
-            DynamicThresholdFailingPeriods
         dim_params = self.parameters.get('dimensions', [])
         dimensions = []
         for dim in dim_params:
-            dimensions.append(MetricDimension(**dim))
+            dimensions.append(dim)
         self.parameters['dimensions'] = dimensions
         self.parameters['name'] = ''  # will be auto-populated later
 
         if 'failing_periods' in self.parameters:
             # dynamic metric criteria
-            failing_periods = DynamicThresholdFailingPeriods(**self.parameters['failing_periods'])
+            failing_periods = self.parameters['failing_periods']
             self.parameters['failing_periods'] = failing_periods
-            return DynamicMetricCriteria(**self.parameters)
+            return {"dynamic": self.parameters}
 
         # static metric criteria
-        return MetricCriteria(**self.parameters)
+        return {"static": self.parameters}
