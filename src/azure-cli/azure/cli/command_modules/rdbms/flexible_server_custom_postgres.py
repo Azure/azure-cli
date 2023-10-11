@@ -196,7 +196,9 @@ def flexible_server_restore(cmd, client,
 
     try:
         id_parts = parse_resource_id(source_server_id)
-        source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
+        source_subscription_id = id_parts['subscription']
+        postgres_source_client = get_postgresql_flexible_management_client(cmd.cli_ctx, source_subscription_id)
+        source_server_object = postgres_source_client.servers.get(id_parts['resource_group'], id_parts['name'])
 
         location = ''.join(source_server_object.location.lower().split())
 
