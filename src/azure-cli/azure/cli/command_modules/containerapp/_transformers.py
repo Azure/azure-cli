@@ -23,9 +23,10 @@ def clean_up_sensitive_values(response_json):
     for container in safe_get(response_json, "properties", "template", "containers", default=[]):
         if "env" in container:
             for env in container["env"]:
-                del env["value"]
+                if env.get("value"):
+                    del env["value"]
 
-    if "scale" in response_json["properties"]["template"]:
+    if safe_get(response_json, "properties", "template") and "scale" in response_json["properties"]["template"]:
         for rule in safe_get(response_json, "properties", "template", "scale", "rules", default=[]):
             for (key, val) in rule.items():
                 if key != "name":

@@ -1024,7 +1024,7 @@ class ContainerappScaleTests(ScenarioTest):
 
         self.cmd(f'containerapp create -g {resource_group} -n {app} --image nginx --ingress external --target-port 80 --environment {env} --scale-rule-name http-scale-rule --scale-rule-http-concurrency 50 --scale-rule-auth trigger=secretref --scale-rule-metadata key=value')
 
-        self.cmd(f'containerapp show -g {resource_group} -n {app}', checks=[
+        self.cmd(f'containerapp show -g {resource_group} -n {app} --show-sensitive-values', checks=[
             JMESPathCheck("properties.template.scale.rules[0].name", "http-scale-rule"),
             JMESPathCheck("properties.template.scale.rules[0].http.metadata.concurrentRequests", "50"),
             JMESPathCheck("properties.template.scale.rules[0].http.metadata.key", "value"),
@@ -1034,7 +1034,7 @@ class ContainerappScaleTests(ScenarioTest):
 
         self.cmd(f'containerapp create -g {resource_group} -n {app}2 --image nginx --environment {env} --scale-rule-name my-datadog-rule --scale-rule-type datadog --scale-rule-metadata "queryValue=7" "age=120" "metricUnavailableValue=0" --scale-rule-auth "apiKey=api-key" "appKey=app-key"')
 
-        self.cmd(f'containerapp show -g {resource_group} -n {app}2', checks=[
+        self.cmd(f'containerapp show -g {resource_group} -n {app}2 --show-sensitive-values', checks=[
             JMESPathCheck("properties.template.scale.rules[0].name", "my-datadog-rule"),
             JMESPathCheck("properties.template.scale.rules[0].custom.type", "datadog"),
             JMESPathCheck("properties.template.scale.rules[0].custom.metadata.queryValue", "7"),
@@ -1060,7 +1060,7 @@ class ContainerappScaleTests(ScenarioTest):
 
         self.cmd(f'containerapp create -g {resource_group} -n {app} --image nginx --ingress external --target-port 80 --environment {env} --scale-rule-name http-scale-rule --scale-rule-http-concurrency 50 --scale-rule-auth trigger=secretref --scale-rule-metadata key=value')
 
-        self.cmd(f'containerapp show -g {resource_group} -n {app}', checks=[
+        self.cmd(f'containerapp show -g {resource_group} -n {app} --show-sensitive-values', checks=[
             JMESPathCheck("properties.template.scale.rules[0].name", "http-scale-rule"),
             JMESPathCheck("properties.template.scale.rules[0].http.metadata.concurrentRequests", "50"),
             JMESPathCheck("properties.template.scale.rules[0].http.metadata.key", "value"),
@@ -1070,7 +1070,7 @@ class ContainerappScaleTests(ScenarioTest):
 
         self.cmd(f'containerapp update -g {resource_group} -n {app} --image nginx --scale-rule-name my-datadog-rule --scale-rule-type datadog --scale-rule-metadata "queryValue=7" "age=120" "metricUnavailableValue=0"  --scale-rule-auth "apiKey=api-key" "appKey=app-key"')
 
-        self.cmd(f'containerapp show -g {resource_group} -n {app}', checks=[
+        self.cmd(f'containerapp show -g {resource_group} -n {app} --show-sensitive-values', checks=[
             JMESPathCheck("properties.template.scale.rules[0].name", "my-datadog-rule"),
             JMESPathCheck("properties.template.scale.rules[0].custom.type", "datadog"),
             JMESPathCheck("properties.template.scale.rules[0].custom.metadata.queryValue", "7"),
@@ -1084,7 +1084,7 @@ class ContainerappScaleTests(ScenarioTest):
         ])
 
         self.cmd(f'containerapp update -g {resource_group} -n {app} --cpu 0.5 --no-wait')
-        self.cmd(f'containerapp show -g {resource_group} -n {app}', checks=[
+        self.cmd(f'containerapp show -g {resource_group} -n {app} --show-sensitive-values', checks=[
             JMESPathCheck("properties.template.containers[0].resources.cpu", "0.5"),
             JMESPathCheck("properties.template.scale.rules[0].name", "my-datadog-rule"),
             JMESPathCheck("properties.template.scale.rules[0].custom.type", "datadog"),
@@ -1111,7 +1111,7 @@ class ContainerappScaleTests(ScenarioTest):
 
         self.cmd(f'containerapp create -g {resource_group} -n {app} --image nginx --ingress external --target-port 80 --environment {env} --scale-rule-name http-scale-rule --scale-rule-http-concurrency 50 --scale-rule-auth trigger=secretref --scale-rule-metadata key=value')
 
-        self.cmd(f'containerapp show -g {resource_group} -n {app}', checks=[
+        self.cmd(f'containerapp show -g {resource_group} -n {app} --show-sensitive-values', checks=[
             JMESPathCheck("properties.template.scale.rules[0].name", "http-scale-rule"),
             JMESPathCheck("properties.template.scale.rules[0].http.metadata.concurrentRequests", "50"),
             JMESPathCheck("properties.template.scale.rules[0].http.metadata.key", "value"),
@@ -1121,7 +1121,7 @@ class ContainerappScaleTests(ScenarioTest):
 
         self.cmd(f'containerapp revision copy -g {resource_group} -n {app} --image nginx --scale-rule-name my-datadog-rule --scale-rule-type datadog --scale-rule-metadata "queryValue=7" "age=120" "metricUnavailableValue=0"  --scale-rule-auth "apiKey=api-key" "appKey=app-key"')
 
-        self.cmd(f'containerapp show -g {resource_group} -n {app}', checks=[
+        self.cmd(f'containerapp show -g {resource_group} -n {app} --show-sensitive-values', checks=[
             JMESPathCheck("properties.template.scale.rules[0].name", "my-datadog-rule"),
             JMESPathCheck("properties.template.scale.rules[0].custom.type", "datadog"),
             JMESPathCheck("properties.template.scale.rules[0].custom.metadata.queryValue", "7"),
@@ -1231,7 +1231,7 @@ class ContainerappScaleTests(ScenarioTest):
         write_test_file(containerapp_file_name, containerapp_yaml_text)
         self.cmd(f'containerapp create -n {app} -g {resource_group} --environment {env} --yaml {containerapp_file_name}')
 
-        self.cmd(f'containerapp show -g {resource_group} -n {app}', checks=[
+        self.cmd(f'containerapp show -g {resource_group} -n {app} --show-sensitive-values', checks=[
             JMESPathCheck("properties.provisioningState", "Succeeded"),
             JMESPathCheck("properties.configuration.ingress.external", True),
             JMESPathCheck("properties.configuration.ingress.ipSecurityRestrictions[0].name", "name"),
@@ -1291,7 +1291,7 @@ class ContainerappScaleTests(ScenarioTest):
 
         self.cmd(f'containerapp update -n {app} -g {resource_group} --yaml {containerapp_file_name}')
 
-        self.cmd(f'containerapp show -g {resource_group} -n {app}', checks=[
+        self.cmd(f'containerapp show -g {resource_group} -n {app} --show-sensitive-values', checks=[
             JMESPathCheck("properties.provisioningState", "Succeeded"),
             JMESPathCheck("properties.configuration.ingress.external", True),
             JMESPathCheck("properties.configuration.ingress.ipSecurityRestrictions[0].name", "name"),
