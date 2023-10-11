@@ -49,7 +49,7 @@ def signalr_restart(client, signalr_name, resource_group_name):
 
 
 def signalr_update_get():
-    return SignalRResource()
+    return SignalRResource(location="")
 
 
 def signalr_update_set(client, signalr_name, resource_group_name, parameters):
