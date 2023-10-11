@@ -25,27 +25,13 @@ LABEL maintainer="Microsoft" \
       org.label-schema.vcs-url="https://github.com/Azure/azure-cli.git" \
       org.label-schema.docker.cmd="docker run -v \${HOME}/.azure:/root/.azure -it mcr.microsoft.com/azure-cli:$CLI_VERSION"
 
-# bash gcc make openssl-dev libffi-dev musl-dev - dependencies required for CLI
-# openssh - included for ssh-keygen
-# ca-certificates
 
-# curl - required for installing jp
-# jq - we include jq as a useful tool
-# pip wheel - required for CLI packaging
-# jmespath-terminal - we include jpterm as a useful tool
-# libintl and icu-libs - required by azure devops artifact (az extension add --name azure-devops)
+# ca-certificates bash bash-completion - for convenience
+# libintl and icu-libs - required by azure-devops https://github.com/Azure/azure-cli/pull/9683
+# libc6-compat - required by az storage blob sync https://github.com/Azure/azure-cli/issues/10381
 
 # We don't use openssl (3.0) for now. We only install it so that users can use it.
-RUN apk add --no-cache bash openssh ca-certificates jq curl openssl perl git zip \
- && apk add --no-cache --virtual .build-deps gcc make openssl-dev libffi-dev musl-dev linux-headers \
- && apk add --no-cache libintl icu-libs libc6-compat \
- && apk add --no-cache bash-completion \
- && update-ca-certificates
-
-ARG JP_VERSION="0.2.1"
-
-RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && curl -L https://github.com/jmespath/jp/releases/download/${JP_VERSION}/jp-linux-$arch -o /usr/local/bin/jp \
- && chmod +x /usr/local/bin/jp
+RUN apk add --no-cache ca-certificates bash bash-completion libintl icu-libs libc6-compat && update-ca-certificates
 
 WORKDIR azure-cli
 COPY . /azure-cli
