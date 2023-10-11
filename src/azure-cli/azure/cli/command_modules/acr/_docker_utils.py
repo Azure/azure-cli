@@ -655,6 +655,32 @@ def request_data_from_registry(http_method,
     raise CLIError(errorMessage)
 
 
+def parse_image_name(image, allow_digest=False, default_latest=True):
+    if allow_digest and '@' in image:
+        # This is probably an image name by manifest digest
+        tokens = image.split('@')
+        if len(tokens) == 2:
+            return tokens[0], None, tokens[1]
+
+    if ':' in image and '@' not in image:
+        # This is probably an image name by tag
+        tokens = image.split(':')
+        if len(tokens) == 2:
+            return tokens[0], tokens[1], None
+
+    if ':' not in image and '@' not in image:
+        # This is probably an image with implicit latest tag
+        if default_latest:
+            return image, 'latest', None
+
+        return image, None, None
+
+    if allow_digest:
+        raise CLIError("The name of the image may include a tag in the format"
+                       " 'name:tag' or digest in the format 'name@digest'.")
+    raise CLIError("The name of the image may include a tag in the format 'name:tag'.")
+
+
 def parse_error_message(error_message, response):
     import json
     try:
