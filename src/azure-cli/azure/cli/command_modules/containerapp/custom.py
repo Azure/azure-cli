@@ -496,11 +496,11 @@ def update_containerapp_logic(cmd,
                         volume_mount_def["volumeName"] = volume_def["name"]
                         volume_mount_def["mountPath"] = secret_volume_mount
 
-                        if "volumes" not in new_containerapp["properties"]["template"] or new_containerapp["properties"]["template"]["volumes"] is None:
+                        if "volumes" not in new_containerapp["properties"]["template"]:
                             new_containerapp["properties"]["template"]["volumes"] = [volume_def]
                         else:
                             new_containerapp["properties"]["template"]["volumes"].append(volume_def)
-                        c["volumeMounts"] = [volume_mount_def]
+                        c["volumeMounts"] = volume_mount_def
                     else:
                         if len(c["volumeMounts"]) > 1:
                             raise ValidationError("Usage error: --secret-volume-mount can only be used with a container that has a single volume mount, to define multiple volumes and mounts please use --yaml")
@@ -4769,17 +4769,18 @@ def create_containerapps_from_compose(cmd,  # pylint: disable=R0914
     parsed_managed_env = parse_resource_id(managed_env)
     managed_env_name = parsed_managed_env['name']
 
-    logger.info(  # pylint: disable=W1203
-        f"Creating the Container Apps managed environment {managed_env_name} under {resource_group_name} in {location}.")
+    env_rg = parsed_managed_env.get('resource_group', resource_group_name)
 
     try:
         managed_environment = show_managed_environment(cmd=cmd,
                                                        name=managed_env_name,
-                                                       resource_group_name=resource_group_name)
+                                                       resource_group_name=env_rg)
     except CLIInternalError:  # pylint: disable=W0702
+        logger.info(  # pylint: disable=W1203
+            f"Creating the Container Apps managed environment {managed_env_name} under {env_rg} in {location}.")
         managed_environment = create_containerapps_compose_environment(cmd,
                                                                        managed_env_name,
-                                                                       resource_group_name,
+                                                                       env_rg,
                                                                        tags=tags)
 
     compose_yaml = load_yaml_file(compose_file_path)
