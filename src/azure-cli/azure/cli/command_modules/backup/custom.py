@@ -139,7 +139,15 @@ def create_vault(client, vault_name, resource_group_name, location, tags=None,
         security_settings=_get_vault_security_settings(client, resource_group_name, vault_name, immutability_state),
         restore_settings=_get_vault_restore_settings(cross_subscription_restore_state)
     )
-    vault = Vault(location=location, sku=vault_sku, properties=vault_properties, tags=tags)
+
+    try:
+        existing_vault_if_any = client.get(resource_group_name, vault_name)
+        identity = existing_vault_if_any.identity
+        vault = Vault(location=location, sku=vault_sku, properties=vault_properties, tags=tags, identity=identity)
+    except CoreResourceNotFoundError:
+        # This runs for a create - if there is no vault, identity details don't need to be provided
+        vault = Vault(location=location, sku=vault_sku, properties=vault_properties, tags=tags)
+
     return client.begin_create_or_update(resource_group_name, vault_name, vault)
 
 
