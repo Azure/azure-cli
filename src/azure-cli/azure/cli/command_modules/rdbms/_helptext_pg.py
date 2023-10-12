@@ -632,6 +632,13 @@ examples:
         --source-server testserver --vnet newVnet --subnet newSubnet \\
         --address-prefixes 172.0.0.0/16 --subnet-prefixes 172.0.0.0/24 \\
         --private-dns-zone testDNS.postgres.database.azure.com --location newLocation
+  - name: >
+      Geo-restore 'testserver' to current point-in-time as a new server 'testserverNew' in a different subscription / resource group. \\
+      Here --restore-group is for the target server's resource group, and --source-server must be passed as resource ID. \\
+      This resource ID can be in a subscription different than the subscription used for az account set.
+    text: >
+      az postgres flexible-server geo-restore --resource-group testGroup --name testserverNew --location newLocation \\
+        --source-server /subscriptions/{sourceSubscriptionId}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{sourceServerName}
 """
 
 helps['postgres flexible-server revive-dropped'] = """

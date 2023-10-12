@@ -544,9 +544,11 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
     else:
         source_server_id = source_server
 
-    source_server_id_parts = parse_resource_id(source_server_id)
     try:
-        source_server_object = client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
+        id_parts = parse_resource_id(source_server_id)
+        source_subscription_id = id_parts['subscription']
+        postgres_source_client = get_postgresql_flexible_management_client(cmd.cli_ctx, source_subscription_id)
+        source_server_object = postgres_source_client.servers.get(id_parts['resource_group'], id_parts['name'])
     except Exception as e:
         raise ResourceNotFoundError(e)
 
