@@ -344,13 +344,13 @@ def get_action_group_validator(dest):
         subscription = get_subscription_id(cmd.cli_ctx)
         resource_group = namespace.resource_group_name
         for group in action_groups:
-            if not is_valid_resource_id(group.action_group_id):
-                group.action_group_id = resource_id(
+            if not is_valid_resource_id(group["action_group_id"]):
+                group["action_group_id"] = resource_id(
                     subscription=subscription,
                     resource_group=resource_group,
                     namespace='microsoft.insights',
                     type='actionGroups',
-                    name=group.action_group_id
+                    name=group["action_group_id"]
                 )
     return validate_action_groups
 
