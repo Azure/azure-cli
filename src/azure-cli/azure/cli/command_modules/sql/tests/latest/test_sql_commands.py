@@ -942,8 +942,8 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
         database_name_one = "cliautomationdb01"
         database_name_two = "cliautomationdb02"
         database_name_three = "cliautomationdb03"
-        preferred_enclave_type_default = AlwaysEncryptedEnclaveType.default
-        preferred_enclave_type_vbs = AlwaysEncryptedEnclaveType.vbs
+        preferred_enclave_type_default = AlwaysEncryptedEnclaveType.default.value
+        preferred_enclave_type_vbs = AlwaysEncryptedEnclaveType.vbs.value
 
 
         # test sql db is created with default enclave type
@@ -1020,8 +1020,8 @@ class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_sql_db_serverless_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"
-        compute_model_serverless = ComputeModelType.serverless
-        compute_model_provisioned = ComputeModelType.provisioned
+        compute_model_serverless = ComputeModelType.serverless.value
+        compute_model_provisioned = ComputeModelType.provisioned.value
 
         # Create database with vcore edition
         vcore_edition = 'GeneralPurpose'
@@ -3543,8 +3543,8 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
         database_name_one = "cliautomationdb01"
         database_name_two = "cliautomationdb02"
         edition = 'GeneralPurpose'
-        preferred_enclave_type_default = AlwaysEncryptedEnclaveType.default
-        preferred_enclave_type_vbs = AlwaysEncryptedEnclaveType.vbs
+        preferred_enclave_type_default = AlwaysEncryptedEnclaveType.default.value
+        preferred_enclave_type_vbs = AlwaysEncryptedEnclaveType.vbs.value
 
         # Create general purpose pool with default enclave type
         self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {} --preferred-enclave-type {}'

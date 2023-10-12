@@ -105,9 +105,14 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
         return False
 
 
-def create_keyvault_data_plane_client(cli_ctx, vault_base_url):
+def create_data_plane_keyvault_certificate_client(cli_ctx, vault_base_url):
     from azure.cli.command_modules.keyvault._client_factory import data_plane_azure_keyvault_certificate_client
     return data_plane_azure_keyvault_certificate_client(cli_ctx, {"vault_base_url": vault_base_url})
+
+
+def create_data_plane_keyvault_key_client(cli_ctx, vault_base_url):
+    from azure.cli.command_modules.keyvault._client_factory import data_plane_azure_keyvault_key_client
+    return data_plane_azure_keyvault_key_client(cli_ctx, {"vault_base_url": vault_base_url})
 
 
 def get_key_vault_base_url(cli_ctx, vault_name):
