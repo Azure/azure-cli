@@ -253,7 +253,7 @@ parameters:
     short-summary: The Kubernetes network policy to use.
     long-summary: |
         Using together with "azure" network plugin.
-        Specify "azure" for Azure network policy manager, "calico" for calico network policy controller, "cilium" for Azure CNI Overlay powered by Cilium.
+        Specify "azure" for Azure network policy manager, "calico" for calico network policy controller, "cilium" for Azure CNI powered by Cilium.
         Defaults to "" (network policy disabled).
   - name: --network-dataplane
     type: string
@@ -623,7 +623,7 @@ parameters:
     type: string
     short-summary: Update the mode of a network policy.
     long-summary: |
-        Specify "azure" for Azure network policy manager, "cilium" for Azure CNI Overlay powered by Cilium.
+        Specify "azure" for Azure network policy manager, "cilium" for Azure CNI powered by Cilium.
         Defaults to "" (network policy disabled).
   - name: --pod-cidr
     type: string
