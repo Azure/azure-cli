@@ -8741,6 +8741,22 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
             self.check('priorityMixPolicy.regularPriorityPercentageAboveBase', 25),
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_create_flexible_vmss_by_default', location='eastus')
+    def test_create_flexible_vmss_by_default(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10),
+        })
+        self.cmd('vmss create -n {vmss} -g {rg} --image ubuntu2204', checks=[
+            self.check('vmss.orchestrationMode', 'Flexible'),
+            self.check('vmss.upgradePolicy.mode', 'Manual')
+        ])
+        self.cmd('network lb inbound-nat-pool list -g {rg} --lb-name {vmss}LB', checks=[
+            self.check('length(@)', 0)
+        ])
+        self.cmd('network lb inbound-nat-rule list -g {rg} --lb-name {vmss}LB', checks=[
+            self.check('length(@)', 1),
+            self.check('[0].type', 'Microsoft.Network/loadBalancers/inboundNatRules')
+        ])
 
 
 class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
