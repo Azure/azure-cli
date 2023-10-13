@@ -20,6 +20,7 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_namespace')
         g.custom_command('list', 'list_namespace')
         g.custom_command('show', 'show_namespace')
+        g.custom_command('export', 'export_namespace')
 
 
     with self.command_group('discovery service') as g:

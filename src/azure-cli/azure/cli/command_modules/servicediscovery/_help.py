@@ -25,7 +25,10 @@ helps['discovery namespace create'] = """
     examples:
         - name: Create a service discovery namespace
           text: |-
-                az discovery namespace create --namespace MyNs --description "My first discovery namespace"
+                az discovery namespace create --namespace MyNs
+        - name: Create a service discovery namespace that will be automatically exported to app config
+          text: |-
+                az discovery namespace create --namespace MyNs --app-config MyAppConfig
 """
 
 helps['discovery namespace show'] = """
@@ -36,6 +39,16 @@ helps['discovery namespace show'] = """
           text: |-
                 az discovery namespace show --namespace MyNs
 """
+
+helps['discovery namespace export'] = """
+    type: command
+    short-summary: Command to export the instances under a namespace.
+    examples:
+        - name: Export the instances under a namespace to an Azure App Config service
+          text: |-
+                az discovery namespace export --namespace MyNs --app-config MyAppConfig
+"""
+
 
 helps['discovery namespace list'] = """
     type: command
@@ -63,9 +76,9 @@ helps['discovery service create'] = """
         - name: Create a service discovery service
           text: |-
                 az discovery service create --namespace MyNs --service MyService --description "My first discovery service"
-        - name: Create a service discovery service with specified protocal
+        - name: Create a service discovery service with specified protocol
           text: |-
-                az discovery service create --namespace MyNs --service MyService --protocal HTTP --description "My first discovery service"
+                az discovery service create --namespace MyNs --service MyService --protocol HTTP --description "My first discovery service"
 """
 
 helps['discovery service show'] = """

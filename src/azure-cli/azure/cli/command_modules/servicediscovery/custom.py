@@ -6,6 +6,9 @@
 import requests
 import json
 
+from knack.log import get_logger
+logger = get_logger(__name__)
+
 def _run_cli_cmd(cmd, retry=0, interval=0, should_retry_func=None):
     '''Run a CLI command
     :param cmd: The CLI command to be executed
@@ -31,7 +34,7 @@ def _run_cli_cmd(cmd, retry=0, interval=0, should_retry_func=None):
         return output.stdout or None
 
 
-def create_namespace(cmd, ns_name, description=''):
+def create_namespace(cmd, ns_name, description='', app_config=None):
     url = 'https://servicediscoverymvp.azurewebsites.net/namespaces/{}'.format(ns_name)
     payload = {
         'description': description
@@ -126,3 +129,37 @@ def list_instance(cmd, ns_name, service):
 
     response = requests.get(url)
     return json.loads(response.text)
+
+
+def export_namespace(cmd, ns_name, app_config):
+    instance_kv_pairs = dict()
+
+    url = 'https://servicediscoverymvp.azurewebsites.net/namespaces/{}/services'.format(ns_name)
+    response = requests.get(url)
+
+    service_res = json.loads(response.text)
+    service_names = [res.get('id').split('/')[-1] for res in service_res]
+    for service_name in service_names:
+        url = 'https://servicediscoverymvp.azurewebsites.net/namespaces/{}/services/{}/instances'.format(ns_name, service_name)
+        response = requests.get(url)
+        instance_res = json.loads(response.text)
+        
+        for instance in instance_res:
+            instance_name = instance.get('id').split('/')[-1]
+            for key, val in instance.items():
+                res_key = '{}_{}_{}_{}'.format(ns_name, service_name, instance_name, key)
+                instance_kv_pairs[res_key] = str(val)
+
+    import tempfile, datetime
+    temp = tempfile.NamedTemporaryFile(mode='w', delete=False)
+    temp.write(json.dumps(instance_kv_pairs, ensure_ascii=False))
+    temp.flush()
+
+    logger.warning("Service instances collected. Exporting to app config: {} ...".format(app_config))
+    _run_cli_cmd('az appconfig kv import -n {} --source file --format json --path {} --yes'.format(app_config, temp.name))
+
+    return {
+        'Count of key-values exported': len(instance_kv_pairs),
+        'Result': 'Succeeded',
+        'Time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }

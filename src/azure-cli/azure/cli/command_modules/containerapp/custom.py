@@ -322,18 +322,16 @@ def create_containerapp(cmd,
         url = 'https://servicediscoverymvp.azurewebsites.net{}/instances/{}'.format(service_registry, name)
         payload = {
             'description': 'Container app auto registered fqdn',
-            'metadatas': {
-                'fqdn': fqdn
-            },
-            'address': '',
+            'metadatas': {},
+            'address': fqdn,
             'port': target_port
         }
 
         response = requests.put(url, json=payload)
         if response.status_code == 200:
-            logger.warning('Registering FQDN to service regsitery succeeds.')
+            logger.warning('Registering FQDN to service regsitery succeeded. \n')
         else:
-            logger.warning('Registering FQDN to service regsitery fails.')
+            logger.warning('Registering FQDN to service regsitery failed. \n')
     return r
 
 
