@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import pickle
+import base64
 from azure.core import PipelineClient
 from azure.core.configuration import Configuration
 from azure.core.polling.base_polling import LocationPolling, StatusCheckPolling
@@ -17,6 +19,7 @@ registered_clients = {}
 
 def register_client(name):
     def decorator(cls):
+        assert issubclass(cls, AAZPipelineClient)
         if name in registered_clients:
             assert registered_clients[name] == cls
         else:
@@ -26,8 +29,17 @@ def register_client(name):
     return decorator
 
 
+class AAZPipelineClient(PipelineClient):
+
+    def from_continuation_token(self, continuation_token):
+        session = pickle.loads(base64.b64decode(continuation_token))  # nosec
+        # Restore the transport in the context
+        session.context.transport = self._pipeline._transport  # pylint: disable=protected-access
+        return session
+
+
 @register_client("MgmtClient")
-class AAZMgmtClient(PipelineClient):
+class AAZMgmtClient(AAZPipelineClient):
     """Management Client for Management Plane APIs"""
 
     class _Configuration(Configuration):

@@ -62,6 +62,7 @@ class AAZCommand(CLICommand):
     AZ_NAME = None
     AZ_HELP = None
     AZ_SUPPORT_NO_WAIT = False
+    AZ_SUPPORT_LRO_CONTINUE = False
     AZ_SUPPORT_GENERIC_UPDATE = False
     AZ_SUPPORT_PAGINATION = False
 
@@ -86,8 +87,14 @@ class AAZCommand(CLICommand):
         if cls.AZ_SUPPORT_NO_WAIT:
             schema.no_wait = AAZBoolArg(
                 options=['--no-wait'],
-                help='Do not wait for the long-running operation to finish.'
+                help='Do not wait for the long-running operation to finish.' + (
+                    " The continuation token will be cached locally." if cls.AZ_SUPPORT_LRO_CONTINUE else "")
             )
+            if cls.AZ_SUPPORT_LRO_CONTINUE:
+                schema.lro_continue = AAZBoolArg(
+                    options=['--lro-continue'],
+                    help='Continue the long-running operation from cached continuation token.'
+                )
         if cls.AZ_SUPPORT_GENERIC_UPDATE:
             schema.generic_update_add = AAZGenericUpdateAddArg()
             schema.generic_update_set = AAZGenericUpdateSetArg()
@@ -238,7 +245,10 @@ class AAZCommand(CLICommand):
         polling_generator = executor()
         if self.ctx.lro_no_wait:
             # run until yield the first polling
-            _ = next(polling_generator)
+            polling = next(polling_generator)
+            if polling and self.AZ_SUPPORT_LRO_CONTINUE:
+                self.ctx.cache_continuation_token(polling)
+                logger.warning("The continuation token is cached locally. You can use `--lro-continue` for polling.")
             return None
         return AAZLROPoller(polling_generator=polling_generator, result_callback=extract_result)
 
