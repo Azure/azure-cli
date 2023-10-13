@@ -3,6 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=line-too-long
+# pylint: disable=ungrouped-imports
+
 import base64
 import errno
 import io
@@ -25,13 +28,12 @@ import zipfile
 from distutils.version import StrictVersion  # pylint: disable=deprecated-module
 from urllib.error import URLError
 from urllib.request import urlopen
+from azure.cli.command_modules.acs.maintenanceconfiguration import aks_maintenanceconfiguration_update_internal
 
 import colorama
 import requests
 import yaml
-from azure.cli.command_modules.acs._client_factory import (
-    cf_agent_pools,
-)
+from azure.cli.command_modules.acs._client_factory import cf_agent_pools
 from azure.cli.command_modules.acs._consts import (
     ADDONS,
     CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
@@ -343,6 +345,105 @@ def which(binary):
     return None
 
 
+def aks_maintenanceconfiguration_list(
+    cmd,
+    client,
+    resource_group_name,
+    cluster_name
+):
+    return client.list_by_managed_cluster(resource_group_name, cluster_name)
+
+
+def aks_maintenanceconfiguration_show(
+    cmd,
+    client,
+    resource_group_name,
+    cluster_name,
+    config_name
+):
+    logger.warning('resource_group_name: %s, cluster_name: %s, config_name: %s ',
+                   resource_group_name, cluster_name, config_name)
+    return client.get(resource_group_name, cluster_name, config_name)
+
+
+def aks_maintenanceconfiguration_delete(
+    cmd,
+    client,
+    resource_group_name,
+    cluster_name,
+    config_name
+):
+    logger.warning('resource_group_name: %s, cluster_name: %s, config_name: %s ',
+                   resource_group_name, cluster_name, config_name)
+    return client.delete(resource_group_name, cluster_name, config_name)
+
+
+def aks_maintenanceconfiguration_add(
+    cmd,
+    client,
+    resource_group_name,
+    cluster_name,
+    config_name,
+    config_file=None,
+    weekday=None,
+    start_hour=None,
+    schedule_type=None,
+    interval_days=None,
+    interval_weeks=None,
+    interval_months=None,
+    day_of_week=None,
+    day_of_month=None,
+    week_index=None,
+    duration_hours=None,
+    utc_offset=None,
+    start_date=None,
+    start_time=None
+):
+    configs = client.list_by_managed_cluster(resource_group_name, cluster_name)
+    for config in configs:
+        if config.name == config_name:
+            raise CLIError("Maintenance configuration '{}' already exists, please try a different name, "
+                           "use 'aks maintenanceconfiguration list' to get current list of maitenance configurations".format(config_name))
+    # DO NOT MOVE: get all the original parameters and save them as a dictionary
+    raw_parameters = locals()
+    return aks_maintenanceconfiguration_update_internal(cmd, client, raw_parameters)
+
+
+def aks_maintenanceconfiguration_update(
+    cmd,
+    client,
+    resource_group_name,
+    cluster_name,
+    config_name,
+    config_file=None,
+    weekday=None,
+    start_hour=None,
+    schedule_type=None,
+    interval_days=None,
+    interval_weeks=None,
+    interval_months=None,
+    day_of_week=None,
+    day_of_month=None,
+    week_index=None,
+    duration_hours=None,
+    utc_offset=None,
+    start_date=None,
+    start_time=None
+):
+    configs = client.list_by_managed_cluster(resource_group_name, cluster_name)
+    found = False
+    for config in configs:
+        if config.name == config_name:
+            found = True
+            break
+    if not found:
+        raise ResourceNotFoundError("Maintenance configuration '{}' doesn't exist."
+                                    "use 'aks maintenanceconfiguration list' to get current list of maitenance configurations".format(config_name))
+    # DO NOT MOVE: get all the original parameters and save them as a dictionary
+    raw_parameters = locals()
+    return aks_maintenanceconfiguration_update_internal(cmd, client, raw_parameters)
+
+
 def wait_then_open(url):
     """
     Waits for a bit then opens a URL.  Useful for waiting for a proxy to come up, and then open the URL.
@@ -405,6 +506,7 @@ def aks_create(
     network_policy=None,
     network_dataplane=None,
     auto_upgrade_channel=None,
+    node_os_upgrade_channel=None,
     cluster_autoscaler_profile=None,
     uptime_sla=False,
     tier=None,
@@ -450,6 +552,7 @@ def aks_create(
     enable_image_cleaner=False,
     image_cleaner_interval_hours=None,
     enable_keda=False,
+    enable_vpa=False,
     # addons
     enable_addons=None,
     workspace_resource_id=None,
@@ -482,12 +585,12 @@ def aks_create(
     nodepool_labels=None,
     nodepool_taints=None,
     node_osdisk_type=None,
-    node_osdisk_size=0,
+    node_osdisk_size=None,
     vm_set_type=None,
     zones=None,
     ppg=None,
     http_proxy_config=None,
-    max_pods=0,
+    max_pods=None,
     enable_encryption_at_host=False,
     enable_ultra_ssd=False,
     enable_fips_image=False,
@@ -551,6 +654,7 @@ def aks_update(
     disable_local_accounts=False,
     enable_local_accounts=False,
     network_plugin_mode=None,
+    network_dataplane=None,
     pod_cidr=None,
     load_balancer_managed_outbound_ip_count=None,
     load_balancer_managed_outbound_ipv6_count=None,
@@ -560,7 +664,9 @@ def aks_update(
     load_balancer_idle_timeout=None,
     nat_gateway_managed_outbound_ip_count=None,
     nat_gateway_idle_timeout=None,
+    outbound_type=None,
     auto_upgrade_channel=None,
+    node_os_upgrade_channel=None,
     cluster_autoscaler_profile=None,
     uptime_sla=False,
     no_uptime_sla=False,
@@ -568,6 +674,7 @@ def aks_update(
     api_server_authorized_ip_ranges=None,
     enable_public_fqdn=False,
     disable_public_fqdn=False,
+    private_dns_zone=None,
     enable_managed_identity=False,
     assign_identity=None,
     assign_kubelet_identity=None,
@@ -584,6 +691,7 @@ def aks_update(
     enable_windows_gmsa=False,
     gmsa_dns_server=None,
     gmsa_root_domain_name=None,
+    disable_windows_gmsa=False,
     attach_acr=None,
     detach_acr=None,
     enable_defender=False,
@@ -610,6 +718,11 @@ def aks_update(
     http_proxy_config=None,
     enable_keda=False,
     disable_keda=False,
+    enable_vpa=False,
+    disable_vpa=False,
+    enable_force_upgrade=False,
+    disable_force_upgrade=False,
+    upgrade_override_until=None,
     # addons
     enable_secret_rotation=False,
     disable_secret_rotation=False,
@@ -2062,11 +2175,12 @@ def aks_agentpool_add(
     tags=None,
     node_taints=None,
     node_osdisk_type=None,
-    node_osdisk_size=0,
+    node_osdisk_size=None,
     max_surge=None,
+    drain_timeout=None,
     mode=CONST_NODEPOOL_MODE_USER,
     scale_down_mode=CONST_SCALE_DOWN_MODE_DELETE,
-    max_pods=0,
+    max_pods=None,
     zones=None,
     ppg=None,
     enable_encryption_at_host=False,
@@ -2117,6 +2231,7 @@ def aks_agentpool_update(
     tags=None,
     node_taints=None,
     max_surge=None,
+    drain_timeout=None,
     mode=None,
     scale_down_mode=None,
     no_wait=False,
@@ -2154,6 +2269,7 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                           kubernetes_version='',
                           node_image_only=False,
                           max_surge=None,
+                          drain_timeout=None,
                           snapshot_id=None,
                           no_wait=False,
                           aks_custom_headers=None,
@@ -2171,11 +2287,11 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
         )
 
     # Note: we exclude this option because node image upgrade can't accept nodepool put fields like max surge
-    if max_surge and node_image_only:
+    if (max_surge or drain_timeout) and node_image_only:
         raise MutuallyExclusiveArgumentError(
-            'Conflicting flags. Unable to specify max-surge with node-image-only.'
-            'If you want to use max-surge with a node image upgrade, please first '
-            'update max-surge using "az aks nodepool update --max-surge".'
+            'Conflicting flags. Unable to specify max-surge/drain-timeout with node-image-only.'
+            'If you want to use max-surge/drain-timeout with a node image upgrade, please first '
+            'update max-surge/drain-timeout using "az aks nodepool update --max-surge/--drain-timeout".'
         )
 
     if node_image_only:
@@ -2222,6 +2338,8 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
 
     if max_surge:
         instance.upgrade_settings.max_surge = max_surge
+    if drain_timeout:
+        instance.upgrade_settings.drain_timeout_in_minutes = drain_timeout
 
     # custom headers
     aks_custom_headers = extract_comma_separated_string(

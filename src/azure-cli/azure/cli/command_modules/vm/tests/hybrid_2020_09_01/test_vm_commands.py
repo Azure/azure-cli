@@ -18,7 +18,7 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint,
-    StorageAccountPreparer)
+    StorageAccountPreparer, KeyVaultPreparer)
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 # pylint: disable=line-too-long
@@ -94,57 +94,59 @@ def _write_config_file(user_name):
 #                  checks=self.check("length(securityRules[?name == 'open-port-all'])", 1))
 
 
-# class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
+class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
 
-#     @ResourceGroupPreparer(name_prefix='cli_test_vm_list_ip')
-#     def test_vm_show_list_sizes_list_ip_addresses(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_list_ip')
+    @AllowLargeResponse(size_kb=99999)
+    def test_vm_show_list_sizes_list_ip_addresses(self, resource_group):
 
-#         self.kwargs.update({
-#             'loc': 'centralus',
-#             'vm': 'vm-with-public-ip',
-#             'allocation': 'dynamic',
-#             'zone': 2
-#         })
-#         # Expecting no results at the beginning
-#         self.cmd('vm list-ip-addresses --resource-group {rg}', checks=self.is_empty())
-#         self.cmd('vm create --resource-group {rg} --location {loc} -n {vm} --admin-username ubuntu --image Canonical:UbuntuServer:14.04.4-LTS:latest'
-#                  ' --admin-password testPassword0 --public-ip-address-allocation {allocation} --authentication-type password --zone {zone}')
-#         result = self.cmd('vm show --resource-group {rg} --name {vm} -d', checks=[
-#             self.check('type(@)', 'object'),
-#             self.check('name', '{vm}'),
-#             self.check('location', '{loc}'),
-#             self.check('resourceGroup', '{rg}')
-#         ]).get_output_in_json()
-#         self.assertEqual(4, len(result['publicIps'].split('.')))
+        self.kwargs.update({
+            'loc': 'centralus',
+            'vm': 'vm-with-public-ip',
+            'allocation': 'static',
+            'zone': 2
+        })
+        # Expecting no results at the beginning
+        self.cmd('vm list-ip-addresses --resource-group {rg}', checks=self.is_empty())
+        self.cmd('vm create --resource-group {rg} --location {loc} -n {vm} --admin-username ubuntu --image Canonical:UbuntuServer:14.04.4-LTS:latest'
+                 ' --admin-password testPassword0 --public-ip-address-allocation {allocation} --authentication-type password --zone {zone} --nsg-rule NONE')
+        result = self.cmd('vm show --resource-group {rg} --name {vm} -d', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{vm}'),
+            self.check('location', '{loc}'),
+            self.check('resourceGroup', '{rg}')
+        ]).get_output_in_json()
+        self.assertEqual(4, len(result['publicIps'].split('.')))
 
-#         result = self.cmd('vm list --resource-group {rg} -d', checks=[
-#             self.check('[0].name', '{vm}'),
-#             self.check('[0].location', '{loc}'),
-#             self.check('[0].resourceGroup', '{rg}'),
-#             self.check('[0].powerState', 'VM running')
-#         ]).get_output_in_json()
-#         self.assertEqual(4, len(result[0]['publicIps'].split('.')))
+        result = self.cmd('vm list --resource-group {rg} -d', checks=[
+            self.check('[0].name', '{vm}'),
+            self.check('[0].location', '{loc}'),
+            self.check('[0].resourceGroup', '{rg}'),
+            self.check('[0].powerState', 'VM running')
+        ]).get_output_in_json()
+        self.assertEqual(4, len(result[0]['publicIps'].split('.')))
 
-#         self.cmd('vm list-vm-resize-options --resource-group {rg} --name {vm}',
-#                  checks=self.check('type(@)', 'array'))
+        self.cmd('vm list-vm-resize-options --resource-group {rg} --name {vm}',
+                 checks=self.check('type(@)', 'array'))
 
-#         # Expecting the one we just added
-#         self.kwargs['rg_caps'] = resource_group.upper()  # test the command handles name with casing diff.
-#         self.cmd('vm list-ip-addresses --resource-group {rg_caps}', checks=[
-#             self.check('length(@)', 1),
-#             self.check('[0].virtualMachine.name', '{vm}'),
-#             self.check('[0].virtualMachine.resourceGroup', '{rg}'),
-#             self.check('length([0].virtualMachine.network.publicIpAddresses)', 1),
-#             self.check('[0].virtualMachine.network.publicIpAddresses[0].ipAllocationMethod', self.kwargs['allocation'].title()),
-#             self.check('type([0].virtualMachine.network.publicIpAddresses[0].ipAddress)', 'string'),
-#             self.check('[0].virtualMachine.network.publicIpAddresses[0].zone', '{zone}'),
-#             self.check('type([0].virtualMachine.network.publicIpAddresses[0].name)', 'string'),
-#             self.check('[0].virtualMachine.network.publicIpAddresses[0].resourceGroup', '{rg}')
-#         ])
+        # Expecting the one we just added
+        self.kwargs['rg_caps'] = resource_group.upper()  # test the command handles name with casing diff.
+        self.cmd('vm list-ip-addresses --resource-group {rg_caps}', checks=[
+            self.check('length(@)', 1),
+            self.check('[0].virtualMachine.name', '{vm}'),
+            self.check('[0].virtualMachine.resourceGroup', '{rg}'),
+            self.check('length([0].virtualMachine.network.publicIpAddresses)', 1),
+            self.check('[0].virtualMachine.network.publicIpAddresses[0].ipAllocationMethod', self.kwargs['allocation'].title()),
+            self.check('type([0].virtualMachine.network.publicIpAddresses[0].ipAddress)', 'string'),
+            self.check('[0].virtualMachine.network.publicIpAddresses[0].zone', '{zone}'),
+            self.check('type([0].virtualMachine.network.publicIpAddresses[0].name)', 'string'),
+            self.check('[0].virtualMachine.network.publicIpAddresses[0].resourceGroup', '{rg}')
+        ])
 
 
 class VMSizeListScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     def test_vm_size_list(self):
         self.cmd('vm list-sizes --location westus',
                  checks=self.check('type(@)', 'array'))
@@ -233,6 +235,15 @@ class VMGeneralizeScenarioTest(ScenarioTest):
             self.check('sourceVirtualMachine.id', vm['id']),
             self.check('storageProfile.zoneResilient', None)
         ])
+        self.cmd('image show -g {rg} -n {image}', checks=[
+            self.check('name', '{image}'),
+            self.check('sourceVirtualMachine.id', vm['id']),
+            self.check('storageProfile.zoneResilient', None)
+        ])
+        self.cmd('image list -g {rg}', checks=[
+            self.check('length(@)', '1')
+        ])
+        self.cmd('image delete -g {rg} -n {image}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_generalize_vm')
     def test_vm_capture_zone_resilient_image(self, resource_group):
@@ -382,6 +393,30 @@ class VMCustomImageTest(ScenarioTest):
             self.check("sourceVirtualMachine", None),
             self.check("storageProfile.osDisk.managedDisk.id", '{os_disk_id}')
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_image_mgmt_')
+    def test_vm_custom_image_management(self, resource_group):
+        self.kwargs.update({
+            'vm1':'vm1',
+            'vm2':'vm2',
+            'image1':'myImage1',
+            'image2':'myImage2'
+        })
+
+        vm1 = self.cmd('vm create -g {rg} -n {vm1} --admin-username theuser --image OpenLogic:CentOS:7.5:latest --admin-password testPassword0 --authentication-type password --nsg-rule NONE').get_output_in_json()
+        self.cmd('vm deallocate -g {rg} -n {vm1}')
+        self.cmd('vm generalize -g {rg} -n {vm1}')
+
+        self.cmd('image create -g {rg} -n {image1} --source {vm1}')
+
+        self.cmd('image list -g {rg}', checks=self.check('length(@)', 1))
+        self.cmd('image show -g {rg} -n {image1}',
+                 checks=[
+                     self.check('name', '{image1}'),
+                 ])
+        self.cmd('image update -n {image1} -g {rg} --tags foo=bar', checks=self.check('tags.foo', 'bar'))
+        self.cmd('image delete -n {image1} -g {rg}')
+        self.cmd('image list -g {rg}', checks=self.check('length(@)', 0))
 
 
 class VMImageWithPlanTest(ScenarioTest):
@@ -940,6 +975,8 @@ class VMSSCreateAndModify(ScenarioTest):
             self.check('name', '{vmss}'),
             self.check('resourceGroup', '{rg}')
         ])
+
+        self.cmd('vmss get-os-upgrade-history --resource-group {rg} --name {vmss}', checks=self.is_empty())
         result = self.cmd('vmss list-instances --resource-group {rg} --name {vmss} --query "[].instanceId"').get_output_in_json()
         self.kwargs['instance_ids'] = result[3] + ' ' + result[4]
         self.cmd('vmss update-instances --resource-group {rg} --name {vmss} --instance-ids {instance_ids}')
@@ -1015,6 +1052,9 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].lun', 0),
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].diskSizeGb', 1)
         ])
+        result = self.cmd('vmss list -g {rg} -otable')
+        table_output = set(result.output.splitlines()[2].split())
+        self.assertTrue({self.kwargs['vmss']}.issubset(table_output))
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_options')
     def test_vmss_update_instance_disks(self, resource_group):
@@ -2051,9 +2091,6 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
             'loc': resource_group_location
         })
 
-        # fails because not a valid type
-        self.cmd('ppg create -n fail_ppg -g {rg} -t notAvalidType', expect_failure=True)
-
         self.cmd('ppg create -n {ppg1} -t StandarD -g {rg}', checks=[
             self.check('name', '{ppg1}'),
             self.check('location', '{loc}'),
@@ -2193,6 +2230,9 @@ class VMGalleryImage(ScenarioTest):
         self.kwargs.update({
             'gallery': self.create_random_name('sig_', 10),
             'image': 'image1',
+            'disk': 'disk',
+            'snapshot': 'snapshot',
+            'version': '1.0.0',
         })
 
         self.cmd('sig create -g {rg} -r {gallery}', checks=[
@@ -2208,6 +2248,24 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-definition list -g {rg} --gallery-name {gallery}', checks=self.check('length(@)', 1))
         res = self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image}',
                        checks=self.check('name', self.kwargs['image'])).get_output_in_json()
+
+        self.cmd('snapshot create -g {rg} -n {snapshot} --size-gb 1 --sku Premium_LRS --tags tag1=s1')
+        self.cmd('sig image-version create --resource-group {rg} --gallery-name {gallery} '
+                 '--gallery-image-definition {image} --gallery-image-version {version} --os-snapshot {snapshot}',
+                 checks=[
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('sig image-version show -g {rg} -r {gallery} -i {image} -e {version}', checks=[
+            self.check('name', '{version}')
+        ])
+
+        self.cmd('sig image-version list -g {rg} -r {gallery} -i {image}', checks=[
+            self.check('length(@)', 1),
+            self.check('[0].name', '{version}')
+        ])
+        self.cmd('sig image-version delete -g {rg} -r {gallery} -i {image} -e {version}')
+        time.sleep(60)
 
         self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
         time.sleep(60)  # service end latency
@@ -2254,6 +2312,214 @@ class DiskAccessTest(ScenarioTest):
         self.cmd('disk-access list -g {rg}', checks=[
             self.check('length(@)', 0)
         ])
+
+
+class VMRedeployTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='test_vm_redeploy_')
+    def test_vm_redeploy(self, resource_group):
+        self.kwargs.update({
+            'vm':'myvm'
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password --nsg-rule NONE')
+        self.cmd('vm reapply -n {vm} -g {rg}')
+        self.cmd('vm redeploy -n {vm} -g {rg}')
+
+
+class VMConvertTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='test_vm_convert_')
+    def test_vm_convert(self, resource_group):
+        self.kwargs.update({
+            'vm': 'myvm'
+        })
+
+        self.cmd(
+            'vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password --nsg-rule NONE')
+        self.cmd('vm unmanaged-disk attach -g {rg} --vm-name {vm} --new --size-gb 1')
+
+        output = self.cmd('vm unmanaged-disk list --vm-name {vm} -g {rg}').get_output_in_json()
+        self.assertFalse(output[0]['managedDisk'])
+        self.assertTrue(output[0]['vhd'])
+
+        self.cmd('vm deallocate -n {vm} -g {rg}')
+        self.cmd('vm convert -n {vm} -g {rg}')
+
+        converted = self.cmd('vm unmanaged-disk list --vm-name {vm} -g {rg}').get_output_in_json()
+        self.assertTrue(converted[0]['managedDisk'])
+        self.assertFalse(converted[0]['vhd'])
+
+
+class VMSimulateEvictionScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_simulate_eviction')
+    def test_vm_simulate_eviction(self, resource_group):
+
+        self.kwargs.update({
+            'loc': 'eastus',
+            'vm1': 'vm-simualte-eviction1',
+            'vm2': 'vm-simulate-eviction2',
+            'vm3': 'vm-simulate-eviction3'
+        })
+
+        # simulate-eviction on a Regular VM, expect failure
+        self.cmd('vm create --resource-group {rg} --name {vm1} --admin-username azureuser --admin-password testPassword0 --authentication-type password --location {loc} --image OpenLogic:CentOS:7.5:latest --priority Regular --nsg-rule NONE')
+        self.cmd('vm simulate-eviction --resource-group {rg} --name {vm1}', expect_failure=True)
+
+        # simulate-eviction on a Spot VM with Deallocate policy, expect VM to be deallocated
+        self.cmd('vm create --resource-group {rg} --name {vm2} --admin-username azureuser --admin-password testPassword0 --authentication-type password --location {loc} --image OpenLogic:CentOS:7.5:latest --priority Spot --eviction-policy Deallocate --nsg-rule NONE')
+        self.cmd('vm simulate-eviction --resource-group {rg} --name {vm2}')
+        time.sleep(180)
+        self.cmd('vm get-instance-view --resource-group {rg} --name {vm2}', checks=[
+            self.check('name', '{vm2}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('length(instanceView.statuses)', 2),
+            self.check('instanceView.statuses[0].code', 'ProvisioningState/succeeded'),
+            self.check('instanceView.statuses[1].code', 'PowerState/deallocated'),
+        ])
+
+        # simulate-eviction on a Spot VM with Delete policy, expect VM to be deleted
+        self.cmd('vm create --resource-group {rg} --name {vm3} --admin-username azureuser --admin-password testPassword0 --authentication-type password --location {loc} --image OpenLogic:CentOS:7.5:latest --priority Spot --eviction-policy Delete --nsg-rule NONE')
+        self.cmd('vm simulate-eviction --resource-group {rg} --name {vm3}')
+        time.sleep(180)
+        self.cmd('vm list --resource-group {rg}', checks=[self.check('length(@)', 2)])
+        self.cmd('vm show --resource-group {rg} --name {vm3}', expect_failure=True)
+
+
+class VMRestartTest(ScenarioTest):
+    def _check_vm_power_state(self, expected_power_state):
+
+        self.cmd('vm get-instance-view --resource-group {rg} --name {vm}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{vm}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('length(instanceView.statuses)', 2),
+            self.check('instanceView.statuses[0].code', 'ProvisioningState/succeeded'),
+            self.check('instanceView.statuses[1].code', expected_power_state),
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_stop_start')
+    def test_vm_stop_start(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm'
+        })
+        self.cmd(
+            'vm create --resource-group {rg} --name {vm} --admin-username azureuser --admin-password testPassword0 --authentication-type password --image OpenLogic:CentOS:7.5:latest --priority Regular --nsg-rule NONE')
+
+        self.cmd('vm stop --resource-group {rg} --name {vm}')
+        self._check_vm_power_state('PowerState/stopped')
+        self.cmd('vm start --resource-group {rg} --name {vm}')
+        self._check_vm_power_state('PowerState/running')
+
+
+class VMAutoUpdateScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_linux_vm_patch_mode_')
+    def test_linux_vm_patch_mode(self, resource_group):
+        self.cmd('vm create -g {rg} -n vm1 --image Canonical:UbuntuServer:18.04-LTS:latest --enable-agent --generate-ssh-keys --nsg-rule NONE --admin-username vmtest')
+
+        self.cmd('vm assess-patches -g {rg} -n vm1', checks=[
+            self.check('status', 'Succeeded')
+        ])
+
+
+class VMSSSimulateEvictionScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_simulate_eviction')
+    def test_vmss_simulate_eviction(self, resource_group):
+
+        self.kwargs.update({
+            'loc': 'eastus',
+            'vmss1': 'vmss-simualte-eviction1',
+            'vmss2': 'vmss-simulate-eviction2',
+            'vmss3': 'vmss-simulate-eviction3',
+            'instance_ids': []
+        })
+
+        # simulate-eviction on a Regular VMSS, expect failure
+        self.cmd('vmss create --resource-group {rg} --name {vmss1} --location {loc} --instance-count 2 --image OpenLogic:CentOS:7.5:latest --priority Regular --admin-username vmtest')
+        instance_list = self.cmd('vmss list-instances --resource-group {rg} --name {vmss1}').get_output_in_json()
+        self.kwargs['instance_ids'] = [x['instanceId'] for x in instance_list]
+        self.kwargs['id'] = self.kwargs['instance_ids'][0]
+        self.cmd('vmss simulate-eviction --resource-group {rg} --name {vmss1} --instance-id {id}', expect_failure=True)
+
+        # simulate-eviction on a Spot VMSS with Deallocate policy, expect VMSS instance to be deallocated
+        self.cmd('vmss create --resource-group {rg} --name {vmss2} --location {loc} --instance-count 2 --image OpenLogic:CentOS:7.5:latest --priority Spot --eviction-policy Deallocate --single-placement-group True --admin-username vmtest')
+        instance_list = self.cmd('vmss list-instances --resource-group {rg} --name {vmss2}').get_output_in_json()
+        self.kwargs['instance_ids'] = [x['instanceId'] for x in instance_list]
+        self.kwargs['id'] = self.kwargs['instance_ids'][0]
+        self.cmd('vmss simulate-eviction --resource-group {rg} --name {vmss2} --instance-id {id}')
+
+        # simulate-eviction on a Spot VMSS with Delete policy, expect VMSS instance to be deleted
+        self.cmd('vmss create --resource-group {rg} --name {vmss3} --location {loc} --instance-count 2 --image OpenLogic:CentOS:7.5:latest --priority Spot --eviction-policy Delete --single-placement-group True --admin-username vmtest')
+        instance_list = self.cmd('vmss list-instances --resource-group {rg} --name {vmss3}').get_output_in_json()
+        self.kwargs['instance_ids'] = [x['instanceId'] for x in instance_list]
+        self.kwargs['id'] = self.kwargs['instance_ids'][0]
+        self.cmd('vmss simulate-eviction --resource-group {rg} --name {vmss3} --instance-id {id}')
+        time.sleep(180)
+        self.cmd('vmss list-instances --resource-group {rg} --name {vmss3}', checks=[self.check('length(@)', len(self.kwargs['instance_ids']) - 1)])
+        self.cmd('vmss get-instance-view --resource-group {rg} --name {vmss3} --instance-id {id}', expect_failure=True)
+# endregion
+
+
+class VMAvailSetScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer()
+    def test_vm_availset(self, resource_group):
+
+        self.kwargs.update({
+            'availset': 'availset-test'
+        })
+        self.cmd('vm availability-set create -g {rg} -n {availset}', checks=[
+            self.check('name', '{availset}'),
+            self.check('platformFaultDomainCount', 2),
+            self.check('platformUpdateDomainCount', 5),  # server defaults to 5
+            self.check('sku.name', 'Aligned')
+        ])
+
+        # create with explict UD count
+        self.cmd('vm availability-set create -g {rg} -n avset2 --platform-fault-domain-count 2 --platform-update-domain-count 2', checks=[
+            self.check('platformFaultDomainCount', 2),
+            self.check('platformUpdateDomainCount', 2),
+            self.check('sku.name', 'Aligned')
+        ])
+        self.cmd('vm availability-set delete -g {rg} -n avset2')
+
+        self.cmd('vm availability-set update -g {rg} -n {availset} --set tags.test=success',
+                 checks=self.check('tags.test', 'success'))
+        self.cmd('vm availability-set list -g {rg}', checks=[
+            self.check('length(@)', 1),
+            self.check('[0].name', '{availset}')
+        ])
+        result = self.cmd('vm availability-set list --query "[?name==\'availset-test\']"').get_output_in_json()
+        self.assertEqual(1, len(result))
+        self.cmd('vm availability-set list-sizes -g {rg} -n {availset}',
+                 checks=self.check('type(@)', 'array'))
+        self.cmd('vm availability-set show -g {rg} -n {availset}',
+                 checks=[self.check('name', '{availset}')])
+        self.cmd('vm availability-set delete -g {rg} -n {availset}')
+        self.cmd('vm availability-set list -g {rg}',
+                 checks=self.check('length(@)', 0))
+# endregion
+
+
+class TestSnapShotAccess(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='test_snapshot_access_')
+    def test_snapshot_access(self, resource_group):
+        self.kwargs.update({
+            'snapshot': 'snapshot'
+        })
+
+        self.cmd('snapshot create -n {snapshot} -g {rg} --size-gb 1')
+        self.cmd('snapshot grant-access --duration-in-seconds 600 -n {snapshot} -g {rg}')
+        self.cmd('snapshot show -n {snapshot} -g {rg}')
+        self.cmd('snapshot list -g {rg}',
+                 checks=[
+                     self.check('length(@)', '1'),
+                 ])
+        self.cmd('snapshot revoke-access -n {snapshot} -g {rg}')
+        self.cmd('snapshot delete -n {snapshot} -g {rg}')
 # endregion
 
 # endregion

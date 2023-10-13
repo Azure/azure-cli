@@ -34,12 +34,14 @@ from ._resource_config import (
     SOURCE_RESOURCES,
     TARGET_RESOURCES,
     SOURCE_RESOURCES_PARAMS,
+    SOURCE_RESOURCES_OPTIONAL_PARAMS,
     SOURCE_RESOURCES_CREATE_PARAMS,
     TARGET_RESOURCES_PARAMS,
     AUTH_TYPE_PARAMS,
     SUPPORTED_AUTH_TYPE,
     LOCAL_CONNECTION_RESOURCE,
-    LOCAL_CONNECTION_PARAMS
+    LOCAL_CONNECTION_PARAMS,
+    WEB_APP_SLOT_RESOURCE
 )
 
 
@@ -341,7 +343,7 @@ def intelligent_experience(cmd, namespace, missing_args):
     return cmd_arg_values
 
 
-def validate_source_resource_id(namespace):
+def validate_source_resource_id(cmd, namespace):
     '''Validate resource id of a source resource
     '''
     if getattr(namespace, 'source_id', None):
@@ -349,17 +351,29 @@ def validate_source_resource_id(namespace):
             e = InvalidArgumentValueError('Resource id is invalid: {}'.format(namespace.source_id))
             telemetry.set_exception(e, 'source-id-invalid')
             raise e
-        matched = False
-        for resource in SOURCE_RESOURCES.values():
-            matched = re.match(get_resource_regex(resource), namespace.source_id)
+
+        source = get_source_resource_name(cmd)
+
+        # For Web App, match slot pattern first:
+        if source == RESOURCE.WebApp:
+            slotPattern = WEB_APP_SLOT_RESOURCE
+            matched = re.match(get_resource_regex(slotPattern), namespace.source_id, re.IGNORECASE)
             if matched:
                 namespace.source_id = matched.group()
                 return True
-        if not matched:
-            e = InvalidArgumentValueError('Unsupported source resource id: {}'.format(namespace.source_id))
-            telemetry.set_exception(e, 'source-id-unsupported')
-            raise e
 
+        # For other source and Web App which cannot match slot pattern
+        pattern = SOURCE_RESOURCES.get(source)
+        matched = re.match(get_resource_regex(pattern),
+                           namespace.source_id, re.IGNORECASE)
+        if matched:
+            namespace.source_id = matched.group()
+            return True
+        e = InvalidArgumentValueError(
+            'Unsupported source resource id: {}. '
+            'Source id pattern should be: {}'.format(namespace.source_id, pattern))
+        telemetry.set_exception(e, 'source-id-unsupported')
+        raise e
     return False
 
 
@@ -368,7 +382,7 @@ def validate_connection_id(namespace):
     '''
     if getattr(namespace, 'indentifier', None):
         matched = False
-        for resource in SOURCE_RESOURCES.values():
+        for resource in list(SOURCE_RESOURCES.values()) + [WEB_APP_SLOT_RESOURCE]:
             regex = '({})/providers/Microsoft.ServiceLinker/linkers/([^/]*)'.format(get_resource_regex(resource))
             matched = re.match(regex, namespace.indentifier, re.IGNORECASE)
             if matched:
@@ -383,7 +397,7 @@ def validate_connection_id(namespace):
     return False
 
 
-def validate_target_resource_id(namespace):
+def validate_target_resource_id(cmd, namespace):
     '''Validate resource id of a target resource
     '''
     if getattr(namespace, 'target_id', None):
@@ -391,21 +405,22 @@ def validate_target_resource_id(namespace):
             e = InvalidArgumentValueError('Resource id is invalid: {}'.format(namespace.target_id))
             telemetry.set_exception(e, 'target-id-invalid')
             raise e
-        matched = False
-        for resource in TARGET_RESOURCES.values():
-            matched = re.match(get_resource_regex(resource), namespace.target_id, re.IGNORECASE)
-            if matched:
-                namespace.target_id = matched.group()
-                return True
-        if not matched:
-            e = InvalidArgumentValueError('Unsupported target resource id is invalid: {}'.format(namespace.target_id))
-            telemetry.set_exception(e, 'target-id-unsupported')
-            raise e
+
+        target = get_target_resource_name(cmd)
+        pattern = TARGET_RESOURCES.get(target)
+        matched = re.match(get_resource_regex(pattern), namespace.target_id, re.IGNORECASE)
+        if matched:
+            namespace.target_id = matched.group()
+            return True
+        e = InvalidArgumentValueError('Target resource id is invalid: {}. '
+                                      'Target id pattern should be: {}'.format(namespace.target_id, pattern))
+        telemetry.set_exception(e, 'target-id-unsupported')
+        raise e
 
     return False
 
 
-def get_missing_source_args(cmd):
+def get_missing_source_args(cmd, namespace):
     '''Get source resource related args
     '''
     source = get_source_resource_name(cmd)
@@ -414,6 +429,12 @@ def get_missing_source_args(cmd):
     for arg, content in SOURCE_RESOURCES_PARAMS.get(source, {}).items():
         missing_args[arg] = content
 
+    # For WebApp, slot may needed
+    args = SOURCE_RESOURCES_OPTIONAL_PARAMS.get(source)
+    if args:
+        for arg, content in args.items():
+            if getattr(namespace, arg, None):
+                missing_args[arg] = content
     return missing_args
 
 
@@ -549,8 +570,8 @@ def validate_list_params(cmd, namespace):
     '''Get missing args of list command
     '''
     missing_args = dict()
-    if not validate_source_resource_id(namespace):
-        missing_args.update(get_missing_source_args(cmd))
+    if not validate_source_resource_id(cmd, namespace):
+        missing_args.update(get_missing_source_args(cmd, namespace))
     return missing_args
 
 
@@ -558,10 +579,10 @@ def validate_create_params(cmd, namespace):
     '''Get missing args of create command
     '''
     missing_args = dict()
-    if not validate_source_resource_id(namespace):
-        missing_args.update(get_missing_source_args(cmd))
+    if not validate_source_resource_id(cmd, namespace):
+        missing_args.update(get_missing_source_args(cmd, namespace))
     missing_args.update(get_missing_source_create_args(cmd, namespace))
-    if not validate_target_resource_id(namespace):
+    if not validate_target_resource_id(cmd, namespace):
         missing_args.update(get_missing_target_args(cmd))
     missing_args.update(get_missing_auth_args(cmd, namespace))
     return missing_args
@@ -572,7 +593,7 @@ def validate_local_create_params(cmd, namespace):
     '''
     missing_args = dict()
 
-    if not validate_target_resource_id(namespace):
+    if not validate_target_resource_id(cmd, namespace):
         missing_args.update(get_missing_target_args(cmd))
     missing_args.update(get_missing_auth_args(cmd, namespace))
     return missing_args
@@ -582,8 +603,8 @@ def validate_addon_params(cmd, namespace):
     '''Get missing args of add command with '--new'
     '''
     missing_args = dict()
-    if not validate_source_resource_id(namespace):
-        missing_args.update(get_missing_source_args(cmd))
+    if not validate_source_resource_id(cmd, namespace):
+        missing_args.update(get_missing_source_args(cmd, namespace))
     return missing_args
 
 
@@ -592,7 +613,7 @@ def validate_update_params(cmd, namespace):
     '''
     missing_args = dict()
     if not validate_connection_id(namespace):
-        missing_args.update(get_missing_source_args(cmd))
+        missing_args.update(get_missing_source_args(cmd, namespace))
     missing_args.update(get_missing_auth_args(cmd, namespace))
     missing_args.update(get_missing_connection_name(namespace))
     return missing_args
@@ -611,7 +632,7 @@ def validate_default_params(cmd, namespace):
     '''
     missing_args = dict()
     if not validate_connection_id(namespace):
-        missing_args.update(get_missing_source_args(cmd))
+        missing_args.update(get_missing_source_args(cmd, namespace))
     missing_args.update(get_missing_connection_name(namespace))
     return missing_args
 
@@ -635,6 +656,21 @@ def apply_source_args(cmd, namespace, arg_values):
             subscription=get_subscription_id(cmd.cli_ctx),
             **arg_values
         )
+    apply_source_optional_args(cmd, namespace, arg_values)
+
+
+def apply_source_optional_args(cmd, namespace, arg_values):
+    '''Set source resource id by optional arg_values
+    '''
+    source = get_source_resource_name(cmd)
+    if source == RESOURCE.WebApp:
+        if arg_values.get('slot', None):
+            resource = WEB_APP_SLOT_RESOURCE
+            if check_required_args(resource, arg_values):
+                namespace.source_id = resource.format(
+                    subscription=get_subscription_id(cmd.cli_ctx),
+                    **arg_values
+                )
 
 
 def apply_source_create_args(cmd, namespace, arg_values):

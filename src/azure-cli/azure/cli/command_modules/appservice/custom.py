@@ -35,9 +35,7 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_
 
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
-from azure.mgmt.relay.models import AccessRights
 from azure.mgmt.web.models import KeyInfo
-from azure.cli.command_modules.relay._client_factory import hycos_mgmt_client_factory, namespaces_mgmt_client_factory
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
@@ -84,6 +82,10 @@ from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
 
 from .aaz.latest.network.vnet import List as VNetList, Show as VNetShow
 from .aaz.latest.network.vnet.subnet import Show as SubnetShow, Update as SubnetUpdate
+from .aaz.latest.relay.hyco import Show as HyCoShow
+from .aaz.latest.relay.hyco.authorization_rule import List as HycoAuthoList, Create as HycoAuthoCreate
+from .aaz.latest.relay.hyco.authorization_rule.keys import List as HycoAuthoKeysList
+from .aaz.latest.relay.namespace import List as NamespaceList
 
 logger = get_logger(__name__)
 
@@ -1338,7 +1340,7 @@ def get_connection_strings(cmd, resource_group_name, name, slot=None):
                               .connection_string_names or []
     result = [{'name': p,
                'value': result.properties[p].value,
-               'type':result.properties[p].type,
+               'type': result.properties[p].type,
                'slotSetting': p in slot_constr_names} for p in result.properties]
     return result
 
@@ -1602,34 +1604,67 @@ def _build_app_settings_output(app_settings, slot_cfg_names):
              'slotSetting': p in slot_cfg_names} for p in _mask_creds_related_appsettings(app_settings)]
 
 
-def update_connection_strings(cmd, resource_group_name, name, connection_string_type,
+def _build_app_settings_input(settings, connection_string_type):
+    if not settings:
+        return []
+    try:
+        # check if its a json file
+        settings_str = ''.join([i.rstrip() for i in settings])
+        json_obj = json.loads(settings_str)
+        json_obj = json_obj if isinstance(json_obj, list) else [json_obj]
+        for i in json_obj:
+            keys = i.keys()
+            if 'value' not in keys or 'name' not in keys or 'type' not in keys:
+                raise KeyError
+        return json_obj
+    except KeyError:
+        raise ArgumentUsageError("In json settings, 'value', 'name' and 'type' is required; 'slotSetting' is optional")
+    except json.decoder.JSONDecodeError:
+        # this may not be a json file
+        if not connection_string_type:
+            raise ArgumentUsageError('either --connection-string-type is required if not using json, or bad json file')
+        results = []
+        for name_value in settings:
+            conn_string_name, value = name_value.split('=', 1)
+            if value[0] in ["'", '"']:  # strip away the quots used as separators
+                value = value[1:-1]
+            results.append({'name': conn_string_name, 'value': value, 'type': connection_string_type})
+        return results
+
+
+def update_connection_strings(cmd, resource_group_name, name, connection_string_type=None,
                               settings=None, slot=None, slot_settings=None):
     from azure.mgmt.web.models import ConnStringValueTypePair
     if not settings and not slot_settings:
         raise ArgumentUsageError('Usage Error: --settings |--slot-settings')
-
-    settings = settings or []
-    slot_settings = slot_settings or []
+    settings = _build_app_settings_input(settings, connection_string_type)
+    sticky_slot_settings = _build_app_settings_input(slot_settings, connection_string_type)
+    rm_sticky_slot_settings = set()
 
     conn_strings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                            'list_connection_strings', slot)
-    for name_value in settings + slot_settings:
+
+    for name_value_type in settings + sticky_slot_settings:
         # split at the first '=', connection string should not have '=' in the name
-        conn_string_name, value = name_value.split('=', 1)
-        if value[0] in ["'", '"']:  # strip away the quots used as separators
-            value = value[1:-1]
-        conn_strings.properties[conn_string_name] = ConnStringValueTypePair(value=value,
-                                                                            type=connection_string_type)
+        conn_strings.properties[name_value_type['name']] = ConnStringValueTypePair(value=name_value_type['value'],
+                                                                                   type=name_value_type['type'])
+        if 'slotSetting' in name_value_type:
+            if name_value_type['slotSetting']:
+                sticky_slot_settings.append(name_value_type)
+            else:
+                rm_sticky_slot_settings.add(name_value_type['name'])
+
     client = web_client_factory(cmd.cli_ctx)
     result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
                                          'update_connection_strings',
                                          conn_strings, slot, client)
 
-    if slot_settings:
-        new_slot_setting_names = [n.split('=', 1)[0] for n in slot_settings]
+    if sticky_slot_settings or rm_sticky_slot_settings:
+        new_slot_setting_names = set(n['name'] for n in sticky_slot_settings)  # add setting name
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
-        slot_cfg_names.connection_string_names = slot_cfg_names.connection_string_names or []
-        slot_cfg_names.connection_string_names += new_slot_setting_names
+        slot_cfg_names.connection_string_names = set(slot_cfg_names.connection_string_names or [])
+        slot_cfg_names.connection_string_names.update(new_slot_setting_names)
+        slot_cfg_names.connection_string_names -= rm_sticky_slot_settings
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
     return result.properties
@@ -3060,14 +3095,20 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
     webapp_certs = client.certificates.list_by_resource_group(cert_resource_group_name)
 
     found_cert = None
+    # search for a cert that matches in the app service plan's RG
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
             found_cert = webapp_cert
+    # search for a cert that matches in the webapp's RG
     if not found_cert:
         webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
         for webapp_cert in webapp_certs:
             if webapp_cert.thumbprint == certificate_thumbprint:
                 found_cert = webapp_cert
+    # search for a cert that matches in the subscription, filtering on the serverfarm
+    if not found_cert:
+        sub_certs = client.certificates.list(filter=f"ServerFarmId eq '{webapp.server_farm_id}'")
+        found_cert = next(iter([c for c in sub_certs if c.thumbprint == certificate_thumbprint]), None)
     if found_cert:
         if not hostname:
             if len(found_cert.host_names) == 1 and not found_cert.host_names[0].startswith('*'):
@@ -3641,6 +3682,12 @@ def is_plan_elastic_premium(cmd, plan_info):
     return False
 
 
+def should_enable_distributed_tracing(consumption_plan_location, matched_runtime, image):
+    return consumption_plan_location is None \
+        and matched_runtime.name.lower() == "java" \
+        and image is None
+
+
 def create_functionapp(cmd, resource_group_name, name, storage_account, plan=None,
                        os_type=None, functions_version=None, runtime=None, runtime_version=None,
                        consumption_plan_location=None, app_insights=None, app_insights_key=None,
@@ -3921,6 +3968,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if create_app_insights:
         try:
             try_create_application_insights(cmd, functionapp)
+            if should_enable_distributed_tracing(consumption_plan_location, matched_runtime, image):
+                update_app_settings(cmd, functionapp.resource_group, functionapp.name,
+                                    ["APPLICATIONINSIGHTS_ENABLE_AGENT=true"])
+
         except Exception:  # pylint: disable=broad-except
             logger.warning('Error while trying to create and configure an Application Insights for the Function App. '
                            'Please use the Azure Portal to create and configure the Application Insights, if needed.')
@@ -4075,11 +4126,13 @@ def list_consumption_locations(cmd):
     return [{'name': x.name.lower().replace(' ', '')} for x in regions]
 
 
-def list_locations(cmd, sku, linux_workers_enabled=None):
+def list_locations(cmd, sku, linux_workers_enabled=None, hyperv_workers_enabled=None):
     web_client = web_client_factory(cmd.cli_ctx)
     full_sku = get_sku_tier(sku)
     # Temporary fix due to regression in this specific API with 2021-03-01, should be removed with the next SDK update
-    web_client_geo_regions = web_client.list_geo_regions(sku=full_sku, linux_workers_enabled=linux_workers_enabled)
+    web_client_geo_regions = web_client.list_geo_regions(sku=full_sku,
+                                                         linux_workers_enabled=linux_workers_enabled,
+                                                         xenon_workers_enabled=hyperv_workers_enabled)
 
     providers_client = providers_client_factory(cmd.cli_ctx)
     providers_client_locations_list = getattr(providers_client.get('Microsoft.Web'), 'resource_types', [])
@@ -4210,14 +4263,12 @@ def add_hc(cmd, name, resource_group_name, namespace, hybrid_connection, slot=No
     HybridConnection = cmd.get_models('HybridConnection')
 
     web_client = web_client_factory(cmd.cli_ctx)
-    hy_co_client = hycos_mgmt_client_factory(cmd.cli_ctx, cmd.cli_ctx)
-    namespace_client = namespaces_mgmt_client_factory(cmd.cli_ctx, cmd.cli_ctx)
 
     hy_co_id = ''
-    for n in namespace_client.list():
-        logger.warning(n.name)
-        if n.name == namespace:
-            hy_co_id = n.id
+    for n in NamespaceList(cli_ctx=cmd.cli_ctx)(command_args={}):
+        logger.warning(n['name'])
+        if n['name'] == namespace:
+            hy_co_id = n['id']
 
     if hy_co_id == '':
         raise ResourceNotFoundError('Azure Service Bus Relay namespace {} was not found.'.format(namespace))
@@ -4231,26 +4282,33 @@ def add_hc(cmd, name, resource_group_name, namespace, hybrid_connection, slot=No
         i = i + 1
 
     # calling the relay API to get information about the hybrid connection
-    hy_co = hy_co_client.get(hy_co_resource_group, namespace, hybrid_connection)
+    hy_co = HyCoShow(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": hy_co_resource_group,
+                                                        "namespace_name": namespace,
+                                                        "name": hybrid_connection})
 
     # if the hybrid connection does not have a default sender authorization
     # rule, create it
-    hy_co_rules = hy_co_client.list_authorization_rules(hy_co_resource_group, namespace, hybrid_connection)
+    hy_co_rules = HycoAuthoList(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": hy_co_resource_group,
+                                                                   "namespace_name": namespace,
+                                                                   "hybrid_connection_name": hybrid_connection})
     has_default_sender_key = False
     for r in hy_co_rules:
-        if r.name.lower() == "defaultsender":
-            for z in r.rights:
-                if z == z.send:
+        if r['name'].lower() == "defaultsender":
+            for z in r['rights']:
+                if z[0].lower() == 'send' and len(z) == 1:
                     has_default_sender_key = True
 
     if not has_default_sender_key:
-        rights = [AccessRights.send]
-        hy_co_client.create_or_update_authorization_rule(hy_co_resource_group, namespace, hybrid_connection,
-                                                         "defaultSender", rights)
-
-    hy_co_keys = hy_co_client.list_keys(hy_co_resource_group, namespace, hybrid_connection, "defaultSender")
-    hy_co_info = hy_co.id
-    hy_co_metadata = ast.literal_eval(hy_co.user_metadata)
+        rights = ["Send"]
+        args = {"resource_group": hy_co_resource_group, "namespace_name": namespace,
+                "hybrid_connection_name": hybrid_connection, "name": "defaultSender", "rights": rights}
+        HycoAuthoCreate(cli_ctx=cmd.cli_ctx)(command_args=args)
+    hy_co_keys = HycoAuthoKeysList(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": hy_co_resource_group,
+                                                                      "namespace_name": namespace,
+                                                                      "hybrid_connection_name": hybrid_connection,
+                                                                      "name": "defaultSender"})
+    hy_co_info = hy_co['id']
+    hy_co_metadata = ast.literal_eval(hy_co['userMetadata'])
     hy_co_hostname = ''
     for x in hy_co_metadata:
         if x["key"] == "endpoint":
@@ -4270,7 +4328,7 @@ def add_hc(cmd, name, resource_group_name, namespace, hybrid_connection, slot=No
                           hostname=hostname,
                           port=port,
                           send_key_name="defaultSender",
-                          send_key_value=hy_co_keys.primary_key,
+                          send_key_value=hy_co_keys['primaryKey'],
                           service_bus_suffix=".servicebus.windows.net")
 
     if slot is None:
@@ -4309,26 +4367,34 @@ def set_hc_key(cmd, plan, resource_group_name, namespace, hybrid_connection, key
     resource_group_strings = split_uri[1].split('/')
     relay_resource_group = resource_group_strings[0]
 
-    hy_co_client = hycos_mgmt_client_factory(cmd.cli_ctx, cmd.cli_ctx)
     # calling the relay function to obtain information about the hc in question
-    hy_co = hy_co_client.get(relay_resource_group, namespace, hybrid_connection)
+    hy_co = HyCoShow(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": relay_resource_group,
+                                                        "namespace_name": namespace,
+                                                        "name": hybrid_connection})
 
     # if the hybrid connection does not have a default sender authorization
     # rule, create it
-    hy_co_rules = hy_co_client.list_authorization_rules(relay_resource_group, namespace, hybrid_connection)
+    hy_co_rules = HycoAuthoList(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": relay_resource_group,
+                                                                   "namespace_name": namespace,
+                                                                   "hybrid_connection_name": hybrid_connection})
+
     has_default_sender_key = False
     for r in hy_co_rules:
-        if r.name.lower() == "defaultsender":
-            for z in r.rights:
-                if z == z.send:
+        if r['name'].lower() == "defaultsender":
+            for z in r['rights']:
+                if z[0].lower() == 'send' and len(z) == 1:
                     has_default_sender_key = True
 
     if not has_default_sender_key:
-        rights = [AccessRights.send]
-        hy_co_client.create_or_update_authorization_rule(relay_resource_group, namespace, hybrid_connection,
-                                                         "defaultSender", rights)
+        rights = ["Send"]
+        args = {"resource_group": relay_resource_group, "namespace_name": namespace,
+                "hybrid_connection_name": hybrid_connection, "name": "defaultSender", "rights": rights}
+        HycoAuthoCreate(cli_ctx=cmd.cli_ctx)(command_args=args)
 
-    hy_co_keys = hy_co_client.list_keys(relay_resource_group, namespace, hybrid_connection, "defaultSender")
+    hy_co_keys = HycoAuthoKeysList(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": relay_resource_group,
+                                                                      "namespace_name": namespace,
+                                                                      "hybrid_connection_name": hybrid_connection,
+                                                                      "name": "defaultSender"})
     hy_co_metadata = ast.literal_eval(hy_co.user_metadata)
     hy_co_hostname = 0
     for x in hy_co_metadata:
@@ -4341,9 +4407,9 @@ def set_hc_key(cmd, plan, resource_group_name, namespace, hybrid_connection, key
 
     key = "empty"
     if key_type.lower() == "primary":
-        key = hy_co_keys.primary_key
+        key = hy_co_keys['primaryKey']
     elif key_type.lower() == "secondary":
-        key = hy_co_keys.secondary_key
+        key = hy_co_keys['secondaryKey']
     # enures input is correct
     if key == "empty":
         logger.warning("Key type is invalid - must be primary or secondary")
@@ -4714,7 +4780,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         create_resource_group(cmd, rg_name, loc)
         logger.warning("Resource group creation complete")
     # create ASP
-    logger.warning("Creating AppServicePlan '%s' ...", plan)
+    logger.warning("Creating AppServicePlan '%s' or Updating if already exists", plan)
     # we will always call the ASP create or update API so that in case of re-deployment, if the SKU or plan setting are
     # updated we update those
     try:

@@ -22,8 +22,7 @@ from azure.cli.command_modules.keyvault.security_domain.security_domain import D
 from azure.cli.command_modules.keyvault.security_domain.shared_secret import SharedSecret
 from azure.cli.command_modules.keyvault.security_domain.sp800_108 import KDF
 from azure.cli.command_modules.keyvault.security_domain.utils import Utils
-from azure.cli.core import telemetry
-from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError,\
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, \
     MutuallyExclusiveArgumentError
 from azure.cli.core.profiles import ResourceType, AZURE_API_PROFILES, SDKProfile
 from azure.cli.core.util import sdk_no_wait
@@ -1548,38 +1547,17 @@ def create_certificate(client, certificate_name, policy,
                        disabled=False, tags=None):
     logger.info("Starting long-running operation 'keyvault certificate create'")
 
-    client.begin_create_certificate(
-        certificate_name=certificate_name, policy=policy, enabled=not disabled, tags=tags)
-
+    poller = client.begin_create_certificate(certificate_name=certificate_name,
+                                             policy=policy,
+                                             enabled=not disabled,
+                                             tags=tags)
     if policy.issuer_name.lower() == 'unknown':
         # return immediately for a pending certificate
         return client.get_certificate_operation(certificate_name)
 
-    # otherwise loop until the certificate creation is complete
-    while True:
-        check = client.get_certificate_operation(certificate_name)
-        if check.status != 'inProgress':
-            logger.info(
-                "Long-running operation 'keyvault certificate create' finished with result %s.",
-                check)
-            return check
-        try:
-            time.sleep(10)
-        except KeyboardInterrupt:
-            logger.info("Long-running operation wait cancelled.")
-            raise
-        except Exception as client_exception:
-            telemetry.set_exception(exception=client_exception, fault_type='cert-create-error',
-                                    summary='Unexpected client exception during cert creation')
-            message = getattr(client_exception, 'message', client_exception)
-
-            try:
-                ex_message = json.loads(client_exception.response.text)  # pylint: disable=no-member
-                message = str(message) + ' ' + ex_message['error']['details'][0]['message']
-            except:  # pylint: disable=bare-except
-                pass
-
-            raise CLIError('{}'.format(message))
+    # otherwise polling until the certificate creation is complete
+    poller.result()
+    return client.get_certificate_operation(certificate_name)
 
 
 def _asn1_to_iso8601(asn1_date):
@@ -2382,8 +2360,7 @@ def _security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys, pa
 
 def _security_domain_upload_blob(cmd, client, hsm_name, restore_blob_value, identifier=None,
                                  vault_base_url=None, no_wait=False):
-    SecurityDomainObject = cmd.get_models('SecurityDomainObject',
-                                          resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
+    from .vendored_sdks.azure_keyvault_t1.v7_2.models import SecurityDomainObject
     security_domain = SecurityDomainObject(value=restore_blob_value)
     retval = client.upload(vault_base_url=hsm_name or vault_base_url, security_domain=security_domain)
     if no_wait:
@@ -2430,9 +2407,7 @@ def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_d
     if os.path.exists(security_domain_file):
         raise CLIError("File named '{}' already exists.".format(security_domain_file))
 
-    CertificateSet = cmd.get_models('CertificateSet', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
-    SecurityDomainJsonWebKey = cmd.get_models('SecurityDomainJsonWebKey',
-                                              resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
+    from .vendored_sdks.azure_keyvault_t1.v7_2.models import CertificateSet, SecurityDomainJsonWebKey
 
     for path in sd_wrapping_keys:
         if os.path.isdir(path):

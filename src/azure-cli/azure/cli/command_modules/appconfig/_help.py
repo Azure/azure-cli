@@ -159,6 +159,8 @@ examples:
     text: az appconfig kv export -d appconfig --endpoint https://myappconfiguration.azconfig.io --auth-mode login --dest-endpoint https://anotherappconfiguration.azconfig.io --dest-auth-mode login --key * --label * --preserve-labels
   - name: Export all keys and feature flags with label test using appconfig/kvset profile.
     text: az appconfig kv export -n MyAppConfiguration --label test -d file --path D:/abc.json --format json --profile appconfig/kvset
+  - name: Export all keys to another App Configuration from a snapshot of the source configuration
+    text: az appconfig kv export -n MyAppConfiguration -d appconfig --dest-name AnotherAppConfiguration --snapshot MySnapshot
 """
 
 helps['appconfig kv import'] = """
@@ -169,6 +171,8 @@ examples:
     text: az appconfig kv import -n MyAppConfiguration --label test -s file --path D:/abc.json --format json
   - name: Import all keys and feature flags with null label and apply new label from an App Configuration.
     text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-name AnotherAppConfiguration --label ImportedKeys
+  - name: Import all keys from a snapshot of an App Configuration.
+    text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-name AnotherAppConfiguration --src-snapshot MySnapshot
   - name: Import all keys and apply null label from an App Service application.
     text: az appconfig kv import -n MyAppConfiguration -s appservice --appservice-account MyAppService
   - name: Import all keys with label test and apply test2 label excluding feature flags from an App Configuration.
@@ -636,6 +640,9 @@ helps['appconfig snapshot list'] = """
         - name: List all provisioning snapshots with names starting with the prefix 'app'.
           text:
             az appconfig snapshot list -s app* --status provisioning -n MyAppConfiguration
+        - name: List all failed and provisioning snapshots.
+          text:
+            az appconfig snapshot list --status failed provisioning -n MyAppConfiguration
     """
 
 helps['appconfig snapshot archive'] = """

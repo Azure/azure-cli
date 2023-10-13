@@ -352,12 +352,6 @@ helps['acr network-rule add'] = """
 type: command
 short-summary: Add a network rule.
 examples:
-  - name: Add a rule to allow access for a subnet in the same resource group as the registry.
-    text: >
-        az acr network-rule add -n MyRegistry --vnet-name myvnet --subnet mysubnet
-  - name: Add a rule to allow access for a subnet in a different subscription or resource group.
-    text: >
-        az acr network-rule add -n MyRegistry --subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Network/virtualNetworks/myvnet/subnets/mysubnet
   - name: Add a rule to allow access for a specific IP address-range.
     text: >
         az acr network-rule add -n MyRegistry --ip-address 23.45.1.0/24
@@ -376,12 +370,6 @@ helps['acr network-rule remove'] = """
 type: command
 short-summary: Remove a network rule.
 examples:
-  - name: Remove a rule that allows access for a subnet in the same resource group as the registry.
-    text: >
-        az acr network-rule remove -n MyRegistry --vnet-name myvnet --subnet mysubnet
-  - name: Remove a rule that allows access for a subnet in a different subscription or resource group.
-    text: >
-        az acr network-rule remove -n MyRegistry --subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Network/virtualNetworks/myvnet/subnets/mysubnet
   - name: Remove a rule that allows access for a specific IP address-range.
     text: >
         az acr network-rule remove -n MyRegistry --ip-address 23.45.1.0/24

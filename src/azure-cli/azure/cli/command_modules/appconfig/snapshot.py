@@ -95,7 +95,7 @@ def show_snapshot(cmd,
 
 def list_snapshots(cmd,
                    snapshot_name=SearchFilterOptions.ANY_KEY,
-                   status=SearchFilterOptions.ANY_KEY,
+                   status=None,
                    fields=None,
                    name=None,
                    top=None,

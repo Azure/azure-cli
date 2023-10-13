@@ -403,6 +403,8 @@ def validate_vnet_integration(cmd, namespace):
         if is_valid_resource_id(namespace.plan):
             parse_result = parse_resource_id(namespace.plan)
             plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
+        elif _get_consumption_plan_location(namespace):
+            raise ArgumentUsageError("Virtual network integration is not allowed for consumption plans.")
         else:
             plan_info = client.app_service_plans.get(name=namespace.plan,
                                                      resource_group_name=namespace.resource_group_name)
@@ -475,6 +477,12 @@ def _get_app_name(namespace):
 def _get_environment(namespace):
     if hasattr(namespace, "environment"):
         return namespace.environment
+    return None
+
+
+def _get_consumption_plan_location(namespace):
+    if hasattr(namespace, "consumption_plan_location"):
+        return namespace.consumption_plan_location
     return None
 
 

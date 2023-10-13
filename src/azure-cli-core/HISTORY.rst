@@ -3,6 +3,21 @@
 Release History
 ===============
 
+2.53.0
+++++++
+* `aaz`: Fix command name case issue for aaz command table lazy load (#27344)
+
+2.52.0
+++++++
+* `aaz`: Support `configured_default` for `AAZBaseArg` (#27205)
+
+2.51.0
+++++++
+* `aaz`: Add `--max-items` and `--next-token` for pagination (#26710)
+* `aaz`: Support paginating calculation (#26713)
+* `aaz`: Support blank input for compound argument types (#26870)
+* Drop client telemetry cache strategy (#26854)
+
 2.50.0
 ++++++
 * `aaz`: Add short summary for `--location` when its default value comes from resource group (#26584)
