@@ -3494,7 +3494,7 @@ class VMSSCreateAndModify(ScenarioTest):
         self.kwargs.update({
             'vmss': 'vmss1'
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --image OpenLogic:CentOS:7.5:latest --scale-in-policy NewestVM --admin-username azureuser', checks=[
+        self.cmd('vmss create -g {rg} -n {vmss} --image OpenLogic:CentOS:7.5:latest --scale-in-policy NewestVM --admin-username azureuser --orchestration-mode Uniform', checks=[
             self.check('vmss.scaleInPolicy.rules[0]', 'NewestVM')
         ])
         self.cmd('vmss update -g {rg} -n {vmss} --scale-in-policy OldestVM', checks=[
@@ -3521,7 +3521,7 @@ class VMSSCreateOptions(ScenarioTest):
 
         self.cmd('network public-ip create --name {ip} -g {rg}')
 
-        self.cmd('vmss create --image Debian:debian-10:10:latest --admin-password testPassword0 -l westus -g {rg} -n {vmss} --disable-overprovision --instance-count {count} --os-disk-caching {caching} --upgrade-policy-mode {update} --authentication-type password --admin-username myadmin --public-ip-address {ip} --os-disk-size-gb 40 --data-disk-sizes-gb 1 --vm-sku Standard_D2_v2 --computer-name-prefix vmss1')
+        self.cmd('vmss create --image Debian:debian-10:10:latest --admin-password testPassword0 -l westus -g {rg} -n {vmss} --disable-overprovision --instance-count {count} --os-disk-caching {caching} --upgrade-policy-mode {update} --authentication-type password --admin-username myadmin --public-ip-address {ip} --os-disk-size-gb 40 --data-disk-sizes-gb 1 --vm-sku Standard_D2_v2 --computer-name-prefix vmss1 --orchestration-mode Uniform')
         self.cmd('network lb show -g {rg} -n {vmss}lb ',
                  checks=self.check('frontendIPConfigurations[0].publicIPAddress.id.ends_with(@, \'{ip}\')', True))
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
@@ -3582,7 +3582,7 @@ class VMSSCreateOptions(ScenarioTest):
             'vmss': self.create_random_name('vmss', 10)
         })
         self.cmd(
-            'vmss create -n {vmss} -g {rg} --image OpenLogic:CentOS:7.5:latest --upgrade-policy-mode Manual --max-surge true --disable-overprovision',
+            'vmss create -n {vmss} -g {rg} --image OpenLogic:CentOS:7.5:latest --upgrade-policy-mode Manual --max-surge true --disable-overprovision --orchestration-mode Uniform',
             checks=[
                 self.check('vmss.upgradePolicy.rollingUpgradePolicy.maxSurge', True)
             ])
@@ -3602,7 +3602,7 @@ class VMSSCreateOptions(ScenarioTest):
 
         # check that we can create a vmss with local / ephemeral os disk.
         self.cmd('vmss create --resource-group {rg} --name {vmss} --image {image} --ephemeral-os-disk --disable-overprovision '
-                 '--instance-count {count} --data-disk-sizes-gb 1 --storage-sku os=standard_lrs 0=premium_lrs --admin-username {user} --admin-password {password}')
+                 '--instance-count {count} --data-disk-sizes-gb 1 --storage-sku os=standard_lrs 0=premium_lrs --admin-username {user} --admin-password {password} --orchestration-mode Uniform')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('virtualMachineProfile.storageProfile.osDisk.caching', '{caching}'),
             self.check('virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
@@ -3614,7 +3614,7 @@ class VMSSCreateOptions(ScenarioTest):
 
         # explicitly specify os-disk-caching
         self.cmd('vmss create --resource-group {rg} --name {vmss_2} --image {image} --ephemeral-os-disk '
-                 '--os-disk-caching {caching} --disable-overprovision --instance-count {count} --admin-username {user} --admin-password {password}')
+                 '--os-disk-caching {caching} --disable-overprovision --instance-count {count} --admin-username {user} --admin-password {password} --orchestration-mode Uniform')
         self.cmd('vmss show -g {rg} -n {vmss_2}', checks=[
             self.check('virtualMachineProfile.storageProfile.osDisk.caching', '{caching}'),
             self.check('virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
@@ -3650,7 +3650,8 @@ class VMSSCreateOptions(ScenarioTest):
         # check that we can create a vmss with ResourceDisk.
         self.cmd(
             'vmss create --resource-group {rg} --name {vmss} --image {image} --vm-sku Standard_DS4_v2 --ephemeral-os-disk --ephemeral-os-disk-placement {placement1} --disable-overprovision '
-            '--instance-count {count} --data-disk-sizes-gb 1 --storage-sku os=standard_lrs 0=premium_lrs --admin-username {user} --admin-password {password} --admin-username vmtest')
+            '--instance-count {count} --data-disk-sizes-gb 1 --storage-sku os=standard_lrs 0=premium_lrs --admin-username {user} --admin-password {password} --admin-username vmtest '
+            '--orchestration-mode Uniform')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('virtualMachineProfile.storageProfile.osDisk.caching', '{caching}'),
             self.check('virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
@@ -3664,7 +3665,8 @@ class VMSSCreateOptions(ScenarioTest):
 
         # check that we can create a vmss with CacheDisk.
         self.cmd('vmss create --resource-group {rg} --name {vmss_2} --image {image} --ephemeral-os-disk --ephemeral-os-disk-placement {placement2} '
-                 '--os-disk-caching {caching} --disable-overprovision --instance-count {count} --admin-username {user} --admin-password {password} --admin-username vmtest')
+                 '--os-disk-caching {caching} --disable-overprovision --instance-count {count} --admin-username {user} --admin-password {password} --admin-username vmtest '
+                 '--orchestration-mode Uniform')
         self.cmd('vmss show -g {rg} -n {vmss_2}', checks=[
             self.check('virtualMachineProfile.storageProfile.osDisk.caching', '{caching}'),
             self.check('virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
@@ -3772,7 +3774,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         })
 
         res = self.cmd('vmss create -g {rg} --name {vmss} --validate --image Canonical:UbuntuServer:18.04-LTS:latest --disable-overprovision --instance-count 101 --single-placement-group false '
-                       '--admin-username ubuntuadmin --generate-ssh-keys --lb ""').get_output_in_json()
+                       '--admin-username ubuntuadmin --generate-ssh-keys --lb "" --orchestration-mode Uniform').get_output_in_json()
         # Ensure generated template is valid. "Quota Exceeding" is expected on most subscriptions, so we allow that.
         self.assertTrue(not res['error'] or (res['error']['details'][0]['code'] == 'QuotaExceeded'))
 
@@ -3866,7 +3868,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         with self.assertRaisesRegex(CLIError, message):
             self.cmd('vmss list-instance-connection-info -n {vmss5} -g {rg}')
 
-        self.cmd('vmss create -n {vmss6} -g {rg} --image OpenLogic:CentOS:7.5:latest --nat-pool-name {natpool} --lb-sku Standard')
+        self.cmd('vmss create -n {vmss6} -g {rg} --image OpenLogic:CentOS:7.5:latest --nat-pool-name {natpool} --lb-sku Standard --orchestration-mode Uniform')
         self.cmd('vmss show -n {vmss6} -g {rg}', checks=[
             self.exists('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerInboundNatPools[0].id')
         ])
@@ -4298,7 +4300,7 @@ class VMSSCreateExistingOptions(ScenarioTest):
         self.cmd('network vnet create -n {vnet} -g {rg} --subnet-name {subnet}')
         self.cmd('network lb create --name {lb} -g {rg} --backend-pool-name {bepool}')
 
-        self.cmd('vmss create --image OpenLogic:CentOS:7.5:latest --os-disk-name {os_disk} --admin-username ubuntu --vnet-name {vnet} --subnet {subnet} -l "West US" --vm-sku {sku} --storage-container-name {container} -g {rg} --name {vmss} --load-balancer {lb} --ssh-key-value \'{ssh_key}\' --backend-pool-name {bepool} --use-unmanaged-disk')
+        self.cmd('vmss create --image OpenLogic:CentOS:7.5:latest --os-disk-name {os_disk} --admin-username ubuntu --vnet-name {vnet} --subnet {subnet} -l "West US" --vm-sku {sku} --storage-container-name {container} -g {rg} --name {vmss} --load-balancer {lb} --ssh-key-value \'{ssh_key}\' --backend-pool-name {bepool} --use-unmanaged-disk --orchestration-mode Uniform')
         self.cmd('vmss show --name {vmss} -g {rg}', checks=[
             self.check('sku.name', '{sku}'),
             self.check('virtualMachineProfile.storageProfile.osDisk.name', '{os_disk}'),
@@ -4319,9 +4321,9 @@ class VMSSCreateExistingOptions(ScenarioTest):
 
         message = 'usage error: --os-disk-delete-option/--data-disk-delete-option is only available for VMSS with flexible orchestration mode'
         with self.assertRaisesRegex(InvalidArgumentValueError, message):
-            self.cmd('vmss create -g {rg} -n {vmss} --image ubutults --os-disk-delete-option delete --admin-username vmtest')
+            self.cmd('vmss create -g {rg} -n {vmss} --image ubutults --os-disk-delete-option delete --admin-username vmtest --orchestration-mode Uniform')
         with self.assertRaisesRegex(InvalidArgumentValueError, message):
-            self.cmd('vmss create -g {rg} -n {vmss} --image ubutults --data-disk-delete-option delete --admin-username vmtest')
+            self.cmd('vmss create -g {rg} -n {vmss} --image ubutults --data-disk-delete-option delete --admin-username vmtest --orchestration-mode Uniform')
 
         self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --orchestration-mode Flexible --os-disk-delete-option delete', checks=[
             self.check('vmss.orchestrationMode', 'Flexible'),
@@ -4366,7 +4368,7 @@ class VMSSCreateExistingIdsOptions(ScenarioTest):
         assert is_valid_resource_id(self.kwargs['subnet_id'])
         assert is_valid_resource_id(self.kwargs['lb_id'])
 
-        self.cmd('vmss create --image OpenLogic:CentOS:7.5:latest --os-disk-name {os_disk} --admin-username ubuntu --subnet {subnet_id} -l "West US" --vm-sku {sku} --storage-container-name {container} -g {rg} --name {vmss} --load-balancer {lb_id} --ssh-key-value \'{ssh_key}\' --backend-pool-name {bepool} --use-unmanaged-disk')
+        self.cmd('vmss create --image OpenLogic:CentOS:7.5:latest --os-disk-name {os_disk} --admin-username ubuntu --subnet {subnet_id} -l "West US" --vm-sku {sku} --storage-container-name {container} -g {rg} --name {vmss} --load-balancer {lb_id} --ssh-key-value \'{ssh_key}\' --backend-pool-name {bepool} --use-unmanaged-disk --orchestration-mode Uniform')
         self.cmd('vmss show --name {vmss} -g {rg}', checks=[
             self.check('sku.name', '{sku}'),
             self.check('virtualMachineProfile.storageProfile.osDisk.name', '{os_disk}'),
@@ -4582,7 +4584,7 @@ class VMSSCustomDataScenarioTest(ScenarioTest):
             'user_data_file': user_data_file
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Debian:debian-10:10:latest --admin-username deploy --ssh-key-value "{ssh_key}" --user-data "{user_data}"')
+        self.cmd('vmss create -n {vmss} -g {rg} --image Debian:debian-10:10:latest --admin-username deploy --ssh-key-value "{ssh_key}" --user-data "{user_data}" --orchestration-mode Uniform')
 
         self.cmd('vmss show -n {vmss} -g {rg} --include-user-data', checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -4801,13 +4803,13 @@ class MSIScenarioTest(ScenarioTest):
 
         with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
             # create linux vm with default configuration
-            self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope} --role Contributor', checks=[
+            self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope} --role Contributor --orchestration-mode Uniform', checks=[
                 self.check('vmss.identity.role', 'Contributor'),
                 self.check('vmss.identity.scope', '/subscriptions/{sub}/resourceGroups/{rg}'),
             ])
 
             # create a windows vm with reader role on the linux vm
-            result = self.cmd('vmss create -g {rg} -n {vmss2} --image Win2022Datacenter --instance-count 1 --assign-identity --scope {vmss1_id} --role reader --admin-username admin123 --admin-password PasswordPassword1!', checks=[
+            result = self.cmd('vmss create -g {rg} -n {vmss2} --image Win2022Datacenter --instance-count 1 --assign-identity --scope {vmss1_id} --role reader --admin-username admin123 --admin-password PasswordPassword1! --orchestration-mode Uniform', checks=[
                 self.check('vmss.identity.role', 'reader'),
                 self.check('vmss.identity.scope', '{vmss1_id}'),
             ]).get_output_in_json()
@@ -4940,7 +4942,7 @@ class MSIScenarioTest(ScenarioTest):
         emsi2_result = self.cmd('identity create -g {rg} -n {emsi2}').get_output_in_json()
 
         # create a vmss with system + user assigned identities
-        result = self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --assign-identity {emsi} [system] --role reader --scope {scope} --instance-count 1 --generate-ssh-keys --admin-username ubuntuadmin').get_output_in_json()
+        result = self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --assign-identity {emsi} [system] --role reader --scope {scope} --instance-count 1 --generate-ssh-keys --admin-username ubuntuadmin --orchestration-mode Uniform').get_output_in_json()
         emsis = [x.lower() for x in result['vmss']['identity']['userAssignedIdentities'].keys()]
         self.assertEqual(emsis, [emsi_result['id'].lower()])
 
@@ -8366,7 +8368,7 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
         self.cmd('network lb probe create -g {rg} --lb-name {lb} -n {probe} --protocol Tcp --port 80')
         self.cmd('network lb rule create -g {rg} --lb-name {lb} -n {lbrule} --probe-name {probe} --protocol Tcp --frontend-port 80 --backend-port 80')
         # Test enable automatic repairs with a health probe when create vmss
-        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --load-balancer {lb} --health-probe {probe} --automatic-repairs-grace-period 30  --automatic-repairs-action restart --admin-username azureuser',
+        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --load-balancer {lb} --health-probe {probe} --automatic-repairs-grace-period 30  --automatic-repairs-action restart --admin-username azureuser --orchestration-mode Uniform',
                  checks=[
                      self.check('vmss.automaticRepairsPolicy.enabled', True),
                      self.check('vmss.automaticRepairsPolicy.gracePeriod', 'PT30M'),
@@ -8485,7 +8487,7 @@ class VMSSSetOrchestrationServiceStateScenarioTest(ScenarioTest):
         self.cmd(
             'network lb rule create -g {rg} --lb-name {lb} -n {lbrule} --probe-name {probe} --protocol Tcp --frontend-port 80 --backend-port 80')
         self.cmd(
-            'vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --load-balancer {lb} --health-probe {probe} --automatic-repairs-grace-period 30 --admin-username azureuser',
+            'vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --load-balancer {lb} --health-probe {probe} --automatic-repairs-grace-period 30 --admin-username azureuser --orchestration-mode Uniform',
             checks=[
                 self.check('vmss.automaticRepairsPolicy.enabled', True),
                 self.check('vmss.automaticRepairsPolicy.gracePeriod', 'PT30M')
