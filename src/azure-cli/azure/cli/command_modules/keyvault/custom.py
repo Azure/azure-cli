@@ -620,9 +620,13 @@ def create_hsm(cmd, client,
                             properties=properties)
 
     if user_identities:
-        ManagedServiceIdentity = cmd.get_models('ManagedServiceIdentity', resource_type=ResourceType.MGMT_KEYVAULT, operation_group='managed_hsms')
-        identities = {i: {} for i in user_identities}
-        parameters.identity = ManagedServiceIdentity(type='UserAssigned', user_assigned_identities=identities)
+        ManagedServiceIdentity = cmd.get_models('ManagedServiceIdentity', resource_type=ResourceType.MGMT_KEYVAULT,
+                                                operation_group='managed_hsms')
+        if len(user_identities) == 1 and user_identities[0].lower() == 'none':
+            parameters.identity = ManagedServiceIdentity(type='None')
+        else:
+            identities = {i: {} for i in user_identities}
+            parameters.identity = ManagedServiceIdentity(type='UserAssigned', user_assigned_identities=identities)
 
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name=resource_group_name,
@@ -878,9 +882,13 @@ def update_hsm(cmd, instance,
             if default_action:
                 instance.properties.network_acls.default_action = default_action
     if user_identities:
-        ManagedServiceIdentity = cmd.get_models('ManagedServiceIdentity', resource_type=ResourceType.MGMT_KEYVAULT, operation_group='managed_hsms')
-        identities = {i: {} for i in user_identities}
-        instance.identity = ManagedServiceIdentity(type='UserAssigned', user_assigned_identities=identities)
+        ManagedServiceIdentity = cmd.get_models('ManagedServiceIdentity', resource_type=ResourceType.MGMT_KEYVAULT,
+                                                operation_group='managed_hsms')
+        if len(user_identities) == 1 and user_identities[0].lower() == 'none':
+            instance.identity = ManagedServiceIdentity(type='None')
+        else:
+            identities = {i: {} for i in user_identities}
+            instance.identity = ManagedServiceIdentity(type='UserAssigned', user_assigned_identities=identities)
     return instance
 
 
