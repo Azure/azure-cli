@@ -4846,10 +4846,10 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         # ping the site so that the site container is ready
         # logsteam does not work if the site container has not started
         # required for https://github.com/Azure/azure-cli/issues/23058
-        _url = _get_url(cmd, rg_name, name)
-        logger.warning("Waiting for the app to be ready ...")
-        http = urllib3.PoolManager(timeout=urllib3.Timeout(connect=230, read=230))
         try:
+            _url = _get_url(cmd, rg_name, name)
+            logger.warning("Waiting for the app to be ready ...")
+            http = urllib3.PoolManager(timeout=urllib3.Timeout(connect=230, read=230))
             http.request('GET', _url)
             return get_streaming_log(cmd, rg_name, name)
         except Exception:  # pylint: disable=broad-except
