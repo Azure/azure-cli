@@ -30,10 +30,19 @@ class AzCopy:
     def __init__(self, creds=None):
         self.system = platform.system()
         install_location = _get_default_install_location()
-        self.executable = install_location
+        if os.path.isfile(install_location):
+            self.executable = install_location
+        else:
+            try:
+                subprocess.run(["azcopy", "--version"])
+                self.executable = "azcopy"
+            except:
+                self.executable = None
         self.creds = creds
-        if not os.path.isfile(install_location) or self.check_version() != AZCOPY_VERSION:
+        if not self.executable:
+            logger.warning("Azcopy not found, installing")
             self.install_azcopy(install_location)
+            self.executable = install_location
 
     def install_azcopy(self, install_location):
         install_dir = os.path.dirname(install_location)
