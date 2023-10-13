@@ -1341,6 +1341,64 @@ examples:
         az acr token update -n MyToken -r MyRegistry --scope-map MyNewScopeMap
 """
 
+helps['acr artifact-streaming'] = """
+type: group
+short-summary: Manage artifact streaming in any repositories or images.
+"""
+
+helps['acr artifact-streaming operation'] = """
+type: group
+short-summary: Allows you to manage the streaming artifact creation.
+"""
+
+helps['acr artifact-streaming operation cancel'] = """
+type: command
+short-summary: Cancels the given operation.
+examples:
+  - name: Cancel the streaming artifact creation associated with the id 'MyId' under repository 'MyRepo' in ACR 'MyRegistry'.
+    text: >
+        az acr artifact-streaming operation stop -n MyRegistry --repository MyRepo --id MyId
+"""
+
+helps['acr artifact-streaming operation show'] = """
+type: command
+short-summary: Check the operation status.
+examples:
+  - name: Get the streaming artifact creation status for id 'MyId' under repository 'MyRepo' in ACR 'MyRegistry'.
+    text: >
+        az acr artifact-streaming operation show -n MyRegistry --repository MyRepo --id MyId
+"""
+
+helps['acr artifact-streaming create'] = """
+type: command
+short-summary: Create a referrers streaming artifact for a specific image.
+examples:
+  - name: Create the streaming artifact of 'MyImage' in the registry 'MyRegistry'.
+    text: >
+        az acr artifact-streaming create -n MyRegistry  --image MyImage
+"""
+
+helps['acr artifact-streaming update'] = """
+type: command
+short-summary: Allows you to enable or disable auto-creation for streaming artifacts for all newer images under a given repository.
+examples:
+  - name: Enable artifact streaming for 'MyRepository' associated with the registry 'MyRegistry'.
+    text: >
+        az acr artifact-streaming start -n -r MyRegistry --repository MyRepository --enable-streaming True
+  - name: Disable artifact streaming for 'MyRepository' associated with the registry 'MyRegistry'.
+    text: >
+        az acr artifact-streaming start -n MyRegistry --repository MyRepository --enable-streaming False
+"""
+
+helps['acr artifact-streaming show'] = """
+type: command
+short-summary: Show if artifact streaming is enabled in a repository for an Azure Container Registry.
+examples:
+  - name: Get the repository 'MyRepo' streaming status.
+    text: >
+        az acr artifact-streaming show -n MyRegistry --repository MyRepo
+"""
+
 helps['acr agentpool'] = """
 type: group
 short-summary: Manage private Tasks agent pools with Azure Container Registries.
