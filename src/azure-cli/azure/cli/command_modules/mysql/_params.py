@@ -258,12 +258,16 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         options_list=['--data-source-type'],
         arg_type=get_enum_type(['mysql_single', 'azure_blob']),
         help='Data source type. e.g., mysql_single: Azure Database for MySQL Servers. '
+             'azure_blob: Source backup provided in Azure blob container.'
     )
 
     data_source_arg_type = CLIArgumentType(
         options_list=['--data-source'],
         help='Data source for importing to Flexible Server. Based on the data source type provide the data source as mentioned below. '
              'e.g., mysql_single: The name or resource ID of the Azure MySQL single server. '
+             'azure_blob: The name or resource ID of the Azure blob container. The storage uri of the azure blob container. '
+             'Example: https://{blob_name}.blob.core.windows.net/{container_name}. The storage uri should not contain the sas token. '
+             'If required, sas token can be provided in "data-source-sas-token" parameter.'
     )
 
     data_source_backup_dir_arg_type = CLIArgumentType(
