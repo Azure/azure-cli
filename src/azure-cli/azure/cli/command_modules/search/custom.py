@@ -4,7 +4,9 @@
 # --------------------------------------------------------------------------------------------
 from knack.log import get_logger
 from azure.cli.core.util import sdk_no_wait
-from azure.cli.core.azclierror import UnrecognizedArgumentError
+from azure.cli.core.azclierror import (UnrecognizedArgumentError, MutuallyExclusiveArgumentError,
+                                       RequiredArgumentMissingError)
+from .aaz.latest.search.service import Create as _SearchServiceCreate, Update as _SearchServiceUpdate
 
 logger = get_logger(__name__)
 
@@ -15,6 +17,121 @@ def _get_resource_group_location(cli_ctx, resource_group_name):
     client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     # pylint: disable=no-member
     return client.resource_groups.get(resource_group_name).location
+
+
+class SearchServiceCreate(_SearchServiceCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.ip_rules = AAZStrArg(
+            arg_group="Properties",
+            options=['--ip-rules'],
+            help="Some help"
+        )
+        args_schema.auth_options = AAZStrArg(
+            arg_group="Properties",
+            options=['--auth-options'],
+            help="Some Help",
+            enum=["aadOrApiKey", "apiKeyOnly"],
+        )
+        args_schema.ip_rules_internal._registered = False
+        args_schema.api_key_only._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        from azure.cli.core.aaz import has_value
+        import re
+        args = self.ctx.args
+
+        if args.hosting_mode == "highDensity" and args.sku != "standard3":
+            raise UnrecognizedArgumentError(
+                "SearchService.HostingMode: ""highDensity"" is only allowed when sku is ""standard3""")
+
+        if has_value(args.ip_rules):
+            ip_rules = re.split(';|,', args.ip_rules.to_serialized_data())
+            args.ip_rules_internal = [{"value": ip_rule} for ip_rule in ip_rules]
+
+        if has_value(args.disable_local_auth) and args.disable_local_auth.to_serialzied_data() is True:
+            if has_value(args.auth_options):
+                raise MutuallyExclusiveArgumentError("Both the DisableLocalAuth and AuthOptions parameters "
+                                                     "can't be given at the same time")
+            if has_value(args.aad_auth_failure_mode):
+                raise MutuallyExclusiveArgumentError("Both the DisableLocalAuth and AadAuthFailureMode parameters "
+                                                     "can't be given at the same time")
+        if has_value(args.auth_options):
+            if args.auth_options == "apiKeyOnly":
+                if has_value(args.aad_auth_failure_mode):
+                    raise MutuallyExclusiveArgumentError(
+                        "Both an AuthOptions value of apiKeyOnly and an AadAuthFailureMode "
+                        "can't be given at the same time")
+                args.api_key_only = {}
+            elif args.auth_options == "aadOrApiKey" and not has_value(args.aad_auth_failure_mode):
+                raise RequiredArgumentMissingError("An AuthOptions value of aadOrApiKey requires "
+                                                   "an AadAuthFailureMode parameter")
+
+
+class SearchServiceUpdate(_SearchServiceUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.ip_rules = AAZStrArg(
+            arg_group="Properties",
+            options=['--ip-rules'],
+            help="Some help",
+            nullable=True,  # allow to remove all the value when it's assigned by null
+        )
+        args_schema.auth_options = AAZStrArg(
+            arg_group="Properties",
+            options=['--auth-options'],
+            help="Some Help",
+            enum=["aadOrApiKey", "apiKeyOnly"],
+        )
+
+        args_schema.ip_rules_internal._registered = False
+        args_schema.api_key_only._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        from azure.cli.core.aaz import has_value
+        import re
+        args = self.ctx.args
+
+        if has_value(args.ip_rules):
+            if args.ip_rules.to_serialized_data() is None:
+                # cleanup all ip_rules
+                args.ip_rules_internal = None
+            else:
+                ip_rules = re.split(';|,', args.ip_rules.to_serialized_data())
+                args.ip_rules_internal = [{"value": ip_rule} for ip_rule in ip_rules]
+
+        if has_value(args.disable_local_auth) and args.disable_local_auth.to_serialzied_data() is True:
+            if has_value(args.auth_options):
+                raise MutuallyExclusiveArgumentError("Both the DisableLocalAuth and AuthOptions parameters "
+                                                     "can't be given at the same time")
+            if has_value(args.aad_auth_failure_mode):
+                raise MutuallyExclusiveArgumentError("Both the DisableLocalAuth and AadAuthFailureMode parameters "
+                                                     "can't be given at the same time")
+        if has_value(args.auth_options):
+            if args.auth_options == "apiKeyOnly":
+                if has_value(args.aad_auth_failure_mode):
+                    raise MutuallyExclusiveArgumentError(
+                        "Both an AuthOptions value of apiKeyOnly and an AadAuthFailureMode "
+                        "can't be given at the same time")
+                args.api_key_only = {}
+            elif args.auth_options == "aadOrApiKey" and not has_value(args.aad_auth_failure_mode):
+                raise RequiredArgumentMissingError("An AuthOptions value of aadOrApiKey requires "
+                                                   "an AadAuthFailureMode parameter")
+
+    def pre_instance_update(self, instance):
+        from azure.cli.core.aaz import has_value
+        args = self.ctx.args
+        if has_value(args.auth_options):
+            # clean up current auth_options
+            instance.properties.auth_options = {}
 
 
 # pylint: disable=too-many-locals
@@ -53,6 +170,7 @@ def create_search_service(cmd, resource_group_name, search_service_name, sku, lo
     import re
 
     _client = cf_search_services(cmd.cli_ctx, None)
+    # Done in aaz by default
     if location is None:
         location = _get_resource_group_location(cmd.cli_ctx, resource_group_name)
 
@@ -60,16 +178,21 @@ def create_search_service(cmd, resource_group_name, search_service_name, sku, lo
 
     replica_count = int(replica_count)
     partition_count = int(partition_count)
+    # Done in aaz by default range from 1 to 12
     if replica_count > 0:
         _search.replica_count = replica_count
+    # Done in aaz by default range from 1 to 12
     if partition_count > 0:
         _search.partition_count = partition_count
+    # Done in aaz by default
     if (public_network_access.lower() not in ["enabled", "disabled"]):
         raise UnrecognizedArgumentError(
             "SearchService.PublicNetworkAccess: only [""enabled"", ""disabled""] are allowed")
+    # Done in aaz by default range from 1 to 12
     if (hosting_mode not in ["default", "highDensity"]):
         raise UnrecognizedArgumentError(
             "SearchService.HostingMode: only [""default"", ""highDensity""] are allowed")
+    # implemented in pre_operation
     if (hosting_mode == "highDensity" and sku.lower() != "standard3"):
         raise UnrecognizedArgumentError(
             "SearchService.HostingMode: ""highDensity"" is only allowed when sku is ""standard3""")
@@ -77,6 +200,7 @@ def create_search_service(cmd, resource_group_name, search_service_name, sku, lo
     _search.public_network_access = public_network_access
     _search.hosting_mode = hosting_mode
 
+    # implemented in pre_operation
     if ip_rules:
         _ip_rules = []
         _ip_rules_array = re.split(';|,', ip_rules)
@@ -84,9 +208,13 @@ def create_search_service(cmd, resource_group_name, search_service_name, sku, lo
             if _ip_rule:
                 _ip_rules.append(IpRule(value=_ip_rule))
         _search.network_rule_set = NetworkRuleSet(ip_rules=_ip_rules)
+
+    # Done in aaz by default
     if identity_type:
         _identity = Identity(type=identity_type)
         _search.identity = _identity
+
+    # implemented in pre_operation
     setup_search_auth(_search, disable_local_auth, auth_options, aad_auth_failure_mode)
 
     return sdk_no_wait(no_wait, _client.begin_create_or_update, resource_group_name, search_service_name, _search)
@@ -269,17 +397,21 @@ def setup_search_auth(instance, disable_local_auth, auth_options, aad_auth_failu
     """
     from azure.cli.core.azclierror import MutuallyExclusiveArgumentError, RequiredArgumentMissingError
 
+    # Done in aaz by default
     if (disable_local_auth is not None and disable_local_auth not in [True, False]):
         raise UnrecognizedArgumentError(
             "SearchService.DisableLocalAuth: only [True, False] are allowed")
+    # Done by argument define
     if (auth_options is not None and auth_options not in ["aadOrApiKey", "apiKeyOnly"]):
         raise UnrecognizedArgumentError(
             "SearchService.AuthOptions: only [""aadOrApiKey"", ""apiKeyOnly""] are allowed")
+    # Done in aaz by default
     if (aad_auth_failure_mode is not None and aad_auth_failure_mode not in ["http401WithBearerChallenge", "http403"]):
         raise UnrecognizedArgumentError(
             "SearchService.AuthOptions.AadAuthFailureMode: only "
             "[""http401WithBearerChallenge"", ""http403""] are allowed")
 
+    # Done in pre_operations
     if disable_local_auth and auth_options:
         raise MutuallyExclusiveArgumentError("Both the DisableLocalAuth and AuthOptions parameters "
                                              "can't be given at the same time")
