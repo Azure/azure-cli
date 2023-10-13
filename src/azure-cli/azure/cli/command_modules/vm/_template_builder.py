@@ -1267,6 +1267,9 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         vmss_properties['upgradePolicy'] = {
             'mode': upgrade_policy_mode
         }
+        if orchestration_mode.lower() == 'flexible':
+            vmss_properties['upgradePolicy'] = None
+
     if upgrade_policy_mode and cmd.supported_api_version(min_api='2020-12-01',
                                                          operation_group='virtual_machine_scale_sets'):
         vmss_properties['upgradePolicy']['rollingUpgradePolicy'] = {}
