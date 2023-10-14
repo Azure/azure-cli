@@ -4,6 +4,14 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import platform
+import subprocess
+
+from azure.cli.core.azclierror import (
+    ValidationError
+)
+from azure.cli.core.util import user_confirmation
+from azure.cli.core.style import Style, print_styled_text
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -40,9 +48,7 @@ def show_version(cmd):  # pylint: disable=unused-argument
 
 
 def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches, no-member, unused-argument
-    import platform
     import sys
-    import subprocess
     from azure.cli.core import telemetry
     from azure.cli.core import __version__ as local_version
     from azure.cli.core._environment import _ENV_AZ_INSTALLER
@@ -197,7 +203,6 @@ def _upgrade_on_windows():
     tmp_dir, msi_path = _download_from_url(msi_url)
 
     logger.warning("Installing MSI")
-    import subprocess
     exit_code = subprocess.call(['msiexec.exe', '/i', msi_path])
 
     if exit_code:
@@ -234,7 +239,7 @@ def _download_from_url(url):
 
 
 def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
-    from azure.cli.core.style import Style, print_styled_text, format_styled_text
+    from azure.cli.core.style import format_styled_text
     if theme:
         format_styled_text.theme = theme
     print_styled_text("[How to call print_styled_text]")
@@ -367,3 +372,68 @@ class AccessTokenCredential:  # pylint: disable=too-few-public-methods
         from azure.cli.core.auth.util import AccessToken
         # Assume the access token expires in 1 year / 31536000 seconds
         return AccessToken(self.access_token, int(time.time()) + 31536000)
+
+
+def azd_cli(args):
+    return run_azd_command(args)
+
+
+def ensure_azd_installation():
+    system = platform.system()
+    installation_path = _get_azd_installation_path(system)
+
+    if os.path.isfile(installation_path):
+        print_styled_text((Style.SUCCESS, "Azure Developer CLI already installed"))
+        return
+
+    installation_dir = os.path.dirname(installation_path)
+    if not os.path.exists(installation_dir):
+        os.makedirs(installation_dir)
+
+    try:
+        print_styled_text((Style.SUCCESS, "Installing Azure Developer CLI..."))
+
+        _install_azd(system)
+
+        print_styled_text((Style.SUCCESS, "Successfully installed Azure Developer CLI to "
+                                          "{}.".format(installation_path)))
+    except Exception as err:
+        raise ValidationError(f"Error while attempting to install Azure Developer CLI: {err}")
+
+
+def _get_azd_installation_path(system):
+    if system == "Windows":
+        appdata_local_path = os.getenv('LOCALAPPDATA') if os.getenv('LOCALAPPDATA') is not None else ''
+        return os.path.join(appdata_local_path, "Programs\\Azure Dev CLI\\azd.exe")
+    return '/usr/local/bin/azd'
+
+
+def _install_azd(system):
+
+    try:
+        if system == "Windows":
+            subprocess.run(
+                'powershell -ex AllSigned -c "Invoke-RestMethod https://aka.ms/install-azd.ps1 | Invoke-Expression"')
+        else:
+            subprocess.run('curl -fsSL https://aka.ms/install-azd.sh | bash ')
+    except Exception as err:
+        raise ValidationError(f"Error while attempting to install Azure Developer CLI: {err}")
+
+
+def run_azd_command(args):
+    installation_path = _get_azd_installation_path(platform.system())
+    installed = os.path.isfile(installation_path)
+
+    if not installed:
+        user_confirmation('To run az dev, Azure Developer CLI is required to be installed. Do you want to install?')
+        ensure_azd_installation()
+
+    command = [rf"{installation_path}"] + args
+    return _run_command(command)
+
+
+def _run_command(command):
+    try:
+        return subprocess.run(command)
+    except Exception as ex:
+        raise ex

@@ -62,7 +62,7 @@ class CLIPrintMixin(CLIHelp):
     def _print_detailed_help(self, cli_name, help_file):
         CLIPrintMixin._print_extensions_msg(help_file)
         super(CLIPrintMixin, self)._print_detailed_help(cli_name, help_file)
-        self._print_az_find_message(help_file.command)
+        # self._print_az_find_message(help_file.command)
 
     @staticmethod
     def _get_choices_defaults_sources_str(p):
@@ -157,6 +157,15 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
         self._register_help_loaders()
         self._name_to_content = {}
 
+    def show_welcome(self, parser):
+        self.show_privacy_statement()
+        self.show_welcome_message()
+        help_file = self.group_help_cls(self, '', parser)
+        self.print_description_list(help_file.children)
+        print('\nHere are the Partner Commands:\n\n    dev                 : Run Azure Developer CLI (azd). '
+              '\n                          To learn more about azd, please visit: '
+              '\n                          https://learn.microsoft.com/azure/developer/azure-developer-cli/')
+
     def show_help(self, cli_name, nouns, parser, is_group):
         self.update_loaders_with_help_file_contents(nouns)
 
@@ -171,6 +180,10 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
         self._print_detailed_help(cli_name, help_file)
         from azure.cli.core.util import show_updates_available
         show_updates_available(new_line_after=True)
+        if delimiters == '':
+            print('Partner Commands:\n    dev                         : Run Azure Developer CLI (azd). '
+                  '\n                                  To learn more about azd, please visit: '
+                  '\n                                  https://learn.microsoft.com/azure/developer/azure-developer-cli/')
 
     def get_examples(self, command, parser, is_group):
         """Get examples of a certain command from the help file.
