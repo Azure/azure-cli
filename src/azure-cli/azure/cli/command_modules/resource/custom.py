@@ -2304,7 +2304,7 @@ def list_template_specs(cmd, resource_group_name=None, name=None):
     return rcf.template_specs.list_by_subscription()
 
 
-def create_deployment_stack_at_subscription(cmd, name, location, deny_settings_mode, delete_resources=False, delete_resource_groups=False, delete_all=False, deployment_resource_group=None, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, tags=None, yes=False):
+def create_deployment_stack_at_subscription(cmd, name, location, deny_settings_mode, delete_resources=False, delete_resource_groups=False, delete_all=False, deployment_resource_group=None, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, tags=None, yes=False, no_wait=False):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     delete_resources_enum, delete_resource_groups_enum = _prepare_stacks_delete_detach_models(
@@ -2351,7 +2351,7 @@ def create_deployment_stack_at_subscription(cmd, name, location, deny_settings_m
     deployment_stack_model = _prepare_stacks_templates_and_parameters(
         cmd, rcf, 'subscription', deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
 
-    return sdk_no_wait(False, rcf.deployment_stacks.begin_create_or_update_at_subscription, name, deployment_stack_model)
+    return sdk_no_wait(no_wait, rcf.deployment_stacks.begin_create_or_update_at_subscription, name, deployment_stack_model)
 
 
 def show_deployment_stack_at_subscription(cmd, name=None, id=None):  # pylint: disable=redefined-builtin
@@ -2429,7 +2429,7 @@ def export_template_deployment_stack_at_subscription(cmd, name=None, id=None):  
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id.")
 
 
-def create_deployment_stack_at_resource_group(cmd, name, resource_group, deny_settings_mode, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, yes=False, tags=None):
+def create_deployment_stack_at_resource_group(cmd, name, resource_group, deny_settings_mode, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, yes=False, tags=None, no_wait=False):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     delete_resources_enum, delete_resource_groups_enum = _prepare_stacks_delete_detach_models(
@@ -2469,7 +2469,7 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, deny_se
     deployment_stack_model = _prepare_stacks_templates_and_parameters(
         cmd, rcf, 'resourceGroup', deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
 
-    return sdk_no_wait(False, rcf.deployment_stacks.begin_create_or_update_at_resource_group, resource_group, name, deployment_stack_model)
+    return sdk_no_wait(no_wait, rcf.deployment_stacks.begin_create_or_update_at_resource_group, resource_group, name, deployment_stack_model)
 
 
 def show_deployment_stack_at_resource_group(cmd, name=None, resource_group=None, id=None):  # pylint: disable=redefined-builtin
@@ -2558,7 +2558,7 @@ def export_template_deployment_stack_at_resource_group(cmd, name=None, resource_
     raise InvalidArgumentValueError("Please enter the (stack name and resource group) or stack resource id")
 
 
-def create_deployment_stack_at_management_group(cmd, management_group_id, name, location, deny_settings_mode, deployment_subscription=None, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, yes=False, tags=None):
+def create_deployment_stack_at_management_group(cmd, management_group_id, name, location, deny_settings_mode, deployment_subscription=None, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, yes=False, tags=None, no_wait=False):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     delete_resources_enum, delete_resource_groups_enum = _prepare_stacks_delete_detach_models(
@@ -2601,7 +2601,7 @@ def create_deployment_stack_at_management_group(cmd, management_group_id, name, 
     deployment_stack_model = _prepare_stacks_templates_and_parameters(
         cmd, rcf, 'managementGroup', deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
 
-    return sdk_no_wait(False, rcf.deployment_stacks.begin_create_or_update_at_management_group, management_group_id, name, deployment_stack_model)
+    return sdk_no_wait(no_wait, rcf.deployment_stacks.begin_create_or_update_at_management_group, management_group_id, name, deployment_stack_model)
 
 
 def show_deployment_stack_at_management_group(cmd, management_group_id, name=None, id=None):  # pylint: disable=redefined-builtin
