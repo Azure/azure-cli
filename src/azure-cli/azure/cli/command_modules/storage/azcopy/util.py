@@ -36,7 +36,7 @@ class AzCopy:
             try:
                 subprocess.run(["azcopy", "--version"])
                 self.executable = "azcopy"
-            except:
+            except Exception:
                 self.executable = None
         self.creds = creds
         if not self.executable:
