@@ -50,7 +50,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    "antlr4-python3-runtime~=4.9.3",
+    "antlr4-python3-runtime~=4.13.1",
     'azure-appconfiguration~=1.1.1',
     'azure-batch~=14.0.0',
     'azure-cli-core=={}'.format(VERSION),
@@ -91,7 +91,7 @@ DEPENDENCIES = [
     'azure-mgmt-hdinsight~=9.0.0',
     'azure-mgmt-imagebuilder~=1.2.0',
     'azure-mgmt-iotcentral~=10.0.0b1',
-    'azure-mgmt-iothub==2.3.0',
+    'azure-mgmt-iothub==3.0.0',
     'azure-mgmt-iothubprovisioningservices==1.1.0',
     'azure-mgmt-keyvault==10.2.3',
     'azure-mgmt-kusto~=0.3.0',
