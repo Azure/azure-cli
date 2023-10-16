@@ -3177,3 +3177,41 @@ class SynapseScenarioTests(ScenarioTest):
             self.not_exists('identity.userAssignedIdentities[1]')
         ])
 
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
+    def test_workspace_update_network_access(self, resource_group, storage_account):
+        # create a workspace
+        self._create_workspace()
+
+        # check workspace name
+        self.cmd('az synapse workspace check-name --name {workspace}', checks=[
+            self.check('available', False)
+        ])
+
+        # get workspace with workspace name
+        workspace = self.cmd('az synapse workspace show --name {workspace} --resource-group {rg}', checks=[
+            self.check('publicNetworkAccess', True)
+        ]).get_output_in_json()
+        self.kwargs["workspace-id"] = workspace['id']
+
+        # Disable public network access
+        self.cmd('az synapse workspace update --ids {workspace-id} --public_network_access=False', checks=[
+            self.check('publicNetworkAccess', False)
+        ])
+
+        # update tags; shouldn't change network access
+        self.cmd('az synapse workspace update --ids {workspace-id} --tags key1=value1', checks=[
+            self.check('tags.key1', 'value1'),
+            self.check('publicNetworkAccess', False)
+        ])
+
+        # Enable public network access
+        self.cmd('az synapse workspace update --ids {workspace-id} --public_network_access=True', checks=[
+            self.check('publicNetworkAccess', True)
+        ])
+
+        # update tags; shouldn't change network access
+        self.cmd('az synapse workspace update --ids {workspace-id} --tags key1=value2', checks=[
+            self.check('tags.key1', 'value1'),
+            self.check('publicNetworkAccess', True)
+        ])

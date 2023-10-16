@@ -105,6 +105,7 @@ def load_arguments(self, _):
             c.argument('user_assigned_identity_id', options_list=['--uami-id'], nargs='+', help='The list of User-assigned Managed Identity Id for workspace.')
             c.argument('user_assigned_identity_in_encryption', options_list=['--uami-id-in-encrypt'], help='User assigned identity resource Id used in Workspace Encryption')
             c.argument('use_system_assigned_identity_in_encryption', options_list=['--use-sami-in-encrypt'], help='Whether use System assigned identity in Workspace Encryption. If use uami, please set True.If not, set False')
+            c.argument('public_network_access', arg_type=get_three_state_flag(), help="Whether to enable public network access to the workspace.")
 
     with self.argument_context('synapse workspace create') as c:
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
