@@ -29,9 +29,7 @@ def _gen_metrics_alert_rules_clone_list(monitor_client, source_resource, target_
 def _get_metrics_alert_rules_clone_list(cmd, source_resource, target_resource):
     subscription_id = parse_resource_id(source_resource)['subscription']
     from ..aaz.latest.monitor.metrics.alert import List
-    alert_rules = List(cli_ctx=cmd.cli_ctx)(command_args={
-        'subscription_id': subscription_id
-    })
+    alert_rules = List(cli_ctx=cmd.cli_ctx)(command_args={"subscription_id": subscription_id})
     for alert_rule in alert_rules:
         if source_resource in alert_rule['scopes']:
             if target_resource not in alert_rule.scopes:
@@ -90,9 +88,8 @@ def _clone_and_replace_action_group_v2(cmd, source_resource, alert_rule, action_
         else:
             resource_group_name, name = _parse_id(action["actionGroupId"]).values()  # pylint: disable=unbalanced-dict-unpacking
             from ..aaz.latest.monitor.action_group import Show
-
             action_group = Show(cli_ctx=cmd.cli_ctx)(command_args={
-                "subscription_id": source_subscription_id,
+                'subscription_id': source_subscription_id,
                 "resource_group": resource_group_name,
                 "action_group_name": name,
             })
