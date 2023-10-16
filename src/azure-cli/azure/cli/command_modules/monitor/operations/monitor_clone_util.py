@@ -2,13 +2,13 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+# pylint: disable=line-too-long, protected-access
 from azure.cli.core.commands.transform import _parse_id
 from msrestazure.tools import parse_resource_id
 from knack.log import get_logger
 from knack.util import CLIError
 
-from .._client_factory import cf_monitor
+from azure.cli.command_modules.network.custom import _convert_to_snake_case
 from ..util import gen_guid
 
 logger = get_logger(__name__)
@@ -30,9 +30,10 @@ def _get_metrics_alert_rules_clone_list(cmd, source_resource, target_resource):
     subscription_id = parse_resource_id(source_resource)['subscription']
     from ..aaz.latest.monitor.metrics.alert import List
     alert_rules = List(cli_ctx=cmd.cli_ctx)(command_args={"subscription_id": subscription_id})
+    alert_rules = _convert_to_snake_case(alert_rules)
     for alert_rule in alert_rules:
         if source_resource in alert_rule['scopes']:
-            if target_resource not in alert_rule.scopes:
+            if target_resource not in alert_rule['scopes']:
                 yield alert_rule
             else:
                 logger.warning('The target resource already has alert rule %s. '
@@ -110,6 +111,27 @@ def _clone_and_replace_action_group_v2(cmd, source_resource, alert_rule, action_
     return alert_rule
 
 
+def format_metrics_alert_req(alert_rule):
+    all_of = alert_rule["criteria"]["all_of"]
+    odata_type = alert_rule["criteria"]["odata.type"]
+    type = odata_type.split(".")[-1]
+    type_snake = _convert_to_snake_case(type)
+    if type_snake.find("single_resource_multiple_metric_criteria"):
+        alert_rule['criteria'] = {
+            "microsoft_azure_monitor_single_resource_multiple_metric_criteria": {"all_of": all_of}
+        }
+    else:
+        alert_rule['criteria'] = {
+            "microsoft_azure_monitor_multiple_resource_multiple_metric_criteria": {"all_of": all_of}
+        }
+    from .metric_alert import _parse_resource_and_scope_type
+    resource_type, scope_type = _parse_resource_and_scope_type(alert_rule['scopes'])
+    if scope_type not in ['resource_group', 'subscription']:
+        if len(alert_rule['scopes']) != 1:
+            alert_rule["target_resource_type"] = resource_type
+    del alert_rule['type']
+
+
 def _clone_alert_rule(monitor_client, alert_rule, target_resource):
     alert_rule.scopes = [target_resource]
     resource_group_name, name = _parse_id(target_resource).values()  # pylint: disable=unbalanced-dict-unpacking
@@ -122,18 +144,14 @@ def _clone_alert_rule(monitor_client, alert_rule, target_resource):
 def _clone_alert_rule_v2(cmd, source_resource, alert_rule, target_resource):
     alert_rule['scopes'] = [target_resource]
     resource_group_name, name = _parse_id(target_resource).values()  # pylint: disable=unbalanced-dict-unpacking
-    name = CLONED_NAME.format(name, gen_guid())
     subscription_id = parse_resource_id(source_resource)['subscription']
     alert_rule["subscription_id"] = subscription_id
     alert_rule["resource_group"] = resource_group_name
     alert_rule["name"] = name
-    alert_rule["evaluation_frequency"] = alert_rule['evaluationFrequency']
-    alert_rule["window_size"] = alert_rule['windowSize']
-    alert_rule["criteria"] = alert_rule['criteria']
-    alert_rule["target_resource_type"] = alert_rule['type']
-    alert_rule["target_resource_region"] = alert_rule['targetResourceRegion']
-    alert_rule["actions"] = alert_rule['actions']
+
+    format_metrics_alert_req(alert_rule)
     from ..aaz.latest.monitor.metrics.alert import Create
+    print(alert_rule)
     return Create(cli_ctx=cmd.cli_ctx)(command_args=alert_rule)
 
 
