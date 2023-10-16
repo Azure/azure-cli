@@ -1483,6 +1483,9 @@ parameters:
   - name: --drain-timeout
     type: int
     short-summary: When nodes are drain how many minutes to wait for all pods to be evicted
+  - name: --node-soak-duration
+    type: int
+    short-summary: The amount of time (in minutes) to wait after draining a node and before reimaging it and moving on to next node.
   - name: --enable-encryption-at-host
     type: bool
     short-summary: Enable EncryptionAtHost, default value is false.
