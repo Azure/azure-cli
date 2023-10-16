@@ -192,7 +192,6 @@ def _upgrade_on_windows():
     import sys
     import tempfile
 
-    from pathlib import Path
     from azure.cli.core.util import rmtree_with_retry
 
     if platform.architecture()[0] == '32bit':
@@ -202,9 +201,9 @@ def _upgrade_on_windows():
     logger.warning("Updating Azure CLI with MSI from %s", msi_url)
 
     # Save MSI to ~\AppData\Local\Temp\azure-cli-msi, clean up the folder first
-    msi_dir = Path(tempfile.gettempdir()) / 'azure-cli-msi'
+    msi_dir = os.path.join(tempfile.gettempdir(), 'azure-cli-msi')
     rmtree_with_retry(msi_dir)
-    msi_dir.mkdir()
+    os.makedirs(msi_dir, exist_ok=True)
 
     msi_path = _download_from_url(msi_url, msi_dir)
 
