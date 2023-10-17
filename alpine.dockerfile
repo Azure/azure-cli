@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-ARG PYTHON_VERSION="3.10"
+ARG PYTHON_VERSION="3.11"
 
 FROM python:${PYTHON_VERSION}-alpine
 
@@ -18,7 +18,7 @@ LABEL maintainer="Microsoft" \
       org.label-schema.name="Azure CLI" \
       org.label-schema.version=$CLI_VERSION \
       org.label-schema.license="MIT" \
-      org.label-schema.description="The Azure CLI is used for all Resource Manager deployments in Azure." \
+      org.label-schema.description="A great cloud needs great tools; we're excited to introduce Azure CLI, our next generation multi-platform command line experience for Azure." \
       org.label-schema.url="https://docs.microsoft.com/cli/azure/overview" \
       org.label-schema.usage="https://docs.microsoft.com/cli/azure/install-az-cli2#docker" \
       org.label-schema.build-date=$BUILD_DATE \
