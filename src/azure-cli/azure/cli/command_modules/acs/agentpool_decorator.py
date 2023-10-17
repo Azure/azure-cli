@@ -972,6 +972,26 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need validation
         return drain_timeout
 
+    def get_node_soak_duration(self):
+        """Obtain the value of node_soak_duration.
+
+        :return: int
+        """
+        # read the original value passed by the command
+        node_soak_duration = self.raw_param.get("node_soak_duration")
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.agentpool and
+                self.agentpool.upgrade_settings and
+                self.agentpool.upgrade_settings.node_soak_duration is not None
+            ):
+                node_soak_duration = self.agentpool.upgrade_settings.node_soak_duration_in_minutes
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return node_soak_duration
+
     def get_vm_set_type(self) -> str:
         """Obtain the value of vm_set_type, default value is CONST_VIRTUAL_MACHINE_SCALE_SETS.
 
@@ -1562,6 +1582,10 @@ class AKSAgentPoolAddDecorator:
         if drain_timeout:
             upgrade_settings.drain_timeout_in_minutes = drain_timeout
 
+        node_soak_duration = self.context.get_node_soak_duration()
+        if node_soak_duration:
+            upgrade_settings.node_soak_duration_in_minutes = node_soak_duration
+
         agentpool.upgrade_settings = upgrade_settings
         return agentpool
 
@@ -1857,6 +1881,11 @@ class AKSAgentPoolUpdateDecorator:
         drain_timeout = self.context.get_drain_timeout()
         if drain_timeout:
             upgrade_settings.drain_timeout_in_minutes = drain_timeout
+            agentpool.upgrade_settings = upgrade_settings
+
+        node_soak_duration = self.context.get_node_soak_duration()
+        if node_soak_duration:
+            upgrade_settings.node_soak_duration_in_minutes = node_soak_duration
             agentpool.upgrade_settings = upgrade_settings
 
         return agentpool
