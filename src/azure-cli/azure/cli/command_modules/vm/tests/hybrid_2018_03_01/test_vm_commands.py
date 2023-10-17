@@ -267,7 +267,7 @@ class VMVMSSWindowsLicenseTest(ScenarioTest):
         self.cmd('vm update -g {rg} -n {vm} --license-type None', checks=[
             self.check('licenseType', 'None')
         ])
-        self.cmd('vmss create -g {rg} -n {vmss} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --instance-count 1')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --instance-count 1 --orchestration-mode Uniform')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('virtualMachineProfile.licenseType', 'Windows_Server')
         ])
@@ -309,7 +309,7 @@ class VMCustomImageTest(ScenarioTest):
             self.check('storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('storageProfile.osDisk.createOption', 'FromImage')
         ])
-        self.cmd('vmss create -g {rg} -n vmss1 --image {image1} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password', checks=[
+        self.cmd('vmss create -g {rg} -n vmss1 --image {image1} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password --orchestration-mode Uniform', checks=[
             self.check('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage')
         ])
@@ -332,7 +332,7 @@ class VMCustomImageTest(ScenarioTest):
             self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS')
         ])
 
-        self.cmd('vmss create -g {rg} -n vmss2 --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password', checks=[
+        self.cmd('vmss create -g {rg} -n vmss2 --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password --orchestration-mode Uniform', checks=[
             self.check('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
             self.check("length(vmss.virtualMachineProfile.storageProfile.dataDisks)", 1),
@@ -1021,7 +1021,7 @@ class VMSSExtensionInstallTest(ScenarioTest):
             'config_file': config_file
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image UbuntuLTS --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1')
+        self.cmd('vmss create -n {vmss} -g {rg} --image UbuntuLTS --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1 --orchestration-mode Uniform')
 
         self.cmd('vmss extension set -n {ext} --publisher {pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}"')
         self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {ext}', checks=[
@@ -1044,7 +1044,7 @@ class DiagnosticsExtensionInstallTest(ScenarioTest):
             'vmss': 'testdiagvmss'
         })
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --authentication-type password --admin-username user11 --admin-password TestTest12#$')
+        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --authentication-type password --admin-username user11 --admin-password TestTest12#$ --orchestration-mode Uniform')
         self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --authentication-type password --admin-username user11 --admin-password TestTest12#$ --use-unmanaged-disk')
         storage_sastoken = '123'  # use junk keys, do not retrieve real keys which will get into the recording
         _, protected_settings = tempfile.mkstemp()
@@ -1339,7 +1339,7 @@ class VMSSCreateAndModify(ScenarioTest):
             'new_count': 4
         })
 
-        self.cmd('vmss create --admin-password testPassword0 --name {vmss} -g {rg} --admin-username myadmin --image Win2012R2Datacenter --instance-count {count}')
+        self.cmd('vmss create --admin-password testPassword0 --name {vmss} -g {rg} --admin-username myadmin --image Win2012R2Datacenter --instance-count {count} --orchestration-mode Uniform')
 
         self.cmd('vmss show --name {vmss} -g {rg}', checks=[
             self.check('virtualMachineProfile.priority', None),
@@ -1410,7 +1410,7 @@ class VMSSCreateOptions(ScenarioTest):
 
         self.cmd('network public-ip create --name {ip} -g {rg}')
 
-        self.cmd('vmss create --image Debian --admin-password testPassword0 -l westus -g {rg} -n {vmss} --disable-overprovision --instance-count {count} --os-disk-caching {caching} --upgrade-policy-mode {update} --authentication-type password --admin-username myadmin --public-ip-address {ip} --data-disk-sizes-gb 1 --vm-sku Standard_D2_v2')
+        self.cmd('vmss create --image Debian --admin-password testPassword0 -l westus -g {rg} -n {vmss} --disable-overprovision --instance-count {count} --os-disk-caching {caching} --upgrade-policy-mode {update} --authentication-type password --admin-username myadmin --public-ip-address {ip} --data-disk-sizes-gb 1 --vm-sku Standard_D2_v2 --orchestration-mode Uniform')
         self.cmd('network lb show -g {rg} -n {vmss}lb ',
                  checks=self.check('frontendIPConfigurations[0].publicIPAddress.id.ends_with(@, \'{ip}\')', True))
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
@@ -1451,7 +1451,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
             'ssh_key': TEST_SSH_KEY_PUB,
             'quotes': '""' if platform.system() == 'Windows' else "''"
         })
-        self.cmd('vmss create -n {vmss} -g {rg} --image Debian --load-balancer {quotes} --admin-username ubuntu --ssh-key-value \'{ssh_key}\' --public-ip-address {quotes} --tags {quotes} --vm-sku Basic_A1')
+        self.cmd('vmss create -n {vmss} -g {rg} --image Debian --load-balancer {quotes} --admin-username ubuntu --ssh-key-value \'{ssh_key}\' --public-ip-address {quotes} --tags {quotes} --vm-sku Basic_A1 --orchestration-mode Uniform')
         self.cmd('vmss show -n {vmss} -g {rg}', checks=[
             self.check('tags', {}),
             self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations.ipConfigurations.loadBalancerBackendAddressPools', None),
@@ -1468,7 +1468,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
             'vmss': 'vmss1',
             'ssh_key': TEST_SSH_KEY_PUB
         })
-        self.cmd("vmss create -n {vmss} -g {rg} --image Debian --admin-username clittester --ssh-key-value '{ssh_key}' --app-gateway apt1 --instance-count 5",
+        self.cmd("vmss create -n {vmss} -g {rg} --image Debian --admin-username clittester --ssh-key-value '{ssh_key}' --app-gateway apt1 --instance-count 5 --orchestration-mode Uniform",
                  checks=self.check('vmss.provisioningState', 'Succeeded'))
         # spot check it is using gateway
         self.cmd('vmss show -n {vmss} -g {rg}', checks=[
@@ -1483,7 +1483,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         })
 
         res = self.cmd("vmss create -g {rg} --name {vmss} --validate --image UbuntuLTS --disable-overprovision --instance-count 101 --single-placement-group false "
-                       "--admin-username ubuntuadmin --generate-ssh-keys").get_output_in_json()
+                       "--admin-username ubuntuadmin --generate-ssh-keys --orchestration-mode Uniform").get_output_in_json()
         # Ensure generated template is valid. "Quota Exceeding" is expected on most subscriptions, so we allow that.
         self.assertTrue(not res['error'] or (res['error']['details'][0]['code'] == 'QuotaExceeded'))
 
@@ -1494,14 +1494,14 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
             'lb': 'lb1'
         })
         self.cmd('network lb create -g {rg} -n {lb} --backend-pool-name test')
-        self.cmd('vmss create -g {rg} -n {vmss} --load-balancer {lb} --image UbuntuLTS --admin-username clitester --admin-password TestTest12#$')
+        self.cmd('vmss create -g {rg} -n {vmss} --load-balancer {lb} --image UbuntuLTS --admin-username clitester --admin-password TestTest12#$ --orchestration-mode Uniform')
 
     @ResourceGroupPreparer()
     def test_vmss_single_placement_group_default_to_std_lb(self, resource_group):
         self.kwargs.update({
             'vmss': 'vmss123'
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --admin-username clitester --admin-password PasswordPassword1! --image debian --single-placement-group false')
+        self.cmd('vmss create -g {rg} -n {vmss} --admin-username clitester --admin-password PasswordPassword1! --image debian --single-placement-group false --orchestration-mode Uniform')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('singlePlacementGroup', False)
         ])
@@ -1526,7 +1526,7 @@ class VMSSCreatePublicIpPerVm(ScenarioTest):  # pylint: disable=too-many-instanc
             'dns_label': self.create_random_name('clivmss', 20)
         })
         nsg_result = self.cmd('network nsg create -g {rg} -n {nsg}').get_output_in_json()
-        self.cmd("vmss create -n {vmss} -g {rg} --image Debian --admin-username clittester --ssh-key-value '{ssh_key}' --vm-domain-name {dns_label} --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5 --nsg {nsg}",
+        self.cmd("vmss create -n {vmss} -g {rg} --image Debian --admin-username clittester --ssh-key-value '{ssh_key}' --vm-domain-name {dns_label} --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5 --nsg {nsg} --orchestration-mode Uniform",
                  checks=self.check('vmss.provisioningState', 'Succeeded'))
         result = self.cmd("vmss show -n {vmss} -g {rg}", checks=[
             self.check('length(virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].dnsSettings.dnsServers)', 2),
@@ -1548,7 +1548,7 @@ class AcceleratedNetworkingTest(ScenarioTest):
         self.kwargs.update({
             'vmss': 'vmss1'
         })
-        self.cmd("vmss create -n {vmss} -g {rg} --vm-sku Standard_DS4_v2 --image Win2022Datacenter --admin-username clittester --admin-password Test12345678!!! --accelerated-networking --instance-count 1")
+        self.cmd("vmss create -n {vmss} -g {rg} --vm-sku Standard_DS4_v2 --image Win2022Datacenter --admin-username clittester --admin-password Test12345678!!! --accelerated-networking --instance-count 1 --orchestration-mode Uniform")
         self.cmd('vmss show -n {vmss} -g {rg}',
                  checks=self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].enableAcceleratedNetworking', True))
 
@@ -1654,7 +1654,7 @@ class VMSSCreateLinuxSecretsScenarioTest(ScenarioTest):
         vm_format = self.cmd('vm secret format -s {secret_out}').get_output_in_json()
         self.kwargs['secrets'] = json.dumps(vm_format)
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Debian --admin-username deploy --ssh-key-value \'{ssh_key}\' --secrets \'{secrets}\'')
+        self.cmd('vmss create -n {vmss} -g {rg} --image Debian --admin-username deploy --ssh-key-value \'{ssh_key}\' --secrets \'{secrets}\' --orchestration-mode Uniform')
 
         self.cmd('vmss show -n {vmss} -g {rg}', checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -1683,7 +1683,7 @@ class VMSSCreateExistingOptions(ScenarioTest):
         self.cmd('network vnet create -n {vnet} -g {rg} --subnet-name {subnet}')
         self.cmd('network lb create --name {lb} -g {rg} --backend-pool-name {bepool}')
 
-        self.cmd('vmss create --image CentOS --os-disk-name {os_disk} --admin-username ubuntu --vnet-name {vnet} --subnet {subnet} -l "West US" --vm-sku {sku} --storage-container-name {container} -g {rg} --name {vmss} --load-balancer {lb} --ssh-key-value \'{ssh_key}\' --backend-pool-name {bepool} --use-unmanaged-disk')
+        self.cmd('vmss create --image CentOS --os-disk-name {os_disk} --admin-username ubuntu --vnet-name {vnet} --subnet {subnet} -l "West US" --vm-sku {sku} --storage-container-name {container} -g {rg} --name {vmss} --load-balancer {lb} --ssh-key-value \'{ssh_key}\' --backend-pool-name {bepool} --use-unmanaged-disk --orchestration-mode Uniform')
         self.cmd('vmss show --name {vmss} -g {rg}', checks=[
             self.check('sku.name', '{sku}'),
             self.check('virtualMachineProfile.storageProfile.osDisk.name', '{os_disk}'),
@@ -1726,7 +1726,7 @@ class VMSSCreateExistingIdsOptions(ScenarioTest):
         assert is_valid_resource_id(self.kwargs['subnet_id'])
         assert is_valid_resource_id(self.kwargs['lb_id'])
 
-        self.cmd('vmss create --image CentOS --os-disk-name {os_disk} --admin-username ubuntu --subnet {subnet_id} -l "West US" --vm-sku {sku} --storage-container-name {container} -g {rg} --name {vmss} --load-balancer {lb_id} --ssh-key-value \'{ssh_key}\' --backend-pool-name {bepool} --use-unmanaged-disk')
+        self.cmd('vmss create --image CentOS --os-disk-name {os_disk} --admin-username ubuntu --subnet {subnet_id} -l "West US" --vm-sku {sku} --storage-container-name {container} -g {rg} --name {vmss} --load-balancer {lb_id} --ssh-key-value \'{ssh_key}\' --backend-pool-name {bepool} --use-unmanaged-disk --orchestration-mode Uniform')
         self.cmd('vmss show --name {vmss} -g {rg}', checks=[
             self.check('sku.name', '{sku}'),
             self.check('virtualMachineProfile.storageProfile.osDisk.name', '{os_disk}'),
@@ -1754,7 +1754,7 @@ class VMSSVMsScenarioTest(ScenarioTest):
             'instance_ids': []
         })
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --authentication-type password --admin-username admin123 --admin-password TestTest12#$ --instance-count {count}')
+        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --authentication-type password --admin-username admin123 --admin-password TestTest12#$ --instance-count {count} --orchestration-mode Uniform')
 
         instance_list = self.cmd('vmss list-instances --resource-group {rg} --name {vmss}', checks=[
             self.check('type(@)', 'array'),
@@ -1793,7 +1793,7 @@ class VMSSCustomDataScenarioTest(ScenarioTest):
             'ssh_key': TEST_SSH_KEY_PUB
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Debian --admin-username deploy --ssh-key-value "{ssh_key}" --custom-data "#cloud-config\nhostname: myVMhostname"')
+        self.cmd('vmss create -n {vmss} -g {rg} --image Debian --admin-username deploy --ssh-key-value "{ssh_key}" --custom-data "#cloud-config\nhostname: myVMhostname" --orchestration-mode Uniform')
 
         # custom data is write only, hence we have no automatic way to cross check. Here we just verify VM was provisioned
         self.cmd('vmss show -n {vmss} -g {rg}',
@@ -1810,7 +1810,7 @@ class VMSSNicScenarioTest(ScenarioTest):
             'iid': 0
         })
 
-        self.cmd('vmss create -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter')
+        self.cmd('vmss create -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter --orchestration-mode Uniform')
 
         self.cmd('vmss nic list -g {rg} --vmss-name {vmss}', checks=[
             self.check('type(@)', 'array'),
@@ -1836,8 +1836,8 @@ class VMSSCreateIdempotentTest(ScenarioTest):
         self.kwargs.update({'vmss': 'vmss1'})
 
         # run the command twice with the same parameters and verify it does not fail
-        self.cmd('vmss create -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image UbuntuLTS --use-unmanaged-disk')
-        self.cmd('vmss create -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image UbuntuLTS --use-unmanaged-disk')
+        self.cmd('vmss create -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image UbuntuLTS --use-unmanaged-disk --orchestration-mode Uniform')
+        self.cmd('vmss create -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image UbuntuLTS --use-unmanaged-disk --orchestration-mode Uniform')
 
         # still 1 vnet and 1 subnet inside
         self.cmd('network vnet list -g {rg}', checks=[
@@ -1855,7 +1855,7 @@ class VMSSILBTest(ScenarioTest):
 
         self.kwargs.update({'vmss': 'vmss1'})
 
-        self.cmd('vmss create -g {rg} -n {vmss} --admin-username admin123 --admin-password PasswordPassword1! --image centos --instance-count 1 --public-ip-address ""')
+        self.cmd('vmss create -g {rg} -n {vmss} --admin-username admin123 --admin-password PasswordPassword1! --image centos --instance-count 1 --public-ip-address "" --orchestration-mode Uniform')
         # TODO: restore error validation when #5155 is addressed
         # with self.assertRaises(AssertionError) as err:
         self.cmd('vmss list-instance-connection-info -g {rg} -n {vmss}', expect_failure=True)
@@ -1879,7 +1879,7 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
         })
 
         # default to Basic
-        self.cmd('vmss create -g {rg} -l {loc} -n {vmss0} --image UbuntuLTS --admin-username admin123 --admin-password PasswordPassword1!')
+        self.cmd('vmss create -g {rg} -l {loc} -n {vmss0} --image UbuntuLTS --admin-username admin123 --admin-password PasswordPassword1! --orchestration-mode Uniform')
         self.cmd('network lb list -g {rg}', checks=self.check('[0].sku.name', 'Basic'))
         self.cmd('network public-ip list -g {rg}', checks=[
             self.check('[0].sku.name', 'Basic'),
@@ -1887,7 +1887,7 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
         ])
 
         # but you can overrides the defaults
-        self.cmd('vmss create -g {rg} -l {loc} -n {vmss} --lb {lb} --lb-sku {sku} --public-ip-address {ip} --image UbuntuLTS --admin-username admin123 --admin-password PasswordPassword1!')
+        self.cmd('vmss create -g {rg} -l {loc} -n {vmss} --lb {lb} --lb-sku {sku} --public-ip-address {ip} --image UbuntuLTS --admin-username admin123 --admin-password PasswordPassword1! --orchestration-mode Uniform')
         self.cmd('network lb show -g {rg} -n {lb}',
                  checks=self.check('sku.name', 'Standard'))
         self.cmd('network public-ip show -g {rg} -n {ip}', checks=[
@@ -2006,7 +2006,7 @@ class VMSSRollingUpgrade(ScenarioTest):
         self.cmd('network lb inbound-nat-pool create -g {rg} --lb-name {lb} -n nat-pool1 --backend-port 22 --frontend-port-range-start 50000 --frontend-port-range-end 50119 --protocol Tcp --frontend-ip-name LoadBalancerFrontEnd')
 
         # create a scaleset to use the LB, note, we start with the manual mode as we are not done with the setup yet
-        self.cmd('vmss create -g {rg} -n {vmss} --image ubuntults --admin-username clitester1 --admin-password Testqwer1234! --lb {lb} --health-probe {probe}')
+        self.cmd('vmss create -g {rg} -n {vmss} --image ubuntults --admin-username clitester1 --admin-password Testqwer1234! --lb {lb} --health-probe {probe} --orchestration-mode Uniform')
 
         # install the web server
         _, settings_file = tempfile.mkstemp()
