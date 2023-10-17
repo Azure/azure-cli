@@ -963,7 +963,7 @@ def _parse_bicepparam_inline_params(parameters, template_param_defs):
                 continue
 
             if not _try_parse_key_value_object(template_param_defs, parsed_inline_params, parameter_item):
-                raise CLIError(f"Unable to parse parameter: {parameter_item}. Only correctly formatted in-line parameters are allowed with a .bicepparam file")
+                raise InvalidArgumentValueError(f"Unable to parse parameter: {parameter_item}. Only correctly formatted in-line parameters are allowed with a .bicepparam file")
 
     name_value_obj = {}
     for param in parsed_inline_params:
