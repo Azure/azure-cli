@@ -35,7 +35,7 @@ def clean_up_sensitive_values(response_json):
 
 
 def transform_sensitive_values_wrapper():
-    
+
     def transform_sensitive_values(response_json):
         return clean_up_sensitive_values(response_json)
 
