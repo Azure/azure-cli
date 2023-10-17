@@ -33,7 +33,7 @@ class AzCopy:
         self.executable = install_location
         self.creds = creds
         if not os.path.isfile(install_location) or self.check_version() != AZCOPY_VERSION:
-            logger.warning("Azcopy not found, installing at "+install_location)
+            logger.warning("Azcopy not found, installing at " + install_location)
             self.install_azcopy(install_location)
 
     def install_azcopy(self, install_location):
