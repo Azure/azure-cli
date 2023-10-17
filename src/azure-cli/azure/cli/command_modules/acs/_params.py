@@ -573,6 +573,7 @@ def load_arguments(self, _):
         c.argument('node_osdisk_size', type=int)
         c.argument('max_surge', validator=validate_max_surge)
         c.argument('drain_timeout', type=int)
+        c.argument('node_soak_duration', type=int)
         c.argument('mode', get_enum_type(node_mode_types))
         c.argument('scale_down_mode', arg_type=get_enum_type(scale_down_modes))
         c.argument('max_pods', type=int, options_list=['--max-pods', '-m'])
@@ -605,6 +606,7 @@ def load_arguments(self, _):
         c.argument('node_taints', validator=validate_nodepool_taints)
         c.argument('max_surge', validator=validate_max_surge)
         c.argument('drain_timeout', type=int)
+        c.argument('node_soak_duration', type=int)
         c.argument('mode', get_enum_type(node_mode_types))
         c.argument('scale_down_mode', arg_type=get_enum_type(scale_down_modes))
         c.argument('allowed_host_ports', nargs='+', validator=validate_allowed_host_ports)
@@ -613,6 +615,7 @@ def load_arguments(self, _):
     with self.argument_context('aks nodepool upgrade') as c:
         c.argument('max_surge', validator=validate_max_surge)
         c.argument('drain_timeout', type=int)
+        c.argument('node_soak_duration', type=int)
         c.argument('snapshot_id', validator=validate_snapshot_id)
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
