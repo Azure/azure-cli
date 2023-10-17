@@ -30,19 +30,11 @@ class AzCopy:
     def __init__(self, creds=None):
         self.system = platform.system()
         install_location = _get_default_install_location()
-        if os.path.isfile(install_location):
-            self.executable = install_location
-        else:
-            try:
-                subprocess.run(["azcopy", "--version"])
-                self.executable = "azcopy"
-            except Exception:
-                self.executable = None
+        self.executable = install_location
         self.creds = creds
-        if not self.executable:
-            logger.warning("Azcopy not found, installing")
+        if not os.path.isfile(install_location) or self.check_version() != AZCOPY_VERSION:
+            logger.warning("Azcopy not found, installing at "+install_location)
             self.install_azcopy(install_location)
-            self.executable = install_location
 
     def install_azcopy(self, install_location):
         install_dir = os.path.dirname(install_location)
@@ -196,9 +188,9 @@ def _get_default_install_location():
         if not home_dir:
             raise CLIError('In the Windows platform, please specify the environment variable "USERPROFILE" '
                            'as the installation location.')
-        install_location = os.path.join(home_dir, r'.azcopy\azcopy.exe')
+        install_location = os.path.join(home_dir, r'.azcopy_for_azure_cli\azcopy.exe')
     elif system in ('Linux', 'Darwin'):
-        install_location = os.path.expanduser(os.path.join('~', 'bin/azcopy'))
+        install_location = os.path.expanduser(os.path.join('~', 'bin/azcopy_for_azure_cli/azcopy'))
     else:
         raise CLIError('The {} platform is not currently supported. If you want to know which platforms are supported, '
                        'please refer to the document for supported platforms: '
