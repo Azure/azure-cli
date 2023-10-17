@@ -113,7 +113,7 @@ def _clone_monitor_metrics_alerts(cmd, source_resource, target_resource, always_
     for alert_rule in _get_metrics_alert_rules_clone_list(cmd, source_resource, target_resource):
         if always_clone or not same_sub:
             alert_rule = _clone_and_replace_action_group(cmd, source_resource, alert_rule, action_group_mapping,
-                                                            target_resource)
+                                                         target_resource)
             alert_rule = _clone_alert_rule(cmd, source_resource, alert_rule, target_resource)
         else:
             try:
