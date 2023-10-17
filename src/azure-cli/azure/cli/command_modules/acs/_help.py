@@ -1642,6 +1642,9 @@ parameters:
   - name: --drain-timeout
     type: int
     short-summary: When nodes are drain how many minutes to wait for all pods to be evicted
+  - name: --node-soak-duration
+    type: int
+    short-summary: The amount of time (in minutes) to wait after draining a node and before reimaging it and moving on to next node.
   - name: --node-taints
     type: string
     short-summary: The node taints for the node pool. You can update the existing node taint of a nodepool or create a new node taint for a nodepool. Pass the empty string `""` to remove all taints.
@@ -1684,6 +1687,9 @@ parameters:
   - name: --drain-timeout
     type: int
     short-summary: When nodes are drain how long to wait for all pods to be evicted
+  - name: --node-soak-duration
+    type: int
+    short-summary: The amount of time (in minutes) to wait after draining a node and before reimaging it and moving on to next node.
   - name: --snapshot-id
     type: string
     short-summary: The source snapshot id used to upgrade this nodepool.
