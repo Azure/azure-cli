@@ -401,6 +401,17 @@ def cf_share_service(cli_ctx, kwargs):
         account_url = get_account_url(cli_ctx, account_name=account_name, service='file')
     credential = account_key or sas_token or token_credential
 
+    disallow_trailing_dot = kwargs.pop('disallow_trailing_dot', None)
+    disallow_source_trailing_dot = kwargs.pop('disallow_source_trailing_dot', None)
+
+    if disallow_trailing_dot is not None:
+        client_kwargs["allow_trailing_dot"] = not disallow_trailing_dot
+    if disallow_source_trailing_dot is not None:
+        copy_url = kwargs.get("copy_source")
+        import re
+        if kwargs.get("source_share") or (copy_url and re.match(r"https?:\/\/.*?\.file\..*", copy_url)):
+            client_kwargs["allow_source_trailing_dot"] = not disallow_source_trailing_dot
+
     return t_share_service(account_url=account_url, credential=credential, **client_kwargs)
 
 

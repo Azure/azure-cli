@@ -2685,3 +2685,26 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                          'sub-entities of the directory. Continuation token will only be returned when '
                          '--continue-on-failure is True in case of user errors. If not set the default value is False '
                          'for this.')
+
+    for cmd in ['list-handle', 'close-handle']:
+        with self.argument_context('storage share ' + cmd) as c:
+            c.extra('disallow_trailing_dot', arg_type=get_three_state_flag(), default=False,
+                    help="If true, the trailing dot will be trimmed from the target URI. Default to False")
+
+    for cmd in ['create', 'delete', 'show', 'exists', 'metadata show', 'metadata update', 'list']:
+        with self.argument_context('storage directory ' + cmd) as c:
+            c.extra('disallow_trailing_dot', arg_type=get_three_state_flag(), default=False,
+                    help="If true, the trailing dot will be trimmed from the target URI. Default to False")
+
+    for cmd in ['list', 'delete', 'delete-batch', 'resize', 'url', 'generate-sas', 'show', 'update',
+                'exists', 'metadata show', 'metadata update', 'copy start', 'copy cancel', 'copy start-batch',
+                'upload', 'upload-batch', 'download', 'download-batch']:
+        with self.argument_context('storage file ' + cmd) as c:
+            c.extra('disallow_trailing_dot', arg_type=get_three_state_flag(), default=False,
+                    help="If true, the trailing dot will be trimmed from the target URI. Default to False")
+
+    for cmd in ['start', 'start-batch']:
+        with self.argument_context('storage file copy ' + cmd) as c:
+            c.extra('disallow_source_trailing_dot', arg_type=get_three_state_flag(), default=False,
+                    options_list=["--disallow-source-trailing-dot", "--disallow-src-trailing"],
+                    help="If true, the trailing dot will be trimmed from the source URI. Default to False")
