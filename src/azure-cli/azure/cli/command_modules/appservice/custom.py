@@ -4937,15 +4937,20 @@ def update_host_key(cmd, resource_group_name, name, key_type, key_name, key_valu
     }
     client = web_client_factory(cmd.cli_ctx)
     if slot:
-        return client.web_apps.create_or_update_host_secret_slot(resource_group_name,
-                                                                 name,
-                                                                 key_type,
-                                                                 key_name,
-                                                                 slot, key=key_info)
-    return client.web_apps.create_or_update_host_secret(resource_group_name,
-                                                        name,
-                                                        key_type,
-                                                        key_name, key=key_info)
+        response = client.web_apps.create_or_update_host_secret_slot(resource_group_name,
+                                                                     name,
+                                                                     key_type,
+                                                                     key_name,
+                                                                     slot,
+                                                                     key=key_info)
+    else:
+        response = client.web_apps.create_or_update_host_secret(resource_group_name,
+                                                                name,
+                                                                key_type,
+                                                                key_name,
+                                                                key=key_info)
+    response.value = None
+    return response
 
 
 def list_host_keys(cmd, resource_group_name, name, slot=None):
@@ -4985,17 +4990,20 @@ def update_function_key(cmd, resource_group_name, name, function_name, key_name,
     }
     client = web_client_factory(cmd.cli_ctx)
     if slot:
-        return client.web_apps.create_or_update_function_secret_slot(resource_group_name,
-                                                                     name,
-                                                                     function_name,
-                                                                     key_name,
-                                                                     slot,
-                                                                     key_info)
-    return client.web_apps.create_or_update_function_secret(resource_group_name,
-                                                            name,
-                                                            function_name,
-                                                            key_name,
-                                                            key_info)
+        response = client.web_apps.create_or_update_function_secret_slot(resource_group_name,
+                                                                         name,
+                                                                         function_name,
+                                                                         key_name,
+                                                                         slot,
+                                                                         key_info)
+    else:
+        response = client.web_apps.create_or_update_function_secret(resource_group_name,
+                                                                    name,
+                                                                    function_name,
+                                                                    key_name,
+                                                                    key_info)
+    response.value = None
+    return response
 
 
 def list_function_keys(cmd, resource_group_name, name, function_name, slot=None):
