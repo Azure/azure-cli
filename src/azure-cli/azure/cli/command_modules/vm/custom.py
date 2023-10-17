@@ -420,18 +420,16 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
 
         if hasattr(response, 'hyper_v_generation'):
             if response.hyper_v_generation == 'V1':
-                logger.warning(log_message)
+                logger.warning(UPGRADE_SECURITY_HINT)
             elif response.hyper_v_generation == 'V2':
+                # set default value of hyper_v_generation
                 if hyper_v_generation == 'V1':
-                    logger.warning(log_message)
-                # will set default value of hyper_v_generation
-                if hasattr(response, 'features') and response.features \
-                        and 'SecurityType' in response.features \
-                        and response.features['SecurityType'] in \
-                        ['TrustedLaunchSupported', 'TrustedLaunchAndConfidentialVmSupported'] \
-                        and security_type != 'TrustedLaunch':
-                    # will set default value of security_type
-                    logger.warning(log_message)
+                    hyper_v_generation = 'V2'
+                # set default value of security_type
+                if not security_type:
+                    security_type = 'TrustedLaunch'
+                if security_type != 'TrustedLaunch':
+                    logger.warning(UPGRADE_SECURITY_HINT)
 
         # image_reference is an ID now
         image_reference = {'id': response.id}
