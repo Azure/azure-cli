@@ -407,8 +407,16 @@ def ensure_container_insights_for_monitoring(
             if data_collection_settings is not None:
                 dataCollectionSettings = _get_data_collection_settings(data_collection_settings)
                 validate_data_collection_settings(dataCollectionSettings)
+                dataCollectionSettings.setdefault("enableContainerLogV2", True)
                 extensionSettings["dataCollectionSettings"] = dataCollectionSettings
                 cistreams = dataCollectionSettings["streams"]
+            else:
+                # If data_collection_settings is None, set default dataCollectionSettings
+                dataCollectionSettings = {
+                    "enableContainerLogV2": True
+                }
+                extensionSettings["dataCollectionSettings"] = dataCollectionSettings
+
             # create the DCR
             dcr_creation_body_without_syslog = json.dumps(
                 {
