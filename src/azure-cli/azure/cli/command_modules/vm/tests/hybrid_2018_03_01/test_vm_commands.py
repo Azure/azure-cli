@@ -492,7 +492,7 @@ class VMAttachDisksOnCreate(ScenarioTest):
         # the testing below follow a real custom's workflow requiring the support of attaching data disks on create
 
         # creating a vm
-        self.cmd('vm create -g {rg} -n vm1 --image OpenLogic:CentOS:7.5:latest --admin-username centosadmin --admin-password testPassword0 --authentication-type password --data-disk-sizes-gb 2')
+        self.cmd('vm create -g {rg} -n vm1 --image CentOS85Gen2 --admin-username centosadmin --admin-password testPassword0 --authentication-type password --data-disk-sizes-gb 2')
         result = self.cmd('vm show -g {rg} -n vm1').get_output_in_json()
 
         self.kwargs.update({
@@ -805,7 +805,7 @@ class VMExtensionScenarioTest(ScenarioTest):
             'user': user_name
         })
 
-        self.cmd('vm create -n {vm} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username user11 --admin-password testPassword0')
+        self.cmd('vm create -n {vm} -g {rg} --image ubuntu2204 --authentication-type password --admin-username user11 --admin-password testPassword0')
 
         self.cmd('vm extension list --vm-name {vm} --resource-group {rg}',
                  checks=self.check('length([])', 0))
@@ -959,7 +959,7 @@ class VMCreateNoneOptionsTest(ScenarioTest):  # pylint: disable=too-many-instanc
             'ssh_key': TEST_SSH_KEY_PUB
         })
 
-        self.cmd('vm create -n {vm} -g {rg} --image Debian:debian-10:10:latest --availability-set {quotes} --nsg {quotes} --ssh-key-value \'{ssh_key}\' --public-ip-address {quotes} --tags {quotes} --location {loc} --admin-username user11')
+        self.cmd('vm create -n {vm} -g {rg} --image Debian11 --availability-set {quotes} --nsg {quotes} --ssh-key-value \'{ssh_key}\' --public-ip-address {quotes} --tags {quotes} --location {loc} --admin-username user11')
 
         self.cmd('vm show -n {vm} -g {rg}', checks=[
             self.check('availabilitySet', None),
@@ -998,7 +998,7 @@ class VMBootDiagnostics(ScenarioTest):
                  checks=self.check('diagnosticsProfile.bootDiagnostics.enabled', False))
 
         # try enable it at the create
-        self.cmd('vm create -g {rg} -n {vm2} --image Debian:debian-10:10:latest --admin-username user11 --admin-password testPassword0 --boot-diagnostics-storage {sa}')
+        self.cmd('vm create -g {rg} -n {vm2} --image Debian11 --admin-username user11 --admin-password testPassword0 --boot-diagnostics-storage {sa}')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
             self.check('diagnosticsProfile.bootDiagnostics.enabled', True),
             self.check('diagnosticsProfile.bootDiagnostics.storageUri', '{storage_uri}')
@@ -1468,7 +1468,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
             'vmss': 'vmss1',
             'ssh_key': TEST_SSH_KEY_PUB
         })
-        self.cmd("vmss create -n {vmss} -g {rg} --image Debian:debian-10:10:latest --admin-username clittester --ssh-key-value '{ssh_key}' --app-gateway apt1 --instance-count 5",
+        self.cmd("vmss create -n {vmss} -g {rg} --image Debian11 --admin-username clittester --ssh-key-value '{ssh_key}' --app-gateway apt1 --instance-count 5",
                  checks=self.check('vmss.provisioningState', 'Succeeded'))
         # spot check it is using gateway
         self.cmd('vmss show -n {vmss} -g {rg}', checks=[
@@ -1494,7 +1494,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
             'lb': 'lb1'
         })
         self.cmd('network lb create -g {rg} -n {lb} --backend-pool-name test')
-        self.cmd('vmss create -g {rg} -n {vmss} --load-balancer {lb} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username clitester --admin-password TestTest12#$')
+        self.cmd('vmss create -g {rg} -n {vmss} --load-balancer {lb} --image ubuntu2204 --admin-username clitester --admin-password TestTest12#$')
 
     @ResourceGroupPreparer()
     def test_vmss_single_placement_group_default_to_std_lb(self, resource_group):

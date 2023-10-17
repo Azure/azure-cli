@@ -549,7 +549,7 @@ class VMAttachDisksOnCreate(ScenarioTest):
         # the testing below follow a real custom's workflow requiring the support of attaching data disks on create
 
         # creating a vm
-        self.cmd('vm create -g {rg} -n vm1 --image OpenLogic:CentOS:7.5:latest --admin-username centosadmin --admin-password testPassword0 --authentication-type password --data-disk-sizes-gb 2')
+        self.cmd('vm create -g {rg} -n vm1 --image CentOS85Gen2 --admin-username centosadmin --admin-password testPassword0 --authentication-type password --data-disk-sizes-gb 2')
         result = self.cmd('vm show -g {rg} -n vm1').get_output_in_json()
 
         self.kwargs.update({
@@ -926,7 +926,7 @@ class VMExtensionScenarioTest(ScenarioTest):
             'user': user_name
         })
 
-        self.cmd('vm create -n {vm} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username user11 --admin-password testPassword0')
+        self.cmd('vm create -n {vm} -g {rg} --image ubuntu2204 --authentication-type password --admin-username user11 --admin-password testPassword0')
 
         self.cmd('vm extension list --vm-name {vm} --resource-group {rg}',
                  checks=self.check('length([])', 0))
@@ -1659,7 +1659,7 @@ class VMSSCreateOptions(ScenarioTest):
             'sku': 'Standard_LRS'
         })
 
-        self.cmd('vmss create --image Debian:debian-10:10:latest --admin-username clitest1 --admin-password testPassword0 -l westus -g {rg} -n {vmss}  --storage-sku {sku}')
+        self.cmd('vmss create --image Debian11 --admin-username clitest1 --admin-password testPassword0 -l westus -g {rg} -n {vmss}  --storage-sku {sku}')
         self.cmd('disk create -g {rg} -n {disk} --size-gb 1 --sku {sku}')
         instances = self.cmd('vmss list-instances -g {rg} -n {vmss}').get_output_in_json()
         self.kwargs['instance_id'] = instances[0]['instanceId']
@@ -1682,7 +1682,7 @@ class VMSSCreateOptions(ScenarioTest):
             'ssh_key': TEST_SSH_KEY_PUB,
         })
 
-        self.cmd('vmss create --image Debian:debian-10:10:latest -l westus -g {rg} -n {vmss_1} --authentication-type all '
+        self.cmd('vmss create --image Debian11 -l westus -g {rg} -n {vmss_1} --authentication-type all '
                  ' --admin-username myadmin --admin-password testPassword0 --ssh-key-value \'{ssh_key}\'',
                  checks=[
                      self.check('vmss.virtualMachineProfile.osProfile.linuxConfiguration.disablePasswordAuthentication', False),
@@ -1748,7 +1748,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
             'lb': 'lb1'
         })
         self.cmd('network lb create -g {rg} -n {lb} --backend-pool-name test')
-        self.cmd('vmss create -g {rg} -n {vmss} --load-balancer {lb} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username clitester --admin-password TestTest12#$')
+        self.cmd('vmss create -g {rg} -n {vmss} --load-balancer {lb} --image ubuntu2204 --admin-username clitester --admin-password TestTest12#$')
 
     @ResourceGroupPreparer()
     def test_vmss_single_placement_group_default_to_std_lb(self, resource_group):

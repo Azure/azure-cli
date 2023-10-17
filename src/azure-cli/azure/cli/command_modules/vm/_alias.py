@@ -27,16 +27,16 @@ alias_json = """
           },
           "Debian11":  {
             "publisher":  "Debian",
-             "offer":  "debian-11",
-             "sku":  "11-backports-gen2",
-             "version":  "latest",
+            "offer":  "debian-11",
+            "sku":  "11-backports-gen2",
+            "version":  "latest",
             "architecture": "x64"
           },
           "FlatcarLinuxFreeGen2":  {
             "publisher":  "kinvolk",
-             "offer":  "flatcar-container-linux-free",
-             "sku":  "stable-gen2",
-             "version":  "latest",
+            "offer":  "flatcar-container-linux-free",
+            "sku":  "stable-gen2",
+            "version":  "latest",
             "architecture": "x64"
           },
           "OpenSuseLeap154Gen2":  {
