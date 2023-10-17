@@ -58,7 +58,7 @@ examples:
         vm_secrets=$(az vm secret format -s "$secrets")
 
         az vm create -g group-name -n vm-name --admin-username deploy  \\
-          --image Debian:debian-10:10:latest --secrets "$vm_secrets"
+          --image Debian11 --secrets "$vm_secrets"
 """
 
 helps['keyvault certificate list'] = """
@@ -166,7 +166,7 @@ examples:
         vm_secrets=$(az vm secret format -s "$secrets")
 
         az vm create -g group-name -n vm-name --admin-username deploy  \\
-          --image Debian:debian-10:10:latest --secrets "$vm_secrets"
+          --image Debian11 --secrets "$vm_secrets"
 """
 
 helps['keyvault certificate backup'] = """
