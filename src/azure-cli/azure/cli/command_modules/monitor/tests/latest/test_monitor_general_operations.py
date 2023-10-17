@@ -22,11 +22,11 @@ class MonitorCloneVMScenarios(ScenarioTest):
             'rg': resource_group
         })
 
-        vm1_json = self.cmd('vm create -g {rg} -n {vm1} --image UbuntuLTS --admin-password TestPassword11!! '
+        vm1_json = self.cmd('vm create -g {rg} -n {vm1} --image Ubuntu2204 --admin-password TestPassword11!! '
                             '--admin-username testadmin --authentication-type password').get_output_in_json()
-        vm2_json = self.cmd('vm create -g {rg} -n {vm2} --image UbuntuLTS --admin-password TestPassword11!! '
+        vm2_json = self.cmd('vm create -g {rg} -n {vm2} --image Ubuntu2204 --admin-password TestPassword11!! '
                             '--admin-username testadmin --authentication-type password').get_output_in_json()
-        vm3_json = self.cmd('vm create -g {rg} -n {vm3} --image UbuntuLTS --admin-password TestPassword11!! '
+        vm3_json = self.cmd('vm create -g {rg} -n {vm3} --image Ubuntu2204 --admin-password TestPassword11!! '
                             '--admin-username testadmin --authentication-type password').get_output_in_json()
         self.kwargs.update({
             'vm1_id': vm1_json['id'],
@@ -47,8 +47,8 @@ class MonitorCloneVMScenarios(ScenarioTest):
                 self.check('metricsAlert[0].description', 'High CPU'),
                 self.check('metricsAlert[0].severity', 2),
                 self.check('metricsAlert[0].autoMitigate', None),
-                self.check('metricsAlert[0].windowSize', '0:05:00'),
-                self.check('metricsAlert[0].evaluationFrequency', '0:01:00'),
+                self.check('metricsAlert[0].windowSize', 'PT5M'),
+                self.check('metricsAlert[0].evaluationFrequency', 'PT1M'),
                 self.check('length(metricsAlert[0].scopes)', 3)
             ])
 
@@ -94,8 +94,8 @@ class MonitorCloneStorageAccountScenarios(ScenarioTest):
                 self.check('metricsAlert[0].description', 'Test'),
                 self.check('metricsAlert[0].severity', 2),
                 self.check('metricsAlert[0].autoMitigate', None),
-                self.check('metricsAlert[0].windowSize', '0:05:00'),
-                self.check('metricsAlert[0].evaluationFrequency', '0:01:00'),
+                self.check('metricsAlert[0].windowSize', 'PT5M'),
+                self.check('metricsAlert[0].evaluationFrequency', 'PT1M'),
                 self.check('length(metricsAlert[0].criteria.allOf)', 2),
                 self.check('length(metricsAlert[0].criteria.allOf[0].dimensions)', 2),
                 self.check('length(metricsAlert[0].criteria.allOf[1].dimensions)', 1),
@@ -143,8 +143,8 @@ class MonitorCloneStorageAccountAlwaysScenarios(ScenarioTest):
                 self.check('metricsAlert[0].description', 'Test'),
                 self.check('metricsAlert[0].severity', 2),
                 self.check('metricsAlert[0].autoMitigate', None),
-                self.check('metricsAlert[0].windowSize', '0:05:00'),
-                self.check('metricsAlert[0].evaluationFrequency', '0:01:00'),
+                self.check('metricsAlert[0].windowSize', 'PT5M'),
+                self.check('metricsAlert[0].evaluationFrequency', 'PT1M'),
                 self.check('length(metricsAlert[0].criteria.allOf)', 2),
                 self.check('length(metricsAlert[0].criteria.allOf[0].dimensions)', 2),
                 self.check('length(metricsAlert[0].criteria.allOf[1].dimensions)', 1),
