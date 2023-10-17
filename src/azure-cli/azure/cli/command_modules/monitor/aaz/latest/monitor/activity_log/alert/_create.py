@@ -33,9 +33,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2017-04-01",
+        "version": "2020-10-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.insights/activitylogalerts/{}", "2017-04-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.insights/activitylogalerts/{}", "2020-10-01"],
         ]
     }
 
@@ -63,76 +63,133 @@ class Create(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
+
+        # define Arg Group "ActivityLogAlertRule"
+
+        _args_schema = cls._args_schema
         _args_schema.location = AAZResourceLocationArg(
-            help="Resource location",
-            required=True,
+            arg_group="ActivityLogAlertRule",
+            help="The location of the resource. Since Azure Activity Log Alerts is a global service, the location of the rules should always be 'global'.",
+            default="global",
             fmt=AAZResourceLocationArgFormat(
                 resource_group_arg="resource_group",
             ),
         )
-        _args_schema.action_groups = AAZListArg(
-            options=["--action-groups"],
-            help="The list of activity log alerts.",
+        _args_schema.tags = AAZDictArg(
+            options=["--tags"],
+            arg_group="ActivityLogAlertRule",
+            help="The tags of the resource.",
         )
-        _args_schema.all_of = AAZListArg(
-            options=["--all-of"],
-            help="The list of activity log alert conditions.",
+
+        tags = cls._args_schema.tags
+        tags.Element = AAZStrArg()
+
+        # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.actions = AAZObjectArg(
+            options=["--actions"],
+            arg_group="Properties",
+            help="The actions that will activate when the condition is met.",
+        )
+        _args_schema.condition = AAZObjectArg(
+            options=["--condition"],
+            arg_group="Properties",
+            help="The condition that will cause this alert to activate.",
         )
         _args_schema.description = AAZStrArg(
             options=["--description"],
-            help="A description of this activity log alert.",
+            arg_group="Properties",
+            help="A description of this Activity Log Alert rule.",
         )
         _args_schema.enabled = AAZBoolArg(
             options=["--enabled"],
-            help="Indicates whether this activity log alert is enabled. If an activity log alert is not enabled, then none of its actions will be activated.",
+            arg_group="Properties",
+            help="Indicates whether this Activity Log Alert rule is enabled. If an Activity Log Alert rule is not enabled, then none of its actions will be activated.",
             default=True,
         )
         _args_schema.scopes = AAZListArg(
             options=["--scopes"],
-            help={"short-summary": "A list of resourceIds that will be used as prefixes.", "long-summary": "The alert will only apply to activityLogs with resourceIds that fall under one of these prefixes. This list must include at least one item."},
-        )
-        _args_schema.tags = AAZDictArg(
-            options=["--tags"],
-            help="Resource tags",
+            arg_group="Properties",
+            help="A list of resource IDs that will be used as prefixes. The alert will only apply to Activity Log events with resource IDs that fall under one of these prefixes. This list must include at least one item.",
         )
 
-        action_groups = cls._args_schema.action_groups
+        actions = cls._args_schema.actions
+        actions.action_groups = AAZListArg(
+            options=["action-groups"],
+            help="The list of the Action Groups.",
+        )
+
+        action_groups = cls._args_schema.actions.action_groups
         action_groups.Element = AAZObjectArg()
 
-        _element = cls._args_schema.action_groups.Element
+        _element = cls._args_schema.actions.action_groups.Element
         _element.action_group_id = AAZStrArg(
             options=["action-group-id"],
-            help="The resourceId of the action group. This cannot be null or empty.",
+            help="The resource ID of the Action Group. This cannot be null or empty.",
             required=True,
         )
-        _element.webhook_properties_raw = AAZDictArg(
-            options=["webhook-properties-raw"],
+        _element.webhook_properties = AAZDictArg(
+            options=["webhook-properties"],
             help="the dictionary of custom properties to include with the post operation. These data are appended to the webhook payload.",
         )
 
-        webhook_properties_raw = cls._args_schema.action_groups.Element.webhook_properties_raw
-        webhook_properties_raw.Element = AAZStrArg()
+        webhook_properties = cls._args_schema.actions.action_groups.Element.webhook_properties
+        webhook_properties.Element = AAZStrArg()
 
-        all_of = cls._args_schema.all_of
+        condition = cls._args_schema.condition
+        condition.all_of = AAZListArg(
+            options=["all-of"],
+            help="The list of Activity Log Alert rule conditions.",
+            required=True,
+        )
+
+        all_of = cls._args_schema.condition.all_of
         all_of.Element = AAZObjectArg()
 
-        _element = cls._args_schema.all_of.Element
+        _element = cls._args_schema.condition.all_of.Element
+        _element.any_of = AAZListArg(
+            options=["any-of"],
+            help="An Activity Log Alert rule condition that is met when at least one of its member leaf conditions are met.",
+        )
+        _element.contains_any = AAZListArg(
+            options=["contains-any"],
+            help="The value of the event's field will be compared to the values in this array (case-insensitive) to determine if the condition is met.",
+        )
         _element.equals = AAZStrArg(
             options=["equals"],
-            help="The field value will be compared to this value (case-insensitive) to determine if the condition is met.",
-            required=True,
+            help="The value of the event's field will be compared to this value (case-insensitive) to determine if the condition is met.",
         )
         _element.field = AAZStrArg(
             options=["field"],
-            help="The name of the field that this condition will examine. The possible values for this field are (case-insensitive): 'resourceId', 'category', 'caller', 'level', 'operationName', 'resourceGroup', 'resourceProvider', 'status', 'subStatus', 'resourceType', or anything beginning with 'properties.'.",
-            required=True,
+            help="The name of the Activity Log event's field that this condition will examine. The possible values for this field are (case-insensitive): 'resourceId', 'category', 'caller', 'level', 'operationName', 'resourceGroup', 'resourceProvider', 'status', 'subStatus', 'resourceType', or anything beginning with 'properties'.",
         )
+
+        any_of = cls._args_schema.condition.all_of.Element.any_of
+        any_of.Element = AAZObjectArg()
+
+        _element = cls._args_schema.condition.all_of.Element.any_of.Element
+        _element.contains_any = AAZListArg(
+            options=["contains-any"],
+            help="The value of the event's field will be compared to the values in this array (case-insensitive) to determine if the condition is met.",
+        )
+        _element.equals = AAZStrArg(
+            options=["equals"],
+            help="The value of the event's field will be compared to this value (case-insensitive) to determine if the condition is met.",
+        )
+        _element.field = AAZStrArg(
+            options=["field"],
+            help="The name of the Activity Log event's field that this condition will examine. The possible values for this field are (case-insensitive): 'resourceId', 'category', 'caller', 'level', 'operationName', 'resourceGroup', 'resourceProvider', 'status', 'subStatus', 'resourceType', or anything beginning with 'properties'.",
+        )
+
+        contains_any = cls._args_schema.condition.all_of.Element.any_of.Element.contains_any
+        contains_any.Element = AAZStrArg()
+
+        contains_any = cls._args_schema.condition.all_of.Element.contains_any
+        contains_any.Element = AAZStrArg()
 
         scopes = cls._args_schema.scopes
         scopes.Element = AAZStrArg()
-
-        tags = cls._args_schema.tags
-        tags.Element = AAZStrArg()
         return cls._args_schema
 
     def _execute_operations(self):
@@ -166,7 +223,7 @@ class Create(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.insights/activityLogAlerts/{activityLogAlertName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/activityLogAlerts/{activityLogAlertName}",
                 **self.url_parameters
             )
 
@@ -200,7 +257,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2017-04-01",
+                    "api-version", "2020-10-01",
                     required=True,
                 ),
             }
@@ -225,14 +282,14 @@ class Create(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
-            _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("location", AAZStrType, ".location")
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("actions", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
-                properties.set_prop("condition", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("actions", AAZObjectType, ".actions", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("condition", AAZObjectType, ".condition", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("description", AAZStrType, ".description")
                 properties.set_prop("enabled", AAZBoolType, ".enabled")
                 properties.set_prop("scopes", AAZListType, ".scopes", typ_kwargs={"flags": {"required": True}})
@@ -248,7 +305,7 @@ class Create(AAZCommand):
             _elements = _builder.get(".properties.actions.actionGroups[]")
             if _elements is not None:
                 _elements.set_prop("actionGroupId", AAZStrType, ".action_group_id", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("webhookProperties", AAZDictType, ".webhook_properties_raw")
+                _elements.set_prop("webhookProperties", AAZDictType, ".webhook_properties")
 
             webhook_properties = _builder.get(".properties.actions.actionGroups[].webhookProperties")
             if webhook_properties is not None:
@@ -264,8 +321,28 @@ class Create(AAZCommand):
 
             _elements = _builder.get(".properties.condition.allOf[]")
             if _elements is not None:
-                _elements.set_prop("equals", AAZStrType, ".equals", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("field", AAZStrType, ".field", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("anyOf", AAZListType, ".any_of")
+                _elements.set_prop("containsAny", AAZListType, ".contains_any")
+                _elements.set_prop("equals", AAZStrType, ".equals")
+                _elements.set_prop("field", AAZStrType, ".field")
+
+            any_of = _builder.get(".properties.condition.allOf[].anyOf")
+            if any_of is not None:
+                any_of.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.condition.allOf[].anyOf[]")
+            if _elements is not None:
+                _elements.set_prop("containsAny", AAZListType, ".contains_any")
+                _elements.set_prop("equals", AAZStrType, ".equals")
+                _elements.set_prop("field", AAZStrType, ".field")
+
+            contains_any = _builder.get(".properties.condition.allOf[].anyOf[].containsAny")
+            if contains_any is not None:
+                contains_any.set_elements(AAZStrType, ".")
+
+            contains_any = _builder.get(".properties.condition.allOf[].containsAny")
+            if contains_any is not None:
+                contains_any.set_elements(AAZStrType, ".")
 
             scopes = _builder.get(".properties.scopes")
             if scopes is not None:
@@ -298,9 +375,7 @@ class Create(AAZCommand):
             _schema_on_200_201.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200_201.location = AAZStrType(
-                flags={"required": True},
-            )
+            _schema_on_200_201.location = AAZStrType()
             _schema_on_200_201.name = AAZStrType(
                 flags={"read_only": True},
             )
@@ -355,12 +430,30 @@ class Create(AAZCommand):
             all_of.Element = AAZObjectType()
 
             _element = cls._schema_on_200_201.properties.condition.all_of.Element
-            _element.equals = AAZStrType(
-                flags={"required": True},
+            _element.any_of = AAZListType(
+                serialized_name="anyOf",
             )
-            _element.field = AAZStrType(
-                flags={"required": True},
+            _element.contains_any = AAZListType(
+                serialized_name="containsAny",
             )
+            _element.equals = AAZStrType()
+            _element.field = AAZStrType()
+
+            any_of = cls._schema_on_200_201.properties.condition.all_of.Element.any_of
+            any_of.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.properties.condition.all_of.Element.any_of.Element
+            _element.contains_any = AAZListType(
+                serialized_name="containsAny",
+            )
+            _element.equals = AAZStrType()
+            _element.field = AAZStrType()
+
+            contains_any = cls._schema_on_200_201.properties.condition.all_of.Element.any_of.Element.contains_any
+            contains_any.Element = AAZStrType()
+
+            contains_any = cls._schema_on_200_201.properties.condition.all_of.Element.contains_any
+            contains_any.Element = AAZStrType()
 
             scopes = cls._schema_on_200_201.properties.scopes
             scopes.Element = AAZStrType()
