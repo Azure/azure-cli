@@ -17,7 +17,7 @@ from ._transformers import (transform_containerapp_output,
                             transform_sensitive_values_wrapper)
 
 
-def load_command_table(self):
+def load_command_table(self, _):
     with self.command_group('containerapp') as g:
         g.custom_show_command('show', 'show_containerapp', table_transformer=transform_containerapp_output)
         g.custom_command('list', 'list_containerapp', table_transformer=transform_containerapp_list_output)
