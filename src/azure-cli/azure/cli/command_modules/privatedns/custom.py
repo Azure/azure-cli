@@ -914,11 +914,7 @@ def _privatedns_add_record(record_set, record, record_type, is_list=False):
     record_property, _ = _privatedns_type_to_property_name(record_type)
 
     if is_list:
-        record_list = record_set.get(record_property, None)
-        if record_list is None:
-            record_set[record_property] = []
-            record_list = []
-
+        record_list = record_set.setdefault(record_property, [])
         record_list.append(record)
     else:
         record_set[record_property] = record
@@ -926,6 +922,8 @@ def _privatedns_add_record(record_set, record, record_type, is_list=False):
 
 def _privatedns_add_save_record(cmd, record, record_type, relative_record_set_name, resource_group_name, private_zone_name, is_list=True):
     record_snake, record_camel = _privatedns_type_to_property_name(record_type)
+    is_empty = False
+
     try:
         _record_show = _record_show_func(record_type)
         ret = _record_show(cli_ctx=cmd.cli_ctx)(command_args={
@@ -940,8 +938,19 @@ def _privatedns_add_save_record(cmd, record, record_type, relative_record_set_na
         record_set = _convert_to_snake_case(record_set)
     except HttpResponseError:
         record_set = {"ttl": 3600}
+        is_empty = True
 
     _privatedns_add_record(record_set, record, record_type, is_list)
+
+    if is_empty:
+        _record_create = _record_create_func(record_type)
+        return _record_create(cli_ctx=cmd.cli_ctx)(command_args={
+            "resource_group": resource_group_name,
+            "zone_name": private_zone_name,
+            "record_type": record_type,
+            "name": relative_record_set_name,
+            **record_set
+        })
 
     _record_update = _record_update_func(record_type)
     return _record_update(cli_ctx=cmd.cli_ctx)(command_args={

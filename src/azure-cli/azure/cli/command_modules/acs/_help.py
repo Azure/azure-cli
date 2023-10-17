@@ -78,7 +78,7 @@ parameters:
     short-summary: Availability zones where agent nodes will be placed. Also, to install agent nodes to more than one zones you need to pass zone numbers (1,2 or 3) separated by blanks.  For example -  To have all 3 zones, you are expected to enter `--zones 1 2 3`
   - name: --node-osdisk-size
     type: int
-    short-summary: Size in GB of the OS disk for each node in the node pool. Minimum 30 GB.
+    short-summary: Size in GiB of the OS disk for each node in the node pool. Minimum 30 GiB.
   - name: --node-osdisk-type
     type: string
     short-summary: "OS disk type to be used for machines in a given agent pool: Ephemeral or Managed. Defaults to 'Ephemeral' when possible in conjunction with VM size and OS disk size. May not be changed for this pool after creation."
@@ -885,6 +885,15 @@ parameters:
   - name: --disable-vpa
     type: bool
     short-summary: Disable vertical pod autoscaler for cluster.
+  - name: --enable-force-upgrade
+    type: bool
+    short-summary: Enable forceUpgrade cluster upgrade settings override.
+  - name: --disable-force-upgrade
+    type: bool
+    short-summary: Disable forceUpgrade cluster upgrade settings override.
+  - name: --upgrade-override-until
+    type: string
+    short-summary: Until when the cluster upgradeSettings overrides are effective. It needs to be in a valid date-time format that's within the next 30 days. For example, 2023-04-01T13:00:00Z. Note that if --force-upgrade is set to true and --upgrade-override-until is not set, by default it will be set to 3 days from now.
 
 examples:
   - name: Reconcile the cluster back to its current state.
@@ -974,17 +983,17 @@ type: command
 short-summary: Enable Kubernetes addons.
 long-summary: |-
     These addons are available:
-        - http_application_routing : configure ingress with automatic public DNS name creation.
-        - monitoring               : turn on Log Analytics monitoring. Requires "--workspace-resource-id".
-                                     Requires "--enable-msi-auth-for-monitoring" for managed identity auth.
-                                     Requires "--enable-syslog" to enable syslog data collection from nodes. Note MSI must be enabled
-                                     If monitoring addon is enabled --no-wait argument will have no effect
-        - virtual-node             : enable AKS Virtual Node. Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
-        - azure-policy             : enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
-                                     Learn more at aka.ms/aks/policy.
-        - ingress-appgw            : enable Application Gateway Ingress Controller addon.
-        - open-service-mesh        : enable Open Service Mesh addon.
-        - azure-keyvault-secrets-provider : enable Azure Keyvault Secrets Provider addon.
+    - http_application_routing : configure ingress with automatic public DNS name creation.
+    - monitoring               : turn on Log Analytics monitoring. Requires "--workspace-resource-id".
+                                 Requires "--enable-msi-auth-for-monitoring" for managed identity auth.
+                                 Requires "--enable-syslog" to enable syslog data collection from nodes. Note MSI must be enabled
+                                 If monitoring addon is enabled --no-wait argument will have no effect
+    - virtual-node             : enable AKS Virtual Node. Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
+    - azure-policy             : enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
+                                 Learn more at aka.ms/aks/policy.
+    - ingress-appgw            : enable Application Gateway Ingress Controller addon.
+    - open-service-mesh        : enable Open Service Mesh addon.
+    - azure-keyvault-secrets-provider : enable Azure Keyvault Secrets Provider addon.
 parameters:
   - name: --addons -a
     type: string
@@ -1406,7 +1415,7 @@ parameters:
       - "`az aks get-versions`"
   - name: --node-osdisk-size
     type: int
-    short-summary: Size in GB of the OS disk for each node in the agent pool. Minimum 30 GB.
+    short-summary: Size in GiB of the OS disk for each node in the agent pool. Minimum 30 GiB.
   - name: --node-osdisk-type
     type: string
     short-summary: OS disk type to be used for machines in a given agent pool. Defaults to 'Ephemeral' when possible in conjunction with VM size and OS disk size. May not be changed for this pool after creation. ('Ephemeral' or 'Managed')
@@ -1471,6 +1480,9 @@ parameters:
   - name: --max-surge
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
+  - name: --drain-timeout
+    type: int
+    short-summary: When nodes are drain how many minutes to wait for all pods to be evicted
   - name: --enable-encryption-at-host
     type: bool
     short-summary: Enable EncryptionAtHost, default value is false.
@@ -1577,6 +1589,9 @@ parameters:
   - name: --max-surge
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
+  - name: --drain-timeout
+    type: int
+    short-summary: When nodes are drain how many minutes to wait for all pods to be evicted
   - name: --node-taints
     type: string
     short-summary: The node taints for the node pool. You can update the existing node taint of a nodepool or create a new node taint for a nodepool. Pass the empty string `""` to remove all taints.
@@ -1610,6 +1625,9 @@ parameters:
   - name: --max-surge
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33% (mutually exclusive with "--node-image-only". See "az aks nodepool update --max-surge" to update max surge before upgrading with "--node-image-only")
+  - name: --drain-timeout
+    type: int
+    short-summary: When nodes are drain how long to wait for all pods to be evicted
   - name: --snapshot-id
     type: string
     short-summary: The source snapshot id used to upgrade this nodepool.

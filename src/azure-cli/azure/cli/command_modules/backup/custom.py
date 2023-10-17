@@ -8,7 +8,6 @@ import os
 from datetime import datetime, timedelta, timezone
 # pylint: disable=too-many-lines
 from knack.log import get_logger
-
 from azure.mgmt.core.tools import is_valid_resource_id
 
 from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
@@ -126,40 +125,111 @@ password_length = 15
 # pylint: disable=too-many-function-args
 
 
+# TODO: Re-add references to SoftDeleteSettings once SDK version is upgraded:
+# Import SoftDeleteSettings, args in create_vault and _get_vault_security_settings
 def create_vault(client, vault_name, resource_group_name, location, tags=None,
                  public_network_access=None, immutability_state=None, cross_subscription_restore_state=None,
                  classic_alerts='Enable', azure_monitor_alerts_for_job_failures='Enable'):
     vault_sku = Sku(name=SkuName.standard)
+
+    vault_properties = VaultProperties(
+        monitoring_settings=_get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures, classic_alerts),
+        public_network_access=_get_vault_public_network_access(client, resource_group_name, vault_name,
+                                                               public_network_access),
+        security_settings=_get_vault_security_settings(client, resource_group_name, vault_name, immutability_state),
+        restore_settings=_get_vault_restore_settings(cross_subscription_restore_state)
+    )
+    vault = Vault(location=location, sku=vault_sku, properties=vault_properties, tags=tags)
+    return client.begin_create_or_update(resource_group_name, vault_name, vault)
+
+
+def _get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures, classic_alerts):
+    monitoring_settings = MonitoringSettings(
+        azure_monitor_alert_settings=AzureMonitorAlertSettings(
+            alerts_for_all_job_failures=cust_help.transform_enable_parameters(azure_monitor_alerts_for_job_failures)
+        ),
+        classic_alert_settings=ClassicAlertSettings(
+            alerts_for_critical_operations=cust_help.transform_enable_parameters(classic_alerts)
+        )
+    )
+    return monitoring_settings
+
+
+# TODO Remove pylint supress once the new SDK is in place
+# pylint: disable=unused-argument
+def _get_vault_security_settings(client, resource_group_name, vault_name, immutability_state):
+    security_settings = None
+    immutability_settings = None
+    if immutability_state is not None:
+        immutability_settings = ImmutabilitySettings(state=immutability_state)
+    security_settings = SecuritySettings(
+        immutability_settings=None if immutability_settings is None else immutability_settings)
+
+    # TODO Re-add once the new SDK is in place
+    # security_settings = None
+    # if immutability_state is not None or soft_delete_state is not None or \
+    #         soft_delete_retention_period_in_days is not None:
+    #     immutability_settings = None
+    #     soft_delete_settings = None
+
+    #     if immutability_state is not None:
+    #         immutability_settings = ImmutabilitySettings(state=immutability_state)
+
+    #     if soft_delete_state is not None or soft_delete_retention_period_in_days is not None:
+    #         # Both soft delete state and retention period need to be passed, so we need to fetch the existing values
+    #         # if not provided in the input. If the vault does not exist, the default values are Enabled/14 days
+    #         if soft_delete_state is None:
+    #             try:
+    #                 existing_vault_if_any = client.get(resource_group_name, vault_name)
+    #                 existing_soft_delete_state = existing_vault_if_any.properties.security_settings.\
+    #                     soft_delete_settings.soft_delete_state
+    #                 soft_delete_state = cust_help.transform_enable_parameters(existing_soft_delete_state)
+    #             except CoreResourceNotFoundError:
+    #                 soft_delete_state = "Enable"
+    #         if soft_delete_retention_period_in_days is None:
+    #             try:
+    #                 existing_vault_if_any = client.get(resource_group_name, vault_name)
+    #                 existing_soft_delete_retention_period_in_days = existing_vault_if_any.properties.\
+    #                     security_settings.soft_delete_settings.soft_delete_retention_period_in_days
+    #                 soft_delete_retention_period_in_days = existing_soft_delete_retention_period_in_days
+    #             except CoreResourceNotFoundError:
+    #                 soft_delete_retention_period_in_days = 14
+
+    #         soft_delete_settings = SoftDeleteSettings(
+    #             soft_delete_state=cust_help.transform_softdelete_parameters(soft_delete_state),
+    #             soft_delete_retention_period_in_days=soft_delete_retention_period_in_days
+    #         )
+
+    #     security_settings = SecuritySettings(
+    #         immutability_settings=None if immutability_settings is None else immutability_settings,
+    #         soft_delete_settings=None if soft_delete_settings is None else soft_delete_settings
+    #     )
+
+    return security_settings
+
+
+def _get_vault_restore_settings(cross_subscription_restore_state):
+    restore_settings = None
+    if cross_subscription_restore_state is not None:
+        restore_settings = RestoreSettings(
+            cross_subscription_restore_settings=CrossSubscriptionRestoreSettings(
+                cross_subscription_restore_state=cust_help.transform_enable_parameters(cross_subscription_restore_state)
+            )
+        )
+    return restore_settings
+
+
+def _get_vault_public_network_access(client, resource_group_name, vault_name, public_network_access):
     if public_network_access is None:
         # get the existing value of public_network_access so the request is made correctly
         try:
             existing_vault_if_any = client.get(resource_group_name, vault_name)
             existing_vault_public_network_access = existing_vault_if_any.properties.public_network_access
-            # TODO add better validation for existing_vault_public_network_access? It might be invalid.
-            #   Maybe have a list of possible values and iterate through, and if not add a warning to
-            #   contact support? Such as: if public_network_access in [list], <action>, else <warn user>.
-            public_network_access = existing_vault_public_network_access[:-1]
+            public_network_access = cust_help.transform_enable_parameters(existing_vault_public_network_access)
         except CoreResourceNotFoundError:
+            # This runs for a create - if there is no vault, default value is Enable
             public_network_access = 'Enable'
-
-    vault_properties = VaultProperties(
-        monitoring_settings=MonitoringSettings(
-            azure_monitor_alert_settings=AzureMonitorAlertSettings(
-                alerts_for_all_job_failures=azure_monitor_alerts_for_job_failures + 'd'),
-            classic_alert_settings=ClassicAlertSettings(alerts_for_critical_operations=classic_alerts + 'd')),
-        public_network_access=public_network_access + 'd',
-        security_settings=None if immutability_state is None else SecuritySettings(
-            immutability_settings=ImmutabilitySettings(
-                state=immutability_state
-            )
-        ),
-        restore_settings=None if cross_subscription_restore_state is None else RestoreSettings(
-            cross_subscription_restore_settings=CrossSubscriptionRestoreSettings(
-                cross_subscription_restore_state=cross_subscription_restore_state + 'd'
-            )
-        ))
-    vault = Vault(location=location, sku=vault_sku, properties=vault_properties, tags=tags)
-    return client.begin_create_or_update(resource_group_name, vault_name, vault)
+    return cust_help.transform_enable_parameters(public_network_access)
 
 
 def _force_delete_vault(cmd, vault_name, resource_group_name):
@@ -232,6 +302,9 @@ def delete_vault(cmd, client, vault_name, resource_group_name, force=False):
     except HttpResponseError as ex:  # pylint: disable=broad-except
         if 'existing resources within the vault' in ex.message and force:  # pylint: disable=no-member
             _force_delete_vault(cmd, vault_name, resource_group_name)
+        elif "Operation returned an invalid status 'Accepted'" in ex.message:
+            # TODO: Once the swagger is updated, this won't be needed.
+            pass
         else:
             raise ex
 
@@ -435,22 +508,41 @@ def show_encryption(client, resource_group_name, vault_name):
     return encryption_config_response
 
 
+# pylint: disable=too-many-locals
 def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_storage_redundancy=None,
                           soft_delete_feature_state=None, cross_region_restore_flag=None,
                           hybrid_backup_security_features=None, tenant_id=None,
-                          classic_alerts=None, azure_monitor_alerts_for_job_failures=None):
-    if soft_delete_feature_state or hybrid_backup_security_features:
-        logger.warning("""
-        --backup-storage-redundancy, --cross-region-restore-flag, --classic-alerts and
-        --azure-monitor-alerts-for-job-failures parameters will be ignored if provided.
-        """)
+                          classic_alerts=None, azure_monitor_alerts_for_job_failures=None,
+                          retention_duration_in_days=None):
+    if soft_delete_feature_state or hybrid_backup_security_features or retention_duration_in_days:
+        logger.warning('--backup-storage-redundancy, --cross-region-restore-flag, --classic-alerts and '
+                       '--azure-monitor-alerts-for-job-failures parameters will be ignored if provided.')
+
+        # TODO Re-add once the new SDK is in place
+        # if soft_delete_feature_state or retention_duration_in_days:
+        #     logger.warning("Modifying the soft delete properties of a vault via this command will "
+        #                    "soon be deprecated. Please use the 'az backup vault create' command "
+        #                    "to modify soft delete settings.")
         vault_config_client = backup_resource_vault_config_cf(cmd.cli_ctx)
         if tenant_id is not None:
             vault_config_client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
                                                           aux_tenants=[tenant_id]).backup_resource_vault_configs
         vault_config_response = vault_config_client.get(vault_name, resource_group_name)
+
+        # Manual input validation - can be removed once the error messages are fixed (ETA October 2023)
+        if vault_config_response.properties.soft_delete_feature_state.lower() == "alwayson" \
+                and soft_delete_feature_state is not None:
+            logger.warning("Vault's current Soft Delete State is AlwaysOn. This cannot be modified.")
+            soft_delete_feature_state = None
+        if retention_duration_in_days is not None:
+            if retention_duration_in_days < 14 or retention_duration_in_days > 180:
+                logger.warning("Retention duration must be between 14 and 180 days. Not modifying this field.")
+                retention_duration_in_days = None
+
         soft_delete_feature_state = vault_config_response.properties.soft_delete_feature_state if (
-            soft_delete_feature_state is None) else soft_delete_feature_state + "d"
+            soft_delete_feature_state is None) else cust_help.transform_softdelete_parameters(soft_delete_feature_state)
+        retention_duration_in_days = vault_config_response.properties.soft_delete_retention_period_in_days if (
+            retention_duration_in_days is None) else retention_duration_in_days
         hybrid_backup_security_features = vault_config_response.properties.enhanced_security_state if (
             hybrid_backup_security_features is None) else hybrid_backup_security_features + "d"
         resource_guard_operation_requests = None
@@ -460,14 +552,14 @@ def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_s
                     cmd.cli_ctx, resource_group_name, vault_name, "disableSoftDelete")]
         vault_config = BackupResourceVaultConfig(soft_delete_feature_state=soft_delete_feature_state,
                                                  enhanced_security_state=hybrid_backup_security_features,
-                                                 resource_guard_operation_requests=resource_guard_operation_requests)
+                                                 resource_guard_operation_requests=resource_guard_operation_requests,
+                                                 soft_delete_retention_period_in_days=retention_duration_in_days)
         vault_config_resource = BackupResourceVaultConfigResource(properties=vault_config)
         return vault_config_client.update(vault_name, resource_group_name, vault_config_resource)
 
     if backup_storage_redundancy or cross_region_restore_flag:
-        logger.warning("""
-        --classic-alerts and --azure-monitor-alerts-for-job-failures parameters will be ignored if provided.
-        """)
+        logger.warning(
+            '--classic-alerts and --azure-monitor-alerts-for-job-failures parameters will be ignored if provided.')
         backup_config_response = client.get(vault_name, resource_group_name)
         prev_crr_flag = backup_config_response.properties.cross_region_restore_flag
         if backup_storage_redundancy is None:
@@ -522,6 +614,13 @@ def get_default_policy_for_vm(client, resource_group_name, vault_name):
 
 def show_policy(client, resource_group_name, vault_name, name):
     return client.get(vault_name, resource_group_name, name)
+
+
+# pylint: disable=redefined-builtin
+def list_deleted_protection_containers(client, resource_group_name, vault_name, backup_management_type):
+    # backup_management_type should be made an optional field after the swagger is fixed
+    filter = "backupManagementType eq '{}'".format(backup_management_type)
+    return client.list(resource_group_name, vault_name, filter)
 
 
 def update_resource_guard_mapping(cmd, client, resource_group_name, vault_name, resource_guard_id, tenant_id=None):

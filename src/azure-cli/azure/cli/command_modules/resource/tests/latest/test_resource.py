@@ -5,17 +5,23 @@
 
 import json
 import os
+import platform
+import shutil
 import time
 from unittest import mock
 import unittest
+from pathlib import Path
+import logging
 
 from azure.cli.core.parser import IncorrectUsageError, InvalidArgumentValueError
 from azure.cli.testsdk.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
-                               live_only, record_only)
+from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
+                               create_random_name, live_only, record_only)
+from azure.cli.testsdk.constants import AUX_SUBSCRIPTION, AUX_TENANT
 from azure.cli.core.util import get_file_json
 from knack.util import CLIError
+from azure.cli.core.azclierror import ResourceNotFoundError
 
 
 class ResourceGroupScenarioTest(ScenarioTest):
@@ -2291,6 +2297,239 @@ class ResourceGroupLocalContextScenarioTest(LocalContextScenarioTest):
         self.cmd('group delete -n {group2} -y')
 
 
+class BicepScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse()
+    def test_bicep_list_versions(self):
+        self.cmd('az bicep list-versions', checks=[
+            self.greater_than('length(@)', 0)
+        ])
+
+class BicepDecompileParamsTest(LiveScenarioTest):
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
+    def test_bicep_decompile_params_file(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'test-params.json').replace('\\', '\\\\')
+        params_path = os.path.join(curr_dir, 'test-params.bicepparam').replace('\\', '\\\\')
+        self.kwargs.update({
+            'tf': tf,
+            'params_path': params_path,
+        })
+
+        self.cmd('az bicep decompile-params --file {tf}')
+
+        if os.path.exists(params_path):
+            os.remove(params_path)
+
+class BicepBuildParamsTest(LiveScenarioTest):
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
+    def test_bicep_build_params_file(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'sample_params.bicepparam').replace('\\', '\\\\')
+        params_path = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
+        self.kwargs.update({
+            'tf': tf,
+            'params_path': params_path,
+        })
+
+        self.cmd('az bicep build-params --file {tf}')
+
+        if os.path.exists(params_path):
+            os.remove(params_path)
+
+    def test_bicep_build_params_file_outfile(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'sample_params.bicepparam').replace('\\', '\\\\')
+        params_path = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
+        self.kwargs.update({
+            'tf': tf,
+            'params_path': params_path,
+        })
+
+        self.cmd('az bicep build-params --file {tf} --outfile {params_path}')
+
+        if os.path.exists(params_path):
+            os.remove(params_path)
+
+# Because don't want to record bicep cli binary
+class BicepBuildTest(LiveScenarioTest):
+
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
+    def test_bicep_build_decompile(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'storage_account_deploy.bicep').replace('\\', '\\\\')
+        build_path = os.path.join(curr_dir, 'test.json').replace('\\', '\\\\')
+        decompile_path = os.path.join(curr_dir, 'test.bicep').replace('\\', '\\\\')
+        self.kwargs.update({
+            'tf': tf,
+            'build_path': build_path,
+            'decompile_path': decompile_path
+        })
+
+        self.cmd('az bicep build -f {tf} --outfile {build_path}')
+        self.cmd('az bicep decompile -f {build_path}')
+        self.cmd('az bicep decompile -f {build_path} --force')
+
+        if os.path.exists(build_path):
+            os.remove(build_path)
+        if os.path.exists(decompile_path):
+            os.remove(decompile_path)
+
+class BicepGenerateParamsTest(LiveScenarioTest):
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
+    def test_bicep_generate_params_output_format_only(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+        params_path = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
+        self.kwargs.update({
+            'tf': tf,
+            'params_path': params_path,
+        })
+
+        self.cmd('az bicep generate-params -f {tf} --outfile {params_path} --output-format json')
+
+        if os.path.exists(params_path):
+            os.remove(params_path)
+
+    def test_bicep_generate_params_include_params_only(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+        params_path = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
+        self.kwargs.update({
+            'tf': tf,
+            'params_path': params_path,
+        })
+
+        self.cmd('az bicep generate-params -f {tf} --outfile {params_path} --include-params all')
+
+        if os.path.exists(params_path):
+            os.remove(params_path)
+
+    def test_bicep_generate_params(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+        params_path = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
+        self.kwargs.update({
+            'tf': tf,
+            'params_path': params_path,
+        })
+
+        self.cmd('az bicep generate-params -f {tf} --outfile {params_path}')
+
+        if os.path.exists(params_path):
+            os.remove(params_path)
+
+class BicepInstallationTest(LiveScenarioTest):
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
+    def test_install_and_upgrade(self):
+        self.cmd('az bicep install')
+        self.cmd('az bicep version')
+
+        self.cmd('az bicep uninstall')
+
+        self.cmd('az bicep install --target-platform win-x64')
+        self.cmd('az bicep version')
+
+        self.cmd('az bicep uninstall')
+
+        self.cmd('az bicep install --version v0.4.63')
+        self.cmd('az bicep upgrade')
+        self.cmd('az bicep version')
+
+        self.cmd('az bicep uninstall')
+
+        self.cmd('az bicep install --version v0.4.63')
+        self.cmd('az bicep upgrade -t win-x64')
+        self.cmd('az bicep version')
+
+
+class BicepRestoreTest(LiveScenarioTest):
+
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
+    def test_restore(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        bf = os.path.join(curr_dir, 'data', 'external_modules.bicep').replace('\\', '\\\\')
+        out_path = os.path.join(curr_dir, 'data', 'external_modules.json').replace('\\', '\\\\')
+        self.kwargs.update({
+            'bf': bf,
+            'out_path': out_path,
+        })
+
+        self.cmd('az bicep restore -f {bf}')
+        self.cmd('az bicep restore -f {bf} --force')
+        self.cmd('az bicep build -f {bf} --no-restore')
+
+        if os.path.exists(out_path):
+            os.remove(out_path)
+
+
+class BicepFormatTest(LiveScenarioTest):
+
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
+    def test_format(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        bf = os.path.join(curr_dir, 'storage_account_deploy.bicep').replace('\\', '\\\\')
+        out_file = os.path.join(curr_dir, 'storage_account_deploy.formatted.bicep').replace('\\', '\\\\')
+        self.kwargs.update({
+            'bf': bf,
+            'out_file': out_file,
+        })
+
+        self.cmd('az bicep format --file {bf} --outfile {out_file} --newline lf --indent-kind space --indent-size 2 --insert-final-newline')
+
+        if os.path.exists(out_file):
+            os.remove(out_file)
+
+
 class ResourceManagementPrivateLinkTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_resourcemanager_privatelink_get', location='westus')
     def test_get_resourcemanagementprivatelink(self, resource_group, resource_group_location):
@@ -2474,6 +2713,19 @@ class PrivateLinkAssociationTest(ScenarioTest):
         # clean
         self.cmd('resourcemanagement private-link delete -g {rg} -n {n} --yes', checks=self.is_empty())
         self.cmd('private-link association delete -m {mg} -n {pla} --yes', self.is_empty())
+
+
+class PrivateLinkAssociationTest(ScenarioTest):
+    def test_list_locations(self):
+        result = self.cmd('account list-locations').get_output_in_json()
+        extended_result = self.cmd('account list-locations --include-extended-locations').get_output_in_json()
+        assert isinstance(result, list)
+        assert len(extended_result) >= len(result)
+        # Verify there is an item with displayName 'East US'.
+        assert any('East US' == loc['displayName'] for loc in result)
+        assert any('geography' in loc['metadata'] for loc in result)
+        assert any('availabilityZoneMappings' in loc for loc in result)
+
 
 if __name__ == '__main__':
     unittest.main()

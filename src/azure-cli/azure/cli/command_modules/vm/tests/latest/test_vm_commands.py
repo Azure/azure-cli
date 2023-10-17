@@ -1691,10 +1691,13 @@ class VMExtensionScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'vm': 'myvm',
+            'vm2': 'myvm2',
             'pub': 'Microsoft.OSTCExtensions',
             'ext': 'VMAccessForLinux',
             'pub2': 'Microsoft.Azure.Security.LinuxAttestation',
             'ext2': 'GuestAttestation',
+            'pub3': 'Microsoft.Azure.Security.WindowsCodeIntegrity',
+            'ext3': 'CodeIntegrityAgent',
             'config': config_file,
             'user': user_name
         })
@@ -1733,6 +1736,18 @@ class VMExtensionScenarioTest(ScenarioTest):
             self.check('enableAutomaticUpgrade', True)
         ])
         self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext2}')
+
+        self.cmd(
+            'vm create -g {rg} -n {vm2} --image Win2022Datacenter --admin-username AzureUser --admin-password testPassword0 --nsg-rule NONE')
+
+        self.cmd('vm extension set -n {ext3} --publisher {pub3} --vm-name {vm2} --resource-group {rg} --force-update')
+        self.cmd('vm extension show --resource-group {rg} --vm-name {vm2} --name {ext3}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{ext3}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('enableAutomaticUpgrade', True)
+        ])
+        self.cmd('vm extension delete --resource-group {rg} --vm-name {vm2} --name {ext3}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_extension_debian')
     def test_vm_extension_debian(self, resource_group):
@@ -2291,6 +2306,8 @@ class VMMonitorTestUpdateLinux(ScenarioTest):
             'nsg': self.create_random_name('clinsg', 20)
         })
         self.cmd('network nsg create -g {rg} -n {nsg}')
+        # use new migrated log-analystics workspace create instead of monitor sdk
+        self.cmd('monitor log-analytics workspace create -n {workspace1} -g {rg}')
         self.cmd('vm create -n {vm} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --nsg {nsg} --generate-ssh-keys --admin-username azureuser')
         with mock.patch('azure.cli.command_modules.vm.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('vm update -n {vm} -g {rg} --workspace {workspace1}')
@@ -2446,6 +2463,7 @@ class VMBootDiagnostics(ScenarioTest):
 
 class VMSSExtensionInstallTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_extension')
     def test_vmss_extension(self):
 
@@ -2455,7 +2473,9 @@ class VMSSExtensionInstallTest(ScenarioTest):
         self.kwargs.update({
             'vmss': 'vmss1',
             'net-pub': 'Microsoft.Azure.NetworkWatcher', 'script-pub': 'Microsoft.Azure.Extensions', 'access-pub': 'Microsoft.OSTCExtensions',
+            'code-pub': 'Microsoft.Azure.Security.WindowsCodeIntegrity',
             'net-ext': 'NetworkWatcherAgentLinux', 'script-ext': 'customScript', 'access-ext': 'VMAccessForLinux',
+            'code-ext': 'CodeIntegrityAgent',
             'username': username,
             'config_file': config_file
         })
@@ -2496,9 +2516,17 @@ class VMSSExtensionInstallTest(ScenarioTest):
             self.check('provisionAfterExtensions[1]', '{script-ext}'),
         ])
 
+        self.cmd('vmss extension set -g {rg} --vmss-name {vmss} -n {code-ext} --publisher {code-pub} '
+                 '--protected-settings "{config_file}"')
+
+        self.cmd('vmss extension show -g {rg} --vmss-name {vmss} --name {code-ext}', checks=[
+            self.check('enableAutomaticUpgrade', True)
+        ])
+
         self.cmd('vmss extension upgrade -g {rg} -n {vmss}')
 
         # delete all the extensions
+        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {code-ext}')
         self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {access-ext}')
         self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {script-ext}')
         self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {net-ext}')
@@ -5331,6 +5359,19 @@ class VMDiskEncryptionTest(ScenarioTest):
         })
         self.cmd('vm create -g {rg} -n {vm} --image win2012datacenter --admin-username clitester1 --admin-password Test123456789! --nsg-rule NONE')
         self.cmd('vm encryption enable -g {rg} -n {vm} --disk-encryption-keyvault {vault}')
+        self.cmd('vm encryption show -g {rg} -n {vm}', checks=[self.check('disks[0].statuses[0].code', 'EncryptionState/encrypted')])
+        self.cmd('vm encryption disable -g {rg} -n {vm}')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_encryption', location='eastus2')
+    @KeyVaultPreparer(name_prefix='vault', name_len=10, location='eastus2', key='vault', additional_params='--enabled-for-disk-encryption')
+    def test_vm_disk_encryption_with_key(self, resource_group, resource_group_location, key_vault):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'key': 'KEK'
+        })
+        self.cmd('vm create -g {rg} -n {vm} --image win2012datacenter --admin-username clitester1 --admin-password Test123456789! --nsg-rule NONE')
+        self.cmd('keyvault key create --vault-name {vault} --name {key} --protection software')
+        self.cmd('vm encryption enable -g {rg} -n {vm} --disk-encryption-keyvault {vault} --key-encryption-key {key}')
         self.cmd('vm encryption show -g {rg} -n {vm}', checks=[self.check('disks[0].statuses[0].code', 'EncryptionState/encrypted')])
         self.cmd('vm encryption disable -g {rg} -n {vm}')
 

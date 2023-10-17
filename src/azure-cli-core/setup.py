@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.52.0"
+VERSION = "2.53.0"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -38,6 +38,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
     'License :: OSI Approved :: MIT License',
 ]
 
@@ -52,7 +53,7 @@ DEPENDENCIES = [
     'jmespath',
     'knack~=0.11.0',
     'msal-extensions~=1.0.0',
-    'msal[broker]==1.24.0b1',
+    'msal[broker]==1.24.0b2',
     'msrestazure~=0.6.4',
     'packaging>=20.9',
     'paramiko>=2.0.8,<4.0.0',

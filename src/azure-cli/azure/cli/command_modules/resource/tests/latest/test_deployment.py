@@ -15,7 +15,6 @@ from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPrep
 from azure.cli.testsdk.constants import AUX_SUBSCRIPTION, AUX_TENANT
 from knack.util import CLIError
 
-
 class TemplateSpecsTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs_list', parameter_name='resource_group_one', location='westus')
@@ -1398,7 +1397,12 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack sub delete --name {name} --yes')
 
         #create deployment stack with template spec and parameter file
-        self.cmd('stack sub create --name {name} --location {location} --template-spec "{template-spec-id}" --deny-settings-mode "none" --parameters "{parameter-file}" --yes', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack sub create --name {name} --location {location} --template-spec "{template-spec-id}" --deny-settings-mode "none" --parameters "{parameter-file}" --no-wait', checks=self.is_empty())
+
+        time.sleep(20)
+
+        # check if the stack was created successfully
+        self.cmd('stack sub show --name {name}', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup
         self.cmd('stack sub delete --name {name} --yes')
@@ -1767,7 +1771,12 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack group delete --name {name} --resource-group {resource-group} --yes')
 
         # create deployment stack with template spec and parameter file
-        self.cmd('stack group create --name {name} --resource-group {resource-group}  --template-spec "{template-spec-id}" --deny-settings-mode "none" --parameters "{parameter-file}" --yes', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack group create --name {name} --resource-group {resource-group}  --template-spec "{template-spec-id}" --deny-settings-mode "none" --parameters "{parameter-file}" --yes --no-wait', checks=self.is_empty())
+
+        time.sleep(20)
+
+        # check if the stack was created successfully
+        self.cmd('stack group show --name {name} -g {resource-group}', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup
         self.cmd('stack group delete --name {name} --resource-group {resource-group} --yes')
@@ -2122,7 +2131,12 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack mg delete --name {name} --management-group-id {mg} --yes')
 
         # create deployment stack with template file and parameter file
-        self.cmd('stack mg create --name {name} --management-group-id {mg} --location {location} --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file}" --description "MG stack deployment" --delete-all --deny-settings-excluded-principals "principal1 principal2" --deny-settings-excluded-actions "action1 action2" --deny-settings-apply-to-child-scopes', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack mg create --name {name} --management-group-id {mg} --location {location} --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file}" --description "MG stack deployment" --delete-all --deny-settings-excluded-principals "principal1 principal2" --deny-settings-excluded-actions "action1 action2" --deny-settings-apply-to-child-scopes --no-wait', checks=self.is_empty())
+
+        time.sleep(20)
+
+        # check if the stack was created successfully
+        self.cmd('stack mg show --name {name} --management-group-id {mg}', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup
         self.cmd('stack mg delete --name {name} --management-group-id {mg} --yes')
@@ -2418,7 +2432,6 @@ class DeploymentTestAtResourceGroupTemplateSpecs(ScenarioTest):
             self.check('properties.provisioningState', 'Canceled')
         ])
 
-
 class CrossRGDeploymentScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_cross_rg_alt', parameter_name='resource_group_cross')
@@ -2710,240 +2723,6 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
         with self.assertRaises(AssertionError):
             self.cmd('deployment group create -g {vm_rg} -n {dn} --template-file "{tf}" --parameters SIG_ImageVersion_id={sig_id} NIC_id={nic_id} --aux-tenants "{aux_tenant}" --aux-subs "{aux_sub}"')
 
-
-class BicepScenarioTest(ScenarioTest):
-
-    @AllowLargeResponse()
-    def test_bicep_list_versions(self):
-        self.cmd('az bicep list-versions', checks=[
-            self.greater_than('length(@)', 0)
-        ])
-
-class BicepDecompileParamsTest(LiveScenarioTest):
-    def setup(self):
-        super().setup()
-        self.cmd('az bicep uninstall')
-
-    def tearDown(self):
-        super().tearDown()
-        self.cmd('az bicep uninstall')
-
-    def test_bicep_decompile_params_file(self):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        tf = os.path.join(curr_dir, 'test-params.json').replace('\\', '\\\\')
-        params_path = os.path.join(curr_dir, 'test-params.bicepparam').replace('\\', '\\\\')
-        self.kwargs.update({
-            'tf': tf,
-            'params_path': params_path,
-        })
-
-        self.cmd('az bicep decompile-params --file {tf}')
-
-        if os.path.exists(params_path):
-            os.remove(params_path)
-
-class BicepBuildParamsTest(LiveScenarioTest):
-    def setup(self):
-        super().setup()
-        self.cmd('az bicep uninstall')
-
-    def tearDown(self):
-        super().tearDown()
-        self.cmd('az bicep uninstall')
-
-    def test_bicep_build_params_file(self):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        tf = os.path.join(curr_dir, 'sample_params.bicepparam').replace('\\', '\\\\')
-        params_path = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
-        self.kwargs.update({
-            'tf': tf,
-            'params_path': params_path,
-        })
-
-        self.cmd('az bicep build-params --file {tf}')
-
-        if os.path.exists(params_path):
-            os.remove(params_path)
-
-    def test_bicep_build_params_file_outfile(self):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        tf = os.path.join(curr_dir, 'sample_params.bicepparam').replace('\\', '\\\\')
-        params_path = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
-        self.kwargs.update({
-            'tf': tf,
-            'params_path': params_path,
-        })
-
-        self.cmd('az bicep build-params --file {tf} --outfile {params_path}')
-
-        if os.path.exists(params_path):
-            os.remove(params_path)
-
-# Because don't want to record bicep cli binary
-class BicepBuildTest(LiveScenarioTest):
-
-    def setup(self):
-        super().setup()
-        self.cmd('az bicep uninstall')
-
-    def tearDown(self):
-        super().tearDown()
-        self.cmd('az bicep uninstall')
-
-    def test_bicep_build_decompile(self):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        tf = os.path.join(curr_dir, 'storage_account_deploy.bicep').replace('\\', '\\\\')
-        build_path = os.path.join(curr_dir, 'test.json').replace('\\', '\\\\')
-        decompile_path = os.path.join(curr_dir, 'test.bicep').replace('\\', '\\\\')
-        self.kwargs.update({
-            'tf': tf,
-            'build_path': build_path,
-            'decompile_path': decompile_path
-        })
-
-        self.cmd('az bicep build -f {tf} --outfile {build_path}')
-        self.cmd('az bicep decompile -f {build_path}')
-        self.cmd('az bicep decompile -f {build_path} --force')
-
-        if os.path.exists(build_path):
-            os.remove(build_path)
-        if os.path.exists(decompile_path):
-            os.remove(decompile_path)
-
-class BicepGenerateParamsTest(LiveScenarioTest):
-    def setup(self):
-        super().setup()
-        self.cmd('az bicep uninstall')
-
-    def tearDown(self):
-        super().tearDown()
-        self.cmd('az bicep uninstall')
-
-    def test_bicep_generate_params_output_format_only(self):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        tf = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
-        params_path = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
-        self.kwargs.update({
-            'tf': tf,
-            'params_path': params_path,
-        })
-
-        self.cmd('az bicep generate-params -f {tf} --outfile {params_path} --output-format json')
-
-        if os.path.exists(params_path):
-            os.remove(params_path)
-
-    def test_bicep_generate_params_include_params_only(self):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        tf = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
-        params_path = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
-        self.kwargs.update({
-            'tf': tf,
-            'params_path': params_path,
-        })
-
-        self.cmd('az bicep generate-params -f {tf} --outfile {params_path} --include-params all')
-
-        if os.path.exists(params_path):
-            os.remove(params_path)
-
-    def test_bicep_generate_params(self):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        tf = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
-        params_path = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
-        self.kwargs.update({
-            'tf': tf,
-            'params_path': params_path,
-        })
-
-        self.cmd('az bicep generate-params -f {tf} --outfile {params_path}')
-
-        if os.path.exists(params_path):
-            os.remove(params_path)
-
-class BicepInstallationTest(LiveScenarioTest):
-    def setup(self):
-        super().setup()
-        self.cmd('az bicep uninstall')
-
-    def tearDown(self):
-        super().tearDown()
-        self.cmd('az bicep uninstall')
-
-    def test_install_and_upgrade(self):
-        self.cmd('az bicep install')
-        self.cmd('az bicep version')
-
-        self.cmd('az bicep uninstall')
-
-        self.cmd('az bicep install --target-platform win-x64')
-        self.cmd('az bicep version')
-
-        self.cmd('az bicep uninstall')
-
-        self.cmd('az bicep install --version v0.4.63')
-        self.cmd('az bicep upgrade')
-        self.cmd('az bicep version')
-
-        self.cmd('az bicep uninstall')
-
-        self.cmd('az bicep install --version v0.4.63')
-        self.cmd('az bicep upgrade -t win-x64')
-        self.cmd('az bicep version')
-
-
-class BicepRestoreTest(LiveScenarioTest):
-
-    def setup(self):
-        super().setup()
-        self.cmd('az bicep uninstall')
-
-    def tearDown(self):
-        super().tearDown()
-        self.cmd('az bicep uninstall')
-
-    def test_restore(self):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        bf = os.path.join(curr_dir, 'data', 'external_modules.bicep').replace('\\', '\\\\')
-        out_path = os.path.join(curr_dir, 'data', 'external_modules.json').replace('\\', '\\\\')
-        self.kwargs.update({
-            'bf': bf,
-            'out_path': out_path,
-        })
-
-        self.cmd('az bicep restore -f {bf}')
-        self.cmd('az bicep restore -f {bf} --force')
-        self.cmd('az bicep build -f {bf} --no-restore')
-
-        if os.path.exists(out_path):
-            os.remove(out_path)
-
-
-class BicepFormatTest(LiveScenarioTest):
-
-    def setup(self):
-        super().setup()
-        self.cmd('az bicep uninstall')
-
-    def tearDown(self):
-        super().tearDown()
-        self.cmd('az bicep uninstall')
-
-    def test_format(self):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        bf = os.path.join(curr_dir, 'storage_account_deploy.bicep').replace('\\', '\\\\')
-        out_file = os.path.join(curr_dir, 'storage_account_deploy.formatted.bicep').replace('\\', '\\\\')
-        self.kwargs.update({
-            'bf': bf,
-            'out_file': out_file,
-        })
-
-        self.cmd('az bicep format --file {bf} --outfile {out_file} --newline lf --indent-kind space --indent-size 2 --insert-final-newline')
-
-        if os.path.exists(out_file):
-            os.remove(out_file)
-
-
 class DeploymentWithBicepScenarioTest(LiveScenarioTest):
 
     def setup(self):
@@ -3155,7 +2934,7 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
 
         result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" --description {description} --version-description {version_description}', checks=[
             self.check('location', "westus"),
-            self.check('mainTemplate.metadata._generator.name', 'bicep'),
+            self.check('mainTemplate.functions', []),
             self.check("name", "1.0")
         ]).get_output_in_json()
 
@@ -3166,7 +2945,6 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
         # clean up
         self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
-
 
 if __name__ == '__main__':
     unittest.main()

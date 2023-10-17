@@ -268,7 +268,7 @@ class ContainerAppAuthTest(ScenarioTest):
             JMESPathCheck('registration.openIdConnectConfiguration.wellKnownOpenIdConfiguration', configuration),
         ])
 
-        self.cmd('containerapp auth openid-connect show -g {} --name {} --provider-name {}'.format(resource_group, app, provider_name))
-        self.cmd('containerapp auth openid-connect remove -g {} --name {} --provider-name {} --yes'.format(resource_group, app, provider_name), expect_failure=True)
+        self.cmd('containerapp auth openid-connect show -g {} --name {} --provider-name {}'.format(resource_group, app, provider_name), expect_failure=False)
+        self.cmd( 'containerapp auth openid-connect remove -g {} --name {} --provider-name {} --yes'.format(resource_group, app, provider_name), expect_failure=False)
         self.cmd('containerapp auth openid-connect update -g {} --name {} --client-id {} --client-secret {} --client-secret-name {} --provider-name {} --openid-configuration {} --scope sc --yes'
             .format(resource_group, app, client_id, test_secret, test_secret, provider_name, configuration), expect_failure=True)

@@ -19,6 +19,7 @@ TEMPLATE_FILE_NAME = 'formula_template.txt'
 CLI_VERSION = os.environ['CLI_VERSION']
 HOMEBREW_UPSTREAM_URL = os.environ['HOMEBREW_UPSTREAM_URL']
 HOMEBREW_FORMULAR_LATEST = "https://raw.githubusercontent.com/Homebrew/homebrew-core/master/Formula/a/azure-cli.rb"
+PYTHON_VERSION = '3.11'
 
 
 def main():
@@ -123,6 +124,10 @@ def update_formula() -> str:
     resp = requests.get(HOMEBREW_FORMULAR_LATEST)
     resp.raise_for_status()
     text = resp.text
+
+    # update python version
+    text = re.sub('depends_on "python@.*"', f'depends_on "python@{PYTHON_VERSION}"', text, 1)
+    text = re.sub(r'virtualenv_create\(libexec, "python.*"', f'virtualenv_create(libexec, "python{PYTHON_VERSION}"', text, 1)  # pylint: disable=line-too-long
 
     # update url and sha256 of azure-cli
     text = re.sub('url ".*"', 'url "{}"'.format(HOMEBREW_UPSTREAM_URL), text, 1)
