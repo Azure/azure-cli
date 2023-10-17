@@ -17,7 +17,7 @@ CLONED_NAME = "cloned-{}-{}"
 def _get_metrics_alert_rules_clone_list(cmd, source_resource, target_resource):
     subscription_id = parse_resource_id(source_resource)['subscription']
     from ..aaz.latest.monitor.metrics.alert import List
-    alert_rules = List(cli_ctx=cmd.cli_ctx)(command_args={"subscription_id": subscription_id})
+    alert_rules = List(cli_ctx=cmd.cli_ctx)(command_args={"subscription": subscription_id})
     alert_rules = _convert_to_snake_case(alert_rules)
     for alert_rule in alert_rules:
         if source_resource in alert_rule['scopes']:
@@ -32,7 +32,7 @@ def _add_into_existing_scopes(cmd, source_resource, alert_rule, target_resource)
     subscription_id = parse_resource_id(source_resource)['subscription']
     alert_rule['scopes'].append(target_resource)
     resource_group_name, name = _parse_id(alert_rule['id']).values()  # pylint: disable=unbalanced-dict-unpacking
-    alert_rule["subscription_id"] = subscription_id
+    alert_rule["subscription"] = subscription_id
     alert_rule["resource_group"] = resource_group_name
     alert_rule["name"] = name
     from ..aaz.latest.monitor.metrics.alert import Update
@@ -49,7 +49,7 @@ def _clone_and_replace_action_group(cmd, source_resource, alert_rule, action_gro
             resource_group_name, name = _parse_id(action["action_group_id"]).values()  # pylint: disable=unbalanced-dict-unpacking
             from ..aaz.latest.monitor.action_group import Show
             action_group = Show(cli_ctx=cmd.cli_ctx)(command_args={
-                'subscription_id': source_subscription_id,
+                'subscription': source_subscription_id,
                 "resource_group": resource_group_name,
                 "action_group_name": name,
             })
@@ -57,7 +57,7 @@ def _clone_and_replace_action_group(cmd, source_resource, alert_rule, action_gro
             from .action_groups import ActionGroupCreate
             name = CLONED_NAME.format(name, gen_guid())
             resource_group_name, _ = _parse_id(target_resource).values()  # pylint: disable=unbalanced-dict-unpacking
-            action_group["subscription_id"] = target_subscription_id
+            action_group["subscription"] = target_subscription_id
             action_group["resource_group"] = resource_group_name
             action_group["action_group_name"] = name
             new_action_group = ActionGroupCreate(cli_ctx=cmd.cli_ctx)(command_args=action_group)
@@ -95,7 +95,7 @@ def _clone_alert_rule(cmd, source_resource, alert_rule, target_resource):
     alert_rule['scopes'] = [target_resource]
     resource_group_name, name = _parse_id(target_resource).values()  # pylint: disable=unbalanced-dict-unpacking
     subscription_id = parse_resource_id(source_resource)['subscription']
-    alert_rule["subscription_id"] = subscription_id
+    alert_rule["subscription"] = subscription_id
     alert_rule["resource_group"] = resource_group_name
     alert_rule["name"] = name
     format_metrics_alert_req(alert_rule)
