@@ -84,7 +84,7 @@ def _try_parse_key_value_object(template_param_defs, parameters, value):
 
     param = template_param_defs.get(key, None)
     if param is None:
-        raise CLIError("unrecognized template parameter '{}'. Allowed parameters: {}".format(key, ', '.join(sorted(template_param_defs.keys()))))
+        raise InvalidArgumentValueError("unrecognized template parameter '{}'. Allowed parameters: {}".format(key, ', '.join(sorted(template_param_defs.keys()))))
 
     param_type = param.get('type', None)
     if param_type:
