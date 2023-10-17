@@ -396,20 +396,6 @@ def ensure_container_insights_for_monitoring(
                     error = e
             else:
                 raise error
-            json_response = json.loads(r.text)
-            for resource in json_response["resourceTypes"]:
-                if resource["resourceType"].lower() == "datacollectionrules":
-                    region_ids = map(
-                        lambda x: region_names_to_id[x], resource["locations"])
-                    if location not in region_ids:
-                        raise ClientRequestError(
-                            f"Data Collection Rules are not supported for LA workspace region {location}")
-                if resource["resourceType"].lower() == "datacollectionruleassociations":
-                    region_ids = map(
-                        lambda x: region_names_to_id[x], resource["locations"])
-                    if cluster_region not in region_ids:
-                        raise ClientRequestError(
-                            f"Data Collection Rule Associations are not supported for cluster region {cluster_region}")
             dcr_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
                 f"{dcr_resource_id}?api-version=2022-06-01"
             # get existing tags on the container insights extension DCR if the customer added any
