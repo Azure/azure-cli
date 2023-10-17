@@ -242,7 +242,8 @@ examples:
           --storage-size 32 --tags "key=value" --high-availability ZoneRedundant \\
           --zone 1 --standby-zone 3 --storage-auto-grow Enabled --iops 500
   - name: >
-      Trigger import from source backup stored in azure blob container. (Backup files present in container root and blob storage accessible through sas token with Read and List permissions.)
+      Trigger import from source backup stored in azure blob container.
+      (Backup files present in container root and blob storage accessible through sas token with Read and List permissions. Please pass '--%' in the command with SAS token.)
     text: >
         az mysql flexible-server import create --data-source-type "azure_blob" \\
           --data-source "https://teststorage.blob.windows.net/backupcontainer" \\
