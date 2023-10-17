@@ -8,7 +8,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands.transform import _parse_id
 from azure.cli.command_modules.network.custom import _convert_to_snake_case
-from ..util import gen_guid
+from azure.cli.command_modules.monitor.util import gen_guid
 
 logger = get_logger(__name__)
 CLONED_NAME = "cloned-{}-{}"
@@ -54,7 +54,6 @@ def _add_into_existing_scopes_v2(cmd, source_resource, alert_rule, target_resour
     alert_rule["subscription_id"] = subscription_id
     alert_rule["resource_group"] = resource_group_name
     alert_rule["name"] = name
-    format_metrics_alert_req(alert_rule)
     from ..aaz.latest.monitor.metrics.alert import Update
     return Update(cli_ctx=cmd.cli_ctx)(command_args=alert_rule)
 
