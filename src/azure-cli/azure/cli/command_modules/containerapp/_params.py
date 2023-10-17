@@ -33,11 +33,6 @@ def load_arguments(self, _):
         c.argument('managed_env', validator=validate_managed_env_name_or_id, options_list=['--environment'], help="Name or resource ID of the container app's environment.")
         c.argument('yaml', type=file_type, help='Path to a .yaml file with the configuration of a container app. All other parameters will be ignored. For an example, see  https://docs.microsoft.com/azure/container-apps/azure-resource-manager-api-spec#examples')
 
-    for item in ['create', 'update', 'show', 'list', 'up']:
-        with self.argument_context('containerapp {}'.format(item)) as c:
-            c.argument('show_sensitive_values', help="Show potentially sensitive environment variable and scale rules.",
-                       action='store_true')
-
     with self.argument_context('containerapp exec') as c:
         c.argument('container', help="The name of the container to ssh into")
         c.argument('replica', help="The name of the replica to ssh into. List replicas with 'az containerapp replica list'. A replica may not exist if there is not traffic to your app.")
@@ -444,11 +439,6 @@ def load_arguments(self, _):
         c.argument('min_executions', type=int, help="Minimum number of job executions that are created for a trigger, default 0.")
         c.argument('max_executions', type=int, help="Maximum number of job executions that are created for a trigger, default 100.")
         c.argument('polling_interval', type=int, help="Interval to check each event source in seconds. Defaults to 30s.", default=30)
-
-    for item in ['create', 'update', 'show', 'list', 'up']:
-        with self.argument_context('containerapp job {}'.format(item)) as c:
-            c.argument('show_sensitive_values', help="Show potentially sensitive environment variable and scale rules.",
-                       action='store_true')
 
     with self.argument_context('containerapp job create') as c:
         c.argument('system_assigned', options_list=['--mi-system-assigned', c.deprecate(target='--system-assigned', redirect='--mi-system-assigned', hide=True)], help='Boolean indicating whether to assign system-assigned identity.', action='store_true')

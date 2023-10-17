@@ -20,18 +20,16 @@ from ._transformers import (transform_containerapp_output,
 
 def load_command_table(self, args):
     with self.command_group('containerapp') as g:
-        g.custom_show_command('show', 'show_containerapp', table_transformer=transform_containerapp_output,
-                              transform=transform_sensitive_values_wrapper(args))
-        g.custom_command('list', 'list_containerapp', table_transformer=transform_containerapp_list_output,
-                         transform=transform_sensitive_values_list_output_wrapper(args))
+        g.custom_show_command('show', 'show_containerapp', table_transformer=transform_containerapp_output)
+        g.custom_command('list', 'list_containerapp', table_transformer=transform_containerapp_list_output)
         g.custom_command('create', 'create_containerapp', supports_no_wait=True, exception_handler=ex_handler_factory(),
-                         table_transformer=transform_containerapp_output, transform=transform_sensitive_values_wrapper(args))
+                         table_transformer=transform_containerapp_output, transform=transform_sensitive_values_wrapper())
         g.custom_command('update', 'update_containerapp', supports_no_wait=True, exception_handler=ex_handler_factory(),
-                         table_transformer=transform_containerapp_output, transform=transform_sensitive_values_wrapper(args))
+                         table_transformer=transform_containerapp_output, transform=transform_sensitive_values_wrapper())
         g.custom_command('delete', 'delete_containerapp', supports_no_wait=True, confirmation=True, exception_handler=ex_handler_factory())
         g.custom_command('exec', 'containerapp_ssh', validator=validate_ssh)
         g.custom_command('up', 'containerapp_up', supports_no_wait=False, exception_handler=ex_handler_factory(),
-                         transform=transform_sensitive_values_wrapper(args))
+                         transform=transform_sensitive_values_wrapper())
         g.custom_command('browse', 'open_containerapp_in_browser')
 
     with self.command_group('containerapp replica') as g:
@@ -51,13 +49,13 @@ def load_command_table(self, args):
         g.custom_command('update', 'update_managed_environment', supports_no_wait=True, exception_handler=ex_handler_factory())
 
     with self.command_group('containerapp job') as g:
-        g.custom_show_command('show', 'show_containerappsjob', transform=transform_sensitive_values_wrapper(args))
-        g.custom_command('list', 'list_containerappsjob', transform=transform_sensitive_values_list_output_wrapper(args))
+        g.custom_show_command('show', 'show_containerappsjob')
+        g.custom_command('list', 'list_containerappsjob')
         g.custom_command('create', 'create_containerappsjob', supports_no_wait=True, exception_handler=ex_handler_factory(),
-                         transform=transform_sensitive_values_wrapper(args))
+                         transform=transform_sensitive_values_wrapper())
         g.custom_command('delete', 'delete_containerappsjob', supports_no_wait=True, confirmation=True, exception_handler=ex_handler_factory())
         g.custom_command('update', 'update_containerappsjob', supports_no_wait=True, exception_handler=ex_handler_factory(),
-                         transform=transform_sensitive_values_wrapper(args))
+                         transform=transform_sensitive_values_wrapper())
         g.custom_command('start', 'start_containerappsjob', supports_no_wait=True, exception_handler=ex_handler_factory())
         g.custom_command('stop', 'stop_containerappsjob', supports_no_wait=True, exception_handler=ex_handler_factory())
 

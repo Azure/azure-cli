@@ -242,7 +242,7 @@ class ContainerappScenarioTest(ScenarioTest):
         ])
 
         # Update Container App with ACR
-        update_string = 'containerapp update -g {} -n {} --min-replicas 0 --max-replicas 1 --set-env-vars testenv=testing --show-sensitive-values'.format(
+        update_string = 'containerapp update -g {} -n {} --min-replicas 0 --max-replicas 1 --set-env-vars testenv=testing'.format(
             resource_group, containerapp_name)
         self.cmd(update_string, checks=[
             JMESPathCheck('name', containerapp_name),
@@ -253,7 +253,7 @@ class ContainerappScenarioTest(ScenarioTest):
             JMESPathCheck('properties.template.scale.maxReplicas', '1'),
             JMESPathCheck('length(properties.template.containers[0].env)', 1),
             JMESPathCheck('properties.template.containers[0].env[0].name', "testenv"),
-            JMESPathCheck('properties.template.containers[0].env[0].value', "testing"),
+            JMESPathCheck('properties.template.containers[0].env[0].value', None),
         ])
 
         # Add secrets to Container App with ACR
@@ -273,7 +273,7 @@ class ContainerappScenarioTest(ScenarioTest):
             self.cmd('containerapp secret remove -g {} -n {} --secret-names {}'.format(resource_group, containerapp_name, secret_name))
 
         # Update Container App with ACR
-        update_string = 'containerapp update -g {} -n {} --min-replicas 0 --max-replicas 1 --replace-env-vars testenv=testing2 --show-sensitive-values'.format(
+        update_string = 'containerapp update -g {} -n {} --min-replicas 0 --max-replicas 1 --replace-env-vars testenv=testing2'.format(
             resource_group, containerapp_name)
         self.cmd(update_string, checks=[
             JMESPathCheck('name', containerapp_name),
@@ -283,9 +283,9 @@ class ContainerappScenarioTest(ScenarioTest):
             JMESPathCheck('properties.template.scale.maxReplicas', '1'),
             JMESPathCheck('length(properties.template.containers[0].env)', 1),
             JMESPathCheck('properties.template.containers[0].env[0].name', "testenv"),
-            JMESPathCheck('properties.template.containers[0].env[0].value', "testing2"),
+            JMESPathCheck('properties.template.containers[0].env[0].value', None),
         ])
-        update_string = 'containerapp update -g {} -n {} --min-replicas 0 --max-replicas 1 --remove-env-vars testenv --remove-all-env-vars --show-sensitive-values'.format(resource_group, containerapp_name)
+        update_string = 'containerapp update -g {} -n {} --min-replicas 0 --max-replicas 1 --remove-env-vars testenv --remove-all-env-vars'.format(resource_group, containerapp_name)
         self.cmd(update_string, checks=[
             JMESPathCheck('name', containerapp_name),
             JMESPathCheck('properties.configuration.registries[0].server', registry_server),
@@ -597,7 +597,7 @@ class ContainerappScenarioTest(ScenarioTest):
         self.cmd(
             f'containerapp create -n {app} -g {resource_group} --environment {env2} --yaml {containerapp_file_name}')
 
-        self.cmd(f'containerapp show -g {resource_group} -n {app} --show-sensitive-values', checks=[
+        self.cmd(f'containerapp show -g {resource_group} -n {app}', checks=[
             JMESPathCheck("properties.provisioningState", "Succeeded"),
             JMESPathCheck("properties.environmentId", containerapp_env1["id"]),
             JMESPathCheck("properties.configuration.ingress.external", False),
@@ -675,7 +675,7 @@ class ContainerappScenarioTest(ScenarioTest):
         app2 = self.create_random_name(prefix='yaml2', length=24)
         self.cmd(
             f'containerapp create -n {app2} -g {resource_group} --environment {env2} --yaml {containerapp_file_name}')
-        self.cmd(f'containerapp show -g {resource_group} -n {app2} --show-sensitive-values', checks=[
+        self.cmd(f'containerapp show -g {resource_group} -n {app2}', checks=[
             JMESPathCheck("properties.provisioningState", "Succeeded"),
             JMESPathCheck("properties.environmentId", containerapp_env2["id"]),
             JMESPathCheck("properties.configuration.ingress.external", False),

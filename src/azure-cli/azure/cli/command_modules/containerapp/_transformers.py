@@ -34,22 +34,17 @@ def clean_up_sensitive_values(response_json):
     return response_json
 
 
-def transform_sensitive_values_wrapper(args):
+def transform_sensitive_values_wrapper():
+    
     def transform_sensitive_values(response_json):
-        if '--show-sensitive-values' in args:
-            return response_json
-
         return clean_up_sensitive_values(response_json)
 
     return transform_sensitive_values
 
 
-def transform_sensitive_values_list_output_wrapper(args):
+def transform_sensitive_values_list_output_wrapper():
 
     def transform_sensitive_values_list_output(apps):
-        if '--show-sensitive-values' in args:
-            return apps
-
         return [clean_up_sensitive_values(a) for a in apps]
 
     return transform_sensitive_values_list_output
