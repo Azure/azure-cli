@@ -1866,7 +1866,12 @@ def update_git_token(cmd, git_token=None):
     client = web_client_factory(cmd.cli_ctx)
     from azure.mgmt.web.models import SourceControl
     sc = SourceControl(name='not-really-needed', source_control_name='GitHub', token=git_token or '')
-    return client.update_source_control('GitHub', sc)
+    response = client.update_source_control('GitHub', sc)
+    logger.warning('Tokens have been redacted.')
+    response.refresh_token = None
+    response.token = None
+    response.token_secret = None
+    return response
 
 
 def show_source_control(cmd, resource_group_name, name, slot=None):
