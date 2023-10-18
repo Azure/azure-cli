@@ -60,7 +60,6 @@ def load_arguments(self, _):
         options_list=['--zone', '-z'],
         nargs='+',
         help='Space-separated list of availability zones into which to provision the resource.',
-        choices=['1', '2', '3']
     )
     edge_zone = CLIArgumentType(help='The name of edge zone.')
 
