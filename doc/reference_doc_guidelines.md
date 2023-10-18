@@ -143,7 +143,7 @@ Examples given in the reference documentation provide customers with information
 
 - **Provide at least one example for every parameter.** A single example can use multiple parameters, but a parameter that doesn't appear within an example code block often shows no usage statistics in Azure CLI reporting.
 
-- Bash examples should be formatted for readability using a line continuation character of a backslash (`\`). PowerShell examples should use [splatting](https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_splatting). Your Python source code will look similar to this:
+- Bash examples should be formatted for readability using a line continuation character of a backslash (`\`). PowerShell examples should use a backtick for line continuation. ([Splatting](https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_splatting) does not work with Azure CLI commands because CLI parameters use two dashes, `--`, not one, `-`). Your Python source code will look similar to this:
 
 ```python
 helps['vm create'] = """
