@@ -109,7 +109,6 @@ class Update(AAZCommand):
         _element.probe_threshold = AAZIntArg(
             options=["probe-threshold"],
             help={"short-summary": "The number of consecutive successful or failed probes in order to allow or deny traffic from being delivered to this endpoint. It is currently in preview and is not recommended for production workloads. For most scenarios, we recommend maintaining the default value of 1 by not specifying the value of the property.", "long-summary": "After failing the number of consecutive probes equal to this value, the endpoint will be taken out of rotation and require the same number of successful consecutive probes to be placed back in rotation."},
-            is_preview=True,
             nullable=True,
         )
         _element.protocol = AAZStrArg(
@@ -1429,7 +1428,7 @@ class _UpdateHelper:
         _element.id = AAZStrType()
         _element.name = AAZStrType()
         _element.properties = AAZObjectType(
-            flags={"required": True, "client_flatten": True},
+            flags={"client_flatten": True},
         )
         _element.type = AAZStrType(
             flags={"read_only": True},

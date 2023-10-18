@@ -27,7 +27,7 @@ class Create(AAZCommand):
         az network lb create -g MyResourceGroup -n MyLb --sku Basic --public-ip-zone 2
 
     :example: Create a standard zone flavored public-facing load balancer, through provisioning a zonal frontend ip configuration and Vnet.
-        az etwork lb create -g MyResourceGroup -n MyLb --sku Standard --frontend-ip-zone 1 --vnet-name MyVnet --subnet MySubnet
+        az network lb create -g MyResourceGroup -n MyLb --sku Standard --frontend-ip-zone 1 --vnet-name MyVnet --subnet MySubnet
     """
 
     _aaz_info = {
@@ -243,7 +243,6 @@ class Create(AAZCommand):
         _element.backend_port = AAZIntArg(
             options=["backend-port"],
             help="The port used for internal connections on the endpoint. Acceptable values are between 1 and 65535.",
-            required=True,
         )
         _element.enable_floating_ip = AAZBoolArg(
             options=["enable-floating-ip"],
@@ -261,12 +260,10 @@ class Create(AAZCommand):
         _element.frontend_port_range_end = AAZIntArg(
             options=["frontend-port-range-end"],
             help="The last port number in the range of external ports that will be used to provide Inbound Nat to NICs associated with a load balancer. Acceptable values range between 1 and 65535.",
-            required=True,
         )
         _element.frontend_port_range_start = AAZIntArg(
             options=["frontend-port-range-start"],
             help="The first port number in the range of external ports that will be used to provide Inbound Nat to NICs associated with a load balancer. Acceptable values range between 1 and 65534.",
-            required=True,
         )
         _element.idle_timeout_in_minutes = AAZIntArg(
             options=["idle-timeout-in-minutes"],
@@ -275,7 +272,6 @@ class Create(AAZCommand):
         _element.protocol = AAZStrArg(
             options=["protocol"],
             help="The reference to the transport protocol used by the inbound NAT pool.",
-            required=True,
             enum={"All": "All", "Tcp": "Tcp", "Udp": "Udp"},
         )
 
@@ -466,7 +462,6 @@ class Create(AAZCommand):
         _element.probe_threshold = AAZIntArg(
             options=["probe-threshold"],
             help={"short-summary": "The number of consecutive successful or failed probes in order to allow or deny traffic from being delivered to this endpoint. It is currently in preview and is not recommended for production workloads. For most scenarios, we recommend maintaining the default value of 1 by not specifying the value of the property.", "long-summary": "After failing the number of consecutive probes equal to this value, the endpoint will be taken out of rotation and require the same number of successful consecutive probes to be placed back in rotation."},
-            is_preview=True,
         )
         _element.protocol = AAZStrArg(
             options=["protocol"],
@@ -984,7 +979,7 @@ class Create(AAZCommand):
             if _elements is not None:
                 _elements.set_prop("id", AAZStrType, ".id")
                 _elements.set_prop("name", AAZStrType, ".name")
-                _elements.set_prop("properties", AAZObjectType, ".", typ_kwargs={"flags": {"required": True, "client_flatten": True}})
+                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
             properties = _builder.get(".properties.inboundNatPools[].properties")
             if properties is not None:
@@ -1185,7 +1180,7 @@ class Create(AAZCommand):
             _element.id = AAZStrType()
             _element.name = AAZStrType()
             _element.properties = AAZObjectType(
-                flags={"required": True, "client_flatten": True},
+                flags={"client_flatten": True},
             )
             _element.type = AAZStrType(
                 flags={"read_only": True},

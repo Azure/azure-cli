@@ -29,6 +29,8 @@ class List(AAZCommand):
         ]
     }
 
+    AZ_SUPPORT_PAGINATION = True
+
     def _handler(self, command_args):
         super()._handler(command_args)
         return self.build_paging(self._execute_operations, self._output)
@@ -225,7 +227,7 @@ class List(AAZCommand):
             _element.id = AAZStrType()
             _element.name = AAZStrType()
             _element.properties = AAZObjectType(
-                flags={"required": True, "client_flatten": True},
+                flags={"client_flatten": True},
             )
             _element.type = AAZStrType(
                 flags={"read_only": True},
@@ -588,7 +590,7 @@ class List(AAZCommand):
             _element.id = AAZStrType()
             _element.name = AAZStrType()
             _element.properties = AAZObjectType(
-                flags={"required": True, "client_flatten": True},
+                flags={"client_flatten": True},
             )
             _element.type = AAZStrType(
                 flags={"read_only": True},
