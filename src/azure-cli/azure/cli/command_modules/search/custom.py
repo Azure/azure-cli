@@ -101,7 +101,7 @@ class SearchServiceUpdate(_SearchServiceUpdate):
         args = self.ctx.args
 
         if has_value(args.ip_rules):
-            if args.ip_rules.to_serialized_data() is None:
+            if args.ip_rules.to_serialized_data() is None or args.ip_rules in [';', ','] :
                 # cleanup all ip_rules
                 args.ip_rules_internal = None
             else:
