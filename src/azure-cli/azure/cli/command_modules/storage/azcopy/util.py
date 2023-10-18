@@ -45,7 +45,7 @@ class AzCopy:
                 out_bytes = subprocess.check_output(args)
                 out_text = out_bytes.decode('utf-8')
                 version = re.findall(r"azcopy version (.+?)\n", out_text)[0]
-                if version or parse_version(version) >= parse_version(AZCOPY_VERSION):
+                if version and parse_version(version) >= parse_version(AZCOPY_VERSION):
                     self.executable = "azcopy"
             except Exception:  # pylint: disable=broad-except
                 self.executable = None
