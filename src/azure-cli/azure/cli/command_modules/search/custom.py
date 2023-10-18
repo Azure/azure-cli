@@ -53,7 +53,7 @@ class SearchServiceCreate(_SearchServiceCreate):
             ip_rules = re.split(';|,', args.ip_rules.to_serialized_data())
             args.ip_rules_internal = [{"value": ip_rule} for ip_rule in ip_rules]
 
-        if has_value(args.disable_local_auth) and args.disable_local_auth.to_serialzied_data() is True:
+        if has_value(args.disable_local_auth) and args.disable_local_auth.to_serialized_data() is True:
             if has_value(args.auth_options):
                 raise MutuallyExclusiveArgumentError("Both the DisableLocalAuth and AuthOptions parameters "
                                                      "can't be given at the same time")
@@ -108,7 +108,7 @@ class SearchServiceUpdate(_SearchServiceUpdate):
                 ip_rules = re.split(';|,', args.ip_rules.to_serialized_data())
                 args.ip_rules_internal = [{"value": ip_rule} for ip_rule in ip_rules]
 
-        if has_value(args.disable_local_auth) and args.disable_local_auth.to_serialzied_data() is True:
+        if has_value(args.disable_local_auth) and args.disable_local_auth.to_serialized_data() is True:
             if has_value(args.auth_options):
                 raise MutuallyExclusiveArgumentError("Both the DisableLocalAuth and AuthOptions parameters "
                                                      "can't be given at the same time")

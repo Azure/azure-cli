@@ -9,7 +9,7 @@ import unittest
 
 class AzureSearchServicesTests(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_list_private_link_resources(self, resource_group):
         import json
 

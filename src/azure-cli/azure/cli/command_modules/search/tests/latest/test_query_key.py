@@ -9,7 +9,7 @@ import unittest
 
 class AzureSearchQueryKeysTests(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_query_key_create_delete_list(self, resource_group):
         self.kwargs.update({
             'sku_name': 'standard',

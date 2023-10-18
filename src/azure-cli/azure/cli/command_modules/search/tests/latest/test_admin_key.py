@@ -9,7 +9,7 @@ import unittest
 
 class AzureSearchAdminKeysTests(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_admin_key_show_renew(self, resource_group):
         self.kwargs.update({
             'sku_name': 'standard',

@@ -9,7 +9,7 @@ import unittest
 
 class AzureSearchServicesTests(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_private_endpoint_connection_crud(self, resource_group):
         self.kwargs.update({
             'sku_name': 'basic',
