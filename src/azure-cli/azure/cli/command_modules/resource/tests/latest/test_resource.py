@@ -5157,6 +5157,39 @@ class BicepGenerateParamsTest(LiveScenarioTest):
         if os.path.exists(params_path):
             os.remove(params_path)
 
+class BicepLintTest(LiveScenarioTest):
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
+    def test_bicep_lint(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+
+        self.cmd('az bicep lint -f {tf}')
+
+    def test_bicep_lint_no_restore(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+
+        self.cmd('az bicep lint -f {tf} --no-restore')
+
+    def test_bicep_lint_diagnostics_format_default(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+
+        self.cmd('az bicep lint -f {tf} --diagnostics-format default')
+
+    def test_bicep_lint_diagnostics_format_sarif(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+
+        self.cmd('az bicep lint -f {tf} --diagnostics-format sarif')
+
 class BicepInstallationTest(LiveScenarioTest):
     def setup(self):
         super().setup()
