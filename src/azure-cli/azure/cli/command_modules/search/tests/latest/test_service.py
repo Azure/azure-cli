@@ -412,5 +412,48 @@ class AzureSearchServicesTests(ScenarioTest):
                     self.check('disableLocalAuth', '{disable_local_auth}'),
                     self.check('authOptions', { 'aadOrApiKey': { 'aadAuthFailureMode': 'http403' }, 'apiKeyOnly': None } )])
 
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    def test_service_create_semantic_search(self, resource_group):
+        self.kwargs.update({
+            'sku_name': 'standard',
+            'name': self.create_random_name(prefix='test', length=24),
+            'location': 'eastus2euap',
+            'replica_count': 1,
+            'partition_count': 1,
+            'semantic_search': 'disabled'
+        })
+
+        self.cmd('az search service create -n {name} -g {rg} --sku {sku_name} --location {location} '
+                 '--semantic-search {semantic_search}',
+                 checks=[self.check('name', '{name}'),
+                         self.check('sku.name', '{sku_name}'),
+                         self.check('replicaCount', '{replica_count}'),
+                         self.check('partitionCount', '{partition_count}'),
+                         self.check('semanticSearch', '{semantic_search}')])
+
+        self.kwargs.update({
+            'semantic_search': 'free'
+        })
+
+        self.cmd('az search service create -n {name} -g {rg} --sku {sku_name}  --location {location} '
+                 '--semantic-search {semantic_search}',
+                 checks=[self.check('name', '{name}'),
+                         self.check('sku.name', '{sku_name}'),
+                         self.check('replicaCount', '{replica_count}'),
+                         self.check('partitionCount', '{partition_count}'),
+                         self.check('semanticSearch', '{semantic_search}')])
+
+        self.kwargs.update({
+            'semantic_search': 'standard'
+        })
+
+        self.cmd('az search service create -n {name} -g {rg} --sku {sku_name} --location {location} '
+                 '--semantic-search {semantic_search}',
+                 checks=[self.check('name', '{name}'),
+                         self.check('sku.name', '{sku_name}'),
+                         self.check('replicaCount', '{replica_count}'),
+                         self.check('partitionCount', '{partition_count}'),
+                         self.check('semanticSearch', '{semantic_search}')])
+
 if __name__ == '__main__':
     unittest.main()
