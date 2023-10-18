@@ -55,8 +55,10 @@ def create_service(cmd, ns_name, service, description='', protocol='HTTP'):
     return json.loads(response.text)
 
 
-def create_instance(cmd, ns_name, service, instance, description='', address=None, port=None, metadata=None):
+def create_instance(cmd, ns_name, service, instance, description='', address='', port=0, metadata=dict(), connection_string=''):
     url = 'https://servicediscoverymvp.azurewebsites.net/namespaces/{}/services/{}/instances/{}'.format(ns_name, service, instance)
+    if connection_string:
+        metadata['connection_string'] = connection_string
     payload = {
         'description': description,
         'metadatas': metadata,
@@ -138,17 +140,30 @@ def export_namespace(cmd, ns_name, app_config):
     response = requests.get(url)
 
     service_res = json.loads(response.text)
-    service_names = [res.get('id').split('/')[-1] for res in service_res]
-    for service_name in service_names:
+    
+    # DB service nammes
+    db_service_names = [res.get('id').split('/')[-1] for res in service_res if res.get('protocol') == 'DB']
+    for service_name in db_service_names:
         url = 'https://servicediscoverymvp.azurewebsites.net/namespaces/{}/services/{}/instances'.format(ns_name, service_name)
         response = requests.get(url)
         instance_res = json.loads(response.text)
-        
         for instance in instance_res:
             instance_name = instance.get('id').split('/')[-1]
-            for key, val in instance.items():
-                res_key = '{}_{}_{}_{}'.format(ns_name, service_name, instance_name, key)
-                instance_kv_pairs[res_key] = str(val)
+            conn_string = instance.get('metadatas', dict()).get('connection_string', '')
+            if conn_string:
+                instance_kv_pairs['ConnectionStrings:{}'.format(service_name)] = conn_string
+
+    # HTTP service names
+    http_service_names = [res.get('id').split('/')[-1] for res in service_res if res.get('protocol') == 'HTTP']
+    for service_name in http_service_names:
+        url = 'https://servicediscoverymvp.azurewebsites.net/namespaces/{}/services/{}/instances'.format(ns_name, service_name)
+        response = requests.get(url)
+        instance_res = json.loads(response.text)
+        for instance in instance_res:
+            instance_name = instance.get('id').split('/')[-1]
+            fqdn = instance.get('address', '')
+            if 'azurecontainerapps.io' in fqdn:
+                instance_kv_pairs['Services:{}'.format(service_name)] = fqdn
 
     import tempfile, datetime
     temp = tempfile.NamedTemporaryFile(mode='w', delete=False)
@@ -159,7 +174,7 @@ def export_namespace(cmd, ns_name, app_config):
     _run_cli_cmd('az appconfig kv import -n {} --source file --format json --path {} --yes'.format(app_config, temp.name))
 
     return {
-        'Count of key-values exported': len(instance_kv_pairs),
         'Result': 'Succeeded',
+        'Count of key-values exported': len(instance_kv_pairs),
         'Time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
