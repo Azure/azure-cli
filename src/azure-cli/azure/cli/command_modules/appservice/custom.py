@@ -4203,23 +4203,35 @@ def _get_latest_deployment_id(cmd, rg_name, name, deployment_status_url, slot):
 def _track_deployment_using_deploymentstatus_api(cmd, deploymentstatusapi_url, timeout=None):
     import time
 
-    total_trials = (int(timeout) // 5) if timeout else 450
+    total_trials = (int(timeout) // 5) if timeout else 200
     num_trials = 0
     runtime_successful = False
     start_time = time.time()
     while num_trials < total_trials:
         time.sleep(5)
-        response_body = send_raw_request(cmd.cli_ctx, "GET", deploymentstatusapi_url, disable_request_response_logging=True)
-        deployment_status = response_body.json().get('properties').get('status')
+        response_body = send_raw_request(cmd.cli_ctx, "GET", deploymentstatusapi_url, disable_request_response_logging=True).json()
+        deployment_status = response_body.get('properties').get('status')
         time_elapseed = int(time.time() - start_time)
-        logger.info("Current deployment Status: %s. Total time elapsed: %s sec", deployment_status, time_elapseed)
+        logger.info("Current deployment status: %s. %s sec(s)", deployment_status, time_elapseed)
         if deployment_status == "RuntimeSuccessful":
             runtime_successful = True
             break
         if deployment_status == "RuntimeFailed":
-            raise CLIError("Deployment Failed: Runtime failed to start, check the deployment logs for more info")
+            deployment_properties = response_body.get('properties')
+            logger.error("Deployment failed because the runtime failed to start, InprogressInstances: %s, SuccessfulInstances: %s, FailedInstances: %s", \
+                deployment_properties.get('numberOfInstancesInProgress'), deployment_properties.get('numberOfInstancesSuccessful'), \
+                deployment_properties.get('numberOfInstancesFailed'))
+            logger.error("Errors: %s", deployment_properties.get('errors'))
+            logger.error("Please check the deployment logs for more info: %s", deployment_properties.get('failedInstancesLogs'))
+            break
         if deployment_status == "BuildFailed":
-            raise CLIError("Deployment Failed: Build failed, check the deployment logs for more info")
+            deployment_properties = response_body.get('properties')
+            logger.error("Deployment failed because the build process failed,  InprogressInstances: %s, SuccessfulInstances: %s, FailedInstances: %s", \
+                deployment_properties.get('numberOfInstancesInProgress'), deployment_properties.get('numberOfInstancesSuccessful'), \
+                deployment_properties.get('numberOfInstancesFailed'))
+            logger.error("Errors: %s", deployment_properties.get('errors'))
+            logger.error("Please check the build logs for more info: %s", deployment_properties.get('failedInstancesLogs'))
+            break
     if not runtime_successful:
         raise CLIError("Timeout reached while tracking deployment status, however,"
                        "the deployment operation is still on-going."
@@ -5282,9 +5294,10 @@ def _make_onedeploy_request(params):
                 if deployment_id is None:
                     raise CLIError("Unable to fetch deployment id for this deployment")
                 deploymentstatusapi_url = _build_deploymentstatus_url(params, deployment_id)
-                _track_deployment_using_deploymentstatus_api(params.cmd, deploymentstatusapi_url, params.timeout)
-            response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
-                                                         deployment_status_url, params.slot, params.timeout)
+                response_body = _track_deployment_using_deploymentstatus_api(params.cmd, deploymentstatusapi_url, params.timeout)
+            else:
+                response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
+                                                            deployment_status_url, params.slot, params.timeout)
             logger.info('Async deployment complete. Server response: %s', response_body)
         else:
             if 'application/json' in response.headers.get('content-type', ""):
