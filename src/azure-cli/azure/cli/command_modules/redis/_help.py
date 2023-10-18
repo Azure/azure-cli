@@ -111,6 +111,11 @@ short-summary: List Redis Caches.
 long-summary: Lists details about all caches within current Subscription or provided Resource Group.
 """
 
+helps['redis flush'] = """
+type: group
+short-summary: Deletes all of the keys in a cache.
+"""
+
 helps['redis patch-schedule'] = """
 type: group
 short-summary: Manage Redis patch schedules.
