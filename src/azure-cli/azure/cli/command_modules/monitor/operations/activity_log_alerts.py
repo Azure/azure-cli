@@ -94,7 +94,6 @@ class ActivityLogAlertCreate(_ActivityLogAlertCreate):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.enabled._registered = False
         args_schema.location._registered = False
-        args_schema.all_of._registered = False
         args_schema.action_groups._registered = False
         args_schema.scopes._registered = False
         args_schema.scope_ui = AAZListArg(
@@ -189,7 +188,6 @@ class ActivityLogAlertUpdate(_ActivityLogAlertUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.all_of._registered = False
         args_schema.action_groups._registered = False
         args_schema.scopes._registered = False
         args_schema.condition = AAZCustomListArg(
