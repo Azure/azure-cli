@@ -112,7 +112,7 @@ long-summary: Lists details about all caches within current Subscription or prov
 """
 
 helps['redis flush'] = """
-type: group
+type: command
 short-summary: Deletes all of the keys in a cache.
 """
 
