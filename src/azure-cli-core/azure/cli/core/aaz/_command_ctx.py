@@ -73,7 +73,7 @@ class AAZCommandCtx:
             credential = self.get_login_credential()
             client_kwargs = _prepare_client_kwargs_track2(self._cli_ctx)
             client_kwargs['user_agent'] += " (AAZ)"  # Add AAZ label in user agent
-            self._clients[client_type] = client_cls(self._cli_ctx, credential, **client_kwargs)
+            self._clients[client_type] = client_cls(self._cli_ctx, credential=credential, **client_kwargs)
 
         return self._clients[client_type]
 
