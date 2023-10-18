@@ -18,7 +18,7 @@ def load_arguments(self, _):
         c.argument('address', help='Address of the registered service instance')
         c.argument('port', help='Port of the registered service instance')
         c.argument('metadata', help='Service instance metadata. --medata key1=val1 key2=val2', nargs='*', action=MetaDataAction)
-        c.argument('connection_string', options_list=['--conn-string'], help='Connection string of a database')
+        c.argument('connection_string', options_list=['--conn-string'], help='Connection string of a database, applicable when protocol is DB')
 
     for cmd_group_name in ['namespace', 'service', 'instance']:
         with self.argument_context('discovery {}'.format(cmd_group_name)) as c:

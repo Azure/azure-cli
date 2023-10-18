@@ -58,7 +58,7 @@ def create_service(cmd, ns_name, service, description='', protocol='HTTP'):
 def create_instance(cmd, ns_name, service, instance, description='', address='', port=0, metadata=dict(), connection_string=''):
     url = 'https://servicediscoverymvp.azurewebsites.net/namespaces/{}/services/{}/instances/{}'.format(ns_name, service, instance)
     if connection_string:
-        metadata['connection_string'] = connection_string
+        metadata['ConnectionString'] = connection_string
     payload = {
         'description': description,
         'metadatas': metadata,
@@ -149,7 +149,7 @@ def export_namespace(cmd, ns_name, app_config):
         instance_res = json.loads(response.text)
         for instance in instance_res:
             instance_name = instance.get('id').split('/')[-1]
-            conn_string = instance.get('metadatas', dict()).get('connection_string', '')
+            conn_string = instance.get('metadatas', dict()).get('ConnectionString', '')
             if conn_string:
                 instance_kv_pairs['ConnectionStrings:{}'.format(service_name)] = conn_string
 
