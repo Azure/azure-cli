@@ -18,6 +18,7 @@ from azure.cli.core._profile import Profile
 from azure.cli.core.api import get_config_dir
 from knack.log import get_logger
 from knack.util import CLIError
+from packaging.version import parse as parse_version
 
 logger = get_logger(__name__)
 
@@ -34,18 +35,20 @@ class AzCopy:
         self.executable = None
         if os.path.isfile(install_location):
             self.executable = install_location
+            version = self.check_version()
+            if not version or parse_version(version) < parse_version(AZCOPY_VERSION):
+                self.executable = None
         else:
             try:
                 import re
-                from packaging.version import parse as parse_version
                 args = ["azcopy", "--version"]
                 out_bytes = subprocess.check_output(args)
                 out_text = out_bytes.decode('utf-8')
                 version = re.findall(r"azcopy version (.+?)\n", out_text)[0]
-                if parse_version(version) >= parse_version(AZCOPY_VERSION):
+                if version or parse_version(version) >= parse_version(AZCOPY_VERSION):
                     self.executable = "azcopy"
-            except FileNotFoundError:
-                pass
+            except Exception:  # pylint: disable=broad-except
+                self.executable = None
         self.creds = creds
         if not self.executable:
             logger.warning("Azcopy not found, installing at %s", install_location)
