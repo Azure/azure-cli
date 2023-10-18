@@ -26,14 +26,18 @@ LABEL maintainer="Microsoft" \
       org.label-schema.docker.cmd="docker run -v \${HOME}/.azure:/root/.azure -it mcr.microsoft.com/azure-cli:$CLI_VERSION"
 
 
-# ca-certificates bash bash-completion - for convenience
+# ca-certificates bash bash-completion jq jp - for convenience
 # libintl icu-libs - required by azure-devops https://github.com/Azure/azure-cli/pull/9683
 # libc6-compat - required by az storage blob sync https://github.com/Azure/azure-cli/issues/10381
 # gcc python3-dev musl-dev linux-headers libffi-dev - temporarily required by psutil
 
+ARG JP_VERSION="0.2.1"
+RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && curl -L https://github.com/jmespath/jp/releases/download/${JP_VERSION}/jp-linux-$arch -o /usr/local/bin/jp \
+    && chmod +x /usr/local/bin/jp
+
 WORKDIR azure-cli
 COPY . /azure-cli
-RUN apk add --no-cache ca-certificates bash bash-completion libintl icu-libs libc6-compat \
+RUN apk add --no-cache ca-certificates bash bash-completion libintl icu-libs libc6-compat jq \
     && apk add --no-cache --virtual .build-deps gcc python3-dev musl-dev linux-headers libffi-dev \
     && update-ca-certificates && ./scripts/install_full.sh && python ./scripts/trim_sdk.py \
     && cat /azure-cli/az.completion > ~/.bashrc \
