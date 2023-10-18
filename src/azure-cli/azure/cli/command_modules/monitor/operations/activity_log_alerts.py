@@ -178,7 +178,7 @@ class ActivityLogAlertCreate(_ActivityLogAlertCreate):
         for i in action_group_rids:
             args.action_groups.append({
                 "action_group_id": i,
-                "webhook_properties_raw": webhook_properties
+                "webhook_properties": webhook_properties
             })
         if has_value(args.disable):
             args.enabled = not args.disable
