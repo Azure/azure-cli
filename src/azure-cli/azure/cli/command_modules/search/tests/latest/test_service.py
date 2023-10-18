@@ -380,7 +380,7 @@ class AzureSearchServicesTests(ScenarioTest):
             ' --auth-options {auth_options}',
             checks=[self.check('name', '{name}'),
                     self.check('disableLocalAuth', '{disable_local_auth}'),
-                    self.check('authOptions', {'apiKeyOnly': {}, 'aadOrApiKey': None })])
+                    self.check('authOptions', {'apiKeyOnly': {} })])
 
         self.kwargs.update({
             'disable_local_auth': False,
@@ -395,7 +395,7 @@ class AzureSearchServicesTests(ScenarioTest):
             ' --aad-auth-failure-mode {aad_auth_failure_mode}',
             checks=[self.check('name', '{name}'),
                     self.check('disableLocalAuth', '{disable_local_auth}'),
-                    self.check('authOptions', { 'aadOrApiKey': { 'aadAuthFailureMode': 'http401WithBearerChallenge' }, 'apiKeyOnly': None } )])
+                    self.check('authOptions', { 'aadOrApiKey': { 'aadAuthFailureMode': 'http401WithBearerChallenge' } } )])
 
         self.kwargs.update({
             'disable_local_auth': False,
@@ -410,7 +410,7 @@ class AzureSearchServicesTests(ScenarioTest):
             ' --aad-auth-failure-mode {aad_auth_failure_mode}',
             checks=[self.check('name', '{name}'),
                     self.check('disableLocalAuth', '{disable_local_auth}'),
-                    self.check('authOptions', { 'aadOrApiKey': { 'aadAuthFailureMode': 'http403' }, 'apiKeyOnly': None } )])
+                    self.check('authOptions', { 'aadOrApiKey': { 'aadAuthFailureMode': 'http403' } } )])
 
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_service_create_semantic_search(self, resource_group):
