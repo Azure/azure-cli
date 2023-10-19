@@ -298,10 +298,10 @@ class TestCommandRegistration(unittest.TestCase):
         loader.load_command_table(["hello", "mod-only"])
         _check_index()
 
-        with mock.patch("azure.cli.core.__version__", "2.7.0"), mock.patch.object(cli.cloud, "profile", "2019-03-01-hybrid"):
+        with mock.patch.object(cli.cloud, "profile", "2019-03-01-hybrid"):
             def update_and_check_index():
                 loader.load_command_table(["hello", "mod-only"])
-                self.assertEqual(INDEX[CommandIndex._COMMAND_INDEX_VERSION], "2.7.0")
+                self.assertEqual(INDEX[CommandIndex._COMMAND_INDEX_VERSION], __version__)
                 self.assertEqual(INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE], "2019-03-01-hybrid")
                 self.assertDictEqual(INDEX[CommandIndex._COMMAND_INDEX], self.expected_command_index)
 
@@ -395,6 +395,7 @@ class TestCommandRegistration(unittest.TestCase):
     @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_get_extension_modname)
     @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
     def test_command_index_always_loaded_extensions(self):
+        import azure
         from azure.cli.core import CommandIndex
 
         cli = DummyCli()
@@ -403,14 +404,14 @@ class TestCommandRegistration(unittest.TestCase):
         index.invalidate()
 
         # Test azext_always_loaded is loaded when command index is rebuilt
-        with mock.patch('azure.cli.core.ALWAYS_LOADED_EXTENSIONS', ['azext_always_loaded']):
+        with mock.patch.object(azure.cli.core,'ALWAYS_LOADED_EXTENSIONS', ['azext_always_loaded']):
             loader.load_command_table(["hello", "mod-only"])
             self.assertEqual(TestCommandRegistration.test_hook, "FAKE_HANDLER")
 
         TestCommandRegistration.test_hook = []
 
         # Test azext_always_loaded is loaded when command index is used
-        with mock.patch('azure.cli.core.ALWAYS_LOADED_EXTENSIONS', ['azext_always_loaded']):
+        with mock.patch.object(azure.cli.core,'ALWAYS_LOADED_EXTENSIONS', ['azext_always_loaded']):
             loader.load_command_table(["hello", "mod-only"])
             self.assertEqual(TestCommandRegistration.test_hook, "FAKE_HANDLER")
 

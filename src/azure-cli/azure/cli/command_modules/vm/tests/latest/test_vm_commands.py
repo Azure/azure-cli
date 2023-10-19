@@ -2306,6 +2306,8 @@ class VMMonitorTestUpdateLinux(ScenarioTest):
             'nsg': self.create_random_name('clinsg', 20)
         })
         self.cmd('network nsg create -g {rg} -n {nsg}')
+        # use new migrated log-analystics workspace create instead of monitor sdk
+        self.cmd('monitor log-analytics workspace create -n {workspace1} -g {rg}')
         self.cmd('vm create -n {vm} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --nsg {nsg} --generate-ssh-keys --admin-username azureuser')
         with mock.patch('azure.cli.command_modules.vm.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('vm update -n {vm} -g {rg} --workspace {workspace1}')
@@ -5357,6 +5359,19 @@ class VMDiskEncryptionTest(ScenarioTest):
         })
         self.cmd('vm create -g {rg} -n {vm} --image win2012datacenter --admin-username clitester1 --admin-password Test123456789! --nsg-rule NONE')
         self.cmd('vm encryption enable -g {rg} -n {vm} --disk-encryption-keyvault {vault}')
+        self.cmd('vm encryption show -g {rg} -n {vm}', checks=[self.check('disks[0].statuses[0].code', 'EncryptionState/encrypted')])
+        self.cmd('vm encryption disable -g {rg} -n {vm}')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_encryption', location='eastus2')
+    @KeyVaultPreparer(name_prefix='vault', name_len=10, location='eastus2', key='vault', additional_params='--enabled-for-disk-encryption')
+    def test_vm_disk_encryption_with_key(self, resource_group, resource_group_location, key_vault):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'key': 'KEK'
+        })
+        self.cmd('vm create -g {rg} -n {vm} --image win2012datacenter --admin-username clitester1 --admin-password Test123456789! --nsg-rule NONE')
+        self.cmd('keyvault key create --vault-name {vault} --name {key} --protection software')
+        self.cmd('vm encryption enable -g {rg} -n {vm} --disk-encryption-keyvault {vault} --key-encryption-key {key}')
         self.cmd('vm encryption show -g {rg} -n {vm}', checks=[self.check('disks[0].statuses[0].code', 'EncryptionState/encrypted')])
         self.cmd('vm encryption disable -g {rg} -n {vm}')
 

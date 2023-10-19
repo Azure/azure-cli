@@ -50,7 +50,7 @@ def update_add_actions(args):
             add_actions.append({
                 "key": "email",
                 "value": {
-                    "custom_emails": add_action_item_arr[1:]
+                    "customEmails": add_action_item_arr[1:]
                 }
             })
         elif _type == "webhook":
@@ -182,30 +182,49 @@ class AutoScaleUpdate(_AutoScaleUpdate):
                 profile.capacity.default = str(count)
                 profile.capacity.minimum = str(min_count)
                 profile.capacity.maximum = str(max_count)
+        updated_notification = None
+        if instance.properties.notifications:
+            retained_notification = []
+            for x in instance.properties.notifications:
+                note = x.to_serialized_data()
+                if note['operation'].lower() == 'scale':
+                    updated_notification = note
+                else:
+                    retained_notification.append(note)
+            instance.properties.notifications = retained_notification
+        else:
+            instance.properties.notifications = []
 
-        if not instance.properties.notifications:
-            return
-        notification = next(x for x in instance.properties.notifications if x.operation.to_serialized_data().lower() == 'scale')
+        if updated_notification is None:
+            updated_notification = {
+                "operation": "scale",
+                "email": {
+                    "customEmails": []
+                },
+                "webhooks": []
+            }
 
         # process removals
         if len(remove_actions) > 0:
             removed_emails, removed_webhooks = _parse_action_removals(remove_actions)
-            notification.email.custom_emails = \
-                [x for x in notification.email.custom_emails if x not in removed_emails]
-            notification.webhooks = \
-                [x for x in notification.webhooks if x.service_uri not in removed_webhooks]
+            updated_notification['email']['customEmails'] = \
+                [x for x in updated_notification['email']['customEmails'] if x not in removed_emails]
+            updated_notification['webhooks'] = \
+                [x for x in updated_notification['webhooks'] if x['serviceUri'] not in removed_webhooks]
 
         # process additions
         for action in add_actions:
             if action["key"] == "email":
-                for email in action["value"]["custom_emails"]:
-                    notification.email.custom_emails.append(email)
+                for email in action["value"]["customEmails"]:
+                    updated_notification['email']['customEmails'].append(email)
             elif action["key"] == "webhook":
-                notification.webhooks.append(action["value"])  # please check snake case key here
+                updated_notification['webhooks'].append(action["value"])
         if has_value(args.email_administrator):
-            notification.email.send_to_subscription_administrator = args.email_administrator.to_serialized_data()
+            updated_notification['email']['sendToSubscriptionAdministrator'] = args.email_administrator.to_serialized_data()
         if has_value(args.email_coadministrators):
-            notification.email.send_to_subscription_co_administrators = args.email_coadministrators.to_serialized_data()
+            updated_notification['email']['sendToSubscriptionCoAdministrators'] = args.email_coadministrators.to_serialized_data()
+
+        instance.properties.notifications.append(updated_notification)
 
         if has_value(args.scale_look_ahead_time) and not has_value(args.scale_mode) \
                 and not has_value(instance.properties.predictive_autoscale_policy):

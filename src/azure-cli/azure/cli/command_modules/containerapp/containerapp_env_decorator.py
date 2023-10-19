@@ -215,10 +215,10 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
         if self.get_argument_infrastructure_subnet_resource_id() or self.get_argument_docker_bridge_cidr() or self.get_argument_platform_reserved_cidr() or self.get_argument_platform_reserved_dns_ip():
             vnet_config_def = VnetConfigurationModel
 
-            if self.get_argument_infrastructure_subnet_resource_id is not None:
+            if self.get_argument_infrastructure_subnet_resource_id() is not None:
                 vnet_config_def["infrastructureSubnetId"] = self.get_argument_infrastructure_subnet_resource_id()
 
-            if self.get_argument_docker_bridge_cidr is not None:
+            if self.get_argument_docker_bridge_cidr() is not None:
                 vnet_config_def["dockerBridgeCidr"] = self.get_argument_docker_bridge_cidr()
 
             if self.get_argument_platform_reserved_cidr() is not None:

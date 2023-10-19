@@ -2181,7 +2181,12 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack sub delete --name {name} --yes')
 
         #create deployment stack with template spec and parameter file
-        self.cmd('stack sub create --name {name} --location {location} --template-spec "{template-spec-id}" --deny-settings-mode "none" --parameters "{parameter-file}" --yes', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack sub create --name {name} --location {location} --template-spec "{template-spec-id}" --deny-settings-mode "none" --parameters "{parameter-file}" --no-wait', checks=self.is_empty())
+
+        time.sleep(20)
+
+        # check if the stack was created successfully
+        self.cmd('stack sub show --name {name}', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup
         self.cmd('stack sub delete --name {name} --yes')
@@ -2550,7 +2555,12 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack group delete --name {name} --resource-group {resource-group} --yes')
 
         # create deployment stack with template spec and parameter file
-        self.cmd('stack group create --name {name} --resource-group {resource-group}  --template-spec "{template-spec-id}" --deny-settings-mode "none" --parameters "{parameter-file}" --yes', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack group create --name {name} --resource-group {resource-group}  --template-spec "{template-spec-id}" --deny-settings-mode "none" --parameters "{parameter-file}" --yes --no-wait', checks=self.is_empty())
+
+        time.sleep(20)
+
+        # check if the stack was created successfully
+        self.cmd('stack group show --name {name} -g {resource-group}', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup
         self.cmd('stack group delete --name {name} --resource-group {resource-group} --yes')
@@ -2905,7 +2915,12 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack mg delete --name {name} --management-group-id {mg} --yes')
 
         # create deployment stack with template file and parameter file
-        self.cmd('stack mg create --name {name} --management-group-id {mg} --location {location} --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file}" --description "MG stack deployment" --delete-all --deny-settings-excluded-principals "principal1 principal2" --deny-settings-excluded-actions "action1 action2" --deny-settings-apply-to-child-scopes', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack mg create --name {name} --management-group-id {mg} --location {location} --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file}" --description "MG stack deployment" --delete-all --deny-settings-excluded-principals "principal1 principal2" --deny-settings-excluded-actions "action1 action2" --deny-settings-apply-to-child-scopes --no-wait', checks=self.is_empty())
+
+        time.sleep(20)
+
+        # check if the stack was created successfully
+        self.cmd('stack mg show --name {name} --management-group-id {mg}', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup
         self.cmd('stack mg delete --name {name} --management-group-id {mg} --yes')
@@ -5141,6 +5156,39 @@ class BicepGenerateParamsTest(LiveScenarioTest):
 
         if os.path.exists(params_path):
             os.remove(params_path)
+
+class BicepLintTest(LiveScenarioTest):
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
+    def test_bicep_lint(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+
+        self.cmd('az bicep lint -f {tf}')
+
+    def test_bicep_lint_no_restore(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+
+        self.cmd('az bicep lint -f {tf} --no-restore')
+
+    def test_bicep_lint_diagnostics_format_default(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+
+        self.cmd('az bicep lint -f {tf} --diagnostics-format default')
+
+    def test_bicep_lint_diagnostics_format_sarif(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+
+        self.cmd('az bicep lint -f {tf} --diagnostics-format sarif')
 
 class BicepInstallationTest(LiveScenarioTest):
     def setup(self):
