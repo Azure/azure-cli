@@ -436,7 +436,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
         update_application_settings_polling(cmd, resource_group_name, name, app_settings, slot, client)
         result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     else:
-        result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
+        result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,.
                                              'update_application_settings',
                                              app_settings, slot, client)
 
@@ -1715,7 +1715,7 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
         except Exception as ex:  # pylint: disable=broad-except
             logger.warning("Retrieving credentials failed with an exception:'%s'", ex)  # consider throw if needed
 
-    if docker_registry_server_user is not None:
+    if docker_registry_server_user is not None: 
         settings.append('DOCKER_REGISTRY_SERVER_USERNAME=' + docker_registry_server_user)
     if docker_registry_server_password is not None:
         settings.append('DOCKER_REGISTRY_SERVER_PASSWORD=' + docker_registry_server_password)
@@ -1744,7 +1744,12 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
 
 def update_container_settings_functionapp(cmd, resource_group_name, name, registry_server=None,
                                           image=None, registry_username=None,
-                                          registry_password=None, slot=None, min_replicas=None, max_replicas=None):
+                                          registry_password=None, slot=None, min_replicas=None, max_replicas=None, 
+                                          workload_profile_name=None, cpu=None, memory=None):
+    if is_centauri_functionapp(cmd, resource_group_name, name):
+        _validate_cpu_momory_functionapp(cpu, memory)
+        update_resource_config(cmd, resource_group_name, name, cpu=cpu, memory=memory, workload_profile_name=workload_profile_name)
+    
     return update_container_settings(cmd, resource_group_name, name, registry_server,
                                      image, registry_username, None,
                                      registry_password, multicontainer_config_type=None,
@@ -3687,6 +3692,33 @@ def should_enable_distributed_tracing(consumption_plan_location, matched_runtime
         and matched_runtime.name.lower() == "java" \
         and image is None
 
+def update_functionapp_polling(cmd, resource_group_name, name, functionapp):
+    try:
+        _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update', None, functionapp)
+    except Exception as ex:  # pylint: disable=broad-except
+        poll_url = ex.response.headers['Location'] if 'Location' in ex.response.headers else None
+        if ex.response.status_code == 202 and poll_url:
+            r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+            poll_timeout = time.time() + 60 * 2  # 2 minute timeout
+
+            while r.status_code != 200 and time.time() < poll_timeout:
+                time.sleep(5)
+                r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+        else:
+            raise CLIError(ex)
+
+def update_resource_config(cmd, resource_group_name, name, workload_profile_name=None, 
+                       cpu=None, memory=None):
+    site = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
+    
+    if cpu is not None and memory is not None:
+        setattr(site.resource_config, 'cpu', cpu)
+        setattr(site.resource_config, 'memory', memory)
+    
+    if workload_profile_name is not None:
+        setattr(site, 'workload_profile_name', workload_profile_name)
+    
+    update_functionapp_polling(cmd, resource_group_name, name, site)
 
 def create_functionapp(cmd, resource_group_name, name, storage_account, plan=None,
                        os_type=None, functions_version=None, runtime=None, runtime_version=None,
@@ -3696,7 +3728,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        registry_server=None, registry_password=None, registry_username=None,
                        image=None, tags=None, assign_identities=None,
                        role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
-                       environment=None, min_replicas=None, max_replicas=None):
+                       environment=None, min_replicas=None, max_replicas=None, workload_profile_name=None, 
+                       cpu=None, memory=None):
+    
+    logger.warning("Khuram Test: %s", "workload_profile_name")
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
@@ -3712,7 +3747,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                            "used with parameter --environment, please provide the name "
                                            "of the container app environment using --environment.")
     from azure.mgmt.web.models import Site
-    SiteConfig, NameValuePair = cmd.get_models('SiteConfig', 'NameValuePair')
+    SiteConfig, NameValuePair, ResourceConfig = cmd.get_models('SiteConfig', 'NameValuePair', 'ResourceConfig')
     disable_app_insights = (disable_app_insights == "true")
 
     site_config = SiteConfig(app_settings=[])
@@ -3746,6 +3781,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     else:
         subnet_resource_id = None
         vnet_route_all_enabled = None
+
 
     functionapp_def = Site(location=None, site_config=site_config, tags=tags,
                            virtual_network_subnet_id=subnet_resource_id, https_only=https_only,
@@ -3822,6 +3858,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     site_config_dict = matched_runtime.site_config_dict
     app_settings_dict = matched_runtime.app_settings_dict
 
+    # validate either both cup and momory
+    _validate_cpu_momory_functionapp(cpu, memory)
+    
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 
     if environment is not None:
@@ -3868,6 +3907,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                                               value='false'))
                 site_config.linux_fx_version = _format_fx_version(image)
 
+                site_config.workload_profile = workload_profile_name
+                site_config.resource_config.cpu = cpu
+                site_config.resource_config.momory = memory
+
                 # clear all runtime specific configs and settings
                 site_config_dict.use32_bit_worker_process = False
                 app_settings_dict = {}
@@ -3894,6 +3937,14 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functionapp_def.hyper_v = None
         functionapp_def.is_xenon = None
         functionapp_def.type = 'Microsoft.Web/sites'
+        
+        if (workload_profile_name is not None):
+            functionapp_def.workload_profile_name = workload_profile_name
+           
+        functionapp_def.resource_config = ResourceConfig() 
+        if (cpu is not None and memory is None):
+            functionapp_def.resource_config.cpu = cpu
+            functionapp_def.resource_config.memory = memory
 
         site_config.net_framework_version = None
         site_config.java_version = None
@@ -3989,6 +4040,29 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functionapp.identity = identity
 
     return functionapp
+
+def _validate_cpu_momory_functionapp(cpu=None, memory=None):
+    # validate either both cup and momory are provided or none is provided. throw error otherwise
+    if cpu is None and memory is None:
+        return
+    
+    if cpu is not None and memory is None:
+        raise ArgumentUsageError("--memory input is required with --cpu. Please provide both or none.")
+    
+    if cpu is None and memory is not None:
+        raise ArgumentUsageError("--cpu input is required with --memory. Please provide both or none.")
+    
+    # validate that memory is number and ends with Gi
+    if memory is not None:
+        try:
+            float(memory[:-2])
+        except ValueError:
+            raise ValidationError("--momory input is not valid. Please provide a correct value. e.g. 1.0Gi.")
+        
+    if memory is not None and not memory.endswith("Gi"):
+        raise ValidationError("--momory input should end with Gi. Please provide a correct value. e.g. 1.0Gi.")
+        
+    return
 
 
 def _get_extension_version_functionapp(functions_version):

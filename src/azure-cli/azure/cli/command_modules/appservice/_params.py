@@ -397,6 +397,9 @@ subscription than the app service environment, please use the resource ID for --
                    help='the container registry server password')
         c.argument('min_replicas', type=int, help="The minimum number of replicas when create funtion app on container app", is_preview=True)
         c.argument('max_replicas', type=int, help="The maximum number of replicas when create funtion app on container app", is_preview=True)
+        c.argument('workload_profile_name', help="The name of the workload profile to run the app on.", is_preview=True)
+        c.argument('cpu', type=int, help="Required CPU in cores from 0.5 to 2.0.", is_preview=True)
+        c.argument('memory', type=int, help="Required momory from 1.0 to 4.0 ending with ""Gi"" e.g. 1.0Gi, ", is_preview=True)
 
     with self.argument_context('webapp config connection-string list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
@@ -737,6 +740,9 @@ subscription than the app service environment, please use the resource ID for --
                    help='The container registry server password. Required for private registries.')
         c.argument('min_replicas', type=int, help="The minimum number of replicas when create funtion app on container app", is_preview=True)
         c.argument('max_replicas', type=int, help="The maximum number of replicas when create funtion app on container app", is_preview=True)
+        c.argument('workload_profile_name', help="The name of the workload profile to run the app on.", is_preview=True)
+        c.argument('cpu', type=int, help="Required CPU in cores from 0.5 to 2.0.", is_preview=True)
+        c.argument('memory', type=int, help="Required momory from 1.0 to 4.0 ending with ""Gi"" e.g. 1.0Gi, ", is_preview=True)
 
     with self.argument_context('functionapp cors credentials') as c:
         c.argument('enable', help='enable/disable access-control-allow-credentials', arg_type=get_three_state_flag())
