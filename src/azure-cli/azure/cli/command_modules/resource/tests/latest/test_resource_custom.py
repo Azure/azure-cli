@@ -398,6 +398,15 @@ class TestCustom(unittest.TestCase):
         self.assertTrue(is_generated_params_file_exists)
 
     @live_only()
+    def test_bicep_lint_defaults(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        param_file = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+
+        run_bicep_command(cli_ctx, ["lint", param_file])
+
+        self.assertTrue(param_file)
+
+    @live_only()
     def test_bicep_build_params_defaults(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         param_file = os.path.join(curr_dir, 'sample_params.bicepparam').replace('\\', '\\\\')

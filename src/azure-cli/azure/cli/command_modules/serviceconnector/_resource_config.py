@@ -86,7 +86,7 @@ class CLIENT_TYPE(Enum):
 
 
 # The source resources released as CLI extensions
-SOURCE_RESOURCES_IN_EXTENSION = [RESOURCE.SpringCloud, RESOURCE.SpringCloudDeprecated, RESOURCE.ContainerApp]
+SOURCE_RESOURCES_IN_EXTENSION = [RESOURCE.SpringCloud, RESOURCE.SpringCloudDeprecated]
 
 # The source resources using user token
 SOURCE_RESOURCES_USERTOKEN = [RESOURCE.KubernetesCluster]

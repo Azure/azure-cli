@@ -1843,9 +1843,9 @@ def map_single_server_configuration(single_server_client, source_server_id, tier
 
 def get_default_flex_configuration(tier, sku_name, storage_gb, auto_grow, backup_retention, geo_redundant_backup, version, administrator_login):
     if not tier:
-        tier = 'GeneralPurpose'
+        tier = 'Burstable'
     if not sku_name:
-        sku_name = 'Standard_D2ds_v4'
+        sku_name = 'Standard_B1ms'
     if not storage_gb:
         storage_gb = 32
     if not version:
