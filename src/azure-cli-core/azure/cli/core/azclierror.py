@@ -33,7 +33,7 @@ class AzCLIError(CLIError):
 
         # Get error reason from Azure OpenAI
         if error_enabled():
-            self.error_help = error_assistance(command=command)
+            self.error_help = error_assistance(command=command, error=error_msg)
         else:
             self.error_help = None
 

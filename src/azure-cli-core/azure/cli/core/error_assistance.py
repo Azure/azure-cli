@@ -14,7 +14,7 @@ from azure.cli.core._config import GLOBAL_CONFIG_PATH
 from azure.cli.core.style import Style, print_styled_text
 
 
-def error_assistance(command=None):
+def error_assistance(command=None, error=None):
     openai.api_key = os.getenv('AZURE_OPENAI_API_KEY')  # Edit to genearalize and keep endpoint secure
     openai.api_version = "2023-07-01-preview"
     openai.api_type = "azure"
@@ -27,10 +27,16 @@ def error_assistance(command=None):
     if command is None:
         return None
 
-    prompt = "Azure CLI Command: '" + command + "'\n This isn't working, why not?"
+    prompt = "Azure CLI Command: ###" + command + "###"
+
+    if error is None:
+        prompt = prompt + "\n This isn't working, why not?"
+    else:
+        prompt = prompt + "\n The error is: " + error
+
     messages = [
         {"role": "system", "content": "You receive an Azure CLI command that contains \
-         a syntax or command structure error. Find out what the error is and correct it, \
+         a syntax or command structure error, or it returns an errors when it runs. Find out what the error is and correct it, \
          giving back a corrected command Azure CLI command to the user. \n \
          Example with all the parameters missing: \n \
          Azure CLI Command: storage account create \n \
