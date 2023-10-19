@@ -67,7 +67,7 @@ class AzureSearchServicesTests(ScenarioTest):
         with self.assertRaises(SystemExit) as ex:
             self.cmd('az search shared-private-link-resource show --service-name {search_service_name} -g {rg} --name {shared_private_link_resource_name}')
         self.assertEqual(ex.exception.code, 3)
-    """"
+    """
 
 if __name__ == '__main__':
     unittest.main()
