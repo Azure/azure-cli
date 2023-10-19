@@ -4614,6 +4614,8 @@ class NetworkPrivateLinkElasticSANScenarioTest(ScenarioTest):
 class NetworkPrivateLinkMongoClustersTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_mongo_cl', location='eastus2euap')
     def test_private_link_resource_cosmosdb_mongo_clusters(self, resource_group):
+        secret1 = "mongo"
+        secret2 = "Administrator1"
         self.kwargs.update({
             'cluster_name': self.create_random_name(prefix='cli', length=10),
             'loc': 'eastus2euap',
@@ -4621,7 +4623,7 @@ class NetworkPrivateLinkMongoClustersTest(ScenarioTest):
             'namespace': 'Microsoft.DocumentDB',
             'resource_type': 'mongoClusters',
             'api_version': '2023-03-01-preview',
-            'body': '{\\"location\\":\\"eastus2euap\\",\\"properties\\":{\\"nodeGroupSpecs\\":[{\\"kind\\":\\"Shard\\",\\"sku\\":\\"M30\\",\\"diskSizeGB\\":128,\\"nodeCount\\":1,\\"enableHa\\":false}],\\"administratorLogin\\":\\"mongo\\",\\"administratorLoginPassword\\":\\"Administrator123\\"}}'
+            'body': f"""{{\\"location\\":\\"eastus2euap\\",\\"properties\\":{{\\"nodeGroupSpecs\\":[{{\\"kind\\":\\"Shard\\",\\"sku\\":\\"M30\\",\\"diskSizeGB\\":128,\\"nodeCount\\":1,\\"enableHa\\":false}}],\\"administratorLogin\\":\\"{secret1}\\",\\"administratorLoginPassword\\":\\"{secret2}\\"}}}}"""
         })
 
         self.cmd('az rest --method "PUT" \
@@ -4639,6 +4641,8 @@ class NetworkPrivateLinkMongoClustersTest(ScenarioTest):
         from azure.mgmt.core.tools import resource_id
         namespace = 'Microsoft.DocumentDB'
         resource_type = 'mongoClusters'
+        secret1 = "mongo"
+        secret2 = "Administrator1"
         resource_name = self.create_random_name(prefix='cli', length=10)
         target_resource_id = resource_id(
             subscription=self.get_subscription_id(),
@@ -4659,7 +4663,7 @@ class NetworkPrivateLinkMongoClustersTest(ScenarioTest):
             'pe': self.create_random_name('cli-pe-', 24),
             'pe_connection': self.create_random_name('cli-pec-', 24),
             'api_version': '2023-03-01-preview',
-            'body': '{\\"location\\":\\"eastus2euap\\",\\"properties\\":{\\"nodeGroupSpecs\\":[{\\"kind\\":\\"Shard\\",\\"sku\\":\\"M30\\",\\"diskSizeGB\\":128,\\"nodeCount\\":1,\\"enableHa\\":false}],\\"administratorLogin\\":\\"mongo\\",\\"administratorLoginPassword\\":\\"Administrator123\\"}}'
+            'body': f"""{{\\"location\\":\\"eastus2euap\\",\\"properties\\":{{\\"nodeGroupSpecs\\":[{{\\"kind\\":\\"Shard\\",\\"sku\\":\\"M30\\",\\"diskSizeGB\\":128,\\"nodeCount\\":1,\\"enableHa\\":false}}],\\"administratorLogin\\":\\"{secret1}\\",\\"administratorLoginPassword\\":\\"{secret2}\\"}}}}"""
         })
 
         cluster = self.cmd('az rest --method "PUT" \
