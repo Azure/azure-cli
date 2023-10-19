@@ -64,23 +64,23 @@ class AAZClientConfiguration(Configuration):
 class AAZBaseClient(PipelineClient):
     """Base Client"""
 
-    def __init__(self, cli_ctx, credential, **kwargs):
+    def __init__(self, ctx, credential, **kwargs):
         super().__init__(
-            base_url=self._base_url(cli_ctx, **kwargs),
-            config=self._configuration(cli_ctx, credential, **kwargs),
-            per_call_policies=self._per_call_policies(cli_ctx, **kwargs)
+            base_url=self._base_url(ctx, **kwargs),
+            config=self._configuration(ctx, credential, **kwargs),
+            per_call_policies=self._per_call_policies(ctx, **kwargs)
         )
 
     @classmethod
     @abstractmethod
-    def _base_url(cls, cli_ctx, **kwargs):
+    def _base_url(cls, ctx, **kwargs):
         """Provide a complete url. Supports placeholder added"""
-        # return "https://{KeyVaultName}" + cli_ctx.cloud.suffixes.keyvault_dns
+        # return "https://{KeyVaultName}" + ctx.cli_ctx.cloud.suffixes.keyvault_dns
         raise NotImplementedError()
 
     @classmethod
     @abstractmethod
-    def _configuration(cls, cli_ctx, credential, **kwargs):
+    def _configuration(cls, ctx, credential, **kwargs):
         """Provide client configuration"""
         # return AAZClientConfiguration(
         #     credential=credential,
@@ -90,7 +90,7 @@ class AAZBaseClient(PipelineClient):
         raise NotImplementedError()
 
     @classmethod
-    def _per_call_policies(cls, cli_ctx, **kwargs):
+    def _per_call_policies(cls, ctx, **kwargs):
         return []
 
     def send_request(self, request, stream=False, **kwargs):  # pylint: disable=arguments-differ
@@ -127,20 +127,20 @@ class AAZMgmtClient(AAZBaseClient):
     """Management Client for Management Plane APIs"""
 
     @classmethod
-    def _base_url(cls, cli_ctx, **kwargs):
-        return cli_ctx.cloud.endpoints.resource_manager
+    def _base_url(cls, ctx, **kwargs):
+        return ctx.cli_ctx.cloud.endpoints.resource_manager
 
     @classmethod
-    def _configuration(cls, cli_ctx, credential, **kwargs):
+    def _configuration(cls, ctx, credential, **kwargs):
         from azure.cli.core.auth.util import resource_to_scopes
         return AAZClientConfiguration(
             credential=credential,
-            credential_scopes=resource_to_scopes(cli_ctx.cloud.endpoints.active_directory_resource_id),
+            credential_scopes=resource_to_scopes(ctx.cli_ctx.cloud.endpoints.active_directory_resource_id),
             **kwargs
         )
 
     @classmethod
-    def _per_call_policies(cls, cli_ctx, **kwargs):
+    def _per_call_policies(cls, ctx, **kwargs):
         from azure.mgmt.core.policies import ARMAutoResourceProviderRegistrationPolicy
         return [ARMAutoResourceProviderRegistrationPolicy()]
 
