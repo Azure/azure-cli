@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "search service",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Demo
+    """Manage Azure Search services
     """
     pass
 
