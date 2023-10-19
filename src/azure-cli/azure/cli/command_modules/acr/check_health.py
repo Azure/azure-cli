@@ -70,7 +70,7 @@ def _subprocess_communicate(command_parts, shell=False):
 # Checks docker command, docker daemon, docker version and docker pull
 def _get_docker_status_and_version(ignore_errors, yes):
     from ._errors import DOCKER_DAEMON_ERROR, DOCKER_PULL_ERROR, DOCKER_VERSION_ERROR
-
+    print_pass("Get docker status")
     # Docker command and docker daemon check
     docker_command, error = get_docker_command(is_diagnostics_context=True)
     docker_daemon_available = True
@@ -126,7 +126,7 @@ def _get_docker_status_and_version(ignore_errors, yes):
 def _get_cli_version():
     from azure.cli.core import __version__ as core_version
     logger.warning('Azure CLI version: %s', core_version)
-
+print_pass("Get CLI version")
 
 # Get helm versions
 def _get_helm_version(ignore_errors):
@@ -292,9 +292,9 @@ def _get_endpoint_and_token_status(cmd, login_server, ignore_errors):
     print_pass("Fetch refresh token for registry '{}'".format(login_server))
     print_pass("Fetch access token for registry '{}'".format(login_server))
 
-
 def _check_registry_health(cmd, registry_name, ignore_errors):
     from azure.cli.core.profiles import ResourceType
+    print_pass("Check registry health")
     if registry_name is None:
         logger.warning("Registry name must be provided to check connectivity.")
         return
@@ -343,7 +343,7 @@ def _check_registry_health(cmd, registry_name, ignore_errors):
 def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # pylint: disable=too-many-locals, too-many-statements
     import socket
     from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
-
+    print_pass("Check private endpoint")
     if registry_name is None:
         raise CLIError("Registry name must be provided to verify DNS routings of its private endpoints")
 
@@ -415,23 +415,116 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # py
         print_pass('DNS routing to private endpoint')
     else:
         raise CLIError('DNS routing verification failed')
+    
+# Validate if specific blob can be pulled
+def _check_blob_exists(cmd,
+                       registry_name,
+                       repository_name,
+                       image):
+    import sys
+    import requests
+    from .repository import get_access_credentials
+    print_pass("Check blob exists")
+    if registry_name is None:
+        raise CLIError("Registry name must be provided to verify if image exists in registry.")      
+    registry, _ = get_registry_by_name(cmd.cli_ctx, registry_name)
 
+    login_server = registry.login_server.rstrip('/')
+
+    if repository_name is None:
+        raise CLIError("Repository name must be provided to verify if image exists in registry.")
+       
+    if image is None:
+        raise CLIError("Image or tag must be provided to verify if image exists in registry.")
+ 
+    # Get the access credentials for the registry
+    registry_name, username, password = get_access_credentials(
+    cmd,
+    registry_name=registry_name,
+    tenant_suffix=None,
+    username=None,
+    password=None,
+    repository=repository_name,
+    permission='pull')
+
+    # Get manifest
+    # GET {url}/v2/{name}/manifests/{reference}
+    manifest_url = 'https://{}/v2/{}/manifests/{}'.format(login_server, repository_name, image)
+    
+    response = requests.get(
+        manifest_url,
+        headers={'Accept': 'application/vnd.oci.artifact.manifest.v1+json'
+            ', application/vnd.cncf.oras.artifact.manifest.v1+json'
+            ', application/vnd.oci.image.manifest.v1+json'
+            ', application/vnd.oci.image.index.v1+json'
+            ', application/vnd.docker.distribution.manifest.v2+json'
+            ', application/vnd.docker.distribution.manifest.list.v2+json'},
+        auth=(username, password))
+
+    manifest = response.json()
+
+    # get the digest of the smallest blob for performance purposes
+    # check if manifest has been pulled using a tag or digest - may not need this
+    def get_smallest_blob_digest(manifest):
+        # check if manifest has fsLayers which indicates that the manifest was pulled using a tag
+        if 'fsLayers' in manifest:
+            # Find the smallest layer in the manifest
+            smallest_blob = {'digest': '', 'size': sys.maxsize}
+            for layer in manifest['fsLayers']:
+                layer_digest = layer['blobSum']
+
+                # Find the smallest blob
+                layer_size_url = 'https://{}/v2/{}/blobs/{}'.format(login_server, repository_name, layer_digest)
+                layer_size_response = requests.head(layer_size_url, auth=(username, password))
+                layer_size = int(layer_size_response.headers['Content-Length'])
+
+
+                if layer_size < smallest_blob['size'] :
+                    # Get the digest number of the smallest blob
+                    smallest_blob = {'digest': layer_digest, 'size': layer_size}
+                    
+            return smallest_blob['digest']
+        else:
+            # Find the smallest blob when user pulls using a digest
+            smallest_blob = min(manifest['layers'], key=lambda layer: layer['size'])
+            smallest_blob_digest = smallest_blob['digest']
+
+            return smallest_blob_digest
+    
+    digest = get_smallest_blob_digest(manifest)
+
+    # Pull blob - GET {url}/v2/{name}/blobs/{digest}
+    request_url = 'https://' + login_server + '/v2/' + repository_name + '/blobs/' + digest
+    
+    logger.debug(add_timestamp("Sending a HTTP GET request to {}".format(request_url)))
+    
+    response = requests.get(request_url, auth=(username, password))
+    
+    if response.status_code < 400:
+        print_pass("The blob identified by image {} is available to pull from registry {}.".format(image, login_server))
+    else:
+        raise CLIError("'Blob identified by image {} cannot be pulled from registry {}.".format(image, login_server))
 
 # General command
 def acr_check_health(cmd,  # pylint: disable useless-return
                      vnet=None,
                      ignore_errors=False,
                      yes=False,
-                     registry_name=None):
+                     registry_name=None,
+                     repository_name=None,
+                     image=None):
     from azure.cli.core.util import in_cloud_console
+    print_pass("Check health 1 passed")
     in_cloud_console = in_cloud_console()
     if in_cloud_console:
         logger.warning("Environment checks are not supported in Azure Cloud Shell.")
     else:
+        print_pass("Check health 2 passed")
         _get_docker_status_and_version(ignore_errors, yes)
         _get_cli_version()
-
+    
     _check_registry_health(cmd, registry_name, ignore_errors)
+    _check_blob_exists(cmd, registry_name, repository_name, image)
 
     if vnet:
         _check_private_endpoint(cmd, registry_name, vnet)
@@ -439,5 +532,4 @@ def acr_check_health(cmd,  # pylint: disable useless-return
     if not in_cloud_console:
         _get_helm_version(ignore_errors)
         _get_notary_version(ignore_errors)
-
     logger.warning(FAQ_MESSAGE)

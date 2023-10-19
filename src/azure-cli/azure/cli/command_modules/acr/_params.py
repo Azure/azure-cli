@@ -424,6 +424,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('ignore_errors', options_list=['--ignore-errors'], help='Provide all health checks, even if errors are found', action='store_true', required=False)
         c.argument('vnet', options_list=['--vnet'],
                    help="Virtual network ID so to run this command inside a VNET to verify the DNS routing to private endpoints", required=False)
+        c.argument('registry_name', options_list=['--name', '-n'], help="The name of the registry.")
+        c.argument('repository_name', options_list=['--repository', '-r'], help="The target repository namespace such as 'ubuntu'.")
+        c.argument('image', options_list=['--image','-t'],
+                   help="The digest of the manifest such as '--image sha256@abc123', or the tag such as '-t latest'")
 
     with self.argument_context('acr scope-map') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
