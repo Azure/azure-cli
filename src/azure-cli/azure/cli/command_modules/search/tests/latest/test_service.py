@@ -14,6 +14,8 @@ class AzureSearchServicesTests(ScenarioTest):
         self.vcr.match_on = ['scheme', 'method', 'path', 'query'] # not 'host', 'port'
         super(AzureSearchServicesTests, self).setUp()
 
+    # Quota
+    """
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_service_create_skus(self, resource_group):
         self.kwargs.update({
@@ -60,6 +62,7 @@ class AzureSearchServicesTests(ScenarioTest):
                     self.check('replicaCount', '{replica_count}'),
                     self.check('partitionCount', '{partition_count}'),
                     self.check('hostingMode', '{hosting_mode}')])
+    """
 
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_service_create_multi_partition(self, resource_group):
