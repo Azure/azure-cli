@@ -458,7 +458,7 @@ def get_network_resources_from_subnets(cli_ctx, subnets, fail, oc):
 
         if subnet.get("natGateway", None):
             subnet_resources.add(subnet["natGateway"]["id"])
-        
+
         if oc.network_profile.preconfigured_nsg == 'Enabled':
             if subnet.get("networkSecurityGroup", None):
                 subnet_resources.add(subnet['networkSecurityGroup']['id'])
@@ -473,7 +473,7 @@ def get_network_resources_from_subnets(cli_ctx, subnets, fail, oc):
                                not attached for all required subnets. Please make sure all the following\
                                subnets have a network security groups attached and retry.\
                               {subnets_with_no_nsg_attached}")
-    
+
     return subnet_resources
 
 
