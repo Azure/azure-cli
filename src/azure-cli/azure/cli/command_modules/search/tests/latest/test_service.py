@@ -9,6 +9,11 @@ import unittest
 
 class AzureSearchServicesTests(ScenarioTest):
 
+    # https://vcrpy.readthedocs.io/en/latest/configuration.html#request-matching
+    def setUp(self):
+        self.vcr.match_on = ['scheme', 'method', 'path', 'query'] # not 'host', 'port'
+        super(AzureSearchServicesTests, self).setUp()
+
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_service_create_skus(self, resource_group):
         self.kwargs.update({
@@ -446,7 +451,7 @@ class AzureSearchServicesTests(ScenarioTest):
             'semantic_search': 'standard'
         })
 
-        self.cmd('az search service create -n {name} -g {rg} --sku {sku_name}'
+        self.cmd('az search service create -n {name} -g {rg} --sku {sku_name} '
                  '--semantic-search {semantic_search}',
                  checks=[self.check('name', '{name}'),
                          self.check('sku.name', '{sku_name}'),

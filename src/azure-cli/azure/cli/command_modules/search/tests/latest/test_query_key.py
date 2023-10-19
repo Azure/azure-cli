@@ -9,6 +9,11 @@ import unittest
 
 class AzureSearchQueryKeysTests(ScenarioTest):
 
+    # https://vcrpy.readthedocs.io/en/latest/configuration.html#request-matching
+    def setUp(self):
+        self.vcr.match_on = ['scheme', 'method', 'path', 'query'] # not 'host', 'port'
+        super(AzureSearchQueryKeysTests, self).setUp()
+
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_query_key_create_delete_list(self, resource_group):
         self.kwargs.update({

@@ -9,6 +9,11 @@ import unittest
 
 class AzureSearchServicesTests(ScenarioTest):
 
+    # https://vcrpy.readthedocs.io/en/latest/configuration.html#request-matching
+    def setUp(self):
+        self.vcr.match_on = ['scheme', 'method', 'path', 'query'] # not 'host', 'port'
+        super(AzureSearchServicesTests, self).setUp()
+
     # Test isn't runnable due to service issues
     """
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
