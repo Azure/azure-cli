@@ -407,7 +407,7 @@ def _valid_range(addr_range):
 def firewall_rule_name_validator(ns):
     if not re.search(r'^[a-zA-Z0-9][-_a-zA-Z0-9]{0,79}(?<!-)$', ns.firewall_rule_name):
         raise ValidationError("The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. "
-                              "Additionally, the name of the firewall rule must be at least 2 characters "
+                              "Additionally, the name of the firewall rule must be at least 1 character "
                               "and no more than 80 characters in length. ")
 
 
