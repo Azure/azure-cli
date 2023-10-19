@@ -21,6 +21,7 @@ def _get_resource_group_location(cli_ctx, resource_group_name):
 
 class SearchServiceCreate(_SearchServiceCreate):
 
+    # pylint: disable=protected-access
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZStrArg
@@ -74,6 +75,7 @@ class SearchServiceCreate(_SearchServiceCreate):
 
 class SearchServiceUpdate(_SearchServiceUpdate):
 
+    # pylint: disable=protected-access
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZStrArg
@@ -101,7 +103,7 @@ class SearchServiceUpdate(_SearchServiceUpdate):
         args = self.ctx.args
 
         if has_value(args.ip_rules):
-            if args.ip_rules.to_serialized_data() is None or args.ip_rules in [';', ','] :
+            if args.ip_rules.to_serialized_data() is None or args.ip_rules in [';', ',']:
                 # cleanup all ip_rules
                 args.ip_rules_internal = None
             else:
@@ -132,6 +134,7 @@ class SearchServiceUpdate(_SearchServiceUpdate):
         if has_value(args.auth_options):
             # clean up current auth_options
             instance.properties.auth_options = {}
+
 
 def update_search_service(instance, partition_count=0, replica_count=0, public_network_access=None,
                           ip_rules=None, identity_type=None, disable_local_auth=None, auth_options=None,
@@ -308,8 +311,6 @@ def setup_search_auth(instance, disable_local_auth, auth_options, aad_auth_failu
                     possible values include "http401WithBearerChallenge", "http403";
                      This cannot be combined with disable_local_auth.
     """
-    from azure.cli.core.azclierror import MutuallyExclusiveArgumentError, RequiredArgumentMissingError
-
     # Done in aaz by default
     if (disable_local_auth is not None and disable_local_auth not in [True, False]):
         raise UnrecognizedArgumentError(
