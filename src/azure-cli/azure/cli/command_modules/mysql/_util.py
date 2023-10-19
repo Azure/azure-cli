@@ -566,3 +566,7 @@ def get_single_to_flex_sku_mapping(source_single_server_sku, tier, sku_name):
         else:
             sku_name = single_to_flex_sku_mapping.get(tier).get(source_single_server_sku.capacity)
     return tier, sku_name
+
+
+def get_firewall_rules_from_paged_response(firewall_rules):
+    return list(firewall_rules) if isinstance(firewall_rules, ItemPaged) else firewall_rules
