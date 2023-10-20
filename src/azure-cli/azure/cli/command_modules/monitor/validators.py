@@ -397,6 +397,16 @@ def validate_storage_accounts_name_or_id(cmd, namespace):
                 )
 
 
+def validate_loganalytics_workspace_search_table_name(namespace):
+    if namespace.table_name and not namespace.table_name.endswith("_SRCH"):
+        raise CLIError('usage: The table name needs to end with _SRCH')
+
+
+def validate_loganalytics_workspace_restore_table_name(namespace):
+    if namespace.table_name and not namespace.table_name.endswith("_RST"):
+        raise CLIError('usage: The table name needs to end with _RST')
+
+
 def process_subscription_id(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
     namespace.subscription_id = get_subscription_id(cmd.cli_ctx)

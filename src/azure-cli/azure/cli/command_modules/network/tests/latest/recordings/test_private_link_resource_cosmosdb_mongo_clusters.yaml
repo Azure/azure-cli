@@ -1,0 +1,287 @@
+interactions:
+- request:
+    body: '{"location": "eastus2euap", "properties": {"nodeGroupSpecs": [{"kind":
+      "Shard", "sku": "M30", "diskSizeGB": 128, "nodeCount": 1, "enableHa": false}],
+      "administratorLogin": "mongo", "administratorLoginPassword": "Administrator1"}}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - rest
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '229'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --method --url --body
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) AZURECLI/2.53.0
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongo_cl000001/providers/Microsoft.DocumentDB/mongoClusters/cli000002?api-version=2023-03-01-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongo_cl000001/providers/Microsoft.DocumentDB/mongoClusters/cli000002\",\n
+        \ \"name\": \"cli000002\",\n  \"type\": \"Microsoft.DocumentDB/mongoClusters\",\n
+        \ \"tags\": {\n  },\n  \"location\": \"eastus2euap\",\n  \"properties\": {\n
+        \   \"provisioningState\": \"InProgress\",\n    \"clusterStatus\": \"Provisioning\",\n
+        \   \"administratorLogin\": \"mongo\",\n    \"serverVersion\": \"6.0\",\n
+        \   \"nodeGroupSpecs\": [\n      {\n        \"name\": \"\",\n        \"kind\":
+        \"Shard\",\n        \"sku\": \"M30\",\n        \"diskSizeGB\": 128,\n        \"enableHa\":
+        false,\n        \"nodeCount\": 1\n      }\n    ],\n    \"connectionString\":
+        \"mongodb+srv://<user>:<password>@cli000002.global.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000\",\n
+        \   \"earliestRestoreTime\": null,\n    \"privateEndpointConnections\": [\n\n
+        \   ]\n  }\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/eastus2euap/mongoClusterAzureAsyncOperation/fbbb9aad-26bf-419b-b72d-347720a03468?api-version=2023-03-01-preview&t=638333441488398565&c=MIIHHjCCBgagAwIBAgITOgHdu1YTh8euUCK3igAEAd27VjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMwODAzMDMyNjM2WhcNMjQwNzI4MDMyNjM2WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALknmEY9JGv-HSJFQdmQ8zaxIqfFpV9xSwIlEZFWVO0X4fGsM-7m3RRAapiXE_aFZ-2DMzJS5r5L3idnESTizSQ7lffW9N6rrV2tF_ni-L9irsufK1qK74ZtxwGT44DrGtQS-uu6CP60YZm5tj33--pxadLNkgHYTzygn7x-TC5QMeEOS4BYV0LjPaNLu3mlpqez0n9zEAD7XdCAwzYRk9ENGakOXCOggifZvECPaxWWJTIyT9HMZ276Xb6u8aC_qPkD_8bbPcpY-KhJsFQUrfxJgTf8WIUY1tmcM_GQNc_x-OrwkWYD8m-OITkRdpRyocJor5B9jG57eno5coefGOECAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBSE5FQ-z2dyfvehmSqEpSUPxBA51jAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAHrGYgxGaqcUoODRTsWSsTt369JFMPdZmf6TBi5RjaY25hP1hqli1ZDA7N5UmraoChJcnLVyMgk-i5XhWz3Pdp_odbJ8J4W_5JiIt9iDDe8cqEFGe0fLtapiTrB2uh9IiDBEbQMSbEv6Dd6UJwbUP9wSMc3J5cD5y8czBDiBmVfcBkQ3eAw3VAsVmgS-gGni9q-r_woeh3OKnDE5JEmNYc1DF5VetOfTBiwWm5WREwY4ic3FgkMinR8ZbEEI9rng0S_qJaJzkTc9CW7qd4rT852Qy5rRet2oJESRcdpZEInPwniSlUq7_Dx77IIAb3hjAH4KVsvBCGgbxqCE6evU1lU&s=m3wGvo4v1L6K-WKaXiNxH5tGeaXdvFjo0n8TUSJVOxjX4u90H1sglUyUZafDzAsxKpboqlG6NU2Z9SRNGyTUbh0h_KgaKYUQnD-lHLFqebgN_nBnX40mRCJiHQsGebonSRwsDiuOZN6sSxuLq_1rr98xz6_MeFOs1rXqAhVGWhGbBcu0pRef2tpjEZpV7abYDsTIqFk38iD3W61V8qK2CVhQOGtNcy_WEclfNBurRo4toB7KlgNRbI4u1YxCJHxYfya2MRc5JjIDWFZ5QjHliEnJv4QjfNO_LeuMIgmHHHT2ZoGilkW_i3cMdq8G2JW0i1I5D72YLiRL82CCBO5kQA&h=tq67Ki3VHCR_CdDMaDgHO2kM2U1i9jS8aAhItVxA-0I
+      cache-control:
+      - no-cache
+      content-length:
+      - '897'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 Oct 2023 20:29:08 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/eastus2euap/mongoClusterOperationResults/fbbb9aad-26bf-419b-b72d-347720a03468?api-version=2023-03-01-preview&t=638333441488398565&c=MIIHHjCCBgagAwIBAgITOgHdu1YTh8euUCK3igAEAd27VjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMwODAzMDMyNjM2WhcNMjQwNzI4MDMyNjM2WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALknmEY9JGv-HSJFQdmQ8zaxIqfFpV9xSwIlEZFWVO0X4fGsM-7m3RRAapiXE_aFZ-2DMzJS5r5L3idnESTizSQ7lffW9N6rrV2tF_ni-L9irsufK1qK74ZtxwGT44DrGtQS-uu6CP60YZm5tj33--pxadLNkgHYTzygn7x-TC5QMeEOS4BYV0LjPaNLu3mlpqez0n9zEAD7XdCAwzYRk9ENGakOXCOggifZvECPaxWWJTIyT9HMZ276Xb6u8aC_qPkD_8bbPcpY-KhJsFQUrfxJgTf8WIUY1tmcM_GQNc_x-OrwkWYD8m-OITkRdpRyocJor5B9jG57eno5coefGOECAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBSE5FQ-z2dyfvehmSqEpSUPxBA51jAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAHrGYgxGaqcUoODRTsWSsTt369JFMPdZmf6TBi5RjaY25hP1hqli1ZDA7N5UmraoChJcnLVyMgk-i5XhWz3Pdp_odbJ8J4W_5JiIt9iDDe8cqEFGe0fLtapiTrB2uh9IiDBEbQMSbEv6Dd6UJwbUP9wSMc3J5cD5y8czBDiBmVfcBkQ3eAw3VAsVmgS-gGni9q-r_woeh3OKnDE5JEmNYc1DF5VetOfTBiwWm5WREwY4ic3FgkMinR8ZbEEI9rng0S_qJaJzkTc9CW7qd4rT852Qy5rRet2oJESRcdpZEInPwniSlUq7_Dx77IIAb3hjAH4KVsvBCGgbxqCE6evU1lU&s=pJzTIkSUuB4QfE3WzZDU14VXupucLmkPYXk4qeS64zIJey34eMZmGrGtSHVGaogWQZu0z2ndihoPP6vnsn2ksz3wu4zyf174u8Ij9A3aYFBTT1bjwAFzQbWbcP8RJfLW7fLGY6mjfNvNRTuMxITc10LAoHOX2i4F2hRKfx4bf0dBNtaz7WAxZ4APKX7YdRmSxqajOchHBHO3SPGhJWiyhiZQARhZShKAClCha1hc5kpBwU_HUkw7yH8pkyZ-u4kHU25KufXbPi9zZ19lxEPXwfQpjYr__yT94Kmg_HI8-xK4nAAz_Fe8nigQ5v90M8vGdyZFQlrxeYarlyjRnpKZNQ&h=PNfa2npSHxFJUSloizO4OZBi_erDgxzlOnPMusWPhpI
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - 6d96643f-6538-46f3-9249-17e2fdf67757
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - rest
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --method --url
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) AZURECLI/2.53.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cosmosdb_mongo_cl000001/providers/Microsoft.DocumentDB/mongoClusters/cli000002?api-version=2023-03-01-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongo_cl000001/providers/Microsoft.DocumentDB/mongoClusters/cli000002\",\n
+        \ \"name\": \"cli000002\",\n  \"type\": \"Microsoft.DocumentDB/mongoClusters\",\n
+        \ \"tags\": {\n  },\n  \"location\": \"eastus2euap\",\n  \"properties\": {\n
+        \   \"provisioningState\": \"InProgress\",\n    \"clusterStatus\": \"Provisioning\",\n
+        \   \"administratorLogin\": \"mongo\",\n    \"serverVersion\": \"6.0\",\n
+        \   \"nodeGroupSpecs\": [\n      {\n        \"name\": \"\",\n        \"kind\":
+        \"Shard\",\n        \"sku\": \"M30\",\n        \"diskSizeGB\": 128,\n        \"enableHa\":
+        false,\n        \"nodeCount\": 1\n      }\n    ],\n    \"connectionString\":
+        \"mongodb+srv://<user>:<password>@cli000002.global.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000\",\n
+        \   \"earliestRestoreTime\": null,\n    \"privateEndpointConnections\": [\n\n
+        \   ]\n  }\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '897'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 Oct 2023 20:29:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - 36ba00f6-67ea-432a-84e7-a74687a186ae
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - rest
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --method --url
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) AZURECLI/2.53.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cosmosdb_mongo_cl000001/providers/Microsoft.DocumentDB/mongoClusters/cli000002?api-version=2023-03-01-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongo_cl000001/providers/Microsoft.DocumentDB/mongoClusters/cli000002\",\n
+        \ \"name\": \"cli000002\",\n  \"type\": \"Microsoft.DocumentDB/mongoClusters\",\n
+        \ \"tags\": {\n  },\n  \"location\": \"eastus2euap\",\n  \"properties\": {\n
+        \   \"provisioningState\": \"Succeeded\",\n    \"clusterStatus\": \"Ready\",\n
+        \   \"administratorLogin\": \"mongo\",\n    \"serverVersion\": \"6.0\",\n
+        \   \"nodeGroupSpecs\": [\n      {\n        \"name\": \"\",\n        \"kind\":
+        \"Shard\",\n        \"sku\": \"M30\",\n        \"diskSizeGB\": 128,\n        \"enableHa\":
+        false,\n        \"nodeCount\": 1\n      }\n    ],\n    \"connectionString\":
+        \"mongodb+srv://<user>:<password>@cli000002.global.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000\",\n
+        \   \"earliestRestoreTime\": null,\n    \"privateEndpointConnections\": [\n\n
+        \   ]\n  }\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '889'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 Oct 2023 20:39:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - 2ed24845-2608-49e8-a7aa-b7bfb01b939e
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-link-resource list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --type
+      User-Agent:
+      - python/3.8.10 (Windows-10-10.0.22000-SP0) AZURECLI/2.53.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongo_cl000001/providers/Microsoft.DocumentDB/mongoClusters/cli000002/privateLinkResources?api-version=2023-03-01-preview
+  response:
+    body:
+      string: "{\n  \"value\": [\n    {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_mongo_cl000001/providers/Microsoft.DocumentDB/mongoClusters/cli000002/privateLinkResources/MongoCluster\",\n
+        \     \"name\": \"MongoCluster\",\n      \"type\": \"Microsoft.DocumentDB/mongoClusters/privateLinkResources\",\n
+        \     \"system_data\": {\n      },\n      \"properties\": {\n        \"groupId\":
+        \"MongoCluster\",\n        \"requiredMembers\": [\n          \"c.3pz5dgogbejwze\"\n
+        \       ],\n        \"requiredZoneNames\": [\n          \"privatelink.mongocluster.cosmos.azure.com\"\n
+        \       ]\n      }\n    }\n  ]\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '600'
+      content-security-policy:
+      - default-src 'none'; base-uri 'self'; block-all-mixed-content; connect-src
+        'self'; font-src 'self'; form-action 'self'; img-src 'self'; script-src 'self';
+        style-src 'self'; upgrade-insecure-requests
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 19 Oct 2023 20:39:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      referrer-policy:
+      - same-origin
+      request-id:
+      - 271396a6-9315-46de-88b4-b8a5e3283525
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - DENY
+      x-permitted-cross-domain-policies:
+      - none
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+version: 1
