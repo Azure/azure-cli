@@ -14,7 +14,7 @@ class AzureSearchServicesTests(ScenarioTest):
         self.vcr.match_on = ['scheme', 'method', 'path', 'query'] # not 'host', 'port'
         super(AzureSearchServicesTests, self).setUp()
 
-    # Quota
+    # Quota Standard3
     """
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_service_create_skus(self, resource_group):
