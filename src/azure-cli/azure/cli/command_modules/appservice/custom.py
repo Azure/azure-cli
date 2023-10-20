@@ -4201,15 +4201,14 @@ def _get_latest_deployment_id(cmd, rg_name, name, deployment_status_url, slot):
 
 
 def _track_deployment_using_deploymentstatus_api(cmd, deploymentstatusapi_url, timeout=None):
-    import time
-
     total_trials = (int(timeout) // 5) if timeout else 200
     num_trials = 0
     runtime_successful = False
     start_time = time.time()
     while num_trials < total_trials:
         time.sleep(5)
-        response_body = send_raw_request(cmd.cli_ctx, "GET", deploymentstatusapi_url, disable_request_response_logging=True).json()
+        response_body = send_raw_request(cmd.cli_ctx, "GET", deploymentstatusapi_url,
+                                         disable_request_response_logging=True).json()
         deployment_status = response_body.get('properties').get('status')
         time_elapseed = int(time.time() - start_time)
         logger.info("Current deployment status: %s. %s sec(s)", deployment_status, time_elapseed)
@@ -4218,19 +4217,25 @@ def _track_deployment_using_deploymentstatus_api(cmd, deploymentstatusapi_url, t
             break
         if deployment_status == "RuntimeFailed":
             deployment_properties = response_body.get('properties')
-            logger.error("Deployment failed because the runtime failed to start, InprogressInstances: %s, SuccessfulInstances: %s, FailedInstances: %s", \
-                deployment_properties.get('numberOfInstancesInProgress'), deployment_properties.get('numberOfInstancesSuccessful'), \
-                deployment_properties.get('numberOfInstancesFailed'))
+            logger.error("Deployment failed because the runtime failed to start, InprogressInstances: %s, \
+                SuccessfulInstances: %s, FailedInstances: %s", \
+                    deployment_properties.get('numberOfInstancesInProgress'), \
+                    deployment_properties.get('numberOfInstancesSuccessful'), \
+                    deployment_properties.get('numberOfInstancesFailed'))
             logger.error("Errors: %s", deployment_properties.get('errors'))
-            logger.error("Please check the deployment logs for more info: %s", deployment_properties.get('failedInstancesLogs'))
+            logger.error("Please check the deployment logs for more info: %s",
+                         deployment_properties.get('failedInstancesLogs'))
             break
         if deployment_status == "BuildFailed":
             deployment_properties = response_body.get('properties')
-            logger.error("Deployment failed because the build process failed,  InprogressInstances: %s, SuccessfulInstances: %s, FailedInstances: %s", \
-                deployment_properties.get('numberOfInstancesInProgress'), deployment_properties.get('numberOfInstancesSuccessful'), \
+            logger.error("Deployment failed because the build process failed,  InprogressInstances: %s, \
+                SuccessfulInstances: %s, FailedInstances: %s", \
+                deployment_properties.get('numberOfInstancesInProgress'),\
+                deployment_properties.get('numberOfInstancesSuccessful'), \
                 deployment_properties.get('numberOfInstancesFailed'))
             logger.error("Errors: %s", deployment_properties.get('errors'))
-            logger.error("Please check the build logs for more info: %s", deployment_properties.get('failedInstancesLogs'))
+            logger.error("Please check the build logs for more info: %s",
+                         deployment_properties.get('failedInstancesLogs'))
             break
     if not runtime_successful:
         raise CLIError("Timeout reached while tracking deployment status, however,"
@@ -5294,7 +5299,8 @@ def _make_onedeploy_request(params):
                 if deployment_id is None:
                     raise CLIError("Unable to fetch deployment id for this deployment")
                 deploymentstatusapi_url = _build_deploymentstatus_url(params, deployment_id)
-                response_body = _track_deployment_using_deploymentstatus_api(params.cmd, deploymentstatusapi_url, params.timeout)
+                response_body = _track_deployment_using_deploymentstatus_api(params.cmd,
+                                                                             deploymentstatusapi_url, params.timeout)
             else:
                 response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
                                                             deployment_status_url, params.slot, params.timeout)
