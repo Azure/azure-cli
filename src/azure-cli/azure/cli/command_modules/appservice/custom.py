@@ -4190,7 +4190,7 @@ def _get_latest_deployment_id(cmd, rg_name, name, deployment_status_url, slot):
                                 verify=not should_disable_connection_verify())
         try:
             res_dict = response.json()
-        except: # pylint: disable=bare-except
+        except:   # pylint: disable=bare-except
             logger.warning("Deployment status endpoint %s returned malformed data. Retrying...", deployment_status_url)
             return None
         finally:
@@ -4218,10 +4218,10 @@ def _track_deployment_using_deploymentstatus_api(cmd, deploymentstatusapi_url, t
         if deployment_status == "RuntimeFailed":
             deployment_properties = response_body.get('properties')
             logger.error("Deployment failed because the runtime failed to start, InprogressInstances: %s, \
-                SuccessfulInstances: %s, FailedInstances: %s", \
-                    deployment_properties.get('numberOfInstancesInProgress'), \
-                    deployment_properties.get('numberOfInstancesSuccessful'), \
-                    deployment_properties.get('numberOfInstancesFailed'))
+                            SuccessfulInstances: %s, FailedInstances: %s",
+                         deployment_properties.get('numberOfInstancesInProgress'),
+                         deployment_properties.get('numberOfInstancesSuccessful'),
+                         deployment_properties.get('numberOfInstancesFailed'))
             logger.error("Errors: %s", deployment_properties.get('errors'))
             logger.error("Please check the deployment logs for more info: %s",
                          deployment_properties.get('failedInstancesLogs'))
@@ -4229,10 +4229,10 @@ def _track_deployment_using_deploymentstatus_api(cmd, deploymentstatusapi_url, t
         if deployment_status == "BuildFailed":
             deployment_properties = response_body.get('properties')
             logger.error("Deployment failed because the build process failed,  InprogressInstances: %s, \
-                SuccessfulInstances: %s, FailedInstances: %s", \
-                deployment_properties.get('numberOfInstancesInProgress'),\
-                deployment_properties.get('numberOfInstancesSuccessful'), \
-                deployment_properties.get('numberOfInstancesFailed'))
+                            SuccessfulInstances: %s, FailedInstances: %s",
+                         deployment_properties.get('numberOfInstancesInProgress'),
+                         deployment_properties.get('numberOfInstancesSuccessful'),
+                         deployment_properties.get('numberOfInstancesFailed'))
             logger.error("Errors: %s", deployment_properties.get('errors'))
             logger.error("Please check the build logs for more info: %s",
                          deployment_properties.get('failedInstancesLogs'))
@@ -5303,7 +5303,7 @@ def _make_onedeploy_request(params):
                                                                              deploymentstatusapi_url, params.timeout)
             else:
                 response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
-                                                            deployment_status_url, params.slot, params.timeout)
+                                                             deployment_status_url, params.slot, params.timeout)
             logger.info('Async deployment complete. Server response: %s', response_body)
         else:
             if 'application/json' in response.headers.get('content-type', ""):
