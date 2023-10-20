@@ -1045,7 +1045,7 @@ class DiagnosticsExtensionInstallTest(ScenarioTest):
         })
 
         self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username user11 --admin-password TestTest12#$ --orchestration-mode Uniform')
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username user11 --admin-password TestTest12#$ --use-unmanaged-disk --orchestration-mode Uniform')
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username user11 --admin-password TestTest12#$ --use-unmanaged-disk')
         storage_sastoken = '123'  # use junk keys, do not retrieve real keys which will get into the recording
         _, protected_settings = tempfile.mkstemp()
         with open(protected_settings, 'w') as outfile:
