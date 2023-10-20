@@ -331,39 +331,6 @@ def load_command_table(self, _):
             g.keyvault_command('show', 'get_setting')
             g.keyvault_custom('update', 'update_hsm_setting')
 
-    data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT)).\
-        replace('.', '_').replace('-', '_')
-
-    if data_api_version != '2016_10_01':
-        with self.command_group('keyvault storage', data_entity.command_type, deprecate_info=self.deprecate()) as g:
-            g.keyvault_command('add', 'set_storage_account')
-            g.keyvault_command('list', 'get_storage_accounts', transform=keep_max_results)
-            g.keyvault_command('show', 'get_storage_account')
-            g.keyvault_command('update', 'update_storage_account')
-            g.keyvault_command('remove', 'delete_storage_account')
-            g.keyvault_command('regenerate-key', 'regenerate_storage_account_key')
-            g.keyvault_command('list-deleted', 'get_deleted_storage_accounts', transform=keep_max_results)
-            g.keyvault_command('show-deleted', 'get_deleted_storage_account')
-            g.keyvault_command('purge', 'purge_deleted_storage_account')
-            g.keyvault_command('recover', 'recover_deleted_storage_account')
-            g.keyvault_custom('backup', 'backup_storage_account',
-                              doc_string_source=data_entity.operations_docs_tmpl.format('backup_storage_account'))
-            g.keyvault_custom('restore', 'restore_storage_account',
-                              doc_string_source=data_entity.operations_docs_tmpl.format('restore_storage_account'))
-
-    if data_api_version != '2016_10_01':
-        with self.command_group('keyvault storage sas-definition', data_entity.command_type) as g:
-            g.keyvault_command('create', 'set_sas_definition',
-                               doc_string_source=data_entity.operations_docs_tmpl.format('set_sas_definition'))
-            g.keyvault_command('list', 'get_sas_definitions', transform=keep_max_results)
-            g.keyvault_command('show', 'get_sas_definition')
-            g.keyvault_command('update', 'update_sas_definition',
-                               doc_string_source=data_entity.operations_docs_tmpl.format('update_sas_definition'))
-            g.keyvault_command('delete', 'delete_sas_definition')
-            g.keyvault_command('list-deleted', 'get_deleted_sas_definitions', transform=keep_max_results)
-            g.keyvault_command('show-deleted', 'get_deleted_sas_definition')
-            g.keyvault_command('recover', 'recover_deleted_sas_definition')
-
     if not is_azure_stack_profile(self):
         with self.command_group('keyvault region', mgmt_hsms_regions_entity.command_type,
                                 client_factory=mgmt_hsms_regions_entity.client_factory, min_api='2023-02-01') as g:
