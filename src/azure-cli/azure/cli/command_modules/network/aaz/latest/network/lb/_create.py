@@ -243,6 +243,7 @@ class Create(AAZCommand):
         _element.backend_port = AAZIntArg(
             options=["backend-port"],
             help="The port used for internal connections on the endpoint. Acceptable values are between 1 and 65535.",
+            required=True,
         )
         _element.enable_floating_ip = AAZBoolArg(
             options=["enable-floating-ip"],
@@ -260,10 +261,12 @@ class Create(AAZCommand):
         _element.frontend_port_range_end = AAZIntArg(
             options=["frontend-port-range-end"],
             help="The last port number in the range of external ports that will be used to provide Inbound Nat to NICs associated with a load balancer. Acceptable values range between 1 and 65535.",
+            required=True,
         )
         _element.frontend_port_range_start = AAZIntArg(
             options=["frontend-port-range-start"],
             help="The first port number in the range of external ports that will be used to provide Inbound Nat to NICs associated with a load balancer. Acceptable values range between 1 and 65534.",
+            required=True,
         )
         _element.idle_timeout_in_minutes = AAZIntArg(
             options=["idle-timeout-in-minutes"],
@@ -272,6 +275,7 @@ class Create(AAZCommand):
         _element.protocol = AAZStrArg(
             options=["protocol"],
             help="The reference to the transport protocol used by the inbound NAT pool.",
+            required=True,
             enum={"All": "All", "Tcp": "Tcp", "Udp": "Udp"},
         )
 
@@ -979,7 +983,7 @@ class Create(AAZCommand):
             if _elements is not None:
                 _elements.set_prop("id", AAZStrType, ".id")
                 _elements.set_prop("name", AAZStrType, ".name")
-                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                _elements.set_prop("properties", AAZObjectType, ".", typ_kwargs={"flags": {"required": True, "client_flatten": True}})
 
             properties = _builder.get(".properties.inboundNatPools[].properties")
             if properties is not None:
@@ -1180,7 +1184,7 @@ class Create(AAZCommand):
             _element.id = AAZStrType()
             _element.name = AAZStrType()
             _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
+                flags={"required": True, "client_flatten": True},
             )
             _element.type = AAZStrType(
                 flags={"read_only": True},
