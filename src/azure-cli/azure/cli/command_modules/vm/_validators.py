@@ -418,8 +418,6 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         namespace.enable_secure_boot = True
         namespace.enable_vtpm = True
         namespace.security_type = 'TrustedLaunch'
-        # did not specify image XOR attach-os-disk
-        # raise CLIError('incorrect usage: --image IMAGE | --attach-os-disk DISK')
 
     auth_params = ['admin_password', 'admin_username', 'authentication_type',
                    'generate_ssh_keys', 'ssh_dest_key_path', 'ssh_key_value']
