@@ -467,7 +467,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         argument_context_string = 'mysql flexible-server firewall-rule {}'.format(scope)
         with self.argument_context(argument_context_string) as c:
             c.argument('firewall_rule_name', id_part='child_name_1', options_list=['--rule-name', '-r'], validator=firewall_rule_name_validator,
-                       help='The name of the firewall rule. If name is omitted, default name will be chosen for firewall name. The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. Additionally, the name of the firewall rule must be at least 3 characters and no more than 128 characters in length. ')
+                       help='The name of the firewall rule. If name is omitted, default name will be chosen for firewall name. The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. Additionally, the name of the firewall rule must be at least 1 character and no more than 80 characters in length. ')
             c.argument('end_ip_address', options_list=['--end-ip-address'], validator=ip_address_validator,
                        help='The end IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
             c.argument('start_ip_address', options_list=['--start-ip-address'], validator=ip_address_validator,
