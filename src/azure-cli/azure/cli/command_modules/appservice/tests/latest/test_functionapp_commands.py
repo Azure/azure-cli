@@ -1405,11 +1405,11 @@ class FunctionAppSlotTests(ScenarioTest):
         self.cmd('functionapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, functionapp, slotname), checks=[
             JMESPathCheck('name', slotname)
         ])
-        self.cmd('functionapp config appsettings set -g {} -n {} --slot {} --slot-settings FOO=BAR'.format(resource_group, functionapp,
-                                                                                                           slotname), checks=[
-            JMESPathCheck("[?name=='FOO'].value|[0]", 'BAR'),
-            JMESPathCheck("[?name=='FOO'].slotSetting|[0]", True)
-        ])
+        self.cmd('functionapp config appsettings set -g {} -n {} --slot {} --slot-settings FOO=BAR'
+                 .format(resource_group, functionapp, slotname)).assert_with_checks([
+                     JMESPathCheck("[?name=='FOO']|[0].name", 'FOO'),
+                     JMESPathCheck("[?name=='FOO']|[0].value", None)
+                 ])
         self.cmd('functionapp config appsettings list -g {} -n {} --slot {}'.format(resource_group, functionapp, slotname), checks=[
             JMESPathCheck("[?name=='FOO'].value|[0]", 'BAR'),
             JMESPathCheck("[?name=='FOO'].slotSetting|[0]", True)
@@ -1436,7 +1436,8 @@ class FunctionAppSlotTests(ScenarioTest):
             JMESPathCheck('name', slotname)
         ])
         self.cmd('functionapp config appsettings set -g {} -n {} --slot {} --settings FOO=BAR'.format(resource_group, functionapp,
-                                                                                                      slotname), checks=[
+                                                                                                      slotname))
+        self.cmd('functionapp config appsettings list -g {} -n {} --slot {}'.format(resource_group, functionapp, slotname), checks=[
             JMESPathCheck("[?name=='FOO'].value|[0]", 'BAR')
         ])
         self.cmd('functionapp deployment slot swap -g {} -n {} --slot {} --action swap'.format(
@@ -1835,7 +1836,11 @@ class FunctionappLinuxConsumptionZipDeploy(LiveScenarioTest):
         functionapp_name = self.create_random_name('functionapp', 40)
 
         self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Linux --runtime dotnet --functions-version 4'.format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
-        self.cmd('functionapp config appsettings delete -g {} -n {} --setting-names AzureWebJobsStorage'.format(resource_group, functionapp_name))
+        self.cmd('functionapp config appsettings delete -g {} -n {} --setting-names AzureWebJobsStorage'.format(resource_group, functionapp_name)).assert_with_checks([
+            JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME']|[0].value", None),
+            JMESPathCheck("[?name=='FUNCTIONS_EXTENSION_VERSION']|[0].value", None),
+            JMESPathCheck("[?name=='WEBSITE_CONTENTAZUREFILECONNECTIONSTRING']|[0].value", None)
+        ])
 
         with self.assertRaises(ValidationError):
             self.cmd('functionapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, functionapp_name, zip_file))
