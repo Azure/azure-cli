@@ -18,7 +18,7 @@ class Create(AAZCommand):
     """Create new or updates existing metadata schema.
 
     :example: Create schema
-        az apic metadata-schema create -g api-center-test -s contoso --name approver --schema "{\"type\":\"string\",\"title\":\"Approver\",pattern:\"^[a-zA-Z0-9]+$\"}"
+        az apic metadata-schema create -g api-center-test -s contoso --name approver --schema "{\"type\":\"string\",\"title\":\"Approver\", \"pattern\":\"^[a-zA-Z]+$\"}"
     """
 
     _aaz_info = {
@@ -119,9 +119,6 @@ class Create(AAZCommand):
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
-            print("-----")
-            print(request.body);
-            print("-----")
             session = self.client.send_request(request=request, stream=False, **kwargs)
             if session.http_response.status_code in [200, 201]:
                 return self.on_200_201(session)
