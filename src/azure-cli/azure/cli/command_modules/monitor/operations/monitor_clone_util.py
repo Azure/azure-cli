@@ -85,11 +85,11 @@ def format_metrics_alert_req(alert_rule):
         }
 
 
-def _clone_alert_rule(cmd, source_resource, alert_rule, target_resource):
+def _clone_alert_rule(cmd, alert_rule, target_resource):
     alert_rule['scopes'] = [target_resource]
     resource_group_name, name = _parse_id(target_resource).values()  # pylint: disable=unbalanced-dict-unpacking
     name = CLONED_NAME.format(name, gen_guid())
-    subscription_id = parse_resource_id(source_resource)['subscription']
+    subscription_id = parse_resource_id(target_resource)['subscription']
     alert_rule["subscription"] = subscription_id
     alert_rule["resource_group"] = resource_group_name
     alert_rule["name"] = name
@@ -109,13 +109,13 @@ def _clone_monitor_metrics_alerts(cmd, source_resource, target_resource, always_
         if always_clone or not same_sub:
             alert_rule = _clone_and_replace_action_group(cmd, source_resource, alert_rule, action_group_mapping,
                                                          target_resource)
-            alert_rule = _clone_alert_rule(cmd, source_resource, alert_rule, target_resource)
+            alert_rule = _clone_alert_rule(cmd, alert_rule, target_resource)
         else:
             try:
                 alert_rule = _add_into_existing_scopes(cmd, source_resource, alert_rule, target_resource)
             except HttpResponseError as ex:  # Create new alert rule
                 if ex.status_code == 400:
-                    alert_rule = _clone_alert_rule(cmd, source_resource, alert_rule, target_resource)
+                    alert_rule = _clone_alert_rule(cmd, alert_rule, target_resource)
                 else:
                     raise ex
         updated_metrics_alert_rules.append(alert_rule)
