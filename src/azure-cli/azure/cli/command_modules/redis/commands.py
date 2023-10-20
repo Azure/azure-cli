@@ -51,6 +51,7 @@ def load_command_table(self, _):
         g.custom_command('regenerate-keys', 'cli_redis_regenerate_key')
         g.show_command('show', 'get')
         g.generic_update_command('update', setter_name='custom_update_setter', setter_type=redis_operations_custom, custom_func_name='cli_redis_update')
+        g.command('flush', 'begin_flush_cache', confirmation=True)
 
     with self.command_group('redis patch-schedule', redis_patch, custom_command_type=redis_patch_schedules_custom) as g:
         g.custom_command('create', 'cli_redis_patch_schedule_create_or_update')
