@@ -1893,7 +1893,7 @@ def migrate_firewall_rules_from_single_to_flex(db_context, cmd, source_server_id
     firewall_rules = get_firewall_rules_from_paged_response(firewall_client.list_by_server(id_parts['resource_group'], id_parts['name']))
     for rule in firewall_rules:
         if not re.search(r'^[a-zA-Z0-9][-_a-zA-Z0-9]{0,79}(?<!-)$', rule.name):
-            logger.warning("Skipping the firewall rule \'%s\' since firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. "
+            logger.warning("Could not migrate firewall rule \'%s\' since firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. "
                            "Additionally, the name of the firewall rule must be at least 1 character "
                            "and no more than 80 characters in length. ", rule.name)
             continue
