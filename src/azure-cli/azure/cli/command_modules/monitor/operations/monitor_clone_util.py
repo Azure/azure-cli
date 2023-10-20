@@ -83,17 +83,12 @@ def format_metrics_alert_req(alert_rule):
         alert_rule['criteria'] = {
             "microsoft_azure_monitor_multiple_resource_multiple_metric_criteria": {"all_of": all_of}
         }
-    from .metric_alert import _parse_resource_and_scope_type
-    resource_type, scope_type = _parse_resource_and_scope_type(alert_rule['scopes'])
-    if scope_type not in ['resource_group', 'subscription']:
-        if len(alert_rule['scopes']) != 1:
-            alert_rule["target_resource_type"] = resource_type
-    del alert_rule['type']
 
 
 def _clone_alert_rule(cmd, source_resource, alert_rule, target_resource):
     alert_rule['scopes'] = [target_resource]
     resource_group_name, name = _parse_id(target_resource).values()  # pylint: disable=unbalanced-dict-unpacking
+    name = CLONED_NAME.format(name, gen_guid())
     subscription_id = parse_resource_id(source_resource)['subscription']
     alert_rule["subscription"] = subscription_id
     alert_rule["resource_group"] = resource_group_name

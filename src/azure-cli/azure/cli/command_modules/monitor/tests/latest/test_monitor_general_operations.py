@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only, JMESPathCheck
 from azure.cli.testsdk.constants import AUX_SUBSCRIPTION
 from unittest import mock
 import unittest
@@ -52,6 +52,11 @@ class MonitorCloneVMScenarios(ScenarioTest):
                 self.check('length(metricsAlert[0].scopes)', 3)
             ])
 
+            # add to existing metrics alerts' scopes, multiple resource multiple metrics
+            self.cmd('monitor metrics alert list -g {} -ojson'.format(resource_group),
+                     checks=[JMESPathCheck('type(@)', 'array'),
+                             JMESPathCheck('length(@)', 1)])
+
 
 class MonitorCloneStorageAccountScenarios(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_clone')
@@ -99,7 +104,16 @@ class MonitorCloneStorageAccountScenarios(ScenarioTest):
                 self.check('length(metricsAlert[0].criteria.allOf)', 2),
                 self.check('length(metricsAlert[0].criteria.allOf[0].dimensions)', 2),
                 self.check('length(metricsAlert[0].criteria.allOf[1].dimensions)', 1),
+                self.check('length(metricsAlert[0].scopes)', 1)
             ])
+
+            # same action-group, new metrics alert created, single resource multiple metrics
+            self.cmd('monitor action-group list -g {} -ojson'.format(resource_group),
+                     checks=[JMESPathCheck('type(@)', 'array'),
+                             JMESPathCheck('length(@)', 1)])
+            self.cmd('monitor metrics alert list -g {} -ojson'.format(resource_group),
+                     checks=[JMESPathCheck('type(@)', 'array'),
+                             JMESPathCheck('length(@)', 2)])
 
 
 class MonitorCloneStorageAccountAlwaysScenarios(ScenarioTest):
@@ -127,7 +141,13 @@ class MonitorCloneStorageAccountAlwaysScenarios(ScenarioTest):
         })
 
         self.cmd('monitor action-group create -g {rg} -n {ag1}')
-        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {sa_id} --region westus --action {ag1} --description "Test" --condition "total transactions > 5 where ResponseType includes Success and ApiName includes GetBlob" --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob"', checks=[
+        self.cmd('monitor action-group update -n {ag1} -g {rg} --short-name new_name --tag owner=alice -a email alice alice@example.com usecommonalertsChema -ojson',
+                 checks=[
+                     JMESPathCheck('tags.owner', 'alice'),
+                     JMESPathCheck('length(emailReceivers)', 1),
+                     JMESPathCheck('groupShortName', 'new_name')
+                 ])
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {sa_id} --region westus --action {ag1} ag1key=ag1value --description "Test" --condition "total transactions > 5 where ResponseType includes Success and ApiName includes GetBlob" --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob"', checks=[
             self.check('description', 'Test'),
             self.check('severity', 2),
             self.check('autoMitigate', None),
@@ -145,10 +165,19 @@ class MonitorCloneStorageAccountAlwaysScenarios(ScenarioTest):
                 self.check('metricsAlert[0].autoMitigate', None),
                 self.check('metricsAlert[0].windowSize', 'PT5M'),
                 self.check('metricsAlert[0].evaluationFrequency', 'PT1M'),
+                self.check('metricsAlert[0].actions[0].webHookProperties.ag1key', 'ag1value'),
                 self.check('length(metricsAlert[0].criteria.allOf)', 2),
                 self.check('length(metricsAlert[0].criteria.allOf[0].dimensions)', 2),
                 self.check('length(metricsAlert[0].criteria.allOf[1].dimensions)', 1),
             ])
+
+            # always-clone means new action-group created along with new metrics alert created
+            self.cmd('monitor action-group list -g {} -ojson'.format(resource_group),
+                     checks=[JMESPathCheck('type(@)', 'array'),
+                             JMESPathCheck('length(@)', 2)])
+            self.cmd('monitor metrics alert list -g {} -ojson'.format(resource_group),
+                     checks=[JMESPathCheck('type(@)', 'array'),
+                             JMESPathCheck('length(@)', 2)])
 
 
 class MonitorClonePublicIpScenarios(ScenarioTest):
@@ -180,7 +209,7 @@ class MonitorClonePublicIpScenarios(ScenarioTest):
             self.check('length(scopes)', 1)
         ])
 
-        self.cmd('monitor metrics alert create -g {rg} -n {alert2} --scopes {ip1_id} --region westus --action {ag1} --description "Test2" --condition "max TCPBytesForwardedDDoS > 5"', checks=[
+        self.cmd('monitor metrics alert create -g {rg} -n {alert2} --scopes {ip1_id} --region westus --action {ag1} ag1key=ag1value --description "Test2" --condition "max TCPBytesForwardedDDoS > 5"', checks=[
             self.check('description', 'Test2'),
             self.check('severity', 2),
             self.check('windowSize', 'PT5M'),
@@ -192,6 +221,13 @@ class MonitorClonePublicIpScenarios(ScenarioTest):
             self.cmd('monitor clone --source-resource {ip1_id} --target-resource {ip2_id}', checks=[
                 self.check('length(metricsAlert)', 2),
             ])
+
+            self.cmd('monitor action-group list -g {} -ojson'.format(resource_group),
+                     checks=[JMESPathCheck('type(@)', 'array'),
+                             JMESPathCheck('length(@)', 1)])
+            self.cmd('monitor metrics alert list -g {} -ojson'.format(resource_group),
+                     checks=[JMESPathCheck('type(@)', 'array'),
+                             JMESPathCheck('length(@)', 4)])
 
 
 class MonitorCloneStorageAccountAcrossSubsScenarios(ScenarioTest):
