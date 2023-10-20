@@ -50,10 +50,6 @@ CREDENTIAL_WARNING = (
     "The output includes credentials that you must protect. Be sure that you do not include these credentials in "
     "your code or check the credentials into your source control. For more information, see https://aka.ms/azadsp-cli")
 
-SCOPE_WARNING = (
-    "--scope argument will become required for creating a role assignment in the breaking change release of the fall "
-    "of 2023. Please explicitly specify --scope.")
-
 logger = get_logger(__name__)
 
 # pylint: disable=too-many-lines, protected-access
