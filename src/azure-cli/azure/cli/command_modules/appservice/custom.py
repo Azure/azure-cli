@@ -436,7 +436,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
         update_application_settings_polling(cmd, resource_group_name, name, app_settings, slot, client)
         result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     else:
-        result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,.
+        result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
                                              'update_application_settings',
                                              app_settings, slot, client)
 
