@@ -166,6 +166,10 @@ def load_arguments(self, _):
         c.argument('retention_days', validator=validate_retention_days_on_creation,
                    help='Soft delete data retention days. It accepts >=7 and <=90. '
                         'Defaults to 90 for keyvault creation. Required for MHSM creation')
+        c.argument('what_if', options_list=['--what-if', '-w'], action='store_true',
+                   help='Instruct the command to run deployment What-If.')
+        c.argument('fail_on_exist', arg_type=get_three_state_flag(),
+                   help='Throw an exception if the keyvault already exists.')
 
     with self.argument_context('keyvault create', arg_group='Network Rule') as c:
         c.argument('network_acls', type=validate_file_or_dict,

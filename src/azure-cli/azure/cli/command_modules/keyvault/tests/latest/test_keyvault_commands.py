@@ -471,11 +471,17 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         self.cmd('keyvault list -g {rg}', checks=self.is_empty())
         self.cmd('keyvault show-deleted -n {kv}', checks=self.check('type', 'Microsoft.KeyVault/deletedVaults'))
         self.cmd('keyvault purge -n {kv}')
-        # ' will be parsed by shlex, so need escaping
-        self.cmd(r"az keyvault list-deleted --resource-type vault --query [?name==\'{kv}\']", checks=self.is_empty())
+        # There're too many deleted keyvaults in test sub, skip this line to avoid long wait and large recording file
+        # self.cmd(r"az keyvault list-deleted --resource-type vault --query [?name==\'{kv}\']", checks=self.is_empty())
 
+    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_mgmt')
+    def test_keyvault_creation(self, resource_group):
+        self.kwargs.update({
+            'kv': self.create_random_name('cli-test-kv-mgmt-', 24),
+            'loc': 'eastus'
+        })
         # test create keyvault further
-        self.cmd('keyvault create -g {rg} -n {kv2} -l {loc} '  # enableSoftDelete is True if omitted
+        self.cmd('keyvault create -g {rg} -n {kv} -l {loc} '  # enableSoftDelete is True if omitted
                  '--retention-days 7 '
                  '--sku premium '
                  '--enabled-for-deployment true --enabled-for-disk-encryption true --enabled-for-template-deployment true '
@@ -490,24 +496,33 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
                      self.check('type(properties.accessPolicies)', 'array'),
                      self.check('length(properties.accessPolicies)', 0),
                  ])
-        self.cmd('keyvault delete -n {kv2}')
-        self.cmd('keyvault purge -n {kv2}')
+        self.cmd('keyvault delete -n {kv}')
+        self.cmd('keyvault purge -n {kv}')
 
+    # this test would create a keyvault with purge protection enabled
+    # which cannot be deleted until 7 days later
+    # so we use record_only to avoid creating such resources through live test pipeline
+    @record_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_mgmt')
+    def test_keyvault_creation_with_purge_protection(self, resource_group):
+        self.kwargs.update({
+            'kv': self.create_random_name('cli-test-kv-mgmt-', 24),
+            'loc': 'eastus'
+        })
         # test explicitly set '--enable-purge-protection true'
         # unfortunately this will leave some waste behind, so make it the last test to lowered the execution count
-        self.cmd('keyvault create -g {rg} -n {kv4} -l {loc} --enable-purge-protection true --retention-days 7',
+        self.cmd('keyvault create -g {rg} -n {kv} -l {loc} --enable-purge-protection true --retention-days 7',
                  checks=[self.check('properties.enableSoftDelete', True),
                          self.check('properties.enablePurgeProtection', True)])
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_list_deleted')
-    def test_keyvault_list_deleted(self, resource_group):
+    @KeyVaultPreparer(name_prefix='cli-test-kv-mgmt-', name_len=24, skip_delete=True)
+    @ManagedHSMPreparer(name_prefix='cli-test-hsm-mgmt-', name_len=24, skip_delete=True, certs_path=CERTS_DIR)
+    def test_keyvault_list_deleted(self, resource_group, key_vault, managed_hsm):
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-mgmt-', 24),
-            'hsm': self.create_random_name('cli-test-hsm-mgmt-', 24),
-            'loc': 'eastus'
+            'kv': key_vault,
+            'hsm': managed_hsm,
         })
-        _create_keyvault(self, self.kwargs)
-        _create_hsm(self)
 
         # delete resources
         self.cmd('keyvault delete --name {kv}')
@@ -528,10 +543,6 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
             self.exists("[?name=='{hsm}']"),
             self.exists("[?name=='{kv}']")
         ])
-
-        # clean resources
-        self.cmd('keyvault purge --name {kv} -l {loc}')
-        self.cmd('keyvault purge --hsm-name {hsm} -l {loc}')
 
 
 class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
@@ -2508,7 +2519,7 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
         })
 
         self.cmd('keyvault create -n {kv4} -l {loc} -g {rg} --network-acls-ips {ip3} {ip4} '
-                 '--network-acls-vnets {subnetId2} {vnet3}/{subnet3}', checks=[
+                 '--network-acls-vnets {subnetId2} "{vnet3}/{subnet3}"', checks=[
                      self.check('length(properties.networkAcls.ipRules)', 2),
                      self.check('properties.networkAcls.ipRules[0].value', '{ip3}'),
                      self.check('properties.networkAcls.ipRules[1].value', '{ip4}'),
@@ -2625,7 +2636,7 @@ class KeyVaultPublicNetworkAccessScenarioTest(ScenarioTest):
             'kv': self.create_random_name('cli-test-kv-pna-', 24),
             'kv2': self.create_random_name('cli-test-kv2-pna-', 24),
             'kv3': self.create_random_name('cli-test-kv3-pna-', 24),
-            'loc': 'eastus2euap'
+            'loc': 'eastus'
         })
         self.cmd('keyvault create -g {rg} -n {kv} -l {loc}',
                  checks=[self.check('properties.publicNetworkAccess', 'Enabled')])

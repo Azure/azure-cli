@@ -451,7 +451,7 @@ def recover_vault(cmd, client, vault_name, resource_group_name, location, no_wai
 
 
 def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acls_ips, network_acls_vnets,
-                        bypass, default_action):
+                        bypass, default_action, json_format=False):
     if network_acls_json is None:
         network_acls_json = {}
 
@@ -469,6 +469,24 @@ def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acl
         for vnet_rule in network_acls_vnets:
             if vnet_rule not in network_acls_json['vnet']:
                 network_acls_json['vnet'].append(vnet_rule)
+
+    if json_format:
+        ret_json = {}
+        ret_json['bypass'] = bypass
+        ret_json['default_action'] = default_action
+        ret_json['ip'] = network_acls_json.get('ip', [])
+        ret_json['vnet'] = []
+        for vnet_rule in network_acls_json.get('vnet', []):
+            items = vnet_rule.split('/')
+            if len(items) == 2:
+                vnet_name = items[0].lower()
+                subnet_name = items[1].lower()
+                vnet = _construct_vnet(cmd, resource_group_name, vnet_name, subnet_name)
+                ret_json['vnet'].append(vnet)
+            else:
+                subnet_id = vnet_rule.lower()
+                ret_json['vnet'].append(subnet_id)
+        return ret_json
 
     VirtualNetworkRule = cmd.get_models('VirtualNetworkRule', resource_type=ResourceType.MGMT_KEYVAULT)
     IPRule = cmd.get_models('IPRule', resource_type=ResourceType.MGMT_KEYVAULT)
@@ -527,8 +545,33 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                         tags=None,
                         no_wait=False,
                         public_network_access=None,
+                        what_if=None,
+                        fail_on_exist=True,
                         ):
-    if is_azure_stack_profile(cmd) or vault_name:
+    if is_azure_stack_profile(cmd):
+        return create_vault_azure_stack(cmd=cmd,
+                                        client=client,
+                                        resource_group_name=resource_group_name,
+                                        vault_name=vault_name,
+                                        location=location,
+                                        sku=sku,
+                                        enabled_for_deployment=enabled_for_deployment,
+                                        enabled_for_disk_encryption=enabled_for_disk_encryption,
+                                        enabled_for_template_deployment=enabled_for_template_deployment,
+                                        enable_rbac_authorization=enable_rbac_authorization,
+                                        enable_purge_protection=enable_purge_protection,
+                                        retention_days=retention_days,
+                                        network_acls=network_acls,
+                                        network_acls_ips=network_acls_ips,
+                                        network_acls_vnets=network_acls_vnets,
+                                        bypass=bypass,
+                                        default_action=default_action,
+                                        no_self_perms=no_self_perms,
+                                        tags=tags,
+                                        no_wait=no_wait,
+                                        public_network_access=public_network_access)
+
+    if vault_name:
         return create_vault(cmd=cmd,
                             client=client,
                             resource_group_name=resource_group_name,
@@ -549,7 +592,9 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                             no_self_perms=no_self_perms,
                             tags=tags,
                             no_wait=no_wait,
-                            public_network_access=public_network_access)
+                            public_network_access=public_network_access,
+                            what_if=what_if,
+                            fail_on_exist=fail_on_exist)
 
     if hsm_name:
         hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
@@ -642,7 +687,143 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
                  no_self_perms=None,
                  tags=None,
                  no_wait=False,
-                 public_network_access=None):
+                 public_network_access=None,
+                 what_if=None,
+                 fail_on_exist=None):
+    if fail_on_exist:
+        from azure.core.exceptions import HttpResponseError
+        try:
+            vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
+            if vault:
+                raise InvalidArgumentValueError('The specified vault: {} already exists'.format(vault_name))
+        except HttpResponseError:
+            # if client.get raise exception, we can take it as no existing vault found
+            # just continue the normal creation process
+            pass
+    from azure.cli.core._profile import Profile
+    from azure.cli.command_modules.role import graph_client_factory, GraphError
+
+    KeyPermissions = cmd.get_models('KeyPermissions', resource_type=ResourceType.MGMT_KEYVAULT)
+    SecretPermissions = cmd.get_models('SecretPermissions', resource_type=ResourceType.MGMT_KEYVAULT)
+    CertificatePermissions = cmd.get_models('CertificatePermissions', resource_type=ResourceType.MGMT_KEYVAULT)
+    StoragePermissions = cmd.get_models('StoragePermissions', resource_type=ResourceType.MGMT_KEYVAULT)
+
+    profile = Profile(cli_ctx=cmd.cli_ctx)
+    _, _, tenant_id = profile.get_login_credentials(
+        resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
+
+    graph_client = graph_client_factory(cmd.cli_ctx)
+    subscription = profile.get_subscription()
+
+    # if bypass or default_action was specified create a NetworkRuleSet
+    # if neither were specified we will parse it from parameter `--network-acls`
+    if network_acls or network_acls_ips or network_acls_vnets:
+        network_acls = _parse_network_acls(
+            cmd, resource_group_name, network_acls, network_acls_ips, network_acls_vnets,
+            bypass, default_action, json_format=True)
+    else:
+        network_acls = {'bypass': bypass, 'default_action': default_action}
+
+    if no_self_perms or enable_rbac_authorization:
+        access_policies = []
+    else:
+        permissions = {
+            "keys": [KeyPermissions.all.value],
+            "secrets": [SecretPermissions.all.value],
+            "certificates": [CertificatePermissions.all.value],
+            "storage": [StoragePermissions.all.value]
+        }
+
+        try:
+            object_id = _get_current_user_object_id(graph_client)
+        except GraphError:
+            object_id = _get_object_id(graph_client, subscription=subscription)
+        if not object_id:
+            raise CLIError('Cannot create vault.\nUnable to query active directory for information '
+                           'about the current user.\nYou may try the --no-self-perms flag to '
+                           'create a vault without permissions.')
+        access_policies = [{
+            "tenantId": tenant_id,
+            "objectId": object_id,
+            "permissions": permissions
+        }]
+
+    deploy_parameters = {
+        "vaultName": {"value": vault_name},
+        "location": {"value": location},
+        "enabledForDeployment": {"value": enabled_for_deployment},
+        "enabledForDiskEncryption": {"value": enabled_for_disk_encryption},
+        "enabledForTemplateDeployment": {"value": enabled_for_template_deployment},
+        "enablePurgeProtection": {"value": enable_purge_protection},
+        "enableRbacAuthorization": {"value": enable_rbac_authorization},
+        "softDeleteRetentionInDays": {"value": int(retention_days)},
+        "tenantId": {"value": tenant_id},
+        "networkRuleBypassOptions": {"value": bypass},
+        "NetworkRuleAction": {"value": default_action},
+        "ipRules": {"value": network_acls.get('ip', [])},
+        "accessPolicies": {"value": access_policies},
+        "virtualNetworkRules": {"value": network_acls.get('vnet', [])},
+        "publicNetworkAccess": {"value": public_network_access},
+        "skuName": {"value": sku},
+        "tags": {"value": tags},
+        "apiVersion": {"value": cmd.get_api_version(resource_type=ResourceType.MGMT_KEYVAULT)}
+    }
+
+    from azure.cli.command_modules.keyvault.util import client_tool_kv_creation_template as deploy_template
+    if enabled_for_deployment is None:
+        deploy_template["resources"][0]["properties"]["enabledForDeployment"] = None
+    if enabled_for_disk_encryption is None:
+        deploy_template["resources"][0]["properties"]["enabledForDiskEncryption"] = None
+    if enabled_for_template_deployment is None:
+        deploy_template["resources"][0]["properties"]["enabledForTemplateDeployment"] = None
+    if enable_purge_protection is None:
+        deploy_template["resources"][0]["properties"]["enablePurgeProtection"] = None
+    if enable_rbac_authorization is None:
+        deploy_template["resources"][0]["properties"]["enableRbacAuthorization"] = None
+
+    from azure.cli.core.util import random_string
+    from azure.cli.core.commands import LongRunningOperation
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    deploy_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+    deployment_name = 'keyvault_deploy_' + random_string(32)
+
+    if what_if:
+        DeploymentWhatIfProperties = cmd.get_models('DeploymentWhatIfProperties',
+                                                    resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        properties = DeploymentWhatIfProperties(template=deploy_template,
+                                                parameters=deploy_parameters,
+                                                mode='incremental')
+        DeploymentWhatIf = cmd.get_models('DeploymentWhatIf', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        deployment_what_if = DeploymentWhatIf(properties=properties)
+        return sdk_no_wait(no_wait, deploy_client.begin_what_if, resource_group_name, deployment_name, deployment_what_if)
+
+    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    properties = DeploymentProperties(template=deploy_template, parameters=deploy_parameters, mode='incremental')
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    deployment = Deployment(properties=properties)
+    deployment_poller = deploy_client.begin_create_or_update(resource_group_name, deployment_name, deployment)
+    LongRunningOperation(cmd.cli_ctx)(deployment_poller)
+
+    return client.get(resource_group_name=resource_group_name, vault_name=vault_name)
+
+
+def create_vault_azure_stack(cmd, client,  # pylint: disable=too-many-locals, too-many-statements
+                             resource_group_name, vault_name, location=None, sku=None,
+                             enabled_for_deployment=None,
+                             enabled_for_disk_encryption=None,
+                             enabled_for_template_deployment=None,
+                             enable_rbac_authorization=None,
+                             enable_purge_protection=None,
+                             retention_days=None,
+                             network_acls=None,
+                             network_acls_ips=None,
+                             network_acls_vnets=None,
+                             bypass=None,
+                             default_action=None,
+                             no_self_perms=None,
+                             tags=None,
+                             no_wait=False,
+                             public_network_access=None):
     from azure.core.exceptions import HttpResponseError
     try:
         vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
