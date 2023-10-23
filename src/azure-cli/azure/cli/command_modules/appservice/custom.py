@@ -422,7 +422,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
         app_settings_slot_cfg_names = slot_cfg_names.app_setting_names
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
-    return _build_app_settings_output(result.properties, app_settings_slot_cfg_names)
+    return _build_app_settings_output(result.properties, app_settings_slot_cfg_names, redact=True)
 
 
 def add_azure_storage_account(cmd, resource_group_name, name, custom_id, storage_type, account_name,
@@ -1406,7 +1406,9 @@ def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None
                                          'update_application_settings',
                                          app_settings, slot, client)
 
-    return _build_app_settings_output(result.properties, slot_cfg_names.app_setting_names)
+    return _build_app_settings_output(result.properties,
+                                      slot_cfg_names.app_setting_names if slot_cfg_names else [],
+                                      redact=True)
 
 
 def delete_azure_storage_accounts(cmd, resource_group_name, name, custom_id, slot=None):
@@ -1442,11 +1444,20 @@ def _ssl_context():
     return ssl.create_default_context()
 
 
-def _build_app_settings_output(app_settings, slot_cfg_names):
+def _build_app_settings_output(app_settings, slot_cfg_names, redact=False):
     slot_cfg_names = slot_cfg_names or []
     return [{'name': p,
              'value': app_settings[p],
-             'slotSetting': p in slot_cfg_names} for p in _mask_creds_related_appsettings(app_settings)]
+             'slotSetting': p in slot_cfg_names} for p in (_redact_appsettings(app_settings) if redact
+                                                           else _mask_creds_related_appsettings(app_settings))]
+
+
+def _redact_appsettings(settings):
+    logger.warning('App settings have been redacted. '
+                   'Use `az webapp/logicapp/functionapp config appsettings list` to view.')
+    for x in settings:
+        settings[x] = None
+    return settings
 
 
 def update_connection_strings(cmd, resource_group_name, name, connection_string_type,
