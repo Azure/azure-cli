@@ -22,11 +22,11 @@ class MonitorCloneVMScenarios(ScenarioTest):
             'rg': resource_group
         })
 
-        vm1_json = self.cmd('vm create -g {rg} -n {vm1} --image UbuntuLTS --admin-password TestPassword11!! '
+        vm1_json = self.cmd('vm create -g {rg} -n {vm1} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-password TestPassword11!! '
                             '--admin-username testadmin --authentication-type password').get_output_in_json()
-        vm2_json = self.cmd('vm create -g {rg} -n {vm2} --image UbuntuLTS --admin-password TestPassword11!! '
+        vm2_json = self.cmd('vm create -g {rg} -n {vm2} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-password TestPassword11!! '
                             '--admin-username testadmin --authentication-type password').get_output_in_json()
-        vm3_json = self.cmd('vm create -g {rg} -n {vm3} --image UbuntuLTS --admin-password TestPassword11!! '
+        vm3_json = self.cmd('vm create -g {rg} -n {vm3} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-password TestPassword11!! '
                             '--admin-username testadmin --authentication-type password').get_output_in_json()
         self.kwargs.update({
             'vm1_id': vm1_json['id'],
@@ -38,8 +38,8 @@ class MonitorCloneVMScenarios(ScenarioTest):
             self.check('description', 'High CPU'),
             self.check('severity', 2),
             self.check('autoMitigate', None),
-            self.check('windowSize', '0:05:00'),
-            self.check('evaluationFrequency', '0:01:00'),
+            self.check('windowSize', 'PT5M'),
+            self.check('evaluationFrequency', 'PT1M'),
             self.check('length(scopes)', 2)
         ])
         with mock.patch('azure.cli.command_modules.monitor.operations.monitor_clone_util.gen_guid', side_effect=self.create_guid):
@@ -82,8 +82,8 @@ class MonitorCloneStorageAccountScenarios(ScenarioTest):
             self.check('description', 'Test'),
             self.check('severity', 2),
             self.check('autoMitigate', None),
-            self.check('windowSize', '0:05:00'),
-            self.check('evaluationFrequency', '0:01:00'),
+            self.check('windowSize', 'PT5M'),
+            self.check('evaluationFrequency', 'PT1M'),
             self.check('length(criteria.allOf)', 2),
             self.check('length(criteria.allOf[0].dimensions)', 2),
             self.check('length(criteria.allOf[1].dimensions)', 1)
@@ -131,8 +131,8 @@ class MonitorCloneStorageAccountAlwaysScenarios(ScenarioTest):
             self.check('description', 'Test'),
             self.check('severity', 2),
             self.check('autoMitigate', None),
-            self.check('windowSize', '0:05:00'),
-            self.check('evaluationFrequency', '0:01:00'),
+            self.check('windowSize', 'PT5M'),
+            self.check('evaluationFrequency', 'PT1M'),
             self.check('length(criteria.allOf)', 2),
             self.check('length(criteria.allOf[0].dimensions)', 2),
             self.check('length(criteria.allOf[1].dimensions)', 1)
@@ -175,16 +175,16 @@ class MonitorClonePublicIpScenarios(ScenarioTest):
         self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {ip1_id} --region westus --action {ag1} --description "Test" --condition "total TCPBytesForwardedDDoS > 5"', checks=[
             self.check('description', 'Test'),
             self.check('severity', 2),
-            self.check('windowSize', '0:05:00'),
-            self.check('evaluationFrequency', '0:01:00'),
+            self.check('windowSize', 'PT5M'),
+            self.check('evaluationFrequency', 'PT1M'),
             self.check('length(scopes)', 1)
         ])
 
         self.cmd('monitor metrics alert create -g {rg} -n {alert2} --scopes {ip1_id} --region westus --action {ag1} --description "Test2" --condition "max TCPBytesForwardedDDoS > 5"', checks=[
             self.check('description', 'Test2'),
             self.check('severity', 2),
-            self.check('windowSize', '0:05:00'),
-            self.check('evaluationFrequency', '0:01:00'),
+            self.check('windowSize', 'PT5M'),
+            self.check('evaluationFrequency', 'PT1M'),
             self.check('length(scopes)', 1)
         ])
 

@@ -7,6 +7,9 @@
 import copy
 import argparse
 
+from knack.arguments import CLIArgumentType
+from knack.log import get_logger
+from knack.util import CLIError
 from azure.cli.command_modules.monitor.util import (
     get_aggregation_map, get_operator_map, get_autoscale_scale_direction_map)
 
@@ -19,6 +22,8 @@ from azure.cli.core.aaz._arg_action import AAZCompoundTypeArgAction, AAZArgActio
 from azure.cli.core.aaz._help import AAZShowHelp
 from azure.cli.core.aaz.exceptions import AAZInvalidValueError
 from azure.cli.core.aaz._prompt import AAZPromptInput
+
+logger = get_logger(__name__)
 
 
 def timezone_name_type(value):
@@ -96,6 +101,47 @@ def get_period_type(as_timedelta=False):
     return period_type
 
 
+# pylint: disable=redefined-builtin
+def get_date_midnight_type(help=None):
+
+    help_string = help + ' ' if help else ''
+    accepted_formats = ['date (yyyy-mm-dd)', 'time (hh:mm:ss.xxxxx)', 'timezone (+/-hh:mm)']
+    help_string = help_string + 'Format: ' + ' '.join(accepted_formats)
+
+    # pylint: disable=too-few-public-methods
+    class DateAction(argparse.Action):
+
+        def __call__(self, parser, namespace, values, option_string=None):
+            """ Parse a date value and return the ISO8601 string. """
+            import dateutil.parser
+            import dateutil.tz
+
+            value_string = ' '.join(values)
+            dt_val = None
+            try:
+                # attempt to parse ISO 8601
+                dt_val = dateutil.parser.parse(value_string)
+            except ValueError:
+                pass
+
+            # TODO: custom parsing attempts here
+            if not dt_val:
+                raise CLIError("Unable to parse: '{}'. Expected format: {}".format(value_string, help_string))
+            if dt_val.tzinfo:
+                logger.warning('Timezone info will be ignored in %s.', value_string)
+            dt_val = dt_val.replace(tzinfo=dateutil.tz.tzutc())
+
+            # Issue warning if any supplied time will be ignored
+            if any([dt_val.hour, dt_val.minute, dt_val.second, dt_val.microsecond]):
+                logger.warning('Time info will be set to midnight UTC for %s.', value_string)
+            date_midnight = dt_val.replace(hour=0, minute=0, second=0, microsecond=0)
+            format_string = date_midnight.isoformat()
+            logger.info('Time info set to midnight UTC from %s to %s', value_string, format_string)
+            setattr(namespace, self.dest, format_string)
+
+    return CLIArgumentType(action=DateAction, nargs='+', help=help_string)
+
+
 # pylint: disable=protected-access, too-few-public-methods
 class MetricAlertConditionAction(argparse._AppendAction):
 
@@ -106,7 +152,6 @@ class MetricAlertConditionAction(argparse._AppendAction):
 
         from azure.cli.command_modules.monitor.grammar.metric_alert import (
             MetricAlertConditionLexer, MetricAlertConditionParser, MetricAlertConditionValidator)
-        from azure.mgmt.monitor.models import MetricCriteria, DynamicMetricCriteria
 
         usage = 'usage error: --condition {avg,min,max,total,count} [NAMESPACE.]METRIC\n' \
                 '                         [{=,!=,>,>=,<,<=} THRESHOLD]\n' \
@@ -127,15 +172,15 @@ class MetricAlertConditionAction(argparse._AppendAction):
             walker = antlr4.ParseTreeWalker()
             walker.walk(validator, tree)
             metric_condition = validator.result()
-            if isinstance(metric_condition, MetricCriteria):
+            if "static" in metric_condition:
                 # static metric criteria
                 for item in ['time_aggregation', 'metric_name', 'operator', 'threshold']:
-                    if not getattr(metric_condition, item, None):
+                    if item not in metric_condition["static"]:
                         raise InvalidArgumentValueError(usage)
-            elif isinstance(metric_condition, DynamicMetricCriteria):
+            elif "dynamic" in metric_condition:
                 # dynamic metric criteria
                 for item in ['time_aggregation', 'metric_name', 'operator', 'alert_sensitivity', 'failing_periods']:
-                    if not getattr(metric_condition, item, None):
+                    if item not in metric_condition["dynamic"]:
                         raise InvalidArgumentValueError(usage)
             else:
                 raise NotImplementedError()
@@ -157,13 +202,12 @@ class MetricAlertAddAction(argparse._AppendAction):
             )
             raise InvalidArgumentValueError(err_msg)
 
-        from azure.mgmt.monitor.models import MetricAlertAction
-        action = MetricAlertAction(
-            action_group_id=action_group_id,
-            web_hook_properties=webhook_property_candidates
-        )
-        action.odatatype = 'Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models.Microsoft.AppInsights.Nexus.' \
-                           'DataContracts.Resources.ScheduledQueryRules.Action'
+        action = {
+            "action_group_id": action_group_id,
+            "web_hook_properties": webhook_property_candidates
+        }
+        action["odatatype"] = "Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models.Microsoft.AppInsights." \
+                              "Nexus.DataContracts.Resources.ScheduledQueryRules.Action"
         super(MetricAlertAddAction, self).__call__(parser, namespace, action, option_string)
 
 
@@ -469,7 +513,7 @@ class ActionGroupReceiverParameterAction(MultiObjectsDeserializeAction):
         return receiver
 
 
-class AAZActionGroupReceiverArgAction(AAZCompoundTypeArgAction):
+class AAZCustomListArgAction(AAZCompoundTypeArgAction):
 
     def __call__(self, parser, namespace, values, option_string=None):
         if not isinstance(getattr(namespace, self.dest), AAZArgActionOperations):
@@ -559,7 +603,6 @@ class AAZActionGroupReceiverArgAction(AAZCompoundTypeArgAction):
 
 
 class AAZCustomListArg(AAZCompoundTypeArg, AAZListType):
-    # refer to ActionGroupReceiverParameterAction
 
     def __init__(self, fmt=None, singular_options=None, **kwargs):
         fmt = fmt or AAZListArgFormat()
@@ -579,7 +622,7 @@ class AAZCustomListArg(AAZCompoundTypeArg, AAZListType):
         return arg
 
     def _build_cmd_action(self):
-        class Action(AAZActionGroupReceiverArgAction):
+        class Action(AAZCustomListArgAction):
             _schema = self  # bind action class with current schema
 
         return Action
