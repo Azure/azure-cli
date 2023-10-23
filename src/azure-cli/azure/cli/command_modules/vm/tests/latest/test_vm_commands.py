@@ -4563,7 +4563,6 @@ class VMSSCustomDataScenarioTest(ScenarioTest):
             'ssh_key': TEST_SSH_KEY_PUB
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Debian --admin-username deploy --ssh-key-value "{ssh_key}" ')
         self.cmd('vmss create -n {vmss} -g {rg} --image Debian11 --admin-username deploy --ssh-key-value "{ssh_key}" --orchestration-mode Uniform')
         self.cmd('vmss update -n {vmss} -g {rg} --custom-data "#cloud-config\nhostname: myVMSShostname"')
         # custom data is write only, hence we have no automatic way to cross check. Here we just verify VM was provisioned
