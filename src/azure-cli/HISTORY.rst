@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.53.1
+++++++
+
+**App Service**
+
+* [BREAKING CHANGE] Redact appsettings output on set/delete commands (#27565)
+
 2.53.0
 ++++++
 
