@@ -451,6 +451,50 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
         ])
 
 
+class FunctionWorkloadProfile(ScenarioTest):
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location="northeurope")
+    @StorageAccountPreparer()
+    def test_functionapp_workloadprofiles(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionapp', 40)
+        managed_environment_name = self.create_random_name(
+            'managedenvironment', 40
+        )
+        workload_profile_name = self.create_random_name(
+            'workloadprofilename', 40
+        )
+
+        self.cmd('containerapp env create --name {} --resource-group {} --location {}'.format(
+            managed_environment_name,
+            resource_group,
+            "northeurope"
+        ))
+
+        self.cmd('functionapp create -g {} -n {} -s {} --functions-version 4 --runtime dotnet-isolated --environment {} --workload_profile_name {} --cpu 4 --memory 8.0Gi'.format(
+            resource_group,
+            functionapp_name,
+            storage_account,
+            managed_environment_name,
+            workload_profile_name
+        )).assert_with_checks([
+            JMESPathCheck('properties.resourceConfig.cpu', 4),
+            JMESPathCheck('properties.resourceConfig.memory', '8.0Gi'),
+            JMESPathCheck('properties.workloadProfileName', workload_profile_name),
+        ])
+
+        self.cmd('functionapp config container set -g {} -n {} --workload_profile_name {} --cpu 4 --memory 8.0gi'.format(
+            resource_group,
+            functionapp_name,
+            workload_profile_name
+        ))
+
+        self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
+            JMESPathCheck('properties.resourceConfig.cpu', 4),
+            JMESPathCheck('properties.resourceConfig.memory', '8.0Gi'),
+            JMESPathCheck('properties.workloadProfileName', workload_profile_name),
+        ])
+
 class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-linux', location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
