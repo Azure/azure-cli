@@ -23,27 +23,28 @@ def delete_rule(cmd, cluster_subscription, cluster_resource_group_name, default_
 
 
 def delete_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster_name):
+    # limit rule group name to 260 characters
     delete_rule(
         cmd,
         cluster_subscription,
         cluster_resource_group_name,
-        "NodeRecordingRulesRuleGroup-{0}".format(cluster_name)
+        "NodeRecordingRulesRuleGroup-{0}".format(cluster_name[:232])
     )
     delete_rule(
         cmd,
         cluster_subscription,
         cluster_resource_group_name,
-        "KubernetesRecordingRulesRuleGroup-{0}".format(cluster_name)
+        "KubernetesRecordingRulesRuleGroup-{0}".format(cluster_name[:226])
     )
     delete_rule(
         cmd,
         cluster_subscription,
         cluster_resource_group_name,
-        "NodeRecordingRulesRuleGroup-Win-{0}".format(cluster_name)
+        "NodeRecordingRulesRuleGroup-Win-{0}".format(cluster_name[:228])
     )
     delete_rule(
         cmd,
         cluster_subscription,
         cluster_resource_group_name,
-        "NodeAndKubernetesRecordingRulesRuleGroup-Win-{0}".format(cluster_name)
+        "NodeAndKubernetesRecordingRulesRuleGroup-Win-{0}".format(cluster_name[:215])
     )

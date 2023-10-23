@@ -18,7 +18,6 @@ from azure.cli.command_modules.acs.azuremonitormetrics.helper import (
 )
 from azure.cli.command_modules.acs.azuremonitormetrics.recordingrules.create import create_rules
 from azure.cli.command_modules.acs.azuremonitormetrics.recordingrules.delete import delete_rules
-from azure.cli.core.azclierror import InvalidArgumentValueError
 from knack.util import CLIError
 
 
@@ -73,7 +72,7 @@ def ensure_azure_monitor_profile_prerequisites(
     cloud_name = cmd.cli_ctx.cloud.name
     if cloud_name.lower() == 'azurechinacloud':
         raise CLIError("Azure China Cloud is not supported for the Azure Monitor Metrics addon")
-    
+
     if remove_azuremonitormetrics:
         unlink_azure_monitor_profile_artifacts(
             cmd,
