@@ -163,7 +163,7 @@ def export_namespace(cmd, ns_name, app_config):
             instance_name = instance.get('id').split('/')[-1]
             fqdn = instance.get('address', '')
             if 'azurecontainerapps.io' in fqdn:
-                instance_kv_pairs['Services:{}'.format(service_name)] = fqdn
+                instance_kv_pairs['Services:{}'.format(service_name)] = 'https://{}'.format(fqdn)
 
     import tempfile, datetime
     temp = tempfile.NamedTemporaryFile(mode='w', delete=False)
