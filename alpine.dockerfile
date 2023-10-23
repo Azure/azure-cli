@@ -27,9 +27,9 @@ LABEL maintainer="Microsoft" \
 
 
 # ca-certificates bash bash-completion jq jp openssh-keygen - for convenience
-# libintl icu-libs - required by azure-devops https://github.com/Azure/azure-cli/pull/9683
+# libintl icu-libs - required by azure-devops extension https://github.com/Azure/azure-cli/pull/9683
 # libc6-compat - required by az storage blob sync https://github.com/Azure/azure-cli/issues/10381
-# gcc python3-dev musl-dev linux-headers libffi-dev - temporarily required by psutil
+# gcc musl-dev linux-headers libffi-dev - temporarily required by psutil
 # curl - temporarily required by jp
 
 ARG JP_VERSION="0.2.1"
@@ -37,7 +37,7 @@ ARG JP_VERSION="0.2.1"
 WORKDIR azure-cli
 COPY . /azure-cli
 RUN apk add --no-cache ca-certificates bash bash-completion libintl icu-libs libc6-compat jq openssh-keygen \
-    && apk add --no-cache --virtual .build-deps gcc python3-dev musl-dev linux-headers libffi-dev curl \
+    && apk add --no-cache --virtual .build-deps gcc musl-dev linux-headers libffi-dev curl \
     && update-ca-certificates && ./scripts/install_full.sh && python ./scripts/trim_sdk.py \
     && cat /azure-cli/az.completion > ~/.bashrc \
     && dos2unix /root/.bashrc /usr/local/bin/az \
