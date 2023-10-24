@@ -40,7 +40,11 @@ from ._featuremodels import (map_featureflag_to_keyvalue, is_feature_flag, Featu
 logger = get_logger(__name__)
 FEATURE_MANAGEMENT_KEYWORDS = ["FeatureManagement", "featureManagement", "feature_management", "feature-management"]
 ENABLED_FOR_KEYWORDS = ["EnabledFor", "enabledFor", "enabled_for", "enabled-for"]
-FEATURE_FLAG_PROPERTIES = {'id', 'description', 'enabled', 'conditions'}
+FEATURE_FLAG_PROPERTIES = {
+    FeatureFlagConstants.ID,
+    FeatureFlagConstants.DESCRIPTION,
+    FeatureFlagConstants.ENABLED,
+    FeatureFlagConstants.CONDITIONS}
 
 
 class FeatureManagementReservedKeywords:
@@ -710,7 +714,7 @@ def __export_features(retrieved_features, naming_convention):
 
             elif feature.state == "conditional":
                 feature_state = {feature_reserved_keywords.enabledfor: []}
-                client_filters = feature.conditions["client_filters"]
+                client_filters = feature.conditions[FeatureFlagConstants.CLIENT_FILTERS]
                 # client_filters is a list of dictionaries, where all dictionaries have 2 keys - Name and Parameters
                 for filter_ in client_filters:
                     feature_filter = {}
@@ -732,7 +736,7 @@ def __export_features(retrieved_features, naming_convention):
 def __convert_feature_dict_to_keyvalue_list(features_dict, enabled_for_keyword):
     # pylint: disable=too-many-nested-blocks
     key_values = []
-    default_conditions = {'client_filters': []}
+    default_conditions = {FeatureFlagConstants.CLIENT_FILTERS: []}
 
     try:
         for k, v in features_dict.items():
@@ -745,14 +749,14 @@ def __convert_feature_dict_to_keyvalue_list(features_dict, enabled_for_keyword):
                     # This may be a conditional feature
                     feature_flag_value.enabled = False
                     try:
-                        feature_flag_value.conditions = {'client_filters': v[enabled_for_keyword]}
+                        feature_flag_value.conditions = {FeatureFlagConstants.CLIENT_FILTERS: v[enabled_for_keyword]}
                     except KeyError:
                         raise ValidationError("Feature '{0}' must contain '{1}' definition or have a true/false value. \n".format(str(k), enabled_for_keyword))
 
-                    if feature_flag_value.conditions["client_filters"]:
+                    if feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS]:
                         feature_flag_value.enabled = True
 
-                        for idx, val in enumerate(feature_flag_value.conditions["client_filters"]):
+                        for idx, val in enumerate(feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS]):
                             # each val should be a dict with at most 2 keys (Name, Parameters) or at least 1 key (Name)
                             val = {filter_key.lower(): filter_val for filter_key, filter_val in val.items()}
                             if not val.get("name", None):
@@ -766,10 +770,10 @@ def __convert_feature_dict_to_keyvalue_list(features_dict, enabled_for_keyword):
                                 break
 
                             filter_param = val.get("parameters", {})
-                            new_val = {'name': val["name"]}
+                            new_val = {FeatureFlagConstants.FILTER_NAME: val["name"]}
                             if filter_param:
-                                new_val["parameters"] = filter_param
-                            feature_flag_value.conditions["client_filters"][idx] = new_val
+                                new_val[FeatureFlagConstants.FILTER_PARAMETERS] = filter_param
+                            feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS][idx] = new_val
                 elif isinstance(v, bool):
                     feature_flag_value.enabled = v
                     feature_flag_value.conditions = default_conditions
@@ -916,7 +920,7 @@ def __validate_import_feature_flag(kv):
         try:
             ff = json.loads(kv.value)
             if FEATURE_FLAG_PROPERTIES == ff.keys():
-                return validate_import_feature(ff["id"])
+                return validate_import_feature(ff[FeatureFlagConstants.ID])
 
             logger.warning("The feature flag with key '{%s}' is not a valid feature flag. It will not be imported.", kv.key)
         except JSONDecodeError as exception:
