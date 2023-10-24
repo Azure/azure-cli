@@ -427,7 +427,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('registry_name', options_list=['--name', '-n'], help="The name of the registry.")
         c.argument('repository_name', options_list=['--repository', '-r'], help="The target repository namespace such as 'ubuntu'.")
         c.argument('image', options_list=['--image','-t'],
-                   help="The digest of the manifest such as '--image sha256@abc123', or the tag such as '-t latest'")
+                   help="The image digest of the manifest such as '--image sha256@abc123', or the tag such as '-t latest'")
 
     with self.argument_context('acr scope-map') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
