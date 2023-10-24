@@ -108,7 +108,7 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
         ])
         self.cmd('containerapp env delete -g {} -n {} --yes --no-wait'.format(resource_group, env), expect_failure=False)
 
-        env1 = self.create_random_name(prefix='env4', length=24)
+        env1 = self.create_random_name(prefix='env1', length=24)
         self.cmd('containerapp env create -g {} -n {} --logs-destination none'.format(
             resource_group, env1), expect_failure=False, checks=[
             JMESPathCheck("name", env1),
