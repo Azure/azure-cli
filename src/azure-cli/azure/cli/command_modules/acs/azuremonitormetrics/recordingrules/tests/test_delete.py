@@ -1,3 +1,7 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
 import unittest
 from unittest.mock import patch
 from azure.cli.command_modules.acs.azuremonitormetrics.recordingrules.delete import delete_rules
