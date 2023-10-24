@@ -30,13 +30,15 @@ def _get_metrics_alert_rules_clone_list(cmd, source_resource, target_resource):
 
 def _add_into_existing_scopes(cmd, source_resource, alert_rule, target_resource):
     subscription_id = parse_resource_id(source_resource)['subscription']
-    alert_rule['scopes'].append(target_resource)
     resource_group_name, name = _parse_id(alert_rule['id']).values()  # pylint: disable=unbalanced-dict-unpacking
-    alert_rule["subscription"] = subscription_id
-    alert_rule["resource_group"] = resource_group_name
-    alert_rule["name"] = name
+    command_args = {
+        "subscription": subscription_id,
+        "resource_group": resource_group_name,
+        "name": name,
+        "scopes": alert_rule['scopes'] + [target_resource]
+    }
     from ..aaz.latest.monitor.metrics.alert import Update
-    return Update(cli_ctx=cmd.cli_ctx)(command_args=alert_rule)
+    return Update(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 def _clone_and_replace_action_group(cmd, source_resource, alert_rule, action_group_mapping, target_resource):
