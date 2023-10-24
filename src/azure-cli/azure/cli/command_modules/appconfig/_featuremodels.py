@@ -174,8 +174,7 @@ def custom_serialize_conditions(conditions_dict):
         for feature_filter
         in conditions_dict.get(FeatureFlagConstants.CLIENT_FILTERS, [])]
 
-    requirement_type = conditions_dict.get(
-        FeatureFlagConstants.REQUIREMENT_TYPE)
+    requirement_type = conditions_dict.get(FeatureFlagConstants.REQUIREMENT_TYPE, None)
 
     if requirement_type:
         featurefilterdict[FeatureFlagConstants.REQUIREMENT_TYPE] = requirement_type
