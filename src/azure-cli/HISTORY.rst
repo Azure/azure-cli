@@ -6,6 +6,10 @@ Release History
 2.53.1
 ++++++
 
+**AKS**
+
+* Hotfix: `az aks update`: Fix bug where supportPlan can be reset to None (#27664)
+
 **App Service**
 
 * [BREAKING CHANGE] Redact appsettings output on set/delete commands (#27565)
