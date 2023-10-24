@@ -1263,10 +1263,11 @@ def _validate_vm_vmss_msi(cmd, namespace, is_identity_assign=False):
             raise ArgumentUsageError(
                 "usage error: please specify both --role and --scope when assigning a role to the managed identity")
 
-    # For "az vm identity assign", "--scope" must be passed in when assigning a role to the managed identity
+    # For "az vm/vmss identity assign", "--role" and "--scope" should be passed in at the same time
+    # when assigning a role to the managed identity
     if is_identity_assign:
-        if not namespace.identity_scope and namespace.identity_role or \
-                not namespace.identity_role and namespace.identity_scope:
+        if (namespace.identity_scope and not namespace.identity_role) or \
+                (not namespace.identity_scope and namespace.identity_role):
             raise ArgumentUsageError(
                 "usage error: please specify both --role and --scope when assigning a role to the managed identity")
 
