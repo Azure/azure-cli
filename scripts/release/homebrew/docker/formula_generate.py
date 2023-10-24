@@ -142,7 +142,7 @@ def update_formula() -> str:
     upgrade = False
     for idx, line in enumerate(lines):
         # In released formula, the url is in the release tag format, such as
-        # "https://github.com/Azure/azure-cli/archive/azure-cli-2.17.1.tar.gz".
+        # "https://github.com/Azure/azure-cli/archive/refs/tags/azure-cli-2.17.1.tar.gz".
         # version is extracted from url. During build, the url is in the format like
         # "https://codeload.github.com/Azure/azure-cli/legacy.tar.gz/7e09fd50c9ef02e1ed7d4709c7ab1a71acd3840b".
         # We need to add the version explicitly after url.

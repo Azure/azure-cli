@@ -11,7 +11,7 @@ CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
 TAR_NAME=azure-cli-$CLI_VERSION.tar.gz
 
 mkdir -p $BUILD_STAGINGDIRECTORY/github/ >/dev/null 2>&1
-curl -sL https://github.com/Azure/azure-cli/archive/$TAR_NAME -o $BUILD_STAGINGDIRECTORY/github/$TAR_NAME
+curl -sL https://github.com/Azure/azure-cli/archive/refs/tags/$TAR_NAME -o $BUILD_STAGINGDIRECTORY/github/$TAR_NAME
 
 az storage blob upload -c releases -n $TAR_NAME -f $BUILD_STAGINGDIRECTORY/github/$TAR_NAME
 
