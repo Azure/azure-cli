@@ -138,6 +138,8 @@ class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
             template = 'az storage account create -n {} -g {} -l {} --sku {} --kind {} --https-only'
             if not self.allow_blob_public_access:
                 template += ' --allow-blob-public-access false'
+            else:
+                template += ' --allow-blob-public-access true'
             if self.hns:
                 template += ' --hns'
             self.live_only_execute(self.cli_ctx, template.format(
