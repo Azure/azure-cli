@@ -317,13 +317,11 @@ def create_containerapp(cmd,
         from knack.log import get_logger
         logger = get_logger(__name__)
 
-        fqdn = r.get('properties').get('latestRevisionFqdn')
-        
         url = 'https://servicediscoverymvp.azurewebsites.net{}/instances/{}'.format(service_registry, name)
         payload = {
             'description': 'Container app auto registered fqdn',
             'metadatas': {},
-            'address': fqdn,
+            'address': r.get('properties').get('configuration').get('ingress').get('fqdn'),
             'port': target_port
         }
 
