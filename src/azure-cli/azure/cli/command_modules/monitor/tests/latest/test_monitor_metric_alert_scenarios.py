@@ -139,7 +139,7 @@ class MonitorTests(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_monitor')
     def test_metric_alert_basic_scenarios(self, resource_group):
         vm = 'vm1'
-        vm_json = self.cmd('vm create -g {} -n {} --image UbuntuLTS --admin-password TestPassword11!! --admin-username '
+        vm_json = self.cmd('vm create -g {} -n {} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-password TestPassword11!! --admin-username '
                            'testadmin --authentication-type password'.format(resource_group, vm)).get_output_in_json()
         vm_id = vm_json['id']
 
