@@ -5101,7 +5101,7 @@ def perform_onedeploy(cmd,
                       ignore_stack=None,
                       timeout=None,
                       slot=None,
-                      track_deployment=None):
+                      track_deployment=False):
     params = OneDeployParams()
 
     params.cmd = cmd
@@ -5139,7 +5139,7 @@ class OneDeployParams:
         self.should_ignore_stack = None
         self.timeout = None
         self.slot = None
-        self.track_deployment = None
+        self.track_deployment = False
 # pylint: enable=too-many-instance-attributes,too-few-public-methods
 
 
@@ -5297,7 +5297,7 @@ def _make_onedeploy_request(params):
         response_body = None
         if poll_async_deployment_for_debugging:
             logger.info('Polling the status of async deployment')
-            if params.track_deployment is not None and params.track_deployment.lower() == 'true':
+            if params.track_deployment is not None and params.track_deployment:
                 # once deploymentstatus/latest is available, we can use it to track the deployment
                 deployment_id = _get_latest_deployment_id(params.cmd, params.resource_group_name,
                                                           params.webapp_name, deployment_status_url, params.slot)
