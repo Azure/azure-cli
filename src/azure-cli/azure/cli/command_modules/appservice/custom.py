@@ -4192,7 +4192,7 @@ def _get_latest_deployment_id(cmd, rg_name, name, deployment_status_url, slot):
                                 verify=not should_disable_connection_verify())
         try:
             res_dict = response.json()
-        except Exception as ex:   # pylint: disable=bare-except
+        except Exception as ex:  # pylint: disable=broad-except
             logger.warning("Deployment status endpoint %s returned malformed data. Exception: %s "
                            "\nRetrying...", deployment_status_url, ex)
             return None

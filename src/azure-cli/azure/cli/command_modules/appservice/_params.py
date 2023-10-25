@@ -727,6 +727,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('ignore_stack', options_list=['--ignore-stack'], help='If true, any stack-specific defaults are ignored.', choices=['true', 'false'])
         c.argument('timeout', options_list=['--timeout'], help='Timeout for the deployment operation in milliseconds.')
         c.argument('slot', help="The name of the slot. Default to the productions slot if not specified.")
+        c.argument('track_deployment', help="If true, web app deployment status will be tracked verbosely.", arg_type=get_three_state_flag())
 
     with self.argument_context('functionapp create') as c:
         c.argument('vnet', options_list=['--vnet'], help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
