@@ -19,7 +19,7 @@ def transform_containerapp_output(app):
     return result
 
 
-def clean_up_sensitive_values(response_json):
+def transform_sensitive_values(response_json):
     for container in safe_get(response_json, "properties", "template", "containers", default=[]):
         if "env" in container:
             for env in container["env"]:
@@ -36,22 +36,6 @@ def clean_up_sensitive_values(response_json):
         for rule in safe_get(response_json, "properties", "configuration", "eventTriggerConfig", "scale", "rules", default=[]):
             rule["metadata"] = dict((k, "") for k, v in rule["metadata"].items())
     return response_json
-
-
-def transform_sensitive_values_wrapper():
-
-    def transform_sensitive_values(response_json):
-        return clean_up_sensitive_values(response_json)
-
-    return transform_sensitive_values
-
-
-def transform_sensitive_values_list_output_wrapper():
-
-    def transform_sensitive_values_list_output(apps):
-        return [clean_up_sensitive_values(a) for a in apps]
-
-    return transform_sensitive_values_list_output
 
 
 def transform_containerapp_list_output(apps):
