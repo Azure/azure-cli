@@ -161,19 +161,10 @@ def _get_location_from_resource_group(cli_ctx, resource_group_name):
     return group.location
 
 
-def show_raw_functionapp(cmd, resource_group_name, name):
-    client = web_client_factory(cmd.cli_ctx)
-    site_url_base = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    site_url = site_url_base.format(subscription_id, resource_group_name, name, client.DEFAULT_API_VERSION)
-    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + site_url
-    response = send_raw_request(cmd.cli_ctx, "GET", request_url)
-    return response.json()
-
-
 def is_centauri_functionapp(cmd, resource_group, name):
-    function_app = show_raw_functionapp(cmd, resource_group, name)
-    return function_app.get("properties", {}).get("managedEnvironmentId", None) is not None
+    client = web_client_factory(cmd.cli_ctx)
+    functionapp = client.web_apps.get(resource_group, name)
+    return functionapp.managed_environment_id is not None
 
 
 def _list_app(cli_ctx, resource_group_name=None):
