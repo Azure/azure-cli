@@ -2048,7 +2048,7 @@ class WebappImplictIdentityTest(ScenarioTest):
             resource_group, webapp_name), checks=self.is_empty())
 
 
-class WebappListLocationsFreeSKUTest(ScenarioTest):
+class WebappListLocationsTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_list-locations-free-sku-test')
     def test_webapp_list_locations_free_sku(self, resource_group):
         asp_F1 = self.cmd(
@@ -2056,6 +2056,15 @@ class WebappListLocationsFreeSKUTest(ScenarioTest):
         result = self.cmd(
             'appservice list-locations --sku Free').get_output_in_json()
         self.assertEqual(asp_F1, result)
+
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_list-locations-hyperv-workers-enabled-test')
+    def test_webapp_list_locations_hyperv_workers_enabled(self, resource_group):
+        self.cmd('appservice list-locations --sku P1V3 --hyperv-workers-enabled', checks = [
+            JMESPathCheck('length(@) > `0`', True)
+        ])        
+        self.cmd('appservice list-locations --sku P1MV3 --hyperv-workers-enabled', checks = [
+            JMESPathCheck('length(@) > `0`', True)
+        ])
 
 
 class ContainerWebappE2ETest(ScenarioTest):

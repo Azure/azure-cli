@@ -16,7 +16,7 @@ from ._validators import (validate_alert_status,
                           validate_auto_provisioning_toggle,
                           validate_pricing_tier,
                           validate_assessment_status_code)
-from .actions import AppendBaselines, AppendBaseline
+from .actions import AppendBaselines, AppendBaseline, GetExtension
 
 name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME', help='name of the resource to be fetched')
 home_region_arg_type = CLIArgumentType(options_list=('--home-region', '-hr'), metavar='HOMEREGION', help='home region that was selected for the subscription')
@@ -66,6 +66,8 @@ contact_alerts_admins_arg_type = CLIArgumentType(options_list=('--alerts-admins'
 
 # Pricing
 pricing_tier_arg_type = CLIArgumentType(options_list=('--tier'), metavar='TIER', help='pricing tier type')
+pricing_tier_subplan_arg_type = CLIArgumentType(options_list=('--subplan'), metavar='SUBPLAN', help='bundle suplan', required=False)
+pricing_tier_extensions_arg_type = CLIArgumentType(options_list=('--extensions'), metavar='EXTENSIONS', help='pricing extensions', required=False, action=GetExtension, nargs='*')
 
 # Workspace settings
 workspace_setting_target_workspace_arg_type = CLIArgumentType(options_list=('--target-workspace'), metavar='TARGETWORKSPACE', help='An ID of the workspace resource that will hold the security data')
@@ -345,6 +347,16 @@ def load_arguments(self, _):
                 'tier',
                 validator=validate_pricing_tier,
                 arg_type=pricing_tier_arg_type)
+
+            c.argument(
+                'subplan',
+                arg_type=pricing_tier_subplan_arg_type)
+
+            c.argument('baseline', arg_type=va_sql_baseline_multiple_arg_type)
+
+            c.argument(
+                'extensions',
+                arg_type=pricing_tier_extensions_arg_type)
 
     for scope in ['workspace-setting create']:
         with self.argument_context('security {}'.format(scope)) as c:

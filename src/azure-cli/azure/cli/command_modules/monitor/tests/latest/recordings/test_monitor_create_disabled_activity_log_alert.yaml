@@ -13,7 +13,49 @@ interactions:
       ParameterSetName:
       - -n -g --disable -o
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.6 (macOS-13.5.2-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"southcentralus","tags":{"product":"azurecli","cause":"automation","test":"test_monitor_create_disabled_activity_log_alert","date":"2023-09-24T09:38:18Z","module":"monitor"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '394'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 24 Sep 2023 09:38:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor activity-log alert create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --disable -o
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.5.2-x86_64-i386-64bit)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/activityLogAlerts/clialert000002?api-version=2017-04-01
   response:
@@ -25,11 +67,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '316'
+      - '239'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 10 Dec 2021 05:25:36 GMT
+      - Sun, 24 Sep 2023 09:38:25 GMT
       expires:
       - '-1'
       pragma:
@@ -44,9 +86,9 @@ interactions:
       code: 404
       message: Not Found
 - request:
-    body: '{"location": "global", "properties": {"scopes": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001"],
-      "condition": {"allOf": [{"field": "category", "equals": "ServiceHealth"}]},
-      "actions": {"actionGroups": []}, "enabled": false}}'
+    body: '{"location": "Global", "properties": {"actions": {"actionGroups": []},
+      "condition": {"allOf": [{"equals": "ServiceHealth", "field": "category"}]},
+      "enabled": false, "scopes": ["/subscriptions/00000000-0000-0000-0000-000000000000"]}}'
     headers:
       Accept:
       - application/json
@@ -57,27 +99,38 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '323'
+      - '232'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g --disable -o
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.5.2-x86_64-i386-64bit)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/activityLogAlerts/clialert000002?api-version=2017-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/activityLogAlerts/clialert000002","type":"Microsoft.Insights/ActivityLogAlerts","name":"clialert000002","location":"Global","kind":null,"tags":{},"properties":{"scopes":["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001"],"condition":{"allOf":[{"field":"category","equals":"ServiceHealth","containsAny":null,"odata.type":null}],"odata.type":null},"actions":{"actionGroups":[]},"enabled":false,"description":null},"identity":null}'
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/activityLogAlerts/clialert000002\"\
+        ,\r\n  \"name\": \"clialert000002\",\r\n  \"type\": \"Microsoft.Insights/ActivityLogAlerts\"\
+        ,\r\n  \"location\": \"Global\",\r\n  \"properties\": {\r\n    \"scopes\"\
+        : [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000\"\r\n \
+        \   ],\r\n    \"condition\": {\r\n      \"allOf\": [\r\n        {\r\n    \
+        \      \"field\": \"category\",\r\n          \"equals\": \"ServiceHealth\"\
+        \r\n        }\r\n      ]\r\n    },\r\n    \"actions\": {\r\n      \"actionGroups\"\
+        : []\r\n    },\r\n    \"enabled\": false\r\n  }\r\n}"
     headers:
+      api-supported-versions:
+      - 2017-03-01-preview, 2017-04-01, 2020-10-01, 2023-01-01-preview
+      arr-disable-session-affinity:
+      - 'true'
       cache-control:
       - no-cache
       content-length:
-      - '738'
+      - '597'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 10 Dec 2021 05:25:44 GMT
+      - Sun, 24 Sep 2023 09:38:32 GMT
       expires:
       - '-1'
       pragma:
@@ -86,10 +139,14 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1198'
+      x-powered-by:
+      - ASP.NET
     status:
       code: 201
       message: Created

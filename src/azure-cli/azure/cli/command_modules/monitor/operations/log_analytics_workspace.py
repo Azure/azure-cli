@@ -11,9 +11,12 @@ from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspac
 from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.table import \
     Create as _WorkspaceTableCreate, \
     Update as _WorkspaceTableUpdate
+from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.table.search_job \
+    import Cancel as _WorkspaceTableSearchJobCancel
 
 from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, RequiredArgumentMissingError
 from azure.cli.core.commands.transform import _parse_id
+from azure.cli.core.aaz import has_value
 
 
 def list_deleted_log_analytics_workspaces(client, resource_group_name=None):
@@ -167,9 +170,33 @@ class WorkspaceTableCreate(_WorkspaceTableCreate):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.total_retention_time._fmt = AAZIntArgFormat(
             maximum=2556,
-            minimum=4,
+            minimum=-1,
+        )
+        args_schema.retention_time._fmt = AAZIntArgFormat(
+            maximum=730,
+            minimum=-1,
         )
         return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.retention_time):
+            retention_time = args.retention_time.to_serialized_data()
+            if retention_time == -1 or (4 <= retention_time <= 730):
+                pass
+            else:
+                raise InvalidArgumentValueError("usage error: --retention-time should between 4 and 730. "
+                                                "Otherwise setting this property to -1 will default to "
+                                                "workspace retention.")
+
+        if has_value(args.total_retention_time):
+            total_retention_time = args.total_retention_time.to_serialized_data()
+            if total_retention_time == -1 or (4 <= total_retention_time <= 2556):
+                pass
+            else:
+                raise InvalidArgumentValueError("usage error: --total-retention-time should between 4 and 2556. "
+                                                "Otherwise setting this property to -1 will default to "
+                                                "table retention.")
 
 
 class WorkspaceTableUpdate(_WorkspaceTableUpdate):
@@ -180,9 +207,41 @@ class WorkspaceTableUpdate(_WorkspaceTableUpdate):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.total_retention_time._fmt = AAZIntArgFormat(
             maximum=2556,
-            minimum=4,
+            minimum=-1,
+        )
+        args_schema.retention_time._fmt = AAZIntArgFormat(
+            maximum=730,
+            minimum=-1,
         )
         return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.retention_time):
+            retention_time = args.retention_time.to_serialized_data()
+            if retention_time == -1 or (4 <= retention_time <= 730):
+                pass
+            else:
+                raise InvalidArgumentValueError("usage error: --retention-time should between 4 and 730. "
+                                                "Otherwise setting this property to -1 will default to "
+                                                "workspace retention.")
+
+        if has_value(args.total_retention_time):
+            total_retention_time = args.total_retention_time.to_serialized_data()
+            if total_retention_time == -1 or (4 <= total_retention_time <= 2556):
+                pass
+            else:
+                raise InvalidArgumentValueError("usage error: --total-retention-time should between 4 and 2556. "
+                                                "Otherwise setting this property to -1 will default to "
+                                                "table retention.")
+
+
+class WorkspaceTableSearchJobCancel(_WorkspaceTableSearchJobCancel):
+    def pre_operations(self):
+        args = self.ctx.args
+        table_name = args.table_name.to_serialized_data()
+        if table_name and not table_name.endswith("_SRCH"):
+            raise InvalidArgumentValueError('usage: The table name needs to end with _SRCH')
 
 
 # pylint:disable=too-many-locals

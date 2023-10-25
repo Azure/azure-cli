@@ -4138,11 +4138,13 @@ def list_consumption_locations(cmd):
     return [{'name': x.name.lower().replace(' ', '')} for x in regions]
 
 
-def list_locations(cmd, sku, linux_workers_enabled=None):
+def list_locations(cmd, sku, linux_workers_enabled=None, hyperv_workers_enabled=None):
     web_client = web_client_factory(cmd.cli_ctx)
     full_sku = get_sku_tier(sku)
     # Temporary fix due to regression in this specific API with 2021-03-01, should be removed with the next SDK update
-    web_client_geo_regions = web_client.list_geo_regions(sku=full_sku, linux_workers_enabled=linux_workers_enabled)
+    web_client_geo_regions = web_client.list_geo_regions(sku=full_sku,
+                                                         linux_workers_enabled=linux_workers_enabled,
+                                                         xenon_workers_enabled=hyperv_workers_enabled)
 
     providers_client = providers_client_factory(cmd.cli_ctx)
     providers_client_locations_list = getattr(providers_client.get('Microsoft.Web'), 'resource_types', [])

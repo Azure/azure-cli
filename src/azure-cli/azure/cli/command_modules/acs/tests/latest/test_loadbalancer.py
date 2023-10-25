@@ -118,7 +118,6 @@ class TestLoadBalancer(unittest.TestCase):
         outbound_ip_prefixes = None
         outbound_ports = 80
         idle_timeout = 3600
-        backend_pool_type = "nodeIP"
 
         load_balancer_models = AKSManagedClusterModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).load_balancer_models
         # store all the models used by load balancer
@@ -147,19 +146,21 @@ class TestLoadBalancer(unittest.TestCase):
         profile.outbound_ip_prefixes = ManagedClusterLoadBalancerProfileOutboundIPPrefixes(
             public_ip_prefixes="public_ip_prefixes"
         )
-        err = "outbound ip/ipprefix and managed ip should be mutual exclusive."
-        with self.assertRaises(InvalidArgumentValueError) as cm:
-            loadbalancer.configure_load_balancer_profile(
-                managed_outbound_ip_count,
-                managed_outbound_ipv6_count,
-                outbound_ips,
-                outbound_ip_prefixes,
-                outbound_ports,
-                idle_timeout,
-                profile,
-                load_balancer_models,
-            )
-        self.assertEqual(str(cm.exception), err)
+        p = loadbalancer.configure_load_balancer_profile(
+            managed_outbound_ip_count,
+            managed_outbound_ipv6_count,
+            outbound_ips,
+            outbound_ip_prefixes,
+            outbound_ports,
+            idle_timeout,
+            profile,
+            load_balancer_models,
+        )
+        self.assertEqual(p.managed_outbound_i_ps.count, 5)
+        self.assertEqual(p.managed_outbound_i_ps.count_ipv6, 3)
+        self.assertEqual(p.outbound_i_ps.public_i_ps,  [load_balancer_models.ResourceReference(id=x.strip()) for x in ["testpip1","testpip2"]])
+        self.assertEqual(p.allocated_outbound_ports, 80)
+        self.assertEqual(p.idle_timeout_in_minutes, 3600)
 
 
 if __name__ == '__main__':
