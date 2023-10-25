@@ -3,7 +3,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=bare-except
+# pylint: disable=bare-except, line-too-long
 from azure.cli.command_modules.containerapp._utils import safe_get
 
 
@@ -32,7 +32,8 @@ def transform_sensitive_values(response_json):
                 if key != "name":
                     val["metadata"] = dict((k, "") for k, v in val["metadata"].items())
 
-    if safe_get(response_json, "properties", "configuration", "eventTriggerConfig") and "scale" in response_json["properties"]["configuration"]["eventTriggerConfig"]:
+    if safe_get(response_json, "properties", "configuration", "eventTriggerConfig") and \
+            "scale" in response_json["properties"]["configuration"]["eventTriggerConfig"]:
         for rule in safe_get(response_json, "properties", "configuration", "eventTriggerConfig", "scale", "rules", default=[]):
             rule["metadata"] = dict((k, "") for k, v in rule["metadata"].items())
     return response_json
