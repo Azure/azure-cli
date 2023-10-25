@@ -503,7 +503,7 @@ def add_azure_storage_account(cmd, resource_group_name, name, custom_id, storage
             slot_cfg_names.azure_storage_config_names.append(custom_id)
             client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
-    return result.properties
+    return _redact_storage_accounts(result.properties)
 
 
 def update_azure_storage_account(cmd, resource_group_name, name, custom_id, storage_type=None, account_name=None,
@@ -542,7 +542,7 @@ def update_azure_storage_account(cmd, resource_group_name, name, custom_id, stor
             slot_cfg_names.azure_storage_config_names.append(custom_id)
             client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
-    return result.properties
+    return _redact_storage_accounts(result.properties)
 
 
 def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_remote=False, timeout=None, slot=None):
@@ -1584,7 +1584,15 @@ def delete_azure_storage_accounts(cmd, resource_group_name, name, custom_id, slo
                                          'update_azure_storage_accounts', azure_storage_accounts,
                                          slot, client)
 
-    return result.properties
+    return _redact_storage_accounts(result.properties)
+
+
+def _redact_storage_accounts(properties):
+    logger.warning('Storage account access keys have been redacted. '
+                   'Use `az webapp config storage-account list` to view.')
+    for account in properties:
+        properties[account].accessKey = None
+    return properties
 
 
 def _ssl_context():
