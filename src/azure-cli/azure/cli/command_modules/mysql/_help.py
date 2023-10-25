@@ -192,7 +192,11 @@ helps['mysql flexible-server import create'] = """
 type: command
 short-summary: Create a new import workflow for flexible server.
 long-summary: >
-    Migrate a MySQL single server to flexible server with custom or default configuration. For more information for network configuration, see
+    This command is used for following two purposes:
+
+    To Migrate an external MySQL server to Azure MySQL Flexible server whose backup is stored on an Azure Blob Container.
+
+    To Migrate a Azure MySQL single server to Azure MySQL Flexible server. For more information for network configuration, see
 
     - Migrate Azure Database for MySQL - Single Server to Flexible Server using Azure MySQL Import CLI
 
@@ -208,13 +212,46 @@ long-summary: >
 
 examples:
   - name: >
-      Trigger a Import from single server to flexible server
+      Trigger a Import from azure mysql single server.
     text: >
         az mysql flexible-server import create --data-source-type mysql_single \\
           --data-source test-single-server --resource-group test-rg \\
           --location northeurope --name testserver \\
           --sku-name Standard_B1ms --tier Burstable --public-access 0.0.0.0 \\
           --storage-size 32 --tags "key=value" --version 5.7 --high-availability ZoneRedundant \\
+          --zone 1 --standby-zone 3 --storage-auto-grow Enabled --iops 500
+  - name: >
+      Trigger a Import from source backup stored in azure blob container.
+    text: >
+        az mysql flexible-server import create --data-source-type "azure_blob" \\
+          --data-source "https://teststorage.blob.windows.net/backupcontainer" \\
+          --resource-group test-rg --name testserver --version 5.7 --location northeurope \\
+          --admin-user "username" --admin-password "password" \\
+          --sku-name Standard_D2ds_v4 --tier GeneralPurpose --public-access 0.0.0.0 \\
+          --storage-size 32 --tags "key=value" --high-availability ZoneRedundant \\
+          --zone 1 --standby-zone 3 --storage-auto-grow Enabled --iops 500
+  - name: >
+      Trigger import from source backup stored in azure blob container. (Backup files not present in container root. Instead present in backupdata/data/)
+    text: >
+        az mysql flexible-server import create --data-source-type "azure_blob" \\
+          --data-source "https://teststorage.blob.windows.net/backupcontainer" \\
+          --data-source-backup-dir "backupdata/data/" \\
+          --resource-group test-rg --name testserver --version 5.7 --location northeurope \\
+          --admin-user "username" --admin-password "password" \\
+          --sku-name Standard_D2ds_v4 --tier GeneralPurpose --public-access 0.0.0.0 \\
+          --storage-size 32 --tags "key=value" --high-availability ZoneRedundant \\
+          --zone 1 --standby-zone 3 --storage-auto-grow Enabled --iops 500
+  - name: >
+      Trigger import from source backup stored in azure blob container.
+      (Backup files present in container root and blob storage accessible through sas token with Read and List permissions. Please pass '--%' in the command with SAS token.)
+    text: >
+        az mysql flexible-server import create --data-source-type "azure_blob" \\
+          --data-source "https://teststorage.blob.windows.net/backupcontainer" \\
+          --data-source-sas-token "sp=r&st=2023-07-20T10:30:07Z..."  \\
+          --resource-group test-rg --name testserver --version 5.7 --location northeurope \\
+          --admin-user "username" --admin-password "password" \\
+          --sku-name Standard_D2ds_v4 --tier GeneralPurpose --public-access 0.0.0.0 \\
+          --storage-size 32 --tags "key=value" --high-availability ZoneRedundant \\
           --zone 1 --standby-zone 3 --storage-auto-grow Enabled --iops 500
 """
 

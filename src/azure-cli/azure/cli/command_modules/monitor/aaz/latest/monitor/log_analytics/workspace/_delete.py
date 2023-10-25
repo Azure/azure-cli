@@ -28,9 +28,9 @@ class Delete(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2021-12-01-preview",
+        "version": "2022-10-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}", "2021-12-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}", "2022-10-01"],
         ]
     }
 
@@ -76,11 +76,11 @@ class Delete(AAZCommand):
         yield self.WorkspacesDelete(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
@@ -160,7 +160,7 @@ class Delete(AAZCommand):
                     "force", self.ctx.args.force,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2021-12-01-preview",
+                    "api-version", "2022-10-01",
                     required=True,
                 ),
             }
@@ -171,6 +171,10 @@ class Delete(AAZCommand):
 
         def on_204(self, session):
             pass
+
+
+class _DeleteHelper:
+    """Helper class for Delete"""
 
 
 __all__ = ["Delete"]
