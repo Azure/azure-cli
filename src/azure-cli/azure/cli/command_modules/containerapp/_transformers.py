@@ -31,6 +31,10 @@ def clean_up_sensitive_values(response_json):
             for (key, val) in rule.items():
                 if key != "name":
                     val["metadata"] = dict((k, "") for k, v in val["metadata"].items())
+
+    if safe_get(response_json, "properties", "configuration", "eventTriggerConfig") and "scale" in response_json["properties"]["configuration"]["eventTriggerConfig"]:
+        for rule in safe_get(response_json, "properties", "configuration", "eventTriggerConfig", "scale", "rules", default=[]):
+            rule["metadata"] = dict((k, "") for k, v in rule["metadata"].items())
     return response_json
 
 
