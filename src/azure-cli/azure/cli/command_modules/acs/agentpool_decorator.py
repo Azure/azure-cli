@@ -943,7 +943,7 @@ class AKSAgentPoolContext(BaseAKSContext):
             if (
                 self.agentpool and
                 self.agentpool.upgrade_settings and
-                self.agentpool.upgrade_settings.drain_timeout is not None
+                self.agentpool.upgrade_settings.drain_timeout_in_minutes is not None
             ):
                 drain_timeout = self.agentpool.upgrade_settings.drain_timeout_in_minutes
 

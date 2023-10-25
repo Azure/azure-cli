@@ -4610,3 +4610,149 @@ class NetworkPrivateLinkElasticSANScenarioTest(ScenarioTest):
 
         # Test delete
         self.cmd('az network private-endpoint-connection delete --id {pec_id} -y')
+    
+class NetworkPrivateLinkMongoClustersTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_mongo_cl', location='eastus2euap')
+    def test_private_link_resource_cosmosdb_mongo_clusters(self, resource_group):
+        secret1 = "mongo"
+        secret2 = "Administrator1"
+        self.kwargs.update({
+            'cluster_name': self.create_random_name(prefix='cli', length=10),
+            'loc': 'eastus2euap',
+            'sub': self.get_subscription_id(),
+            'namespace': 'Microsoft.DocumentDB',
+            'resource_type': 'mongoClusters',
+            'api_version': '2023-03-01-preview',
+            'body': f"""{{\\"location\\":\\"eastus2euap\\",\\"properties\\":{{\\"nodeGroupSpecs\\":[{{\\"kind\\":\\"Shard\\",\\"sku\\":\\"M30\\",\\"diskSizeGB\\":128,\\"nodeCount\\":1,\\"enableHa\\":false}}],\\"administratorLogin\\":\\"{secret1}\\",\\"administratorLoginPassword\\":\\"{secret2}\\"}}}}"""
+        })
+
+        self.cmd('az rest --method "PUT" \
+                 --url "https://management.azure.com/subscriptions/{sub}/resourceGroups/{rg}/providers/{namespace}/{resource_type}/{cluster_name}?api-version={api_version}" \
+                 --body "{body}"')
+
+        # check for resource provisioning state
+        self.check_provisioning_state_for_mongocluster_resource()
+        self.cmd('az network private-link-resource list --name {cluster_name} --resource-group {rg} --type Microsoft.DocumentDB/mongoClusters',
+                 checks=[self.check('length(@)', 1), self.check('[0].properties.groupId', 'MongoCluster')])
+
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_mongo_cl', random_name_length=30, location='eastus2euap')
+    def test_private_endpoint_connection_cosmosdb_mongo_clusters(self, resource_group):
+        from azure.mgmt.core.tools import resource_id
+        namespace = 'Microsoft.DocumentDB'
+        resource_type = 'mongoClusters'
+        secret1 = "mongo"
+        secret2 = "Administrator1"
+        resource_name = self.create_random_name(prefix='cli', length=10)
+        target_resource_id = resource_id(
+            subscription=self.get_subscription_id(),
+            resource_group=resource_group,
+            namespace=namespace,
+            type=resource_type,
+            name=resource_name,
+        )
+        self.kwargs.update({
+            'cluster_name': resource_name,
+            'target_resource_id': target_resource_id,
+            'loc': 'eastus2euap',
+            'sub': self.get_subscription_id(),
+            'namespace': namespace,
+            'resource_type': resource_type,
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24),
+            'api_version': '2023-03-01-preview',
+            'body': f"""{{\\"location\\":\\"eastus2euap\\",\\"properties\\":{{\\"nodeGroupSpecs\\":[{{\\"kind\\":\\"Shard\\",\\"sku\\":\\"M30\\",\\"diskSizeGB\\":128,\\"nodeCount\\":1,\\"enableHa\\":false}}],\\"administratorLogin\\":\\"{secret1}\\",\\"administratorLoginPassword\\":\\"{secret2}\\"}}}}"""
+        })
+
+        cluster = self.cmd('az rest --method "PUT" \
+                 --url "https://management.azure.com/subscriptions/{sub}/resourceGroups/{rg}/providers/{namespace}/{resource_type}/{cluster_name}?api-version={api_version}" \
+                 --body "{body}"').get_output_in_json()
+
+        # check for resource provisioning state
+        self.check_provisioning_state_for_mongocluster_resource()
+        self.kwargs['cluster_id'] = cluster['id']
+        
+        self.cmd('az network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('az network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+        
+        target_private_link_resource = self.cmd('az network private-link-resource list --name {cluster_name} --resource-group {rg} --type {namespace}/{resource_type}').get_output_in_json()
+        self.kwargs.update({
+            'group_id': target_private_link_resource[0]['properties']['groupId']
+        })
+        # Create a private endpoint connection
+        pe = self.cmd(
+            'az network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
+            '--connection-name {pe_connection} --private-connection-resource-id {target_resource_id} '
+            '--group-id {group_id} --manual-request').get_output_in_json()
+        self.kwargs['pe_id'] = pe['id']
+        self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
+
+        # Show the connection at cosmos db side
+        list_private_endpoint_conn = self.cmd('az network private-endpoint-connection list --name {cluster_name} --resource-group {rg} --type {namespace}/{resource_type}').get_output_in_json()
+        self.kwargs.update({
+            "pec_id": list_private_endpoint_conn[0]['id']
+        })
+
+        self.kwargs.update({
+            "pec_name": self.kwargs['pec_id'].split('/')[-1]
+        })
+        self.cmd('az network private-endpoint-connection show --id {pec_id}',
+                 checks=self.check('id', '{pec_id}'))
+        self.cmd('az network private-endpoint-connection show --resource-name {cluster_name} -n {pec_name} -g {rg} --type {namespace}/{resource_type}')
+
+        self.cmd(
+            "az network private-endpoint-connection show --resource-name {cluster_name} -n {pec_name} -g {rg} --type {namespace}/{resource_type}",
+            checks=self.check('properties.privateLinkServiceConnectionState.status', 'Pending')
+        )
+
+        # Approve / reject private endpoint
+        self.kwargs.update({
+            'approval_desc': 'Approved.',
+            'rejection_desc': 'Rejected.'
+        })
+        self.cmd(
+            'az network private-endpoint-connection approve --resource-name {cluster_name} --resource-group {rg} --name {pec_name} --type {namespace}/{resource_type} '
+            '--description "{approval_desc}"', checks=[
+                self.check('properties.privateLinkServiceConnectionState.status', 'Approved')
+            ])
+        self.cmd('az network private-endpoint-connection reject --id {pec_id} '
+                 '--description "{rejection_desc}"',
+                 checks=[
+                     self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')
+                 ])
+        self.cmd('az network private-endpoint-connection list --name {cluster_name} --resource-group {rg} --type {namespace}/{resource_type}', checks=[
+            self.check('length(@)', 1)
+        ])
+
+        # Test delete
+        self.cmd('az network private-endpoint-connection delete --id {pec_id} -y')
+
+    def get_provisioning_state_for_mongocluster_resource(self):
+        # get provisioning state
+        response = self.cmd('az rest --method "GET" \
+                --url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/providers/{namespace}/{resource_type}/{cluster_name}?api-version={api_version}"').get_output_in_json()
+
+        return response['properties']['provisioningState']
+
+    def check_provisioning_state_for_mongocluster_resource(self):
+        count = 0
+        print("checking status of creation...........")
+        state = self.get_provisioning_state_for_mongocluster_resource()
+        print(state)
+        while state!="Succeeded":
+            if state == "Failed":
+                print("creation failed!")
+                self.assertTrue(False)
+            elif (count == 12):
+                print("TimeOut after waiting for 120 mins!")
+                self.assertTrue(False)
+            print("instance not yet created. waiting for 10 more mins...")
+            count+=1
+            time.sleep(600) # Wait for 10 minutes
+            state = self.get_provisioning_state_for_mongocluster_resource()
+        print("creation succeeded!")

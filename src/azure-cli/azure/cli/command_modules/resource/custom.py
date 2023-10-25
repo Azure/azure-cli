@@ -4456,6 +4456,24 @@ def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, 
         logger.error("az bicep generate-params could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
 
 
+def lint_bicep_file(cmd, file, no_restore=None, diagnostics_format=None):
+    ensure_bicep_installation(cmd.cli_ctx)
+
+    minimum_supported_version = "0.7.4"
+    if bicep_version_greater_than_or_equal_to(minimum_supported_version):
+        args = ["lint", file]
+        if no_restore:
+            args += ["--no-restore"]
+        if diagnostics_format:
+            args += ["--diagnostics-format", diagnostics_format]
+
+        output = run_bicep_command(cmd.cli_ctx, args)
+
+        print(output)
+    else:
+        logger.error("az bicep lint could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
+
+
 def create_resourcemanager_privatelink(
         cmd, resource_group, name, location):
     rcf = _resource_privatelinks_client_factory(cmd.cli_ctx)
