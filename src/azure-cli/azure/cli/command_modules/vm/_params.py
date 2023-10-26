@@ -1077,7 +1077,7 @@ def load_arguments(self, _):
             c.argument('public_ip_address_dns_name', help='Globally unique DNS name for a newly created public IP.')
 
             if self.cli_ctx.cloud.profile == 'latest':
-                c.argument('public_ip_sku', help='Public IP SKU. The public IP is supported to be created on edge zone only when it is \'Standard\'',
+                c.argument('public_ip_sku', help='Public IP SKU. It is set to Standard by default. The public IP is supported to be created on edge zone only when it is \'Standard\'',
                            default=None, arg_type=get_enum_type(['Basic', 'Standard']))
             elif self.supported_api_version(min_api='2017-08-01', resource_type=ResourceType.MGMT_NETWORK):
                 c.argument('public_ip_sku', help='Public IP SKU. It is set to Basic by default. The public IP is supported to be created on edge zone only when it is \'Standard\'',
