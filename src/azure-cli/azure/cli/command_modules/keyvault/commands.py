@@ -13,7 +13,7 @@ from azure.cli.command_modules.keyvault._client_factory import (
 
 from azure.cli.command_modules.keyvault._transformers import (
     extract_subresource_name, filter_out_managed_resources,
-    multi_transformers, transform_key_decryption_output, keep_max_results,
+    multi_transformers, transform_key_decryption_output, keep_max_results, transform_key_list_output,
     transform_key_output, transform_key_encryption_output, transform_key_random_output,
     transform_secret_list, transform_deleted_secret_list, transform_secret_set,
     transform_secret_set_attributes, transform_secret_show_deleted, transform_secret_delete, transform_secret_recover,
@@ -160,39 +160,54 @@ def load_command_table(self, _):
             g.keyvault_custom('download', 'security_domain_download', supports_no_wait=True)
             g.keyvault_custom('wait', '_wait_security_domain_operation')
 
-    with self.command_group('keyvault key', data_entity.command_type) as g:
-        g.keyvault_command('list', 'get_keys',
-                           transform=multi_transformers(
-                               filter_out_managed_resources,
-                               keep_max_results,
-                               extract_subresource_name(id_parameter='kid')))
-        g.keyvault_command('list-versions', 'get_key_versions',
-                           transform=multi_transformers(
-                               keep_max_results,
-                               extract_subresource_name(id_parameter='kid')))
-        g.keyvault_command('list-deleted', 'get_deleted_keys',
-                           transform=multi_transformers(
-                               keep_max_results,
-                               extract_subresource_name(id_parameter='kid')))
-        g.keyvault_command('show-deleted', 'get_deleted_key')
-        g.keyvault_command('delete', 'delete_key')
-        g.keyvault_command('purge', 'purge_deleted_key')
-        g.keyvault_command('recover', 'recover_deleted_key')
-        g.keyvault_custom('backup', 'backup_key',
-                          doc_string_source=data_entity.operations_docs_tmpl.format('backup_key'))
-        g.keyvault_custom('restore', 'restore_key', supports_no_wait=True,
-                          doc_string_source=data_entity.operations_docs_tmpl.format('restore_key'))
-        g.keyvault_custom('download', 'download_key')
+    # with self.command_group('keyvault key', data_entity.command_type) as g:
+        # g.keyvault_command('list', 'get_keys',
+        #                    transform=multi_transformers(
+        #                        filter_out_managed_resources,
+        #                        keep_max_results,
+        #                        extract_subresource_name(id_parameter='kid')))
+        # g.keyvault_command('list-versions', 'get_key_versions',
+        #                    transform=multi_transformers(
+        #                        keep_max_results,
+        #                        extract_subresource_name(id_parameter='kid')))
+        # g.keyvault_command('list-deleted', 'get_deleted_keys',
+        #                    transform=multi_transformers(
+        #                        keep_max_results,
+        #                        extract_subresource_name(id_parameter='kid')))
+        # g.keyvault_command('show-deleted', 'get_deleted_key')
+        # g.keyvault_command('delete', 'delete_key')
+        # g.keyvault_command('purge', 'purge_deleted_key')
+        # g.keyvault_command('recover', 'recover_deleted_key')
+        # g.keyvault_custom('backup', 'backup_key',
+        #                   doc_string_source=data_entity.operations_docs_tmpl.format('backup_key'))
+        # g.keyvault_custom('restore', 'restore_key', supports_no_wait=True,
+        #                   doc_string_source=data_entity.operations_docs_tmpl.format('restore_key'))
+        # g.keyvault_custom('download', 'download_key')
 
     with self.command_group('keyvault key', data_key_entity.command_type) as g:
         g.keyvault_custom('create', 'create_key', transform=transform_key_output,
-                          doc_string_source=data_entity.operations_docs_tmpl.format('create_key'))
+                          doc_string_source=data_key_entity.operations_docs_tmpl.format('create_key'))
         g.keyvault_command('set-attributes', 'update_key_properties', transform=transform_key_output)
         g.keyvault_command('show', 'get_key', transform=transform_key_output)
         g.keyvault_custom('import', 'import_key', transform=transform_key_output)
         g.keyvault_custom('get-policy-template', 'get_policy_template', is_preview=True)
         g.keyvault_custom('encrypt', 'encrypt_key', is_preview=True, transform=transform_key_encryption_output)
         g.keyvault_custom('decrypt', 'decrypt_key', is_preview=True, transform=transform_key_decryption_output)
+        g.keyvault_custom('list', 'list_keys',
+                          transform=multi_transformers(keep_max_results, transform_key_list_output))
+        g.keyvault_command('list-versions', 'list_properties_of_key_versions',
+                           transform=multi_transformers(keep_max_results, transform_key_list_output))
+        g.keyvault_command('list-deleted', 'list_deleted_keys',
+                           transform=multi_transformers(keep_max_results, transform_key_list_output))
+        g.keyvault_command('show-deleted', 'get_deleted_key', transform=transform_key_output)
+        g.keyvault_custom('delete', 'delete_key', transform=transform_key_output)
+        g.keyvault_custom('recover', 'recover_key', transform=transform_key_output)
+        g.keyvault_command('purge', 'purge_deleted_key')
+        g.keyvault_custom('download', 'download_key')
+        g.keyvault_custom('backup', 'backup_key',
+                          doc_string_source=data_key_entity.operations_docs_tmpl.format('backup_key'))
+        g.keyvault_custom('restore', 'restore_key', supports_no_wait=True, transform=transform_key_output,
+                          doc_string_source=data_key_entity.operations_docs_tmpl.format('restore_key_backup'))
 
     if not is_azure_stack_profile(self):
         with self.command_group('keyvault key', data_key_entity.command_type) as g:
