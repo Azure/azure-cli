@@ -139,8 +139,7 @@ logger = get_logger(__name__)
 RULESET_VERSION = {"0.1": "0.1", "1.0": "1.0", "2.2.9": "2.2.9", "3.0": "3.0", "3.1": "3.1", "3.2": "3.2"}
 
 remove_basic_option_msg = "It's recommended to create with `%s`. " \
-                          "Please be aware that the default %s is Standard and " \
-                          "Basic option will be removed in the future."
+                          "Please be aware that Basic option will be removed in the future."
 
 
 # region Utility methods
