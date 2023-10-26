@@ -1695,21 +1695,6 @@ def delete_certificate_issuer_admin(client, issuer_name, email):
 # endregion
 
 
-# region storage_account
-def backup_storage_account(client, file_path, vault_base_url=None,
-                           storage_account_name=None, identifier=None):  # pylint: disable=unused-argument
-    backup = client.backup_storage_account(vault_base_url, storage_account_name).value
-    with open(file_path, 'wb') as output:
-        output.write(backup)
-
-
-def restore_storage_account(client, vault_base_url, file_path):
-    with open(file_path, 'rb') as file_in:
-        data = file_in.read()
-        return client.restore_storage_account(vault_base_url, data)
-# endregion
-
-
 # region private_link
 def _verify_vault_or_hsm_name(vault_name, hsm_name):
     if not vault_name and not hsm_name:
