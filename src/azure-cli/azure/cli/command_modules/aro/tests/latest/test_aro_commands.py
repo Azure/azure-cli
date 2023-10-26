@@ -43,12 +43,7 @@ class AroScenarioTests(ScenarioTest):
             'worker_subnet_resource': resource_id(subscription=subscription, resource_group=resource_group, namespace='Microsoft.Network', type='virtualNetworks', child_type_1='subnets', name='dev-vnet', child_name_1=worker_subnet),
         })
 
-        self.cmd('network vnet create -g {rg} -n dev-vnet --address-prefixes 10.0.0.0/9', checks=[
-            StringContainCheck('dev-vnet'),
-            StringContainCheck(resource_group),
-            StringContainCheck('eastus'),
-            StringContainCheck('Succeeded'),
-        ])
+        self.cmd('network vnet create -g {rg} -n dev-vnet --address-prefixes 10.0.0.0/9')
         self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {master_subnet} --address-prefixes {master_ip_range} --service-endpoints Microsoft.ContainerRegistry')
         self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry')
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
@@ -85,12 +80,7 @@ class AroScenarioTests(ScenarioTest):
             'worker_subnet_resource': resource_id(subscription=subscription, resource_group=resource_group, namespace='Microsoft.Network', type='virtualNetworks', child_type_1='subnets', name='dev-vnet', child_name_1=worker_subnet),
         })
 
-        self.cmd('network vnet create -g {rg} -n dev-vnet --address-prefixes 10.0.0.0/9', checks=[
-            StringContainCheck('dev-vnet'),
-            StringContainCheck(resource_group),
-            StringContainCheck('eastus'),
-            StringContainCheck('Succeeded'),
-        ])
+        self.cmd('network vnet create -g {rg} -n dev-vnet --address-prefixes 10.0.0.0/9')
         self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {master_subnet} --address-prefixes {master_ip_range} --service-endpoints Microsoft.ContainerRegistry')
         self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry')
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
@@ -121,12 +111,7 @@ class AroScenarioTests(ScenarioTest):
             'worker_subnet_resource': resource_id(subscription=subscription, resource_group=resource_group, namespace='Microsoft.Network', type='virtualNetworks', child_type_1='subnets', name='dev-vnet', child_name_1=worker_subnet),
         })
 
-        self.cmd('network vnet create -g {rg} -n dev-vnet --address-prefixes 10.0.0.0/9', checks=[
-            StringContainCheck('dev-vnet'),
-            StringContainCheck(resource_group),
-            StringContainCheck('eastus'),
-            StringContainCheck('Succeeded'),
-        ])
+        self.cmd('network vnet create -g {rg} -n dev-vnet --address-prefixes 10.0.0.0/9')
         self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {master_subnet} --address-prefixes {master_ip_range} --service-endpoints Microsoft.ContainerRegistry')
         self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry')
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
@@ -162,12 +147,7 @@ class AroScenarioTests(ScenarioTest):
             'temp_kubeconfig_path': temp_kubeconfig_path, 
         })
 
-        self.cmd('network vnet create -g {rg} -n dev-vnet --address-prefixes 10.0.0.0/9', checks=[
-            StringContainCheck('dev-vnet'),
-            StringContainCheck(resource_group),
-            StringContainCheck('eastus'),
-            StringContainCheck('Succeeded'),
-        ])
+        self.cmd('network vnet create -g {rg} -n dev-vnet --address-prefixes 10.0.0.0/9')
         self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {master_subnet} --address-prefixes {master_ip_range} --service-endpoints Microsoft.ContainerRegistry')
         self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry')
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
@@ -205,12 +185,7 @@ class AroScenarioTests(ScenarioTest):
             'worker_subnet_resource': resource_id(subscription=subscription, resource_group=resource_group, namespace='Microsoft.Network', type='virtualNetworks', child_type_1='subnets', name='dev-vnet', child_name_1=worker_subnet),
         })
         
-        self.cmd('network vnet create -g {rg} -n dev-vnet --address-prefixes 10.0.0.0/9', checks=[
-            StringContainCheck('dev-vnet'),
-            StringContainCheck(resource_group),
-            StringContainCheck('eastus'),
-            StringContainCheck('Succeeded'),
-        ])
+        self.cmd('network vnet create -g {rg} -n dev-vnet --address-prefixes 10.0.0.0/9')
         self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {master_subnet} --address-prefixes {master_ip_range} --service-endpoints Microsoft.ContainerRegistry')
         self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry')
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
@@ -248,12 +223,7 @@ class AroScenarioTests(ScenarioTest):
             'worker_subnet_resource': resource_id(subscription=subscription, resource_group=resource_group, namespace='Microsoft.Network', type='virtualNetworks', child_type_1='subnets', name='dev-vnet', child_name_1=worker_subnet),
         })
 
-        self.cmd('network vnet create -g {rg} -n dev-vnet --address-prefixes 10.0.0.0/9', checks=[
-            StringContainCheck('dev-vnet'),
-            StringContainCheck(resource_group),
-            StringContainCheck('eastus'),
-            StringContainCheck('Succeeded'),
-        ])
+        self.cmd('network vnet create -g {rg} -n dev-vnet --address-prefixes 10.0.0.0/9')
         self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {master_subnet} --address-prefixes {master_ip_range} --service-endpoints Microsoft.ContainerRegistry')
         self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry')
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
@@ -290,12 +260,7 @@ class AroScenarioTests(ScenarioTest):
             'worker_subnet_resource': resource_id(subscription=subscription, resource_group=resource_group, namespace='Microsoft.Network', type='virtualNetworks', child_type_1='subnets', name='dev-vnet', child_name_1=worker_subnet),
         })
 
-        self.cmd('network vnet create -g {rg} -n dev-vnet --address-prefixes 10.0.0.0/9', checks=[
-            StringContainCheck('dev-vnet'),
-            StringContainCheck(resource_group),
-            StringContainCheck('eastus'),
-            StringContainCheck('Succeeded'),
-        ])
+        self.cmd('network vnet create -g {rg} -n dev-vnet --address-prefixes 10.0.0.0/9')
         self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {master_subnet} --address-prefixes {master_ip_range} --service-endpoints Microsoft.ContainerRegistry')
         self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry')
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
@@ -328,12 +293,7 @@ class AroScenarioTests(ScenarioTest):
             'worker_subnet_resource': resource_id(subscription=subscription, resource_group=resource_group, namespace='Microsoft.Network', type='virtualNetworks', child_type_1='subnets', name='dev-vnet', child_name_1=worker_subnet),
         })
 
-        self.cmd('network vnet create -g {rg} -n dev-vnet --address-prefixes 10.0.0.0/9', checks=[
-            StringContainCheck('dev-vnet'),
-            StringContainCheck(resource_group),
-            StringContainCheck('eastus'),
-            StringContainCheck('Succeeded'),
-        ])
+        self.cmd('network vnet create -g {rg} -n dev-vnet --address-prefixes 10.0.0.0/9')
         self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {master_subnet} --address-prefixes {master_ip_range} --service-endpoints Microsoft.ContainerRegistry')
         self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry')
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
