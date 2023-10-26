@@ -139,8 +139,8 @@ logger = get_logger(__name__)
 RULESET_VERSION = {"0.1": "0.1", "1.0": "1.0", "2.2.9": "2.2.9", "3.0": "3.0", "3.1": "3.1", "3.2": "3.2"}
 
 remove_basic_option_msg = "It's recommended to create with `%s`. " \
-                          "Please be aware that the default %s will be changed from Basic to Standard " \
-                          "in the next release. Also note that Basic option will be removed in the future."
+                          "Please be aware that the default %s is Standard and " \
+                          "Basic option will be removed in the future."
 
 
 # region Utility methods
@@ -3960,7 +3960,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
             "in the future."
         )
 
-    if sku is None or sku.lower() == "basic":
+    if sku.lower() == "basic":
         logger.warning(remove_basic_option_msg, "--sku standard", "LB SKU")
 
     tags = tags or {}
@@ -5155,7 +5155,7 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         tier = pip_obj['sku']['tier']
         zone = pip_obj['zones'] if 'zones' in pip_obj else None
 
-    if sku is None or sku.lower() == "basic":
+    if sku.lower() == "basic":
         logger.warning(remove_basic_option_msg, "--sku standard", "Public IP SKU")
 
     if not allocation_method:
