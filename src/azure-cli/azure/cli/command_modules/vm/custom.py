@@ -94,6 +94,9 @@ extension_mappings = {
     }
 }
 
+remove_basic_option_msg = "It's recommended to create with `%s`. " \
+                          "Please be aware that Basic option will be removed in the future."
+
 
 def _construct_identity_info(identity_scope, identity_role, implicit_identity, external_identities):
     info = {}
@@ -943,7 +946,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     # we use the hint to guide users to use Standard public IP to create VM in the first stage.
     if cmd.cli_ctx.cloud.profile == 'latest':
         if public_ip_sku is None and public_ip_address_type == 'new':
-            public_ip_sku = "Standard"
+            public_ip_sku = 'Standard'
+        if public_ip_sku == "Basic":
+            logger.warning(remove_basic_option_msg, "--public-ip-sku Standard")
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     if os_disk_encryption_set is not None and not is_valid_resource_id(os_disk_encryption_set):
@@ -3198,8 +3203,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
     # The default load balancer will be expected to be changed from Basic to Standard, and Basic will be removed.
     # In order to avoid breaking change which has a big impact to users,
     # we use the hint to guide users to use Standard load balancer to create VMSS in the first stage.
-    if load_balancer_sku is None:
-        load_balancer_sku = "Standard"
+    if load_balancer_sku == 'Basic':
+        logger.warning(remove_basic_option_msg, "--lb-sku Standard")
 
     # Build up the ARM template
     master_template = ArmTemplateBuilder()
