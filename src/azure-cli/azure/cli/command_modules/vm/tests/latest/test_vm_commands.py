@@ -10218,6 +10218,60 @@ class RestorePointScenarioTest(ScenarioTest):
             self.check('sourceRestorePoint.id', '{point_id}')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_restore_point_encryption', location='EastUS2EUAP')
+    @KeyVaultPreparer(name_prefix='vault1-', name_len=20, key='vault1', parameter_name='key_vault1', location='EastUS2EUAP', additional_params='--enabled-for-disk-encryption true --enable-purge-protection')
+    @KeyVaultPreparer(name_prefix='vault2-', name_len=20, key='vault2', parameter_name='key_vault2', location='EastUS2EUAP', additional_params='--enabled-for-disk-encryption true --enable-purge-protection')
+    def test_restore_point_encryption(self):
+        self.kwargs.update({
+            'collection_name': self.create_random_name('coll', 10),
+            'vm_name': self.create_random_name('vm_', 15),
+            'point_name1': self.create_random_name('point_', 15),
+            'point_name2': self.create_random_name('point_', 15),
+            'des1': self.create_random_name('des_', 10),
+            'des2': self.create_random_name('des_', 10),
+            'disk1': self.create_random_name('disk_', 10),
+            'disk2': self.create_random_name('disk_', 10),
+        })
+        kid1 = self.cmd('keyvault key create -n {key1} --vault {vault1} --protection software').get_output_in_json()['key']['kid']
+        kid2 = self.cmd('keyvault key create -n {key2} --vault {vault2} --protection software').get_output_in_json()['key']['kid']
+        vault1_id = self.cmd('keyvault show -g {rg} -n {vault1}').get_output_in_json()['id']
+        vault2_id = self.cmd('keyvault show -g {rg} -n {vault2}').get_output_in_json()['id']
+
+        self.kwargs.update({
+            'kid1': kid1,
+            'kid2': kid2,
+            'vault1_id': vault1_id,
+            'vault2_id': vault2_id
+        })
+        vault_id = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()['id']
+        kid = self.cmd('keyvault key create -n {key} --vault {vault1} --protection software').get_output_in_json()['key']['kid']
+        des1 = self.cmd('disk-encryption-set create -g {rg} -n {des1} --key-url {kid} --source-vault {vault}').get_output_in_json()
+        des2 = self.cmd('disk-encryption-set create -g {rg} -n {des2} --key-url {kid} --source-vault {vault}').get_output_in_json()
+        disk1 = self.cmd('disk create -g {rg} -n {disk1} --size-gb 10').get_output_in_json()
+        disk2 = self.cmd('disk create -g {rg} -n {disk2}  --size-gb 10').get_output_in_json()
+        self.cmd('vm create -g {rg} -n {vm1} --attach-os-disk {disk1} --attach-data-disk {disk2} --os-type linux --nsg-rule NONE')
+        vm = self.cmd('vm show -g {rg} -n {vm_name}').get_output_in_json()
+        self.kwargs.update({
+            'vault_id': vault_id,
+            'kid': kid,
+            'disk1_id': disk1['id'],
+            'disk2_id': disk2['id'],
+            'des1_id': des1['id'],
+            'des2_id': des2['id'],
+            'source_os_id': vm['storageProfile']['osDisk']['managedDisk']['id'],
+        })
+
+        # Local restore point test
+
+        self.cmd('restore-point collection create -g {rg} --collection-name {collection_name} --source-id {vm_id}').get_output_in_json()
+        self.cmd('restore-point create -g {rg} -n {point_name1} --collection-name {collection_name} --source-os-resource {source_os_id} '
+                 '--os-restore-point-encryption-set {des1} --source-data-disk-resource {disk1_id} {disk2_id} '
+                 '--data-disk-restore-point-encryption-set {des1_id} {des2_id}', checks=[
+            self.check('')
+        ])
+
+        # Remote restore point
+
 
 class ArchitectureScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='westus')

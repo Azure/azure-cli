@@ -1596,6 +1596,12 @@ def load_arguments(self, _):
                    'included.')
         c.argument('source_restore_point', help='Resource Id of the source restore point from which a copy needs to be created')
         c.argument('consistency_mode', arg_type=get_enum_type(self.get_models('ConsistencyModeTypes')), is_preview=True, min_api='2021-07-01', help='Consistency mode of the restore point. Can be specified in the input while creating a restore point. For now, only CrashConsistent is accepted as a valid input. Please refer to https://aka.ms/RestorePoints for more details.')
+        c.argument('source_os_resource', help='Resource Id of the source OS disk')
+        c.argument('os_restore_point_encryption_set', help='Customer managed OS disk encryption set resource id')
+        c.argument('os_restore_point_encryption_type', arg_type=get_enum_type(self.get_models('RestorePointEncryptionType')), help='The type of key used to encrypt the data of the OS disk restore point.')
+        c.argument('source_data_disk_resource',  nargs='+', help='Resource Id of the source data disk')
+        c.argument('data_disk_restore_point_encryption_set', nargs='+', help='Customer managed data disk encryption set resource id')
+        c.argument('data_disk_restore_point_encryption_type', nargs='+', arg_type=get_enum_type(self.get_models('RestorePointEncryptionType')), help='The type of key used to encrypt the data of the data disk restore point.')
 
     with self.argument_context('restore-point show') as c:
         c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
