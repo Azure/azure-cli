@@ -696,44 +696,6 @@ def validate_keyvault_resource_id(entity_type):
     return _validate
 
 
-def validate_sas_definition_id(ns):
-    from .vendored_sdks.azure_keyvault_t1 import StorageSasDefinitionId
-    acct_name = getattr(ns, 'storage_account_name', None)
-    sas_name = getattr(ns, 'sas_definition_name', None)
-    vault = getattr(ns, 'vault_base_url', None)
-    identifier = getattr(ns, 'identifier', None)
-
-    if identifier:
-        ident = StorageSasDefinitionId(uri=identifier)
-        setattr(ns, 'sas_definition_name', getattr(ident, 'sas_definition'))
-        setattr(ns, 'storage_account_name', getattr(ident, 'account_name'))
-        setattr(ns, 'vault_base_url', ident.vault)
-    elif not (acct_name and sas_name and vault):
-        raise CLIError('incorrect usage: --id ID | --vault-name VAULT --account-name --name NAME')
-
-
-def validate_storage_account_id(ns):
-    from .vendored_sdks.azure_keyvault_t1 import StorageAccountId
-    acct_name = getattr(ns, 'storage_account_name', None)
-    vault = getattr(ns, 'vault_base_url', None)
-    identifier = getattr(ns, 'identifier', None)
-
-    if identifier:
-        ident = StorageAccountId(uri=identifier)
-        setattr(ns, 'storage_account_name', ident.name)
-        setattr(ns, 'vault_base_url', ident.vault)
-    elif not (acct_name and vault):
-        raise CLIError('incorrect usage: --id ID | --vault-name VAULT --name NAME')
-
-
-def validate_storage_disabled_attribute(attr_arg_name, attr_type):
-    def _validate(ns):
-        disabled = getattr(ns, 'disabled', None)
-        attr_arg = attr_type(enabled=(not disabled))
-        setattr(ns, attr_arg_name, attr_arg)
-    return _validate
-
-
 def validate_encryption(ns):
     if ns.data_type == KeyEncryptionDataType.BASE64:
         ns.value = base64.b64decode(ns.value.encode('utf-8'))

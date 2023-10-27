@@ -86,7 +86,7 @@ class CLIENT_TYPE(Enum):
 
 
 # The source resources released as CLI extensions
-SOURCE_RESOURCES_IN_EXTENSION = [RESOURCE.SpringCloud, RESOURCE.SpringCloudDeprecated, RESOURCE.ContainerApp]
+SOURCE_RESOURCES_IN_EXTENSION = [RESOURCE.SpringCloud, RESOURCE.SpringCloudDeprecated]
 
 # The source resources using user token
 SOURCE_RESOURCES_USERTOKEN = [RESOURCE.KubernetesCluster]
@@ -104,13 +104,14 @@ TARGET_RESOURCES_DEPRECATED = [RESOURCE.Mysql, RESOURCE.Postgres]
 SOURCE_RESOURCES = {
     RESOURCE.WebApp: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.Web/sites/{site}',
     RESOURCE.FunctionApp: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.Web/sites/{site}',
-    RESOURCE.SpringCloud: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.AppPlatform/Spring/{spring}/apps/{app}/deployments/{deployment}',
+    RESOURCE.SpringCloud: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.AppPlatform/Spring/{spring}/apps/{app}',
     RESOURCE.SpringCloudDeprecated: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.AppPlatform/Spring/{spring}/apps/{app}/deployments/{deployment}',
     # RESOURCE.KubernetesCluster: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.ContainerService/managedClusters/{cluster}',
     RESOURCE.ContainerApp: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.App/containerApps/{app}'
 }
 
 WEB_APP_SLOT_RESOURCE = '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.Web/sites/{site}/slots/{slot}'
+SPRING_APP_DEPLOYMENT_RESOURCE = '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.AppPlatform/Spring/{spring}/apps/{app}/deployments/{deployment}'
 LOCAL_CONNECTION_RESOURCE = '/subscriptions/{subscriptionId}/resourceGroups/{resource_group}/providers/Microsoft.ServiceLinker/locations/{location}/connectors/{connection_name}'
 
 # The dict defines the resource id pattern of target resources.
@@ -205,12 +206,6 @@ SOURCE_RESOURCES_PARAMS = {
             'help': 'Name of the app in the Azure Spring Apps',
             'placeholder': 'MyApp'
         },
-        'deployment': {
-            'options': ['--deployment'],
-            'help': 'The deployment name of the app',
-            'placeholder': 'MyDeployment',
-            'deprecate_info': ' Note: The default value of `--deployment` is deprecated and will be removed in a future release. Use `--deployment default` if you want stay in current behavior.',
-        }
     },
     RESOURCE.SpringCloudDeprecated: {
         'source_resource_group': {
@@ -232,7 +227,7 @@ SOURCE_RESOURCES_PARAMS = {
             'options': ['--deployment'],
             'help': 'The deployment name of the app',
             'placeholder': 'MyDeployment',
-            'deprecate_info': ' Note: The default value of `--deployment` is deprecated and will be removed in a future release. Use `--deployment default` if you want stay in current behavior.',
+            'deprecate_info': ' Note: The default value of `--deployment` is removed. Use `--deployment default` if you want stay in default behavior.',
         }
     },
     RESOURCE.KubernetesCluster: {
@@ -282,6 +277,14 @@ SOURCE_RESOURCES_OPTIONAL_PARAMS = {
             'placeholder': 'WebAppSlot'
         },
     },
+    RESOURCE.SpringCloud: {
+        'deployment': {
+            'options': ['--deployment'],
+            'help': 'The deployment name of the app. Note: The default value of `--deployment` is removed. Use `--deployment default` if you want stay in default behavior.',
+            'placeholder': 'MyDeployment',
+            'deprecate_info': ' Note: The default value of `--deployment` is removed. Use `--deployment default` if you want stay in default behavior.',
+        },
+    }
 }
 
 # The dict defines the parameters used to position the target resources.

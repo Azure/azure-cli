@@ -942,8 +942,8 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
         database_name_one = "cliautomationdb01"
         database_name_two = "cliautomationdb02"
         database_name_three = "cliautomationdb03"
-        preferred_enclave_type_default = AlwaysEncryptedEnclaveType.default
-        preferred_enclave_type_vbs = AlwaysEncryptedEnclaveType.vbs
+        preferred_enclave_type_default = AlwaysEncryptedEnclaveType.default.value
+        preferred_enclave_type_vbs = AlwaysEncryptedEnclaveType.vbs.value
 
 
         # test sql db is created with default enclave type
@@ -1020,8 +1020,8 @@ class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_sql_db_serverless_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"
-        compute_model_serverless = ComputeModelType.serverless
-        compute_model_provisioned = ComputeModelType.provisioned
+        compute_model_serverless = ComputeModelType.serverless.value
+        compute_model_provisioned = ComputeModelType.provisioned.value
 
         # Create database with vcore edition
         vcore_edition = 'GeneralPurpose'
@@ -1100,6 +1100,42 @@ class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
                 JMESPathCheck('sku.name', 'GP_S_Gen5'),
                 JMESPathCheck('autoPauseDelay', auto_pause_delay),
                 JMESPathCheck('minCapacity', min_capacity)])
+
+class SqlServerFreeDbMgmtScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='eastus2euap')
+    @SqlServerPreparer(location='eastus2euap')
+    @AllowLargeResponse()
+    def test_sql_db_free_params(self, resource_group, resource_group_location, server):
+        database_name = "freeDb1"
+        compute_model_serverless = "Serverless"
+
+        # Create database with vcore edition
+        vcore_edition = 'GeneralPurpose'
+        family = 'Gen5'
+        capacity = 2
+        free_limit_exhaustion_behavior = 'AutoPause'
+        self.cmd('sql db create -g {} --server {} --name {} --edition {} --family {} --capacity {} --compute-model {} --use-free-limit --free-limit-exhaustion-behavior {}'
+                 .format(resource_group, server, database_name, vcore_edition, family, capacity, compute_model_serverless, free_limit_exhaustion_behavior),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('useFreeLimit', True),
+                     JMESPathCheck('freeLimitExhaustionBehavior', free_limit_exhaustion_behavior)])
+
+        new_free_limit_exhaustion_behavior = 'BillOverUsage'
+        # Update database to serverless offering
+        self.cmd('sql db update -g {} --server {} --name {} --free-limit-exhaustion-behavior {}'
+                 .format(resource_group, server, database_name, new_free_limit_exhaustion_behavior),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('sku.name', 'GP_S_Gen5'),
+                     JMESPathCheck('freeLimitExhaustionBehavior', new_free_limit_exhaustion_behavior),
+                     JMESPathCheck('useFreeLimit', True)])
 
 
 class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
@@ -3543,8 +3579,8 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
         database_name_one = "cliautomationdb01"
         database_name_two = "cliautomationdb02"
         edition = 'GeneralPurpose'
-        preferred_enclave_type_default = AlwaysEncryptedEnclaveType.default
-        preferred_enclave_type_vbs = AlwaysEncryptedEnclaveType.vbs
+        preferred_enclave_type_default = AlwaysEncryptedEnclaveType.default.value
+        preferred_enclave_type_vbs = AlwaysEncryptedEnclaveType.vbs.value
 
         # Create general purpose pool with default enclave type
         self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {} --preferred-enclave-type {}'
