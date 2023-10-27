@@ -47,7 +47,7 @@ def load_arguments(self, _):
                    validator=validate_cluster_resource_group)
         c.argument('fips_validated_modules', arg_type=get_three_state_flag(),
                    options_list=['--fips-validated-modules', '--fips'],
-                   help='Use FIPS validated cryptography modules.')
+                   help='Use FIPS validated cryptography modules. [Default: false]')
 
         c.argument('client_id',
                    help='Client ID of cluster service principal.',
@@ -62,46 +62,47 @@ def load_arguments(self, _):
                    validator=validate_version_format)
 
         c.argument('pod_cidr',
-                   help='CIDR of pod network. Must be a minimum of /18 or larger.',
+                   help='CIDR of pod network. Must be a minimum of /18 or larger. [Default: 10.128.0.0/14]',
                    validator=validate_cidr('pod_cidr'))
         c.argument('service_cidr',
-                   help='CIDR of service network. Must be a minimum of /18 or larger.',
+                   help='CIDR of service network. Must be a minimum of /18 or larger. [Default: 172.30.0.0/16]',
                    validator=validate_cidr('service_cidr'))
 
         c.argument('outbound_type',
-                   help='Outbound type of cluster. Must be "Loadbalancer" (default) or "UserDefinedRouting".',
+                   help='Outbound type of cluster. Must be "Loadbalancer" or "UserDefinedRouting". \
+                   [Default: Loadbalancer]',
                    validator=validate_outbound_type)
         c.argument('enable_preconfigured_nsg', arg_type=get_three_state_flag(),
-                   help='Use Preconfigured NSGs. Allowed values: false, true.')
+                   help='Use Preconfigured NSGs. Allowed values: false, true. [Default: false]')
         c.argument('disk_encryption_set',
                    help='ResourceID of the DiskEncryptionSet to be used for master and worker VMs.',
                    validator=validate_disk_encryption_set)
         c.argument('master_encryption_at_host', arg_type=get_three_state_flag(),
                    options_list=['--master-encryption-at-host', '--master-enc-host'],
-                   help='Encryption at host flag for master VMs.')
+                   help='Encryption at host flag for master VMs. [Default: false]')
         c.argument('master_vm_size',
-                   help='Size of master VMs.')
+                   help='Size of master VMs. [Default: Standard_D8s_v3]')
 
         c.argument('worker_encryption_at_host', arg_type=get_three_state_flag(),
                    options_list=['--worker-encryption-at-host', '--worker-enc-host'],
-                   help='Encryption at host flag for worker VMs.')
+                   help='Encryption at host flag for worker VMs. [Default: false]')
         c.argument('worker_vm_size',
-                   help='Size of worker VMs.')
+                   help='Size of worker VMs. [Default: Standard_D4s_v3]')
         c.argument('worker_vm_disk_size_gb',
                    type=int,
-                   help='Disk size in GB of worker VMs.',
+                   help='Disk size in GB of worker VMs. [Default: 128]',
                    validator=validate_worker_vm_disk_size_gb)
         c.argument('worker_count',
                    type=int,
-                   help='Count of worker VMs.',
+                   help='Count of worker VMs. [Default: 3]',
                    validator=validate_worker_count)
 
         c.argument('apiserver_visibility', arg_type=get_enum_type(['Private', 'Public']),
-                   help='API server visibility.',
+                   help='API server visibility. [Default: Public]',
                    validator=validate_visibility('apiserver_visibility'))
 
         c.argument('ingress_visibility', arg_type=get_enum_type(['Private', 'Public']),
-                   help='Ingress visibility.',
+                   help='Ingress visibility. [Default: Public]',
                    validator=validate_visibility('ingress_visibility'))
 
         c.argument('vnet_resource_group_name',
