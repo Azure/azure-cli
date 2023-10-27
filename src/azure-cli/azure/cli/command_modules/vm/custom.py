@@ -949,18 +949,6 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         if public_ip_sku is None and public_ip_address_type == 'new' or public_ip_sku == "Basic":
             logger.warning(remove_basic_option_msg, "--public-ip-sku Standard", "Public IP")
 
-    # Breaking Change Warning, change image alias
-    if image:
-        if image == "UbuntuLTS":
-            logger.warning('Consider using the "Ubuntu2204" alias. On April 30, 2023,'
-                           'the image deployed by the "UbuntuLTS" alias reaches its end of life. '
-                           'The "UbuntuLTS" will be removed with the breaking change release of Fall 2023.')
-        if image in ["RHEL", "Debian", "CentOS", "Flatcar", "SLES", "openSUSE-Leap"]:
-            logger.warning('Consider using the image alias including the version of the distribution you want to use. '
-                           'For example: please use Debian11 instead of Debian.\nIn Ignite (November) 2023, '
-                           'the aliases without version suffix (such as: `UbuntuLTS`, `CentOS`, `Debian`, `Flatcar`, '
-                           '`SLES`, `openSUSE-Leap` and `RHEL`) will be removed.')
-
     subscription_id = get_subscription_id(cmd.cli_ctx)
     if os_disk_encryption_set is not None and not is_valid_resource_id(os_disk_encryption_set):
         os_disk_encryption_set = resource_id(
@@ -2894,13 +2882,13 @@ def get_vm_format_secret(cmd, secrets, certificate_store=None, keyvault=None, re
 
 def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, certificate_store=None):
     from msrestazure.tools import parse_resource_id
-    from ._vm_utils import create_keyvault_data_plane_client, get_key_vault_base_url
+    from ._vm_utils import create_data_plane_keyvault_certificate_client, get_key_vault_base_url
     VaultSecretGroup, SubResource, VaultCertificate = cmd.get_models(
         'VaultSecretGroup', 'SubResource', 'VaultCertificate')
     vm = get_vm_to_update(cmd, resource_group_name, vm_name)
 
     if '://' not in certificate:  # has a cert name rather a full url?
-        keyvault_client = create_keyvault_data_plane_client(
+        keyvault_client = create_data_plane_keyvault_certificate_client(
             cmd.cli_ctx, get_key_vault_base_url(cmd.cli_ctx, parse_resource_id(keyvault)['name']))
         cert_info = keyvault_client.get_certificate(certificate)
         certificate = cert_info.secret_id
@@ -3210,18 +3198,6 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                                                                 build_application_gateway_resource,
                                                                 build_msi_role_assignment, build_nsg_resource,
                                                                 build_nat_rule_v2)
-
-    # Breaking Change Warning, change image alias
-    if image:
-        if image == "UbuntuLTS":
-            logger.warning('Consider using the "Ubuntu2204" alias. On April 30, 2023,'
-                           'the image deployed by the "UbuntuLTS" alias reaches its end of life. '
-                           'The "UbuntuLTS" will be removed with the breaking change release of Fall 2023.')
-        if image in ["RHEL", "Debian", "CentOS", "Flatcar", "SLES", "openSUSE-Leap"]:
-            logger.warning('Consider using the image alias including the version of the distribution you want to use. '
-                           'For example: please use Debian11 instead of Debian.\nIn Ignite (November) 2023, '
-                           'the aliases without version suffix (such as: `UbuntuLTS`, `CentOS`, `Debian`, `Flatcar`, '
-                           '`SLES`, `openSUSE-Leap` and `RHEL`) will be removed.')
 
     # The default load balancer will be expected to be changed from Basic to Standard, and Basic will be removed.
     # In order to avoid breaking change which has a big impact to users,
