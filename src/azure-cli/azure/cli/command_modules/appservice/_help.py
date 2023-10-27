@@ -638,6 +638,7 @@ short-summary: Manage function keys.
 helps['functionapp function keys set'] = """
 type: command
 short-summary: Create or update a function key.
+long-summary: Note that key values are now redacted in the result. Please use the `az functionapp function keys list` command to view the key values.
 examples:
   - name: Create a function key.
     text: >
@@ -742,6 +743,7 @@ short-summary: Manage function app keys.
 helps['functionapp keys set'] = """
 type: command
 short-summary: Create or update a function app key.
+long-summary: Note that key values are now redacted in the result. Please use the `az functionapp keys list` command to view the key values.
 examples:
   - name: Create a function key for an Azure Function app.
     text: >
