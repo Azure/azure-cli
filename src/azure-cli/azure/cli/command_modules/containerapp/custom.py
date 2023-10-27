@@ -496,11 +496,11 @@ def update_containerapp_logic(cmd,
                         volume_mount_def["volumeName"] = volume_def["name"]
                         volume_mount_def["mountPath"] = secret_volume_mount
 
-                        if "volumes" not in new_containerapp["properties"]["template"]:
+                        if "volumes" not in new_containerapp["properties"]["template"] or new_containerapp["properties"]["template"]["volumes"] is None:
                             new_containerapp["properties"]["template"]["volumes"] = [volume_def]
                         else:
                             new_containerapp["properties"]["template"]["volumes"].append(volume_def)
-                        c["volumeMounts"] = volume_mount_def
+                        c["volumeMounts"] = [volume_mount_def]
                     else:
                         if len(c["volumeMounts"]) > 1:
                             raise ValidationError("Usage error: --secret-volume-mount can only be used with a container that has a single volume mount, to define multiple volumes and mounts please use --yaml")

@@ -73,3 +73,23 @@ def create_and_verify_containerapp_up(
         if location:
             up_cmd += f" -l {location.upper()}"
             test_cls.cmd(up_cmd)
+
+def prepare_containerapp_env_for_app_e2e_tests(test_cls):
+        from azure.cli.core.azclierror import CLIInternalError
+        from .common import TEST_LOCATION
+        # resource group not found, create new resource group needs location 
+        rg_name = f'client.env_rg_{TEST_LOCATION}'.lower().replace(" ", "").replace("(", "").replace(")", "")
+        env_name = f'env-{TEST_LOCATION}'.lower().replace(" ", "").replace("(", "").replace(")", "")
+        managed_env = None
+        try:
+            managed_env = test_cls.cmd('containerapp env show -g {} -n {}'.format(rg_name, env_name)).get_output_in_json()
+        except CLIInternalError as e:
+            if e.error_msg.__contains__('ResourceGroupNotFound') or e.error_msg.__contains__('ResourceNotFound'):
+                test_cls.cmd(f'group create -n {rg_name} -l {TEST_LOCATION}')
+                test_cls.cmd(f'containerapp env create -g {rg_name} -n {env_name} --logs-destination none')
+                managed_env = test_cls.cmd('containerapp env show -g {} -n {}'.format(rg_name, env_name)).get_output_in_json()
+
+                while managed_env["properties"]["provisioningState"].lower() == "waiting":
+                    time.sleep(5)
+                    managed_env = test_cls.cmd('containerapp env show -g {} -n {}'.format(rg_name, env_name)).get_output_in_json()
+        return managed_env["id"]
