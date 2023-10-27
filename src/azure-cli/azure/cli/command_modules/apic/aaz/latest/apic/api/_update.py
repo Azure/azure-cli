@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-07-01-preview",
+        "version": "2024-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.apicenter/services/{}/workspaces/{}/apis/{}", "2023-07-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.apicenter/services/{}/workspaces/{}/apis/{}", "2024-03-01"],
         ]
     }
 
@@ -57,7 +57,6 @@ class Update(AAZCommand):
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
-            help="Resource group",
             required=True,
         )
         _args_schema.service_name = AAZStrArg(
@@ -90,6 +89,13 @@ class Update(AAZCommand):
             arg_group="Properties",
             help="The contact information for the API.",
             nullable=True,
+        )
+        _args_schema.custom_properties = AAZObjectArg(
+            options=["--custom-properties"],
+            arg_group="Properties",
+            help="The custom metadata defined for API catalog entities.",
+            nullable=True,
+            blank={},
         )
         _args_schema.description = AAZStrArg(
             options=["--description"],
@@ -326,7 +332,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-07-01-preview",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -417,7 +423,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-07-01-preview",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -480,6 +486,7 @@ class Update(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("contacts", AAZListType, ".contacts")
+                properties.set_prop("customProperties", AAZObjectType, ".custom_properties")
                 properties.set_prop("description", AAZStrType, ".description")
                 properties.set_prop("externalDocumentation", AAZListType, ".external_documentation")
                 properties.set_prop("kind", AAZStrType, ".kind", typ_kwargs={"flags": {"required": True}})
@@ -566,6 +573,9 @@ class _UpdateHelper:
 
         properties = _schema_api_read.properties
         properties.contacts = AAZListType()
+        properties.custom_properties = AAZObjectType(
+            serialized_name="customProperties",
+        )
         properties.description = AAZStrType()
         properties.external_documentation = AAZListType(
             serialized_name="externalDocumentation",

@@ -17,14 +17,17 @@ from azure.cli.core.aaz import *
 class Show(AAZCommand):
     """Get details of the metadata schema.
 
-    :example: Show schema details
-        az apic metadata-schema show -g api-center-test -s contoso --name approver
+    :example: Show schema details 1
+        az apic metadata-schema show -g api-center-test -s contosoeuap --name approver
+
+    :example: Show schema details 2
+        az az apic metadata-schema show --resource-group api-center-test --service-name contoso --name "testchoices"
     """
 
     _aaz_info = {
-        "version": "2023-07-01-preview",
+        "version": "2024-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.apicenter/services/{}/metadataschemas/{}", "2023-07-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.apicenter/services/{}/metadataschemas/{}", "2024-03-01"],
         ]
     }
 
@@ -55,7 +58,6 @@ class Show(AAZCommand):
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
-            help="Resource group",
             required=True,
         )
         _args_schema.service_name = AAZStrArg(
@@ -139,7 +141,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-07-01-preview",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }

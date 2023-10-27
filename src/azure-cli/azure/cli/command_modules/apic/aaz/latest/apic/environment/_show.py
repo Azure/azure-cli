@@ -18,13 +18,13 @@ class Show(AAZCommand):
     """Get details of the environment.
 
     :example: Show environment details
-        az apic environment show -g api-center-test -s contoso --name public
+        az apic environment show -g api-center-test -s contosoeuap --name public
     """
 
     _aaz_info = {
-        "version": "2023-07-01-preview",
+        "version": "2024-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.apicenter/services/{}/workspaces/{}/environments/{}", "2023-07-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.apicenter/services/{}/workspaces/{}/environments/{}", "2024-03-01"],
         ]
     }
 
@@ -55,7 +55,6 @@ class Show(AAZCommand):
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
-            help="Resource group",
             required=True,
         )
         _args_schema.service_name = AAZStrArg(
@@ -154,7 +153,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-07-01-preview",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -205,6 +204,9 @@ class Show(AAZCommand):
             )
 
             properties = cls._schema_on_200.properties
+            properties.custom_properties = AAZObjectType(
+                serialized_name="customProperties",
+            )
             properties.description = AAZStrType()
             properties.kind = AAZStrType(
                 flags={"required": True},

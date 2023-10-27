@@ -18,13 +18,13 @@ class Update(AAZCommand):
     """Update new or updates existing API deployment.
 
     :example: Update API deployment
-        az apic api deployment update -g api-center-test -s contoso --name production --title "Production deployment"
+        az apic api deployment update -g api-center-test -s contoso --name production --title "Production deployment" --api echo-api
     """
 
     _aaz_info = {
-        "version": "2023-07-01-preview",
+        "version": "2024-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.apicenter/services/{}/workspaces/{}/apis/{}/deployments/{}", "2023-07-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.apicenter/services/{}/workspaces/{}/apis/{}/deployments/{}", "2024-03-01"],
         ]
     }
 
@@ -67,7 +67,6 @@ class Update(AAZCommand):
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
-            help="Resource group",
             required=True,
         )
         _args_schema.service_name = AAZStrArg(
@@ -95,6 +94,13 @@ class Update(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.custom_properties = AAZObjectArg(
+            options=["--custom-properties"],
+            arg_group="Properties",
+            help="The custom metadata defined for API catalog entities.",
+            nullable=True,
+            blank={},
+        )
         _args_schema.definition_id = AAZStrArg(
             options=["--definition-id"],
             arg_group="Properties",
@@ -246,7 +252,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-07-01-preview",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -341,7 +347,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-07-01-preview",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -403,6 +409,7 @@ class Update(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
+                properties.set_prop("customProperties", AAZObjectType, ".custom_properties")
                 properties.set_prop("definitionId", AAZStrType, ".definition_id")
                 properties.set_prop("description", AAZStrType, ".description")
                 properties.set_prop("environmentId", AAZStrType, ".environment_id")
@@ -465,6 +472,9 @@ class _UpdateHelper:
         )
 
         properties = _schema_deployment_read.properties
+        properties.custom_properties = AAZObjectType(
+            serialized_name="customProperties",
+        )
         properties.definition_id = AAZStrType(
             serialized_name="definitionId",
         )
