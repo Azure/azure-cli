@@ -119,12 +119,10 @@ class HdinsightonaksClusterScenario(ScenarioTest):
                 "loc": self.location,
                 "poolName": self.create_random_name(prefix='hilopool-', length=18),
                 "clusterName": "testclipool" # self.create_random_name(prefix='hilo-', length=18),
-
                 "clusterType": "Trino",
                 "computeNodeProfile": self.cmd('az hdinsightonaks cluster node-profile create --count 5 --type Worker --vm-size Standard_D8d_v5').get_output_in_json(),    # Create a cluster node-profile object.
 
                 "keyVaultResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PSGroup/providers/Microsoft.KeyVault/vaults/sqlpass",
-    
                 "trinoHiveCatalogOption": self.cmd('az hdinsightonaks cluster trino-hive-catalog create --catalog-name ' + self.catalogName \
                                                                 + ' --metastore-db-connection-url ' + self.metastoreDbConnectionURL + ' --metastore-db-connection-user-name ' + self.metastoreDbUserName \
                                                                 + ' --metastore-db-connection-password-secret ' + self.metastoreDbPasswordSecret + ' --metastore-warehouse-dir ' + self.metastoreWarehouseDir).get_output_in_json(),
