@@ -138,6 +138,7 @@ DEPENDENCIES = [
     'fabric~=2.4',
     'javaproperties~=0.5.1',
     'jsondiff~=2.0.0',
+    'Jinja2~=3.0.3',
     'packaging>=20.9',
     'pycomposefile>=0.0.29',
     'PyGithub~=1.38',
