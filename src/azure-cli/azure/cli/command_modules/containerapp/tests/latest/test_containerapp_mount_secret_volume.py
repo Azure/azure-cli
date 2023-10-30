@@ -50,13 +50,13 @@ class ContainerAppMountSecretTest(ScenarioTest):
             JMESPathCheck('properties.template.volumes[0].secrets', None)
         ])
 
-        # self.cmd(f'az containerapp update -n {app} -g {resource_group} --secret-volume-mount "mnt/newpath"')
+        self.cmd(f'az containerapp update -n {app} -g {resource_group} --secret-volume-mount "mnt/newpath"')
 
-        # self.cmd('containerapp show -g {} -n {}'.format(resource_group, app), checks=[
-        #     JMESPathCheck('properties.template.volumes[0].storageType', 'Secret'),
-        #     JMESPathCheck('properties.template.volumes[0].secrets', None),
-        #     JMESPathCheck('properties.template.containers[0].volumeMounts[0].mountPath', 'mnt/newpath'),
-        # ])
+        self.cmd('containerapp show -g {} -n {}'.format(resource_group, app), checks=[
+            JMESPathCheck('properties.template.volumes[0].storageType', 'Secret'),
+            JMESPathCheck('properties.template.volumes[0].secrets', None),
+            JMESPathCheck('properties.template.containers[0].volumeMounts[0].mountPath', 'mnt/newpath'),
+        ])
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northcentralus")
