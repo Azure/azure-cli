@@ -282,6 +282,24 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         )
         self.assertEqual(ctx_1.get_host_group_id(), "test_host_group_id")
 
+    def common_get_crg_id(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"crg_id": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_crg_id(), None)
+        # custom
+        agentpool_1 = self.create_initialized_agentpool_instance(
+            capacity_reservation_group_id="test_capacity_reservation_group_id"
+        )
+        ctx_1.attach_agentpool(agentpool_1)
+        self.assertEqual(ctx_1.get_crg_id(), "test_capacity_reservation_group_id")
+
+
     def common_get_kubernetes_version(self):
         # default
         ctx_1 = AKSAgentPoolContext(

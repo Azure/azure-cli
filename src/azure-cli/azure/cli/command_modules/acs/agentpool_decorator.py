@@ -368,6 +368,22 @@ class AKSAgentPoolContext(BaseAKSContext):
             host_group_id = raw_value
         return host_group_id
 
+    def get_crg_id(self) -> Union[str, None]:
+        return self._get_crg_id()
+
+    def _get_crg_id(self) -> Union[str, None]:
+        raw_value = self.raw_param.get("crg_id")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        value_obtained_from_agentpool = None
+        if self.agentpool and hasattr(self.agentpool, "crg_id"):
+            value_obtained_from_agentpool = self.agentpool.crg_id
+        if value_obtained_from_agentpool is not None:
+            crg_id = value_obtained_from_agentpool
+        else:
+            crg_id = raw_value
+        return crg_id
+
+
     def _get_kubernetes_version(self, read_only: bool = False) -> str:
         """Internal function to dynamically obtain the value of kubernetes_version according to the context.
 
