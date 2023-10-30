@@ -30,12 +30,14 @@ def transform_sensitive_values(response_json):
         for rule in safe_get(response_json, "properties", "template", "scale", "rules", default=[]):
             for (key, val) in rule.items():
                 if key != "name":
-                    val["metadata"] = dict((k, "") for k, v in val["metadata"].items())
+                    if val.get("metadata"):
+                        val["metadata"] = dict((k, "") for k, v in val.get("metadata").items())
 
-    if safe_get(response_json, "properties", "configuration", "eventTriggerConfig") and \
-            "scale" in response_json["properties"]["configuration"]["eventTriggerConfig"]:
+    if safe_get(response_json, "properties", "configuration", "eventTriggerConfig") and "scale" in response_json["properties"]["configuration"]["eventTriggerConfig"]:
         for rule in safe_get(response_json, "properties", "configuration", "eventTriggerConfig", "scale", "rules", default=[]):
-            rule["metadata"] = dict((k, "") for k, v in rule["metadata"].items())
+            if rule.get("metadata"):
+                rule["metadata"] = dict((k, "") for k, v in rule.get("metadata").items())
+
     return response_json
 
 
