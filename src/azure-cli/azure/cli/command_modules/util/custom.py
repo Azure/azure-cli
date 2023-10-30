@@ -139,7 +139,7 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
             logger.warning("Exit the container to pull latest image with 'docker pull mcr.microsoft.com/azure-cli' "
                            "or run 'pip install --upgrade azure-cli' in this container")
         elif installer == 'MSI':
-            exit_code = _upgrade_on_windows()
+            _upgrade_on_windows()
         else:
             logger.warning(UPGRADE_MSG)
     if exit_code:
@@ -188,28 +188,32 @@ def _upgrade_on_windows():
     This also gives the user a chance to manually install the MSI in case of msiexec.exe failure.
     """
     import platform
+    import subprocess
+    import sys
+    import tempfile
+
+    from azure.cli.core.util import rmtree_with_retry
 
     if platform.architecture()[0] == '32bit':
         msi_url = 'https://aka.ms/installazurecliwindows'
     else:
         msi_url = 'https://aka.ms/installazurecliwindowsx64'
     logger.warning("Updating Azure CLI with MSI from %s", msi_url)
-    tmp_dir, msi_path = _download_from_url(msi_url)
 
-    logger.warning("Installing MSI")
-    import subprocess
-    exit_code = subprocess.call(['msiexec.exe', '/i', msi_path])
+    # Save MSI to ~\AppData\Local\Temp\azure-cli-msi, clean up the folder first
+    msi_dir = os.path.join(tempfile.gettempdir(), 'azure-cli-msi')
+    rmtree_with_retry(msi_dir)
+    os.makedirs(msi_dir, exist_ok=True)
 
-    if exit_code:
-        logger.warning("Installation Failed. You may manually install %s", msi_path)
-    else:
-        from azure.cli.core.util import rmtree_with_retry
-        logger.warning("Succeeded. Deleting %s", tmp_dir)
-        rmtree_with_retry(tmp_dir)
-    return exit_code
+    msi_path = _download_from_url(msi_url, msi_dir)
+
+    subprocess.Popen(['msiexec.exe', '/i', msi_path])
+    logger.warning("Installation started. Please complete the upgrade in the opened window.\nTo update extensions, "
+                   "please run `az upgrade` again after completing the upgrade.")
+    sys.exit(0)
 
 
-def _download_from_url(url):
+def _download_from_url(url, target_dir):
     import requests
     from azure.cli.core.util import should_disable_connection_verify
     r = requests.get(url, stream=True, verify=(not should_disable_connection_verify()))
@@ -218,19 +222,14 @@ def _download_from_url(url):
 
     # r.url is the real path of the msi, like'https://azcliprod.blob.core.windows.net/msi/azure-cli-2.27.1.msi'
     file_name = r.url.rsplit('/')[-1]
-    import tempfile
-    tmp_dir = tempfile.mkdtemp()
-    msi_path = os.path.join(tmp_dir, file_name)
+    msi_path = os.path.join(target_dir, file_name)
     logger.warning("Downloading MSI to %s", msi_path)
 
     with open(msi_path, 'wb') as f:
         for chunk in r.iter_content(chunk_size=1024):
             f.write(chunk)
 
-    # Return both the temp directory and MSI path, like
-    # 'C:\Users\<name>\AppData\Local\Temp\tmpzv4pelsf',
-    # 'C:\Users\<name>\AppData\Local\Temp\tmpzv4pelsf\azure-cli-2.27.1.msi'
-    return tmp_dir, msi_path
+    return msi_path
 
 
 def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
