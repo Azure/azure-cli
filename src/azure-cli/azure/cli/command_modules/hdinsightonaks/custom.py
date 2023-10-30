@@ -20,21 +20,6 @@ class NodeProfile:
     VMSize: str     # The virtual machine SKU.
 
 @dataclass
-class ServiceConfigProfileConfigFile:
-    FileName: str   # The name of the config file.
-    Value: str      # List of key value pairs where key represents a valid service configuration name and value represents the value of the config.
-
-@dataclass
-class ServiceConfigProfileConfig:
-    ComponentName: str   # Name of the component the config files should apply to.
-    File: ServiceConfigProfileConfigFile            # List of Config Files.
-
-@dataclass
-class ServiceConfigsProfile:
-    ServiceName: str    # Name of the service the configurations should apply to.
-    Config: ServiceConfigProfileConfig        # List of service configs.
-
-@dataclass
 class SecretReference:
     secret_name: str
     reference_name: str
@@ -54,20 +39,6 @@ def create_compute_node_profile(count, type, vm_size):
     node_profile = NodeProfile(count, type, vm_size)
     nodes = [repr(node_profile.__dict__).replace(" ", "")]
     return nodes
-
-# Create a service config profile.
-def create_service_configs_profile(service_name, config):
-    str = "[" + "{'ServiceName':'" + service_name + "','Config':" + config + "]" 
-    return str
-
-# Create a component config.
-def create_service_config_profile_config(component_name, file):
-    str = "[" + "{'ComponentName':'" + component_name + "','File':" + file + "]" 
-    return str
-
-# Create cluster config file.
-def create_service_config_profile_config_file(file_name, value):
-    return "{'FileName':'" + file_name  +"','Value':'" + value + "'}"
 
 # Create a hive catalog configured as a Trino cluster.
 def create_trino_hive_catalog(catalog_name, metastore_db_connection_url, metastore_db_connection_user_name, metastore_db_connection_password_secret, metastore_warehouse_dir = None):

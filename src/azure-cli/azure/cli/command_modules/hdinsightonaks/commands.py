@@ -19,9 +19,7 @@ def load_command_table(self, _):  # pylint: disable=unused-argument
 
     with self.command_group('hdinsightonaks', hdinsightonaks_cluster_sdk) as g:
         g.command('cluster node-profile create', 'create_compute_node_profile')
-        g.command('cluster service-config create', 'create_service_configs_profile')
-        g.command('cluster service-config config create', 'create_service_config_profile_config')
-        g.command('cluster service-config config file create', 'create_service_config_profile_config_file')
+
         g.command('cluster trino-hive-catalog create', 'create_trino_hive_catalog')
         g.command('cluster secret create', 'create_secret_reference')
         g.command('cluster flink-job create', 'create_flink_job_property')
