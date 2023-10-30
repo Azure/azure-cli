@@ -42,7 +42,6 @@ class ContainerAppMountSecretTest(ScenarioTest):
         secretRef2 = "fakeanothersecret"
         fakesecretValue2 = "food2"
 
-        # here is where the error is occuring rn
         self.cmd(f'az containerapp create -g {resource_group} --environment {env} -n {app} --secrets {secretRef1}={fakesecretValue1} {secretRef2}={fakesecretValue2} --secret-volume-mount "mnt/secrets"')        
         
         self.cmd('containerapp show -g {} -n {}'.format(resource_group, app), checks=[
