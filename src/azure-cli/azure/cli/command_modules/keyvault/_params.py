@@ -24,7 +24,7 @@ from azure.cli.command_modules.keyvault._validators import (
     validate_key_import_source, validate_key_type, validate_policy_permissions, validate_principal,
     validate_resource_group_name, validate_x509_certificate_chain,
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet, validate_ip_address,
-    validate_vault_or_hsm, validate_key_id,
+    validate_vault_or_hsm,
     validate_deleted_vault_or_hsm_name, validate_encryption, validate_decryption,
     validate_vault_name_and_hsm_name, set_vault_base_url, validate_keyvault_resource_id,
     process_hsm_name, KeyEncryptionDataType, process_key_release_policy, process_certificate_policy,

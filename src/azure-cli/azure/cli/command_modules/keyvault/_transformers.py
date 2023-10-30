@@ -84,7 +84,7 @@ def transform_key_decryption_output(result, **command_args):
     return output
 
 
-def transform_key_list_output(result, **command_args):
+def transform_key_list_output(result, **command_args):  # pylint: disable=unused-argument
     if not result:
         return result
     output = []
@@ -98,7 +98,7 @@ def transform_key_list_output(result, **command_args):
             k['scheduledPurgeDate'] = key.scheduled_purge_date
             k['recoveryId'] = key.recovery_id
             key = key.properties
-        k['attributes'] = key._attributes
+        k['attributes'] = key._attributes    # pylint: disable=protected-access
         k['kid'] = key.id
         k['name'] = key.name
         k['managed'] = key.managed

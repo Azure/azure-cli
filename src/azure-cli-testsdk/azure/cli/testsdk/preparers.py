@@ -233,7 +233,7 @@ class KeyVaultPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 class ManagedHSMPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
     def __init__(self, certs_path, name_prefix='clitest', location='uksouth', key='hsm', name_len=24,
                  parameter_name='managed_hsm', resource_group_parameter_name='resource_group',
-                 administrators=None, roles=[], additional_params=None,  skip_delete=False, skip_purge=False):
+                 administrators=None, roles=[], additional_params=None, skip_delete=False, skip_purge=False):
         super(ManagedHSMPreparer, self).__init__(name_prefix, name_len)
         self.cli_ctx = get_dummy_cli()
         self.location = location
