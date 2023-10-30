@@ -775,8 +775,7 @@ parameters:
     short-summary: Supply deployment parameter values.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax. Also note if you are providing a bicepparam file with a bicep template then you can use this
-        argument only once.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax. Also note if you are providing a bicepparam file then you can use this argument only once.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -812,9 +811,9 @@ examples:
   - name: Create a deployment at resource group scope from a template-spec
     text: >
         az deployment group create --resource-group testrg --template-spec "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Resources/templateSpecs/myTemplateSpec/versions/1.0"
-  - name: Create a deployment at resource group scope from a bicep template and a bicepparam parameter file
+  - name: Create a deployment at resource group scope from a bicepparam parameter file
     text: >
-        az deployment group create --resource-group testrg --template-file azuredeploy.bicep --parameters parameters.bicepparam
+        az deployment group create --resource-group testrg --parameters parameters.bicepparam
   - name: Create a deployment at resource group across tenants
     text: >
         az deployment group create --resource-group testrg --name rollout01 \\
@@ -3100,6 +3099,18 @@ examples:
     text: az bicep generate-params --file {bicep_file} --no-restore
   - name: Generate parameters file for a Bicep file with specified output format. Valid values are ( json | bicepparam ).
     text: az bicep generate-params --file {bicep_file} --output-format {output_format} --include-params {include_params}
+"""
+
+helps['bicep lint'] = """
+type: command
+short-summary: Lint a Bicep file.
+examples:
+  - name: Lint a Bicep file.
+    text: az bicep lint --file {bicep_file}
+  - name: Lint a Bicep file without restoring external modules.
+    text: az bicep lint --file {bicep_file} --no-restore
+  - name: Lint a Bicep file with specified diagnostics format. Valid values are ( default | sarif ).
+    text: az bicep lint --file {bicep_file} --diagnostics-format {diagnostics_format}
 """
 
 helps['resourcemanagement'] = """

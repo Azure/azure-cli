@@ -196,6 +196,8 @@ class TestParser(unittest.TestCase):
     @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_extension_modname)
     @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
     def test_parser_error_spellchecker(self):
+        import logging
+        import azure
         cli = DummyCli()
         main_loader = MainCommandsLoader(cli)
         cli.loader = main_loader
@@ -224,8 +226,8 @@ class TestParser(unittest.TestCase):
             pass
 
         # run multiple faulty commands and save error logs, as well as close matches
-        with mock.patch('logging.Logger.error', mock_log_error), \
-                mock.patch('difflib.get_close_matches', mock_get_close_matches):
+        with mock.patch.object(logging.Logger, 'error', mock_log_error), \
+                mock.patch.object(difflib, 'get_close_matches', mock_get_close_matches):
             faulty_cmd_args = [
                 'test module1 --opt enum_1',
                 'test extension1 --opt enum_1',
@@ -256,11 +258,14 @@ class TestParser(unittest.TestCase):
                 self.assertIn(choice, choices)
 
         # test dynamic extension install
-        with mock.patch('logging.Logger.error', mock_log_error), \
-                mock.patch('azure.cli.core.extension.operations.add_extension', mock_add_extension), \
-                mock.patch('azure.cli.core.extension.dynamic_install._get_extension_command_tree', mock_ext_cmd_tree_load), \
-                mock.patch('azure.cli.core.extension.dynamic_install._get_extension_use_dynamic_install_config', return_value='yes_without_prompt'), \
-                mock.patch('azure.cli.core.extension.dynamic_install._get_extension_run_after_dynamic_install_config', return_value=False):
+        with mock.patch.object(logging.Logger, 'error', mock_log_error), \
+                mock.patch.object(azure.cli.core.extension.operations, 'add_extension', mock_add_extension), \
+                mock.patch.object(azure.cli.core.extension.dynamic_install, '_get_extension_command_tree',
+                                  mock_ext_cmd_tree_load), \
+                mock.patch.object(azure.cli.core.extension.dynamic_install, '_get_extension_use_dynamic_install_config',
+                                  return_value='yes_without_prompt'), \
+                mock.patch.object(azure.cli.core.extension.dynamic_install,
+                                  '_get_extension_run_after_dynamic_install_config', return_value=False):
             with self.assertRaises(SystemExit):
                 parser.parse_args('test new-ext create --opt enum_2'.split())
             self.assertIn("Extension new-ext-name installed. Please rerun your command.", logger_msgs[5])

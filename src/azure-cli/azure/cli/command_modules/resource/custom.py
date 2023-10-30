@@ -72,6 +72,38 @@ def _build_resource_id(**kwargs):
         return None
 
 
+def _try_parse_key_value_object(template_param_defs, parameters, value):
+    # support situation where empty JSON "{}" is provided
+    if value == '{}' and not parameters:
+        return True
+
+    try:
+        key, value = value.split('=', 1)
+    except ValueError:
+        return False
+
+    param = template_param_defs.get(key, None)
+    if param is None:
+        raise InvalidArgumentValueError("unrecognized template parameter '{}'. Allowed parameters: {}".format(key, ', '.join(sorted(template_param_defs.keys()))))
+
+    param_type = param.get('type', None)
+    if param_type:
+        param_type = param_type.lower()
+    if param_type in ['object', 'array', 'secureobject']:
+        parameters[key] = {'value': shell_safe_json_parse(value)}
+    elif param_type in ['string', 'securestring']:
+        parameters[key] = {'value': value}
+    elif param_type == 'bool':
+        parameters[key] = {'value': value.lower() == 'true'}
+    elif param_type == 'int':
+        parameters[key] = {'value': int(value)}
+    else:
+        logger.warning("Unrecognized type '%s' for parameter '%s'. Interpretting as string.", param_type, key)
+        parameters[key] = {'value': value}
+
+    return True
+
+
 def _process_parameters(template_param_defs, parameter_lists):  # pylint: disable=too-many-statements
 
     def _try_parse_json_object(value):
@@ -106,38 +138,6 @@ def _process_parameters(template_param_defs, parameter_lists):  # pylint: disabl
             except Exception:  # pylint: disable=broad-except
                 pass
         return None
-
-    def _try_parse_key_value_object(template_param_defs, parameters, value):
-        # support situation where empty JSON "{}" is provided
-        if value == '{}' and not parameters:
-            return True
-
-        try:
-            key, value = value.split('=', 1)
-        except ValueError:
-            return False
-
-        param = template_param_defs.get(key, None)
-        if param is None:
-            raise CLIError("unrecognized template parameter '{}'. Allowed parameters: {}"
-                           .format(key, ', '.join(sorted(template_param_defs.keys()))))
-
-        param_type = param.get('type', None)
-        if param_type:
-            param_type = param_type.lower()
-        if param_type in ['object', 'array', 'secureobject']:
-            parameters[key] = {'value': shell_safe_json_parse(value)}
-        elif param_type in ['string', 'securestring']:
-            parameters[key] = {'value': value}
-        elif param_type == 'bool':
-            parameters[key] = {'value': value.lower() == 'true'}
-        elif param_type == 'int':
-            parameters[key] = {'value': int(value)}
-        else:
-            logger.warning("Unrecognized type '%s' for parameter '%s'. Interpretting as string.", param_type, key)
-            parameters[key] = {'value': value}
-
-        return True
 
     parameters = {}
     for params in parameter_lists or []:
@@ -274,9 +274,10 @@ def _is_bicepparam_file_provided(parameters):
     if not parameters or len(parameters) < 1:
         return False
 
-    for parameter in parameters:
-        if is_bicepparam_file(parameter[0]):
-            return True
+    for parameter_list in parameters:
+        for parameter_item in parameter_list:
+            if is_bicepparam_file(parameter_item):
+                return True
     return False
 
 
@@ -579,7 +580,7 @@ def _deploy_arm_template_at_resource_group(cmd,
                                                                       no_prompt=no_prompt, template_spec=template_spec, query_string=query_string)
 
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, aux_subscriptions=aux_subscriptions,
-                                                    aux_tenants=aux_tenants, plug_pipeline=(template_uri is None and template_spec is None))
+                                                    aux_tenants=aux_tenants, plug_pipeline=(deployment_properties.template_link is None))
 
     from azure.core.exceptions import HttpResponseError
     Deployment = cmd.get_models('Deployment')
@@ -670,7 +671,7 @@ def _deploy_arm_template_at_management_group(cmd,
                                                                       parameters=parameters, mode=mode,
                                                                       no_prompt=no_prompt, template_spec=template_spec, query_string=query_string)
 
-    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
+    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(deployment_properties.template_link is None))
 
     from azure.core.exceptions import HttpResponseError
     ScopedDeployment = cmd.get_models('ScopedDeployment')
@@ -754,7 +755,7 @@ def _deploy_arm_template_at_tenant_scope(cmd,
                                                                       parameters=parameters, mode='Incremental',
                                                                       no_prompt=no_prompt, template_spec=template_spec, query_string=query_string,)
 
-    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
+    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(deployment_properties.template_link is None))
 
     from azure.core.exceptions import HttpResponseError
     ScopedDeployment = cmd.get_models('ScopedDeployment')
@@ -804,7 +805,7 @@ def _what_if_deploy_arm_template_at_resource_group_core(cmd, resource_group_name
     what_if_properties = _prepare_deployment_what_if_properties(cmd, 'resourceGroup', template_file, template_uri,
                                                                 parameters, mode, result_format, no_prompt, template_spec, query_string)
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, aux_tenants=aux_tenants,
-                                                    plug_pipeline=(template_uri is None and template_spec is None))
+                                                    plug_pipeline=(what_if_properties.template_link is None))
     DeploymentWhatIf = cmd.get_models('DeploymentWhatIf')
     deployment_what_if = DeploymentWhatIf(properties=what_if_properties)
     what_if_poller = mgmt_client.begin_what_if(resource_group_name, deployment_name,
@@ -834,7 +835,7 @@ def _what_if_deploy_arm_template_at_subscription_scope_core(cmd,
                                                             return_result=None):
     what_if_properties = _prepare_deployment_what_if_properties(cmd, 'subscription', template_file, template_uri, parameters,
                                                                 DeploymentMode.incremental, result_format, no_prompt, template_spec, query_string)
-    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
+    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(what_if_properties.template_link is None))
     ScopedDeploymentWhatIf = cmd.get_models('ScopedDeploymentWhatIf')
     scoped_deployment_what_if = ScopedDeploymentWhatIf(location=deployment_location, properties=what_if_properties)
     what_if_poller = mgmt_client.begin_what_if_at_subscription_scope(deployment_name,
@@ -864,7 +865,7 @@ def _what_if_deploy_arm_template_at_management_group_core(cmd, management_group_
                                                           return_result=None):
     what_if_properties = _prepare_deployment_what_if_properties(cmd, 'managementGroup', template_file, template_uri, parameters,
                                                                 DeploymentMode.incremental, result_format, no_prompt, template_spec=template_spec, query_string=query_string)
-    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
+    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(what_if_properties.template_link is None))
     ScopedDeploymentWhatIf = cmd.get_models('ScopedDeploymentWhatIf')
     scoped_deployment_what_if = ScopedDeploymentWhatIf(location=deployment_location, properties=what_if_properties)
     what_if_poller = mgmt_client.begin_what_if_at_management_group_scope(management_group_id, deployment_name,
@@ -894,7 +895,7 @@ def _what_if_deploy_arm_template_at_tenant_scope_core(cmd,
                                                       return_result=None):
     what_if_properties = _prepare_deployment_what_if_properties(cmd, 'tenant', template_file, template_uri, parameters,
                                                                 DeploymentMode.incremental, result_format, no_prompt, template_spec, query_string)
-    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
+    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(what_if_properties.template_link is None))
     ScopedDeploymentWhatIf = cmd.get_models('ScopedDeploymentWhatIf')
     scoped_deployment_what_if = ScopedDeploymentWhatIf(location=deployment_location, properties=what_if_properties)
     what_if_poller = mgmt_client.begin_what_if_at_tenant_scope(deployment_name, parameters=scoped_deployment_what_if)
@@ -939,12 +940,109 @@ def _prepare_template_uri_with_query_string(template_uri, input_query_string):
         raise InvalidArgumentValueError('Unable to parse parameter: {} .Make sure the value is formed correctly.'.format(input_query_string))
 
 
+def _get_bicepparam_file_path(parameters):
+    bicepparam_file_path = None
+
+    for parameter_list in parameters:
+        for parameter_item in parameter_list:
+            if is_bicepparam_file(parameter_item):
+                if not bicepparam_file_path:
+                    bicepparam_file_path = parameter_item
+                else:
+                    raise ArgumentUsageError("Only one .bicepparam file can be provided with --parameters argument")
+
+    return bicepparam_file_path
+
+
+def _parse_bicepparam_inline_params(parameters, template_param_defs):
+    parsed_inline_params = {}
+
+    for parameter_list in parameters:
+        for parameter_item in parameter_list:
+            if is_bicepparam_file(parameter_item):
+                continue
+
+            if not _try_parse_key_value_object(template_param_defs, parsed_inline_params, parameter_item):
+                raise InvalidArgumentValueError(f"Unable to parse parameter: {parameter_item}. Only correctly formatted in-line parameters are allowed with a .bicepparam file")
+
+    name_value_obj = {}
+    for param in parsed_inline_params:
+        name_value_obj[param] = parsed_inline_params[param]['value']
+
+    return name_value_obj
+
+
+def _build_bicepparam_file(cli_ctx, bicepparam_file, template_file, inline_params=None):
+    custom_env = os.environ.copy()
+    if inline_params:
+        custom_env["BICEP_PARAMETERS_OVERRIDES"] = json.dumps(inline_params)
+
+    if template_file:
+        build_bicepparam_output = run_bicep_command(cli_ctx, ["build-params", bicepparam_file, "--bicep-file", template_file, "--stdout"], custom_env=custom_env)
+    else:
+        build_bicepparam_output = run_bicep_command(cli_ctx, ["build-params", bicepparam_file, "--stdout"], custom_env=custom_env)
+
+    template_content = None
+    template_spec_id = None
+
+    build_bicepparam_output_json = json.loads(build_bicepparam_output)
+    if "templateJson" in build_bicepparam_output_json:
+        template_content = build_bicepparam_output_json["templateJson"]
+    if "templateSpecId" in build_bicepparam_output_json:
+        template_spec_id = build_bicepparam_output_json["templateSpecId"]
+    parameters_content = build_bicepparam_output_json["parametersJson"]
+
+    return template_content, template_spec_id, parameters_content
+
+
+def _parse_bicepparam_file(cmd, template_file, parameters):
+    ensure_bicep_installation(cmd.cli_ctx)
+
+    minimum_supported_version_bicepparam_compilation = "0.14.85"
+    if not bicep_version_greater_than_or_equal_to(minimum_supported_version_bicepparam_compilation):
+        raise ArgumentUsageError(f"Unable to compile .bicepparam file with the current version of Bicep CLI. Please upgrade Bicep CLI to {minimum_supported_version_bicepparam_compilation} or later.")
+
+    minimum_supported_version_supplemental_param = "0.22.6"
+    if len(parameters) > 1 and not bicep_version_greater_than_or_equal_to(minimum_supported_version_supplemental_param):
+        raise ArgumentUsageError(f"Current version of Bicep CLI does not support supplemental parameters with .bicepparam file. Please upgrade Bicep CLI to {minimum_supported_version_supplemental_param} or later.")
+
+    bicepparam_file = _get_bicepparam_file_path(parameters)
+
+    if template_file and not is_bicep_file(template_file):
+        raise ArgumentUsageError("Only a .bicep template is allowed with a .bicepparam file")
+
+    template_content, template_spec_id, parameters_content = _build_bicepparam_file(cmd.cli_ctx, bicepparam_file, template_file)
+
+    if len(parameters) > 1:
+        template_obj = None
+        if template_spec_id:
+            template_obj = _load_template_spec_template(cmd, template_spec_id)
+        else:
+            template_obj = _remove_comments_from_json(template_content)
+
+        template_param_defs = template_obj.get('parameters', {})
+        inline_params = _parse_bicepparam_inline_params(parameters, template_param_defs)
+
+        # re-invoke build-params to process inline parameters
+        template_content, template_spec_id, parameters_content = _build_bicepparam_file(cmd.cli_ctx, bicepparam_file, template_file, inline_params)
+
+    return template_content, template_spec_id, parameters_content
+
+
+def _load_template_spec_template(cmd, template_spec):
+    # The api-version for ResourceType.MGMT_RESOURCE_RESOURCES may get updated and point to another (newer) version of the api version for
+    # ResourceType.MGMT_RESOURCE_TEMPLATESPECS than our designated version. This ensures the api-version of all the rest requests for
+    # template_spec are consistent in the same profile:
+    api_version = get_api_version(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS)
+    template_obj = show_resource(cmd=cmd, resource_ids=[template_spec], api_version=api_version).properties['mainTemplate']
+
+    return template_obj
+
+
 def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_file=None, template_uri=None, parameters=None,
                                               mode=None, rollback_on_error=None, no_prompt=False, template_spec=None, query_string=None):
-    cli_ctx = cmd.cli_ctx
-    DeploymentProperties, TemplateLink, OnErrorDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
-                                                                    'DeploymentProperties', 'TemplateLink',
-                                                                    'OnErrorDeployment', mod='models')
+    DeploymentProperties, TemplateLink, OnErrorDeployment = cmd.get_models('DeploymentProperties', 'TemplateLink', 'OnErrorDeployment')
+
     template_link = None
     template_obj = None
     on_error_deployment = None
@@ -962,34 +1060,23 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
         template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     elif template_spec:
         template_link = TemplateLink(id=template_spec)
-        # The api-version for ResourceType.MGMT_RESOURCE_RESOURCES may get updated and point to another (newer) version of the api version for
-        # ResourceType.MGMT_RESOURCE_TEMPLATESPECS than our designated version. This ensures the api-version of all the rest requests for
-        # template_spec are consistent in the same profile:
-        api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS)
-        template_obj = show_resource(cmd=cmd, resource_ids=[template_spec], api_version=api_version).properties['mainTemplate']
-    else:
-        if _is_bicepparam_file_provided(parameters):
-            ensure_bicep_installation(cli_ctx)
-
-            minimum_supported_version = "0.14.85"
-            if not bicep_version_greater_than_or_equal_to(minimum_supported_version):
-                raise ArgumentUsageError(f"Unable to compile .bicepparam file with the current version of Bicep CLI. Please upgrade Bicep CLI to {minimum_supported_version} or later.")
-            if len(parameters) > 1:
-                raise ArgumentUsageError("Can not use --parameters argument more than once when using a .bicepparam file")
-            bicepparam_file = parameters[0][0]
-            if not is_bicep_file(template_file):
-                raise ArgumentUsageError("Only a .bicep template is allowed with a .bicepparam parameter file")
-
-            build_bicepparam_output = run_bicep_command(cmd.cli_ctx, ["build-params", bicepparam_file, "--bicep-file", template_file, "--stdout"])
-            build_bicepparam_output_json = json.loads(build_bicepparam_output)
-            template_content = build_bicepparam_output_json["templateJson"]
-            bicepparam_json_content = build_bicepparam_output_json["parametersJson"]
+        template_obj = _load_template_spec_template(cmd, template_spec)
+    elif _is_bicepparam_file_provided(parameters):
+        template_content, template_spec_id, bicepparam_json_content = _parse_bicepparam_file(cmd, template_file, parameters)
+        if template_spec_id:
+            template_link = TemplateLink(id=template_spec_id)
+            template_obj = _load_template_spec_template(cmd, template_spec_id)
         else:
-            template_content = (
-                run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
-                if is_bicep_file(template_file)
-                else read_file_content(template_file)
-            )
+            template_obj = _remove_comments_from_json(template_content)
+
+        template_schema = template_obj.get('$schema', '')
+        validate_bicep_target_scope(template_schema, deployment_scope)
+    else:
+        template_content = (
+            run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
+            if is_bicep_file(template_file)
+            else read_file_content(template_file)
+        )
 
         template_obj = _remove_comments_from_json(template_content, file_path=template_file)
 
@@ -1138,11 +1225,11 @@ def _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, del
     return build_confirmation_string
 
 
-def _prepare_stacks_templates_and_parameters(cmd, rcf, deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string):
+def _prepare_stacks_templates_and_parameters(cmd, rcf, deployment_scope, deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string):
     t_spec, t_uri = None, None
     template_obj = None
 
-    deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink()
+    DeploymentStacksTemplateLink = cmd.get_models('DeploymentStacksTemplateLink')
 
     if template_file:
         pass
@@ -1150,54 +1237,49 @@ def _prepare_stacks_templates_and_parameters(cmd, rcf, deployment_stack_model, t
         t_spec = template_spec
     elif template_uri:
         t_uri = template_uri
+    elif _is_bicepparam_file_provided(parameters):
+        pass
     else:
         raise InvalidArgumentValueError(
             "Please enter one of the following: template file, template spec, or template url")
 
     if t_spec:
-        deployment_stacks_template_link.id = t_spec
-        deployment_stack_model.template_link = deployment_stacks_template_link
-        api_version = get_api_version(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS)
-        template_obj = show_resource(cmd=cmd, resource_ids=[template_spec],
-                                     api_version=api_version).properties['mainTemplate']
+        deployment_stack_model.template_link = DeploymentStacksTemplateLink(id=t_spec)
+        template_obj = _load_template_spec_template(cmd, template_spec)
     elif t_uri:
         if query_string:
-            deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink(
+            deployment_stacks_template_link = DeploymentStacksTemplateLink(
                 uri=t_uri, query_string=query_string)
             t_uri = _prepare_template_uri_with_query_string(
                 template_uri=t_uri, input_query_string=query_string)
         else:
-            deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink(uri=t_uri)
+            deployment_stacks_template_link = DeploymentStacksTemplateLink(uri=t_uri)
         deployment_stack_model.template_link = deployment_stacks_template_link
         template_obj = _remove_comments_from_json(_urlretrieve(t_uri).decode('utf-8'), file_path=t_uri)
-    else:
-        if _is_bicepparam_file_provided(parameters):
-            ensure_bicep_installation(cmd.cli_ctx)
-
-            minimum_supported_version = "0.14.85"
-            if not bicep_version_greater_than_or_equal_to(minimum_supported_version):
-                raise ArgumentUsageError(
-                    "Unable to compile .bicepparam file with the current version of Bicep CLI. Please use az bicep upgrade to upgrade Bicep CLI.")
-            if len(parameters) > 1:
-                raise ArgumentUsageError(
-                    "Can not use --parameters argument more than once when using a .bicepparam file")
-            bicepparam_file = parameters[0][0]
-            if not is_bicep_file(template_file):
-                raise ArgumentUsageError("Only a .bicep template is allowed with a .bicepparam parameter file")
-
-            build_bicepparam_output = run_bicep_command(
-                cmd.cli_ctx, ["build-params", bicepparam_file, "--bicep-file", template_file, "--stdout"])
-            build_bicepparam_output_json = json.loads(build_bicepparam_output)
-            template_content = build_bicepparam_output_json["templateJson"]
-            bicepparam_json_content = build_bicepparam_output_json["parametersJson"]
+    elif _is_bicepparam_file_provided(parameters):
+        template_content, template_spec_id, bicepparam_json_content = _parse_bicepparam_file(cmd, template_file, parameters)
+        if template_spec_id:
+            template_obj = _load_template_spec_template(cmd, template_spec_id)
+            deployment_stack_model.template_link = DeploymentStacksTemplateLink(id=template_spec_id)
         else:
-            template_content = (
-                run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
-                if is_bicep_file(template_file)
-                else read_file_content(template_file)
-            )
+            template_obj = _remove_comments_from_json(template_content)
+            deployment_stack_model.template = json.loads(json.dumps(template_obj))
+
+        template_schema = template_obj.get('$schema', '')
+        validate_bicep_target_scope(template_schema, deployment_scope)
+    else:
+        template_content = (
+            run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
+            if is_bicep_file(template_file)
+            else read_file_content(template_file)
+        )
+
         template_obj = _remove_comments_from_json(template_content, file_path=template_file)
+
         if is_bicep_file(template_file):
+            template_schema = template_obj.get('$schema', '')
+            validate_bicep_target_scope(template_schema, deployment_scope)
+
             deployment_stack_model.template = json.loads(json.dumps(template_obj))
         else:
             deployment_stack_model.template = json.load(open(template_file))
@@ -2280,7 +2362,7 @@ def list_template_specs(cmd, resource_group_name=None, name=None):
     return rcf.template_specs.list_by_subscription()
 
 
-def create_deployment_stack_at_subscription(cmd, name, location, deny_settings_mode, delete_resources=False, delete_resource_groups=False, delete_all=False, deployment_resource_group=None, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, tags=None, yes=False):
+def create_deployment_stack_at_subscription(cmd, name, location, deny_settings_mode, delete_resources=False, delete_resource_groups=False, delete_all=False, deployment_resource_group=None, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, tags=None, yes=False, no_wait=False):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     delete_resources_enum, delete_resource_groups_enum = _prepare_stacks_delete_detach_models(
@@ -2295,7 +2377,7 @@ def create_deployment_stack_at_subscription(cmd, name, location, deny_settings_m
     if query_string and not template_uri:
         raise IncorrectUsageError('please provide --template-uri if --query-string is specified')
 
-    if [template_file, template_spec, template_uri].count(None) != 2:
+    if [template_file, template_spec, template_uri].count(None) < 2:
         raise InvalidArgumentValueError(
             "Please enter only one of the following: template file, template spec, or template url")
     try:
@@ -2325,9 +2407,9 @@ def create_deployment_stack_at_subscription(cmd, name, location, deny_settings_m
         description=description, location=location, action_on_unmanage=action_on_unmanage_model, deployment_scope=deployment_scope, deny_settings=deny_settings_model, tags=tags)
 
     deployment_stack_model = _prepare_stacks_templates_and_parameters(
-        cmd, rcf, deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
+        cmd, rcf, 'subscription', deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
 
-    return sdk_no_wait(False, rcf.deployment_stacks.begin_create_or_update_at_subscription, name, deployment_stack_model)
+    return sdk_no_wait(no_wait, rcf.deployment_stacks.begin_create_or_update_at_subscription, name, deployment_stack_model)
 
 
 def show_deployment_stack_at_subscription(cmd, name=None, id=None):  # pylint: disable=redefined-builtin
@@ -2405,7 +2487,7 @@ def export_template_deployment_stack_at_subscription(cmd, name=None, id=None):  
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id.")
 
 
-def create_deployment_stack_at_resource_group(cmd, name, resource_group, deny_settings_mode, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, yes=False, tags=None):
+def create_deployment_stack_at_resource_group(cmd, name, resource_group, deny_settings_mode, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, yes=False, tags=None, no_wait=False):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     delete_resources_enum, delete_resource_groups_enum = _prepare_stacks_delete_detach_models(
@@ -2420,7 +2502,7 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, deny_se
     if query_string and not template_uri:
         raise IncorrectUsageError('please provide --template-uri if --query-string is specified')
 
-    if [template_file, template_spec, template_uri].count(None) != 2:
+    if [template_file, template_spec, template_uri].count(None) < 2:
         raise InvalidArgumentValueError(
             "Please enter only one of the following: template file, template spec, or template url")
 
@@ -2443,9 +2525,9 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, deny_se
 
     # validate and prepare template & paramaters
     deployment_stack_model = _prepare_stacks_templates_and_parameters(
-        cmd, rcf, deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
+        cmd, rcf, 'resourceGroup', deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
 
-    return sdk_no_wait(False, rcf.deployment_stacks.begin_create_or_update_at_resource_group, resource_group, name, deployment_stack_model)
+    return sdk_no_wait(no_wait, rcf.deployment_stacks.begin_create_or_update_at_resource_group, resource_group, name, deployment_stack_model)
 
 
 def show_deployment_stack_at_resource_group(cmd, name=None, resource_group=None, id=None):  # pylint: disable=redefined-builtin
@@ -2534,7 +2616,7 @@ def export_template_deployment_stack_at_resource_group(cmd, name=None, resource_
     raise InvalidArgumentValueError("Please enter the (stack name and resource group) or stack resource id")
 
 
-def create_deployment_stack_at_management_group(cmd, management_group_id, name, location, deny_settings_mode, deployment_subscription=None, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, yes=False, tags=None):
+def create_deployment_stack_at_management_group(cmd, management_group_id, name, location, deny_settings_mode, deployment_subscription=None, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, yes=False, tags=None, no_wait=False):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     delete_resources_enum, delete_resource_groups_enum = _prepare_stacks_delete_detach_models(
@@ -2549,7 +2631,7 @@ def create_deployment_stack_at_management_group(cmd, management_group_id, name, 
     if query_string and not template_uri:
         raise IncorrectUsageError('please provide --template-uri if --query-string is specified')
 
-    if [template_file, template_spec, template_uri].count(None) != 2:
+    if [template_file, template_spec, template_uri].count(None) < 2:
         raise InvalidArgumentValueError(
             "Please enter only one of the following: template file, template spec, or template url")
     try:
@@ -2575,9 +2657,9 @@ def create_deployment_stack_at_management_group(cmd, management_group_id, name, 
         description=description, location=location, action_on_unmanage=action_on_unmanage_model, deployment_scope=deployment_scope, deny_settings=deny_settings_model, tags=tags)
 
     deployment_stack_model = _prepare_stacks_templates_and_parameters(
-        cmd, rcf, deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
+        cmd, rcf, 'managementGroup', deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
 
-    return sdk_no_wait(False, rcf.deployment_stacks.begin_create_or_update_at_management_group, management_group_id, name, deployment_stack_model)
+    return sdk_no_wait(no_wait, rcf.deployment_stacks.begin_create_or_update_at_management_group, management_group_id, name, deployment_stack_model)
 
 
 def show_deployment_stack_at_management_group(cmd, management_group_id, name=None, id=None):  # pylint: disable=redefined-builtin
@@ -4430,6 +4512,24 @@ def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, 
             print(output)
     else:
         logger.error("az bicep generate-params could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
+
+
+def lint_bicep_file(cmd, file, no_restore=None, diagnostics_format=None):
+    ensure_bicep_installation(cmd.cli_ctx)
+
+    minimum_supported_version = "0.7.4"
+    if bicep_version_greater_than_or_equal_to(minimum_supported_version):
+        args = ["lint", file]
+        if no_restore:
+            args += ["--no-restore"]
+        if diagnostics_format:
+            args += ["--diagnostics-format", diagnostics_format]
+
+        output = run_bicep_command(cmd.cli_ctx, args)
+
+        print(output)
+    else:
+        logger.error("az bicep lint could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
 
 
 def create_resourcemanager_privatelink(

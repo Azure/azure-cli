@@ -296,7 +296,8 @@ def _mysql_iops_validator(iops, auto_io_scaling, instance):
 def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, zone=None,
                            standby_availability_zone=None, high_availability=None, subnet=None, public_access=None,
                            version=None, instance=None, geo_redundant_backup=None,
-                           byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None):
+                           byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
+                           auto_grow=None, replication_role=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
     if not instance:
         list_location_capability_info = get_postgres_location_capability_info(
@@ -318,6 +319,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
         geo_redundant_backup = instance.backup.geo_redundant_backup
     _pg_georedundant_backup_validator(geo_redundant_backup, geo_backup_supported)
     _pg_storage_validator(storage_gb, sku_info, tier, instance)
+    pg_auto_grow_validator(auto_grow, replication_role, high_availability, instance)
     _pg_sku_name_validator(sku_name, sku_info, tier, instance)
     _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance)
     _pg_version_validator(version, list_location_capability_info['server_versions'])
@@ -575,11 +577,14 @@ def validate_mysql_replica(server):
                               "Scale up the source server to General Purpose or Memory Optimized. ")
 
 
-def validate_postgres_replica(cmd, tier, location, list_location_capability_info=None):
+def validate_postgres_replica(cmd, tier, location, instance, list_location_capability_info=None):
     # Tier validation
     if tier == 'Burstable':
         raise ValidationError("Read replica is not supported for the Burstable pricing tier. "
                               "Scale up the source server to General Purpose or Memory Optimized. ")
+
+    if instance is not None and instance.storage.auto_grow.lower() == 'enabled':
+        raise ValidationError("Read replica is not supported for servers with Storage Auto-grow enabled")
 
     if not list_location_capability_info:
         list_location_capability_info = get_postgres_location_capability_info(cmd, location)
@@ -666,3 +671,14 @@ def validate_byok_identity(cmd, namespace):
 def validate_identities(cmd, namespace):
     if namespace.identities:
         namespace.identities = [_validate_identity(cmd, namespace, identity) for identity in namespace.identities]
+
+
+def pg_auto_grow_validator(auto_grow, replication_role, high_availability, instance):
+    if auto_grow is None:
+        return
+    if instance is not None:
+        replication_role = instance.replication_role if replication_role is None else replication_role
+        high_availability = instance.high_availability.mode if high_availability is None else high_availability
+    # if replica, cannot be disabled
+    if replication_role not in ('None', None, 'Primary'):
+        raise ValidationError("Storage Auto grow is not supported for replica servers.")

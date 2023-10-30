@@ -1359,11 +1359,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('source_sas')
         c.argument('source_container')
         c.argument('source_share')
-
-        c.extra('tier', tier_type)
+        c.extra('rehydrate_priority', rehydrate_priority_type, arg_group=None)
+        c.extra('tier', tier_type, arg_group=None)
         c.extra('destination_blob_type', arg_type=get_enum_type(['Detect', 'BlockBlob', 'PageBlob', 'AppendBlob']),
                 help='Defines the type of blob at the destination. '
-                     'Value of "Detect" determines the type based on source blob type.')
+                     'Value of "Detect" determines the type based on source blob type.', arg_group=None)
 
     with self.argument_context('storage blob incremental-copy start') as c:
         from azure.cli.command_modules.storage._validators import process_blob_source_uri
@@ -2685,3 +2685,26 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                          'sub-entities of the directory. Continuation token will only be returned when '
                          '--continue-on-failure is True in case of user errors. If not set the default value is False '
                          'for this.')
+
+    for cmd in ['list-handle', 'close-handle']:
+        with self.argument_context('storage share ' + cmd) as c:
+            c.extra('disallow_trailing_dot', arg_type=get_three_state_flag(), default=False,
+                    help="If true, the trailing dot will be trimmed from the target URI. Default to False")
+
+    for cmd in ['create', 'delete', 'show', 'exists', 'metadata show', 'metadata update', 'list']:
+        with self.argument_context('storage directory ' + cmd) as c:
+            c.extra('disallow_trailing_dot', arg_type=get_three_state_flag(), default=False,
+                    help="If true, the trailing dot will be trimmed from the target URI. Default to False")
+
+    for cmd in ['list', 'delete', 'delete-batch', 'resize', 'url', 'generate-sas', 'show', 'update',
+                'exists', 'metadata show', 'metadata update', 'copy start', 'copy cancel', 'copy start-batch',
+                'upload', 'upload-batch', 'download', 'download-batch']:
+        with self.argument_context('storage file ' + cmd) as c:
+            c.extra('disallow_trailing_dot', arg_type=get_three_state_flag(), default=False,
+                    help="If true, the trailing dot will be trimmed from the target URI. Default to False")
+
+    for cmd in ['start', 'start-batch']:
+        with self.argument_context('storage file copy ' + cmd) as c:
+            c.extra('disallow_source_trailing_dot', arg_type=get_three_state_flag(), default=False,
+                    options_list=["--disallow-source-trailing-dot", "--disallow-src-trailing"],
+                    help="If true, the trailing dot will be trimmed from the source URI. Default to False")

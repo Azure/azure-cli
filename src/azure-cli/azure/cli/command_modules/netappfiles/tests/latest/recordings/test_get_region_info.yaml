@@ -7,40 +7,42 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - netappfiles resource region-info
+      - netappfiles resource query-region-info
       Connection:
       - keep-alive
       ParameterSetName:
       - -l
       User-Agent:
-      - AZURECLI/2.40.0 (PIP) azsdk-python-mgmt-netapp/9.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.51.0 azsdk-python-mgmt-netapp/10.1.0 Python/3.10.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westus2/regionInfo?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westus2/regionInfo?api-version=2022-11-01
   response:
     body:
-      string: '{"error":{"code":"InvalidResourceType","message":"The resource type
-        ''locations/regionInfo'' could not be found in the namespace ''Microsoft.NetApp''
-        for api version ''2022-05-01''. The supported api-versions are ''2021-04-01-preview,2021-12-01-preview''."}}'
+      string: '{"storageToNetworkProximity":"T1AndT2AndAcrossT2","availabilityZoneMappings":[{"availabilityZone":"1","isAvailable":true},{"availabilityZone":"2","isAvailable":true},{"availabilityZone":"3","isAvailable":true}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '250'
+      - '211'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 20:11:24 GMT
+      - Wed, 23 Aug 2023 15:46:42 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - gateway
+      x-msedge-ref:
+      - 'Ref A: 7BF9083A9BF04342B6CCACDE5B3D1B81 Ref B: AMS231020615019 Ref C: 2023-08-23T15:46:41Z'
+      x-powered-by:
+      - ASP.NET
     status:
-      code: 404
-      message: Not Found
+      code: 200
+      message: OK
 version: 1
