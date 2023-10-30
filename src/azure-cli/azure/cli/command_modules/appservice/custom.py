@@ -1861,7 +1861,7 @@ def config_source_control(cmd, resource_group_name, name, repo_url, repository_t
 def update_git_token(cmd, git_token=None):
     '''
     Update source control token cached in Azure app service. If no token is provided,
-    the command will clean up existing token.
+    the command will clean up existing token. Note that tokens are now redacted in the result.
     '''
     client = web_client_factory(cmd.cli_ctx)
     from azure.mgmt.web.models import SourceControl
