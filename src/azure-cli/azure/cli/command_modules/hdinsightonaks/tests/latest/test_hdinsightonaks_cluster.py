@@ -118,7 +118,7 @@ class HdinsightonaksClusterScenario(ScenarioTest):
         self.kwargs.update({
                 "loc": self.location,
                 "poolName": self.create_random_name(prefix='hilopool-', length=18),
-                "clusterName": "testclipool" # self.create_random_name(prefix='hilo-', length=18),
+                "clusterName": "testclipool", # self.create_random_name(prefix='hilo-', length=18),
                 "clusterType": "Trino",
                 "computeNodeProfile": self.cmd('az hdinsightonaks cluster node-profile create --count 5 --type Worker --vm-size Standard_D8d_v5').get_output_in_json(),    # Create a cluster node-profile object.
 
