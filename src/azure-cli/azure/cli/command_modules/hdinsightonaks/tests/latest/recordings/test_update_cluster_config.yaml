@@ -1,0 +1,462 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsightonaks cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --cluster-pool-name -g --service-configs-profiles
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PSGroup/providers/Microsoft.HDInsight/clusterpools/ps-test-pool/clusters/testpsspark?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PSGroup/providers/Microsoft.HDInsight/clusterpools/ps-test-pool/clusters/testpsspark","name":"testpsspark","type":"microsoft.hdinsight/clusterpools/clusters","location":"West
+        US 3","systemData":{"createdBy":"v-li@microsoft.com","createdByType":"User","createdAt":"2023-09-13T03:25:46.0142855Z","lastModifiedBy":"v-li@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-10-27T09:28:25.3718892Z"},"properties":{"clusterType":"Spark","computeProfile":{"nodes":[{"type":"Head","vmSize":"Standard_D8d_v5","count":3},{"type":"Worker","vmSize":"Standard_D8d_v5","count":3}]},"clusterProfile":{"clusterVersion":"1.0.6","ossVersion":"3.3.1","components":[{"name":"Yarn","version":"3.3.1"},{"name":"Spark","version":"3.3.1"},{"name":"Hive
+        Metastore","version":"3.1.2"},{"name":"Zookeeper","version":"3.6.2"}],"identityProfile":{"msiResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PSGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/psmsi","msiClientId":"359290f9-fc9a-4b24-a420-4e78e7283f6c","msiObjectId":"31a0be82-373c-45f7-b379-c4ce1f38794f"},"authorizationProfile":{"userIds":["77e9262b-339d-4ac4-a044-8884fdf73071"]},"serviceConfigsProfiles":[{"serviceName":"yarn-service","configs":[{"component":"hadoop-config","files":[{"fileName":"core-site.xml","values":{"test":"testValue"}}]}]}],"connectivityProfile":{"web":{"fqdn":"testpsspark.93fd7b7b1a7e47858cb1da73c1e73e25.westus2.tip.hdinsightaks.net"}},"sparkProfile":{"defaultStorageUrl":"abfs://testcontainer1@hilostorage.dfs.core.windows.net"}},"deploymentId":"93fd7b7b1a7e47858cb1da73c1e73e25","provisioningState":"Succeeded","status":"Running"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1764'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 27 Oct 2023 09:30:28 GMT
+      etag:
+      - '"00007f96-0000-4d00-0000-653b82ca0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "West US 3", "properties": {"clusterProfile": {"authorizationProfile":
+      {"userIds": ["77e9262b-339d-4ac4-a044-8884fdf73071"]}, "clusterVersion": "1.0.6",
+      "identityProfile": {"msiClientId": "359290f9-fc9a-4b24-a420-4e78e7283f6c", "msiObjectId":
+      "31a0be82-373c-45f7-b379-c4ce1f38794f", "msiResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PSGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/psmsi"},
+      "ossVersion": "3.3.1", "serviceConfigsProfiles": [{"configs": [{"component":
+      "hadoop-config", "files": [{"fileName": "core-site.xml", "values": {"test":
+      "testValue"}}]}], "serviceName": "yarn-service"}], "sparkProfile": {"defaultStorageUrl":
+      "abfs://testcontainer1@hilostorage.dfs.core.windows.net"}}, "clusterType":
+      "Spark", "computeProfile": {"nodes": [{"count": 3, "type": "Head", "vmSize":
+      "Standard_D8d_v5"}, {"count": 3, "type": "Worker", "vmSize": "Standard_D8d_v5"}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsightonaks cluster update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '952'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n --cluster-pool-name -g --service-configs-profiles
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PSGroup/providers/Microsoft.HDInsight/clusterpools/ps-test-pool/clusters/testpsspark?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PSGroup/providers/Microsoft.HDInsight/clusterpools/ps-test-pool/clusters/testpsspark","name":"testpsspark","type":"microsoft.hdinsight/clusterpools/clusters","location":"West
+        US 3","systemData":{"createdBy":"v-li@microsoft.com","createdByType":"User","createdAt":"2023-09-13T03:25:46.0142855Z","lastModifiedBy":"v-li@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-10-27T09:30:28.9627242Z"},"properties":{"clusterProfile":{"components":[{"name":"Yarn","version":"3.3.1"},{"name":"Spark","version":"3.3.1"},{"name":"Hive
+        Metastore","version":"3.1.2"},{"name":"Zookeeper","version":"3.6.2"}],"connectivityProfile":{"web":{"fqdn":"testpsspark.93fd7b7b1a7e47858cb1da73c1e73e25.westus2.tip.hdinsightaks.net"}},"authorizationProfile":{"userIds":["77e9262b-339d-4ac4-a044-8884fdf73071"]},"clusterVersion":"1.0.6","identityProfile":{"msiClientId":"359290f9-fc9a-4b24-a420-4e78e7283f6c","msiObjectId":"31a0be82-373c-45f7-b379-c4ce1f38794f","msiResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PSGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/psmsi"},"ossVersion":"3.3.1","serviceConfigsProfiles":[{"configs":[{"component":"hadoop-config","files":[{"fileName":"core-site.xml","values":{"test":"testValue"}}]}],"serviceName":"yarn-service"}],"sparkProfile":{"defaultStorageUrl":"abfs://testcontainer1@hilostorage.dfs.core.windows.net"}},"deploymentId":"93fd7b7b1a7e47858cb1da73c1e73e25","provisioningState":"Accepted","status":"Running","clusterType":"Spark","computeProfile":{"nodes":[{"count":3,"type":"Head","vmSize":"Standard_D8d_v5"},{"count":3,"type":"Worker","vmSize":"Standard_D8d_v5"}]}}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/a5736cca-1071-4ad7-8598-ba8d78ca3fca*A9E3A34A6F0EE3EF16DD5551CF7E505E3290C531A767232676BE3D35B31D96D0?api-version=2023-06-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1763'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 27 Oct 2023 09:30:31 GMT
+      etag:
+      - '"00008f96-0000-4d00-0000-653b83370000"'
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - 73ea50cc-0590-4c7e-9de6-5ec0e8c81dd9
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsightonaks cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --cluster-pool-name -g --service-configs-profiles
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/a5736cca-1071-4ad7-8598-ba8d78ca3fca*A9E3A34A6F0EE3EF16DD5551CF7E505E3290C531A767232676BE3D35B31D96D0?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/a5736cca-1071-4ad7-8598-ba8d78ca3fca*A9E3A34A6F0EE3EF16DD5551CF7E505E3290C531A767232676BE3D35B31D96D0","name":"a5736cca-1071-4ad7-8598-ba8d78ca3fca*A9E3A34A6F0EE3EF16DD5551CF7E505E3290C531A767232676BE3D35B31D96D0","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PSGroup/providers/Microsoft.HDInsight/clusterpools/ps-test-pool/clusters/testpsspark","status":"Accepted","startTime":"2023-10-27T09:30:30.98685Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '522'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 27 Oct 2023 09:30:31 GMT
+      etag:
+      - '"0000dd4a-0000-4d00-0000-653b83370000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsightonaks cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --cluster-pool-name -g --service-configs-profiles
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/a5736cca-1071-4ad7-8598-ba8d78ca3fca*A9E3A34A6F0EE3EF16DD5551CF7E505E3290C531A767232676BE3D35B31D96D0?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/a5736cca-1071-4ad7-8598-ba8d78ca3fca*A9E3A34A6F0EE3EF16DD5551CF7E505E3290C531A767232676BE3D35B31D96D0","name":"a5736cca-1071-4ad7-8598-ba8d78ca3fca*A9E3A34A6F0EE3EF16DD5551CF7E505E3290C531A767232676BE3D35B31D96D0","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PSGroup/providers/Microsoft.HDInsight/clusterpools/ps-test-pool/clusters/testpsspark","status":"Accepted","startTime":"2023-10-27T09:30:30.98685Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '522'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 27 Oct 2023 09:31:01 GMT
+      etag:
+      - '"0000dd4a-0000-4d00-0000-653b83370000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsightonaks cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --cluster-pool-name -g --service-configs-profiles
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/a5736cca-1071-4ad7-8598-ba8d78ca3fca*A9E3A34A6F0EE3EF16DD5551CF7E505E3290C531A767232676BE3D35B31D96D0?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/a5736cca-1071-4ad7-8598-ba8d78ca3fca*A9E3A34A6F0EE3EF16DD5551CF7E505E3290C531A767232676BE3D35B31D96D0","name":"a5736cca-1071-4ad7-8598-ba8d78ca3fca*A9E3A34A6F0EE3EF16DD5551CF7E505E3290C531A767232676BE3D35B31D96D0","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PSGroup/providers/Microsoft.HDInsight/clusterpools/ps-test-pool/clusters/testpsspark","status":"Accepted","startTime":"2023-10-27T09:30:30.98685Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '522'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 27 Oct 2023 09:31:31 GMT
+      etag:
+      - '"0000dd4a-0000-4d00-0000-653b83370000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsightonaks cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --cluster-pool-name -g --service-configs-profiles
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/a5736cca-1071-4ad7-8598-ba8d78ca3fca*A9E3A34A6F0EE3EF16DD5551CF7E505E3290C531A767232676BE3D35B31D96D0?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/a5736cca-1071-4ad7-8598-ba8d78ca3fca*A9E3A34A6F0EE3EF16DD5551CF7E505E3290C531A767232676BE3D35B31D96D0","name":"a5736cca-1071-4ad7-8598-ba8d78ca3fca*A9E3A34A6F0EE3EF16DD5551CF7E505E3290C531A767232676BE3D35B31D96D0","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PSGroup/providers/Microsoft.HDInsight/clusterpools/ps-test-pool/clusters/testpsspark","status":"Succeeded","startTime":"2023-10-27T09:30:30.98685Z","properties":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '541'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 27 Oct 2023 09:32:02 GMT
+      etag:
+      - '"2800a6c1-0000-0800-0000-653b83780000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsightonaks cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --cluster-pool-name -g --service-configs-profiles
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PSGroup/providers/Microsoft.HDInsight/clusterpools/ps-test-pool/clusters/testpsspark?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PSGroup/providers/Microsoft.HDInsight/clusterpools/ps-test-pool/clusters/testpsspark","name":"testpsspark","type":"microsoft.hdinsight/clusterpools/clusters","location":"West
+        US 3","systemData":{"createdBy":"v-li@microsoft.com","createdByType":"User","createdAt":"2023-09-13T03:25:46.0142855Z","lastModifiedBy":"v-li@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-10-27T09:30:28.9627242Z"},"properties":{"clusterType":"Spark","computeProfile":{"nodes":[{"type":"Head","vmSize":"Standard_D8d_v5","count":3},{"type":"Worker","vmSize":"Standard_D8d_v5","count":3}]},"clusterProfile":{"clusterVersion":"1.0.6","ossVersion":"3.3.1","components":[{"name":"Yarn","version":"3.3.1"},{"name":"Spark","version":"3.3.1"},{"name":"Hive
+        Metastore","version":"3.1.2"},{"name":"Zookeeper","version":"3.6.2"}],"identityProfile":{"msiResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PSGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/psmsi","msiClientId":"359290f9-fc9a-4b24-a420-4e78e7283f6c","msiObjectId":"31a0be82-373c-45f7-b379-c4ce1f38794f"},"authorizationProfile":{"userIds":["77e9262b-339d-4ac4-a044-8884fdf73071"]},"serviceConfigsProfiles":[{"serviceName":"yarn-service","configs":[{"component":"hadoop-config","files":[{"fileName":"core-site.xml","values":{"test":"testValue"}}]}]}],"connectivityProfile":{"web":{"fqdn":"testpsspark.93fd7b7b1a7e47858cb1da73c1e73e25.westus2.tip.hdinsightaks.net"}},"sparkProfile":{"defaultStorageUrl":"abfs://testcontainer1@hilostorage.dfs.core.windows.net"}},"deploymentId":"93fd7b7b1a7e47858cb1da73c1e73e25","provisioningState":"Succeeded","status":"Running"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1764'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 27 Oct 2023 09:32:02 GMT
+      etag:
+      - '"00009b96-0000-4d00-0000-653b83490000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsightonaks cluster service-config list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name --cluster-pool-name -g
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PSGroup/providers/Microsoft.HDInsight/clusterpools/ps-test-pool/clusters/testpsspark/serviceConfigs?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"serviceName":"spark-service","componentName":"livy-config","fileName":"livy.conf","type":"key-value","defaultKeys":{"livy.spark.master":{"value":"yarn","description":"livy.spark.master"},"livy.spark.deploy-mode":{"value":"cluster","description":"livy.spark.deploy-mode"}},"customKeys":{"livy.impersonation.enabled":"true","livy.repl.enableHiveContext":"true","livy.server.session.timeout":"3600000","livy.server.csrf_protection.enabled":"false"}}},{"properties":{"serviceName":"spark-service","componentName":"livy-config","fileName":"livy-client.conf","type":"key-value","defaultKeys":{"livy.client.http.connection.timeout":{"value":"10s","description":"livy.client.http.connection.timeout"}},"customKeys":{}}},{"properties":{"serviceName":"spark-service","componentName":"livy-config","fileName":"log4j2.properties","content":"status
+        = INFO\nname = PropertiesConfig\nappenders = console\nappender.console.type
+        = Console\nappender.console.name = STDOUT\nappender.console.layout.type =
+        PatternLayout\nappender.console.layout.pattern = %d %p %c{1} [%t]: %m | Metadata:
+        %replace{%replace{%replace{%X}{([a-zA-Z0-9_]+)}{\"$1\"}}{\\=}{\\:}}{\\\\{\\\\}}{None
+        Available} %n%ex\nrootLogger.level = INFO\nrootLogger.appenderRef.console.ref
+        = STDOUT\n","type":"content"}},{"properties":{"serviceName":"spark-service","componentName":"livy-config","fileName":"spark-blacklist.conf","content":"#\n#
+        Configuration override / blacklist. Defines a list of properties that users
+        are not allowed\n# to override when starting Spark sessions.\n#\n# This file
+        takes a list of property names (one per line). Empty lines and lines starting
+        with \"#\"\n# are ignored.\n#\n\n# Disallow overriding the master and the
+        deploy mode.\nspark.master\nspark.submit.deployMode\n\n# Disallow overriding
+        the location of Spark cached jars.\nspark.yarn.jar\nspark.yarn.jars\nspark.yarn.archive\n\n#
+        Don''t allow users to override the RSC timeout.\nlivy.rsc.server.idle_timeout\n","type":"content"}},{"properties":{"serviceName":"spark-service","componentName":"livy-config","fileName":"livy-env.sh","content":"#
+        Wrongly configured would results in livy startup failures.\nexport LIVY_LOG_DIR=/usr/livy/logs\n#
+        Changing LIVY_SERVER_JAVA_OPTS make sure to update livy.memory-mb in livy.conf
+        too\nexport LIVY_SERVER_JAVA_OPTS=\"-Xmx1536m\"","type":"content"}},{"properties":{"serviceName":"spark-service","componentName":"zeppelin-config","fileName":"zeppelin-site.xml","type":"key-value","defaultKeys":{"zeppelin.websocket.max.text.message.size":{"value":"1024000","description":"zeppelin.websocket.max.text.message.size"},"zeppelin.config.storage.class":{"value":"org.apache.zeppelin.storage.FileSystemConfigStorage","description":"zeppelin.config.storage.class"},"zeppelin.config.fs.dir":{"value":"file:///usr/zeppelin/dataDir/conf","description":"Path
+        authorization and interepreter setting configurations"},"zeppelin.interpreter.connect.timeout":{"value":"30000","description":"zeppelin.interpreter.connect.timeout"},"zeppelin.interpreter.group.order":{"value":"livy,md,angular,jdbc,spark","description":"zeppelin.interpreter.group.order"},"zeppelin.interpreters":{"value":"org.apache.zeppelin.spark.SparkInterpreter,org.apache.zeppelin.spark.PySparkInterpreter,org.apache.zeppelin.livy.LivySparkInterpreter,org.apache.zeppelin.livy.LivyPySparkInterpreter,org.apache.zeppelin.livy.LivySparkSQLInterpreter,org.apache.zeppelin.markdown.Markdown,org.apache.zeppelin.angular.AngularInterpreter,org.apache.zeppelin.jdbc.JDBCInterpreter","description":"zeppelin.interpreters"},"zeppelin.notebook.dir":{"value":"file:///usr/zeppelin/dataDir/notebook","description":"path
+        or URI for notebook persist"},"zeppelin.interpreter.dir":{"value":"interpreter","description":"Interpreter
+        implementation base directory"},"zeppelin.interpreter.group.default":{"value":"livy","description":"Interpreter
+        default shown"}},"customKeys":{"zeppelin.interpreter.config.upgrade":"true"}}},{"properties":{"serviceName":"spark-service","componentName":"zeppelin-config","fileName":"zeppelin-env.sh","content":"export
+        USE_HADOOP=true\nexport ZEPPELIN_JAVA_OPTS=\"-Dhdp.version=5.1.3.7\"\nexport
+        ZEPPELIN_HOME=/usr/zeppelin/current\nexport ZEPPELIN_CONF_DIR=/usr/zeppelin/conf\nexport
+        ZEPPELIN_LOG_DIR=/usr/zeppelin/logs\nexport ZEPPELIN_PID_DIR=/usr/zeppelin/run\nexport
+        ZEPPELIN_SERVER_CONTEXT_PATH=/p/zeppelin\n\nexport PYTHONPATH=\"${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-0.10.9-src.zip\"\nexport
+        SPARK_YARN_USER_ENV=\"PYTHONPATH=${PYTHONPATH}\"\n","type":"content"}},{"properties":{"serviceName":"spark-service","componentName":"zeppelin-config","fileName":"log4j.properties","content":"log4j.rootLogger
+        = INFO, stdout\nlog4j.appender.stdout = org.apache.log4j.ConsoleAppender\nlog4j.appender.stdout.layout
+        = org.apache.log4j.PatternLayout\nlog4j.appender.stdout.layout.ConversionPattern=%5p
+        [%d] ({%t} %F[%M]:%L) - %m%n","type":"content"}},{"properties":{"serviceName":"spark-service","componentName":"spark-config","fileName":"spark-defaults.conf","type":"key-value","defaultKeys":{"spark.history.fs.cleaner.enabled":{"value":"true","description":"spark.history.fs.cleaner.enabled"},"spark.history.fs.cleaner.interval":{"value":"1h","description":"spark.history.fs
+        cleaner interval"},"spark.history.fs.cleaner.maxAge":{"value":"7d","description":"spark.history.fs.cleaner.maxAge"},"spark.io.compression.lz4.blockSize":{"value":"128kb","description":"spark.io.compression.lz4.blockSize"},"spark.shuffle.file.buffer":{"value":"1m","description":"spark.shuffle.file.buffer"},"spark.shuffle.io.backLog":{"value":"8192","description":"spark.shuffle.io.backLog"},"spark.shuffle.io.serverThreads":{"value":"128","description":"spark.shuffle.io.serverThreads"},"spark.shuffle.unsafe.file.output.buffer":{"value":"5m","description":"spark.shuffle.unsafe.file.output.buffer"},"spark.sql.autoBroadcastJoinThreshold":{"value":"26214400","description":"spark.sql.autoBroadcastJoinThreshold"},"spark.sql.shuffle.partitions":{"value":"200","description":"spark.sql.shuffle.partitions"},"spark.unsafe.sorter.spill.reader.buffer.size":{"value":"1m","description":"spark.unsafe.sorter.spill.reader.buffer.size"},"spark.eventLog.enabled":{"value":"true","description":"Whether
+        to log Spark events, useful for reconstructing the Web UI after the application
+        has finished."},"spark.eventLog.dir":{"value":"abfs://testcontainer1@hilostorage.dfs.core.windows.net/eventlogFolder","description":"Base
+        directory in which Spark events are logged, if spark.eventLog.enabled is true."},"spark.yarn.queue":{"value":"spark","description":"Queue
+        name used for spark application submission"},"spark.sql.catalogImplementation":{"value":"in-memory","description":"Catalog
+        implementation.Default in-memory"},"spark.dynamicAllocation.enabled":{"value":"true","description":"Whether
+        to use dynamic resource allocation, which scales the number of executors registered
+        with this application up and down based on the workload."},"spark.shuffle.service.enabled":{"value":"true","description":"Enables
+        the external shuffle service. This service preserves the shuffle files written
+        by executors e.g. so that executors can be safely removed, or so that shuffle
+        fetches can continue in the event of executor failure."}},"customKeys":{"spark.driver.memoryOverhead":"384","spark.executor.cores":"2","spark.executor.instances":"2","spark.executor.memory":"12288m","spark.executor.memoryOverhead":"384","spark.rdd.compress":"true","spark.serializer":"org.apache.spark.serializer.KryoSerializer","spark.sql.cbo.enabled":"true","spark.sql.cbo.joinReorder.enabled":"true","spark.sql.crossJoin.enabled":"true","spark.sql.files.maxPartitionBytes":"134217728","spark.yarn.containerLauncherMaxThreads":"25","spark.yarn.preserve.staging.files":"false","spark.sql.hive.metastore.jars":"/usr/hive-metastore/lib-3.1/*:/usr/hadoop/current/share/hadoop/common/lib/*:/usr/hadoop/current/share/hadoop/common/*","spark.sql.hive.metastore.version":"3.1","spark.history.fs.logDirectory":"abfs://testcontainer1@hilostorage.dfs.core.windows.net/eventlogFolder","spark.sql.warehouse.dir":"abfs://testcontainer1@hilostorage.dfs.core.windows.net/hive/warehouse/managed"}}},{"properties":{"serviceName":"spark-service","componentName":"spark-config","fileName":"spark-env.sh","content":"#
+        - SPARK_HISTORY_OPTS, to set config properties only for the history server
+        (e.g. \"-Dx=y\")\nexport HDP_VERSION=3.3.3.5.2-100223822\nexport PYSPARK_PYTHON=python3\n","type":"content"}},{"properties":{"serviceName":"spark-service","componentName":"spark-config","fileName":"hive-site.xml","type":"key-value","defaultKeys":{"hive.metastore.client.connect.retry.delay":{"value":"5s","description":"hive.metastore.client.connect.retry.delay"},"hive.metastore.client.socket.timeout":{"value":"1800s","description":"hive.metastore.client.socket.timeout"}},"customKeys":{"metastore.catalog.default":"hive","hive.metastore.uris":"thrift://hive-metastore-service:9083"}}},{"properties":{"serviceName":"yarn-service","componentName":"hadoop-config-client","fileName":"core-site.xml","type":"key-value","defaultKeys":{"fs.defaultFS":{"value":"abfs://testcontainer1@hilostorage.dfs.core.windows.net","description":"Default
+        FileSystem for all the services."},"fs.azure.account.oauth2.msi.tenant":{"value":"72f988bf-86f1-41af-91ab-2d7cd011db47","description":"fs.azure.account.oauth2.msi.tenant"},"fs.abfs.impl":{"value":"org.apache.hadoop.fs.azurebfs.AzureBlobFileSystem","description":"fs.abfs.impl"},"fs.azure.account.auth.type":{"value":"OAuth","description":"fs.azure.account.auth.type"},"fs.azure.account.oauth2.client.id":{"value":"359290f9-fc9a-4b24-a420-4e78e7283f6c","description":"fs.azure.account.oauth2.client.id"},"fs.azure.identity.transformer.service.principal.substitution.list":{"value":"*","description":"fs.azure.identity.transformer.service.principal.substitution.list"},"fs.azure.identity.transformer.service.principal.id":{"value":"31a0be82-373c-45f7-b379-c4ce1f38794f","description":"fs.azure.identity.transformer.service.principal.id"},"fs.azure.account.oauth.provider.type":{"value":"org.apache.hadoop.fs.azurebfs.oauth2.MsiTokenProvider","description":"fs.azure.account.oauth.provider.type"}},"customKeys":{}}},{"properties":{"serviceName":"yarn-service","componentName":"hadoop-config-client","fileName":"yarn-env.sh","content":"export
+        YARN_RESOURCEMANAGER_USER=yarn\nexport YARN_NODEMANAGER_USER=yarn\n","type":"content"}},{"properties":{"serviceName":"yarn-service","componentName":"hadoop-config-client","fileName":"yarn-site.xml","type":"key-value","customKeys":{"yarn.nodemanager.resource.memory-mb":"22936","yarn.scheduler.maximum-allocation-mb":"22936"}}},{"properties":{"serviceName":"yarn-service","componentName":"hadoop-config","fileName":"core-site.xml","type":"key-value","defaultKeys":{"fs.defaultFS":{"value":"abfs://testcontainer1@hilostorage.dfs.core.windows.net","description":"Default
+        FileSystem for all the services."},"fs.azure.account.oauth2.msi.tenant":{"value":"72f988bf-86f1-41af-91ab-2d7cd011db47","description":"fs.azure.account.oauth2.msi.tenant"},"fs.abfs.impl":{"value":"org.apache.hadoop.fs.azurebfs.AzureBlobFileSystem","description":"fs.abfs.impl"},"fs.azure.account.auth.type":{"value":"OAuth","description":"fs.azure.account.auth.type"},"fs.azure.account.oauth2.client.id":{"value":"359290f9-fc9a-4b24-a420-4e78e7283f6c","description":"fs.azure.account.oauth2.client.id"},"fs.azure.identity.transformer.service.principal.substitution.list":{"value":"*","description":"fs.azure.identity.transformer.service.principal.substitution.list"},"fs.azure.identity.transformer.service.principal.id":{"value":"31a0be82-373c-45f7-b379-c4ce1f38794f","description":"fs.azure.identity.transformer.service.principal.id"},"fs.azure.account.oauth.provider.type":{"value":"org.apache.hadoop.fs.azurebfs.oauth2.MsiTokenProvider","description":"fs.azure.account.oauth.provider.type"}},"customKeys":{"test":"testValue"}}},{"properties":{"serviceName":"yarn-service","componentName":"hadoop-config","fileName":"yarn-site.xml","type":"key-value","defaultKeys":{"yarn.resourcemanager.recovery.enabled":{"value":"true","description":"yarn.resourcemanager.recovery.enabled"},"yarn.nodemanager.resource.memory-mb":{"value":"22936","description":"yarn.nodemanager.resource.memory-mb"},"yarn.scheduler.maximum-allocation-mb":{"value":"22936","description":"yarn.scheduler.maximum-allocation-mb"},"yarn.timeline-service.enabled":{"value":"false","description":"yarn.timeline-service.enabled
+        to enable timeline server events"},"yarn.resourcemanager.system-metrics-publisher.enabled":{"value":"true","description":"The
+        setting that controls whether or not YARN system metrics are published on
+        the timeline server by RM. Defaults to false."},"yarn.timeline-service.generic-application-history.enabled":{"value":"true","description":"Indicate
+        to clients whether to query generic application data from timeline history-service
+        or not. If not enabled then application data is queried only from Resource
+        Manager. Defaults to false."},"yarn.resourcemanager.configuration.provider-class":{"value":"org.apache.hadoop.yarn.FSBasedIncludeExcludeFileProvider","description":"This
+        configuration helps with loading of configuration based on providers. Leveraged
+        by autoscale feature. org.apache.hadoop.yarn.FSBasedIncludeExcludeFileProvider
+        enables reading of include/exclude files from filesystem configured. Include
+        file configuration is yarn.resourcemanager.nodes.include-path and exclude
+        is yarn.resourcemanager.nodes.exclude-path"},"yarn.resourcemanager.nodes.exclude-path":{"value":"/tmp/excludeFile_93fd7b7b1a7e47858cb1da73c1e73e25.xml","description":"Exclude
+        file path used by autoscale service for updating nodes to be excluded for
+        running."},"yarn.resourcemanager.nodes.include-path":{"value":"/tmp/includeFile_93fd7b7b1a7e47858cb1da73c1e73e25.xml","description":"Include
+        file path used by resource manager service for nodes to be included for running."},"yarn.resourcemanager.enable-node-untracked-without-include-path":{"value":"true","description":"Enable
+        RM to mark inactive nodes as untracked if not available in include file.Used
+        by autoscale"}},"customKeys":{"yarn.nodemanager.aux-services":"spark_shuffle,mapreduce_shuffle","spark.shuffle.service.resolver.class":"org.apache.spark.network.shuffle.ShuffleMovementAwareExternalShuffleBlockResolver","yarn.nodemanager.aux-services.spark_shuffle.class":"org.apache.spark.network.yarn.YarnShuffleService","yarn.nodemanager.aux-services.mapreduce_shuffle.class":"org.apache.hadoop.mapred.ShuffleHandler","yarn.nodemanager.aux-services.spark_shuffle.classpath":"/usr/spark/aux/*"}}},{"properties":{"serviceName":"yarn-service","componentName":"hadoop-config","fileName":"capacity-scheduler.xml","content":"yarn.scheduler.capacity.maximum-am-resource-percent=0.5\nyarn.scheduler.capacity.maximum-applications=10000\nyarn.scheduler.capacity.node-locality-delay=0\nyarn.scheduler.capacity.resource-calculator=org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator\nyarn.scheduler.capacity.queue-mappings-override.enable=false\nyarn.scheduler.capacity.root.maximum-am-resource-percent=0.5\nyarn.scheduler.capacity.root.maximum-applications=10000\nyarn.scheduler.capacity.root.acl_administer_queue=*\nyarn.scheduler.capacity.root.acl_submit_applications=*\nyarn.scheduler.capacity.root.capacity=100\nyarn.scheduler.capacity.root.queues=default,spark\nyarn.scheduler.capacity.root.ordering-policy=priority-utilization\nyarn.scheduler.capacity.root.priority=0\nyarn.scheduler.capacity.root.default.maximum-am-resource-percent=0.5\nyarn.scheduler.capacity.root.default.maximum-applications=10000\nyarn.scheduler.capacity.root.default.maximum-capacity=5\nyarn.scheduler.capacity.root.default.user-limit-factor=1\nyarn.scheduler.capacity.root.default.state=RUNNING\nyarn.scheduler.capacity.root.default.capacity=5\nyarn.scheduler.capacity.root.default.priority=0\nyarn.scheduler.capacity.root.spark.maximum-am-resource-percent=0.1\nyarn.scheduler.capacity.root.spark.maximum-applications=10000\nyarn.scheduler.capacity.root.spark.state=RUNNING\nyarn.scheduler.capacity.root.spark.maximum-capacity=95\nyarn.scheduler.capacity.root.spark.capacity=95\nyarn.scheduler.capacity.root.spark.priority=10\n","type":"content"}},{"properties":{"serviceName":"yarn-service","componentName":"hadoop-config","fileName":"yarn-env.sh","content":"export
+        YARN_RESOURCEMANAGER_USER=yarn\nexport YARN_NODEMANAGER_USER=yarn\nexport
+        YARN_PROXYSERVER_USER=yarn\nexport YARN_RESOURCEMANAGER_OPTS=-javaagent:/usr/hadoop/prometheus/jmx_prometheus_javaagent.jar=9999:/usr/hadoop/etc/hadoop/prometheus-config.yaml\nexport
+        YARN_NODEMANAGER_OPTS=-javaagent:/usr/hadoop/prometheus/jmx_prometheus_javaagent.jar=9999:/usr/hadoop/etc/hadoop/prometheus-config.yaml","type":"content"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '16835'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 27 Oct 2023 09:32:05 GMT
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - d9c6a01d-a131-45ed-90b6-72260a827255
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+    status:
+      code: 200
+      message: OK
+version: 1

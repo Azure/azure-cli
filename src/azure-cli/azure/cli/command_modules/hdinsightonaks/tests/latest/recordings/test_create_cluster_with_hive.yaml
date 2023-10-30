@@ -1,0 +1,942 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsightonaks available-cluster-version list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l --query
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HDInsight/locations/westus3/availableClusterVersions?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HDInsight/locations/westus3/availableclusterversions/flink_1.16.0-1.0.6","name":"flink_1.16.0-1.0.6","properties":{"clusterVersion":"1.0.6","ossVersion":"1.16.0","clusterType":"Flink","clusterPoolVersion":"1.0","isPreview":false,"components":[{"name":"Flink","version":"1.16.0"},{"name":"Hive
+        Metastore","version":"3.1.2"}]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HDInsight/locations/westus3/availableclusterversions/spark_3.3.1-1.0.6","name":"spark_3.3.1-1.0.6","properties":{"clusterVersion":"1.0.6","ossVersion":"3.3.1","clusterType":"Spark","clusterPoolVersion":"1.0","isPreview":false,"components":[{"name":"Yarn","version":"3.3.1"},{"name":"Spark","version":"3.3.1"},{"name":"Hive
+        Metastore","version":"3.1.2"},{"name":"Zookeeper","version":"3.6.2"}]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HDInsight/locations/westus3/availableclusterversions/stub_2.4.1-1.0.0","name":"stub_2.4.1-1.0.0","properties":{"clusterVersion":"1.0.0","ossVersion":"2.4.1","clusterType":"Stub","clusterPoolVersion":"1.0","isPreview":false,"components":[{"name":"ResourceManager","version":"2.4.1"}]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HDInsight/locations/westus3/availableclusterversions/stub_2.4.1-1.0.1","name":"stub_2.4.1-1.0.1","properties":{"clusterVersion":"1.0.1","ossVersion":"2.4.1","clusterType":"Stub","clusterPoolVersion":"1.0","isPreview":false,"components":[{"name":"ResourceManager","version":"2.4.1"}]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HDInsight/locations/westus3/availableclusterversions/stub_2.4.2-1.0.0","name":"stub_2.4.2-1.0.0","properties":{"clusterVersion":"1.0.0","ossVersion":"2.4.2","clusterType":"Stub","clusterPoolVersion":"1.0","isPreview":false,"components":[{"name":"ResourceManager","version":"2.4.2"}]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HDInsight/locations/westus3/availableclusterversions/stub_2.4.3-1.1.0","name":"stub_2.4.3-1.1.0","properties":{"clusterVersion":"1.1.0","ossVersion":"2.4.3","clusterType":"Stub","clusterPoolVersion":"","isPreview":false,"components":[{"name":"ResourceManager","version":"2.4.3"}]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HDInsight/locations/westus3/availableclusterversions/trino_0.410.0-1.0.6","name":"trino_0.410.0-1.0.6","properties":{"clusterVersion":"1.0.6","ossVersion":"0.410.0","clusterType":"Trino","clusterPoolVersion":"1.0","isPreview":false,"components":[{"name":"Trino","version":"410"},{"name":"Hive
+        metastore","version":"3.1.2"}]}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2748'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Oct 2023 09:21:14 GMT
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - 9506eca7-8331-4e69-b6c5-47c295c74200
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus3", "properties": {"clusterProfile": {"authorizationProfile":
+      {"userIds": ["77e9262b-339d-4ac4-a044-8884fdf73071"]}, "clusterVersion": "1.0.6",
+      "identityProfile": {"msiClientId": "359290f9-fc9a-4b24-a420-4e78e7283f6c", "msiObjectId":
+      "31a0be82-373c-45f7-b379-c4ce1f38794f", "msiResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PSGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/psmsi"},
+      "ossVersion": "0.410.0", "prometheusProfile": {"enabled": false}, "secretsProfile":
+      {"keyVaultResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PSGroup/providers/Microsoft.KeyVault/vaults/sqlpass",
+      "secrets": [{"keyVaultObjectName": "sqlpassword", "referenceName": "sqlpassword",
+      "type": "Secret", "version": ""}]}, "trinoProfile": {"catalogOptions": {"hive":
+      [{"catalogName": "mycata", "metastoreDbConnectionPasswordSecret": "sqlpassword",
+      "metastoreDbConnectionURL": "jdbc:sqlserver://sqlserver.database.windows.net:1433;database=testhilo;encrypt=true;trustServerCertificate=true;loginTimeout=30;",
+      "metastoreDbConnectionUserName": "hdi", "metastoreWarehouseDir": "abfs://test1@hilostorage.dfs.core.windows.net/"}]},
+      "coordinator": {"debug": {"enable": false, "port": 8008, "suspend": false},
+      "highAvailabilityEnabled": true}, "worker": {"debug": {"enable": false, "port":
+      8008, "suspend": false}}}}, "clusterType": "Trino", "computeProfile": {"nodes":
+      [{"count": 5, "type": "Worker", "vmSize": "Standard_D8d_v5"}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsightonaks cluster create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1541'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n --cluster-pool-name -g -l --cluster-type --cluster-version --oss-version
+        --nodes --assigned-identity-object-id --assigned-identity-client-id --authorization-user-id
+        --assigned-identity-resource-id --secret-reference --key-vault-id --trino-hive-catalog
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli/providers/Microsoft.HDInsight/clusterpools/testclipool/clusters/hilo-000003?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli/providers/Microsoft.HDInsight/clusterpools/testclipool/clusters/hilo-000003","name":"hilo-000003","type":"microsoft.hdinsight/clusterpools/clusters","location":"westus3","systemData":{"createdBy":"v-li@microsoft.com","createdByType":"User","createdAt":"2023-10-26T09:21:16.6187974Z","lastModifiedBy":"v-li@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-10-26T09:21:16.6187974Z"},"properties":{"clusterProfile":{"authorizationProfile":{"userIds":["77e9262b-339d-4ac4-a044-8884fdf73071"]},"clusterVersion":"1.0.6","identityProfile":{"msiClientId":"359290f9-fc9a-4b24-a420-4e78e7283f6c","msiObjectId":"31a0be82-373c-45f7-b379-c4ce1f38794f","msiResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PSGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/psmsi"},"ossVersion":"0.410.0","prometheusProfile":{"enabled":false},"secretsProfile":{"keyVaultResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PSGroup/providers/Microsoft.KeyVault/vaults/sqlpass","secrets":[{"keyVaultObjectName":"sqlpassword","referenceName":"sqlpassword","type":"Secret","version":""}]},"trinoProfile":{"catalogOptions":{"hive":[{"catalogName":"mycata","metastoreDbConnectionPasswordSecret":"sqlpassword","metastoreDbConnectionURL":"jdbc:sqlserver://sqlserver.database.windows.net:1433;database=testhilo;encrypt=true;trustServerCertificate=true;loginTimeout=30;","metastoreDbConnectionUserName":"hdi","metastoreWarehouseDir":"abfs://test1@hilostorage.dfs.core.windows.net/"}]},"coordinator":{"debug":{"enable":false,"port":8008,"suspend":false},"highAvailabilityEnabled":true},"worker":{"debug":{"enable":false,"port":8008,"suspend":false}}}},"clusterType":"Trino","computeProfile":{"nodes":[{"count":5,"type":"Worker","vmSize":"Standard_D8d_v5"}]},"provisioningState":"Accepted"}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA?api-version=2023-06-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1971'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Oct 2023 09:21:19 GMT
+      etag:
+      - '"09009b8a-0000-4d00-0000-653a2f8f0000"'
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - c3edc7d7-bb71-484b-881e-83a897cc318f
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsightonaks cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --cluster-pool-name -g -l --cluster-type --cluster-version --oss-version
+        --nodes --assigned-identity-object-id --assigned-identity-client-id --authorization-user-id
+        --assigned-identity-resource-id --secret-reference --key-vault-id --trino-hive-catalog
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","name":"e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli/providers/Microsoft.HDInsight/clusterpools/testclipool/clusters/hilo-000003","status":"Accepted","startTime":"2023-10-26T09:21:19.7476594Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '519'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Oct 2023 09:21:19 GMT
+      etag:
+      - '"2d007da6-0000-4d00-0000-653a2f8f0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsightonaks cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --cluster-pool-name -g -l --cluster-type --cluster-version --oss-version
+        --nodes --assigned-identity-object-id --assigned-identity-client-id --authorization-user-id
+        --assigned-identity-resource-id --secret-reference --key-vault-id --trino-hive-catalog
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","name":"e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli/providers/Microsoft.HDInsight/clusterpools/testclipool/clusters/hilo-000003","status":"Accepted","startTime":"2023-10-26T09:21:19.7476594Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '519'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Oct 2023 09:21:50 GMT
+      etag:
+      - '"2d007da6-0000-4d00-0000-653a2f8f0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsightonaks cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --cluster-pool-name -g -l --cluster-type --cluster-version --oss-version
+        --nodes --assigned-identity-object-id --assigned-identity-client-id --authorization-user-id
+        --assigned-identity-resource-id --secret-reference --key-vault-id --trino-hive-catalog
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","name":"e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli/providers/Microsoft.HDInsight/clusterpools/testclipool/clusters/hilo-000003","status":"Accepted","startTime":"2023-10-26T09:21:19.7476594Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '519'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Oct 2023 09:22:20 GMT
+      etag:
+      - '"2d007da6-0000-4d00-0000-653a2f8f0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsightonaks cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --cluster-pool-name -g -l --cluster-type --cluster-version --oss-version
+        --nodes --assigned-identity-object-id --assigned-identity-client-id --authorization-user-id
+        --assigned-identity-resource-id --secret-reference --key-vault-id --trino-hive-catalog
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","name":"e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli/providers/Microsoft.HDInsight/clusterpools/testclipool/clusters/hilo-000003","status":"Accepted","startTime":"2023-10-26T09:21:19.7476594Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '519'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Oct 2023 09:22:51 GMT
+      etag:
+      - '"2d007da6-0000-4d00-0000-653a2f8f0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsightonaks cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --cluster-pool-name -g -l --cluster-type --cluster-version --oss-version
+        --nodes --assigned-identity-object-id --assigned-identity-client-id --authorization-user-id
+        --assigned-identity-resource-id --secret-reference --key-vault-id --trino-hive-catalog
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","name":"e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli/providers/Microsoft.HDInsight/clusterpools/testclipool/clusters/hilo-000003","status":"Accepted","startTime":"2023-10-26T09:21:19.7476594Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '519'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Oct 2023 09:23:21 GMT
+      etag:
+      - '"2d007da6-0000-4d00-0000-653a2f8f0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsightonaks cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --cluster-pool-name -g -l --cluster-type --cluster-version --oss-version
+        --nodes --assigned-identity-object-id --assigned-identity-client-id --authorization-user-id
+        --assigned-identity-resource-id --secret-reference --key-vault-id --trino-hive-catalog
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","name":"e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli/providers/Microsoft.HDInsight/clusterpools/testclipool/clusters/hilo-000003","status":"Accepted","startTime":"2023-10-26T09:21:19.7476594Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '519'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Oct 2023 09:23:51 GMT
+      etag:
+      - '"2d007da6-0000-4d00-0000-653a2f8f0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsightonaks cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --cluster-pool-name -g -l --cluster-type --cluster-version --oss-version
+        --nodes --assigned-identity-object-id --assigned-identity-client-id --authorization-user-id
+        --assigned-identity-resource-id --secret-reference --key-vault-id --trino-hive-catalog
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","name":"e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli/providers/Microsoft.HDInsight/clusterpools/testclipool/clusters/hilo-000003","status":"Accepted","startTime":"2023-10-26T09:21:19.7476594Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '519'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Oct 2023 09:24:21 GMT
+      etag:
+      - '"2d007da6-0000-4d00-0000-653a2f8f0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsightonaks cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --cluster-pool-name -g -l --cluster-type --cluster-version --oss-version
+        --nodes --assigned-identity-object-id --assigned-identity-client-id --authorization-user-id
+        --assigned-identity-resource-id --secret-reference --key-vault-id --trino-hive-catalog
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","name":"e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli/providers/Microsoft.HDInsight/clusterpools/testclipool/clusters/hilo-000003","status":"Accepted","startTime":"2023-10-26T09:21:19.7476594Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '519'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Oct 2023 09:24:52 GMT
+      etag:
+      - '"2d007da6-0000-4d00-0000-653a2f8f0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsightonaks cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --cluster-pool-name -g -l --cluster-type --cluster-version --oss-version
+        --nodes --assigned-identity-object-id --assigned-identity-client-id --authorization-user-id
+        --assigned-identity-resource-id --secret-reference --key-vault-id --trino-hive-catalog
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","name":"e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli/providers/Microsoft.HDInsight/clusterpools/testclipool/clusters/hilo-000003","status":"Accepted","startTime":"2023-10-26T09:21:19.7476594Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '519'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Oct 2023 09:25:22 GMT
+      etag:
+      - '"2d007da6-0000-4d00-0000-653a2f8f0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsightonaks cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --cluster-pool-name -g -l --cluster-type --cluster-version --oss-version
+        --nodes --assigned-identity-object-id --assigned-identity-client-id --authorization-user-id
+        --assigned-identity-resource-id --secret-reference --key-vault-id --trino-hive-catalog
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","name":"e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli/providers/Microsoft.HDInsight/clusterpools/testclipool/clusters/hilo-000003","status":"Accepted","startTime":"2023-10-26T09:21:19.7476594Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '519'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Oct 2023 09:25:52 GMT
+      etag:
+      - '"2d007da6-0000-4d00-0000-653a2f8f0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsightonaks cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --cluster-pool-name -g -l --cluster-type --cluster-version --oss-version
+        --nodes --assigned-identity-object-id --assigned-identity-client-id --authorization-user-id
+        --assigned-identity-resource-id --secret-reference --key-vault-id --trino-hive-catalog
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","name":"e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli/providers/Microsoft.HDInsight/clusterpools/testclipool/clusters/hilo-000003","status":"Accepted","startTime":"2023-10-26T09:21:19.7476594Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '519'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Oct 2023 09:26:23 GMT
+      etag:
+      - '"2d007da6-0000-4d00-0000-653a2f8f0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsightonaks cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --cluster-pool-name -g -l --cluster-type --cluster-version --oss-version
+        --nodes --assigned-identity-object-id --assigned-identity-client-id --authorization-user-id
+        --assigned-identity-resource-id --secret-reference --key-vault-id --trino-hive-catalog
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","name":"e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli/providers/Microsoft.HDInsight/clusterpools/testclipool/clusters/hilo-000003","status":"Accepted","startTime":"2023-10-26T09:21:19.7476594Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '519'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Oct 2023 09:26:52 GMT
+      etag:
+      - '"2d007da6-0000-4d00-0000-653a2f8f0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsightonaks cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --cluster-pool-name -g -l --cluster-type --cluster-version --oss-version
+        --nodes --assigned-identity-object-id --assigned-identity-client-id --authorization-user-id
+        --assigned-identity-resource-id --secret-reference --key-vault-id --trino-hive-catalog
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","name":"e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli/providers/Microsoft.HDInsight/clusterpools/testclipool/clusters/hilo-000003","status":"Accepted","startTime":"2023-10-26T09:21:19.7476594Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '519'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Oct 2023 09:27:23 GMT
+      etag:
+      - '"2d007da6-0000-4d00-0000-653a2f8f0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsightonaks cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --cluster-pool-name -g -l --cluster-type --cluster-version --oss-version
+        --nodes --assigned-identity-object-id --assigned-identity-client-id --authorization-user-id
+        --assigned-identity-resource-id --secret-reference --key-vault-id --trino-hive-catalog
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","name":"e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli/providers/Microsoft.HDInsight/clusterpools/testclipool/clusters/hilo-000003","status":"Accepted","startTime":"2023-10-26T09:21:19.7476594Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '519'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Oct 2023 09:27:53 GMT
+      etag:
+      - '"2d007da6-0000-4d00-0000-653a2f8f0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsightonaks cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --cluster-pool-name -g -l --cluster-type --cluster-version --oss-version
+        --nodes --assigned-identity-object-id --assigned-identity-client-id --authorization-user-id
+        --assigned-identity-resource-id --secret-reference --key-vault-id --trino-hive-catalog
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","name":"e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli/providers/Microsoft.HDInsight/clusterpools/testclipool/clusters/hilo-000003","status":"Accepted","startTime":"2023-10-26T09:21:19.7476594Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '519'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Oct 2023 09:28:24 GMT
+      etag:
+      - '"2d007da6-0000-4d00-0000-653a2f8f0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsightonaks cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --cluster-pool-name -g -l --cluster-type --cluster-version --oss-version
+        --nodes --assigned-identity-object-id --assigned-identity-client-id --authorization-user-id
+        --assigned-identity-resource-id --secret-reference --key-vault-id --trino-hive-catalog
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.HDInsight/locations/WESTUS3/operationStatuses/e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","name":"e8dc56d3-a3ca-4c30-845d-8706a2ab9033*AFB62B6A39F4B153CE89007ACB5C73F417169D0779635CB508433A8F325502CA","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli/providers/Microsoft.HDInsight/clusterpools/testclipool/clusters/hilo-000003","status":"Succeeded","startTime":"2023-10-26T09:21:19.7476594Z","properties":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '538'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Oct 2023 09:28:54 GMT
+      etag:
+      - '"0b007da1-0000-0100-0000-653a313c0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsightonaks cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --cluster-pool-name -g -l --cluster-type --cluster-version --oss-version
+        --nodes --assigned-identity-object-id --assigned-identity-client-id --authorization-user-id
+        --assigned-identity-resource-id --secret-reference --key-vault-id --trino-hive-catalog
+      User-Agent:
+      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli/providers/Microsoft.HDInsight/clusterpools/testclipool/clusters/hilo-000003?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli/providers/Microsoft.HDInsight/clusterpools/testclipool/clusters/hilo-000003","name":"hilo-000003","type":"microsoft.hdinsight/clusterpools/clusters","location":"westus3","systemData":{"createdBy":"v-li@microsoft.com","createdByType":"User","createdAt":"2023-10-26T09:21:16.6187974Z","lastModifiedBy":"v-li@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-10-26T09:21:16.6187974Z"},"properties":{"clusterType":"Trino","computeProfile":{"nodes":[{"type":"Head","vmSize":"Standard_D8d_v5","count":2},{"type":"Worker","vmSize":"Standard_D8d_v5","count":5}]},"clusterProfile":{"clusterVersion":"1.0.6","ossVersion":"0.410.0","components":[{"name":"Trino","version":"410"},{"name":"Hive
+        metastore","version":"3.1.2"}],"identityProfile":{"msiResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PSGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/psmsi","msiClientId":"359290f9-fc9a-4b24-a420-4e78e7283f6c","msiObjectId":"31a0be82-373c-45f7-b379-c4ce1f38794f"},"authorizationProfile":{"userIds":["77e9262b-339d-4ac4-a044-8884fdf73071"]},"secretsProfile":{"keyVaultResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PSGroup/providers/Microsoft.KeyVault/vaults/sqlpass","secrets":[{"referenceName":"sqlpassword","type":"Secret","version":"","keyVaultObjectName":"sqlpassword"}]},"connectivityProfile":{"web":{"fqdn":"hilo-000003.3420b431b0ae4a8ca5fcdf7749b53724.westus2.tip.hdinsightaks.net"}},"prometheusProfile":{"enabled":false},"trinoProfile":{"catalogOptions":{"hive":[{"catalogName":"mycata","metastoreDbConnectionPasswordSecret":"sqlpassword","metastoreDbConnectionURL":"jdbc:sqlserver://sqlserver.database.windows.net:1433;database=testhilo;encrypt=true;trustServerCertificate=true;loginTimeout=30;","metastoreDbConnectionUserName":"hdi","metastoreWarehouseDir":"abfs://test1@hilostorage.dfs.core.windows.net/"}]},"coordinator":{"debug":{"enable":false,"port":8008,"suspend":false},"highAvailabilityEnabled":true},"worker":{"debug":{"enable":false,"port":8008,"suspend":false}}}},"deploymentId":"3420b431b0ae4a8ca5fcdf7749b53724","provisioningState":"Succeeded","status":"Running"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2301'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Oct 2023 09:28:55 GMT
+      etag:
+      - '"0900f28a-0000-4d00-0000-653a31200000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+    status:
+      code: 200
+      message: OK
+version: 1
