@@ -3,8 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.log import get_logger
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import CliCommandType
+import azure.cli.command_modules.iot._help  # pylint: disable=unused-import
+from azure.cli.core.extension import extension_exists
 
 
 class IoTCommandsLoader(AzCommandsLoader):
