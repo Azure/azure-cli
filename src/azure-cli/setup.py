@@ -92,7 +92,7 @@ DEPENDENCIES = [
     'azure-mgmt-iotcentral~=10.0.0b1',
     'azure-mgmt-iothub==2.3.0',
     'azure-mgmt-iothubprovisioningservices==1.1.0',
-    'azure-mgmt-keyvault==10.2.3',
+    'azure-mgmt-keyvault==10.3.0',
     'azure-mgmt-kusto~=0.3.0',
     'azure-mgmt-loganalytics==13.0.0b4',
     'azure-mgmt-managedservices~=1.0',
