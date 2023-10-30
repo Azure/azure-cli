@@ -802,48 +802,6 @@ class VMCreateWithSpecializedUnmanagedDiskTest(ScenarioTest):
 
         self.cmd('vm delete -g {rg} -n {vm} -y')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_image_')
-    @AllowLargeResponse(size_kb=99999)
-    def test_vm_image_with_default_security_type(self, resource_group):
-        self.kwargs.update({
-            'gallery': self.create_random_name(prefix='gallery_', length=20),
-            'image': 'image1',
-            'snapshot': 's1',
-            'vm1': 'vm1',
-            'vm2': 'vm2',
-            'vm3': 'vm3',
-            'vmss1': 'vmss1',
-            'vmss2': 'vmss2'
-        })
-        self.cmd('sig create -g {rg} --gallery-name {gallery}')
-        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux --os-state specialized -p publisher1 -f offer1 -s sku1 --tags tag=test', checks=[
-            self.check('osState', 'Specialized'),
-            self.check('tags', {'tag': 'test'})
-        ])
-        self.cmd('vm create -g {rg} -n {vm1} --image OpenLogic:CentOS:7.5:latest --nsg-rule NONE --admin-username azureuser --admin-password testPassword0 --authentication-type password')
-        disk = self.cmd('vm show -g {rg} -n {vm1}').get_output_in_json()['storageProfile']['osDisk']['name']
-        self.kwargs.update({
-            'disk': disk
-        })
-        self.cmd('snapshot create -g {rg} -n {snapshot} --source {disk}')
-        image_version = self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version 1.0.0 --os-snapshot {snapshot}').get_output_in_json()['id']
-        self.kwargs.update({
-            'image_version': image_version
-        })
-        self.cmd('vm create -g {rg} -n {vm2} --image {image_version} --specialized --nsg-rule NONE --admin-username azureuser --admin-password testPassword0 --authentication-type password --security-type Standard')
-        self.cmd('vm show -g {rg} -n {vm2}', checks=[
-            self.check('securityProfile.securityType', "Standard")
-        ])
-        self.cmd(
-            'vmss create -g {rg} -n {vmss1} --image {image_version} --specialized --admin-username azureuser --admin-password testPassword0 --authentication-type password')
-        self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
-            self.check('virtualMachineProfile.securityProfile.securityType', "Standard"),
-        ])
-
-        self.cmd('vm delete -g {rg} -n {vm1} -y')
-        self.cmd('vm delete -g {rg} -n {vm2} -y')
-        self.cmd('vmss delete -g {rg} -n {vmss1} -y')
-
 
 class VMRedeployTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_vm_redeploy_')

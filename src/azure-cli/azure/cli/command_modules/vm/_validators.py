@@ -1414,14 +1414,19 @@ def _validate_image_trusted_launch(cmd, namespace):
     from azure.cli.core.profiles import ResourceType
     if not cmd.supported_api_version(resource_type=ResourceType.MGMT_COMPUTE, min_api='2020-12-01'):
         return
+    if namespace.image is None:
+        return
+
     from ._vm_utils import is_compute_gallery_image_id
     from ._constants import UPGRADE_SECURITY_HINT
+
     if is_compute_gallery_image_id(namespace.image):
         # set securityType to Standard by default if no inputs by end user
         if namespace.security_type is None:
             namespace.security_type = 'Standard'
-        if namespace.security_type.lower() != 'trustedlaunch':
-            logger.warning(UPGRADE_SECURITY_HINT)
+        return 
+        # if namespace.security_type.lower() != 'trustedlaunch':
+        #     logger.warning(UPGRADE_SECURITY_HINT)
 
     image_type = _parse_image_argument(cmd, namespace)
     if image_type == 'shared_gallery_image_id' or image_type == 'community_gallery_image_id' \
@@ -1752,7 +1757,6 @@ def process_vmss_create_namespace(cmd, namespace):
             if namespace.computer_name_prefix is None:
                 namespace.computer_name_prefix = namespace.vmss_name[:8]
 
-        if namespace.image is not None:
             _validate_image_trusted_launch
 
         # if namespace.platform_fault_domain_count is None:
