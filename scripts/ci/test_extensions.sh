@@ -19,6 +19,7 @@ output=$(az extension list-available --query [].name -otsv)
 exit_code=0
 
 # azure-cli-ml: https://github.com/Azure/azure-cli-extensions/issues/826
+# Disable arcappliance arcdata connectedk8s https://github.com/Azure/azure-cli/pull/20436
 # Disable k8s-extension temporarily: https://github.com/Azure/azure-cli-extensions/pull/6702
 # Disable alias temporarily: https://github.com/Azure/azure-cli/pull/27717
 ignore_list='azure-cli-ml fzf arcappliance arcdata connectedk8s k8s-extension alias'
