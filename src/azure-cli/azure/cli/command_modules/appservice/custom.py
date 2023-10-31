@@ -4949,7 +4949,7 @@ def update_host_key(cmd, resource_group_name, name, key_type, key_name, key_valu
                                                                 key_type,
                                                                 key_name,
                                                                 key=key_info)
-    logger.warning('Keys have been redacted. Use keys list to view.')
+    logger.warning('Keys have been redacted. Use `az functionapp keys list` to view.')
     response.value = None
     return response
 
@@ -5003,7 +5003,7 @@ def update_function_key(cmd, resource_group_name, name, function_name, key_name,
                                                                     function_name,
                                                                     key_name,
                                                                     key_info)
-    logger.warning('Keys have been redacted. Use function keys list to view.')
+    logger.warning('Keys have been redacted. Use `az functionapp function keys list` to view.')
     response.value = None
     return response
 
