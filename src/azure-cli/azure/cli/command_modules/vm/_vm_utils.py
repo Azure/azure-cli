@@ -616,7 +616,7 @@ def validate_vm_disk_trusted_launch(namespace, disk_security_profile):
         if namespace.security_type is None:
             namespace.security_type = 'TrustedLaunch'
     else:
-        logger.warning("")
+        logger.warning(UPGRADE_SECURITY_HINT)
 
 
 def validate_update_vm_trusted_launch_supported(cmd, vm, os_disk_resource_group, os_disk_name):

@@ -1517,8 +1517,7 @@ def process_vm_create_namespace(cmd, namespace):
     _validate_trusted_launch(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
     _validate_generation_version_and_trusted_launch(cmd, namespace)
-    if namespace.image is not None:
-        _validate_image_trusted_launch(cmd, namespace)
+    _validate_image_trusted_launch(cmd, namespace)
     if namespace.boot_diagnostics_storage:
         namespace.boot_diagnostics_storage = get_storage_blob_uri(cmd.cli_ctx, namespace.boot_diagnostics_storage)
 
