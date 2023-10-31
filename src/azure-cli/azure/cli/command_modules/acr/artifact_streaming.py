@@ -31,7 +31,7 @@ def _get_v1_artifact_streaming_operation_path(repository, operation_id, operatio
     return '/acr/v1/{}/_operations/{}'.format(repository, operation_id)
 
 
-def acr_streaming_artifact_update(cmd,
+def acr_artifact_streaming_update(cmd,
                                   registry_name,
                                   repository,
                                   enable_streaming,
@@ -61,20 +61,20 @@ def acr_streaming_artifact_update(cmd,
     return result
 
 
-def acr_streaming_artifact_create(cmd,
+def acr_artifact_streaming_create(cmd,
                                   registry_name,
                                   image,
                                   tenant_suffix=None,
                                   username=None,
-                                  password=None):
+                                  password=None,
+                                  no_wait=False):
     from .repository import get_image_digest
     try:
         repository, digest = get_image_digest(cmd, registry_name, image)
     except CLIError as e:
         raise CLIError("Could not find image '{}'. {}".format(image, e))
-    path = _get_v1_artifact_streaming_image_path(repository, digest)
-    json_payload = {"conversionFormat":"overlaybd", "conversionVersion": "v1"}
 
+    # Get read/write access credentials
     login_server, username, password = get_access_credentials(
         cmd=cmd,
         registry_name=registry_name,
@@ -82,25 +82,31 @@ def acr_streaming_artifact_create(cmd,
         username=username,
         password=password,
         repository=repository,
-        permission=RepoAccessTokenPermission.METADATA_WRITE.value)
+        permission=RepoAccessTokenPermission.META_WRITE_META_READ.value)
 
-    result, _ = request_data_from_registry(http_method='post',
-                                           login_server=login_server,
-                                           path=path,
-                                           username=username,
-                                           password=password,
-                                           json_payload=json_payload,
-                                           raw=True)
-    return result
+    path = _get_v1_artifact_streaming_image_path(repository, digest)
+    json_payload = {"conversionFormat":"overlaybd", "conversionVersion": "v1"}
+    result, _, response_status = request_data_from_registry(http_method='post',
+                                                            login_server=login_server,
+                                                            path=path,
+                                                            username=username,
+                                                            password=password,
+                                                            json_payload=json_payload)
+    return create_streaming_artifact_poller2(repository=repository,
+                                             operationId=operationId,
+                                             create_response=result,
+                                             login_server=login_server,
+                                             username=username,
+                                             password=password)
 
 
-def acr_streaming_artifact_operation_show(cmd,
-                                            registry_name,
-                                            repository,
-                                            operation_id,
-                                            tenant_suffix=None,
-                                            username=None,
-                                            password=None):
+def acr_artifact_streaming_operation_show(cmd,
+                                          registry_name,
+                                          repository,
+                                          operation_id,
+                                          tenant_suffix=None,
+                                          username=None,
+                                          password=None):
 
     path = _get_v1_artifact_streaming_operation_path(repository, operation_id)
 
@@ -122,7 +128,7 @@ def acr_streaming_artifact_operation_show(cmd,
     return result
 
 
-def acr_streaming_artifact_operation_cancel(cmd,
+def acr_artifact_streaming_operation_cancel(cmd,
                                             registry_name,
                                             repository,
                                             operation_id,
@@ -150,7 +156,7 @@ def acr_streaming_artifact_operation_cancel(cmd,
     return result
 
 
-def acr_streaming_artifact_show(cmd,
+def acr_artifact_streaming_show(cmd,
                                 registry_name,
                                 repository=None,
                                 tenant_suffix=None,

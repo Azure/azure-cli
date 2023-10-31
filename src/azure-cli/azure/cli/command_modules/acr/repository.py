@@ -340,10 +340,10 @@ def _acr_repository_attributes_helper(cmd,
 
     if image:
         # If --image is specified, repository must be empty.
-        repository, tag, manifest = parse_image_name(image, allow_digest=True)
+        repository, tag, digest = parse_image_name(image, allow_digest=True)
     else:
         # This is a request on repository
-        tag, manifest = None, None
+        tag, digest = None, None
 
     login_server, username, password = get_access_credentials(
         cmd=cmd,
@@ -357,8 +357,8 @@ def _acr_repository_attributes_helper(cmd,
     if tag:
         path = _get_tag_path(repository, tag)
         result_index = 'tag'
-    elif manifest:
-        path = _get_manifest_path(repository, manifest)
+    elif digest:
+        path = _get_manifest_path(repository, digest)
         result_index = 'manifest'
     else:
         path = _get_repository_path(repository)
@@ -452,7 +452,7 @@ def acr_repository_delete(cmd,
 
 def _validate_parameters(repository, image):
     if bool(repository) == bool(image):
-        raise CLIError('Usage error: --image IMAGE | --repository REPOSITORY')
+        raise CLIError('Usage error: You need to provide either --image IMAGE | --repository REPOSITORY, but not both')
 
 
 def _delete_manifest_confirmation(login_server,
