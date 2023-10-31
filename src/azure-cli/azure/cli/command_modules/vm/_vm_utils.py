@@ -613,9 +613,18 @@ def validate_vm_disk_trusted_launch(namespace, disk_security_profile):
             namespace.enable_secure_boot = True
         if namespace.enable_vtpm is None:
             namespace.enable_vtpm = True
-        if namespace.security_type is None:
-            namespace.security_type = 'TrustedLaunch'
+        namespace.security_type = 'TrustedLaunch'
     else:
+        logger.warning(UPGRADE_SECURITY_HINT)
+
+
+def validate_image_trusted_launch(namespace):
+    from ._constants import UPGRADE_SECURITY_HINT
+
+    # set securityType to Standard by default if no inputs by end user
+    if namespace.security_type is None:
+        namespace.security_type = 'Standard'
+    if namespace.security_type.lower() != 'trustedlaunch':
         logger.warning(UPGRADE_SECURITY_HINT)
 
 
