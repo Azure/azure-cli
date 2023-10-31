@@ -5,111 +5,74 @@
 
 import configparser
 import json
-import openai
-import os
 import shutil
-
+import requests
 
 from azure.cli.core._config import GLOBAL_CONFIG_PATH
 from azure.cli.core.style import Style, print_styled_text
 
+#_DEEPPROMPT_ENDPOINT = 'https://data-ai-dev.microsoft.com/deepprompt/api/v1'
+#_DEEPPROMPT_APP = "7d78b7a3-e228-4b85-8fcf-5633fb326beb"
+#_DEEPPROMPT_ENDPOINT = 'https://data-ai-dev.microsoft.com/deepprompt-test/api/v1'
+_DEEPPROMPT_ENDPOINT = 'http://localhost:5000/api/v1'
+_DEEPPROMPT_APP = "1fc1633d-c28c-4a17-9a68-22a50233d5f7"
+_AAD_TENANT = "72f988bf-86f1-41af-91ab-2d7cd011db47"
+_SCOPES = [f"{_DEEPPROMPT_APP}/.default"]
+_TIMEOUT = 180
 
-def error_assistance(command=None, error=None):
-    openai.api_key = os.getenv('AZURE_OPENAI_API_KEY')  # Edit to genearalize and keep endpoint secure
-    openai.api_version = "2023-07-01-preview"
-    openai.api_type = "azure"
-    openai.api_base = os.getenv('ENDPOINT')
+def request_error_assistance(command: str|None=None, error: str|None=None, cli_ctx=None) -> dict:
+    if error_enabled():
+        print("Generating error assistance. This may take a few seconds.")
 
-    if openai.api_key is None or openai.api_key == '':
-        print("Azure OpenAI API Key for error assistance is not set.")
-        return None
+        from azure.cli.core.azclierror import AuthenticationError
+        try:
+            from azure.cli.core._profile import Profile
+            profile = Profile(cli_ctx=cli_ctx)
+            aad_token = profile.get_raw_token(scopes=_SCOPES, tenant=_AAD_TENANT)[0][1]
+            exchanged_token = _exchange(aad_token)
+            session_id = exchanged_token["session_id"]
+            deepprompt_token = exchanged_token["access_token"]
+            response = _send_query(deepprompt_token, session_id, command, error)
 
-    if command is None:
-        return None
+            if response.status_code == requests.codes.ok:
+                response_body = json.loads(response.json()["response_text"])
+                return response_body
+        except AuthenticationError:
+            pass
 
-    prompt = "Azure CLI Command: ###" + command + "###"
-
-    if error is None:
-        prompt = prompt + "\n This isn't working, why not?"
-    else:
-        prompt = prompt + "\n The error is: " + error
-
-    messages = [
-        {"role": "system", "content": "You receive an Azure CLI command that contains \
-         a syntax or command structure error, or it returns an errors when it runs. Find out what the error is and correct it, \
-         giving back a corrected command Azure CLI command to the user. \n \
-         Example with all the parameters missing: \n \
-         Azure CLI Command: storage account create \n \
-         Response:The resource group, name, and any other necessary parameters are missing. \n \
-         storage account create --resource-group <myResourceGroup> --name <Name>"},
-        {"role": "user", "content": prompt}
-    ]
-
-    functions = [
-        {
-            "name": "error_response",
-            "description": "Receives an Azure CLI command that triggered an error \
-                and checks for any syntactical errors. Provides an explanation as to \
-                    what the problem is as well as the corrected command with no additional text.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "explanation": {
-                        "type": "string",
-                        "description": "The explanation of what the user did wrong in their initial command syntax \
-                            (i.e. The --name flag is missing before the resource name.)"
-                    },
-                    "corrected_command": {
-                        "type": "string",
-                        "description": "The corrected command (i.e. az keyvault create \
-                            --name <UniqueKeyvaultName> --resource-group <myResourceGroup> --location <eastus>)"
-                    }
-                },
-                "required": ["explanation", "corrected_command"],
-            },
-        }
-    ]
-
-    try:
-        response = openai.ChatCompletion.create(
-            deployment_id=os.getenv('DEPLOYMENT'),
-            messages=messages,
-            functions=functions,
-            function_call={"name": "error_response"},
-            temperature=0
-        )
-
-    except openai.error.OpenAIError as exception:
-        print("An error occurred calling Azure OpenAI: ", exception)
-        return None
-
-    return response
+    return {}
 
 
-def print_error_assistance(response):
-    args = response['choices'][0]['message']['function_call']['arguments']
+def print_error_assistance(response) -> None:
+    if response:
+        print_line()
 
-    arg_json = json.loads(args)
+        explanation = response["Explanation"]
 
-    explanation = arg_json['explanation']
-    corrected_command = validate_command(arg_json['corrected_command'])
+        if explanation:
+            print_styled_text([(Style.ERROR, "Issue: ")])
+            print(explanation)
 
-    print("\n")
-    print_line()
-    print_styled_text([(Style.ERROR, "Issue: ")])
-    print(explanation)
-    print("\n")
-    print_styled_text([(Style.ERROR, "Corrected Command: ")])
-    print(corrected_command)
-    print_line()
-    print("\n")
+        suggested_command = validate_command(response["Suggestion"])
+
+        if suggested_command:
+            print_styled_text([(Style.ACTION, "Suggestion: ")])
+            print(suggested_command)
+
+        note = response["Note"]
+
+        if note:
+            print_styled_text([(Style.PRIMARY, "Note: ")])
+            print(note)
+
+        print_line()
 
 
 def validate_command(command_response):
     # Incorporate syntax validation here
     # if command syntax is correct:
     return command_response
-    # else:
+# else:
     # return "No command available."
 
 
@@ -117,7 +80,7 @@ def print_line():
     console_width = shutil.get_terminal_size().columns
     dashed_line = "-" * console_width
 
-    print_styled_text([(Style.ERROR, dashed_line)])
+    print_styled_text([(Style.IMPORTANT, dashed_line)])
 
 
 def error_enabled():
@@ -135,10 +98,51 @@ def get_config():
         return False
 
     return str_to_bool(config.get('core', 'error_assistance', fallback=False)) \
-        or str_to_bool(config.get('interactive', 'error_assistance', fallback=False))
+            or str_to_bool(config.get('interactive', 'error_assistance', fallback=False))
 
 
 def str_to_bool(string):
-    if string == 'True' or string == 'true':
+    if string.casefold() == 'True'.casefold():
         return True
     return False
+
+def _exchange(aad_token: str) -> dict:
+    return requests.post(
+            url=f"{_DEEPPROMPT_ENDPOINT}/exchange",
+            headers={
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                },
+            json={
+                "token": aad_token,
+                "provider": "microsoft",
+                },
+            timeout=_TIMEOUT).json()
+
+def _create_session(access_token: str) -> str:
+    return requests.post(
+            url=f"{_DEEPPROMPT_ENDPOINT}/create_session",
+            headers={
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "Authorization": f"Bearer {access_token}",
+                }).json()['session_id']
+
+def _send_query(access_token: str, session_id: str, command: str|None, error: str|None) -> requests.Response:
+    return requests.post(
+            url=f"{_DEEPPROMPT_ENDPOINT}/query",
+            headers={
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "Authorization": f"Bearer {access_token}",
+                "DeepPrompt-Session-ID": session_id,
+                },
+            json={
+                "query": "Query errors and corrected command for Azure CLI",
+                "intent": "azure_error",
+                "context": {
+                    "command": command,
+                    "error": error,
+                    "language": "azurecli",
+                    }
+                })

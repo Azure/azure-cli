@@ -20,7 +20,6 @@ from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.core.azclierror import CommandNotFoundError
 from azure.cli.core.azclierror import ValidationError
-from azure.cli.core.error_assistance import error_enabled
 
 from knack.log import get_logger
 from knack.parser import CLICommandParser
@@ -151,10 +150,10 @@ class AzCliCommandParser(CLICommandParser):
         # Get command to provide to error help
         full_command = self.prog + ' ' + self.full_raw_command
 
-        if error_enabled():
-            print("Generating error assistance. This may take a few seconds.")
+        cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
 
         az_error = ValidationError(message, full_command)
+        az_error.request_error_assistance(cli_ctx)
         az_error.print_error()
         az_error.send_telemetry()
         self.exit(2)
@@ -170,9 +169,6 @@ class AzCliCommandParser(CLICommandParser):
         # Get command to provide to error help
         full_command = self.prog + ' ' + self.full_raw_command
 
-        if error_enabled():
-            print("Generating error assistance. This may take a few seconds.")
-
         az_error = ArgumentUsageError(message, full_command)
         if 'unrecognized arguments' in message:
             az_error = UnrecognizedArgumentError(message, full_command)
@@ -186,6 +182,7 @@ class AzCliCommandParser(CLICommandParser):
             az_error.set_recommendation(QUERY_REFERENCE)
         elif recommendations:
             az_error.set_aladdin_recommendation(recommendations)
+        az_error.request_error_assistance(cli_ctx)
         az_error.print_error()
         az_error.send_telemetry()
         self.exit(2)
@@ -310,9 +307,6 @@ class AzCliCommandParser(CLICommandParser):
             # Get command to provide to error help
             full_command = self.prog + ' ' + self.full_raw_command
 
-            if error_enabled():
-                print("Generating error assistance. This may take a few seconds.")
-
             command_name_inferred = self.prog
             use_dynamic_install = 'no'
             if not self.command_source:
@@ -341,6 +335,8 @@ class AzCliCommandParser(CLICommandParser):
             command_arguments = self._get_failure_recovery_arguments(action)
             if candidates:
                 az_error.set_recommendation("Did you mean '{}' ?".format(candidates[0]))
+
+            az_error.request_error_assistance(cli_ctx)
 
             # recommend a command for user
             recommender = CommandRecommender(*command_arguments, error_msg, cli_ctx)

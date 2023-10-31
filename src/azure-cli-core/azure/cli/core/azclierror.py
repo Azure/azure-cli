@@ -6,7 +6,7 @@
 import sys
 
 from azure.cli.core import telemetry
-from azure.cli.core.error_assistance import print_error_assistance, error_assistance, error_enabled
+from azure.cli.core.error_assistance import print_error_assistance, request_error_assistance, error_enabled
 from knack.util import CLIError
 from knack.log import get_logger
 
@@ -30,12 +30,8 @@ class AzCLIError(CLIError):
     def __init__(self, error_msg, command=None, recommendation=None):
         # error message
         self.error_msg = error_msg
-
-        # Get error reason from Azure OpenAI
-        if error_enabled():
-            self.error_help = error_assistance(command=command, error=error_msg)
-        else:
-            self.error_help = None
+        self.command = command
+        self.error_help = None
 
         # manual recommendations provided based on developers' knowledge
         self.recommendations = []
@@ -47,6 +43,12 @@ class AzCLIError(CLIError):
         # exception trace for the error
         self.exception_trace = None
         super().__init__(error_msg)
+
+    def request_error_assistance(self, cli_ctx=None) -> None:
+        # Get error reason from Azure OpenAI
+        # We may need to make this call async since it'll take a long time and we don't need the resule until
+        # print_error
+        self.error_help = request_error_assistance(command=self.command, error=self.error_msg, cli_ctx=cli_ctx)
 
     def set_recommendation(self, recommendation):
         """" Set manual recommendations for the error.
