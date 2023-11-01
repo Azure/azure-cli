@@ -55,7 +55,7 @@ class RepoAccessTokenPermission(Enum):
     DELETED_RESTORE = 'deleted_restore'
     PULL = 'pull'
     PUSH = 'push'
-    PULL_PUSH = 'push,pull'
+    PULL_PUSH = '{},{}'.format(PULL, PUSH)
     META_WRITE_META_READ = '{},{}'.format(METADATA_WRITE, METADATA_READ)
     DELETE_META_READ = '{},{}'.format(DELETE, METADATA_READ)
     PULL_META_READ = '{},{}'.format(PULL, METADATA_READ)
