@@ -1715,7 +1715,7 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
         except Exception as ex:  # pylint: disable=broad-except
             logger.warning("Retrieving credentials failed with an exception:'%s'", ex)  # consider throw if needed
 
-    if docker_registry_server_user is not None: 
+    if docker_registry_server_user is not None:
         settings.append('DOCKER_REGISTRY_SERVER_USERNAME=' + docker_registry_server_user)
     if docker_registry_server_password is not None:
         settings.append('DOCKER_REGISTRY_SERVER_PASSWORD=' + docker_registry_server_password)
@@ -3906,10 +3906,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                 site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
                                                               value='false'))
                 site_config.linux_fx_version = _format_fx_version(image)
-
-                site_config.workload_profile = workload_profile_name
-                site_config.resource_config.cpu = cpu
-                site_config.resource_config.momory = memory
 
                 # clear all runtime specific configs and settings
                 site_config_dict.use32_bit_worker_process = False
