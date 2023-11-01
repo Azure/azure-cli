@@ -1333,8 +1333,7 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
         return
     from ._vm_utils import trusted_launch_warning_log, validate_image_trusted_launch, validate_vm_disk_trusted_launch
     if namespace.image is not None:
-        from ._vm_utils import parse_shared_gallery_image_id, parse_community_gallery_image_id, \
-            is_valid_image_version_id
+        from ._vm_utils import is_valid_image_version_id
         if is_valid_image_version_id(namespace.image):
             if namespace.security_type is None:
                 namespace.security_type = 'Standard'

@@ -780,6 +780,28 @@ class VMCreateWithSpecializedUnmanagedDiskTest(ScenarioTest):
             self.check('storageProfile.dataDisks[1].lun', 1)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_with_default_trusted_launch')
+    @AllowLargeResponse(size_kb=99999)
+    def test_vm_create_with_default_trusted_launch(self, resource_group):
+        self.kwargs.update({
+            'vm_disk': self.create_random_name('disk-', 15),
+            'vm': self.create_random_name('vm-', 15),
+            'vm1': self.create_random_name('vm-', 15),
+            'vm2': self.create_random_name('vm-', 15),
+            'vmss': self.create_random_name('vmss-', 15),
+            'image': self.create_random_name('image-', 15),
+            'vmss1': self.create_random_name('vmss-', 15)
+        })
+        self.cmd('disk create -n {vm_disk} -g {rg} --hyper-v-generation v2 --size-gb 10 --security-type "TrustedLaunch"')
+        self.cmd('vm create --disk-controller-type SCSI -n {vm} -g {rg} --attach-os-disk {vm_disk} --os-type linux')
+        self.cmd('vm show -n {vm} -g {rg}', checks=[
+            self.check('securityProfile.uefiSettings.secureBootEnabled', True),
+            self.check('securityProfile.uefiSettings.vTpmEnabled', True),
+            self.check('securityProfile.securityType', "TrustedLaunch")
+        ])
+
+        self.cmd('vm delete -g {rg} -n {vm} -y')
+
 
 class VMRedeployTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_vm_redeploy_')
