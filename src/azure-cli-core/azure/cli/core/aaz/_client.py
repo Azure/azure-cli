@@ -9,9 +9,10 @@ from azure.core.polling.base_polling import LocationPolling, StatusCheckPolling
 from abc import abstractmethod
 
 from ._poller import AAZNoPolling, AAZBasePolling
+from azure.cli.core.cloud import CloudNameEnum
 
 registered_clients = {}
-
+CloudNameEnum = CloudNameEnum
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods, protected-access
 
