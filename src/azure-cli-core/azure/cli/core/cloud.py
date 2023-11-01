@@ -8,7 +8,6 @@ import os
 import json
 from pprint import pformat
 import configparser
-from enum import Enum
 
 from azure.cli.core.profiles import API_PROFILES
 from azure.cli.core._config import GLOBAL_CONFIG_DIR
@@ -295,7 +294,7 @@ class Cloud:  # pylint: disable=too-few-public-methods
                    suffixes=CloudSuffixes(**json_str['suffixes']))
 
 
-class CloudNameEnum:
+class CloudNameEnum:  # pylint: disable=too-few-public-methods
     AzureCloud = 'AzureCloud'
     AzureChinaCloud = 'AzureChinaCloud'
     AzureUSGovernment = 'AzureUSGovernment'
