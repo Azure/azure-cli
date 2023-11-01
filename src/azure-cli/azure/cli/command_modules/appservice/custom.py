@@ -4882,6 +4882,9 @@ def _vnet_delegation_check(cmd, subnet_subscription_id, vnet_resource_group, vne
                            subnet_service_delegation="Microsoft.Web/serverFarms"):
     from azure.cli.core.commands.client_factory import get_subscription_id
 
+    if subnet_service_delegation is None:
+        subnet_service_delegation = "Microsoft.Web/serverFarms"
+
     if get_subscription_id(cmd.cli_ctx).lower() != subnet_subscription_id.lower():
         logger.warning('Cannot validate subnet in other subscription for delegation to Microsoft.Web/serverFarms.'
                        ' Missing delegation can cause "Bad Request" error.')
