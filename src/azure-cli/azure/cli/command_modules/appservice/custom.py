@@ -1851,7 +1851,8 @@ def config_source_control(cmd, resource_group_name, name, repo_url, repository_t
             if response.git_hub_action_configuration and \
                 response.git_hub_action_configuration.container_configuration and \
                     response.git_hub_action_configuration.container_configuration.password:
-                logger.warning('GitHub action password has been redacted. Use deployment source show to view.')
+                logger.warning("GitHub action password has been redacted. Use "
+                               "`az webapp/functionapp deployment source show` to view.")
                 response.git_hub_action_configuration.container_configuration.password = None
             return response
         except Exception as ex:  # pylint: disable=broad-except
