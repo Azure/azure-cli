@@ -500,14 +500,14 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
                          self.check('properties.enablePurgeProtection', True)])
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_list_deleted')
-    def test_keyvault_list_deleted(self, resource_group):
+    @KeyVaultPreparer(name_prefix='cli-test-kv-mgmt-', location='eastus', skip_delete=True)
+    @ManagedHSMPreparer(name_prefix='cli-test-hsm-mgmt-', certs_path=CERTS_DIR, location='eastus', skip_delete=True)
+    def test_keyvault_list_deleted(self, resource_group, key_vault, managed_hsm):
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-mgmt-', 24),
-            'hsm': self.create_random_name('cli-test-hsm-mgmt-', 24),
+            'kv': key_vault,
+            'hsm': managed_hsm,
             'loc': 'eastus'
         })
-        _create_keyvault(self, self.kwargs)
-        _create_hsm(self)
 
         # delete resources
         self.cmd('keyvault delete --name {kv}')
@@ -528,10 +528,6 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
             self.exists("[?name=='{hsm}']"),
             self.exists("[?name=='{kv}']")
         ])
-
-        # clean resources
-        self.cmd('keyvault purge --name {kv} -l {loc}')
-        self.cmd('keyvault purge --hsm-name {hsm} -l {loc}')
 
 
 class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
@@ -1133,7 +1129,7 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         })
         self.cmd('keyvault key import --vault-name {kv} -n import-key-plain --pem-file "{key_plain_file}" -p software')
         self.cmd('keyvault key import --vault-name {kv} -n import-key-encrypted --pem-file "{key_enc_file}" '
-                 '--pem-password {key_enc_password} -p hsm')
+                 '--pem-password {key_enc_password}')
 
         # import PEM from string
         with open(os.path.join(TEST_DIR, 'mydomain.test.encrypted.pem'), 'rb') as f:
@@ -1146,7 +1142,7 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
             'key_plain_string': key_plain_string
         })
         self.cmd("keyvault key import --vault-name {kv} -n import-key-plain --pem-string '{key_plain_string}' -p software")
-        self.cmd('keyvault key import --vault-name {kv} -n import-key-encrypted --pem-string "{key_enc_string}" --pem-password {key_enc_password} -p hsm')
+        self.cmd('keyvault key import --vault-name {kv} -n import-key-encrypted --pem-string "{key_enc_string}" --pem-password {key_enc_password}')
 
         # create ec keys
         self.cmd('keyvault key create --vault-name {kv} -n eckey1 --kty EC',
@@ -1372,12 +1368,12 @@ class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
         result = self.cmd('keyvault key random --count 1 --id {hsm_url}').get_output_in_json()
         self.assertIsNotNone(result['value'])
 
-    # Since the MHSM has to be activated manually so we use fixed hsm resource and mark the test as record_only
-    @record_only()
-    def test_keyvault_hsm_key_encrypt_AES(self):
+    @ResourceGroupPreparer(name_prefix='cli_test_hsm_key')
+    @ManagedHSMPreparer(name_prefix='clitesthsmkey', certs_path=CERTS_DIR, roles=['Managed HSM Crypto Officer', 'Managed HSM Crypto User'])
+    def test_keyvault_hsm_key_encrypt_AES(self, resource_group, managed_hsm):
         self.kwargs.update({
-            'hsm_name': TEST_HSM_NAME,
-            'hsm_url': TEST_HSM_URL,
+            'hsm_name': managed_hsm,
+            'hsm_url': 'https://{}.managedhsm.azure.net'.format(managed_hsm),
             'key': self.create_random_name('oct256key-', 24)
         })
 
@@ -1398,12 +1394,12 @@ class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
         self.cmd('keyvault key delete -n {key} --hsm-name {hsm_name}')
         self.cmd('keyvault key purge -n {key} --hsm-name {hsm_name}')
 
-    # Since the MHSM has to be activated manually so we use fixed hsm resource and mark the test as record_only
-    @record_only()
-    def test_keyvault_hsm_key_release_policy(self):
+    @ResourceGroupPreparer(name_prefix='cli_test_hsm_krp')
+    @ManagedHSMPreparer(name_prefix='clitesthsmkrp', certs_path=CERTS_DIR, roles=['Managed HSM Crypto Officer', 'Managed HSM Crypto User'])
+    def test_keyvault_hsm_key_release_policy(self, resource_group, managed_hsm):
         self.kwargs.update({
-            'hsm_name': TEST_HSM_NAME,
-            'hsm_url': TEST_HSM_URL,
+            'hsm_name': managed_hsm,
+            'hsm_url': 'https://{}.managedhsm.azure.net'.format(managed_hsm),
             'key1': self.create_random_name('skr1-', 24),
             'key2': self.create_random_name('skr2-', 24),
             'policy': os.path.join(TEST_DIR, 'release_policy.json').replace('\\', '\\\\')
@@ -1422,10 +1418,10 @@ class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
         self.assertEqual(result['releasePolicy']['immutable'], True)
 
         # clear test resources
-        self.cmd('keyvault key delete -n {key1} --hsm-name {hsm_name}')
-        self.cmd('keyvault key purge -n {key1} --hsm-name {hsm_name}')
-        self.cmd('keyvault key delete -n {key2} --hsm-name {hsm_name}')
-        self.cmd('keyvault key purge -n {key2} --hsm-name {hsm_name}')
+        # self.cmd('keyvault key delete -n {key1} --hsm-name {hsm_name}')
+        # self.cmd('keyvault key purge -n {key1} --hsm-name {hsm_name}')
+        # self.cmd('keyvault key delete -n {key2} --hsm-name {hsm_name}')
+        # self.cmd('keyvault key purge -n {key2} --hsm-name {hsm_name}')
 
 
 class KeyVaultHSMKeyUsingHSMURLScenarioTest(ScenarioTest):
@@ -2417,16 +2413,16 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
         self.cmd('keyvault certificate purge --vault-name {kv} -n cert2')
 
         # recover and purge
-        self.cmd('keyvault delete -n {kv}')
+        self.cmd('keyvault delete -n {kv} -g {rg}')
         self.cmd('keyvault recover -n {kv} --no-wait')
         self.cmd('keyvault wait --updated -n {kv}')
-        self.cmd('keyvault delete -n {kv}')
+        self.cmd('keyvault delete -n {kv} -g {rg}')
         self.cmd('keyvault purge -n {kv}')
 
         # recover and purge with location
-        self.cmd('keyvault delete -n {kv2}')
+        self.cmd('keyvault delete -n {kv2} -g {rg}')
         self.cmd('keyvault recover -n {kv2} -l {loc}', checks=self.check('name', '{kv2}'))
-        self.cmd('keyvault delete -n {kv2}')
+        self.cmd('keyvault delete -n {kv2} -g {rg}')
         self.cmd('keyvault purge -n {kv2} -l {loc}')
 
 
