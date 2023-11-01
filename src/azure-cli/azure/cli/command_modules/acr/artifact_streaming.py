@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import time
-from enum import StrEnum
+from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
 from ._docker_utils import (
@@ -22,15 +22,15 @@ from .repository import get_image_digest
 logger = get_logger(__name__)
 
 
-class OperationActions(StrEnum):
+class OperationActions(str, Enum):
     CANCEL = 'cancel'
 
 
-class ArtifactStreamingStatus(StrEnum):
-    NotStarted = 'NotStarted',
-    Running = 'Running',
-    Succeeded = 'Succeeded',
-    Failed = 'Failed',
+class ArtifactStreamingStatus(str, Enum):
+    NotStarted = 'NotStarted'
+    Running = 'Running'
+    Succeeded = 'Succeeded'
+    Failed = 'Failed'
     Canceled = 'Canceled'
 
 
