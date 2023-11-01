@@ -72,6 +72,147 @@ def _build_resource_id(**kwargs):
         return None
 
 
+def _get_parameter_type(template_obj, schema_node, visited=None):
+    if schema_node is None:
+        return None
+
+    if 'type' in schema_node:
+        return schema_node['type']
+
+    if '$ref' not in schema_node:
+        return None
+
+    if visited is None:
+        visited = set()
+
+    pointer = schema_node['$ref']
+    if pointer in visited:
+        logger.warning("Cyclic type reference detected at '%s'", pointer)
+        return None
+    visited.add(pointer)
+
+    class _UninitalizedState:
+        def get(self, segment):
+            if segment == '#':
+                return _Initialized()
+
+            return _TerminalState()
+
+        def resolve(self):
+            return None
+
+    class _TerminalState:
+        def get(self, _):
+            return self
+
+        def resolve(self):
+            return None
+
+    class _Initialized:
+        def get(self, segment):
+            if segment in ['definitions', 'parameters', 'outputs'] and segment in template_obj:
+                return _InSchemaDictionary(template_obj[segment])
+
+            return _TerminalState()
+
+        def resolve(self):
+            return None
+
+    class _InSchemaDictionary:
+        def __init__(self, schema_dict):
+            self.schema_dict = schema_dict
+
+        def get(self, segment):
+            for key, value in self.schema_dict.items():
+                if key.lower() == segment:
+                    return _InSchemaNode(value)
+
+            return _TerminalState()
+
+        def resolve(self):
+            return None
+
+    class _InSchemaArray:
+        def __init__(self, schema_array):
+            self.schema_array = schema_array
+
+        def get(self, segment):
+            if segment.isdigit() and len(self.schema_array) > int(segment):
+                return _InSchemaNode(self.schema_array[int(segment)])
+
+            return _TerminalState()
+
+        def resolve(self):
+            return None
+
+    class _InSchemaNode:
+        def __init__(self, schema_node):
+            self.schema_node = schema_node
+
+        def get(self, segment):
+            property_value = None
+            for key, value in self.schema_node.items():
+                if key.lower() == segment:
+                    property_value = value
+                    break
+
+            if property_value is None:
+                return _TerminalState()
+
+            if segment == 'properties':
+                return _InSchemaDictionary(property_value)
+
+            if segment in ['items', 'additionalproperties']:
+                return _InSchemaNode(property_value)
+
+            if segment == 'prefixitems':
+                return _InSchemaArray(property_value)
+
+            return _TerminalState()
+
+        def resolve(self):
+            return self.schema_node
+
+    state = _UninitalizedState()
+    for segment in pointer.split('/'):
+        state = state.get(unquote(segment).replace('~1', '/').replace('~0', '~').lower())
+
+    return _get_parameter_type(state.resolve(), visited)
+
+
+def _try_parse_key_value_object(parameters, template_obj, value):
+    # support situation where empty JSON "{}" is provided
+    if value == '{}' and not parameters:
+        return True
+
+    try:
+        key, value = value.split('=', 1)
+    except ValueError:
+        return False
+
+    param = template_obj.get('parameters', {}).get(key, None)
+    if param is None:
+        raise CLIError("unrecognized template parameter '{}'. Allowed parameters: {}"
+                        .format(key, ', '.join(sorted(template_obj.get('parameters', {}).keys()))))
+
+    param_type = _get_parameter_type(param)
+    if param_type:
+        param_type = param_type.lower()
+    if param_type in ['object', 'array', 'secureobject']:
+        parameters[key] = {'value': shell_safe_json_parse(value)}
+    elif param_type in ['string', 'securestring']:
+        parameters[key] = {'value': value}
+    elif param_type == 'bool':
+        parameters[key] = {'value': value.lower() == 'true'}
+    elif param_type == 'int':
+        parameters[key] = {'value': int(value)}
+    else:
+        logger.warning("Unrecognized type '%s' for parameter '%s'. Interpretting as string.", param_type, key)
+        parameters[key] = {'value': value}
+
+    return True
+
+
 def _process_parameters(template_obj, parameter_lists):  # pylint: disable=too-many-statements
 
     def _try_parse_json_object(value):
@@ -107,145 +248,6 @@ def _process_parameters(template_obj, parameter_lists):  # pylint: disable=too-m
                 pass
         return None
 
-    def _get_parameter_type(schema_node, visited=None):
-        if schema_node is None:
-            return None
-
-        if 'type' in schema_node:
-            return schema_node['type']
-
-        if '$ref' not in schema_node:
-            return None
-
-        if visited is None:
-            visited = set()
-
-        pointer = schema_node['$ref']
-        if pointer in visited:
-            logger.warning("Cyclic type reference detected at '%s'", pointer)
-            return None
-        visited.add(pointer)
-
-        class _UninitalizedState:
-            def get(self, segment):
-                if segment == '#':
-                    return _Initialized()
-
-                return _TerminalState()
-
-            def resolve(self):
-                return None
-
-        class _TerminalState:
-            def get(self, _):
-                return self
-
-            def resolve(self):
-                return None
-
-        class _Initialized:
-            def get(self, segment):
-                if segment in ['definitions', 'parameters', 'outputs'] and segment in template_obj:
-                    return _InSchemaDictionary(template_obj[segment])
-
-                return _TerminalState()
-
-            def resolve(self):
-                return None
-
-        class _InSchemaDictionary:
-            def __init__(self, schema_dict):
-                self.schema_dict = schema_dict
-
-            def get(self, segment):
-                for key, value in self.schema_dict.items():
-                    if key.lower() == segment:
-                        return _InSchemaNode(value)
-
-                return _TerminalState()
-
-            def resolve(self):
-                return None
-
-        class _InSchemaArray:
-            def __init__(self, schema_array):
-                self.schema_array = schema_array
-
-            def get(self, segment):
-                if segment.isdigit() and len(self.schema_array) > int(segment):
-                    return _InSchemaNode(self.schema_array[int(segment)])
-
-                return _TerminalState()
-
-            def resolve(self):
-                return None
-
-        class _InSchemaNode:
-            def __init__(self, schema_node):
-                self.schema_node = schema_node
-
-            def get(self, segment):
-                property_value = None
-                for key, value in self.schema_node.items():
-                    if key.lower() == segment:
-                        property_value = value
-                        break
-
-                if property_value is None:
-                    return _TerminalState()
-
-                if segment == 'properties':
-                    return _InSchemaDictionary(property_value)
-
-                if segment in ['items', 'additionalproperties']:
-                    return _InSchemaNode(property_value)
-
-                if segment == 'prefixitems':
-                    return _InSchemaArray(property_value)
-
-                return _TerminalState()
-
-            def resolve(self):
-                return self.schema_node
-
-        state = _UninitalizedState()
-        for segment in pointer.split('/'):
-            state = state.get(unquote(segment).replace('~1', '/').replace('~0', '~').lower())
-
-        return _get_parameter_type(state.resolve(), visited)
-
-    def _try_parse_key_value_object(parameters, value):
-        # support situation where empty JSON "{}" is provided
-        if value == '{}' and not parameters:
-            return True
-
-        try:
-            key, value = value.split('=', 1)
-        except ValueError:
-            return False
-
-        param = template_obj.get('parameters', {}).get(key, None)
-        if param is None:
-            raise CLIError("unrecognized template parameter '{}'. Allowed parameters: {}"
-                           .format(key, ', '.join(sorted(template_obj.get('parameters', {}).keys()))))
-
-        param_type = _get_parameter_type(param)
-        if param_type:
-            param_type = param_type.lower()
-        if param_type in ['object', 'array', 'secureobject']:
-            parameters[key] = {'value': shell_safe_json_parse(value)}
-        elif param_type in ['string', 'securestring']:
-            parameters[key] = {'value': value}
-        elif param_type == 'bool':
-            parameters[key] = {'value': value.lower() == 'true'}
-        elif param_type == 'int':
-            parameters[key] = {'value': int(value)}
-        else:
-            logger.warning("Unrecognized type '%s' for parameter '%s'. Interpretting as string.", param_type, key)
-            parameters[key] = {'value': value}
-
-        return True
-
     parameters = {}
     for params in parameter_lists or []:
         for item in params:
@@ -256,7 +258,7 @@ def _process_parameters(template_obj, parameter_lists):  # pylint: disable=too-m
                 param_obj = _try_load_uri(item)
             if param_obj is not None:
                 parameters.update(param_obj)
-            elif not _try_parse_key_value_object(parameters, item):
+            elif not _try_parse_key_value_object(parameters, template_obj, item):
                 raise CLIError('Unable to parse parameter: {}'.format(item))
 
     return parameters
@@ -1060,7 +1062,7 @@ def _get_bicepparam_file_path(parameters):
     return bicepparam_file_path
 
 
-def _parse_bicepparam_inline_params(parameters, template_param_defs):
+def _parse_bicepparam_inline_params(parameters, template_obj):
     parsed_inline_params = {}
 
     for parameter_list in parameters:
@@ -1068,7 +1070,7 @@ def _parse_bicepparam_inline_params(parameters, template_param_defs):
             if is_bicepparam_file(parameter_item):
                 continue
 
-            if not _try_parse_key_value_object(template_param_defs, parsed_inline_params, parameter_item):
+            if not _try_parse_key_value_object(parsed_inline_params, template_obj, parameter_item):
                 raise InvalidArgumentValueError(f"Unable to parse parameter: {parameter_item}. Only correctly formatted in-line parameters are allowed with a .bicepparam file")
 
     name_value_obj = {}
@@ -1126,8 +1128,7 @@ def _parse_bicepparam_file(cmd, template_file, parameters):
         else:
             template_obj = _remove_comments_from_json(template_content)
 
-        template_param_defs = template_obj.get('parameters', {})
-        inline_params = _parse_bicepparam_inline_params(parameters, template_param_defs)
+        inline_params = _parse_bicepparam_inline_params(parameters, template_obj)
 
         # re-invoke build-params to process inline parameters
         template_content, template_spec_id, parameters_content = _build_bicepparam_file(cmd.cli_ctx, bicepparam_file, template_file, inline_params)
