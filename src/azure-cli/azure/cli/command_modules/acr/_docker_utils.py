@@ -54,6 +54,8 @@ class RepoAccessTokenPermission(Enum):
     DELETED_READ = 'deleted_read'
     DELETED_RESTORE = 'deleted_restore'
     PULL = 'pull'
+    PUSH = 'push'
+    PULL_PUSH = 'push,pull'
     META_WRITE_META_READ = '{},{}'.format(METADATA_WRITE, METADATA_READ)
     DELETE_META_READ = '{},{}'.format(DELETE, METADATA_READ)
     PULL_META_READ = '{},{}'.format(PULL, METADATA_READ)
@@ -614,20 +616,20 @@ def request_data_from_registry(http_method,
             log_registry_response(response)
 
             if manifest_headers and raw and response.status_code == 200:
-                return response.content.decode('utf-8'), None
+                return response.content.decode('utf-8'), None, response.status_code
             if response.status_code == 200:
                 result = response.json()[result_index] if result_index else response.json()
                 next_link = response.headers['link'] if 'link' in response.headers else None
-                return result, next_link
+                return result, next_link, response.status_code
             if response.status_code == 201 or response.status_code == 202:
                 result = None
                 try:
                     result = response.json()[result_index] if result_index else response.json()
                 except ValueError as e:
                     logger.debug('Response is empty or is not a valid json. Exception: %s', str(e))
-                return result, None
+                return result, None, response.status_code
             if response.status_code == 204:
-                return None, None
+                return None, None, response.status_code
             if response.status_code == 401:
                 raise RegistryException(
                     parse_error_message('Authentication required.', response),

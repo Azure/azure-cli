@@ -82,14 +82,14 @@ def _obtain_manifest_from_registry(login_server,
                                    password,
                                    raw=False):
 
-    result, _ = request_data_from_registry(http_method='get',
-                                           login_server=login_server,
-                                           path=path,
-                                           raw=raw,
-                                           username=username,
-                                           password=password,
-                                           result_index=None,
-                                           manifest_headers=True)
+    result, _, _ = request_data_from_registry(http_method='get',
+                                              login_server=login_server,
+                                              path=path,
+                                              raw=raw,
+                                              username=username,
+                                              password=password,
+                                              result_index=None,
+                                              manifest_headers=True)
 
     return result
 
@@ -110,7 +110,7 @@ def _obtain_referrers_from_registry(login_server,
     while execute_next_http_call:
         execute_next_http_call = False
 
-        result, next_link = request_data_from_registry(
+        result, next_link, _ = request_data_from_registry(
             http_method='get',
             login_server=login_server,
             path=path,
@@ -411,7 +411,7 @@ def acr_manifest_deleted_restore(cmd,
             user_confirmation("Multiple deleted manifests found for tag: {}. Restoring most recently deleted"
                               "manifest with digest: {}. Is this okay?".format(tag, digest), yes)
 
-    raw_result, _ = request_data_from_registry(
+    raw_result, _, _ = request_data_from_registry(
         'post',
         login_server,
         _get_restore_deleted_manifest_path(repository, digest),

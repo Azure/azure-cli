@@ -93,7 +93,7 @@ def _obtain_data_from_registry(login_server,
             params['n'] = DEFAULT_PAGINATION if top > DEFAULT_PAGINATION else top
             top -= params['n']
 
-        result, next_link = request_data_from_registry(
+        result, next_link, _ = request_data_from_registry(
             http_method='get',
             login_server=login_server,
             path=path,
