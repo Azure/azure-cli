@@ -1572,7 +1572,7 @@ class FunctionAppFunctionKeysTests(LiveScenarioTest):
         key_value = "keyvalue1"
 
         self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet'.format(resource_group, functionapp_name, plan_name, storage_account))
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet --runtime-version 6 --functions-version 4'.format(resource_group, functionapp_name, plan_name, storage_account))
 
         requests.get('http://{}.scm.azurewebsites.net'.format(functionapp_name), timeout=240)
         time.sleep(30)
@@ -1608,7 +1608,7 @@ class FunctionAppFunctionKeysTests(LiveScenarioTest):
         key_value = "keyvalue1"
 
         self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet'.format(resource_group, functionapp_name, plan_name, storage_account))
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet --runtime-version 6 --functions-version 4'.format(resource_group, functionapp_name, plan_name, storage_account))
 
         requests.get('http://{}.scm.azurewebsites.net'.format(functionapp_name), timeout=240)
         time.sleep(30)
