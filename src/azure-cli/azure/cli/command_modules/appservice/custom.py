@@ -4037,7 +4037,7 @@ def try_create_workspace_based_application_insights(cmd, functionapp, workspace_
 
     ai_resource_group_name = functionapp.resource_group
     ai_name = functionapp.name
-    ai_location = functionapp.location
+    ai_location = _normalize_location(cmd, functionapp.location)
 
     workspace = get_workspace(cmd, workspace_name)
 
