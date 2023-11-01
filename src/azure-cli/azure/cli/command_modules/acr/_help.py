@@ -1355,18 +1355,18 @@ helps['acr artifact-streaming operation cancel'] = """
 type: command
 short-summary: Cancels the given operation.
 examples:
-  - name: Cancel the streaming artifact creation associated with the id 'MyId' under repository 'MyRepo' in ACR 'MyRegistry'.
+  - name: Cancel the streaming artifact creation associated with the id 'OperationId' under repository 'MyRepo' in ACR 'MyRegistry'.
     text: >
-        az acr artifact-streaming operation stop -n MyRegistry --repository MyRepo --id MyId
+        az acr artifact-streaming operation cancel -n MyRegistry --repository MyRepo --id OperationId
 """
 
 helps['acr artifact-streaming operation show'] = """
 type: command
 short-summary: Check the operation status.
 examples:
-  - name: Get the streaming artifact creation status for id 'MyId' under repository 'MyRepo' in ACR 'MyRegistry'.
+  - name: Get the streaming artifact creation status for id 'OperationId' under repository 'MyRepo' in ACR 'MyRegistry'.
     text: >
-        az acr artifact-streaming operation show -n MyRegistry --repository MyRepo --id MyId
+        az acr artifact-streaming operation show -n MyRegistry --repository MyRepo --id OperationId
 """
 
 helps['acr artifact-streaming create'] = """
@@ -1375,7 +1375,7 @@ short-summary: Create a referrers streaming artifact for a specific image.
 examples:
   - name: Create the streaming artifact of 'MyImage' in the registry 'MyRegistry'.
     text: >
-        az acr artifact-streaming create -n MyRegistry  --image MyImage
+        az acr artifact-streaming create -n MyRegistry -t MyImage
 """
 
 helps['acr artifact-streaming update'] = """
@@ -1384,10 +1384,10 @@ short-summary: Allows you to enable or disable auto-creation for streaming artif
 examples:
   - name: Enable artifact streaming for 'MyRepository' associated with the registry 'MyRegistry'.
     text: >
-        az acr artifact-streaming start -n -r MyRegistry --repository MyRepository --enable-streaming True
+        az acr artifact-streaming update -n MyRegistry --repository MyRepository --enable-streaming True
   - name: Disable artifact streaming for 'MyRepository' associated with the registry 'MyRegistry'.
     text: >
-        az acr artifact-streaming start -n MyRegistry --repository MyRepository --enable-streaming False
+        az acr artifact-streaming update -n MyRegistry --repository MyRepository --enable-streaming False
 """
 
 helps['acr artifact-streaming show'] = """
