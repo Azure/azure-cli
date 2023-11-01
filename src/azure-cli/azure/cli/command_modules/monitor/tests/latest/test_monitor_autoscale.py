@@ -10,6 +10,7 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 class TestMonitorAutoscaleScenario(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale')
     def test_monitor_autoscale_basic(self, resource_group):
         self.kwargs.update({
@@ -50,6 +51,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
         ])
         self.cmd('monitor autoscale delete -g {rg} -n {vmss}')
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_refine')
     def test_monitor_autoscale_refined(self, resource_group):
         self.kwargs.update({
@@ -96,6 +98,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
 
         self.cmd('monitor autoscale delete -g {rg} -n {vmss}')
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_rules')
     def test_monitor_autoscale_rules(self, resource_group):
         self.kwargs.update({
@@ -187,6 +190,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
         list_4 = self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss}').get_output_in_json()
         self.assertTrue(len(list_4) == 0)
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_rule_with_dimensions')
     def test_monitor_autoscale_rule_with_dimensions(self, resource_group):
         self.kwargs.update({
@@ -267,6 +271,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
             self.check('length(@)', 3)
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_fixed')
     def test_monitor_autoscale_fixed(self, resource_group):
         self.kwargs.update({
@@ -300,6 +305,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
                  checks=self.check('length(@)', 1))
 
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_recurring')
     def test_monitor_autoscale_recurring(self, resource_group):
         import json
@@ -359,6 +365,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
         self.cmd('monitor autoscale profile list -g {rg} --autoscale-name {vmss}',
                  checks=self.check('length(@)', 1))
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_predictive_policy')
     def test_monitor_autoscale_predictive_policy(self, resource_group):
         self.kwargs.update({
@@ -392,6 +399,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
         ])
         self.cmd('monitor autoscale delete -g {rg} -n {vmss}')
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_show_predictive_metric')
     def test_monitor_autoscale_show_predictive_metric(self, resource_group):
         self.kwargs.update({
