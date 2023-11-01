@@ -3101,6 +3101,18 @@ examples:
     text: az bicep generate-params --file {bicep_file} --output-format {output_format} --include-params {include_params}
 """
 
+helps['bicep lint'] = """
+type: command
+short-summary: Lint a Bicep file.
+examples:
+  - name: Lint a Bicep file.
+    text: az bicep lint --file {bicep_file}
+  - name: Lint a Bicep file without restoring external modules.
+    text: az bicep lint --file {bicep_file} --no-restore
+  - name: Lint a Bicep file with specified diagnostics format. Valid values are ( default | sarif ).
+    text: az bicep lint --file {bicep_file} --diagnostics-format {diagnostics_format}
+"""
+
 helps['resourcemanagement'] = """
 type: group
 short-summary: resourcemanagement CLI command group.

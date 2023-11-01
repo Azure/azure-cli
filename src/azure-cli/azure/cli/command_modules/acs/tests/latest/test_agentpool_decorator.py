@@ -1308,6 +1308,20 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         ctx_1.attach_agentpool(agentpool_1)
         self.assertEqual(ctx_1.get_gpu_instance_profile(), "test_gpu_instance_profile")
 
+    def common_get_drain_timeout(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"drain_timeout": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_drain_timeout(), None)
+        agentpool_1 = self.create_initialized_agentpool_instance(upgrade_settings=self.models.AgentPoolUpgradeSettings(drain_timeout_in_minutes=123))
+        ctx_1.attach_agentpool(agentpool_1)
+        self.assertEqual(ctx_1.get_drain_timeout(), 123)
+
 class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
@@ -1488,6 +1502,9 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
     def test_get_gpu_instance_profile(self):
         self.common_get_gpu_instance_profile()
 
+    def test_get_drain_timeout(self):
+        self.common_get_drain_timeout()
+
 class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
@@ -1641,6 +1658,9 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
 
     def test_get_gpu_instance_profile(self):
         self.common_get_gpu_instance_profile()
+
+    def test_get_drain_timeout(self):
+        self.common_get_drain_timeout()
 
 class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
     def _remove_defaults_in_agentpool(self, agentpool):

@@ -59,8 +59,8 @@ class TestVMImage(unittest.TestCase):
         cli_ctx = DummyCli()
         cli_ctx.cloud = mock_cloud
         images = load_images_from_aliases_doc(cli_ctx)
-        self.assertEqual(images[0], {'urnAlias': 'CentOS', 'publisher': 'OpenLogic',
-                                     'offer': 'CentOS', 'sku': '7.5', 'version': 'latest',
+        self.assertEqual(images[0], {'urnAlias': 'CentOS85Gen2', 'publisher': 'OpenLogic',
+                                     'offer': 'CentOS', 'sku': '8_5-gen2', 'version': 'latest',
                                      'architecture': 'x64'})
 
 
