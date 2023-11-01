@@ -384,18 +384,6 @@ def ensure_container_insights_for_monitoring(
                     "name"
                 ]
 
-            # check if region supports DCRs and DCR-A
-            for _ in range(3):
-                try:
-                    feature_check_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                        f"/subscriptions/{cluster_subscription}/providers/Microsoft.Insights?api-version=2020-10-01"
-                    r = send_raw_request(cmd.cli_ctx, "GET", feature_check_url)
-                    error = None
-                    break
-                except AzCLIError as e:
-                    error = e
-            else:
-                raise error
             dcr_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
                 f"{dcr_resource_id}?api-version=2022-06-01"
             # get existing tags on the container insights extension DCR if the customer added any
