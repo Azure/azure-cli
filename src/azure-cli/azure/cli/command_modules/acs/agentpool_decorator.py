@@ -376,7 +376,7 @@ class AKSAgentPoolContext(BaseAKSContext):
         # try to read the property value corresponding to the parameter from the `agentpool` object
         value_obtained_from_agentpool = None
         if self.agentpool and hasattr(self.agentpool, "crg_id"):
-            value_obtained_from_agentpool = self.agentpool.crg_id
+            value_obtained_from_agentpool = self.agentpool.capacity_reservation_group_id
         if value_obtained_from_agentpool is not None:
             crg_id = value_obtained_from_agentpool
         else:
@@ -1563,7 +1563,7 @@ class AKSAgentPoolAddDecorator:
         """
         self._ensure_agentpool(agentpool)
 
-        agentpool.crg_id = self.context.get_crg_id()
+        agentpool.capacity_reservation_group_id = self.context.get_crg_id()
         return agentpool
 
     def construct_agentpool_profile_default(self, bypass_restore_defaults: bool = False) -> AgentPool:
