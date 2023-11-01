@@ -153,8 +153,8 @@ def _parse_fqdn(cmd, fqdn, is_manifest=True, allow_digest=True, default_latest=T
                                             " should not include a tag or digest.")
 
         repository, tag, digest = parse_image_name(manifest_spec,
-                                                     allow_digest=allow_digest,
-                                                     default_latest=default_latest)
+                                                   allow_digest=allow_digest,
+                                                   default_latest=default_latest)
 
     except IndexError as e:
         if is_manifest:
@@ -445,8 +445,11 @@ def acr_manifest_list_referrers(cmd,
     if manifest_id:
         registry_name, repository, tag, digest = _parse_fqdn(cmd, manifest_id[0])
     else:
+        repository, tag, digest = parse_image_name(manifest_spec, allow_digest=True)
+
+    if not digest:
         image = repository + ':' + tag
-        repository, tag, digest = get_image_digest(cmd, registry_name, image, tenant_suffix, username, password)
+        repository, digest = get_image_digest(cmd, registry_name, image, tenant_suffix, username, password)
 
     login_server, username, password = get_access_credentials(
         cmd=cmd,
@@ -622,6 +625,9 @@ def acr_manifest_delete(cmd,
     if manifest_id:
         registry_name, repository, tag, digest = _parse_fqdn(cmd, manifest_id[0])
     else:
+        repository, tag, digest = parse_image_name(manifest_spec, allow_digest=True)
+
+    if not digest:
         image = repository + ':' + tag
         repository, digest = get_image_digest(cmd, registry_name, image, tenant_suffix, username, password)
 
