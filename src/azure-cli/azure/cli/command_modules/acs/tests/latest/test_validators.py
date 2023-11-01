@@ -483,7 +483,7 @@ class TestValidateCapacityReservationGroupID(unittest.TestCase):
     def test_invalid_crg_id(self):
         invalid_crg_id = "dummy group id"
         namespace = CapacityReservationGroupIDNamespace(crg_id=invalid_crg_id)
-        err = ("--capacity-reservation-group-id is not a valid Azure resource ID.")
+        err = ("--crg-id is not a valid Azure resource ID.")
 
         with self.assertRaises(CLIError) as cm:
             validators.validate_crg_id(namespace)

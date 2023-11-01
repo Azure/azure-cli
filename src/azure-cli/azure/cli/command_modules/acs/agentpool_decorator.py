@@ -1556,6 +1556,16 @@ class AKSAgentPoolAddDecorator:
         agentpool.gpu_instance_profile = self.context.get_gpu_instance_profile()
         return agentpool
 
+    def set_up_crg_properties(self, agentpool: AgentPool) -> AgentPool:
+        """Set up crg related properties for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        agentpool.crg_id = self.context.get_crg_id()
+        return agentpool
+
     def construct_agentpool_profile_default(self, bypass_restore_defaults: bool = False) -> AgentPool:
         """The overall controller used to construct the AgentPool profile by default.
 
@@ -1590,6 +1600,8 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_custom_node_config(agentpool)
         # set up gpu instance profile
         agentpool = self.set_up_gpu_properties(agentpool)
+        # set up crg id
+        agentpool = self.set_up_crg_properties(agentpool)
         # restore defaults
         if not bypass_restore_defaults:
             agentpool = self._restore_defaults_in_agentpool(agentpool)

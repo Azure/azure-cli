@@ -1523,6 +1523,9 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
     def test_get_drain_timeout(self):
         self.common_get_drain_timeout()
 
+    def test_get_crg_id(self):
+        self.common_get_crg_id()
+
 class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
@@ -1679,6 +1682,9 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
 
     def test_get_drain_timeout(self):
         self.common_get_drain_timeout()
+
+    def test_get_crg_id(self):
+        self.common_get_crg_id()
 
 class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
     def _remove_defaults_in_agentpool(self, agentpool):
@@ -2202,6 +2208,7 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
             mode=CONST_NODEPOOL_MODE_USER,
             scale_down_mode=CONST_SCALE_DOWN_MODE_DELETE,
             host_group_id=None,
+            crg_id=None,
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
@@ -2345,6 +2352,7 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
             enable_fips=False,
             mode=CONST_NODEPOOL_MODE_SYSTEM,
             host_group_id=None,
+            crg_id=None,
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
