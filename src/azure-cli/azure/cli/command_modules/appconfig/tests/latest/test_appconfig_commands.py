@@ -783,6 +783,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         export_separator_features_file_path = os.path.join(TEST_DIR, 'export_separator_features.json')
         import_separator_features_file_path = os.path.join(TEST_DIR, 'import_separator_features.json')
         import_features_alt_syntax_file_path = os.path.join(TEST_DIR, 'import_features_alt_syntax.json')
+        import_features_random_conditions_file_path = os.path.join(TEST_DIR, 'import_features_random_conditions.json')
 
         self.kwargs.update({
             'label': 'KeyValuesWithFeatures',
@@ -881,6 +882,21 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         self.cmd(
             'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --separator {separator} -y')
         with open(imported_file_path) as json_file:
+            imported_kvs = json.load(json_file)
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert imported_kvs == exported_kvs
+
+        # Support including all properties in the feature flag conditions
+        self.kwargs.update({
+            'imported_file_path': import_features_random_conditions_file_path,
+            'label': 'RandomConditionsTest',
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} -y')
+        with open(import_features_random_conditions_file_path) as json_file:
             imported_kvs = json.load(json_file)
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
