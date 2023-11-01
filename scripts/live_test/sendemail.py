@@ -492,15 +492,17 @@ def html_to_csv(html_file, module, platform):
                 Duration = result.find('td', {'class': 'col-duration'}).text
                 Status = result.find('td', {'class': 'col-result'}).text
                 if Status == 'Failed':
-                    contents = result.find('td', {'class': 'extra'}).find('div', {'class': 'log'}).contents
+                    # TODO: We must filter sensitive information before we can continue to collect error logs,
+                    # otherwise ICM will appear
+                    # contents = result.find('td', {'class': 'extra'}).find('div', {'class': 'log'}).contents
                     Details = ''
-                    for content in contents:
-                        if content.name == 'br':
-                            Details += '\n'
-                        elif not content.name:
-                            Details += content
-                        else:
-                            logger.info(content.name) if content.name != 'span' else None
+                    # for content in contents:
+                    #     if content.name == 'br':
+                    #         Details += '\n'
+                    #     elif not content.name:
+                    #         Details += content
+                    #     else:
+                    #         logger.info(content.name) if content.name != 'span' else None
                 else:
                     Details = ''
                 EndDateTime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -508,7 +510,7 @@ def html_to_csv(html_file, module, platform):
                     "%Y-%m-%d %H:%M:%S")
                 data.append(
                     [Source, BuildId, platform, PYTHON_VERSION, Module, Name, Description, StartDateTime, EndDateTime,
-                     Duration, Status, Details, ExtendedProperties])
+                     Duration, Status, ExtendedProperties, Details])
     return data
 
 

@@ -9,6 +9,8 @@ import re
 import time
 from types import SimpleNamespace
 from typing import Dict, List, Optional, Tuple, TypeVar, Union
+import datetime
+from dateutil.parser import parse
 
 from azure.mgmt.containerservice.models import KubernetesSupportPlan
 
@@ -4704,17 +4706,13 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         :return: string or None
         """
-        # default to None
-        support_plan = None
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if self.mc and hasattr(self.mc, "support_plan") and self.mc.support_plan is not None:
-            support_plan = self.mc.support_plan
-
-        # if specified by customer, use the specified value
+        # take input
         support_plan = self.raw_param.get("k8s_support_plan")
+        if support_plan is None:
+            # user didn't update this property, load from existing ManagedCluster
+            if self.mc and hasattr(self.mc, "support_plan") and self.mc.support_plan is not None:
+                support_plan = self.mc.support_plan
 
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
         return support_plan
 
     def get_yes(self) -> bool:
@@ -4887,6 +4885,31 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: bool
         """
         return self._get_disable_vpa(enable_validation=True)
+
+    def get_force_upgrade(self) -> Union[bool, None]:
+        """Obtain the value of force_upgrade.
+        :return: bool or None
+        """
+        # this parameter does not need dynamic completion
+        # validation is done with param validator
+        enable_force_upgrade = self.raw_param.get("enable_force_upgrade")
+        disable_force_upgrade = self.raw_param.get("disable_force_upgrade")
+
+        if enable_force_upgrade is False and disable_force_upgrade is False:
+            return None
+        if enable_force_upgrade is not None:
+            return enable_force_upgrade
+        if disable_force_upgrade is not None:
+            return not disable_force_upgrade
+        return None
+
+    def get_upgrade_override_until(self) -> Union[str, None]:
+        """Obtain the value of upgrade_override_until.
+        :return: string or None
+        """
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return self.raw_param.get("upgrade_override_until")
 
 
 class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
@@ -6421,6 +6444,42 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             mc.tags = tags
         return mc
 
+    def update_upgrade_settings(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update upgrade settings for the ManagedCluster object.
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        existing_until = None
+        if mc.upgrade_settings is not None and mc.upgrade_settings.override_settings is not None and mc.upgrade_settings.override_settings.until is not None:
+            existing_until = mc.upgrade_settings.override_settings.until
+
+        force_upgrade = self.context.get_force_upgrade()
+        override_until = self.context.get_upgrade_override_until()
+
+        if force_upgrade is not None or override_until is not None:
+            if mc.upgrade_settings is None:
+                mc.upgrade_settings = self.models.ClusterUpgradeSettings()
+            if mc.upgrade_settings.override_settings is None:
+                mc.upgrade_settings.override_settings = self.models.UpgradeOverrideSettings()
+            # sets force_upgrade
+            if force_upgrade is not None:
+                mc.upgrade_settings.override_settings.force_upgrade = force_upgrade
+            # sets until
+            if override_until is not None:
+                try:
+                    mc.upgrade_settings.override_settings.until = parse(override_until)
+                except Exception:  # pylint: disable=broad-except
+                    raise InvalidArgumentValueError(
+                        f"{override_until} is not a valid datatime format."
+                    )
+            elif force_upgrade:
+                default_extended_until = datetime.datetime.utcnow() + datetime.timedelta(days=3)
+                if existing_until is None or existing_until.timestamp() < default_extended_until.timestamp():
+                    mc.upgrade_settings.override_settings.until = default_extended_until
+
+        return mc
+
     def process_attach_detach_acr(self, mc: ManagedCluster) -> None:
         """Attach or detach acr for the cluster.
 
@@ -7269,6 +7328,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_k8s_support_plan(mc)
         # update azure monitor metrics profile
         mc = self.update_azure_monitor_profile(mc)
+        # update cluster upgrade settings
+        mc = self.update_upgrade_settings(mc)
         return mc
 
     def check_is_postprocessing_required(self, mc: ManagedCluster) -> bool:

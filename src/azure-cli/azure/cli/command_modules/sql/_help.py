@@ -129,6 +129,8 @@ examples:
     text: az sql db create -g mygroup -s myserver -n mydb -e GeneralPurpose --backup-storage-redundancy Local
   - name: Create a database with VBS enclave enabled.
     text: az sql db create -g mygroup -s myserver -n mydb --preferred-enclave-type VBS
+  - name: Create a database with free limit applied
+    text: az sql db create -g mygroup -s myserver -n mydb -e GeneralPurpose -f Gen5 -c 2 --compute-model Serverless --use-free-limit --free-limit-exhaustion-behavior AutoPause
 """
 
 helps['sql db delete'] = """
@@ -535,6 +537,8 @@ examples:
     text: az sql db update -g mygroup -s myserver -n mydb --backup-storage-redundancy Local
   - name: Update database with VBS enclave enabled.
     text: az sql db update -g mygroup -s myserver -n mydb --preferred-enclave-type VBS
+  - name: Update exhaustion behavior of free limit database to BillOverUsage
+    text: az sql db update -g mygroup -s myserver -n mydb --free-limit-exhaustion-behavior BillOverUsage
 
 """
 
