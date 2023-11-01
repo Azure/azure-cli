@@ -645,7 +645,7 @@ def __export_keyvalues(fetched_items, format_, separator, prefix=None):
                 try:
                     # Convert JSON string value to python object
                     kv.value = json.loads(kv.value)
-                except ValueError:
+                except ValueError or TypeError:
                     logger.debug('Error while converting value "%s" for key "%s" to JSON. Value will be treated as string.', kv.value, kv.key)
 
             if prefix is not None:
@@ -699,7 +699,6 @@ def __try_convert_to_arrays(constructed_data):
 def __export_features(retrieved_features, naming_convention):
     feature_reserved_keywords = FeatureManagementReservedKeywords(naming_convention)
     exported_dict = {feature_reserved_keywords.featuremanagement: {}}
-    client_filters = []
 
     try:
         # retrieved_features is a list of FeatureFlag objects
@@ -714,14 +713,13 @@ def __export_features(retrieved_features, naming_convention):
 
             elif feature.state == "conditional":
                 feature_state = {feature_reserved_keywords.enabledfor: []}
-                client_filters = feature.conditions[FeatureFlagConstants.CLIENT_FILTERS]
-                # client_filters is a list of dictionaries, where all dictionaries have 2 keys - Name and Parameters
-                for filter_ in client_filters:
-                    feature_filter = {}
-                    feature_filter["Name"] = filter_.name
-                    if filter_.parameters:
-                        feature_filter["Parameters"] = filter_.parameters
-                    feature_state[feature_reserved_keywords.enabledfor].append(feature_filter)
+
+                for condition_key, condition in feature.conditions.items():
+                    if condition_key == FeatureFlagConstants.CLIENT_FILTERS:
+                        feature_state[feature_reserved_keywords.enabledfor] = [filter_.to_dict() for filter_ in condition]
+                        continue
+
+                    feature_state[condition_key] = condition
 
             feature_entry = {feature.name: feature_state}
 
@@ -748,9 +746,17 @@ def __convert_feature_dict_to_keyvalue_list(features_dict, enabled_for_keyword):
                 if isinstance(v, dict):
                     # This may be a conditional feature
                     feature_flag_value.enabled = False
-                    try:
-                        feature_flag_value.conditions = {FeatureFlagConstants.CLIENT_FILTERS: v[enabled_for_keyword]}
-                    except KeyError:
+                    feature_flag_value.conditions = {}
+                    enabled_for_found = False
+
+                    for condition, condition_value in v.items():
+                        if condition == enabled_for_keyword:
+                            feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS] = condition_value
+                            enabled_for_found = True
+                            continue
+
+                        feature_flag_value.conditions[condition] = condition_value
+                    if not enabled_for_found:
                         raise ValidationError("Feature '{0}' must contain '{1}' definition or have a true/false value. \n".format(str(k), enabled_for_keyword))
 
                     if feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS]:

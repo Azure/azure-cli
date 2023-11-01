@@ -154,6 +154,14 @@ class FeatureFilter:
         }
         return json.dumps(featurefilter, indent=2, ensure_ascii=False)
 
+    def to_dict(self):
+        feature_filter_dict = {"Name": self.name}
+
+        if self.parameters:
+            feature_filter_dict["Parameters"] = self.parameters
+        
+        return feature_filter_dict
+
 # Feature Flag Helper Functions #
 
 
@@ -162,22 +170,19 @@ def custom_serialize_conditions(conditions_dict):
         Helper Function to serialize Conditions
 
         Args:
-            conditions_dict - Dictionary of {str, List[FeatureFilter]}
+            conditions_dict - Dictionary of {str, Any}
 
         Return:
             JSON serializable Dictionary
     '''
     featurefilterdict = {}
 
-    featurefilterdict[FeatureFlagConstants.CLIENT_FILTERS] = [
-        feature_filter.__dict__
-        for feature_filter
-        in conditions_dict.get(FeatureFlagConstants.CLIENT_FILTERS, [])]
+    for key, value in conditions_dict.items():
+        if key == FeatureFlagConstants.CLIENT_FILTERS:
+            featurefilterdict[key] = [feature_filter.__dict__ for feature_filter in value] 
+            continue
 
-    requirement_type = conditions_dict.get(FeatureFlagConstants.REQUIREMENT_TYPE, None)
-
-    if requirement_type:
-        featurefilterdict[FeatureFlagConstants.REQUIREMENT_TYPE] = requirement_type
+        featurefilterdict[key] = value
 
     return featurefilterdict
 
