@@ -720,6 +720,9 @@ def aks_update(
     disable_keda=False,
     enable_vpa=False,
     disable_vpa=False,
+    enable_force_upgrade=False,
+    disable_force_upgrade=False,
+    upgrade_override_until=None,
     # addons
     enable_secret_rotation=False,
     disable_secret_rotation=False,
@@ -2174,6 +2177,7 @@ def aks_agentpool_add(
     node_osdisk_type=None,
     node_osdisk_size=None,
     max_surge=None,
+    drain_timeout=None,
     mode=CONST_NODEPOOL_MODE_USER,
     scale_down_mode=CONST_SCALE_DOWN_MODE_DELETE,
     max_pods=None,
@@ -2227,6 +2231,7 @@ def aks_agentpool_update(
     tags=None,
     node_taints=None,
     max_surge=None,
+    drain_timeout=None,
     mode=None,
     scale_down_mode=None,
     no_wait=False,
@@ -2264,6 +2269,7 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                           kubernetes_version='',
                           node_image_only=False,
                           max_surge=None,
+                          drain_timeout=None,
                           snapshot_id=None,
                           no_wait=False,
                           aks_custom_headers=None,
@@ -2281,11 +2287,11 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
         )
 
     # Note: we exclude this option because node image upgrade can't accept nodepool put fields like max surge
-    if max_surge and node_image_only:
+    if (max_surge or drain_timeout) and node_image_only:
         raise MutuallyExclusiveArgumentError(
-            'Conflicting flags. Unable to specify max-surge with node-image-only.'
-            'If you want to use max-surge with a node image upgrade, please first '
-            'update max-surge using "az aks nodepool update --max-surge".'
+            'Conflicting flags. Unable to specify max-surge/drain-timeout with node-image-only.'
+            'If you want to use max-surge/drain-timeout with a node image upgrade, please first '
+            'update max-surge/drain-timeout using "az aks nodepool update --max-surge/--drain-timeout".'
         )
 
     if node_image_only:
@@ -2332,6 +2338,8 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
 
     if max_surge:
         instance.upgrade_settings.max_surge = max_surge
+    if drain_timeout:
+        instance.upgrade_settings.drain_timeout_in_minutes = drain_timeout
 
     # custom headers
     aks_custom_headers = extract_comma_separated_string(

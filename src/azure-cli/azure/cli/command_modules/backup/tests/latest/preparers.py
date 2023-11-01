@@ -34,6 +34,9 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=t
             self.resource_group = self._get_resource_group(**kwargs)
             self.location = self._get_resource_group_location(**kwargs)
             cmd = 'az backup vault create -n {} -g {} --location {}'.format(name, self.resource_group, self.location)
+            # TODO: once the soft delete feature move is enabled across the board, use the following lines instead 
+            # if not self.soft_delete:
+            #     cmd += ' --soft-delete-state Disable'
             execute(self.cli_ctx, cmd)
             if not self.soft_delete:
                 cmd = 'az backup vault backup-properties set -n {} -g {} --soft-delete-feature-state Disable'.format(name, self.resource_group)
@@ -98,10 +101,12 @@ class VMPreparer(AbstractPreparer, SingleValueReplacer):
         if not self.dev_setting_value:
             self.resource_group = self._get_resource_group(**kwargs)
             self.location = self._get_resource_group_location(**kwargs)
-            param_format = '-n {} -g {} --image {} --admin-username {} --admin-password {} --tags {} --nsg-rule None'
+            param_format = '-n {} -g {} --image {} --admin-username {} --admin-password {} '
+            param_format += '--tags {} --nsg-rule None'
+            # param_format += '--tags {} --size {} --nsg-rule None'
             param_tags = 'MabUsed=Yes Owner=sisi Purpose=CLITest DeleteBy=12-2099 AutoShutdown=No'
             param_string = param_format.format(name, self.resource_group, 'Win2012R2Datacenter', name,
-                                               '%j^VYw9Q3Z@Cu$*h', param_tags)
+                                               '%j^VYw9Q3Z@Cu$*h', param_tags)  #, 'Standard_D2a_v4')
             cmd = 'az vm create {}'.format(param_string)
             execute(self.cli_ctx, cmd)
             return {self.parameter_name: name}
