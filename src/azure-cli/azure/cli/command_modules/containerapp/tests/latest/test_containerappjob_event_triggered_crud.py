@@ -44,7 +44,7 @@ class ContainerAppJobsCRUDOperationsTest(ScenarioTest):
 
         ## test for CRUD operations on Container App Job resource with trigger type as event
         # create a Container App Job resource with trigger type as event
-        self.cmd("az containerapp job create --name {} --resource-group {} --environment {} --trigger-type 'Event' --replica-timeout 60 --replica-retry-limit 1 --replica-completion-count 1 --parallelism 1 --min-executions 0 --max-executions 10 --polling-interval 60 --scale-rule-name 'queue' --scale-rule-type 'azure-queue' --scale-rule-metadata 'accountName=containerappextension' 'queueName=testeventdrivenjobs' 'queueLength=1' 'connectionFromEnv=AZURE_STORAGE_CONNECTION_STRING' --scale-rule-auth 'connection=connection-string-secret' --image 'mcr.microsoft.com/k8se/quickstart-jobs:latest' --cpu '0.5' --memory '1Gi' --secrets 'connection-string-secret=testConnString' --env-vars 'AZURE_STORAGE_QUEUE_NAME=testeventdrivenjobs' 'AZURE_STORAGE_CONNECTION_STRING=secretref:connection-string-secret'".format(job, resource_group, env_id))
+        self.cmd("az containerapp job create --name {} --resource-group {} --environment {} --trigger-type 'Event' --replica-timeout 60 --replica-retry-limit 1 --replica-completion-count 1 --parallelism 1 --min-executions 0 --max-executions 10 --polling-interval 60 --scale-rule-name 'queue' --scale-rule-type 'azure-queue' --scale-rule-metadata 'accountName=containerappextension' 'queueName=testeventdrivenjobs' 'queueLength=1' 'connectionFromEnv=AZURE_STORAGE_CONNECTION_STRING' --scale-rule-auth 'connection=connection-string-secret' --image 'mcr.microsoft.com/k8se/quickstart-jobs:latest' --cpu '0.5' --memory '1Gi' --secrets 'connection-string-secret=testConnString' --env-vars 'AZURE_STORAGE_QUEUE_NAME=testeventdrivenjobs' 'AZURE_STORAGE_CONNECTION_STRING=secretref:connection-string-secret'".format(job, resource_group, env_id), checks=[JMESPathCheck('properties.configuration.eventTriggerConfig.scale.rules[0].metadata.queueLength', "")])
 
         # verify the container app job resource
         self.cmd("az containerapp job show --resource-group {} --name {}".format(resource_group, job), checks=[
@@ -53,6 +53,7 @@ class ContainerAppJobsCRUDOperationsTest(ScenarioTest):
             JMESPathCheck('properties.configuration.replicaRetryLimit', 1),
             JMESPathCheck('properties.configuration.triggerType', "event", case_sensitive=False),
             JMESPathCheck('properties.configuration.eventTriggerConfig.scale.maxExecutions', 10),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.rules[0].metadata.queueLength', "1"),
         ])
 
         # get list of Container App Jobs

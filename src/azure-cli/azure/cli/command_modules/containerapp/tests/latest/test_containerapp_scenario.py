@@ -214,7 +214,7 @@ class ContainerappScenarioTest(ScenarioTest):
             JMESPathCheck('properties.template.scale.maxReplicas', '1'),
             JMESPathCheck('length(properties.template.containers[0].env)', 1),
             JMESPathCheck('properties.template.containers[0].env[0].name', "testenv"),
-            JMESPathCheck('properties.template.containers[0].env[0].value', "testing"),
+            JMESPathCheck('properties.template.containers[0].env[0].value', None),
         ])
 
         # Add secrets to Container App with ACR
@@ -244,7 +244,7 @@ class ContainerappScenarioTest(ScenarioTest):
             JMESPathCheck('properties.template.scale.maxReplicas', '1'),
             JMESPathCheck('length(properties.template.containers[0].env)', 1),
             JMESPathCheck('properties.template.containers[0].env[0].name', "testenv"),
-            JMESPathCheck('properties.template.containers[0].env[0].value', "testing2"),
+            JMESPathCheck('properties.template.containers[0].env[0].value', None),
         ])
         update_string = 'containerapp update -g {} -n {} --min-replicas 0 --max-replicas 1 --remove-env-vars testenv --remove-all-env-vars'.format(resource_group, containerapp_name)
         self.cmd(update_string, checks=[

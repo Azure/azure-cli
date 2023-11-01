@@ -187,7 +187,7 @@ def dyn_validate_subnet_and_route_tables(key):
                 "Microsoft.Network/routeTables/read",
                 "Microsoft.Network/routeTables/write"])
 
-        if subnet_obj.get('networkSecurityGroup', None):
+        if not namespace.enable_preconfigured_nsg and subnet_obj.get('networkSecurityGroup', None):
             message = f"A Network Security Group \"{subnet_obj['networkSecurityGroup']['id']}\" "\
                       "is already assigned to this subnet. Ensure there are no Network "\
                       "Security Groups assigned to cluster subnets before cluster creation"
