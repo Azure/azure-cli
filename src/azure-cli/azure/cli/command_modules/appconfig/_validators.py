@@ -312,6 +312,9 @@ def validate_export_as_reference(namespace):
         if namespace.destination != 'appservice':
             raise InvalidArgumentValueError("The option '--export-as-reference' can only be used when exporting to app service.")
 
+        if namespace.snapshot:
+            raise MutuallyExclusiveArgumentError("Cannot export snapshot key-values as references to App Service.")
+
 
 def __construct_kvset_invalid_argument_error(is_exporting, argument):
     action = 'exporting' if is_exporting else 'importing'
