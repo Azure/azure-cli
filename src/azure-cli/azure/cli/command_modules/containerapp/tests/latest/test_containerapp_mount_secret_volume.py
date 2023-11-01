@@ -4,10 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-import time
 
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, live_only, StorageAccountPreparer,
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck,
                                LogAnalyticsWorkspacePreparer)
 
 from .utils import create_containerapp_env
@@ -26,7 +25,6 @@ class ContainerAppMountSecretTest(ScenarioTest):
     @ResourceGroupPreparer(location="northcentralus")
     @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
     def test_container_app_mount_secret_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
-        import requests
 
         env = self.create_random_name(prefix='env', length=24)
         app = self.create_random_name(prefix='app1', length=24)
@@ -63,7 +61,6 @@ class ContainerAppMountSecretTest(ScenarioTest):
     @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
     def test_container_app_mount_secret_update_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         # test creating a container app that does not have a secret volume mount, then uses update to add a secret volume mount
-        import requests
 
         env = self.create_random_name(prefix='env', length=24)
         app = self.create_random_name(prefix='app1', length=24)
