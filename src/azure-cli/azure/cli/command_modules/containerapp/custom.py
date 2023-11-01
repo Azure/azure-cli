@@ -4898,7 +4898,7 @@ def add_workload_profile(cmd, resource_group_name, env_name, workload_profile_na
     return update_managed_environment(cmd, env_name, resource_group_name, workload_profile_type=workload_profile_type, workload_profile_name=workload_profile_name, min_nodes=min_nodes, max_nodes=max_nodes)
 
 
-def update_workload_profile(cmd, resource_group_name, env_name, workload_profile_name, workload_profile_type=None, min_nodes=None, max_nodes=None):
+def update_workload_profile(cmd, resource_group_name, env_name, workload_profile_name, min_nodes=None, max_nodes=None):
     try:
         r = ManagedEnvironmentClient.show(cmd=cmd, resource_group_name=resource_group_name, name=env_name)
     except CLIError as e:
@@ -4911,7 +4911,7 @@ def update_workload_profile(cmd, resource_group_name, env_name, workload_profile
     if workload_profile_name.lower() not in workload_profiles_lower:
         raise ValidationError(f"Workload profile with name {workload_profile_name} does not exist in this environment. The workload profiles available in this environment are {','.join([p['name'] for p in workload_profiles])}")
 
-    return update_managed_environment(cmd, env_name, resource_group_name, workload_profile_type=workload_profile_type, workload_profile_name=workload_profile_name, min_nodes=min_nodes, max_nodes=max_nodes)
+    return update_managed_environment(cmd, env_name, resource_group_name, workload_profile_name=workload_profile_name, min_nodes=min_nodes, max_nodes=max_nodes)
 
 
 def delete_workload_profile(cmd, resource_group_name, env_name, workload_profile_name):
@@ -4928,11 +4928,11 @@ def delete_workload_profile(cmd, resource_group_name, env_name, workload_profile
 
     workload_profiles = [p for p in r["properties"]["workloadProfiles"] if p["name"].lower() != workload_profile_name.lower()]
 
-    r["properties"]["workloadProfiles"] = workload_profiles
-
+    managed_env_def = {}
+    safe_set(managed_env_def, "properties", "workloadProfiles", value=workload_profiles)
     try:
-        r = ManagedEnvironmentClient.create(
-            cmd=cmd, resource_group_name=resource_group_name, name=env_name, managed_environment_envelope=r)
+        r = ManagedEnvironmentClient.update(
+            cmd=cmd, resource_group_name=resource_group_name, name=env_name, managed_environment_envelope=managed_env_def)
 
         return r
     except Exception as e:
