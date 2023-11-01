@@ -125,6 +125,20 @@ password_length = 15
 # pylint: disable=too-many-function-args
 
 
+# TODO Look into replacing PUT with PATCH for update after Soft Delete is stabilized
+def update_vault(client, vault_name, resource_group_name, tags=None,
+                 public_network_access=None, immutability_state=None, cross_subscription_restore_state=None,
+                 classic_alerts='Enable', azure_monitor_alerts_for_job_failures='Enable'):
+    try:
+        existing_vault_if_any = client.get(resource_group_name, vault_name)
+        location = existing_vault_if_any.location
+        create_vault(client, vault_name, resource_group_name, location, tags, public_network_access, immutability_state,
+                     cross_subscription_restore_state, classic_alerts, azure_monitor_alerts_for_job_failures)
+    except CoreResourceNotFoundError:
+        # This runs for a create - if there is no vault, identity details don't need to be provided
+        raise CLIError("No vault {} in resource group {} was found. Please create the vault first."
+                       .format(vault_name, resource_group_name))
+
 # TODO: Re-add references to SoftDeleteSettings once SDK version is upgraded:
 # Import SoftDeleteSettings, args in create_vault and _get_vault_security_settings
 def create_vault(client, vault_name, resource_group_name, location, tags=None,
