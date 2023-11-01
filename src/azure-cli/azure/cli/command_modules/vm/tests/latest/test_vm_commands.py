@@ -66,6 +66,7 @@ class VMImageListByAliasesScenarioTest(ScenarioTest):
 
 class VmReimageTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_reimage_')
     def test_vm_reimage(self, resource_group):
 
@@ -73,7 +74,7 @@ class VmReimageTest(ScenarioTest):
             'vm': 'vm'
         })
 
-        self.cmd('vm create -g {rg} -n {vm} --image CentOS85Gen2 --admin-username centosadmin --admin-password testPassword0 '
+        self.cmd('vm create -g {rg} -n {vm} --image ""OpenLogic:CentOS:7.5:latest"" --admin-username centosadmin --admin-password testPassword0 '
                  '--authentication-type password --os-disk-delete-option Delete --nsg-rule NONE')
         vm_json_before_reimage = self.cmd('vm show -n {vm} -g {rg}').get_output_in_json()
         self.kwargs.update({
@@ -4007,6 +4008,7 @@ class VMSSUpdateTests(ScenarioTest):
         with self.assertRaisesRegex(HttpResponseError, 'UEFI settings are not supported for VMs and VM Scale Sets using Generation 1 Image\.'):
             self.cmd('vmss update -g {rg} -n {vmss} --security-type TrustedLaunch')
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_security_type_', location='NorthEurope')
     def test_vmss_update_security_type(self):
         self.kwargs.update({
@@ -4014,7 +4016,7 @@ class VMSSUpdateTests(ScenarioTest):
             'img2': 'microsoftwindowsserver:windowsserver:2019-datacenter-zhcn:latest',
             'img2_sku_gen2': '2022-datacenter-azure-edition',
             'vmss3': self.create_random_name('vmss', 10),
-            'img3': 'OpenLogic:CentOS:8_5-gen2:latest',
+            'img3': 'Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest',
             'vmss4': self.create_random_name('vmss', 10),
             'img4': 'MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest',
         })
@@ -4028,12 +4030,12 @@ class VMSSUpdateTests(ScenarioTest):
         ])
 
         self.cmd('vmss create -n {vmss3} -g {rg} --image {img3} --admin-username vmtest --generate-ssh-keys', checks=[
-            self.check('vmss.virtualMachineProfile.securityProfile', None),
+            self.check('vmss.virtualMachineProfile.securityProfile.securityType', 'TrustedLaunch'),
         ])
         self.cmd('vmss update -g {rg} -n {vmss3} --security-type TrustedLaunch', checks=[
-            self.check('virtualMachineProfile.storageProfile.imageReference.offer', 'CentOS'),
+            self.check('virtualMachineProfile.storageProfile.imageReference.offer', '0001-com-ubuntu-server-jammy'),
             self.check('virtualMachineProfile.securityProfile.securityType', 'TrustedLaunch'),
-            self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', False),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True),
             self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True),
         ])
         self.cmd('vmss update -g {rg} -n {vmss3} --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm false', checks=[
@@ -4554,6 +4556,7 @@ class VMSSCustomDataScenarioTest(ScenarioTest):
         self.cmd('vmss show -n {vmss} -g {rg}',
                  checks=self.check('provisioningState', 'Succeeded'))
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_custom_data')
     def test_vmss_update_custom_data(self):
         self.kwargs.update({
@@ -4561,7 +4564,7 @@ class VMSSCustomDataScenarioTest(ScenarioTest):
             'ssh_key': TEST_SSH_KEY_PUB
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Debian11 --admin-username deploy --ssh-key-value "{ssh_key}"')
+        self.cmd('vmss create -n {vmss} -g {rg} --image "OpenLogic:CentOS:7.5:latest" --admin-username deploy --ssh-key-value "{ssh_key}"')
         self.cmd('vmss update -n {vmss} -g {rg} --custom-data "#cloud-config\nhostname: myVMSShostname"')
         # custom data is write only, hence we have no automatic way to cross check. Here we just verify VM was provisioned
         self.cmd('vmss show -n {vmss} -g {rg}', checks=[
@@ -5535,6 +5538,7 @@ class VMCreateWithExistingNic(ScenarioTest):
 
 class VMSecretTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_secrets')
     @KeyVaultPreparer(name_prefix='vmsecretkv', name_len=20, key='vault', additional_params='--enabled-for-disk-encryption true --enabled-for-deployment true')
     def test_vm_secret_e2e_test(self, resource_group, resource_group_location, key_vault):
@@ -5546,7 +5550,7 @@ class VMSecretTest(ScenarioTest):
 
         self.kwargs['policy_path'] = os.path.join(TEST_DIR, 'keyvault', 'policy.json')
 
-        self.cmd('vm create -g {rg} -n {vm} --image RHELRaw8LVMGen2 --generate-ssh-keys --admin-username rheladmin --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm} --image Ubuntu2204 --generate-ssh-keys --admin-username rheladmin --nsg-rule NONE')
         time.sleep(60)  # ensure we don't hit the DNS exception (ignored under playback)
 
         self.cmd('keyvault certificate create --vault-name {vault} -n {cert} -p @"{policy_path}"')
@@ -8154,6 +8158,7 @@ class DiskEncryptionSetTest(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.diskEncryptionSet.id', '{des}')
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_disk_controller_type', location='eastus2euap')
     def test_disk_controller_type(self, resource_group):
         self.kwargs.update({
@@ -8177,7 +8182,7 @@ class DiskEncryptionSetTest(ScenarioTest):
             self.check('storageProfile.diskControllerType', 'SCSI')
         ])
 
-        self.cmd('vm create -g {rg} -n {vm2} --image CANONICAL:UBUNTUSERVER:18_04-LTS-GEN2:latest --storage-sku standard_lrs --size Standard_E2bs_v5 --admin-username clitest1 --admin-password Password001! --generate-ssh-key --nsg-rule None')
+        self.cmd('vm create -g {rg} -n {vm2} --image CANONICAL:UBUNTUSERVER:18_04-LTS-GEN2:latest --storage-sku standard_lrs --size Standard_E2bs_v5 --admin-username clitest1 --admin-password Password001! --generate-ssh-key --nsg-rule None --security-type Standard')
         self.cmd('vm deallocate -g {rg} -n {vm2}')
         self.cmd('vm generalize -g {rg} -n {vm2}')
         self.cmd('image create -g {rg} -n {image} --source {vm2} --hyper-v-generation v2')
@@ -10182,6 +10187,7 @@ class RestorePointScenarioTest(ScenarioTest):
 
         self.cmd('restore-point collection delete -g {rg} --collection-name {collection_name} -y')
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_copy_vm_restore_point', location='westus')
     def test_copy_vm_restore_point(self, resource_group):
         self.kwargs.update({
