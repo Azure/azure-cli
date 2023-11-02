@@ -1184,7 +1184,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             'disk4': 'd4',
             'disk5': 'd5',
             'disk6': 'd6',
-            'image': '/Subscriptions/' + subs_id + '/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/0001-com-ubuntu-server-jammy/Skus/22_04-lts-gen2/Versions/22.04.202305160',
+            'image': '/Subscriptions/' + subs_id + '/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/0001-com-ubuntu-server-jammy/Skus/22_04-lts-gen2/Versions/22.04.202310260',
             'image2': 'image2',
             'g1': self.create_random_name('g1', 20),
             'vm': 'vm1'
