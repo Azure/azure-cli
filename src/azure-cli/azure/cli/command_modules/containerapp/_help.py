@@ -565,7 +565,7 @@ helps['containerapp env workload-profile update'] = """
     examples:
     - name: Update an existing workload profile in a Container Apps environment
       text: |
-          az containerapp env workload-profile update -g MyResourceGroup -n MyEnvironment --workload-profile-name my-wlp --workload-profile-type D4 --min-nodes 1 --max-nodes 3
+          az containerapp env workload-profile update -g MyResourceGroup -n MyEnvironment --workload-profile-name my-wlp --min-nodes 1 --max-nodes 3
 """
 
 # Container Apps Job Commands
