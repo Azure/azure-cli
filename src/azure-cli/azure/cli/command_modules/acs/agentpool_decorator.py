@@ -383,7 +383,6 @@ class AKSAgentPoolContext(BaseAKSContext):
             crg_id = raw_value
         return crg_id
 
-
     def _get_kubernetes_version(self, read_only: bool = False) -> str:
         """Internal function to dynamically obtain the value of kubernetes_version according to the context.
 

@@ -512,6 +512,9 @@ parameters:
   - name: --enable-vpa
     type: bool
     short-summary: Enable vertical pod autoscaler for cluster.
+  - name: --crg-id
+    type: string
+    short-summary: The crg-id used to associate the new cluster with the existed Capacity Reservation Group resource.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -586,6 +589,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-monitor-metrics
   - name: Create a kubernetes cluster with vertical pod autoscaler enaled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-vpa
+  - name: create a kubernetes cluster with a Capacity Reservation Group(CRG) ID.
+    text: az aks create -g MyResourceGroup -n MyMC --kubernetes-version 1.20.9 --node-vm-size VMSize --assign-identity CRG-RG-ID --enable-managed-identity --crg-id "subscriptions/SubID/resourceGroups/RGName/providers/Microsoft.ContainerService/CapacityReservationGroups/MyCRGID"  
 """
 
 helps['aks update'] = """
@@ -1510,6 +1515,10 @@ parameters:
   - name: --gpu-instance-profile
     type: string
     short-summary: GPU instance profile to partition multi-gpu Nvidia GPUs.
+  - name: --crg-id
+    type: string
+    short-summary: The crg-id used to associate the new nodepool with the existed Capacity Reservation Group resource.
+
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
@@ -1525,6 +1534,8 @@ examples:
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --kubernetes-version 1.20.9 --snapshot-id "/subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/snapshots/mysnapshot1"
   - name: create a nodepool in an existing AKS cluster with host group id
     text: az aks nodepool add -g MyResourceGroup -n MyNodePool --cluster-name MyMC --host-group-id /subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/hostGroups/myHostGroup --node-vm-size VMSize
+  - name: create a nodepool with a Capacity Reservation Group(CRG) ID.
+    text: az aks nodepool add -g MyResourceGroup -n MyNodePool --cluster-name MyMC --node-vm-size VMSize --crg-id "/subscriptions/SubID/resourceGroups/ResourceGroupName/providers/Microsoft.ContainerService/CapacityReservationGroups/MyCRGID"
 """
 
 helps['aks nodepool delete'] = """
