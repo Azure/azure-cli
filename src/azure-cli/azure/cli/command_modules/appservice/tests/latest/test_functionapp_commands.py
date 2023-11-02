@@ -1155,11 +1155,11 @@ class FunctionappAppInsightsWorkspace(ScenarioTest):
     def test_functionapp_create_default_rg_and_workspace(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(prefix='functionappworkspaceai', length=40)
         self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4'.format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
-        subscription_id = self.get_subscription_id()
+        subscription_id = 'dbf67cc6-6c57-44b8-97fc-4356f0d555b3'
         default_rg_name = 'DefaultResourceGroup-PAR'
         default_workspace_name = 'DefaultWorkspace-{}-PAR'.format(subscription_id)
         workspace_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.OperationalInsights/workspaces/{}'.format(
-            subscription_id,
+            self.get_subscription_id(),
             default_rg_name,
             default_workspace_name
         )
@@ -1171,30 +1171,24 @@ class FunctionappAppInsightsWorkspace(ScenarioTest):
     @StorageAccountPreparer()
     def test_functionapp_existing_workspace(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(prefix='functionappworkspaceai', length=40)
-        subscription_id = self.get_subscription_id()
-        existing_workspace_name = 'ExistingWorkspace-{}-PAR'.format(subscription_id)
-        self.cmd('monitor log-analytics workspace create -g {} -n {} -l {}'.format(resource_group, existing_workspace_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+        existing_workspace_name = 'ExistingWorkspace-PAR'
+        workspace = self.cmd('monitor log-analytics workspace create -g {} -n {} -l {}'.format(resource_group, existing_workspace_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).get_output_in_json()
         self.cmd('functionapp create -g {} -n {} -c {} -s {} --workspace {} --functions-version 4'.format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account, existing_workspace_name))
-        workspace_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.OperationalInsights/workspaces/{}'.format(
-            subscription_id,
-            resource_group,
-            existing_workspace_name
-        )
         self.cmd('monitor app-insights component show -g {} --app {}'.format(resource_group, functionapp_name), checks=[
-            self.check('workspaceResourceId', workspace_id)
+            self.check('workspaceResourceId', workspace['id'])
         ])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_existing_default_rg(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(prefix='functionappworkspaceai', length=40)
-        subscription_id = self.get_subscription_id()
+        subscription_id = 'dbf67cc6-6c57-44b8-97fc-4356f0d555b3'
         default_rg_name = 'DefaultResourceGroup-PAR'
         self.cmd('group create -n {} -l {}'.format(default_rg_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
         default_workspace_name = 'DefaultWorkspace-{}-PAR'.format(subscription_id)
         self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4'.format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
         workspace_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.OperationalInsights/workspaces/{}'.format(
-            subscription_id,
+            self.get_subscription_id(),
             default_rg_name,
             default_workspace_name
         )
