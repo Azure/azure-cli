@@ -634,12 +634,19 @@ def display_region_recommendation(cmd, namespace):
     telemetry.set_region_identified(namespace.location, identified_region)
 
     if identified_region and cmd.cli_ctx.config.getboolean('core', 'display_region_identified', True):
-        logger.warning('Selecting "%s" may reduce your costs. '
-                       'The region you\'ve selected may cost more for the same services. '
-                       'You can disable this message in the future with the command'
-                       ' "az config set core.display_region_identified=false". '
-                       'Learn more at https://go.microsoft.com/fwlink/?linkid=222571 ',
-                       identified_region)
+        from azure.cli.core.style import Style, print_styled_text
+        import sys
+        recommend_region = 'Selecting "' + identified_region + '" may reduce your costs. ' \
+                           'The region you\'ve selected may cost more for the same services. ' \
+                           'You can disable this message in the future with the command '
+        disable_config = '"az config set core.display_region_identified=false". '
+        learn_more_msg = 'Learn more at https://go.microsoft.com/fwlink/?linkid=222571 '
+        # Since the output of the "az vm create" command is a JSON object
+        # which can be used for automated script parsing
+        # So we output the notification message to sys.stderr
+        print_styled_text([(Style.WARNING, recommend_region), (Style.ACTION, disable_config),
+                           (Style.WARNING, learn_more_msg)], file=sys.stderr)
+        print_styled_text(file=sys.stderr)
 
 
 def import_aaz_by_profile(profile, module_name):
