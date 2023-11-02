@@ -46,25 +46,26 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
                worker_subnet,
                vnet=None,  # pylint: disable=unused-argument
                vnet_resource_group_name=None,  # pylint: disable=unused-argument
+               enable_preconfigured_nsg=False,
                location=None,
                pull_secret=None,
                domain=None,
                cluster_resource_group=None,
-               fips_validated_modules=None,
+               fips_validated_modules=False,
                client_id=None,
                client_secret=None,
-               pod_cidr=None,
-               service_cidr=None,
-               outbound_type=None,
+               pod_cidr='10.128.0.0/14',
+               service_cidr='172.30.0.0/16',
+               outbound_type='Loadbalancer',
                disk_encryption_set=None,
                master_encryption_at_host=False,
-               master_vm_size=None,
+               master_vm_size='Standard_D8s_v3',
                worker_encryption_at_host=False,
-               worker_vm_size=None,
-               worker_vm_disk_size_gb=None,
-               worker_count=None,
-               apiserver_visibility=None,
-               ingress_visibility=None,
+               worker_vm_size='Standard_D4s_v3',
+               worker_vm_disk_size_gb='128',
+               worker_count='3',
+               apiserver_visibility='Public',
+               ingress_visibility='Public',
                tags=None,
                version=None,
                no_wait=False):
@@ -85,6 +86,7 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
              master_subnet,
              worker_subnet,
              vnet=vnet,
+             enable_preconfigured_nsg=enable_preconfigured_nsg,
              cluster_resource_group=cluster_resource_group,
              client_id=client_id,
              client_secret=client_secret,
@@ -139,6 +141,7 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
             pod_cidr=pod_cidr or '10.128.0.0/14',
             service_cidr=service_cidr or '172.30.0.0/16',
             outbound_type=outbound_type or '',
+            preconfigured_nsg='Enabled' if enable_preconfigured_nsg else 'Disabled',
         ),
         master_profile=openshiftcluster.MasterProfile(
             vm_size=master_vm_size or 'Standard_D8s_v3',
@@ -184,6 +187,7 @@ def validate(cmd,  # pylint: disable=too-many-locals,too-many-statements
              master_subnet,
              worker_subnet,
              vnet=None,
+             enable_preconfigured_nsg=None,
              cluster_resource_group=None,  # pylint: disable=unused-argument
              client_id=None,
              client_secret=None,  # pylint: disable=unused-argument
@@ -196,7 +200,10 @@ def validate(cmd,  # pylint: disable=too-many-locals,too-many-statements
              warnings_as_text=False):
 
     class mockoc:  # pylint: disable=too-few-public-methods
-        def __init__(self, disk_encryption_id, master_subnet_id, worker_subnet_id):
+        def __init__(self, disk_encryption_id, master_subnet_id, worker_subnet_id, preconfigured_nsg):
+            self.network_profile = openshiftcluster.NetworkProfile(
+                preconfigured_nsg='Enabled' if preconfigured_nsg else 'Disabled'
+            )
             self.master_profile = openshiftcluster.MasterProfile(
                 subnet_id=master_subnet_id,
                 disk_encryption_set_id=disk_encryption_id
@@ -204,6 +211,7 @@ def validate(cmd,  # pylint: disable=too-many-locals,too-many-statements
             self.worker_profiles = [openshiftcluster.WorkerProfile(
                 subnet_id=worker_subnet_id
             )]
+            self.worker_profiles_status = None
 
     aad = AADManager(cmd.cli_ctx)
 
@@ -216,7 +224,7 @@ def validate(cmd,  # pylint: disable=too-many-locals,too-many-statements
     if client_id is not None:
         sp_obj_ids.append(aad.get_service_principal_id(client_id))
 
-    cluster = mockoc(disk_encryption_set, master_subnet, worker_subnet)
+    cluster = mockoc(disk_encryption_set, master_subnet, worker_subnet, enable_preconfigured_nsg)
     try:
         # Get cluster resources we need to assign permissions on, sort to ensure the same order of operations
         resources = {ROLE_NETWORK_CONTRIBUTOR: sorted(get_cluster_network_resources(cmd.cli_ctx, cluster, True)),
@@ -426,9 +434,10 @@ def generate_random_id():
     return random_id
 
 
-def get_network_resources_from_subnets(cli_ctx, subnets, fail):
+def get_network_resources_from_subnets(cli_ctx, subnets, fail, oc):
 
     subnet_resources = set()
+    subnets_with_no_nsg_attached = set()
     for sn in subnets:
         sid = parse_resource_id(sn)
 
@@ -450,6 +459,21 @@ def get_network_resources_from_subnets(cli_ctx, subnets, fail):
         if subnet.get("natGateway", None):
             subnet_resources.add(subnet["natGateway"]["id"])
 
+        if oc.network_profile.preconfigured_nsg == 'Enabled':
+            if subnet.get("networkSecurityGroup", None):
+                subnet_resources.add(subnet['networkSecurityGroup']['id'])
+            else:
+                subnets_with_no_nsg_attached.add(sn)
+
+    # when preconfiguredNSG feature is Enabled we either have all subnets NSG attached or none.
+    if oc.network_profile.preconfigured_nsg == 'Enabled' and \
+        len(subnets_with_no_nsg_attached) != 0 and \
+            len(subnets_with_no_nsg_attached) != len(subnets):
+        raise ValidationError(f"(ValidationError) preconfiguredNSG feature is enabled but an NSG is\
+                               not attached for all required subnets. Please make sure all the following\
+                               subnets have a network security groups attached and retry.\
+                              {subnets_with_no_nsg_attached}")
+
     return subnet_resources
 
 
@@ -462,6 +486,11 @@ def get_cluster_network_resources(cli_ctx, oc, fail):
     if oc.worker_profiles is not None:
         worker_subnets = {w.subnet_id for w in oc.worker_profiles}
 
+    # Ensure that worker_profiles_status exists
+    # it will not be returned if the cluster resources do not exist
+    if oc.worker_profiles_status is not None:
+        worker_subnets |= {w.subnet_id for w in oc.worker_profiles_status}
+
     master_parts = parse_resource_id(master_subnet)
     vnet = resource_id(
         subscription=master_parts['subscription'],
@@ -471,11 +500,11 @@ def get_cluster_network_resources(cli_ctx, oc, fail):
         name=master_parts['name'],
     )
 
-    return get_network_resources(cli_ctx, worker_subnets | {master_subnet}, vnet, fail)
+    return get_network_resources(cli_ctx, worker_subnets | {master_subnet}, vnet, fail, oc)
 
 
-def get_network_resources(cli_ctx, subnets, vnet, fail):
-    subnet_resources = get_network_resources_from_subnets(cli_ctx, subnets, fail)
+def get_network_resources(cli_ctx, subnets, vnet, fail, oc):
+    subnet_resources = get_network_resources_from_subnets(cli_ctx, subnets, fail, oc)
 
     resources = set()
     resources.add(vnet)

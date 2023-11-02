@@ -130,9 +130,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
+    displayName: 'Use Python 3.11'
     inputs:
-      versionSpec: 3.10
+      versionSpec: 3.11
 
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Linux.txt'
@@ -145,9 +145,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
+    displayName: 'Use Python 3.11'
     inputs:
-      versionSpec: 3.10
+      versionSpec: 3.11
 
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Darwin.txt'
@@ -160,9 +160,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
+    displayName: 'Use Python 3.11'
     inputs:
-      versionSpec: 3.10
+      versionSpec: 3.11
 
   - task: BatchScript@1
     inputs:
@@ -177,9 +177,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
+    displayName: 'Use Python 3.11'
     inputs:
-      versionSpec: 3.10
+      versionSpec: 3.11
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -259,19 +259,15 @@ jobs:
     inputs:
       filePath: build_scripts\windows\scripts\test_msi_installation.ps1
 
-- job: BuildDockerImage
-  displayName: Build Docker Image
-
-  dependsOn: ExtractMetadata
-  condition: succeeded()
+- job: BuildDockerImageAlpine
+  displayName: Build Docker Image Alpine
   strategy:
     matrix:
-      AMD64:
-        pool: ${{ variables.ubuntu_pool }}
-        artifactName: docker-amd64
-      ARM64:
-        pool: ${{ variables.ubuntu_arm64_pool }}
-        artifactName: docker-arm64
+      ${{ each arch in parameters.architectures }}:
+        ${{ arch.name }}:
+          pool: ${{ arch.pool }}
+          artifactName: docker-${{ arch.value }}
+          dockerfile: alpine.dockerfile
   pool:
     name: $(pool)
   steps:
@@ -295,19 +291,18 @@ jobs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: $(artifactName)
 
-- job: TestDockerImage
-  displayName: Test Docker Image
-
-  dependsOn: BuildDockerImage
+- job: TestDockerImageAlpine
+  displayName: Test Docker Image Alpine
+  dependsOn:
+    - BuildDockerImageAlpine
+    - ExtractMetadata
   condition: succeeded()
   strategy:
     matrix:
-      AMD64:
-        pool: ${{ variables.ubuntu_pool }}
-        artifactName: docker-amd64
-      ARM64:
-        pool: ${{ variables.ubuntu_arm64_pool }}
-        artifactName: docker-arm64
+      ${{ each arch in parameters.architectures }}:
+        ${{ arch.name }}:
+          pool: ${{ arch.pool }}
+          artifactName: docker-${{ arch.name }}
   pool:
     name: $(pool)
   steps:
@@ -316,7 +311,6 @@ jobs:
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
-
 
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Docker Image'
@@ -340,6 +334,88 @@ jobs:
       docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && sleep 5"
     displayName: 'Bash Script'
 
+- job: BuildDockerImageAzureLinux
+  displayName: Build Docker Image Azure Linux
+  dependsOn: BuildRpmPackageMariner
+  strategy:
+    matrix:
+      ${{ each arch in parameters.architectures }}:
+        Mariner 2.0 ${{ arch.name }}:
+          pool: ${{ arch.pool }}
+          artifactName: docker-mariner2.0-${{ arch.value }}
+          dockerfile: azure-linux.dockerfile
+          packageArtifactName: rpm-mariner2.0-${{ arch.value }}
+  pool:
+    name: $(pool)
+  steps:
+    - bash: ./scripts/ci/install_docker.sh
+      displayName: Install Docker
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Download Build Artifacts'
+      inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
+        artifactName: $(packageArtifactName)
+    - bash: |
+        set -ex
+        mkdir docker-temp
+        mv $(Build.ArtifactStagingDirectory)/docker/*.rpm ./docker-temp/azure-cli.rpm
+        
+        bash scripts/release/docker/pipeline.sh
+      displayName: 'Build Docker'
+
+    - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+      displayName: 'SBOM'
+      inputs:
+        BuildDropPath: $(Build.ArtifactStagingDirectory)
+        DockerImagesToScan: 'clibuild$BUILD_BUILDNUMBER:latest'
+
+    - task: PublishPipelineArtifact@0
+      inputs:
+        TargetPath: $(Build.ArtifactStagingDirectory)
+        ArtifactName: $(artifactName)
+
+- job: TestDockerImageAzureLinux
+  displayName: Test Docker Image Azure Linux
+  dependsOn:
+    - BuildDockerImageAzureLinux
+    - ExtractMetadata
+  strategy:
+    matrix:
+      ${{ each arch in parameters.architectures }}:
+        Mariner 2.0 ${{ arch.name }}:
+          pool: ${{ arch.pool }}
+          artifactName: docker-mariner2.0-${{ arch.value }}
+  pool:
+    name: $(pool)
+  steps:
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Download Metadata'
+      inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+        artifactName: metadata
+
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Download Docker Image'
+      inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
+        artifactName: $(artifactName)
+
+    - bash: ./scripts/ci/install_docker.sh
+      displayName: Install Docker
+
+    - bash: |
+        set -exv
+        
+        CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
+        IMAGE_NAME=clibuild$BUILD_BUILDNUMBER:latest
+        TAR_FILE=$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-$CLI_VERSION.tar
+        
+        echo "== Test docker image =="
+        
+        docker load < $TAR_FILE
+        docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && sleep 5"
+      displayName: 'Bash Script'
+
 - job: BuildPythonWheel
   displayName: Build Python Wheels
 
@@ -349,9 +425,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
+    displayName: 'Use Python 3.11'
     inputs:
-      versionSpec: 3.10
+      versionSpec: 3.11
 
 
   - script: |
@@ -411,9 +487,9 @@ jobs:
         --rm -v $PYPI_FILES:/mnt/pypi python:3.9 \
         /bin/bash -c "cd /mnt/pypi && ls && pip install --find-links ./ azure_cli-$CLI_VERSION*whl && az self-test && az --version && sleep 5"
       
-      echo "== Testing pip install on Python 3.10 =="
+      echo "== Testing pip install on Python 3.11 =="
       docker run \
-        --rm -v $PYPI_FILES:/mnt/pypi python:3.10 \
+        --rm -v $PYPI_FILES:/mnt/pypi python:3.11 \
         /bin/bash -c "cd /mnt/pypi && ls && pip install --find-links ./ azure_cli-$CLI_VERSION*whl && az self-test && az --version && sleep 5"
 
     displayName: 'Test pip Install'
@@ -427,8 +503,8 @@ jobs:
     matrix:
       Python39:
         python.version: '3.9'
-      Python310:
-        python.version: '3.10'
+      Python311:
+        python.version: '3.11'
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
@@ -444,8 +520,8 @@ jobs:
     matrix:
       Python39:
         python.version: '3.9'
-      Python310:
-        python.version: '3.10'
+      Python311:
+        python.version: '3.11'
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
@@ -464,8 +540,8 @@ jobs:
     matrix:
       Python39:
         python.version: '3.9'
-      Python310:
-        python.version: '3.10'
+      Python311:
+        python.version: '3.11'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python $(python.version)'
@@ -485,8 +561,8 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
-      Python310:
-        python.version: '3.10'
+      Python311:
+        python.version: '3.11'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python $(python.version)'
@@ -530,7 +606,7 @@ jobs:
                  -e CLI_VERSION=$CLI_VERSION \
                  -e HOMEBREW_UPSTREAM_URL=$HOMEBREW_UPSTREAM_URL \
                  --name azurecli \
-                 python:3.10 \
+                 python:3.11 \
                  /mnt/scripts/run.sh
       
       # clean up
@@ -954,9 +1030,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
+    displayName: 'Use Python 3.11'
     inputs:
-      versionSpec: 3.10
+      versionSpec: 3.11
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -970,9 +1046,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
+    displayName: 'Use Python 3.11'
     inputs:
-      versionSpec: 3.10
+      versionSpec: 3.11
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -987,8 +1063,8 @@ jobs:
     matrix:
       Python39:
         python.version: '3.9'
-      Python310:
-        python.version: '3.10'
+      Python311:
+        python.version: '3.11'
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:
@@ -1016,9 +1092,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
+    displayName: 'Use Python 3.11'
     inputs:
-      versionSpec: 3.10
+      versionSpec: 3.11
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1039,9 +1115,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
+    displayName: 'Use Python 3.11'
     inputs:
-      versionSpec: 3.10
+      versionSpec: 3.11
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1098,8 +1174,10 @@ jobs:
     - VerifyVersions
     - BuildWindowsMSI
     - TestMsiInstallation
-    - BuildDockerImage
-    - TestDockerImage
+    - BuildDockerImageAlpine
+    - TestDockerImageAlpine
+    - BuildDockerImageAzureLinux
+    - TestDockerImageAzureLinux
     - BuildPythonWheel
     - TestPythonWheel
     - TestCore
@@ -1126,9 +1204,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
+    displayName: 'Use Python 3.11'
     inputs:
-      versionSpec: 3.10
+      versionSpec: 3.11
   - task: AzureCLI@2
     inputs:
       azureSubscription: 'Azure CLI'

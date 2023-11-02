@@ -138,7 +138,7 @@ class Update(AAZCommand):
         _args_schema.max_size_in_megabytes = AAZIntArg(
             options=["--max-size", "--max-size-in-megabytes"],
             arg_group="Properties",
-            help="Maximum size of the topic in megabytes, which is the size of the memory allocated for the topic. Default is 1024.",
+            help="The maximum capacity of the queue, denoted in megabytes, signifies the volume of memory assigned to the queue. The permissible values for this parameter are 1024, 2048, 3072, 4096, and 5120 megabytes. By default, the system assigns a capacity of 1024 megabytes. If the ‘enable-partition’ setting is set to true, the specified queue size will be amplified by a factor of 16.",
             nullable=True,
         )
         _args_schema.status = AAZStrArg(
