@@ -24,7 +24,7 @@ from azure.cli.command_modules.keyvault._validators import (
     validate_key_import_source, validate_key_type, validate_policy_permissions, validate_principal,
     validate_resource_group_name, validate_x509_certificate_chain,
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet, validate_ip_address,
-    validate_vault_or_hsm, validate_key_id,
+    validate_vault_or_hsm,
     validate_deleted_vault_or_hsm_name, validate_encryption, validate_decryption,
     validate_vault_name_and_hsm_name, set_vault_base_url, validate_keyvault_resource_id,
     process_hsm_name, KeyEncryptionDataType, process_key_release_policy, process_certificate_policy,
@@ -272,91 +272,14 @@ def load_arguments(self, _):
     # endregion
 
     # region keys
-    # keys track1
     with self.argument_context('keyvault key') as c:
         c.argument('key_ops', arg_type=get_enum_type(JsonWebKeyOperation), options_list=['--ops'], nargs='*',
                    help='Space-separated list of permitted JSON web key operations.')
 
-    for item in ['delete', 'list', 'list-deleted', 'list-versions', 'purge', 'recover', 'show-deleted']:
-        with self.argument_context('keyvault key {}'.format(item), arg_group='Id') as c:
-            c.ignore('cls')
-            c.argument('key_name', options_list=['--name', '-n'], required=False, id_part='child_name_1',
-                       completer=get_keyvault_name_completion_list('key'),
-                       help='Name of the key. Required if --id is not specified.')
-            c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx),
-                       id_part=None, required=False)
-            c.argument('key_version', options_list=['--version', '-v'],
-                       help='The key version. If omitted, uses the latest version.', default='',
-                       required=False, completer=get_keyvault_version_completion_list('key'))
-            c.extra('identifier', options_list=['--id'], validator=validate_key_id('key'),
-                    help='Id of the key. If specified all other \'Id\' arguments should be omitted.')
-            c.extra('hsm_name', data_plane_hsm_name_type)
-
-            if item in ['list', 'list-deleted']:
-                c.extra('identifier', options_list=['--id'], validator=validate_vault_or_hsm,
-                        help='Full URI of the Vault or HSM. If specified all other \'Id\' arguments should be omitted.')
-            elif item in ['show-deleted', 'purge', 'recover']:
-                c.extra('identifier', options_list=['--id'], validator=validate_key_id('deletedkey'),
-                        help='The recovery id of the key. If specified all other \'Id\' arguments should be omitted.')
-
-    for item in ['backup', 'download']:
-        with self.argument_context('keyvault key {}'.format(item), arg_group='Id') as c:
-            c.argument('key_name', options_list=['--name', '-n'],
-                       help='Name of the key. Required if --id is not specified.',
-                       required=False, id_part='child_name_1', completer=get_keyvault_name_completion_list('key'))
-            c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
-            c.argument('key_version', options_list=['--version', '-v'],
-                       help='The key version. If omitted, uses the latest version.', default='',
-                       required=False, completer=get_keyvault_version_completion_list('key'))
-            c.argument('identifier', options_list=['--id'], validator=validate_key_id('key'),
-                       help='Id of the key. If specified all other \'Id\' arguments should be omitted.')
-            c.argument('hsm_name', data_plane_hsm_name_type)
-
-    with self.argument_context('keyvault key backup') as c:
-        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
-                   help='Local file path in which to store key backup.')
-
-    with self.argument_context('keyvault key download') as c:
-        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
-                   help='File to receive the key contents.')
-        c.argument('encoding', arg_type=get_enum_type(key_format_values), options_list=['--encoding', '-e'],
-                   help='Encoding of the key, default: PEM', default='PEM')
-
-    with self.argument_context('keyvault key restore', arg_group='Id') as c:
-        c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
-        c.argument('identifier', options_list=['--id'], validator=validate_vault_or_hsm,
-                   help='Full URI of the Vault or HSM. If specified all other \'Id\' arguments should be omitted.')
-        c.argument('hsm_name', data_plane_hsm_name_type, validator=None)
-
-    with self.argument_context('keyvault key restore') as c:
-        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
-                   help='Local key backup from which to restore key.')
-
-    with self.argument_context('keyvault key restore', arg_group='Storage Id') as c:
-        c.argument('storage_resource_uri', options_list=['--storage-resource-uri', '-u'],
-                   help='Azure Blob storage container Uri. If specified, all '
-                        'other \'Storage Id\' arguments should be omitted')
-        c.argument('storage_account_name', help='Name of Azure Storage Account.')
-        c.argument('blob_container_name', help='Name of Blob Container.')
-
-    with self.argument_context('keyvault key restore', arg_group='Restoring keys from storage account') as c:
-        c.argument('token', options_list=['--storage-container-SAS-token', '-t'],
-                   help='The SAS token pointing to an Azure Blob storage container')
-        c.argument('backup_folder', help='Name of the blob container which contains the backup')
-        c.argument('key_name', options_list=['--name', '-n'],
-                   help='Name of the key. (Only for restoring from storage account)')
-
-    for scope in ['list', 'list-deleted', 'list-versions']:
-        with self.argument_context('keyvault key {}'.format(scope)) as c:
-            c.argument('maxresults', options_list=['--maxresults'], type=int)
-
-    with self.argument_context('keyvault key list') as c:
-        c.extra('include_managed', arg_type=get_three_state_flag(), default=False,
-                help='Include managed keys. Default: false')
-
     # keys track2
-    for scope in ['create', 'import', 'set-attributes', 'show', 'encrypt', 'decrypt', 'sign', 'verify',
-                  'rotate', 'rotation-policy show', 'rotation-policy update']:
+    for scope in ['create', 'import', 'set-attributes', 'show', 'show-deleted', 'delete', 'list', 'list-deleted',
+                  'list-versions', 'encrypt', 'decrypt', 'sign', 'verify', 'recover', 'purge', 'download',
+                  'backup', 'restore', 'rotate', 'rotation-policy show', 'rotation-policy update']:
         with self.argument_context('keyvault key {}'.format(scope), arg_group='Id') as c:
             c.argument('name', options_list=['--name', '-n'], id_part='child_name_1',
                        required=False, completer=get_keyvault_name_completion_list('key'),
@@ -369,6 +292,28 @@ def load_arguments(self, _):
             c.extra('identifier', options_list=['--id'],
                     help='Id of the key. If specified all other \'Id\' arguments should be omitted.',
                     validator=validate_keyvault_resource_id('key'))
+
+    for item in ['list', 'list-deleted', 'restore']:
+        with self.argument_context(f'keyvault key {item}') as c:
+            c.extra('hsm_name', hsm_url_type, required=False, arg_group='Id',
+                    help='Name of the HSM. Can be omitted if --id is specified.')
+            c.extra('identifier', options_list=['--id'], validator=validate_vault_or_hsm, arg_group='Id',
+                    help='Full URI of the Vault or HSM. If specified all other \'Id\' arguments should be omitted.')
+
+    for item in ['recover', 'purge']:
+        with self.argument_context(f'keyvault key {item}') as c:
+            c.extra('identifier', options_list=['--id'], arg_group='Id',
+                    help='The recovery id of the key. If specified all other \'Id\' arguments should be omitted.',
+                    validator=validate_keyvault_resource_id('key'))
+
+    with self.argument_context('keyvault key list') as c:
+        c.extra('include_managed', arg_type=get_three_state_flag(), default=False,
+                help='Include managed keys.')
+        c.argument('maxresults', options_list=['--maxresults'], type=int, help='Maximum number of results to return.')
+
+    for item in ['list-versions', 'list-deleted']:
+        with self.argument_context(f'keyvault key {item}') as c:
+            c.extra('max_page_size', options_list=['--maxresults'], type=int, help='Maximum number of results to return.')
 
     for item in ['create', 'import']:
         with self.argument_context('keyvault key {}'.format(item)) as c:
@@ -413,6 +358,34 @@ def load_arguments(self, _):
         c.argument('pem_password', help='Password of PEM file.')
         c.argument('byok_file', type=file_type, help='BYOK file containing the key to be imported. Must not be password protected.', completer=FilesCompleter(), validator=validate_key_import_source)
         c.argument('byok_string', type=file_type, help='BYOK string containing the key to be imported. Must not be password protected.', validator=validate_key_import_source)
+
+    with self.argument_context('keyvault key download') as c:
+        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
+                   help='File to receive the key contents.')
+        c.argument('encoding', arg_type=get_enum_type(key_format_values), options_list=['--encoding', '-e'],
+                   help='Encoding of the key, default: PEM', default='PEM')
+
+    with self.argument_context('keyvault key backup') as c:
+        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
+                   help='Local file path in which to store key backup.')
+
+    with self.argument_context('keyvault key restore') as c:
+        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
+                   help='Local key backup from which to restore key.')
+
+    with self.argument_context('keyvault key restore', arg_group='Storage Id') as c:
+        c.argument('storage_resource_uri', options_list=['--storage-resource-uri', '-u'],
+                   help='Azure Blob storage container Uri. If specified, all '
+                        'other \'Storage Id\' arguments should be omitted')
+        c.argument('storage_account_name', help='Name of Azure Storage Account.')
+        c.argument('blob_container_name', help='Name of Blob Container.')
+
+    with self.argument_context('keyvault key restore', arg_group='Restoring keys from storage account') as c:
+        c.argument('token', options_list=['--storage-container-SAS-token', '-t'],
+                   help='The SAS token pointing to an Azure Blob storage container')
+        c.argument('backup_folder', help='Name of the blob container which contains the backup')
+        c.argument('name', options_list=['--name', '-n'],
+                   help='Name of the key. (Only for restoring from storage account)')
 
     for scope in ['encrypt', 'decrypt']:
         with self.argument_context('keyvault key {}'.format(scope)) as c:

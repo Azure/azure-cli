@@ -1061,6 +1061,10 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
             'appservice_account': webapp_name
         })
 
+         # Export snapshot kvs to app service as reference should fail
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 'Cannot export snapshot key-values as references to App Service.'):
+            self.cmd('appconfig kv export --connection-string {connection_string} -d {export_dest} --appservice-account {appservice_account} -y --export-as-reference --snapshot dummy_snapshot')
+
         self.cmd('appconfig kv export --connection-string {connection_string} -d {export_dest} --appservice-account {appservice_account} --label {label} -y --export-as-reference')
         self.cmd('appconfig kv export --connection-string {connection_string} -d {export_dest} --appservice-account {appservice_account} -y --export-as-reference')
 
