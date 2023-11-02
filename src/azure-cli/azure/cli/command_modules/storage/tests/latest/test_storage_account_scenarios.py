@@ -1784,6 +1784,17 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('storage container create -n {container} --account-name {sa1} --blob-endpoint {endpoint} --account-key {storage_key}') \
             .assert_with_checks(self.check('created', True))
 
+    @ResourceGroupPreparer(location='eastus2euap')
+    @StorageAccountPreparer(location='eastus2euap', kind='StorageV2')
+    def test_storage_account_migration(self, resource_group, storage_account):
+        self.kwargs.update({
+            'sa': storage_account
+        })
+        self.cmd('az storage account migration start --account-name {sa} -g {rg} --sku Standard_ZRS --no-wait')
+        # other status would take days to months
+        self.cmd('az storage account migration show -n default -g {rg} --account-name {sa}',
+                 checks=[JMESPathCheck('migrationStatus', 'SubmittedForConversion')])
+
 
 class RoleScenarioTest(LiveScenarioTest):
     def run_under_service_principal(self):
