@@ -1152,8 +1152,8 @@ class VMManagedDiskScenarioTest(ScenarioTest):
                  checks=[self.check('creationData.createOption', 'Copy')])
         # in different region, it should default copyStart as True
         # TODO: should not throw exception after feature GA
-        from azure.core.exceptions import ResourceExistsError
-        with self.assertRaisesRegex(ResourceExistsError, 'CopyStart creation is not supported for this subscription'):
+        from azure.core.exceptions import ResourceNotFoundError
+        with self.assertRaises(ResourceNotFoundError):
             self.cmd('snapshot create -g {rg} -n {snapshot2} --source {disk} -l eastus')
 
     """ Disable temporarily
@@ -1184,7 +1184,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             'disk4': 'd4',
             'disk5': 'd5',
             'disk6': 'd6',
-            'image': '/Subscriptions/' + subs_id + '/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/0001-com-ubuntu-server-jammy/Skus/22_04-lts-gen2/Versions/22.04.202305160',
+            'image': '/Subscriptions/' + subs_id + '/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/0001-com-ubuntu-server-jammy/Skus/22_04-lts-gen2/Versions/22.04.202311010',
             'image2': 'image2',
             'g1': self.create_random_name('g1', 20),
             'vm': 'vm1'
@@ -6249,6 +6249,8 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}')
         time.sleep(60)  # service end latency
         self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
+        self.cmd('snapshot delete -g {rg} -n {snapshot1}')
+        self.cmd('disk delete -g {rg} -n {disk1} -y')
         self.cmd('sig delete -g {rg} --gallery-name {gallery}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_gallery_specialized_', location='eastus2')
@@ -7838,7 +7840,7 @@ class DiskEncryptionSetTest(ScenarioTest):
             'des1_id': des1_id
         })
 
-        self.cmd('keyvault set-policy -n {vault} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('keyvault set-policy -g {rg} -n {vault} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
 
         time.sleep(15)
 
@@ -10079,6 +10081,45 @@ class DiskRPTestScenario(ScenarioTest):
         self.cmd('snapshot create -n {snapshot} -g {rg} --incremental true --source {disk}', checks=[
             self.check('creationData.sourceResourceId', '{disk_id}')
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_disk_with_elastic_san', location='westus2')
+    @AllowLargeResponse(size_kb=99999)
+    def test_disk_with_elastic_san(self, resource_group):
+        self.kwargs.update({
+            'disk': self.create_random_name('disk', 10),
+            'snapshot': self.create_random_name('snap', 10),
+            'elastic_san': self.create_random_name('elastic_san', 20),
+            'volume_group': self.create_random_name('volume_group', 20),
+            'volume_name': self.create_random_name('volume-name', 20),
+            'snapshot_name': self.create_random_name('snapshot_name', 20),
+        })
+        self.cmd('extension add -n elastic-san')
+        self.cmd('elastic-san create -n {elastic_san} -g {rg} -l westus2 --base-size-tib 23 --extended-size 14 --sku {{name:Premium_LRS,tier:Premium}}')
+        self.cmd('elastic-san volume-group create -e {elastic_san} -g {rg} -n {volume_group}')
+        volume = self.cmd('elastic-san volume create -e {elastic_san} -g {rg} -v {volume_group} -n {volume_name} --size-gib 2').get_output_in_json()
+        self.kwargs.update({"volume_id": volume['id']})
+        snapshot = self.cmd('elastic-san volume snapshot create -g {rg} -e {elastic_san} -v {volume_group} -n {snapshot_name} --creation-data {{source-id:{volume_id}}}').get_output_in_json()
+        self.kwargs.update({"snapshot_id": snapshot['id']})
+        disk_info = self.cmd('disk create -g {rg} -n {disk} --elastic-san-resource-id {snapshot_id}', checks=[
+            self.check('creationData.createOption', 'CopyFromSanSnapshot'),
+            self.check('creationData.sourceResourceId', "{snapshot_id}")
+        ]).get_output_in_json()
+        self.kwargs.update({
+            'disk_id': disk_info['id']
+        })
+        # self.cmd('snapshot create -n {snapshot} -g {rg} --elastic-san-resource-id {snapshot_id}', checks=[
+        #     self.check('creationData.sourceResourceId', '')
+        # ])
+
+    @ResourceGroupPreparer(name_prefix='cli_disk_with_optimized_for_frequent_attach', location='westus2')
+    @AllowLargeResponse(size_kb=99999)
+    def test_disk_with_optimized_for_frequent_attach(self):
+        self.kwargs.update({
+            'disk1': self.create_random_name('disk', 10),
+            'disk2': self.create_random_name('disk', 10)
+        })
+        self.cmd('disk create -g {rg} -n {disk1} --optimized-for-frequent-attach true --size-gb 200', self.check('optimizedForFrequentAttach', True))
+        self.cmd('disk create -g {rg} -n {disk2} --optimized-for-frequent-attach false --size-gb 200', self.check('optimizedForFrequentAttach', False))
 
 
 class RestorePointScenarioTest(ScenarioTest):
