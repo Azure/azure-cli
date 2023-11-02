@@ -311,7 +311,7 @@ def acr_artifact_streaming_operation_show(cmd,
                                                                                username=username,
                                                                                password=password)
         if not stream_response:
-            raise CLIError("The operation found in image '{}'".format(image))
+            raise CLIError("No operation found for image '{}'".format(image))
         operation_id = stream_response['id']
 
     path = _get_v1_artifact_streaming_operation_path(repository, operation_id)
@@ -350,9 +350,11 @@ def acr_artifact_streaming_operation_cancel(cmd,
                                                                                tenant_suffix=tenant_suffix,
                                                                                username=username,
                                                                                password=password)
-        if not stream_response or not _is_ongoing_streaming_status(stream_response['status']):
-            last_operation = "" if not stream_response else "Latest operation id: {}".format(stream_response['id'])
-            raise CLIError("The image '{}' does not have any ongoing operation. {}".format(image, last_operation))
+        if not stream_response:
+            raise CLIError("No operation found for image '{}'".format(image))
+        if not _is_ongoing_streaming_status(stream_response['status']):
+            raise CLIError("The image '{}' does not have any ongoing operation. Operation ID: {}".
+                           format(image, stream_response['id']))
         operation_id = stream_response['id']
 
     login_server, username, password = get_access_credentials(
@@ -378,4 +380,4 @@ def _validate_operation_parameters(repository, operation_id, image):
     op_id = bool(operation_id)
     img = bool(image)
     if (not repo and op_id) or (not op_id and not img) or (repo and img) :
-        raise CLIError('Usage error: You need to provide either --repository REPOSITORY --id ID | --image IMAGE')
+        raise CLIError('Usage error: You need to provide either --repository MyRepo --id MyId | --image MyImage')

@@ -686,8 +686,14 @@ def parse_image_name(image, allow_digest=False, default_latest=True):
 def parse_error_message(error_message, response):
     import json
     try:
-        server_message = json.loads(response.text)['errors'][0]['message']
-        error_message = 'Error: {}'.format(server_message) if server_message else error_message
+        server_error = json.loads(response.text)['errors'][0]
+        if 'message' in server_error:
+            server_message = server_error['message']
+            if 'detail' in server_error and isinstance(server_error['detail'], str):
+                server_details = server_error['detail']
+                error_message = 'Error: {} Detail: {}'.format(server_message, server_details)
+            else:
+                error_message = 'Error: {}'.format(server_message)
     except (ValueError, KeyError, TypeError, IndexError):
         pass
 
