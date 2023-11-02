@@ -1785,11 +1785,11 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(self.check('created', True))
 
     @ResourceGroupPreparer(location='eastus2euap')
-    def test_storage_account_migration(self, resource_group):
+    @StorageAccountPreparer(location='eastus2euap', kind='StorageV2')
+    def test_storage_account_migration(self, resource_group, storage_account):
         self.kwargs.update({
-            'sa': self.create_random_name('samigration', 24)
+            'sa': storage_account
         })
-        self.cmd('az storage account create -n {sa} -g {rg} -l eastus2euap --sku Standard_LRS')
         self.cmd('az storage account migration start --account-name {sa} -g {rg} --sku Standard_ZRS --no-wait')
         # other status would take days to months
         self.cmd('az storage account migration show -n default -g {rg} --account-name {sa}',
