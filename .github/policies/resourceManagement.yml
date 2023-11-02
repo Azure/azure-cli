@@ -192,11 +192,47 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
+            label: AAD
+        then:
+        - mentionUsers:
+            mentionees:
+            - adamedx
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ACS
+        then:
+        - mentionUsers:
+            mentionees:
+            - acsdevx-msft
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Advisor
+        then:
+        - mentionUsers:
+            mentionees:
+            - mojayara
+            - jportugal0
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
             label: AKS
         then:
         - mentionUsers:
             mentionees:
-            - Azure/aks-pm
+            - dyu1208
+            - FumingZhang
+            - andyliuliming
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -215,34 +251,86 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
+            label: Analysis Services
+        then:
+        - mentionUsers:
+            mentionees:
+            - athipp
+            - taiwu
+            - minghan
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: API Management
+        then:
+        - mentionUsers:
+            mentionees:
+            - solankisamir
+            - mikebudzynski
+            - KedarJoshi
+            - yingru97
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: App Configuration
+        then:
+        - mentionUsers:
+            mentionees:
+            - shenmuxiaosen
+            - avanigupta
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: App Services
+        then:
+        - mentionUsers:
+            mentionees:
+            - antcp
+            - AzureAppServiceCLI
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Application Insights
+        then:
+        - mentionUsers:
+            mentionees:
+            - azmonapplicationinsights
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ArcResourceBridge
+        then:
+        - mentionUsers:
+            mentionees:
+            - alt-key
+            - saisankargochhayat
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
             label: ARM
         then:
         - mentionUsers:
             mentionees:
             - josephkwchan
             - jennyhunter-msft
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: ARM - Templates
-        then:
-        - mentionUsers:
-            mentionees:
-            - Azure/deployments-owners
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: ARM - Tags
-        then:
-        - mentionUsers:
-            mentionees:
-            - rthorn17
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -272,17 +360,6 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
-            label: ARM - Service Catalog
-        then:
-        - mentionUsers:
-            mentionees:
-            - MSEvanhi
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
             label: ARM - RBAC
         then:
         - mentionUsers:
@@ -295,72 +372,33 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
-            label: Advisor
+            label: ARM - Service Catalog
         then:
         - mentionUsers:
             mentionees:
-            - mojayara
-            - Prasanna-Padmanabhan
+            - MSEvanhi
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
         - hasLabel:
             label: Service Attention
         - hasLabel:
-            label: Analysis Services
+            label: ARM - Tags
         then:
         - mentionUsers:
             mentionees:
-            - athipp
-            - taiwu
-            - minghan
+            - rthorn17
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
         - hasLabel:
             label: Service Attention
         - hasLabel:
-            label: API Management
+            label: ARM - Templates
         then:
         - mentionUsers:
             mentionees:
-            - adrianhall
-            - KedarJoshi
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Application Insights
-        then:
-        - mentionUsers:
-            mentionees:
-            - azmonapplicationinsights
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: App Services
-        then:
-        - mentionUsers:
-            mentionees:
-            - antcp
-            - AzureAppServiceCLI
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: App Configuration
-        then:
-        - mentionUsers:
-            mentionees:
-            - albertofori
-            - avanigupta
+            - Azure/deployments-owners
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -409,6 +447,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - jaspkaur28
+            - sanjkum
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -422,6 +461,33 @@ configuration:
             - divka78
             - amitchat
             - aishu
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Azure Arc enabled servers
+        then:
+        - mentionUsers:
+            mentionees:
+            - rpsqrd
+            - edyoung
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Azure Data Explorer
+        then:
+        - mentionUsers:
+            mentionees:
+            - ilayrn
+            - orhasban
+            - zoharHenMicrosoft
+            - sagivf
+            - Aviv-Yaniv
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -442,17 +508,28 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
+            label: Azure.Spring - Cosmos
+        then:
+        - mentionUsers:
+            mentionees:
+            - kushagraThapar
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
             label: Batch
         then:
         - mentionUsers:
             mentionees:
-            - cRui861
-            - paterasMSFT
-            - gingi
-            - dpwatrous
             - mksuni
             - bgklein
             - mscurrell
+            - dpwatrous
+            - gingi
+            - paterasMSFT
+            - cRui861
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -515,29 +592,6 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
-            label: Cognitive - Text Analytics
-        then:
-        - mentionUsers:
-            mentionees:
-            - assafi
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Cognitive - Form Recognizer
-        then:
-        - mentionUsers:
-            mentionees:
-            - ctstone
-            - anrothMSFT
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
             label: Cognitive - Anomaly Detector
         then:
         - mentionUsers:
@@ -550,12 +604,12 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
-            label: Cognitive - Custom Vision
+            label: Cognitive - Bing
         then:
         - mentionUsers:
             mentionees:
-            - areddish
-            - tburns10
+            - jaggerbodas-ms
+            - arwong
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -568,6 +622,29 @@ configuration:
             mentionees:
             - ryogok
             - TFR258
+            - tburns10
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cognitive - Content Moderator
+        then:
+        - mentionUsers:
+            mentionees:
+            - swiftarrow11
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cognitive - Custom Vision
+        then:
+        - mentionUsers:
+            mentionees:
+            - areddish
             - tburns10
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
@@ -588,69 +665,12 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
-            label: Cognitive - QnA Maker
+            label: Cognitive - Form Recognizer
         then:
         - mentionUsers:
             mentionees:
-            - bingisbestest
-            - nerajput1607
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Cognitive - Translator
-        then:
-        - mentionUsers:
-            mentionees:
-            - swmachan
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Cognitive - Speech
-        then:
-        - mentionUsers:
-            mentionees:
-            - robch
-            - oscholz
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Cognitive - LUIS
-        then:
-        - mentionUsers:
-            mentionees:
-            - cahann
-            - kayousef
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Cognitive - Content Moderator
-        then:
-        - mentionUsers:
-            mentionees:
-            - swiftarrow11
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Cognitive - Personalizer
-        then:
-        - mentionUsers:
-            mentionees:
-            - dwaijam
+            - ctstone
+            - anrothMSFT
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -679,12 +699,12 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
-            label: Cognitive - Bing
+            label: Cognitive - LUIS
         then:
         - mentionUsers:
             mentionees:
-            - jaggerbodas-ms
-            - arwong
+            - cahann
+            - kayousef
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -702,12 +722,80 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
+            label: Cognitive - Personalizer
+        then:
+        - mentionUsers:
+            mentionees:
+            - dwaijam
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cognitive - QnA Maker
+        then:
+        - mentionUsers:
+            mentionees:
+            - bingisbestest
+            - nerajput1607
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cognitive - Speech
+        then:
+        - mentionUsers:
+            mentionees:
+            - robch
+            - oscholz
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cognitive - Text Analytics
+        then:
+        - mentionUsers:
+            mentionees:
+            - assafi
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cognitive - Translator
+        then:
+        - mentionUsers:
+            mentionees:
+            - swmachan
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
             label: Commerce
         then:
         - mentionUsers:
             mentionees:
             - ms-premp
             - qiaozha
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Communication
+        then:
+        - mentionUsers:
+            mentionees:
+            - acsdevx-msft
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -749,7 +837,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - TravisCragg-MSFT
-            - nikhilpatel909
+            - sandeepraichura
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -802,7 +890,18 @@ configuration:
         - mentionUsers:
             mentionees:
             - TravisCragg-MSFT
-            - hilaryw29
+            - sandeepraichura
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Confidential Ledger
+        then:
+        - mentionUsers:
+            mentionees:
+            - accledgerdevs
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -820,11 +919,88 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
+            label: Consumption
+        then:
+        - mentionUsers:
+            mentionees:
+            - ms-premp
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Consumption - Billing
+        then:
+        - mentionUsers:
+            mentionees:
+            - ccmbpxpcrew
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Consumption - Budget
+        then:
+        - mentionUsers:
+            mentionees:
+            - ccmaxpcrew
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Consumption - Consumption
+        then:
+        - mentionUsers:
+            mentionees:
+            - ccmaxpcrew
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Consumption - Query
+        then:
+        - mentionUsers:
+            mentionees:
+            - ccmixpdevs
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Consumption - RIandShowBack
+        then:
+        - mentionUsers:
+            mentionees:
+            - ccmshowbackdevs
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Consumption - UsageDetailsandExport
+        then:
+        - mentionUsers:
+            mentionees:
+            - TiagoCrewGitHubIssues
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
             label: Container Instances
         then:
         - mentionUsers:
             mentionees:
-            - macolso
+            - dkkapur
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -858,28 +1034,91 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
-            label: Cosmos
+            label: ContainerApp
         then:
         - mentionUsers:
             mentionees:
-            - pjohari-ms
-            - MehaKaushik
-            - zfoster
-            - kushagraThapar
-            - simorenoh
-            - simplynaveen20
-            - abinav2307
+            - calvinsID
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
         - hasLabel:
             label: Service Attention
         - hasLabel:
-            label: Customer Insights
+            label: CosmosDB
         then:
         - mentionUsers:
             mentionees:
-            - shefymk
+            - pjohari-ms
+            - kushagraThapar
+            - simplynaveen20
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cost Management
+        then:
+        - mentionUsers:
+            mentionees:
+            - ms-premp
+            - ramaganesan-rg
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cost Management - Billing
+        then:
+        - mentionUsers:
+            mentionees:
+            - ccmbpxpcrew
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cost Management - Budget
+        then:
+        - mentionUsers:
+            mentionees:
+            - ccmaxpcrew
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cost Management - Query
+        then:
+        - mentionUsers:
+            mentionees:
+            - ccmixpdevs
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cost Management - RIandShowBack
+        then:
+        - mentionUsers:
+            mentionees:
+            - ccmshowbackdevs
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cost Management - UsageDetailsAndExport
+        then:
+        - mentionUsers:
+            mentionees:
+            - TiagoCrewGitHubIssues
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -892,6 +1131,17 @@ configuration:
             mentionees:
             - manoharp
             - MSEvanhi
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Customer Insights
+        then:
+        - mentionUsers:
+            mentionees:
+            - shefymk
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -914,6 +1164,108 @@ configuration:
         - mentionUsers:
             mentionees:
             - arindamc
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Data Catalog
+        then:
+        - mentionUsers:
+            mentionees:
+            - anilman
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Data Factory
+        then:
+        - mentionUsers:
+            mentionees:
+            - zhangyd2015
+            - Frey-Wang
+            - Jingshu923
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Data Lake
+        then:
+        - mentionUsers:
+            mentionees:
+            - sumantmehtams
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Data Lake Analytics
+        then:
+        - mentionUsers:
+            mentionees:
+            - idear1203
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Data Lake Storage Gen1
+        then:
+        - mentionUsers:
+            mentionees:
+            - sumantmehtams
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Data Lake Storage Gen2
+        then:
+        - mentionUsers:
+            mentionees:
+            - sumantmehtams
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Data Lake Store
+        then:
+        - mentionUsers:
+            mentionees:
+            - sumantmehtams
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Data Migration
+        then:
+        - mentionUsers:
+            mentionees:
+            - rgreenMSFT
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Data Share
+        then:
+        - mentionUsers:
+            mentionees:
+            - raedJarrar
+            - jifems
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -947,115 +1299,23 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
-            label: Data Catalog
+            label: DataProtection
         then:
         - mentionUsers:
             mentionees:
-            - ingave
+            - Daya-Patil
+            - hiaga
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
         - hasLabel:
             label: Service Attention
         - hasLabel:
-            label: Data Factory
+            label: Dev Center
         then:
         - mentionUsers:
             mentionees:
-            - Jingshu923
-            - zhangyd2015
-            - Frey-Wang
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Data Lake
-        then:
-        - mentionUsers:
-            mentionees:
-            - sumantmehtams
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Data Lake Storage Gen1
-        then:
-        - mentionUsers:
-            mentionees:
-            - sumantmehtams
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Data Lake Storage Gen2
-        then:
-        - mentionUsers:
-            mentionees:
-            - sumantmehtams
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Data Lake Analytics
-        then:
-        - mentionUsers:
-            mentionees:
-            - idear1203
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Data Lake Store
-        then:
-        - mentionUsers:
-            mentionees:
-            - sumantmehtams
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Data Migration
-        then:
-        - mentionUsers:
-            mentionees:
-            - radjaram
-            - kavitham10
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Data Share
-        then:
-        - mentionUsers:
-            mentionees:
-            - raedJarrar
-            - jifems
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: DevOps
-        then:
-        - mentionUsers:
-            mentionees:
-            - v-anvashist
-            - V-hmusukula
+            - nazang
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1075,22 +1335,34 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
-            label: Devtestlab
+            label: Device Provisioning Service
         then:
         - mentionUsers:
             mentionees:
-            - Tanmayeekamath
+            - nberdy
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
         - hasLabel:
             label: Service Attention
         - hasLabel:
-            label: Device Provisioning Service
+            label: DevOps
         then:
         - mentionUsers:
             mentionees:
-            - nberdy
+            - v-anvashist
+            - V-hmusukula
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Devtestlab
+        then:
+        - mentionUsers:
+            mentionees:
+            - Tanmayeekamath
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1135,11 +1407,9 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - amamounelsayed
-            - kaibocai
-            - shreyas-gopalakrishna
-            - kamperiadis
-            - apawast
+            - AnatoliB
+            - Francisco-Gamino
+            - shreyabatra4
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1206,6 +1476,53 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
+            label: IoT/CLI
+        then:
+        - mentionUsers:
+            mentionees:
+            - Azure/azure-iot-cli-triage
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: IotCentral
+        then:
+        - mentionUsers:
+            mentionees:
+            - iluican
+            - jlian
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: IotDPS
+        then:
+        - mentionUsers:
+            mentionees:
+            - iluican
+            - jlian
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: IotHub
+        then:
+        - mentionUsers:
+            mentionees:
+            - rkmanda
+            - chieftn
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
             label: KeyVault
         then:
         - mentionUsers:
@@ -1230,21 +1547,6 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
-            label: Azure Data Explorer
-        then:
-        - mentionUsers:
-            mentionees:
-            - ilayrn
-            - orhasban
-            - zoharHenMicrosoft
-            - sagivf
-            - Aviv-Yaniv
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
             label: Lab Services
         then:
         - mentionUsers:
@@ -1260,7 +1562,7 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - Azure/azure-logicapps-team
+            - wsilveiranz
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1311,11 +1613,33 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
+            label: Managed Identity
+        then:
+        - mentionUsers:
+            mentionees:
+            - varunkch
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
             label: Managed Services
         then:
         - mentionUsers:
             mentionees:
             - Lighthouse-Azure
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Management Partner
+        then:
+        - mentionUsers:
+            mentionees:
+            - jeffrey-ACE
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1360,7 +1684,161 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - shijojoy
+            - prsadhu-ms-idc
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ML-AutoML
+        then:
+        - mentionUsers:
+            mentionees:
+            - Aniththa
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ML-Compute
+        then:
+        - mentionUsers:
+            mentionees:
+            - nishankgu
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ML-Core UI
+        then:
+        - mentionUsers:
+            mentionees:
+            - abeomor
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ML-Data Labeling
+        then:
+        - mentionUsers:
+            mentionees:
+            - kvijaykannan
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ML-Data4ML
+        then:
+        - mentionUsers:
+            mentionees:
+            - SturgeonMi
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ML-Designer
+        then:
+        - mentionUsers:
+            mentionees:
+            - alainli0928
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ML-Hyperdrive
+        then:
+        - mentionUsers:
+            mentionees:
+            - Aniththa
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ML-Inference
+        then:
+        - mentionUsers:
+            mentionees:
+            - shivanissambare
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ML-MLOps
+        then:
+        - mentionUsers:
+            mentionees:
+            - lostmygithubaccount
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ML-Pipelines
+        then:
+        - mentionUsers:
+            mentionees:
+            - shbijlan
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ML-Reinforcement Learning
+        then:
+        - mentionUsers:
+            mentionees:
+            - keijik
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ML-Responsible AI
+        then:
+        - mentionUsers:
+            mentionees:
+            - minthigpen
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ML-Training
+        then:
+        - mentionUsers:
+            mentionees:
+            - lostmygithubaccount
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ML-Workspace Management
+        then:
+        - mentionUsers:
+            mentionees:
+            - rastala
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1383,18 +1861,18 @@ configuration:
         - mentionUsers:
             mentionees:
             - SameergMS
-            - dadunl
+            - yairgil
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
         - hasLabel:
             label: Service Attention
         - hasLabel:
-            label: Monitor - Autoscale
+            label: Monitor - ActionGroups
         then:
         - mentionUsers:
             mentionees:
-            - AzMonEssential
+            - AzmonActionG
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1402,28 +1880,6 @@ configuration:
             label: Service Attention
         - hasLabel:
             label: Monitor - ActivityLogs
-        then:
-        - mentionUsers:
-            mentionees:
-            - AzMonEssential
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Monitor - Metrics
-        then:
-        - mentionUsers:
-            mentionees:
-            - AzMonEssential
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Monitor - Diagnostic Settings
         then:
         - mentionUsers:
             mentionees:
@@ -1445,11 +1901,48 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
-            label: Monitor - ActionGroups
+            label: Monitor - ApplicationInsights
         then:
         - mentionUsers:
             mentionees:
-            - AzmonActionG
+            - azmonapplicationinsights
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Monitor - Autoscale
+        then:
+        - mentionUsers:
+            mentionees:
+            - AzMonEssential
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Monitor - Diagnostic Settings
+        then:
+        - mentionUsers:
+            mentionees:
+            - AzMonEssential
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Monitor - Exporter
+        then:
+        - mentionUsers:
+            mentionees:
+            - cijothomas
+            - reyang
+            - rajkumar-rangaraj
+            - TimothyMothra
+            - vishweshbankwar
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1467,11 +1960,11 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
-            label: Monitor - ApplicationInsights
+            label: Monitor - Metrics
         then:
         - mentionUsers:
             mentionees:
-            - azmonapplicationinsights
+            - AzMonEssential
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1484,6 +1977,18 @@ configuration:
             mentionees:
             - ambhatna
             - savjani
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: MySQL - Flexible
+        then:
+        - mentionUsers:
+            mentionees:
+            - daeunyim
+            - rajsell
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1512,12 +2017,24 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
+            label: Network - Bastion
+        then:
+        - mentionUsers:
+            mentionees:
+            - bastionsuppgithub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
             label: Network - CDN
         then:
         - mentionUsers:
             mentionees:
             - t-bzhan
             - gxue
+            - TracyYaoYao
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1535,7 +2052,18 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
-            label: Network - ExpressRoute
+            label: Network - DNS
+        then:
+        - mentionUsers:
+            mentionees:
+            - dnssuppgithub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Network - ExpressRoutes
         then:
         - mentionUsers:
             mentionees:
@@ -1562,6 +2090,9 @@ configuration:
         - mentionUsers:
             mentionees:
             - cdnfdsuppgithub
+            - t-bzhan
+            - gxue
+            - TracyYaoYao
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1579,11 +2110,11 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
-            label: Network - Virtual Network NAT
+            label: Network - Network Virtual Appliance
         then:
         - mentionUsers:
             mentionees:
-            - vnetsuppgithub
+            - nvasuppgithub
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1594,18 +2125,19 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - netwatchsuppgithub
+            - shivamtripathi
+            - kumaam
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
         - hasLabel:
             label: Service Attention
         - hasLabel:
-            label: Network - DNS
+            label: Network - Private Link
         then:
         - mentionUsers:
             mentionees:
-            - dnssuppgithub
+            - privlinksuppgithub
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1617,6 +2149,39 @@ configuration:
         - mentionUsers:
             mentionees:
             - tmsuppgithub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Network - Virtual Network
+        then:
+        - mentionUsers:
+            mentionees:
+            - vnetsuppgithub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Network - Virtual Network NAT
+        then:
+        - mentionUsers:
+            mentionees:
+            - vnetsuppgithub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Network - Virtual WAN
+        then:
+        - mentionUsers:
+            mentionees:
+            - vwansuppgithub
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1639,6 +2204,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - tjsomasundaram
+            - aimankhan
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1684,9 +2250,43 @@ configuration:
         - mentionUsers:
             mentionees:
             - sunilagarwal
-            - lfittl-msft
             - sr-msft
             - niklarin
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: PostgreSQL - Flexible
+        then:
+        - mentionUsers:
+            mentionees:
+            - daeunyim
+            - rajsell
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: PowerBI
+        then:
+        - mentionUsers:
+            mentionees:
+            - laurent-mic
+            - ayeshurun
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Quantum
+        then:
+        - mentionUsers:
+            mentionees:
+            - ricardo-espinoza
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1720,7 +2320,8 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - yegu-ms
+            - shariq-mcs
+            - MSFTeegarden
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1753,7 +2354,7 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - darshanhs90
+            - kenieva
             - AshishGargMicrosoft
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
@@ -1794,6 +2395,18 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
+            label: Schema Registry
+        then:
+        - mentionUsers:
+            mentionees:
+            - arerlend
+            - alzimmermsft
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
             label: Search
         then:
         - mentionUsers:
@@ -1813,7 +2426,29 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - chlahav
+            - zivraf
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: SecurityInsights
+        then:
+        - mentionUsers:
+            mentionees:
+            - nazang
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Serial Console
+        then:
+        - mentionUsers:
+            mentionees:
+            - CraigWiand
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1835,21 +2470,10 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - QingChenmsft
-            - vaishnavk
-            - juhacket
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Schema Registry
-        then:
-        - mentionUsers:
-            mentionees:
-            - arerlend
-            - alzimmermsft
+            - mwesigwaguma
+            - a-Santamaria
+            - LukeSlev
+            - jkochhar
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1868,18 +2492,20 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
-            label: SQL
+            label: Spring Cloud
         then:
         - mentionUsers:
             mentionees:
-            - azureSQLGitHub
+            - yucwan
+            - yuwzho
+            - ShichaoQiu
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
         - hasLabel:
             label: Service Attention
         - hasLabel:
-            label: SQL - VM
+            label: SQL
         then:
         - mentionUsers:
             mentionees:
@@ -1935,6 +2561,17 @@ configuration:
             label: Service Attention
         - hasLabel:
             label: SQL - Replication & Failover
+        then:
+        - mentionUsers:
+            mentionees:
+            - azureSQLGitHub
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: SQL - VM
         then:
         - mentionUsers:
             mentionees:
@@ -2013,7 +2650,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - wonner
-            - kevinzz6
+            - v-yanjungao
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2065,449 +2702,12 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
-            label: Network - Virtual Network
+            label: WebPubSub
         then:
         - mentionUsers:
             mentionees:
-            - vnetsuppgithub
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Network - Virtual WAN
-        then:
-        - mentionUsers:
-            mentionees:
-            - vwansuppgithub
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Network - Network Virtual Appliance
-        then:
-        - mentionUsers:
-            mentionees:
-            - nvasuppgithub
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Network - Bastion
-        then:
-        - mentionUsers:
-            mentionees:
-            - bastionsuppgithub
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: IoT/CLI
-        then:
-        - mentionUsers:
-            mentionees:
-            - Azure/azure-iot-cli-triage
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Azure.Spring - Cosmos
-        then:
-        - mentionUsers:
-            mentionees:
-            - kushagraThapur
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Network - Private Link
-        then:
-        - mentionUsers:
-            mentionees:
-            - privlinksuppgithub
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Azure arc enabled servers
-        then:
-        - mentionUsers:
-            mentionees:
-            - rpsqrd
-            - edyoung
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: SecurityInsights
-        then:
-        - mentionUsers:
-            mentionees:
-            - amirkeren
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Azure Data Explorer
-        then:
-        - mentionUsers:
-            mentionees:
-            - Ilayrn
-            - orhasban
-            - zoharHenMicrosoft
-            - sagivf
-            - Aviv-Yaniv
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Communication
-        then:
-        - mentionUsers:
-            mentionees:
-            - acsdevx-msft
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Cost Management and Consumption
-        then:
-        - mentionUsers:
-            mentionees:
-            - ccmaxpcrew
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: ML-AutoML
-        - hasLabel:
-            label: Service Attention
-        then:
-        - mentionUsers:
-            mentionees:
-            - Aniththa
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: ML-Hyperdrive
-        then:
-        - mentionUsers:
-            mentionees:
-            - Aniththa
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: ML-Compute
-        then:
-        - mentionUsers:
-            mentionees:
-            - nishankgu
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: ML-Core UI
-        then:
-        - mentionUsers:
-            mentionees:
-            - abeomor
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: ML-Data4ML
-        then:
-        - mentionUsers:
-            mentionees:
-            - SturgeonMi
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: ML-Designer
-        then:
-        - mentionUsers:
-            mentionees:
-            - alainli0928
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: ML-Data Labeling
-        then:
-        - mentionUsers:
-            mentionees:
-            - kvijaykannan
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: ML-Inference
-        then:
-        - mentionUsers:
-            mentionees:
-            - shivanissambare
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: ML-MLOps
-        then:
-        - mentionUsers:
-            mentionees:
-            - lostmygithubaccount
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: ML-Pipelines
-        - hasLabel:
-            label: Service Attention
-        then:
-        - mentionUsers:
-            mentionees:
-            - shbijlan
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: ML-Responsible AI
-        - hasLabel:
-            label: Service Attention
-        then:
-        - mentionUsers:
-            mentionees:
-            - minthigpen
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: ML-Reinforcement Learning
-        - hasLabel:
-            label: Service Attention
-        then:
-        - mentionUsers:
-            mentionees:
-            - keijik
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: ML-Training
-        - hasLabel:
-            label: Service Attention
-        then:
-        - mentionUsers:
-            mentionees:
-            - lostmygithubaccount
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: ML-Workspace Management
-        - hasLabel:
-            label: Service Attention
-        then:
-        - mentionUsers:
-            mentionees:
-            - rastala
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Spring Cloud
-        - hasLabel:
-            label: Service Attention
-        then:
-        - mentionUsers:
-            mentionees:
-            - ShichaoQiu
-            - yuwzho
-            - yucwan
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Cost Management-Budget
-        then:
-        - mentionUsers:
-            mentionees:
-            - ccmaxpcrew
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Consumption-Budget
-        then:
-        - mentionUsers:
-            mentionees:
-            - ccmaxpcrew
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Cost Management-Query
-        then:
-        - mentionUsers:
-            mentionees:
-            - ccmixpdevs
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Consumption-Query
-        then:
-        - mentionUsers:
-            mentionees:
-            - ccmixpdevs
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Cost Management-Billing
-        then:
-        - mentionUsers:
-            mentionees:
-            - ccmbpxpcrew
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Consumption-Billing
-        then:
-        - mentionUsers:
-            mentionees:
-            - ccmbpxpcrew
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Cost Management-UsageDetailsAndExport
-        then:
-        - mentionUsers:
-            mentionees:
-            - TiagoCrewGitHubIssues
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Consumption-UsageDetailsandExport
-        then:
-        - mentionUsers:
-            mentionees:
-            - TiagoCrewGitHubIssues
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Consumption- RIandShowBack
-        then:
-        - mentionUsers:
-            mentionees:
-            - ccmshowbackdevs
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Serial Console
-        then:
-        - mentionUsers:
-            mentionees:
-            - microsoft/azserialconsole
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Monitor - Exporter
-        - hasLabel:
-            label: Service Attention
-        then:
-        - mentionUsers:
-            mentionees:
-            - cijothomas
-            - reyang
-            - rajkumar-rangaraj
-            - TimothyMothra
-            - vishweshbankwar
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Cost Management-RIandShowBack
-        then:
-        - mentionUsers:
-            mentionees:
-            - ccmshowbackdevs
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: ContainerApp
-        then:
-        - mentionUsers:
-            mentionees:
-            - calvinsID
+            - JialinXin
+            - vicancy
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       description: Triage issues to the service team
@@ -2533,7 +2733,7 @@ configuration:
           label: customer-reported
       - addReply:
           reply: Thank you for your contribution ${issueAuthor}! We will review the pull request and get back to you soon.
-      description: 'Add customer-reported label to PRs from customers '
+      description: Add customer-reported label to PRs from customers
     - if:
       - payloadType: Issues
       - isAction:
@@ -2771,7 +2971,7 @@ configuration:
       - addLabel:
           label: AKS
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - addLabel:
           label: Auto-Assign
       description: '[AKS] auto assign labels and users based on issue description.'
@@ -2812,7 +3012,7 @@ configuration:
       - addLabel:
           label: Web Apps
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - addLabel:
           label: Auto-Assign
       description: '[webapp] auto assign labels and users based on issue description.'
@@ -2850,7 +3050,7 @@ configuration:
       - addLabel:
           label: Service Connector
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - addLabel:
           label: Auto-Assign
       - assignTo:
@@ -2874,7 +3074,7 @@ configuration:
       - addLabel:
           label: IoT
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - addLabel:
           label: Auto-Assign
       - addLabel:
@@ -2896,7 +3096,7 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - addLabel:
           label: Spring-Cloud
       description: '[spring-cloud] auto assign labels and users based on issue description.'
@@ -3046,7 +3246,7 @@ configuration:
       - addLabel:
           label: ARM
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       description: '[arm-cxp] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -3064,7 +3264,7 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - addLabel:
           label: SQL
       description: '[sql] auto assign labels and users based on issue description.'
@@ -3084,7 +3284,7 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - addLabel:
           label: Container Registry
       description: '[acr] auto assign labels and users based on issue description.'
@@ -3131,7 +3331,7 @@ configuration:
       - addLabel:
           label: Container Instances
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       description: '[container] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -3188,7 +3388,7 @@ configuration:
       - addLabel:
           label: Functions
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       description: '[functionapp] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -3230,7 +3430,7 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - addLabel:
           label: API Management
       description: '[apim] auto assign labels and users based on issue description.'
@@ -3250,7 +3450,7 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - addLabel:
           label: DevOps
       description: '[devops] auto assign labels and users based on issue description.'
@@ -3347,7 +3547,7 @@ configuration:
       - addLabel:
           label: Service Bus
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       description: '[servicebus] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -3365,7 +3565,7 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - addLabel:
           label: Machine Learning
       description: '[machine learning] auto assign labels and users based on issue description.'
@@ -3385,7 +3585,7 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - addLabel:
           label: Devtestlab
       description: '[devtestlab] auto assign labels and users based on issue description.'
@@ -3430,7 +3630,7 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - assignTo:
           users:
           - jiasli
@@ -3451,7 +3651,7 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - addLabel:
           label: NetAppFiles
       description: '[netappfiles] auto assign labels and users based on issue description.'
@@ -3471,9 +3671,9 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - addLabel:
-          label: Cosmos
+          label: CosmosDB
       description: '[cosmosdb] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -3665,7 +3865,7 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - addLabel:
           label: Event Grid
       description: '[eventgrid] auto assign labels and users based on issue description. '
@@ -3713,7 +3913,7 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - addLabel:
           label: Automation
       description: '[automation] auto assign labels and users based on issue description. '
@@ -3954,7 +4154,7 @@ configuration:
       - addLabel:
           label: Network - CDN
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       description: '[cdn] auto assign labels and users based on issue description. '
     - if:
       - payloadType: Pull_Request
@@ -3969,7 +4169,7 @@ configuration:
             isRegex: True
       then:
       - addLabel:
-          label: Cosmos
+          label: CosmosDB
       - addLabel:
           label: Auto-Assign
       - requestReview:
@@ -3998,7 +4198,7 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - addLabel:
           label: Redis Cache
       description: '[redis] auto assign labels and users based on issue description.'
@@ -4048,7 +4248,7 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - addLabel:
           label: Service Fabric
       description: '[Service Fabric] auto assign labels and users based on issue description.'
@@ -4096,7 +4296,7 @@ configuration:
       - addLabel:
           label: VM SSH
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - addLabel:
           label: SSH
       description: '[ssh] auto assign labels and users based on issue description. '
@@ -4116,7 +4316,7 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - addLabel:
           label: PostgreSQL
       description: '[postgres] auto assign labels and users based on issue description.'
@@ -4136,7 +4336,7 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - addLabel:
           label: Synapse
       description: '[synapse] auto assign labels and users based on issue description.'
@@ -4342,7 +4542,7 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - addLabel:
           label: Pipelines
       - addLabel:
@@ -4500,7 +4700,7 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - addLabel:
           label: Network - Bastion
       description: '[network bastion] auto assign labels and users based on issue description.'
@@ -4597,7 +4797,7 @@ configuration:
       - addLabel:
           label: Recovery Services Backup
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       description: '[Backup] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -4645,7 +4845,7 @@ configuration:
       - addLabel:
           label: ContainerApp
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       description: '[container app] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -4721,7 +4921,7 @@ configuration:
       - addLabel:
           label: Batch
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       description: '[batch] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -4797,7 +4997,7 @@ configuration:
       - addLabel:
           label: SQL - VM
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       description: '[SqlVirtualMachine] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -4843,7 +5043,7 @@ configuration:
       - addLabel:
           label: Network - Front Door
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       description: '[Azure Front Door] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -4929,7 +5129,7 @@ configuration:
       - addLabel:
           label: Media Services
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       description: '[ams] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -4977,7 +5177,7 @@ configuration:
       - addLabel:
           label: Event Hubs
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       description: '[eventhub] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -4997,7 +5197,7 @@ configuration:
       - addLabel:
           label: Cognitive Services
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       description: '[Cognitive Services] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -5050,7 +5250,7 @@ configuration:
       - addLabel:
           label: App Configuration
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       description: '[appconfig] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -5096,7 +5296,7 @@ configuration:
       - addLabel:
           label: MySQL
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       description: '[mysql] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -5116,7 +5316,7 @@ configuration:
       - addLabel:
           label: Logic App
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       description: '[logic app] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -5233,7 +5433,7 @@ configuration:
       - addLabel:
           label: arcdata
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       description: '[acrdata] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -5277,7 +5477,7 @@ configuration:
       - addLabel:
           label: Recovery Services Backup
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       description: '[backup restore] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -5297,7 +5497,7 @@ configuration:
       - addLabel:
           label: Bot Services
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       description: '[botservice] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -5317,7 +5517,7 @@ configuration:
       - addLabel:
           label: Advisor
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       description: '[Advisor] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -5336,7 +5536,7 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - assignTo:
           users:
           - madsd
@@ -5358,7 +5558,7 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - assignTo:
           users:
           - Hamster-Huey
@@ -5380,7 +5580,7 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - assignTo:
           users:
           - gsethdev
@@ -5402,7 +5602,7 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - assignTo:
           users:
           - yutanglin16
@@ -5424,7 +5624,7 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - assignTo:
           users:
           - btardif
@@ -5446,7 +5646,7 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - assignTo:
           users:
           - seligj95
@@ -5468,7 +5668,7 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - assignTo:
           users:
           - apwestgarth
@@ -5490,7 +5690,7 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - assignTo:
           users:
           - yutanglin16
@@ -5512,7 +5712,7 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - assignTo:
           users:
           - madsd
@@ -5534,7 +5734,7 @@ configuration:
       - addLabel:
           label: Auto-Assign
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       - assignTo:
           users:
           - madsd
@@ -5557,7 +5757,7 @@ configuration:
       - addLabel:
           label: Artifacts
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       description: '[Artifacts] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -5577,7 +5777,7 @@ configuration:
       - addLabel:
           label: Kubernetes Configuration
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       description: '[Kubernetes Configuration] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -5621,7 +5821,7 @@ configuration:
       - addLabel:
           label: Reservations
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       description: '[Reservations] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -5641,7 +5841,7 @@ configuration:
       - addLabel:
           label: ARM
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       description: '[ARM-stack] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -5661,7 +5861,7 @@ configuration:
       - addLabel:
           label: ARO
       - addLabel:
-          label: CXP Attention
+          label: Service Attention
       description: '[ARO] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request

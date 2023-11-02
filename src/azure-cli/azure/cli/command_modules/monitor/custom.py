@@ -2,13 +2,16 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+
+# pylint: disable=protected-access
+
 from knack.log import get_logger
 
 logger = get_logger(__name__)
 
 
 # region ActivityLog
-def list_activity_log(client, correlation_id=None, resource_group=None, resource_id=None,
+def list_activity_log(cmd, correlation_id=None, resource_group=None, resource_id=None,
                       resource_provider=None, start_time=None, end_time=None, caller=None, status=None, max_events=50,
                       select=None, offset='6h'):
     odata_filters = _build_activity_log_odata_filter(correlation_id, resource_group, resource_id, resource_provider,
@@ -17,7 +20,14 @@ def list_activity_log(client, correlation_id=None, resource_group=None, resource
     select_filters = _activity_log_select_filter_builder(select)
     logger.info('OData Filter: %s', odata_filters)
     logger.info('Select Filter: %s', select_filters)
-    activity_log = client.list(filter=odata_filters, select=select_filters)
+
+    from .aaz.latest.monitor.activity_log import List
+    # activity_log = client.list(filter=odata_filters, select=select_filters)
+    activity_log = List(cli_ctx=cmd.cli_ctx)(command_args={
+        "filter": odata_filters,
+        "select": select_filters,
+    })
+
     return _limit_results(activity_log, max_events)
 
 
