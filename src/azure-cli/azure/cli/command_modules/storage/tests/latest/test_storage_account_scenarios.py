@@ -2585,6 +2585,7 @@ class StorageAccountBlobInventoryScenarioTest(StorageScenarioMixin, ScenarioTest
                          JMESPathCheck("policy.rules[0].definition.filters.includeSnapshots", True),
                          JMESPathCheck("policy.rules[0].definition.filters.prefixMatch[0]", "inventoryprefix1"),
                          JMESPathCheck("policy.rules[0].definition.filters.prefixMatch[1]", "inventoryprefix2"),
+                         JMESPathCheck("policy.rules[0].definition.filters.creationTime.lastNDays", 3),
                          JMESPathCheck("policy.rules[0].definition.format", "Csv"),
                          JMESPathCheck("policy.rules[0].definition.objectType", "Blob"),
                          JMESPathCheck("policy.rules[0].definition.schedule", "Daily"),

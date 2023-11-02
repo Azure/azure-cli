@@ -4775,6 +4775,11 @@ class MSIScenarioTest(ScenarioTest):
             # create a linux vm w/o identity and later enable it
             vm3_result = self.cmd('vm create -g {rg} -n {vm3} --image Debian:debian-10:10:latest --admin-username admin123 --admin-password PasswordPassword1! --nsg-rule NONE').get_output_in_json()
             self.assertIsNone(vm3_result.get('identity'))
+
+            with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope when assigning a role to the managed identity"):
+                self.cmd(
+                    'vm identity assign -g {rg} -n {vm3} --scope {vm1_id}')
+
             result = self.cmd('vm identity assign -g {rg} -n {vm3} --scope {vm1_id} --role reader', checks=[
                 self.check('role', 'reader'),
                 self.check('scope', '{vm1_id}'),
@@ -4820,6 +4825,10 @@ class MSIScenarioTest(ScenarioTest):
             # create a linux vm w/o identity and later enable it
             result = self.cmd('vmss create -g {rg} -n {vmss3} --image Debian:debian-10:10:latest --instance-count 1 --admin-username admin123 --admin-password PasswordPassword1! --orchestration-mode Uniform').get_output_in_json()['vmss']
             self.assertIsNone(result.get('identity'))
+
+            with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope when assigning a role to the managed identity"):
+                self.cmd(
+                    'vmss identity assign -g {rg} -n {vmss3} --scope "{vmss1_id}"')
 
             result = self.cmd('vmss identity assign -g {rg} -n {vmss3} --scope "{vmss1_id}" --role reader', checks=[
                 self.check('role', 'reader'),
