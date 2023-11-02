@@ -1263,18 +1263,13 @@ def _validate_vm_vmss_msi(cmd, namespace, is_identity_assign=False):
             raise ArgumentUsageError(
                 "usage error: please specify both --role and --scope when assigning a role to the managed identity")
 
-    # For "az vm identity assign", "--scope" must be passed in when assigning a role to the managed identity
+    # For "az vm/vmss identity assign", "--role" and "--scope" should be passed in at the same time
+    # when assigning a role to the managed identity
     if is_identity_assign:
-        role_is_explicitly_specified = getattr(namespace.identity_role, 'is_default', None) is None
-        if not namespace.identity_scope and role_is_explicitly_specified:
+        if (namespace.identity_scope and not namespace.identity_role) or \
+                (not namespace.identity_scope and namespace.identity_role):
             raise ArgumentUsageError(
-                "usage error: please specify --scope when assigning a role to the managed identity")
-        if not role_is_explicitly_specified and namespace.identity_scope:
-            logger.warning(
-                "Please note that the default value of '--role' will be removed in the breaking change release of the "
-                "fall. So specify '--role' and '--scope' at the same time when assigning a role to the managed "
-                "identity to avoid breaking your automation script when the default value of '--role' is removed."
-            )
+                "usage error: please specify both --role and --scope when assigning a role to the managed identity")
 
     # Assign managed identity
     if is_identity_assign or namespace.assign_identity is not None:
@@ -1307,7 +1302,7 @@ def _enable_msi_for_trusted_launch(namespace):
     # Enable system assigned msi by default when Trusted Launch configuration is met
     is_trusted_launch = namespace.security_type and namespace.security_type.lower() == 'trustedlaunch' \
         and namespace.enable_vtpm and namespace.enable_secure_boot
-    if is_trusted_launch and not namespace.disable_integrity_monitoring:
+    if is_trusted_launch and namespace.enable_integrity_monitoring:
         from ._vm_utils import MSI_LOCAL_ID
         logger.info('The MSI is enabled by default when Trusted Launch configuration is met')
         if namespace.assign_identity is None:

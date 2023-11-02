@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.53.0"
+VERSION = "2.53.1"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -78,7 +78,7 @@ DEPENDENCIES = [
     'azure-mgmt-compute~=30.2.0',
     'azure-mgmt-containerinstance==10.1.0',
     'azure-mgmt-containerregistry==10.1.0',
-    'azure-mgmt-containerservice~=26.0.0',
+    'azure-mgmt-containerservice~=27.0.0',
     'azure-mgmt-cosmosdb==9.3.0',
     'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datalake-store~=0.5.0',
@@ -109,7 +109,7 @@ DEPENDENCIES = [
     'azure-mgmt-rdbms~=10.2.0b11',
     'azure-mgmt-recoveryservicesbackup~=7.0.0',
     'azure-mgmt-recoveryservices~=2.5.0',
-    'azure-mgmt-redhatopenshift~=1.3.0',
+    'azure-mgmt-redhatopenshift~=1.4.0',
     'azure-mgmt-redis~=14.1.0',
     'azure-mgmt-resource==23.1.0b2',
     'azure-mgmt-search~=9.0',
@@ -121,7 +121,7 @@ DEPENDENCIES = [
     'azure-mgmt-signalr==2.0.0b1',
     'azure-mgmt-sqlvirtualmachine==1.0.0b5',
     'azure-mgmt-sql==4.0.0b12',
-    'azure-mgmt-storage~=21.0.0',
+    'azure-mgmt-storage==21.1.0',
     'azure-mgmt-synapse==2.1.0b5',
     'azure-mgmt-trafficmanager~=1.0.0',
     'azure-mgmt-web==7.0.0',

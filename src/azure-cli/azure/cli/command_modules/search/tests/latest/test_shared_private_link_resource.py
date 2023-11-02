@@ -9,7 +9,12 @@ import unittest
 
 class AzureSearchServicesTests(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    # https://vcrpy.readthedocs.io/en/latest/configuration.html#request-matching
+    def setUp(self):
+        self.vcr.match_on = ['scheme', 'method', 'path', 'query'] # not 'host', 'port'
+        super(AzureSearchServicesTests, self).setUp()
+
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='westcentralus')
     @StorageAccountPreparer(name_prefix='satest', kind='StorageV2')
     def test_shared_private_link_resource_crud(self, resource_group, storage_account):
         self.kwargs.update({
@@ -65,7 +70,6 @@ class AzureSearchServicesTests(ScenarioTest):
         with self.assertRaises(SystemExit) as ex:
             self.cmd('az search shared-private-link-resource show --service-name {search_service_name} -g {rg} --name {shared_private_link_resource_name}')
         self.assertEqual(ex.exception.code, 3)
-
 
 if __name__ == '__main__':
     unittest.main()
