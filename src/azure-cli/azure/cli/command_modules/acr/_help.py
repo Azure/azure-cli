@@ -1381,7 +1381,7 @@ examples:
 helps['acr artifact-streaming update'] = """
 type: command
 short-summary: Allows you to enable or disable auto-creation of streaming artifacts for newly pushed images under a given registry.
-long-summary: Allows you to enable or disable auto-creation of streaming artifacts for newly pushed images under a given registry. Note: Whenever the flag is enabled, new images pushed into the selected registry will have auto-creation enabled and will be associated with the original image as a referrers artifact.
+long-summary: Allows you to enable or disable auto-creation of streaming artifacts for newly pushed images under a given registry. Note that whenever the flag is enabled, new images pushed into the selected registry will have auto-creation enabled and will be associated with the original image as a referrers artifact.
 examples:
   - name: Enable artifact streaming for 'MyRepository' associated with the registry 'MyRegistry'.
     text: >
