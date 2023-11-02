@@ -1312,6 +1312,13 @@ class FunctionAppFunctionTests(LiveScenarioTest):
         self.cmd('functionapp function delete -g {} -n {} --function-name {}'.format(resource_group, functionapp_name, function_name))
 
 
+class FunctionappDeploymentSourceScenarioTest(ScenarioTest):
+    def test_functionapp_deployment_source_update_token(self):
+        self.cmd('functionapp deployment source update-token --git-token password1234').assert_with_checks([
+            JMESPathCheck('token', None)
+        ])
+
+
 # LiveScenarioTest due to issue https://github.com/Azure/azure-cli/issues/10705
 class FunctionappDeploymentLogsScenarioTest(LiveScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
