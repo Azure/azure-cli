@@ -10266,16 +10266,28 @@ class RestorePointScenarioTest(ScenarioTest):
             self.check('sourceMetadata.storageProfile.dataDisks[0].managedDisk.id', '{data_disk1_id}'),
             self.check('sourceMetadata.storageProfile.dataDisks[1].managedDisk.id', '{data_disk2_id}')
         ])
-        message1 = 'usage error: --data-disk-restore-point-encryption-set must be used together with --source-data-disk-resource'
+
+        message1 = 'usage error: --os-restore-point-encryption-set or --os-restore-point-encryption-type must be used together with --source-os-resource'
         with self.assertRaisesRegex(ArgumentUsageError, message1):
             self.cmd('restore-point create -g {rg} -n {point_name1} --collection-name {collection_name} --source-os-resource {os_disk_id} '
-                     '--os-restore-point-encryption-set {des1_id} --source-data-disk-resource {data_disk1_id} {data_disk2_id} ')
-        message2 = 'Length of --source-data-disk-resource, --data-disk-restore-point-encryption-set must be same.'
+                     '--source-data-disk-resource {data_disk1_id} {data_disk2_id} ')
 
+        message2 = 'usage error: --data-disk-restore-point-encryption-set or --data-disk-restore-point-encryption-type must be used together with --source-data-disk-resource'
         with self.assertRaisesRegex(ArgumentUsageError, message2):
+            self.cmd('restore-point create -g {rg} -n {point_name1} --collection-name {collection_name} --source-os-resource {os_disk_id} '
+                     '--os-restore-point-encryption-set {des1_id} --source-data-disk-resource {data_disk1_id} {data_disk2_id}')
+
+        message3 = 'Length of --source-data-disk-resource, --data-disk-restore-point-encryption-set must be same.'
+        with self.assertRaisesRegex(ArgumentUsageError, message3):
             self.cmd('restore-point create -g {rg} -n {point_name1} --collection-name {collection_name} --source-os-resource {os_disk_id} '
                      '--os-restore-point-encryption-set {des1_id} --source-data-disk-resource {data_disk1_id} {data_disk2_id} '
                      '--data-disk-restore-point-encryption-set {des1_id}')
+
+        message4 = 'Length of --source-data-disk-resource, --data-disk-restore-point-encryption-type must be same.'
+        with self.assertRaisesRegex(ArgumentUsageError, message4):
+            self.cmd('restore-point create -g {rg} -n {point_name1} --collection-name {collection_name} --source-os-resource {os_disk_id} '
+                     '--os-restore-point-encryption-set {des1_id} --source-data-disk-resource {data_disk1_id} {data_disk2_id} '
+                     '--data-disk-restore-point-encryption-type EncryptionAtRestWithCustomerKey')
 
     @ResourceGroupPreparer(name_prefix='cli_test_restore_point_encryption_remote', location='EastUS2EUAP')
     def test_restore_point_encryption_remote(self, resource_group):
@@ -10365,32 +10377,28 @@ class RestorePointScenarioTest(ScenarioTest):
                 self.check('sourceMetadata.storageProfile.dataDisks[1].diskRestorePoint.sourceDiskRestorePoint.id', '{remote_data_disk_id2}')
             ])
 
-        message1 = 'usage error: --data-disk-restore-point-encryption-set and --data-disk-restore-point-encryption-type must be used together with --source-data-disk-resource'
+        message1 = 'usage error: --os-restore-point-encryption-set or --os-restore-point-encryption-type must be used together with --source-os-resource'
         with self.assertRaisesRegex(ArgumentUsageError, message1):
             self.cmd('restore-point create -g {rg} -n {remote_point_name1} --collection-name {remote_collection_name} --source-restore-point {source_point_id} '
-                     '--source-os-resource {remote_os_disk_id} --os-restore-point-encryption-set {remote_des1_id} --source-data-disk-resource {remote_data_disk_id1} {remote_data_disk_id2} '
+                     '--source-os-resource {remote_os_disk_id} --source-data-disk-resource {remote_data_disk_id1} {remote_data_disk_id2} '
                      '--data-disk-restore-point-encryption-type EncryptionAtRestWithPlatformAndCustomerKeys EncryptionAtRestWithPlatformAndCustomerKeys')
 
-        with self.assertRaisesRegex(ArgumentUsageError, message1):
-            self.cmd('restore-point create -g {rg} -n {remote_point_name1} --collection-name {remote_collection_name} --source-restore-point {source_point_id} '
-                     '--source-os-resource {remote_os_disk_id} --os-restore-point-encryption-set {remote_des1_id} --source-data-disk-resource {remote_data_disk_id1} {remote_data_disk_id2} '
-                     '--data-disk-restore-point-encryption-set {remote_des1_id} {remote_des2_id}')
-
-        message2 = 'Length of --source-data-disk-resource, --data-disk-restore-point-encryption-set and --data-disk-restore-point-encryption-type must be same.'
+        message2 = 'usage error: --data-disk-restore-point-encryption-set or --data-disk-restore-point-encryption-type must be used together with --source-data-disk-resource'
         with self.assertRaisesRegex(ArgumentUsageError, message2):
             self.cmd('restore-point create -g {rg} -n {remote_point_name1} --collection-name {remote_collection_name} --source-restore-point {source_point_id} '
-                     '--source-os-resource {remote_os_disk_id} --os-restore-point-encryption-set {remote_des1_id} --source-data-disk-resource {remote_data_disk_id1} {remote_data_disk_id2} '
-                     '--data-disk-restore-point-encryption-set {remote_des1_id} {remote_des2_id} --data-disk-restore-point-encryption-type EncryptionAtRestWithCustomerKey')
+                     '--source-os-resource {remote_os_disk_id} --os-restore-point-encryption-set {remote_des1_id} --source-data-disk-resource {remote_data_disk_id1} {remote_data_disk_id2} ')
 
-        with self.assertRaisesRegex(ArgumentUsageError, message2):
+        message3 = 'Length of --source-data-disk-resource, --data-disk-restore-point-encryption-set must be same.'
+        with self.assertRaisesRegex(ArgumentUsageError, message3):
             self.cmd('restore-point create -g {rg} -n {remote_point_name1} --collection-name {remote_collection_name} --source-restore-point {source_point_id} '
                      '--source-os-resource {remote_os_disk_id} --os-restore-point-encryption-set {remote_des1_id} --source-data-disk-resource {remote_data_disk_id1} {remote_data_disk_id2} '
-                     '--data-disk-restore-point-encryption-set {remote_des1_id} --data-disk-restore-point-encryption-type EncryptionAtRestWithPlatformAndCustomerKeys EncryptionAtRestWithCustomerKey')
+                     '--data-disk-restore-point-encryption-set {remote_des1_id}')
 
-        with self.assertRaisesRegex(ArgumentUsageError, message2):
+        message4 = 'Length of --source-data-disk-resource, --data-disk-restore-point-encryption-type must be same.'
+        with self.assertRaisesRegex(ArgumentUsageError, message4):
             self.cmd('restore-point create -g {rg} -n {remote_point_name1} --collection-name {remote_collection_name} --source-restore-point {source_point_id} '
-                     '--source-os-resource {remote_os_disk_id} --os-restore-point-encryption-set {remote_des1_id} --source-data-disk-resource {remote_data_disk_id1} '
-                     '--data-disk-restore-point-encryption-set {remote_des1_id} {remote_des2_id} --data-disk-restore-point-encryption-type EncryptionAtRestWithCustomerKey EncryptionAtRestWithCustomerKey')
+                     '--source-os-resource {remote_os_disk_id} --os-restore-point-encryption-set {remote_des1_id} --source-data-disk-resource {remote_data_disk_id1} {remote_data_disk_id2} '
+                     '--data-disk-restore-point-encryption-type EncryptionAtRestWithPlatformAndCustomerKeys')
 
 
 class ArchitectureScenarioTest(ScenarioTest):

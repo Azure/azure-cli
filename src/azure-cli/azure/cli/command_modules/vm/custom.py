@@ -5712,14 +5712,23 @@ def restore_point_create(client,
                 'id': source_os_resource
             }
             os_disk['managedDisk'] = managed_disk
-        if os_restore_point_encryption_set is not None:
-            disk_restore_point = {
-                'encryption': {
-                    'diskEncryptionSet': {
-                        'id': os_restore_point_encryption_set
-                    }
+            if os_restore_point_encryption_set is None and os_restore_point_encryption_type is None:
+                raise ArgumentUsageError('usage error: --os-restore-point-encryption-set or --os-restore-point-encryption-type must be used together with --source-os-resource')
+
+        disk_restore_point = {}
+        if os_restore_point_encryption_set is not None or os_restore_point_encryption_type is not None:
+            encryption = {}
+            if os_restore_point_encryption_set is not None:
+                encryption['diskEncryptionSet'] = {
+                    'id': os_restore_point_encryption_set
                 }
-            }
+            if os_restore_point_encryption_type is not None:
+                encryption['type'] = os_restore_point_encryption_type
+
+            if encryption:
+                disk_restore_point['encryption'] = encryption
+
+        if disk_restore_point:
             os_disk['diskRestorePoint'] = disk_restore_point
 
         if os_disk:
@@ -5727,10 +5736,12 @@ def restore_point_create(client,
 
         data_disks = []
         if source_data_disk_resource is not None:
-            if data_disk_restore_point_encryption_set is None:
-                raise ArgumentUsageError('usage error: --data-disk-restore-point-encryption-set must be used together with --source-data-disk-resource')
-            if len(data_disk_restore_point_encryption_set) != len(source_data_disk_resource):
+            if data_disk_restore_point_encryption_set is None and data_disk_restore_point_encryption_type is None:
+                raise ArgumentUsageError('usage error: --data-disk-restore-point-encryption-set or --data-disk-restore-point-encryption-type must be used together with --source-data-disk-resource')
+            if data_disk_restore_point_encryption_set is not None and (len(source_data_disk_resource) != len(data_disk_restore_point_encryption_set)):
                 raise ArgumentUsageError('Length of --source-data-disk-resource, --data-disk-restore-point-encryption-set must be same.')
+            if data_disk_restore_point_encryption_type is not None and (len(source_data_disk_resource) != len(data_disk_restore_point_encryption_type)):
+                raise ArgumentUsageError('Length of --source-data-disk-resource, --data-disk-restore-point-encryption-type must be same.')
 
             for i in range(len(source_data_disk_resource)):
                 data_disks.append({
@@ -5740,8 +5751,9 @@ def restore_point_create(client,
                     'diskRestorePoint': {
                         'encryption': {
                             'disk_encryption_set': {
-                                'id': data_disk_restore_point_encryption_set[i]
-                            }
+                                'id': data_disk_restore_point_encryption_set[i] if data_disk_restore_point_encryption_set is not None else None
+                            },
+                            'type': data_disk_restore_point_encryption_type[i] if data_disk_restore_point_encryption_type is not None else None
                         }
                     }
                 })
@@ -5758,6 +5770,8 @@ def restore_point_create(client,
                 'id': source_os_resource
             }
             disk_restore_point['sourceDiskRestorePoint'] = source_disk_restore_point
+            if os_restore_point_encryption_set is None and os_restore_point_encryption_type is None:
+                raise ArgumentUsageError('usage error: --os-restore-point-encryption-set or --os-restore-point-encryption-type must be used together with --source-os-resource')
 
         if os_restore_point_encryption_set is not None or os_restore_point_encryption_type is not None:
             encryption = {}
@@ -5777,10 +5791,13 @@ def restore_point_create(client,
 
         data_disks = []
         if source_data_disk_resource is not None:
-            if data_disk_restore_point_encryption_set is None or data_disk_restore_point_encryption_type is None:
-                raise ArgumentUsageError('usage error: --data-disk-restore-point-encryption-set and --data-disk-restore-point-encryption-type must be used together with --source-data-disk-resource')
-            if len(set([len(source_data_disk_resource), len(data_disk_restore_point_encryption_set), len(data_disk_restore_point_encryption_type)])) != 1:
-                raise ArgumentUsageError('Length of --source-data-disk-resource, --data-disk-restore-point-encryption-set and --data-disk-restore-point-encryption-type must be same.')
+            if data_disk_restore_point_encryption_set is None and data_disk_restore_point_encryption_type is None:
+                raise ArgumentUsageError('usage error: --data-disk-restore-point-encryption-set or --data-disk-restore-point-encryption-type must be used together with --source-data-disk-resource')
+            if data_disk_restore_point_encryption_set is not None and (len(source_data_disk_resource) != len(data_disk_restore_point_encryption_set)):
+                raise ArgumentUsageError('Length of --source-data-disk-resource, --data-disk-restore-point-encryption-set must be same.')
+            if data_disk_restore_point_encryption_type is not None and (len(source_data_disk_resource) != len(data_disk_restore_point_encryption_type)):
+                raise ArgumentUsageError('Length of --source-data-disk-resource, --data-disk-restore-point-encryption-type must be same.')
+
             for i in range(len(source_data_disk_resource)):
                 data_disks.append({
                     'diskRestorePoint': {
@@ -5788,10 +5805,10 @@ def restore_point_create(client,
                             'id': source_data_disk_resource[i]
                         },
                         'encryption': {
-                            'type': data_disk_restore_point_encryption_type[i],
                             'disk_encryption_set': {
-                                'id': data_disk_restore_point_encryption_set[i]
-                            }
+                                'id': data_disk_restore_point_encryption_set[i] if data_disk_restore_point_encryption_set is not None else None
+                            },
+                            'type': data_disk_restore_point_encryption_type[i] if data_disk_restore_point_encryption_type is not None else None
                         }
                     }
                 })
