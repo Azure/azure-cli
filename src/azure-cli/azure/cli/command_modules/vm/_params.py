@@ -1111,10 +1111,7 @@ def load_arguments(self, _):
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
             c.argument('identity_role', options_list=['--role'],
-                       help='Role name or id the system assigned identity will have. '
-                            'Please note that the default value "Contributor" will be removed in the breaking change '
-                            'release of the fall, so please specify "--role" and "--scope" at the same time '
-                            'when assigning a role to the managed identity')
+                       help='Role name or id the system assigned identity will have.')
 
     with self.argument_context('vm auto-shutdown') as c:
         c.argument('off', action='store_true', help='Turn off auto-shutdown for VM. Configuration will be cleared.')
