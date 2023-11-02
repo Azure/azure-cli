@@ -19,7 +19,7 @@ from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants,
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse, RecordingProcessor
 from azure.cli.testsdk.scenario_tests.utilities import is_json_payload
 from azure.core.exceptions import ResourceNotFoundError
-from azure.cli.core.azclierror import ResourceNotFoundError as CliResourceNotFoundError, RequiredArgumentMissingError
+from azure.cli.core.azclierror import ResourceNotFoundError as CliResourceNotFoundError, RequiredArgumentMissingError, MutuallyExclusiveArgumentError
 from azure.cli.core.util import shell_safe_json_parse
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -1060,6 +1060,10 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
             'export_dest': 'appservice',
             'appservice_account': webapp_name
         })
+
+         # Export snapshot kvs to app service as reference should fail
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 'Cannot export snapshot key-values as references to App Service.'):
+            self.cmd('appconfig kv export --connection-string {connection_string} -d {export_dest} --appservice-account {appservice_account} -y --export-as-reference --snapshot dummy_snapshot')
 
         self.cmd('appconfig kv export --connection-string {connection_string} -d {export_dest} --appservice-account {appservice_account} --label {label} -y --export-as-reference')
         self.cmd('appconfig kv export --connection-string {connection_string} -d {export_dest} --appservice-account {appservice_account} -y --export-as-reference')
@@ -3084,7 +3088,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
 
         # Export snapshot kvs to store
         self.cmd('appconfig kv export -d appconfig --connection-string {connection_string} --dest-connection-string {dest_connection_string} --snapshot {snapshot_name} -y')
-
+        
         # List snapshots in store
         dest_kvs = self.cmd('appconfig kv list --connection-string {dest_connection_string} --key * --label *').get_output_in_json()
         self.assertEqual(len(dest_kvs), 2)
