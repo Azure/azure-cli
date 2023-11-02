@@ -132,7 +132,7 @@ def update_vault(client, vault_name, resource_group_name, tags=None,
     try:
         existing_vault_if_any = client.get(resource_group_name, vault_name)
         location = existing_vault_if_any.location
-        create_vault(client, vault_name, resource_group_name, location, tags, public_network_access, immutability_state,
+        return create_vault(client, vault_name, resource_group_name, location, tags, public_network_access, immutability_state,
                      cross_subscription_restore_state, classic_alerts, azure_monitor_alerts_for_job_failures)
     except CoreResourceNotFoundError:
         # This runs for a create - if there is no vault, identity details don't need to be provided

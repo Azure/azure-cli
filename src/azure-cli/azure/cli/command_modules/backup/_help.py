@@ -480,6 +480,15 @@ examples:
     crafted: true
 """
 
+helps['backup vault update'] = """
+type: command
+short-summary: Update an existing Recovery Services vault.
+examples:
+  - name: Update immutability settings of a Recovery Services vault.
+    text: az backup vault update --name MyRecoveryServicesVault --resource-group MyResourceGroup --immutability-state Unlocked
+    crafted: true
+"""
+
 helps['backup vault delete'] = """
 type: command
 short-summary: Delete an existing Recovery services vault.
