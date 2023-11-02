@@ -7,7 +7,6 @@ try:
     from urllib.parse import urlencode, urlparse, urlunparse
 except ImportError:
     from urllib import urlencode
-    from urlparse import urlparse, urlunparse
 
 import time
 from json import loads

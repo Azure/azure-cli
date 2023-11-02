@@ -13,7 +13,7 @@ from ._docker_utils import (
     RepoAccessTokenPermission,
     RegistryException
 )
-from .manifest import(
+from .manifest import (
     _get_referrers_path,
     _obtain_referrers_from_registry
 )
@@ -68,7 +68,7 @@ def acr_artifact_streaming_create(cmd,
         username=username,
         password=password,
         repository=repository,
-        permission=RepoAccessTokenPermission.PULL_PUSH.value)#RepoAccessTokenPermission.META_WRITE_META_READ.value)
+        permission=RepoAccessTokenPermission.PULL_PUSH.value)
 
     # Check if streaming artifact already exists
     streaming_artifact_exists = _check_if_streaming_artifact_exists(
@@ -94,7 +94,7 @@ def acr_artifact_streaming_create(cmd,
         operation_id = result['id']
     else:
         path = _get_v1_artifact_streaming_image_path(repository, digest)
-        json_payload = {"conversionFormat":"overlaybd", "conversionVersion": "v1"}
+        json_payload = {"conversionFormat": "overlaybd", "conversionVersion": "v1"}
         result, _, response_status = request_data_from_registry(http_method='post',
                                                                 login_server=login_server,
                                                                 path=path,
@@ -249,7 +249,7 @@ def acr_artifact_streaming_update(cmd,
                                   password=None):
 
     path = _get_v1_artifact_streaming_path(repository)
-    json_payload = {"convertPushedImages": enable_streaming, "conversionFormat":"overlaybd", "conversionVersion": "v1"}
+    json_payload = {"convertPushedImages": enable_streaming, "conversionFormat": "overlaybd", "conversionVersion": "v1"}
 
     login_server, username, password = get_access_credentials(
         cmd=cmd,
@@ -379,5 +379,5 @@ def _validate_operation_parameters(repository, operation_id, image):
     repo = bool(repository)
     op_id = bool(operation_id)
     img = bool(image)
-    if (not repo and op_id) or (not op_id and not img) or (repo and img) :
+    if (not repo and op_id) or (not op_id and not img) or (repo and img):
         raise CLIError('Usage error: You need to provide either --repository MyRepo --id MyId | --image MyImage')
