@@ -705,13 +705,19 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
                            'Import by string name instead.'.format(doc_string_source.__name__))
 
         model = doc_string_source
+        # print('kk doc string source', doc_string_source)
         try:
-            model = self.get_models(doc_string_source)
+            model = self.get_models(doc_string_source, ignore=True)
         except APIVersionException:
             model = None
+        if model:
+            print('wat',doc_string_source)
+            import sys
+            sys.exit(0)
         if not model:
             from importlib import import_module
             (path, model_name) = doc_string_source.split('#', 1)
+            # print('fail to get', doc_string_source, 'use', path, model_name, 'instead')
             method_name = None
             if '.' in model_name:
                 (model_name, method_name) = model_name.split('.', 1)
@@ -774,6 +780,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
         from azure.cli.core.profiles import get_sdk
         resource_type = kwargs.get('resource_type', self._get_resource_type())
         operation_group = kwargs.get('operation_group', self.module_kwargs.get('operation_group', None))
+        # print('get_models', resource_type, attr_args)
         return get_sdk(self.cli_ctx, resource_type, *attr_args, mod='models', operation_group=operation_group)
 
     def command_group(self, group_name, command_type=None, **kwargs):
