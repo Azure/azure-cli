@@ -5708,7 +5708,7 @@ def restore_point_create(client,
     if source_restore_point is None:
         os_disk = {}
         if source_os_resource is not None:
-            managed_disk =  {
+            managed_disk = {
                 'id': source_os_resource
             }
             os_disk['managedDisk'] = managed_disk
@@ -5758,6 +5758,7 @@ def restore_point_create(client,
                 'id': source_os_resource
             }
             disk_restore_point['sourceDiskRestorePoint'] = source_disk_restore_point
+
         if os_restore_point_encryption_set is not None or os_restore_point_encryption_type is not None:
             encryption = {}
             if os_restore_point_encryption_set is not None:
@@ -5767,8 +5768,8 @@ def restore_point_create(client,
             if os_restore_point_encryption_type is not None:
                 encryption['type'] = os_restore_point_encryption_type
 
-        if encryption:
-            disk_restore_point['encryption'] = encryption
+            if encryption:
+                disk_restore_point['encryption'] = encryption
         if disk_restore_point:
             os_disk['diskRestorePoint'] = disk_restore_point
         if os_disk:
@@ -5778,7 +5779,7 @@ def restore_point_create(client,
         if source_data_disk_resource is not None:
             if data_disk_restore_point_encryption_set is None or data_disk_restore_point_encryption_type is None:
                 raise ArgumentUsageError('usage error: --data-disk-restore-point-encryption-set and --data-disk-restore-point-encryption-type must be used together with --source-data-disk-resource')
-            if len(set([len(source_data_disk_resource), len(data_disk_restore_point_encryption_set), len(data_disk_restore_point_encryption_type)])) == 1:
+            if len(set([len(source_data_disk_resource), len(data_disk_restore_point_encryption_set), len(data_disk_restore_point_encryption_type)])) != 1:
                 raise ArgumentUsageError('Length of --source-data-disk-resource, --data-disk-restore-point-encryption-set and --data-disk-restore-point-encryption-type must be same.')
             for i in range(len(source_data_disk_resource)):
                 data_disks.append({
@@ -5794,6 +5795,8 @@ def restore_point_create(client,
                         }
                     }
                 })
+        if data_disks:
+            storage_profile['dataDisks'] = data_disks
 
     if storage_profile:
         parameters['sourceMetadata'] = {'storageProfile': storage_profile}

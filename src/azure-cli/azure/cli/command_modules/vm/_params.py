@@ -1599,7 +1599,7 @@ def load_arguments(self, _):
         c.argument('source_os_resource', help='Resource Id of the source OS disk')
         c.argument('os_restore_point_encryption_set', help='Customer managed OS disk encryption set resource id')
         c.argument('os_restore_point_encryption_type', arg_type=get_enum_type(self.get_models('RestorePointEncryptionType')), help='The type of key used to encrypt the data of the OS disk restore point.')
-        c.argument('source_data_disk_resource',  nargs='+', help='Resource Id of the source data disk')
+        c.argument('source_data_disk_resource', nargs='+', help='Resource Id of the source data disk')
         c.argument('data_disk_restore_point_encryption_set', nargs='+', help='Customer managed data disk encryption set resource id')
         c.argument('data_disk_restore_point_encryption_type', nargs='+', arg_type=get_enum_type(self.get_models('RestorePointEncryptionType')), help='The type of key used to encrypt the data of the data disk restore point.')
 
