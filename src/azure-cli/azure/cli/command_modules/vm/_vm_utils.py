@@ -639,8 +639,8 @@ def display_region_recommendation(cmd, namespace):
         recommend_region = 'Selecting "' + identified_region + '" may reduce your costs. ' \
                            'The region you\'ve selected may cost more for the same services. ' \
                            'You can disable this message in the future with the command '
-        disable_config = '"az config set core.display_region_identified=false"'
-        learn_more_msg = '. Learn more at https://go.microsoft.com/fwlink/?linkid=222571 '
+        disable_config = '"az config set core.display_region_identified=false". '
+        learn_more_msg = 'Learn more at https://go.microsoft.com/fwlink/?linkid=222571 '
         # Since the output of the "az vm create" command is a JSON object
         # which can be used for automated script parsing
         # So we output the notification message to sys.stderr
