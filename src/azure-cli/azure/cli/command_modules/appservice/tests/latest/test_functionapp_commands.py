@@ -1082,8 +1082,9 @@ class FunctionAppWithDistributedTracing(ScenarioTest):
         self.cmd('functionapp create -g {} -n {} -p {} -s {} --runtime java --functions-version 4'
                  .format(resource_group, functionapp_name, plan, storage_account))
 
-        app_set = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group,
-                                                                                    functionapp_name)).get_output_in_json()
+        self.cmd('functionapp config appsettings set -g {} -n {} --settings FOO=BAR'.format(resource_group, functionapp_name))
+
+        app_set = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name)).get_output_in_json()
         self.assertTrue('APPLICATIONINSIGHTS_ENABLE_AGENT' in [
                         kp['name'] for kp in app_set])
 
