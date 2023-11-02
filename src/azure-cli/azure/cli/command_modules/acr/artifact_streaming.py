@@ -379,5 +379,5 @@ def _validate_operation_parameters(repository, operation_id, image):
     repo = bool(repository)
     op_id = bool(operation_id)
     img = bool(image)
-    if (not repo and op_id) or (not op_id and not img) or (repo and img):
+    if (not repo and op_id) or not(op_id or img) or (repo and img):
         raise CLIError('Usage error: You need to provide either --repository MyRepo --id MyId | --image MyImage')

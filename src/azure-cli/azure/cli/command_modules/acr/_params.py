@@ -173,7 +173,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('repository', help="The name of the repository.", required=True)
         c.argument('image', arg_type=image_by_tag_or_digest_type, required=True)
         c.argument('enable_streaming', help="Indicates whether artifact streaming is enabled for a repository.", required=True, arg_type=get_three_state_flag())
-    
+
     with self.argument_context('acr artifact-streaming operation') as c:
         c.argument('repository', help="The name of the repository.", required=False)
         c.argument('image', arg_type=image_by_tag_or_digest_type, required=False)

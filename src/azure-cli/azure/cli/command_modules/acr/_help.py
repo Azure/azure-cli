@@ -1348,12 +1348,12 @@ short-summary: Manage artifact streaming for any repositories or supported image
 
 helps['acr artifact-streaming operation'] = """
 type: group
-short-summary: Allows you to manage the streaming artifact creation for ACR.
+short-summary: Manage the streaming artifact creation operations for ACR.
 """
 
 helps['acr artifact-streaming operation cancel'] = """
 type: command
-short-summary: Cancels the given streaming artifact operation for ACR.
+short-summary: Cancel the given streaming artifact operation for ACR.
 examples:
   - name: Cancel the streaming artifact creation associated with the id 'OperationId' under repository 'MyRepo' in ACR 'MyRegistry'.
     text: >
@@ -1362,7 +1362,7 @@ examples:
 
 helps['acr artifact-streaming operation show'] = """
 type: command
-short-summary: Checks the operation status for artifact streaming in an ACR.
+short-summary: Check the operation status for artifact streaming in an ACR.
 examples:
   - name: Get the streaming artifact creation status for id 'OperationId' under repository 'MyRepo' in ACR 'MyRegistry'.
     text: >
@@ -1380,8 +1380,8 @@ examples:
 
 helps['acr artifact-streaming update'] = """
 type: command
-short-summary: Allows you to enable or disable auto-creation of streaming artifacts for newly pushed images under a given registry.
-long-summary: Allows you to enable or disable auto-creation of streaming artifacts for newly pushed images under a given registry. Note that whenever the flag is enabled, new images pushed into the selected registry will have auto-creation enabled and will be associated with the original image as a referrers artifact.
+short-summary: Enable or disable auto-creation of streaming artifacts for newly pushed images under a given registry.
+long-summary: Enable or disable auto-creation of streaming artifacts for newly pushed images under a given registry. Note that whenever the flag is enabled, new images pushed into the selected registry will have auto-creation enabled and will be associated with the original image as a referrers artifact.
 examples:
   - name: Enable artifact streaming for 'MyRepository' associated with the registry 'MyRegistry'.
     text: >
