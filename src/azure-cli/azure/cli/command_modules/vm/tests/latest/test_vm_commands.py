@@ -3479,12 +3479,12 @@ class VMSSCreateAndModify(ScenarioTest):
             'vmss1': self.create_random_name('vmss1', 10),
             'vmss2': self.create_random_name('vmss2', 10),
         })
-        self.cmd('vmss create -g {rg} -n {vmss1} --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --enable-hibernation true --orchestration-mode Flexible --admin-username vmtest --admin-password Test123456789# --orchestration-mode Flexible', checks=[
+        self.cmd('vmss create -g {rg} -n {vmss1} --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --enable-hibernation true --admin-username vmtest --admin-password Test123456789#', checks=[
             self.check('vmss.additionalCapabilities.hibernationEnabled', True),
         ])
         self.cmd('vmss deallocate -g {rg} -n {vmss1} --hibernate true')
 
-        self.cmd('vmss create -g {rg} -n {vmss2} --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --enable-hibernation true --orchestration-mode Flexible --admin-username vmtest --admin-password Test123456789#', checks=[
+        self.cmd('vmss create -g {rg} -n {vmss2} --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --enable-hibernation true --admin-username vmtest --admin-password Test123456789#', checks=[
             self.check('vmss.additionalCapabilities.hibernationEnabled', True),
         ])
         result = self.cmd('vmss list-instances -g {rg} -n {vmss2}')
@@ -3906,7 +3906,7 @@ class VMSSCreatePublicIpPerVm(ScenarioTest):  # pylint: disable=too-many-instanc
         self.assertEqual(len(result[0]['ipAddress'].split('.')), 4)
         self.assertTrue(result[0]['dnsSettings']['domainNameLabel'].endswith(self.kwargs['dns_label']))
 
-        self.cmd('vmss create -g {rg} -n {flex_vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --orchestration-mode Flexible --admin-username vmtest')
+        self.cmd('vmss create -g {rg} -n {flex_vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username vmtest')
         from azure.cli.core.azclierror import ArgumentUsageError
         with self.assertRaises(ArgumentUsageError):
             self.cmd('vmss list-instance-public-ips -n {flex_vmss} -g {rg}')
@@ -3954,7 +3954,7 @@ class VMSSUpdateTests(ScenarioTest):
         # test that cannot try to update protection policy on VMSS itself
         self.cmd('vmss update -g {rg} -n {vmss} --protect-from-scale-in True --protect-from-scale-set-actions True', expect_failure=True)
 
-        self.cmd('vmss create -g {rg} -n {vmss2} --image Canonical:UbuntuServer:18.04-LTS:latest --orchestration-mode Flexible --admin-username vmtest')
+        self.cmd('vmss create -g {rg} -n {vmss2} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username vmtest')
         self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
             self.check('additionalCapabilities.hibernationEnabled', None),
         ])
@@ -4327,12 +4327,12 @@ class VMSSCreateExistingOptions(ScenarioTest):
         with self.assertRaisesRegex(InvalidArgumentValueError, message):
             self.cmd('vmss create -g {rg} -n {vmss} --image ubutults --data-disk-delete-option delete --admin-username vmtest --orchestration-mode Uniform')
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --orchestration-mode Flexible --os-disk-delete-option delete', checks=[
+        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --os-disk-delete-option delete', checks=[
             self.check('vmss.orchestrationMode', 'Flexible'),
             self.check('vmss.virtualMachineProfile.storageProfile.osDisk.deleteOption', 'Delete')
         ])
 
-        self.cmd('vmss create -g {rg} -n {vmss1} --image Canonical:UbuntuServer:18.04-LTS:latest --orchestration-mode Flexible --data-disk-sizes-gb 4 --data-disk-delete-option detach', checks=[
+        self.cmd('vmss create -g {rg} -n {vmss1} --image Canonical:UbuntuServer:18.04-LTS:latest --data-disk-sizes-gb 4 --data-disk-delete-option detach', checks=[
             self.check('vmss.orchestrationMode', 'Flexible'),
             self.check('vmss.virtualMachineProfile.storageProfile.dataDisks[0].deleteOption', 'Detach')
         ])
@@ -4427,7 +4427,7 @@ class VMSSVMsScenarioTest(ScenarioTest):
         self.cmd('vmss delete-instances --resource-group {rg} --name {vmss} --instance-ids *')
         self.cmd('vmss list-instances --resource-group {rg} --name {vmss}')
 
-        self.cmd('vmss create -g {rg} -n {flex_vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --orchestration-mode Flexible --admin-username vmtest')
+        self.cmd('vmss create -g {rg} -n {flex_vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username vmtest')
         from azure.cli.core.azclierror import ArgumentUsageError
         with self.assertRaises(ArgumentUsageError):
             self.cmd('vmss list-instance-connection-info --resource-group {rg} --name {flex_vmss}')
@@ -4470,7 +4470,7 @@ class VMSSVMsScenarioTest(ScenarioTest):
         self.cmd('vmss delete-instances --resource-group {rg} --name {vmss} --instance-ids *')
         self.cmd('vmss list-instances --resource-group {rg} --name {vmss}')
 
-        self.cmd('vmss create -g {rg} -n {flex_vmss} --image Debian:debian-10:10:latest --orchestration-mode Flexible --admin-username vmtest')
+        self.cmd('vmss create -g {rg} -n {flex_vmss} --image Debian:debian-10:10:latest --admin-username vmtest')
         from azure.cli.core.azclierror import ArgumentUsageError
         with self.assertRaises(ArgumentUsageError):
             self.cmd('vmss list-instance-connection-info --resource-group {rg} --name {flex_vmss}')
@@ -8553,7 +8553,7 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
         })
 
         self.cmd('ppg create -g {rg} -n {ppg}')
-        self.cmd('vmss create -g {rg} -n {vmss} --orchestration-mode Flexible --single-placement-group false '
+        self.cmd('vmss create -g {rg} -n {vmss} --single-placement-group false '
                  '--ppg {ppg} --platform-fault-domain-count 3',
                  checks=[
                      self.check('vmss.singlePlacementGroup', False),
@@ -8571,7 +8571,7 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
         self.kwargs.update({
             'vmss': self.create_random_name('vmss', 10),
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --orchestration-mode Flexible --platform-fault-domain-count 2 '
+        self.cmd('vmss create -g {rg} -n {vmss} --platform-fault-domain-count 2 '
                  '--single-placement-group true --image Canonical:UbuntuServer:18.04-LTS:latest --vm-sku Standard_M8ms --admin-username clitest '
                  '-l eastus2euap --upgrade-policy-mode automatic', checks=[
             self.check('vmss.singlePlacementGroup', True),
@@ -8596,7 +8596,7 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
         })
 
         # test without authentication info
-        self.cmd('vmss create -n {vmss0} -g {rg} --orchestration-mode Flexible --single-placement-group false '
+        self.cmd('vmss create -n {vmss0} -g {rg} --single-placement-group false '
                  '--platform-fault-domain-count 1 --vm-sku Standard_DS1_v2 --instance-count 0 --image Canonical:UbuntuServer:18.04-LTS:latest '
                  '--computer-name-prefix testvmss --vnet-name {vnet_name} --subnet default --network-api-version '
                  '2020-11-01 --admin-username testvmss ')
@@ -8616,7 +8616,7 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
         ])
 
         # test with password
-        self.cmd('vmss create -g {rg} -n {vmss1} --orchestration-mode Flexible --single-placement-group false '
+        self.cmd('vmss create -g {rg} -n {vmss1} --single-placement-group false '
                  '--platform-fault-domain-count 1 --vm-sku Standard_DS1_v2 --instance-count 0 --admin-username testvmss '
                  '--admin-password This!s@Terr!bleP@ssw0rd --computer-name-prefix testvmss --image Debian:debian-10:10:latest '
                  '--vnet-name {vnet_name} --subnet default --network-api-version 2020-11-01')
@@ -8635,7 +8635,7 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
         ])
 
         # test with ssh
-        self.cmd('vmss create -n {vmss2} -g {rg} --orchestration-mode Flexible --single-placement-group false '
+        self.cmd('vmss create -n {vmss2} -g {rg} --single-placement-group false '
                  '--platform-fault-domain-count 1 --vm-sku Standard_DS1_v2 --instance-count 0 --image Canonical:UbuntuServer:18.04-LTS:latest '
                  '--computer-name-prefix testvmss --vnet-name {vnet_name} --subnet default --network-api-version '
                  '2020-11-01 --admin-username testvmss --generate-ssh-keys ')
@@ -8655,7 +8655,7 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
         ])
 
         # test with ssh path
-        self.cmd('vmss create -n {vmss3} -g {rg} --orchestration-mode Flexible --single-placement-group false '
+        self.cmd('vmss create -n {vmss3} -g {rg} --single-placement-group false '
                  '--platform-fault-domain-count 1 --vm-sku Standard_DS1_v2 --instance-count 0 --image Canonical:UbuntuServer:18.04-LTS:latest '
                  '--computer-name-prefix testvmss --vnet-name {vnet_name} --subnet default --network-api-version '
                  '2020-11-01 --admin-username testvmss --generate-ssh-keys ')
@@ -8675,7 +8675,7 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
         ])
 
         # test with ssh value
-        self.cmd('vmss create -n {vmss4} -g {rg} --orchestration-mode Flexible --single-placement-group false '
+        self.cmd('vmss create -n {vmss4} -g {rg} --single-placement-group false '
                  '--platform-fault-domain-count 1 --vm-sku Standard_DS1_v2 --instance-count 0 --image Canonical:UbuntuServer:18.04-LTS:latest '
                  '--computer-name-prefix testvmss --vnet-name {vnet_name} --subnet default --network-api-version '
                  '2020-11-01 --admin-username testvmss --ssh-key-value \'{ssh_key}\' ')
@@ -8695,7 +8695,7 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
         ])
 
         # test with authentication type
-        self.cmd('vmss create -n {vmss5} -g {rg} --orchestration-mode Flexible --single-placement-group false '
+        self.cmd('vmss create -n {vmss5} -g {rg} --single-placement-group false '
                  '--platform-fault-domain-count 1 --vm-sku Standard_DS1_v2 --instance-count 0 --image Canonical:UbuntuServer:18.04-LTS:latest '
                  '--computer-name-prefix testvmss --vnet-name {vnet_name} --subnet default --network-api-version '
                  '2020-11-01 --admin-username testvmss --authentication-type ssh ')
@@ -8723,9 +8723,9 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
 
         from azure.cli.core.azclierror import ArgumentUsageError
         with self.assertRaisesRegex(ArgumentUsageError, 'please specify the --image when you want to specify the VM SKU'):
-            self.cmd('vmss create -n {vmss} -g {rg} --orchestration-mode Flexible --platform-fault-domain-count 1 --zones 1 --instance-count 3 --vm-sku Standard_D1_v2')
+            self.cmd('vmss create -n {vmss} -g {rg} --platform-fault-domain-count 1 --zones 1 --instance-count 3 --vm-sku Standard_D1_v2')
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --orchestration-mode flexible --admin-username vmtest')
+        self.cmd('vmss create -n {vmss} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username vmtest')
 
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('orchestrationMode', 'Flexible'),
@@ -8744,7 +8744,7 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
             'vmss': self.create_random_name('vmss', 10),
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image OpenLogic:CentOS:7.5:latest --orchestration-mode flexible --regular-priority-count 4 --regular-priority-percentage 50 --orchestration-mode flexible --instance-count 2 --image OpenLogic:CentOS:7.5:latest --priority Spot --eviction-policy Deallocate --single-placement-group False', checks=[
+        self.cmd('vmss create -n {vmss} -g {rg} --image OpenLogic:CentOS:7.5:latest --regular-priority-count 4 --regular-priority-percentage 50 --instance-count 2 --image OpenLogic:CentOS:7.5:latest --priority Spot --eviction-policy Deallocate --single-placement-group False', checks=[
             self.check('vmss.priorityMixPolicy.baseRegularPriorityCount', 4),
             self.check('vmss.priorityMixPolicy.regularPriorityPercentageAboveBase', 50),
         ])
@@ -8954,7 +8954,7 @@ class VMSSPatchModeScenarioTest(ScenarioTest):
             'rg': resource_group
         })
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image Win2022Datacenter --enable-agent --enable-auto-update false --patch-mode Manual --orchestration-mode Flexible --admin-username azureuser --admin-password testPassword0')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Win2022Datacenter --enable-agent --enable-auto-update false --patch-mode Manual --admin-username azureuser --admin-password testPassword0')
         vm = self.cmd('vmss list-instances -g {rg} -n {vmss}').get_output_in_json()[0]['name']
         self.kwargs['vm'] = vm
 
@@ -8971,7 +8971,7 @@ class VMSSPatchModeScenarioTest(ScenarioTest):
             'rg': resource_group
         })
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --enable-agent --patch-mode ImageDefault --orchestration-mode Flexible --generate-ssh-keys --instance-count 0 --admin-username vmtest')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --enable-agent --patch-mode ImageDefault --generate-ssh-keys --instance-count 0 --admin-username vmtest')
 
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         health_extension_file = os.path.join(curr_dir, 'health_extension.json').replace('\\', '\\\\')
@@ -9435,7 +9435,7 @@ class VMListFilterScenarioTest(ScenarioTest):
             'vmss_flex': self.create_random_name('vmss', 10)
         })
 
-        self.cmd('vmss create -g {rg} -n {vmss_flex} --orchestration-mode Flexible --admin-username vmtest --platform-fault-domain-count 2 --image Canonical:UbuntuServer:18.04-LTS:latest --instance-count 2')
+        self.cmd('vmss create -g {rg} -n {vmss_flex} --admin-username vmtest --platform-fault-domain-count 2 --image Canonical:UbuntuServer:18.04-LTS:latest --instance-count 2')
         vmss_id = self.cmd('vmss show -g {rg} -n {vmss_flex}').get_output_in_json()['id']
         self.kwargs.update({
             'vmss_id': vmss_id
