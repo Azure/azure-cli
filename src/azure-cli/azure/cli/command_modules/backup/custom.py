@@ -126,15 +126,14 @@ password_length = 15
 
 
 # pylint: disable=line-too-long
-def update_vault(client, vault_name, resource_group_name, existing_vault=None, tags=None,
+def update_vault(client, vault_name, resource_group_name, tags=None,
                  public_network_access=None, immutability_state=None, cross_subscription_restore_state=None,
                  classic_alerts=None, azure_monitor_alerts_for_job_failures=None):
-    if existing_vault is None:
-        try:
-            existing_vault = client.get(resource_group_name, vault_name)
-        except CoreResourceNotFoundError:
-            raise CLIError("The vault you are trying to update does not exist. Please create it with "
-                           "az backup vault create")
+    try:
+        existing_vault = client.get(resource_group_name, vault_name)
+    except CoreResourceNotFoundError:
+        raise CLIError("The vault you are trying to update does not exist. Please create it with "
+                       "az backup vault create")
 
     patchvault = PatchVault()
     patchvault.properties = VaultProperties()
@@ -164,13 +163,13 @@ def create_vault(client, vault_name, resource_group_name, location, tags=None,
                  public_network_access=None, immutability_state=None, cross_subscription_restore_state=None,
                  classic_alerts=None, azure_monitor_alerts_for_job_failures=None):
     try:
-        existing_vault_if_any = client.get(resource_group_name, vault_name)
+        client.get(resource_group_name, vault_name)
         logger.warning("You are using the az backup vault create command to update vault properties. Please "
                        "note that this is not officially supported, and can also reset some vault properties "
                        "to their default values. It is recommended to use az backup vault update instead.")
 
         # If the vault exists, we move to the update flow instead
-        update_vault(client, vault_name, resource_group_name, existing_vault_if_any, tags, public_network_access,
+        update_vault(client, vault_name, resource_group_name, tags, public_network_access,
                      immutability_state, cross_subscription_restore_state, classic_alerts,
                      azure_monitor_alerts_for_job_failures)
     except CoreResourceNotFoundError:
