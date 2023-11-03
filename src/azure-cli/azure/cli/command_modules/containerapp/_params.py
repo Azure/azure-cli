@@ -175,7 +175,7 @@ def load_arguments(self, _):
 
     with self.argument_context('containerapp env create') as c:
         c.argument('zone_redundant', options_list=["--zone-redundant", "-z"], help="Enable zone redundancy on the environment. Cannot be used without --infrastructure-subnet-resource-id. If used with --location, the subnet's location must match")
-        c.argument('enable_workload_profiles', arg_type=get_three_state_flag(), options_list=["--enable-workload-profiles", "-w"], help="Boolean indicating if the environment is enabled to have workload profiles", default=False)
+        c.argument('enable_workload_profiles', arg_type=get_three_state_flag(), options_list=["--enable-workload-profiles", "-w"], help="Boolean indicating if the environment is enabled to have workload profiles")
 
     with self.argument_context('containerapp env update') as c:
         c.argument('name', name_type, help='Name of the Container Apps environment.')
@@ -422,7 +422,6 @@ def load_arguments(self, _):
         c.argument('max_nodes', help="The maximum node count for the workload profile")
 
     with self.argument_context('containerapp env workload-profile update') as c:
-        c.argument('workload_profile_type', help="The type of workload profile to update. Run 'az containerapp env workload-profile list-supported -l <region>' to check the options for your region.")
         c.argument('min_nodes', help="The minimum node count for the workload profile")
         c.argument('max_nodes', help="The maximum node count for the workload profile")
 
