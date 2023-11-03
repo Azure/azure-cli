@@ -411,6 +411,16 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                 namespace.storage_profile = StorageProfile.ManagedPirImage
         else:
             raise CLIError('Unrecognized image type: {}'.format(image_type))
+    elif not namespace.image and not getattr(namespace, 'attach_os_disk', None):
+        namespace.image = 'MicrosoftWindowsServer:WindowsServer:2022-datacenter-azure-edition:latest'
+        _parse_image_argument(cmd, namespace)
+        namespace.storage_profile = StorageProfile.ManagedPirImage
+        if namespace.enable_secure_boot is None:
+            namespace.enable_secure_boot = True
+        if namespace.enable_vtpm is None:
+            namespace.enable_vtpm = True
+        if namespace.security_type is None:
+            namespace.security_type = 'TrustedLaunch'
     else:
         # did not specify image XOR attach-os-disk
         raise CLIError('incorrect usage: --image IMAGE | --attach-os-disk DISK')

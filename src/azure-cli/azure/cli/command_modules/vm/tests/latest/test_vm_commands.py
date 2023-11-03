@@ -3223,6 +3223,32 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('additionalCapabilities.hibernationEnabled', False)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_vmss_create_with_minimal_params_', location='eastus2')
+    @AllowLargeResponse(size_kb=99999)
+    def test_vm_vmss_create_with_minimal_params(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'vmss': 'vmss1'
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --admin-username admin123 --admin-password testPassword0')
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('securityProfile.uefiSettings.secureBootEnabled', True),
+            self.check('securityProfile.uefiSettings.vTpmEnabled', True),
+            self.check('securityProfile.securityType', "TrustedLaunch"),
+            self.check('storageProfile.imageReference.publisher', "MicrosoftWindowsServer"),
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss} --admin-username admin123 --admin-password testPassword0')
+
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True),
+            self.check('virtualMachineProfile.securityProfile.securityType', "TrustedLaunch"),
+            self.check('virtualMachineProfile.storageProfile.imageReference.publisher', "MicrosoftWindowsServer"),
+        ])
+
 
 class VMUnmanagedDataDiskTest(ScenarioTest):
 
