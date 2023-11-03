@@ -758,7 +758,7 @@ def load_arguments(self, _):
         c.argument('load_balancer_sku', resource_type=ResourceType.MGMT_NETWORK, min_api='2017-08-01', max_api='2021-02-01', options_list=['--lb-sku'], arg_type=get_enum_type(['Basic', 'Standard']),
                    help="Sku of the Load Balancer to create. Default to 'Standard' when single placement group is turned off; otherwise, default to 'Basic'. The public IP is supported to be created on edge zone only when it is 'Standard'")
         c.argument('load_balancer_sku', resource_type=ResourceType.MGMT_NETWORK, min_api='2021-02-01', options_list=['--lb-sku'], arg_type=get_enum_type(['Basic', 'Standard', 'Gateway'], default='Standard'),
-                   help="Sku of the Load Balancer to create. Default to 'Standard' when single placement group is turned off; otherwise, default to 'Basic'. The public IP is supported to be created on edge zone only when it is 'Standard'")
+                   help="Sku of the Load Balancer to create. The public IP is supported to be created on edge zone only when it is 'Standard'")
         c.argument('nat_pool_name', help='Name to use for the NAT pool when creating a new load balancer.', options_list=['--lb-nat-pool-name', '--nat-pool-name'], deprecate_info=c.deprecate(target='--nat-pool-name', redirect='--nat-rule-name', hide=True))
         c.argument('nat_rule_name', help='Name to use for the NAT rule v2 when creating a new load balancer. (NAT rule V2 is used to replace NAT pool)', options_list=['--lb-nat-rule-name', '--nat-rule-name'])
 
@@ -1076,12 +1076,9 @@ def load_arguments(self, _):
             c.argument('public_ip_address_allocation', help=None, default=None, arg_type=get_enum_type(['dynamic', 'static']))
             c.argument('public_ip_address_dns_name', help='Globally unique DNS name for a newly created public IP.')
 
-            if self.cli_ctx.cloud.profile == 'latest':
-                c.argument('public_ip_sku', help='Public IP SKU. It is set to Standard by default. The public IP is supported to be created on edge zone only when it is \'Standard\'',
-                           default=None, arg_type=get_enum_type(['Basic', 'Standard']))
-            elif self.supported_api_version(min_api='2017-08-01', resource_type=ResourceType.MGMT_NETWORK):
-                c.argument('public_ip_sku', help='Public IP SKU. It is set to Basic by default. The public IP is supported to be created on edge zone only when it is \'Standard\'',
-                           default=None, arg_type=get_enum_type(['Basic', 'Standard']))
+            if self.supported_api_version(min_api='2017-08-01', resource_type=ResourceType.MGMT_NETWORK):
+                c.argument('public_ip_sku', help='Public IP SKU. The public IP is supported to be created on edge zone only when it is \'Standard\'',
+                           default='Standard', arg_type=get_enum_type(['Basic', 'Standard']))
 
             c.argument('nic_delete_option', nargs='+', min_api='2021-03-01',
                        help='Specify what happens to the network interface when the VM is deleted. Use a singular '
