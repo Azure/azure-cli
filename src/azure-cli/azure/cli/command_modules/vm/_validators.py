@@ -1355,7 +1355,7 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
     from azure.cli.core.profiles import ResourceType
     if not cmd.supported_api_version(resource_type=ResourceType.MGMT_COMPUTE, min_api='2020-12-01'):
         return
-    from ._vm_utils import trusted_launch_warning_log, validate_image_trusted_launch, validate_vm_disk_trusted_launch
+    from ._vm_utils import validate_image_trusted_launch, validate_vm_disk_trusted_launch
     if namespace.image is not None:
         from ._vm_utils import is_valid_image_version_id
         if is_valid_image_version_id(namespace.image):
