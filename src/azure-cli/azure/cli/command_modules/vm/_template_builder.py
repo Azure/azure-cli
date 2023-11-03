@@ -1267,6 +1267,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         vmss_properties['upgradePolicy'] = {
             'mode': upgrade_policy_mode
         }
+        # Upgrade policy is currently omitted for VMSS flexible mode, so it needs to be set to 'None'
         if orchestration_mode.lower() == 'flexible':
             vmss_properties['upgradePolicy'] = None
 
