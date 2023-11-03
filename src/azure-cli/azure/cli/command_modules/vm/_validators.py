@@ -1336,25 +1336,18 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
     from azure.cli.core.profiles import ResourceType
     if not cmd.supported_api_version(resource_type=ResourceType.MGMT_COMPUTE, min_api='2020-12-01'):
         return
-    from ._vm_utils import trusted_launch_warning_log
+    from ._vm_utils import trusted_launch_warning_log, validate_image_trusted_launch, validate_vm_disk_trusted_launch
     if namespace.image is not None:
-        from ._vm_utils import parse_shared_gallery_image_id, parse_community_gallery_image_id, \
-            is_valid_image_version_id, parse_gallery_image_id
+        from ._vm_utils import is_valid_image_version_id
         if is_valid_image_version_id(namespace.image):
-            image_info = parse_gallery_image_id(namespace.image)
-            compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=image_info[0])
-            gallery_image_info = compute_client.gallery_images.get(
-                resource_group_name=image_info[1], gallery_name=image_info[2], gallery_image_name=image_info[3])
-            generation_version = gallery_image_info.hyper_v_generation if hasattr(gallery_image_info,
-                                                                                  'hyper_v_generation') else None
-            features = gallery_image_info.features if hasattr(gallery_image_info, 'features') else None
-            trusted_launch_warning_log(namespace, generation_version, features)
-            return
+            if namespace.security_type is None:
+                namespace.security_type = 'Standard'
 
         image_type = _parse_image_argument(cmd, namespace)
 
         if image_type == 'image_id':
             # managed image does not support trusted launch
+            validate_image_trusted_launch(namespace)
             return
 
         if image_type == 'uri':
@@ -1362,25 +1355,11 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
             return
 
         if image_type == 'shared_gallery_image_id':
-            from ._client_factory import cf_shared_gallery_image
-            image_info = parse_shared_gallery_image_id(namespace.image)
-            gallery_image_info = cf_shared_gallery_image(cmd.cli_ctx).get(
-                location=namespace.location, gallery_unique_name=image_info[0], gallery_image_name=image_info[1])
-            generation_version = gallery_image_info.hyper_v_generation if hasattr(gallery_image_info,
-                                                                                  'hyper_v_generation') else None
-            features = gallery_image_info.features if hasattr(gallery_image_info, 'features') else None
-            trusted_launch_warning_log(namespace, generation_version, features)
+            validate_image_trusted_launch(namespace)
             return
 
         if image_type == 'community_gallery_image_id':
-            from ._client_factory import cf_community_gallery_image
-            image_info = parse_community_gallery_image_id(namespace.image)
-            gallery_image_info = cf_community_gallery_image(cmd.cli_ctx).get(
-                location=namespace.location, public_gallery_name=image_info[0], gallery_image_name=image_info[1])
-            generation_version = gallery_image_info.hyper_v_generation if hasattr(gallery_image_info,
-                                                                                  'hyper_v_generation') else None
-            features = gallery_image_info.features if hasattr(gallery_image_info, 'features') else None
-            trusted_launch_warning_log(namespace, generation_version, features)
+            validate_image_trusted_launch(namespace)
             return
 
         if image_type == 'urn':
@@ -1406,10 +1385,9 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
         client = _compute_client_factory(cmd.cli_ctx).disks
         attach_os_disk_name = parse_resource_id(namespace.attach_os_disk)['name']
         attach_os_disk_info = client.get(namespace.resource_group_name, attach_os_disk_name)
-        generation_version = attach_os_disk_info.hyper_v_generation if hasattr(attach_os_disk_info,
-                                                                               'hyper_v_generation') else None
-        features = attach_os_disk_info.features if hasattr(attach_os_disk_info, 'features') else None
-        trusted_launch_warning_log(namespace, generation_version, features)
+        disk_security_profile = attach_os_disk_info.security_profile if hasattr(attach_os_disk_info,
+                                                                                'security_profile') else None
+        validate_vm_disk_trusted_launch(namespace, disk_security_profile)
 
 
 def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
