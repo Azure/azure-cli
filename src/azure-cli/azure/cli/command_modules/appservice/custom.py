@@ -503,7 +503,7 @@ def add_azure_storage_account(cmd, resource_group_name, name, custom_id, storage
             slot_cfg_names.azure_storage_config_names.append(custom_id)
             client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
-    return result.properties
+    return _redact_storage_accounts(result.properties)
 
 
 def update_azure_storage_account(cmd, resource_group_name, name, custom_id, storage_type=None, account_name=None,
@@ -542,7 +542,7 @@ def update_azure_storage_account(cmd, resource_group_name, name, custom_id, stor
             slot_cfg_names.azure_storage_config_names.append(custom_id)
             client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
-    return result.properties
+    return _redact_storage_accounts(result.properties)
 
 
 def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_remote=False, timeout=None, slot=None):
@@ -1590,7 +1590,15 @@ def delete_azure_storage_accounts(cmd, resource_group_name, name, custom_id, slo
                                          'update_azure_storage_accounts', azure_storage_accounts,
                                          slot, client)
 
-    return result.properties
+    return _redact_storage_accounts(result.properties)
+
+
+def _redact_storage_accounts(properties):
+    logger.warning('Storage account access keys have been redacted. '
+                   'Use `az webapp config storage-account list` to view.')
+    for account in properties:
+        properties[account].accessKey = None
+    return properties
 
 
 def _ssl_context():
@@ -1682,7 +1690,7 @@ def update_connection_strings(cmd, resource_group_name, name, connection_string_
         slot_cfg_names.connection_string_names -= rm_sticky_slot_settings
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
-    return result.properties
+    return _redact_connection_strings(result.properties)
 
 
 def delete_connection_strings(cmd, resource_group_name, name, setting_names, slot=None):
@@ -1701,9 +1709,19 @@ def delete_connection_strings(cmd, resource_group_name, name, setting_names, slo
     if is_slot_settings:
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
-    return _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
-                                       'update_connection_strings',
-                                       conn_strings, slot, client)
+    result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
+                                         'update_connection_strings',
+                                         conn_strings, slot, client)
+    _redact_connection_strings(result.properties)
+    return result
+
+
+def _redact_connection_strings(properties):
+    logger.warning('Connection string values have been redacted. '
+                   'Use `az webapp config connection-string list` to view.')
+    for setting in properties:
+        properties[setting].value = None
+    return properties
 
 
 CONTAINER_APPSETTING_NAMES = ['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME',
