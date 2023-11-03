@@ -125,6 +125,7 @@ password_length = 15
 # pylint: disable=too-many-function-args
 
 
+# pylint: disable=line-too-long
 def update_vault(client, vault_name, resource_group_name, existing_vault=None, tags=None,
                  public_network_access=None, immutability_state=None, cross_subscription_restore_state=None,
                  classic_alerts=None, azure_monitor_alerts_for_job_failures=None):
@@ -140,16 +141,16 @@ def update_vault(client, vault_name, resource_group_name, existing_vault=None, t
 
     if public_network_access is not None:
         patchvault.properties.public_network_access = _get_vault_public_network_access(public_network_access)
-    
+
     if immutability_state is not None:
         patchvault.properties.security_settings = _get_vault_security_settings(immutability_state, existing_vault)
-    
+
     if cross_subscription_restore_state is not None:
         patchvault.properties.restore_settings = _get_vault_restore_settings(cross_subscription_restore_state)
 
     if classic_alerts is not None or azure_monitor_alerts_for_job_failures is not None:
         patchvault.properties.monitoring_settings = _get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures,
-                                                                                 classic_alerts, existing_vault)
+                                                                                   classic_alerts, existing_vault)
 
     if tags is not None:
         patchvault.tags = tags
@@ -176,19 +177,20 @@ def create_vault(client, vault_name, resource_group_name, location, tags=None,
         vault_properties = VaultProperties()
 
         # Setting defaults. If we set it in the function signature, the update functionality of the command will break
-        classic_alerts = 'Enable'
-        azure_monitor_alerts_for_job_failures = 'Enable'
-        public_network_access = 'Enable'
+        classic_alerts = 'Enable' if classic_alerts is None else classic_alerts
+        azure_monitor_alerts_for_job_failures = 'Enable' if azure_monitor_alerts_for_job_failures is None \
+            else azure_monitor_alerts_for_job_failures
+        public_network_access = 'Enable' if public_network_access is None else public_network_access
 
     vault_sku = Sku(name=SkuName.standard)
 
     vault_properties.public_network_access = _get_vault_public_network_access(public_network_access)
     vault_properties.monitoring_settings = _get_vault_monitoring_settings(
         azure_monitor_alerts_for_job_failures, classic_alerts)
-    
+
     if immutability_state is not None:
         vault_properties.security_settings = _get_vault_security_settings(immutability_state)
-    
+
     if cross_subscription_restore_state is not None:
         vault_properties.restore_settings = _get_vault_restore_settings(cross_subscription_restore_state)
 
@@ -228,15 +230,15 @@ def _get_vault_security_settings(immutability_state, existing_vault=None):
 
     # if immutability_state is not None:
     #     security_settings.immutability_settings = ImmutabilitySettings(state=immutability_state)
-    
+
     # if soft_delete_state is not None or soft_delete_retention_period_in_days is not None:
     #     soft_delete_settings = security_settings.soft_delete_settings
-        
+
     #     if soft_delete_state is not None:
     #         soft_delete_settings.soft_delete_state = help.transform_softdelete_parameters(soft_delete_state)
     #     if soft_delete_retention_period_in_days is not None:
     #         soft_delete_settings.soft_delete_retention_period_in_days = soft_delete_retention_period_in_days
-        
+
     #     security_settings.soft_delete_settings = soft_delete_settings
     # Old process
     # security_settings = None
@@ -285,9 +287,8 @@ def _get_vault_restore_settings(cross_subscription_restore_state):
     restore_settings = None
     if cross_subscription_restore_state is not None:
         restore_settings = RestoreSettings()
-        restore_settings.cross_subscription_restore_settings=CrossSubscriptionRestoreSettings(
-                cross_subscription_restore_state=cust_help.transform_enable_parameters(cross_subscription_restore_state)
-            )
+        restore_settings.cross_subscription_restore_settings = CrossSubscriptionRestoreSettings(
+            cross_subscription_restore_state=cust_help.transform_enable_parameters(cross_subscription_restore_state))
     return restore_settings
 
 
