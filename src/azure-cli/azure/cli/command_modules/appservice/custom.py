@@ -2054,7 +2054,14 @@ def config_source_control(cmd, resource_group_name, name, repo_url, repository_t
             poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                              'begin_create_or_update_source_control',
                                              slot, source_control)
-            return LongRunningOperation(cmd.cli_ctx)(poller)
+            response = LongRunningOperation(cmd.cli_ctx)(poller)
+            if response.git_hub_action_configuration and \
+                response.git_hub_action_configuration.container_configuration and \
+                    response.git_hub_action_configuration.container_configuration.password:
+                logger.warning("GitHub action password has been redacted. Use "
+                               "`az webapp/functionapp deployment source show` to view.")
+                response.git_hub_action_configuration.container_configuration.password = None
+            return response
         except Exception as ex:  # pylint: disable=broad-except
             ex = ex_handler_factory(no_throw=True)(ex)
             # for non server errors(50x), just throw; otherwise retry 4 times
