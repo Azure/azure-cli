@@ -203,11 +203,13 @@ class TestFunctionappMocked(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers')
     @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', return_value='https://mock-scm')
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('requests.post', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom._check_zip_deployment_status')
     def test_enable_zip_deploy_accepted(self,
                                         check_zip_deployment_status_mock,
                                         requests_post_mock,
+                                        web_client_factory_mock,
                                         get_scm_url_mock,
                                         get_scm_headers_mock):
         # prepare
@@ -219,6 +221,14 @@ class TestFunctionappMocked(unittest.TestCase):
         response.status_code = 202
         requests_post_mock.return_value = response
 
+        appservice_mock = mock.Mock()
+        appservice_mock.kind = "functionapp"
+
+        web_client_mock = mock.Mock()
+        web_client_mock.web_apps = mock.Mock()
+        web_client_mock.web_apps.get = mock.Mock(return_value=appservice_mock)
+        web_client_factory_mock.return_value = web_client_mock
+
         expected_zip_deploy_headers = _get_zip_deploy_headers('usr', 'pwd', cmd_mock.cli_ctx)
         get_scm_headers_mock.return_value = expected_zip_deploy_headers
 
@@ -227,7 +237,7 @@ class TestFunctionappMocked(unittest.TestCase):
             enable_zip_deploy(cmd_mock, 'rg', 'name', 'src', slot=None)
 
         # assert
-        requests_post_mock.assert_called_with('https://mock-scm/api/zipdeploy?isAsync=true', data='zip-content',
+        requests_post_mock.assert_called_with('https://mock-scm/api/zipdeploy?isAsync=true&Deployer=az_cli_functions', data='zip-content',
                                               headers=expected_zip_deploy_headers, verify=mock.ANY)
         # TODO improve authorization matcher
         check_zip_deployment_status_mock.assert_called_with(cmd_mock, 'rg', 'name',
@@ -235,9 +245,11 @@ class TestFunctionappMocked(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers')
     @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', return_value='https://mock-scm')
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('requests.post', autospec=True)
     def test_enable_zip_deploy_conflict(self,
                                         requests_post_mock,
+                                        web_client_factory_mock,
                                         get_scm_url_mock,
                                         get_scm_headers_mock):
         # prepare
@@ -249,6 +261,14 @@ class TestFunctionappMocked(unittest.TestCase):
         response.status_code = 409
         requests_post_mock.return_value = response
 
+        appservice_mock = mock.Mock()
+        appservice_mock.kind = "functionapp"
+
+        web_client_mock = mock.Mock()
+        web_client_mock.web_apps = mock.Mock()
+        web_client_mock.web_apps.get = mock.Mock(return_value=appservice_mock)
+        web_client_factory_mock.return_value = web_client_mock
+
         expected_zip_deploy_headers = _get_zip_deploy_headers('usr', 'pwd', cmd_mock.cli_ctx)
         get_scm_headers_mock.return_value = expected_zip_deploy_headers
 
@@ -258,14 +278,16 @@ class TestFunctionappMocked(unittest.TestCase):
                 enable_zip_deploy(cmd_mock, 'rg', 'name', 'src', slot=None)
 
         # assert
-        requests_post_mock.assert_called_with('https://mock-scm/api/zipdeploy?isAsync=true', data='zip-content',
+        requests_post_mock.assert_called_with('https://mock-scm/api/zipdeploy?isAsync=true&Deployer=az_cli_functions', data='zip-content',
                                               headers=expected_zip_deploy_headers, verify=mock.ANY)
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers')
     @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', return_value='https://mock-scm')
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('requests.post', autospec=True)
     def test_enable_zip_deploy_service_unavailable(self,
                                                    requests_post_mock,
+                                                   web_client_factory_mock,
                                                    get_scm_url_mock,
                                                    get_scm_headers_mock):
         # prepare
@@ -277,6 +299,15 @@ class TestFunctionappMocked(unittest.TestCase):
         response.status_code = 503
         requests_post_mock.return_value = response
 
+        appservice_mock = mock.Mock()
+        appservice_mock.kind = "functionapp"
+
+        web_client_mock = mock.Mock()
+        web_client_mock.web_apps = mock.Mock()
+        web_client_mock.web_apps.get = mock.Mock(return_value=appservice_mock)
+        web_client_factory_mock.return_value = web_client_mock
+
+
         expected_zip_deploy_headers = _get_zip_deploy_headers('usr', 'pwd', cmd_mock.cli_ctx)
         get_scm_headers_mock.return_value = expected_zip_deploy_headers
 
@@ -286,7 +317,7 @@ class TestFunctionappMocked(unittest.TestCase):
                 enable_zip_deploy(cmd_mock, 'rg', 'name', 'src', slot=None)
 
         # assert
-        requests_post_mock.assert_called_with('https://mock-scm/api/zipdeploy?isAsync=true', data='zip-content',
+        requests_post_mock.assert_called_with('https://mock-scm/api/zipdeploy?isAsync=true&Deployer=az_cli_functions', data='zip-content',
                                               headers=expected_zip_deploy_headers, verify=mock.ANY)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._get_app_settings_from_scm', return_value={
