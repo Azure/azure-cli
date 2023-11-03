@@ -672,7 +672,8 @@ class WebappConfigureTest(ScenarioTest):
         ])
         # add
         self.cmd(('webapp config storage-account add -g {} -n {} --custom-id Id --storage-type AzureFiles --account-name name '
-                  '--share-name sharename --access-key key --mount-path /path/to/mount').format(resource_group, linux_webapp))
+                  '--share-name sharename --access-key key --mount-path /path/to/mount')
+                  .format(resource_group, linux_webapp)).assert_with_checks([(JMESPathCheck("[?name=='Id']|[0].value.accessKey", None))])
         self.cmd('webapp config storage-account list -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
             JMESPathCheck('length(@)', 1),
             JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
@@ -682,7 +683,7 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck("[?name=='Id']|[0].value.mountPath", "/path/to/mount")])
         # update
         self.cmd('webapp config storage-account update -g {} -n {} --custom-id Id --mount-path /different/path'
-                 .format(resource_group, linux_webapp))
+                 .format(resource_group, linux_webapp)).assert_with_checks([(JMESPathCheck("[?name=='Id']|[0].value.accessKey", None))])
         self.cmd('webapp config storage-account list -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
             JMESPathCheck("length(@)", 1),
             JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
@@ -700,7 +701,11 @@ class WebappConfigureTest(ScenarioTest):
 
         # site connection string tests
         self.cmd('webapp config connection-string set -t mysql -g {} -n {} --settings c1="conn1" c2=conn2 '
-                 '--slot-settings c3=conn3'.format(resource_group, linux_webapp))
+                 '--slot-settings c3=conn3'
+                 .format(resource_group, linux_webapp)).assert_with_checks([
+                     JMESPathCheck("[?name=='c1']|[0].value", None),
+                     JMESPathCheck("[?name=='c2']|[0].value", None)
+                     ])
         self.cmd('webapp config connection-string list -g {} -n {}'
                  .format(resource_group, linux_webapp)).assert_with_checks([
                      JMESPathCheck('length([])', 3),
@@ -710,7 +715,7 @@ class WebappConfigureTest(ScenarioTest):
                      JMESPathCheck("[?name=='c2']|[0].slotSetting", False),
                      JMESPathCheck("[?name=='c3']|[0].slotSetting", True)])
         self.cmd('webapp config connection-string delete -g {} -n {} --setting-names c1 c3'
-                 .format(resource_group, linux_webapp))
+                 .format(resource_group, linux_webapp)).assert_with_checks([JMESPathCheck("[?name=='c2']|[0].value", None)])
         self.cmd('webapp config connection-string list -g {} -n {}'
                  .format(resource_group, linux_webapp)).assert_with_checks([
                      JMESPathCheck('length([])', 1),
@@ -1348,7 +1353,11 @@ class WebappSlotScenarioTest(ScenarioTest):
                      JMESPathCheck("[?name=='s3']|[0].value", None)
                      ])
 
-        self.cmd('webapp config connection-string set -g {} -n {} -t mysql --slot {} --settings c1=connection1 --slot-settings c2=connection2'.format(resource_group, webapp, slot2))
+        self.cmd('webapp config connection-string set -g {} -n {} -t mysql --slot {} --settings c1=connection1 --slot-settings c2=connection2'
+                 .format(resource_group, webapp, slot2)).assert_with_checks([
+                     JMESPathCheck("[?name=='c1']|[0].value", None),
+                     JMESPathCheck("[?name=='c2']|[0].value", None)
+                 ])
         # verify we can swap with non production slot
         self.cmd('webapp deployment slot swap -g {} -n {} --slot {} --target-slot {}'.format(
             resource_group, webapp, slot, slot2))
