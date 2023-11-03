@@ -72,7 +72,7 @@ alias_json = """
           "Win2022Datacenter": {
             "publisher": "MicrosoftWindowsServer",
             "offer": "WindowsServer",
-            "sku": "2022-Datacenter",
+            "sku": "2022-datacenter-g2",
             "version": "latest",
             "architecture": "x64"
           },
@@ -86,14 +86,14 @@ alias_json = """
           "Win2019Datacenter": {
             "publisher": "MicrosoftWindowsServer",
             "offer": "WindowsServer",
-            "sku": "2019-Datacenter",
+            "sku": "2019-datacenter-gen2",
             "version": "latest",
             "architecture": "x64"
           },
           "Win2016Datacenter": {
             "publisher": "MicrosoftWindowsServer",
             "offer": "WindowsServer",
-            "sku": "2016-Datacenter",
+            "sku": "2016-datacenter-gen2",
             "version": "latest",
             "architecture": "x64"
           },

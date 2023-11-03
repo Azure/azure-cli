@@ -1332,6 +1332,25 @@ def _validate_trusted_launch(namespace):
         namespace.enable_secure_boot = True
 
 
+def trusted_launch_set_default(namespace, generation_version):
+    if not generation_version:
+        return
+
+    from ._constants import UPGRADE_SECURITY_HINT
+    if generation_version == 'V1' or namespace.security_type == 'Standard':
+        logger.warning(UPGRADE_SECURITY_HINT)
+
+    elif generation_version == 'V2':
+        if namespace.security_type is None:
+            namespace.security_type = 'TrustedLaunch'
+
+        if namespace.enable_vtpm is None:
+            namespace.enable_vtpm = True
+
+        if namespace.enable_secure_boot is None:
+            namespace.enable_secure_boot = True
+
+
 def _validate_generation_version_and_trusted_launch(cmd, namespace):
     from azure.cli.core.profiles import ResourceType
     if not cmd.supported_api_version(resource_type=ResourceType.MGMT_COMPUTE, min_api='2020-12-01'):
@@ -1372,8 +1391,7 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
                                        namespace.os_sku, os_version)
             generation_version = vm_image_info.hyper_v_generation if hasattr(vm_image_info,
                                                                              'hyper_v_generation') else None
-            features = vm_image_info.features if hasattr(vm_image_info, 'features') else None
-            trusted_launch_warning_log(namespace, generation_version, features)
+            trusted_launch_set_default(namespace, generation_version)
             return
 
     # create vm with os disk
