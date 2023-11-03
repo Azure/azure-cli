@@ -2185,7 +2185,7 @@ app service environment, please use --location parameter and specify the region 
 has been deployed ".format(app_service_environment)
                 raise ResourceNotFoundError(err_msg)
         if hyper_v and ase.kind in ('ASEV1', 'ASEV2'):
-            raise ArgumentUsageError('Windows containers are only supported on v3 App Service Environments v3 or newer')
+            raise ArgumentUsageError('Windows containers are only supported on App Service Environment v3')
     else:  # Non-ASE
         ase_def = None
         if location is None:
