@@ -125,107 +125,120 @@ password_length = 15
 # pylint: disable=too-many-function-args
 
 
-# TODO Look into replacing PUT with PATCH for update after Soft Delete is stabilized
-def update_vault(client, vault_name, resource_group_name, tags=None,
+def update_vault(client, vault_name, resource_group_name, existing_vault=None, tags=None,
                  public_network_access=None, immutability_state=None, cross_subscription_restore_state=None,
                  classic_alerts=None, azure_monitor_alerts_for_job_failures=None):
+    if existing_vault is None:
+        try:
+            existing_vault = client.get(resource_group_name, vault_name)
+        except CoreResourceNotFoundError:
+            raise CLIError("The vault you are trying to update does not exist. Please create it with "
+                           "az backup vault create")
+
     patchvault = PatchVault()
     patchvault.properties = VaultProperties()
 
     if public_network_access is not None:
-        patchvault.properties.public_network_access=_get_vault_public_network_access(public_network_access)
+        patchvault.properties.public_network_access = _get_vault_public_network_access(public_network_access)
     
     if immutability_state is not None:
-        patchvault.properties.security_settings=_get_vault_security_settings(client, resource_group_name, vault_name, immutability_state)
+        patchvault.properties.security_settings = _get_vault_security_settings(immutability_state, existing_vault)
     
     if cross_subscription_restore_state is not None:
-        patchvault.properties.restore_settings=_get_vault_restore_settings(cross_subscription_restore_state)
+        patchvault.properties.restore_settings = _get_vault_restore_settings(cross_subscription_restore_state)
 
     if classic_alerts is not None or azure_monitor_alerts_for_job_failures is not None:
-        patchvault.properties.monitoring_settings=_get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures, classic_alerts)
+        patchvault.properties.monitoring_settings = _get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures,
+                                                                                 classic_alerts, existing_vault)
+
+    if tags is not None:
+        patchvault.tags = tags
 
     return client.begin_update(resource_group_name, vault_name, patchvault)
-    # try:
-    #     existing_vault_if_any = client.get(resource_group_name, vault_name)
-    #     location = existing_vault_if_any.location
-    #     return create_vault(client, vault_name, resource_group_name, location, tags, public_network_access, immutability_state,
-    #                  cross_subscription_restore_state, classic_alerts, azure_monitor_alerts_for_job_failures)
-    # except CoreResourceNotFoundError:
-    #     # This runs for a create - if there is no vault, identity details don't need to be provided
-    #     raise CLIError("No vault {} in resource group {} was found. Please create the vault first."
-    #                    .format(vault_name, resource_group_name))
+
 
 # TODO: Re-add references to SoftDeleteSettings once SDK version is upgraded:
 # Import SoftDeleteSettings, args in create_vault and _get_vault_security_settings
 def create_vault(client, vault_name, resource_group_name, location, tags=None,
                  public_network_access=None, immutability_state=None, cross_subscription_restore_state=None,
                  classic_alerts=None, azure_monitor_alerts_for_job_failures=None):
-    vault_sku = Sku(name=SkuName.standard)
     try:
         existing_vault_if_any = client.get(resource_group_name, vault_name)
-        # update_vault(client, vault_name, resource_group_name, tags, public_network_access, immutability_state,
-        #              cross_subscription_restore_state, classic_alerts, azure_monitor_alerts_for_job_failures)
-        # logger.warning("You are using the backup vault create command to update the vault properties. "
-        #                "Please note that this use case is unsupported and might have bugs. Please "
-        #                "use the backup vault update command instead."
-        #     )
-        identity = existing_vault_if_any.identity
-        vault_properties = existing_vault_if_any.properties
+        logger.warning("You are using the az backup vault create command to update vault properties. Please "
+                       "note that this is not officially supported, and can also reset some vault properties "
+                       "to their default values. It is recommended to use az backup vault update instead.")
+
+        # If the vault exists, we move to the update flow instead
+        update_vault(client, vault_name, resource_group_name, existing_vault_if_any, tags, public_network_access,
+                     immutability_state, cross_subscription_restore_state, classic_alerts,
+                     azure_monitor_alerts_for_job_failures)
     except CoreResourceNotFoundError:
-        existing_vault_if_any = None
-        # Setting defaults for vault creation
         vault_properties = VaultProperties()
+
+        # Setting defaults. If we set it in the function signature, the update functionality of the command will break
         classic_alerts = 'Enable'
         azure_monitor_alerts_for_job_failures = 'Enable'
         public_network_access = 'Enable'
 
-    
-    if public_network_access is not None:
-        vault_properties.public_network_access=_get_vault_public_network_access(public_network_access)
+    vault_sku = Sku(name=SkuName.standard)
+
+    vault_properties.public_network_access = _get_vault_public_network_access(public_network_access)
+    vault_properties.monitoring_settings = _get_vault_monitoring_settings(
+        azure_monitor_alerts_for_job_failures, classic_alerts)
     
     if immutability_state is not None:
-        vault_properties.security_settings=_get_vault_security_settings(client, resource_group_name, vault_name, immutability_state)
+        vault_properties.security_settings = _get_vault_security_settings(immutability_state)
     
     if cross_subscription_restore_state is not None:
-        vault_properties.restore_settings=_get_vault_restore_settings(cross_subscription_restore_state)
+        vault_properties.restore_settings = _get_vault_restore_settings(cross_subscription_restore_state)
 
-    if classic_alerts is not None or azure_monitor_alerts_for_job_failures is not None:
-        vault_properties.monitoring_settings=_get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures, classic_alerts)
-
-    print(vault_properties.redundancy_settings)
-
-    if existing_vault_if_any is None:
-        # This runs for a create - if there is no vault, identity details don't need to be provided
-        vault = Vault(location=location, sku=vault_sku, properties=vault_properties, tags=tags)
-    else:
-        vault = Vault(location=location, sku=vault_sku, properties=vault_properties, tags=tags, identity=identity)
+    vault = Vault(location=location, sku=vault_sku, properties=vault_properties, tags=tags)
 
     return client.begin_create_or_update(resource_group_name, vault_name, vault)
 
 
-def _get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures, classic_alerts):
+def _get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures, classic_alerts, existing_vault=None):
     monitoring_settings = MonitoringSettings()
+    if existing_vault is not None:
+        monitoring_settings = existing_vault.properties.monitoring_settings
+
     if azure_monitor_alerts_for_job_failures is not None:
-        monitoring_settings.azure_monitor_alert_settings=AzureMonitorAlertSettings(
-            alerts_for_all_job_failures=cust_help.transform_enable_parameters(azure_monitor_alerts_for_job_failures)
-        )
+        monitoring_settings.azure_monitor_alert_settings = AzureMonitorAlertSettings(
+            alerts_for_all_job_failures=cust_help.transform_enable_parameters(azure_monitor_alerts_for_job_failures))
     if classic_alerts is not None:
-        monitoring_settings.classic_alert_settings=ClassicAlertSettings(
-            alerts_for_critical_operations=cust_help.transform_enable_parameters(classic_alerts)
-        )
+        monitoring_settings.classic_alert_settings = ClassicAlertSettings(
+            alerts_for_critical_operations=cust_help.transform_enable_parameters(classic_alerts))
 
     return monitoring_settings
 
 
 # TODO Remove pylint supress once the new SDK is in place
 # pylint: disable=unused-argument
-def _get_vault_security_settings(client, resource_group_name, vault_name, immutability_state):
+def _get_vault_security_settings(immutability_state, existing_vault=None):
     security_settings = None
     if immutability_state is not None:
         security_settings = SecuritySettings()
         security_settings.immutability_settings = ImmutabilitySettings(state=immutability_state)
 
     # TODO Re-add once the new SDK is in place
+    # Using updated process (defaults for soft delete need to be set in create function):
+    # security_settings = SecuritySettings()
+    # if existing_vault is not None:
+    #     security_settings = existing_vault.properties.security_settings
+
+    # if immutability_state is not None:
+    #     security_settings.immutability_settings = ImmutabilitySettings(state=immutability_state)
+    
+    # if soft_delete_state is not None or soft_delete_retention_period_in_days is not None:
+    #     soft_delete_settings = security_settings.soft_delete_settings
+        
+    #     if soft_delete_state is not None:
+    #         soft_delete_settings.soft_delete_state = help.transform_softdelete_parameters(soft_delete_state)
+    #     if soft_delete_retention_period_in_days is not None:
+    #         soft_delete_settings.soft_delete_retention_period_in_days = soft_delete_retention_period_in_days
+        
+    #     security_settings.soft_delete_settings = soft_delete_settings
+    # Old process
     # security_settings = None
     # if immutability_state is not None or soft_delete_state is not None or \
     #         soft_delete_retention_period_in_days is not None:
@@ -279,15 +292,6 @@ def _get_vault_restore_settings(cross_subscription_restore_state):
 
 
 def _get_vault_public_network_access(public_network_access):
-    # if public_network_access is None:
-    #     # get the existing value of public_network_access so the request is made correctly
-    #     try:
-    #         existing_vault_if_any = client.get(resource_group_name, vault_name)
-    #         existing_vault_public_network_access = existing_vault_if_any.properties.public_network_access
-    #         public_network_access = cust_help.transform_enable_parameters(existing_vault_public_network_access)
-    #     except CoreResourceNotFoundError:
-    #         # This runs for a create - if there is no vault, default value is Enable
-    #         public_network_access = 'Enable'
     return cust_help.transform_enable_parameters(public_network_access)
 
 
