@@ -454,7 +454,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                                  logical_sector_size=logical_sector_size,
                                  security_data_uri=security_data_uri,
                                  performance_plus=performance_plus,
-                                 elastic_san_resource_id=elastic_san_resource_id )
+                                 elastic_san_resource_id=elastic_san_resource_id)
 
     if size_gb is None and option == DiskCreateOption.empty:
         raise RequiredArgumentMissingError(
