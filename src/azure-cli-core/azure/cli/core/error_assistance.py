@@ -11,11 +11,8 @@ import requests
 from azure.cli.core._config import GLOBAL_CONFIG_PATH
 from azure.cli.core.style import Style, print_styled_text
 
-#_DEEPPROMPT_ENDPOINT = 'https://data-ai-dev.microsoft.com/deepprompt/api/v1'
-#_DEEPPROMPT_APP = "7d78b7a3-e228-4b85-8fcf-5633fb326beb"
-#_DEEPPROMPT_ENDPOINT = 'https://data-ai-dev.microsoft.com/deepprompt-test/api/v1'
-_DEEPPROMPT_ENDPOINT = 'http://localhost:5000/api/v1'
-_DEEPPROMPT_APP = "1fc1633d-c28c-4a17-9a68-22a50233d5f7"
+_DEEPPROMPT_ENDPOINT = 'https://data-ai-dev.microsoft.com/deepprompt/api/v1'
+_DEEPPROMPT_APP = "7d78b7a3-e228-4b85-8fcf-5633fb326beb"
 _AAD_TENANT = "72f988bf-86f1-41af-91ab-2d7cd011db47"
 _SCOPES = [f"{_DEEPPROMPT_APP}/.default"]
 _TIMEOUT = 180
@@ -139,7 +136,7 @@ def _send_query(access_token: str, session_id: str, command: str|None, error: st
                 },
             json={
                 "query": "Query errors and corrected command for Azure CLI",
-                "intent": "azure_error",
+                "intent": "azure_error_recovery",
                 "context": {
                     "command": command,
                     "error": error,
