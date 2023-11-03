@@ -69,7 +69,7 @@ examples:
 """
 
 helps['batch account keys list'] = f"""
-
+type: command
 short-summary: Gets the account keys for the specified Batch account.
         This operation applies only to Batch accounts with allowedAuthenticationModes containing
         'SharedKey'. If the Batch account doesn't contain 'SharedKey' in its
