@@ -96,7 +96,7 @@ from .aaz.latest.network.vnet import Create as _VNetCreate, Update as _VNetUpdat
 from .aaz.latest.network.vnet.peering import Create as _VNetPeeringCreate
 from .aaz.latest.network.vnet.subnet import Create as _VNetSubnetCreate, Update as _VNetSubnetUpdate
 from .aaz.latest.network.vnet_gateway import Create as _VnetGatewayCreate, Update as _VnetGatewayUpdate, \
-    DisconnectVpnConnections as _VnetGatewayVpnConnectionsDisconnect
+    DisconnectVpnConnections as _VnetGatewayVpnConnectionsDisconnect, Show as _VNetGatewayShow
 from .aaz.latest.network.vnet_gateway.aad import Assign as _VnetGatewayAadAssign
 from .aaz.latest.network.vnet_gateway.ipsec_policy import Add as _VnetGatewayIpsecPolicyAdd
 from .aaz.latest.network.vnet_gateway.nat_rule import Add as _VnetGatewayNatRuleAdd, List as _VnetGatewayNatRuleShow, \
@@ -6064,6 +6064,22 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
                 logger.info('Placing gateway in active-active mode.')
             args.active = active
 
+
+class VNetGatewayShow(_VNetGatewayShow):
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined
+
+        # resolve flatten conflict
+        # when the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+        props = self.ctx.vars.instance.properties
+        if has_value(props.nat_rules):
+            for rule in props.nat_rules:
+                if has_value(rule.properties) and has_value(rule.properties.type):
+                    rule.properties.type = AAZUndefined
+
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+
+        return result
 
 def generate_vpn_client(cmd, resource_group_name, virtual_network_gateway_name, processor_architecture=None,
                         authentication_method=None, radius_server_auth_certificate=None, client_root_certificates=None,
