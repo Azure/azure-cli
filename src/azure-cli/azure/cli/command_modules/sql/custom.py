@@ -2534,7 +2534,7 @@ def failover_group_create(
         failover_group_name,
         partner_server,
         partner_resource_group=None,
-        failover_policy=FailoverPolicyType.automatic.value,
+        failover_policy=FailoverPolicyType.manual.value,
         grace_period=1,
         add_db=None):
     '''
@@ -2588,7 +2588,7 @@ def failover_group_update(
         instance,
         resource_group_name,
         server_name,
-        failover_policy=None,
+        failover_policy=FailoverPolicyType.manual.value,
         grace_period=None,
         add_db=None,
         remove_db=None):
