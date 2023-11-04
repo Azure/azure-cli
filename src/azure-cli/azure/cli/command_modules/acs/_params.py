@@ -65,8 +65,8 @@ from azure.cli.command_modules.acs._validators import (
     validate_registry_name, validate_sku_tier, validate_snapshot_id,
     validate_snapshot_name, validate_spot_max_price, validate_ssh_key,
     validate_nodepool_taints, validate_vm_set_type, validate_vnet_subnet_id, validate_k8s_support_plan,
-    validate_utc_offset, validate_start_date, validate_start_time, validate_crg_id,
-    validate_force_upgrade_disable_and_enable_parameters)
+    validate_utc_offset, validate_start_date, validate_start_time,
+    validate_capacity_reservation_group_id, validate_force_upgrade_disable_and_enable_parameters)
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
     get_resource_name_completion_list, get_three_state_flag, name_type,
@@ -317,7 +317,7 @@ def load_arguments(self, _):
         c.argument('kubelet_config')
         c.argument('linux_os_config')
         c.argument('host_group_id', validator=validate_host_group_id)
-        c.argument('crg_id', validator=validate_crg_id)
+        c.argument('capacity_reservation_group_id', validator=validate_capacity_reservation_group_id)
         c.argument('gpu_instance_profile', arg_type=get_enum_type(gpu_instance_profiles))
         # azure monitor profile
         c.argument('enable_azure_monitor_metrics', action='store_true')
@@ -564,7 +564,7 @@ def load_arguments(self, _):
         c.argument('kubelet_config')
         c.argument('linux_os_config')
         c.argument('host_group_id', validator=validate_host_group_id)
-        c.argument('crg_id', validator=validate_crg_id)
+        c.argument('capacity_reservation_group_id', validator=validate_capacity_reservation_group_id)
         c.argument('gpu_instance_profile', arg_type=get_enum_type(gpu_instance_profiles))
 
     with self.argument_context('aks nodepool update', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='agent_pools') as c:

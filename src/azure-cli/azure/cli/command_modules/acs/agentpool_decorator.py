@@ -368,20 +368,26 @@ class AKSAgentPoolContext(BaseAKSContext):
             host_group_id = raw_value
         return host_group_id
 
-    def get_crg_id(self) -> Union[str, None]:
-        return self._get_crg_id()
+    def get_capacity_reservation_group_id(self) -> Union[str, None]:
+        return self._get_capacity_reservation_group_id()
 
-    def _get_crg_id(self) -> Union[str, None]:
-        raw_value = self.raw_param.get("crg_id")
+    def _get_capacity_reservation_group_id(self) -> Union[str, None]:
+        """Obtain the value of crg_id.
+
+        :return: string or None
+        """
+        capacity_reservation_group_id = self.raw_param.get("capacity_reservation_group_id")
         # try to read the property value corresponding to the parameter from the `agentpool` object
         value_obtained_from_agentpool = None
-        if self.agentpool and hasattr(self.agentpool, "crg_id"):
-            value_obtained_from_agentpool = self.agentpool.capacity_reservation_group_id
-        if value_obtained_from_agentpool is not None:
-            crg_id = value_obtained_from_agentpool
-        else:
-            crg_id = raw_value
-        return crg_id
+        if (
+                self.agentpool and
+                self.agentpool.capacity_reservation_group_id is not None
+        ):
+            capacity_reservation_group_id = self.agentpool.capacity_reservation_group_id
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return capacity_reservation_group_id
 
     def _get_kubernetes_version(self, read_only: bool = False) -> str:
         """Internal function to dynamically obtain the value of kubernetes_version according to the context.
@@ -1555,14 +1561,15 @@ class AKSAgentPoolAddDecorator:
         agentpool.gpu_instance_profile = self.context.get_gpu_instance_profile()
         return agentpool
 
-    def set_up_crg_properties(self, agentpool: AgentPool) -> AgentPool:
+    def set_up_capacity_reservation_group_id(self, agentpool: AgentPool) -> AgentPool:
         """Set up crg related properties for the AgentPool object.
 
         :return: the AgentPool object
         """
         self._ensure_agentpool(agentpool)
-
-        agentpool.capacity_reservation_group_id = self.context.get_crg_id()
+        capacity_reservation_group_id = self.context.get_capacity_reservation_group_id()
+        if capacity_reservation_group_id is not None:
+            agentpool.capacity_reservation_group_id = capacity_reservation_group_id
         return agentpool
 
     def construct_agentpool_profile_default(self, bypass_restore_defaults: bool = False) -> AgentPool:
@@ -1600,7 +1607,7 @@ class AKSAgentPoolAddDecorator:
         # set up gpu instance profile
         agentpool = self.set_up_gpu_properties(agentpool)
         # set up crg id
-        agentpool = self.set_up_crg_properties(agentpool)
+        agentpool = self.set_up_capacity_reservation_group_id(agentpool)
         # restore defaults
         if not bypass_restore_defaults:
             agentpool = self._restore_defaults_in_agentpool(agentpool)
