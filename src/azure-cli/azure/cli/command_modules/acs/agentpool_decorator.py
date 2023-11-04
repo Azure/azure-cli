@@ -378,7 +378,6 @@ class AKSAgentPoolContext(BaseAKSContext):
         """
         capacity_reservation_group_id = self.raw_param.get("capacity_reservation_group_id")
         # try to read the property value corresponding to the parameter from the `agentpool` object
-        value_obtained_from_agentpool = None
         if (
                 self.agentpool and
                 self.agentpool.capacity_reservation_group_id is not None

@@ -9287,7 +9287,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      '--nodepool-name {node_pool_name} -c 1 ' \
                      '--enable-managed-identity ' \
                      '--assign-identity {identity} ' \
-                     '--capacity-reservation-group-id={capacity_reservation_group_id} ' \
+                     '--crg-id={capacity_reservation_group_id} ' \
                      '--ssh-key-value={ssh_key_value}'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -9299,7 +9299,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                  '--cluster-name={name} '
                  '--name={node_pool_name_second} '
                  '--node-vm-size {vm_size} '
-                 '--capacity-reservation-group-id={capacity_reservation_group_id} '
+                 '--crg-id={capacity_reservation_group_id} '
                  '-c 1 ',
                  checks=[
                      self.check('provisioningState', 'Succeeded'),

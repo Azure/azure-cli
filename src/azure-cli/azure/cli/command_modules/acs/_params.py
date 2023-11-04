@@ -317,7 +317,7 @@ def load_arguments(self, _):
         c.argument('kubelet_config')
         c.argument('linux_os_config')
         c.argument('host_group_id', validator=validate_host_group_id)
-        c.argument('capacity_reservation_group_id', validator=validate_capacity_reservation_group_id)
+        c.argument('crg_id', validator=validate_capacity_reservation_group_id)
         c.argument('gpu_instance_profile', arg_type=get_enum_type(gpu_instance_profiles))
         # azure monitor profile
         c.argument('enable_azure_monitor_metrics', action='store_true')
@@ -564,7 +564,7 @@ def load_arguments(self, _):
         c.argument('kubelet_config')
         c.argument('linux_os_config')
         c.argument('host_group_id', validator=validate_host_group_id)
-        c.argument('capacity_reservation_group_id', validator=validate_capacity_reservation_group_id)
+        c.argument('crg_id', validator=validate_capacity_reservation_group_id)
         c.argument('gpu_instance_profile', arg_type=get_enum_type(gpu_instance_profiles))
 
     with self.argument_context('aks nodepool update', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='agent_pools') as c:
