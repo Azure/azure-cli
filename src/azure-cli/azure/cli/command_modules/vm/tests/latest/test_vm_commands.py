@@ -1184,7 +1184,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             'disk4': 'd4',
             'disk5': 'd5',
             'disk6': 'd6',
-            'image': '/Subscriptions/' + subs_id + '/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/0001-com-ubuntu-server-jammy/Skus/22_04-lts-gen2/Versions/22.04.202310260',
+            'image': '/Subscriptions/' + subs_id + '/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/0001-com-ubuntu-server-jammy/Skus/22_04-lts-gen2/Versions/22.04.202311010',
             'image2': 'image2',
             'g1': self.create_random_name('g1', 20),
             'vm': 'vm1'
@@ -10087,6 +10087,20 @@ class DiskRPTestScenario(ScenarioTest):
         })
         self.cmd('snapshot create -n {snapshot} -g {rg} --incremental true --source {disk}', checks=[
             self.check('creationData.sourceResourceId', '{disk_id}')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_disk_snapshot_hyper_v_generation_default_to_null', location='eastus2euap')
+    def test_disk_snapshot_hyper_v_generation_default_to_null(self, resource_group):
+        self.kwargs.update({
+            'disk': self.create_random_name('disk', 10),
+            'snapshot': self.create_random_name('snap', 10),
+        })
+
+        self.cmd('disk create -g {rg} -n {disk} --size-gb 4 ', checks=[
+            self.check('hyperVGeneration', None)
+        ])
+        self.cmd('snapshot create -n {snapshot} -g {rg} --source {disk}', checks=[
+            self.check('hyperVGeneration', None)
         ])
 
 

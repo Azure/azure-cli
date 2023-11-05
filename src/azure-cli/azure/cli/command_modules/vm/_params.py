@@ -99,6 +99,7 @@ def load_arguments(self, _):
         hyper_v_gen_sku = CLIArgumentType(arg_type=get_enum_type(HyperVGenerationTypes, default="V1"))
     else:
         hyper_v_gen_sku = CLIArgumentType(arg_type=get_enum_type(["V1", "V2"], default="V1"))
+    disk_snapshot_hyper_v_gen_sku = get_enum_type(HyperVGenerationTypes) if HyperVGenerationTypes else get_enum_type(["V1", "V2"])
 
     ultra_ssd_enabled_type = CLIArgumentType(
         arg_type=get_three_state_flag(), min_api='2018-06-01',
@@ -151,7 +152,7 @@ def load_arguments(self, _):
             c.argument('duration_in_seconds', help='Time duration in seconds until the SAS access expires', type=int)
             if self.supported_api_version(min_api='2018-09-30', operation_group='disks'):
                 c.argument('access_level', arg_type=get_enum_type(['Read', 'Write']), default='Read', help='access level')
-                c.argument('hyper_v_generation', arg_type=hyper_v_gen_sku, help='The hypervisor generation of the Virtual Machine. Applicable to OS disks only.')
+                c.argument('hyper_v_generation', arg_type=disk_snapshot_hyper_v_gen_sku, help='The hypervisor generation of the Virtual Machine. Applicable to OS disks only.')
             else:
                 c.ignore('access_level', 'for_upload', 'hyper_v_generation')
             c.argument('encryption_type', min_api='2019-07-01', arg_type=get_enum_type(self.get_models('EncryptionType', operation_group='disks')),
