@@ -29,10 +29,14 @@ from azure.cli.command_modules.resource.custom import (
     format_bicep_file,
 )
 
+from azure.cli.command_modules.resource._bicep import (run_bicep_command)
+
 from azure.cli.core.mock import DummyCli
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles._shared import ResourceType
+
+from azure.cli.testsdk import live_only
 
 cli_ctx = DummyCli()
 loader = AzCommandsLoader(cli_ctx, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
@@ -339,6 +343,7 @@ class TestCustom(unittest.TestCase):
     def test_deployment_prompt_alphabetical_order(self):
         # check that params are prompted for in alphabetical order when the file is loaded with preserve_order=False
         curr_dir = os.path.dirname(os.path.realpath(__file__))
+
         template_path = os.path.join(curr_dir, 'param-validation-template.json').replace('\\', '\\\\')
         parameters_path = os.path.join(curr_dir, 'param-validation-params.json').replace('\\', '\\\\')
         parameters_with_reference_path = os.path.join(curr_dir, 'param-validation-ref-params.json').replace('\\', '\\\\')
@@ -361,6 +366,67 @@ class TestCustom(unittest.TestCase):
         self.assertEqual(_is_bicepparam_file_provided([['test.json']]), False)
         self.assertEqual(_is_bicepparam_file_provided([['test.bicepparam']]), True)
         self.assertEqual(_is_bicepparam_file_provided([['test.bicepparam'], ['test.json'],  ['{ \"foo\": { \"value\": \"bar\" } }']]), True)
+
+    @live_only()
+    def test_bicep_generate_params_defaults(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        bicep_file = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+        json_file = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
+
+        run_bicep_command(cli_ctx, ["generate-params", bicep_file])
+        is_generated_params_file_exists = os.path.exists(json_file)
+        self.assertTrue(is_generated_params_file_exists)
+
+    @live_only()
+    def test_bicep_generate_params_output_format(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        bicep_file = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+        json_file = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
+
+        run_bicep_command(cli_ctx, ["generate-params", bicep_file, "--output-format", "json"])
+        is_generated_params_file_exists = os.path.exists(json_file)
+        self.assertTrue(is_generated_params_file_exists)
+
+    @live_only()
+    def test_bicep_generate_params_include_params(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        bicep_file = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+        json_file = os.path.join(curr_dir, 'sample_params.parameters.json').replace('\\', '\\\\')
+
+        run_bicep_command(cli_ctx, ["generate-params", bicep_file, "--include-params", "all"])
+        is_generated_params_file_exists = os.path.exists(json_file)
+        self.assertTrue(is_generated_params_file_exists)
+
+    @live_only()
+    def test_bicep_lint_defaults(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        param_file = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+
+        run_bicep_command(cli_ctx, ["lint", param_file])
+
+        self.assertTrue(param_file)
+
+    @live_only()
+    def test_bicep_build_params_defaults(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        param_file = os.path.join(curr_dir, 'sample_params.bicepparam').replace('\\', '\\\\')
+        json_file = os.path.join(curr_dir, 'sample_params.json').replace('\\', '\\\\')
+
+        run_bicep_command(cli_ctx, ["build-params", param_file])
+        is_generated_params_file_exists = os.path.exists(json_file)
+
+        self.assertTrue(is_generated_params_file_exists)
+
+    @live_only()
+    def test_bicep_decompile_params_defaults(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        param_file = os.path.join(curr_dir, 'param-validation-params.bicepparam').replace('\\', '\\\\')
+        json_file = os.path.join(curr_dir, 'param-validation-params.json').replace('\\', '\\\\')
+
+        run_bicep_command(cli_ctx, ["decompile-params", json_file, "--force"])
+        is_generated_params_file_exists = os.path.exists(param_file)
+
+        self.assertTrue(is_generated_params_file_exists)
 
     @mock.patch("knack.prompting.prompt_y_n", autospec=True)
     @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_resource_group_core", autospec=True)
@@ -556,7 +622,8 @@ class TestFormatBicepFile(unittest.TestCase):
 
         # Assert.
         mock_bicep_version_greater_than_or_equal_to.assert_called_once_with("0.12.1")
-        mock_run_bicep_command.assert_called_once_with(cmd.cli_ctx, ["format", file_path, "--stdout"])        
-        
+        mock_run_bicep_command.assert_called_once_with(cmd.cli_ctx, ["format", file_path, "--stdout"])
+
+
 if __name__ == '__main__':
     unittest.main()

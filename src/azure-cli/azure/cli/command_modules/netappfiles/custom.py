@@ -14,9 +14,11 @@ from azure.mgmt.netapp.models import ActiveDirectory, NetAppAccount, NetAppAccou
     BackupPolicyPatch, VolumePatchPropertiesDataProtection, AccountEncryption, KeyVaultProperties, EncryptionIdentity, AuthorizeRequest, \
     BreakReplicationRequest, PoolChangeRequest, VolumeRevert, Backup, BackupPatch, LdapSearchScopeOpt, SubvolumeInfo, \
     SubvolumePatchRequest, SnapshotRestoreFiles, PlacementKeyValuePairs, VolumeGroupMetaData, VolumeGroupDetails, \
-    VolumeGroupVolumeProperties, VolumeQuotaRule, VolumeQuotaRulePatch, ManagedServiceIdentity, BreakFileLocksRequest
+    VolumeGroupVolumeProperties, VolumeQuotaRule, VolumeQuotaRulePatch, ManagedServiceIdentity, BreakFileLocksRequest, \
+    BackupRestoreFiles, GetGroupIdListForLDAPUserRequest
 from azure.mgmt.netapp.models._net_app_management_client_enums import EncryptionKeySource
 from azure.cli.core.azclierror import ValidationError
+from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import sdk_no_wait
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
@@ -40,7 +42,9 @@ def _update_mapper(existing, new, keys):
     for key in keys:
         existing_value = getattr(existing, key)
         new_value = getattr(new, key)
+        logger.debug("ANF LOG: update mapper => setting:%s old:%s new:%s", key, existing_value, new_value)
         setattr(new, key, new_value if new_value is not None else existing_value)
+    logger.debug("mapping done new is now: %s", new)
 
 
 # ---- ACCOUNT ----
@@ -91,8 +95,78 @@ def add_active_directory(instance, username, password, domain, dns,
                                        preferred_servers_for_ldap_client=preferred_servers_for_ldap_client)
     active_directories.append(active_directory)
     body = NetAppAccountPatch(active_directories=active_directories)
-    _update_mapper(instance, body, ['active_directories'])
+    _update_mapper(instance, body, ['active_directories', 'name'])
+
     return body
+
+
+# account update, active_directory is amended with subgroup commands
+def patch_account(instance, tags=None, encryption=None, key_source=None, key_vault_uri=None,
+                  key_name=None, key_vault_resource_id=None, user_assigned_identity=None):
+    if encryption is not None and key_source is None:
+        key_source = encryption
+    if key_source is not None and key_source == EncryptionKeySource.MICROSOFT_KEY_VAULT:
+        keyVaultProperties = KeyVaultProperties(key_vault_uri=key_vault_uri, key_name=key_name, key_vault_resource_id=key_vault_resource_id)
+        identity = EncryptionIdentity(user_assigned_identity=user_assigned_identity)
+        account_encryption = AccountEncryption(key_source=key_source, key_vault_properties=keyVaultProperties, identity=identity)
+    else:
+        account_encryption = None
+    body = NetAppAccountPatch(tags=tags, encryption=account_encryption)
+    _update_mapper(instance, body, ['tags', 'encryption'])
+    return body
+
+
+# Custom method for account update, active_directory is amended with subgroup commands. Ensure it returns the GET response  (the updated resource)
+def patch_account_custom(cmd, client, resource_group_name, account_name, tags=None, encryption=None, key_source=None, key_vault_uri=None,
+                         key_name=None, key_vault_resource_id=None, user_assigned_identity=None, identity_type=None):
+    if encryption is not None and key_source is None:
+        key_source = encryption
+    if key_source is not None and key_source == EncryptionKeySource.MICROSOFT_KEY_VAULT:
+        keyVaultProperties = KeyVaultProperties(key_vault_uri=key_vault_uri, key_name=key_name, key_vault_resource_id=key_vault_resource_id)
+        identity = EncryptionIdentity(user_assigned_identity=user_assigned_identity)
+        account_encryption = AccountEncryption(key_source=key_source, key_vault_properties=keyVaultProperties, identity=identity)
+    else:
+        account_encryption = None
+
+    if identity_type is not None:
+        account_identity = ManagedServiceIdentity(type=identity_type, user_assigned_identities={user_assigned_identity: {}})
+    else:
+        account_identity = None
+
+    body = NetAppAccountPatch(tags=tags, encryption=account_encryption, identity=account_identity)
+
+    # Poll the lro then do a final get, to get around issue where operation result was not full resource
+    poller = client.begin_update(resource_group_name=resource_group_name, account_name=account_name, body=body)
+    LongRunningOperation(cmd.cli_ctx)(poller)
+    return client.get(resource_group_name, account_name)
+
+
+def add_active_directory_custom(cmd, client, resource_group_name, account_name, username, password, domain, dns,
+                                smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None, site=None,
+                                server_root_ca_cert=None, backup_operators=None, aes_encryption=None, ldap_signing=None,
+                                security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None,
+                                administrators=None, encrypt_dc_conn=None, user_dn=None, group_dn=None, group_filter=None,
+                                preferred_servers_for_ldap_client=None):
+    ldap_search_scope = LdapSearchScopeOpt(user_dn=user_dn,
+                                           group_dn=group_dn,
+                                           group_membership_filter=group_filter)
+    active_directories = []
+    active_directory = ActiveDirectory(username=username, password=password, domain=domain, dns=dns, site=site,
+                                       smb_server_name=smb_server_name, organizational_unit=organizational_unit,
+                                       kdc_ip=kdc_ip, ad_name=ad_name, backup_operators=backup_operators,
+                                       server_root_ca_certificate=server_root_ca_cert, aes_encryption=aes_encryption,
+                                       ldap_signing=ldap_signing, security_operators=security_operators,
+                                       ldap_over_tls=ldap_over_tls,
+                                       allow_local_nfs_users_with_ldap=allow_local_ldap_users,
+                                       administrators=administrators, encrypt_dc_connections=encrypt_dc_conn,
+                                       ldap_search_scope=ldap_search_scope,
+                                       preferred_servers_for_ldap_client=preferred_servers_for_ldap_client)
+    active_directories.append(active_directory)
+    body = NetAppAccountPatch(active_directories=active_directories)
+    # Poll the lro then do a final get, to get around issue where operation result was not full resource
+    poller = client.begin_update(resource_group_name=resource_group_name, account_name=account_name, body=body)
+    LongRunningOperation(cmd.cli_ctx)(poller)
+    return client.get(resource_group_name, account_name)
 
 
 # pylint: disable=too-many-locals, disable=too-many-statements
@@ -130,6 +204,44 @@ def update_active_directory(instance, active_directory_id, username, password,
     return body
 
 
+# pylint: disable=too-many-locals, disable=too-many-statements
+# update an active directory on the netapp account
+# current limitation is 1 AD/subscription
+def update_active_directory_custom(cmd, client, resource_group_name, account_name, active_directory_id, username, password,
+                                   domain, dns, smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None,
+                                   server_root_ca_cert=None, backup_operators=None, aes_encryption=None, ldap_signing=None,
+                                   security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None, site=None,
+                                   administrators=None, encrypt_dc_conn=None, user_dn=None, group_dn=None, group_filter=None):
+
+    account = client.get(resource_group_name=resource_group_name, account_name=account_name)
+    ad_list = account.active_directories
+
+    ldap_search_scope = LdapSearchScopeOpt(user_dn=user_dn,
+                                           group_dn=group_dn,
+                                           group_membership_filter=group_filter)
+
+    active_directory = ActiveDirectory(active_directory_id=active_directory_id, username=username, password=password,
+                                       domain=domain, dns=dns, smb_server_name=smb_server_name, site=site,
+                                       organizational_unit=organizational_unit, kdc_ip=kdc_ip, ad_name=ad_name,
+                                       backup_operators=backup_operators, server_root_ca_certificate=server_root_ca_cert,
+                                       aes_encryption=aes_encryption, ldap_signing=ldap_signing,
+                                       security_operators=security_operators, ldap_over_tls=ldap_over_tls,
+                                       allow_local_nfs_users_with_ldap=allow_local_ldap_users,
+                                       administrators=administrators, encrypt_dc_connections=encrypt_dc_conn,
+                                       ldap_search_scope=ldap_search_scope)
+
+    for ad in ad_list:
+        if ad.active_directory_id == active_directory_id:
+            account.active_directories.remove(ad)
+
+    account.active_directories.append(active_directory)
+
+    body = NetAppAccountPatch(active_directories=ad_list)
+    poller = client.begin_update(resource_group_name=resource_group_name, account_name=account_name, body=body)
+    LongRunningOperation(cmd.cli_ctx)(poller)
+    return client.get(resource_group_name, account_name)
+
+
 # list all active directories
 def list_active_directories(client, account_name, resource_group_name):
     return client.get(resource_group_name, account_name).active_directories
@@ -154,22 +266,6 @@ def remove_active_directory(client, account_name, resource_group_name, active_di
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, account_name, body)
 
 
-# account update, active_directory is amended with subgroup commands
-def patch_account(instance, tags=None, encryption=None, key_source=None, key_vault_uri=None,
-                  key_name=None, key_vault_resource_id=None, user_assigned_identity=None):
-    if encryption is not None and key_source is None:
-        key_source = encryption
-    if key_source is not None and key_source == EncryptionKeySource.MICROSOFT_KEY_VAULT:
-        keyVaultProperties = KeyVaultProperties(key_vault_uri=key_vault_uri, key_name=key_name, key_vault_resource_id=key_vault_resource_id)
-        identity = EncryptionIdentity(user_assigned_identity=user_assigned_identity)
-        account_encryption = AccountEncryption(key_source=key_source, key_vault_properties=keyVaultProperties, identity=identity)
-    else:
-        account_encryption = None
-    body = NetAppAccountPatch(tags=tags, encryption=account_encryption)
-    _update_mapper(instance, body, ['tags', 'encryption'])
-    return body
-
-
 # list accounts by subscription or resource group
 def list_accounts(client, resource_group_name=None):
     if resource_group_name is None:
@@ -192,12 +288,32 @@ def create_pool(cmd, client, account_name, pool_name, resource_group_name, servi
 
 
 def patch_pool(instance, size=None, qos_type=None, tags=None, cool_access=None):
-    # put operation to update the record
+    # patch operation to update the record
     if size is not None:
         size = int(size) * tib_scale
     body = CapacityPoolPatch(qos_type=qos_type, size=size, tags=tags, cool_access=cool_access)
-    _update_mapper(instance, body, ['qos_type', 'size', 'tags'])
+    logger.debug("ANF Log: PATCH pool instance")
+    logger.debug(instance)
+    logger.debug("ANF Log: PATCH pool body: ")
+    _update_mapper(instance, body, ['qos_type', 'size', 'tags', 'name', 'location', 'id'])
+    logger.debug("ANF Log: PATCH pool body after mapping: ")
+    logger.debug(body)
     return body
+
+
+def patch_pool_custom(cmd, client, resource_group_name, account_name, pool_name, tags=None, size=None, qos_type=None, cool_access=None):
+    # patch operation to update the record
+    if size is not None:
+        size = int(size) * tib_scale
+
+    body = CapacityPoolPatch(qos_type=qos_type, size=size, tags=tags, cool_access=cool_access)
+    logger.debug("ANF Log: PATCH  patch_pool_custom pool body")
+    logger.debug(body)
+    poller = client.begin_update(resource_group_name=resource_group_name, account_name=account_name, pool_name=pool_name,
+                                 body=body)
+    LongRunningOperation(cmd.cli_ctx)(poller)
+    logger.debug("ANF Log: GET updated Response: ")
+    return client.get(resource_group_name, account_name, pool_name)
 
 
 # ---- VOLUME ----
@@ -334,10 +450,10 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
 
 
 # -- volume update
-def patch_volume(instance, usage_threshold=None, service_level=None, tags=None, backup_enabled=None,
+def patch_volume(cmd, client, account_name, pool_name, volume_name, resource_group_name, usage_threshold=None, service_level=None, tags=None, backup_enabled=None,
                  backup_policy_id=None, policy_enforced=None, throughput_mibps=None, snapshot_policy_id=None,
                  is_def_quota_enabled=None, default_user_quota=None, default_group_quota=None, unix_permissions=None,
-                 cool_access=None, coolness_period=None):
+                 cool_access=None, coolness_period=None, snapshot_dir_visible=None):
     data_protection = None
     backup = None
     snapshot = None
@@ -364,11 +480,17 @@ def patch_volume(instance, usage_threshold=None, service_level=None, tags=None, 
         default_group_quota_in_ki_bs=default_group_quota,
         unix_permissions=unix_permissions,
         cool_access=cool_access,
-        coolness_period=coolness_period)
+        coolness_period=coolness_period,
+        snapshot_directory_visible=snapshot_dir_visible)
     if throughput_mibps is not None:
         params.throughput_mibps = throughput_mibps
-    _update_mapper(instance, params, ['service_level', 'usage_threshold', 'tags', 'data_protection'])
-    return params
+    # _update_mapper(instance, params, ['service_level', 'usage_threshold', 'tags', 'data_protection'])
+
+    poller = client.begin_update(resource_group_name=resource_group_name, account_name=account_name, pool_name=pool_name, volume_name=volume_name,
+                                 body=params)
+    LongRunningOperation(cmd.cli_ctx)(poller)
+    logger.debug("ANF Log: GET updated Response: ")
+    return client.get(resource_group_name, account_name, pool_name, volume_name=volume_name)
 
 
 # -- volume revert
@@ -400,6 +522,12 @@ def break_replication(client, resource_group_name, account_name, pool_name, volu
                       no_wait=False):
     body = BreakReplicationRequest(force_break_replication=force_break_replication)
     return sdk_no_wait(no_wait, client.begin_break_replication, resource_group_name, account_name, pool_name, volume_name, body)
+
+
+# -- volume get-groupid-list-for-ldapuser
+def volume_getgroupidlist_ldapuser(client, resource_group_name, account_name, pool_name, volume_name, username, no_wait=False):
+    body = GetGroupIdListForLDAPUserRequest(username=username)
+    return sdk_no_wait(no_wait, client.begin_list_get_group_id_list_for_ldap_user, resource_group_name, account_name, pool_name, volume_name, body)
 
 
 # ---- VOLUME EXPORT POLICY ----
@@ -441,6 +569,52 @@ def add_export_policy_rule(instance, allowed_clients, unix_read_only, unix_read_
     return params
 
 
+# add new rule to policy
+def add_export_policy_rule_custom(cmd, client, account_name, pool_name, volume_name, resource_group_name, allowed_clients, unix_read_only, unix_read_write, cifs, nfsv3, nfsv41,
+                                  rule_index=None, kerberos5_r=None, kerberos5_rw=None, kerberos5i_r=None, kerberos5i_rw=None,
+                                  kerberos5p_r=None, kerberos5p_rw=None, has_root_access=None,
+                                  chown_mode=None):
+    volGetResponse = client.get(resource_group_name=resource_group_name, account_name=account_name, pool_name=pool_name, volume_name=volume_name)
+    logger.debug("ANF LOG: get volume before updating export policy")
+    logger.debug(volGetResponse.export_policy.rules)
+    if rule_index is None:
+        rule_index = 1 if len(volGetResponse.export_policy.rules) < 1 else max(rule.rule_index for rule in volGetResponse.export_policy.rules) + 1
+
+    rules = []
+
+    export_policy = ExportPolicyRule(rule_index=rule_index, unix_read_only=unix_read_only,
+                                     unix_read_write=unix_read_write, cifs=cifs,
+                                     nfsv3=nfsv3, nfsv41=nfsv41, allowed_clients=allowed_clients,
+                                     kerberos5_read_only=kerberos5_r,
+                                     kerberos5_read_write=kerberos5_rw,
+                                     kerberos5_i_read_only=kerberos5i_r,
+                                     kerberos5_i_read_write=kerberos5i_rw,
+                                     kerberos5_p_read_only=kerberos5p_r,
+                                     kerberos5_p_read_write=kerberos5p_rw,
+                                     has_root_access=has_root_access,
+                                     chown_mode=chown_mode)
+
+    rules.append(export_policy)
+    for rule in volGetResponse.export_policy.rules:
+        if int(rule_index) == rule.rule_index:
+            raise ValidationError("Rule index %s already exist" % rule_index)
+        rules.append(rule)
+
+    logger.debug("ANF log patch rules len:%s", len(rules))
+    volume_export_policy = VolumePropertiesExportPolicy(rules=rules)
+    logger.debug(volume_export_policy.rules)
+    params = VolumePatch(
+        export_policy=volume_export_policy,
+        service_level=volGetResponse.service_level,
+        usage_threshold=volGetResponse.usage_threshold)
+    # _update_mapper(volGetResponse, params, ['export_policy'])
+    poller = client.begin_update(resource_group_name=resource_group_name, account_name=account_name, pool_name=pool_name, volume_name=volume_name,
+                                 body=params)
+    LongRunningOperation(cmd.cli_ctx)(poller)
+    # export_policy=client.get(resource_group_name, account_name, pool_name, volume_name).export_policy
+    return client.get(resource_group_name, account_name, pool_name, volume_name)
+
+
 # list all rules
 def list_export_policy_rules(client, account_name, pool_name, volume_name, resource_group_name):
     return client.get(resource_group_name, account_name, pool_name, volume_name).export_policy
@@ -473,10 +647,12 @@ def remove_export_policy_rule(instance, rule_index):
 
 # ---- SNAPSHOTS ----
 def create_snapshot(cmd, client, resource_group_name, account_name, pool_name, volume_name, snapshot_name,
-                    location=None, no_wait=False):
+                    location=None):
     location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
     body = Snapshot(location=location)
-    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, account_name, pool_name, volume_name, snapshot_name, body)
+    poller = client.begin_create(resource_group_name, account_name, pool_name, volume_name, snapshot_name, body)
+    LongRunningOperation(cmd.cli_ctx)(poller)
+    return client.get(resource_group_name, account_name, pool_name, volume_name, snapshot_name)
 
 
 def snapshot_restore_files(client, resource_group_name, account_name, pool_name, volume_name, snapshot_name, file_paths,
@@ -509,7 +685,7 @@ def create_snapshot_policy(cmd, client, resource_group_name, account_name, snaps
     return client.create(resource_group_name, account_name, snapshot_policy_name, body)
 
 
-def patch_snapshot_policy(instance,
+def patch_snapshot_policy(cmd, client, resource_group_name, account_name, snapshot_policy_name,
                           hourly_snapshots=None, hourly_minute=None,
                           daily_snapshots=None, daily_minute=None, daily_hour=None,
                           weekly_snapshots=None, weekly_minute=None, weekly_hour=None, weekly_day=None,
@@ -524,8 +700,10 @@ def patch_snapshot_policy(instance,
                                          hour=monthly_hour, days_of_month=monthly_days),
         enabled=enabled, tags=tags)
 
-    _update_mapper(instance, body, ['tags'])
-    return body
+    # Poll the lro then do a final get, to get around issue where operation result was not full resource
+    poller = client.begin_update(resource_group_name=resource_group_name, account_name=account_name, snapshot_policy_name=snapshot_policy_name, body=body)
+    LongRunningOperation(cmd.cli_ctx)(poller)
+    return client.get(resource_group_name, account_name, snapshot_policy_name)
 
 
 # ---- VOLUME BACKUPS ----
@@ -540,6 +718,16 @@ def update_backup(instance, label=None, use_existing_snapshot=None):
     body = BackupPatch(label=label, use_existing_snapshot=use_existing_snapshot)
     _update_mapper(instance, body, ['label', 'use_existing_snapshot'])
     return body
+
+
+def backup_restore_files(client, resource_group_name, account_name, pool_name, volume_name, backup_name, file_paths,
+                         destination_path, destination_volume_id, no_wait=False):
+    body = BackupRestoreFiles(
+        file_list=file_paths,
+        restore_file_path=destination_path,
+        destination_volume_id=destination_volume_id
+    )
+    return sdk_no_wait(no_wait, client.begin_restore_files, resource_group_name, account_name, pool_name, volume_name, backup_name, body)
 
 
 # ---- BACKUP POLICIES ----
@@ -617,7 +805,7 @@ def update_volume_quota_rule(instance, quota_size=None, quota_type=None, quota_t
 
 # ---- VOLUME GROUPS ----
 def create_volume_group(cmd, client, resource_group_name, account_name, pool_name, volume_group_name, vnet, ppg,
-                        sap_sid, location=None, subnet='default', tags=None, gp_rules=None, memory=100,
+                        sap_sid="dev", location=None, subnet='default', tags=None, gp_rules=None, memory=100,
                         add_snapshot_capacity=50, start_host_id=1, number_of_hots=1, prefix="", system_role="PRIMARY",
                         data_size=None, data_throughput=None, log_size=None, log_throughput=None, shared_size=None,
                         shared_throughput=None, data_backup_size=None, data_backup_throughput=None,
@@ -654,7 +842,7 @@ def create_volume_group(cmd, client, resource_group_name, account_name, pool_nam
     group_meta_data = VolumeGroupMetaData(
         group_description="Primary for " + volume_group_name,
         application_type="SAP-HANA",
-        application_identifier="DEV",
+        application_identifier=sap_sid,
         global_placement_rules=rules,
         deployment_spec_id="20542149-bfca-5618-1879-9863dc6767f1"
     )

@@ -15,7 +15,7 @@ from azure.cli.command_modules.appservice._appservice_utils import MSI_LOCAL_ID
 from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider, AzureStorageType
 
 from ._completers import get_hostname_completion_list
-from ._constants import (FUNCTIONS_VERSIONS, WINDOWS_OS_NAME, LINUX_OS_NAME)
+from ._constants import (FUNCTIONS_VERSIONS, LOGICAPPS_NODE_RUNTIME_VERSIONS, WINDOWS_OS_NAME, LINUX_OS_NAME)
 
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
                           validate_front_end_scale_factor, validate_ase_create, validate_ip_address,
@@ -93,6 +93,8 @@ def load_arguments(self, _):
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
 
     with self.argument_context('appservice list-locations') as c:
+        c.argument('hyperv_workers_enabled', action='store_true',
+                   help='get regions which support hosting web apps on Windows Container workers')
         c.argument('linux_workers_enabled', action='store_true',
                    help='get regions which support hosting web apps on Linux workers')
         c.argument('sku', arg_type=sku_arg_type)
@@ -525,9 +527,9 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('slot', options_list=['--slot', '-s'],
                    help="the name of the slot. Default to the productions slot if not specified")
     with self.argument_context('webapp config storage-account add') as c:
-        c.argument('slot_setting', options_list=['--slot-setting'], help="slot setting")
+        c.argument('slot_setting', options_list=['--slot-setting'], help="With slot setting you can decide to make BYOS configuration sticky to a slot, meaning that when that slot is swapped, the storage account stays with that slot.")
     with self.argument_context('webapp config storage-account update') as c:
-        c.argument('slot_setting', options_list=['--slot-setting'], help="slot setting")
+        c.argument('slot_setting', options_list=['--slot-setting'], help="With slot setting you can decide to make BYOS configuration sticky to a slot, meaning that when that slot is swapped, the storage account stays with that slot.")
 
     with self.argument_context('webapp config backup') as c:
         c.argument('storage_account_url', help='URL with SAS token to the blob storage container',
@@ -804,6 +806,9 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-d'], help='The container registry server username.')
         c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'],
                    help='The container registry server password. Required for private registries.')
+        c.argument('runtime_version', help='The runtime version for logic app.', arg_type=get_enum_type(LOGICAPPS_NODE_RUNTIME_VERSIONS))
+        c.argument('functions_version', options_list=['--functions-version', '-v'],
+                   help='The functions version for logic app.', arg_type=get_enum_type(FUNCTIONS_VERSIONS))
 
     with self.argument_context('logicapp show') as c:
         c.argument('name', arg_type=logicapp_name_arg_type)

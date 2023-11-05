@@ -692,6 +692,9 @@ def load_arguments(self, _):
             for dest in scaleset_name_aliases:
                 c.argument(dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
 
+    with self.argument_context('vmss deallocate', operation_group='virtual_machine_scale_sets') as c:
+        c.argument('hibernate', arg_type=get_three_state_flag(), help='Hibernate a virtual machine from the VM scale set. Available for VMSS with Flexible OrchestrationMode only.', min_api='2023-03-01')
+
     with self.argument_context('vmss reimage') as c:
         c.argument('instance_ids', nargs='+',
                    help='Space-separated list of VM instance ID. If missing, reimage all instances.',
@@ -735,6 +738,7 @@ def load_arguments(self, _):
                    help='Indicate whether Automatic Updates is enabled for the Windows virtual machine')
         c.argument('patch_mode', arg_type=get_enum_type(['AutomaticByOS', 'AutomaticByPlatform', 'Manual', 'ImageDefault']), min_api='2020-12-01',
                    help='Mode of in-guest patching to IaaS virtual machine. Allowed values for Windows VM: AutomaticByOS, AutomaticByPlatform, Manual. Allowed values for Linux VM: AutomaticByPlatform, ImageDefault. Manual - You control the application of patches to a virtual machine. You do this by applying patches manually inside the VM. In this mode, automatic updates are disabled; the paramater --enable-auto-update must be false. AutomaticByOS - The virtual machine will automatically be updated by the OS. The parameter --enable-auto-update must be true. AutomaticByPlatform - the virtual machine will automatically updated by the OS. ImageDefault - The virtual machine\'s default patching configuration is used. The parameter --enable-agent and --enable-auto-update must be true')
+        c.argument('enable_hibernation', arg_type=get_three_state_flag(), min_api='2021-03-01', help='The flag that enable or disable hibernation capability on the VMSS.')
         c.argument('security_type', security_type)
         c.argument('enable_secure_boot', enable_secure_boot_type)
         c.argument('enable_vtpm', enable_vtpm_type)
@@ -782,9 +786,11 @@ def load_arguments(self, _):
         c.argument('vm_sku', help='The new size of the virtual machine instances in the scale set. Default to "Standard_DS1_v2". See https://azure.microsoft.com/pricing/details/virtual-machines/ for size info.', is_preview=True)
         c.argument('ephemeral_os_disk_placement', arg_type=ephemeral_placement_type,
                    help='Only applicable when used with `--vm-sku`. Allows you to choose the Ephemeral OS disk provisioning location.')
+        c.argument('enable_hibernation', arg_type=get_three_state_flag(), min_api='2021-03-01', help='The flag that enable or disable hibernation capability on the VMSS.')
         c.argument('enable_secure_boot', enable_secure_boot_type)
         c.argument('enable_vtpm', enable_vtpm_type)
         c.argument('custom_data', help='Custom init script file or text (cloud-init, cloud-config, etc..)', completer=FilesCompleter(), type=file_type)
+        c.argument('security_type', arg_type=get_enum_type(["TrustedLaunch"]), min_api='2020-06-01', help='Specify the security type of the virtual machine scale set.')
 
     with self.argument_context('vmss update', min_api='2018-10-01', arg_group='Automatic Repairs') as c:
 
@@ -1009,7 +1015,8 @@ def load_arguments(self, _):
             c.ignore('aux_subscriptions')
             c.argument('edge_zone', edge_zone_type)
             c.argument('accept_term', action='store_true', help="Accept the license agreement and privacy statement.")
-            c.argument('disable_integrity_monitoring', action='store_true', min_api='2020-12-01', help='Disable the default behavior of installing guest attestation extension and enabling System Assigned Identity for Trusted Launch enabled VMs and VMSS.')
+            c.argument('disable_integrity_monitoring', action='store_true', min_api='2020-12-01', help='Disable installing guest attestation extension and enabling System Assigned Identity for Trusted Launch enabled VMs and VMSS. It will become the default behavior, so it will become useless', deprecate_info=c.deprecate(hide=True))
+            c.argument('enable_integrity_monitoring', action='store_true', min_api='2020-12-01', help='Enable installing Microsoft propietary and not security supported guest attestation extension and enabling System Assigned Identity for Trusted Launch enabled VMs and VMSS.')
             c.argument('os_disk_security_encryption_type', arg_type=get_enum_type(self.get_models('SecurityEncryptionTypes')), min_api='2021-11-01', help='Specify the encryption type of the OS managed disk.')
             c.argument('os_disk_secure_vm_disk_encryption_set', min_api='2021-11-01', help='Specify the customer managed disk encryption set resource ID or name for the managed disk that is used for customer managed key encrypted Confidential VM OS disk and VM guest blob.')
             c.argument('disable_integrity_monitoring_autoupgrade', action='store_true', min_api='2020-12-01', help='Disable auto upgrade of guest attestation extension for Trusted Launch enabled VMs and VMSS.')
@@ -1098,10 +1105,7 @@ def load_arguments(self, _):
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
             c.argument('identity_role', options_list=['--role'],
-                       help='Role name or id the system assigned identity will have. '
-                            'Please note that the default value "Contributor" will be removed in the breaking change '
-                            'release of the fall, so please specify "--role" and "--scope" at the same time '
-                            'when assigning a role to the managed identity')
+                       help='Role name or id the system assigned identity will have.')
 
     with self.argument_context('vm auto-shutdown') as c:
         c.argument('off', action='store_true', help='Turn off auto-shutdown for VM. Configuration will be cleared.')
@@ -1448,12 +1452,12 @@ def load_arguments(self, _):
         c.argument('proximity_placement_group_name', arg_type=name_arg_type, help="The name of the proximity placement group.")
 
     with self.argument_context('ppg create') as c:
-        c.argument('ppg_type', options_list=['--type', '-t'], min_api='2018-04-01', help="The type of the proximity placement group. Allowed values: Standard.")
         c.argument('tags', tags_type, min_api='2018-04-01')
         c.argument('zone', zone_type, min_api='2021-11-01')
 
     for scope in ['ppg create', 'ppg update']:
         with self.argument_context(scope) as c:
+            c.argument('ppg_type', options_list=['--type', '-t'], arg_type=get_enum_type(self.get_models('ProximityPlacementGroupType')), min_api='2018-04-01', help="The type of the proximity placement group.")
             c.argument('intent_vm_sizes', nargs='*', min_api='2021-11-01', help="Specify possible sizes of virtual machines that can be created in the proximity placement group.")
 
     for scope, item in [('vm create', 'VM'), ('vmss create', 'VMSS'),
@@ -1590,6 +1594,12 @@ def load_arguments(self, _):
                    'included.')
         c.argument('source_restore_point', help='Resource Id of the source restore point from which a copy needs to be created')
         c.argument('consistency_mode', arg_type=get_enum_type(self.get_models('ConsistencyModeTypes')), is_preview=True, min_api='2021-07-01', help='Consistency mode of the restore point. Can be specified in the input while creating a restore point. For now, only CrashConsistent is accepted as a valid input. Please refer to https://aka.ms/RestorePoints for more details.')
+        c.argument('source_os_resource', help='Resource Id of the source OS disk')
+        c.argument('os_restore_point_encryption_set', help='Customer managed OS disk encryption set resource id')
+        c.argument('os_restore_point_encryption_type', arg_type=get_enum_type(self.get_models('RestorePointEncryptionType')), help='The type of key used to encrypt the data of the OS disk restore point.')
+        c.argument('source_data_disk_resource', nargs='+', help='Resource Id of the source data disk')
+        c.argument('data_disk_restore_point_encryption_set', nargs='+', help='Customer managed data disk encryption set resource id')
+        c.argument('data_disk_restore_point_encryption_type', nargs='+', arg_type=get_enum_type(self.get_models('RestorePointEncryptionType')), help='The type of key used to encrypt the data of the data disk restore point.')
 
     with self.argument_context('restore-point show') as c:
         c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],

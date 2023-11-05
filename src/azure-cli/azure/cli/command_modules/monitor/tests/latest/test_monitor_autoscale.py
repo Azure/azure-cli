@@ -15,10 +15,10 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
         self.kwargs.update({
             'vmss': 'vmss1'
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --admin-username testadmin --admin-password TestTest12#$')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Ubuntu2204 --admin-username testadmin --admin-password TestTest12#$')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
 
-        self.cmd('monitor autoscale create --resource {vmss_id} --count 3', checks=[
+        self.cmd('monitor autoscale create --resource {vmss_id} --count 3 ', checks=[
             self.check('profiles[0].capacity.default', 3),
             self.check('profiles[0].capacity.minimum', 3),
             self.check('profiles[0].capacity.maximum', 3)
@@ -50,12 +50,58 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
         ])
         self.cmd('monitor autoscale delete -g {rg} -n {vmss}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_refine')
+    def test_monitor_autoscale_refined(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss1'
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --image Ubuntu2204 --admin-username testadmin --admin-password TestTest12#$')
+        self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
+
+        self.cmd('monitor autoscale create --resource {vmss_id} --count 3 --action email abc@example.com efg@example.com opq@example.com --action webhook https://www.contoso.com/alert apiKey=value', checks=[
+            self.check('notifications[0].email.customEmails[0]', 'abc@example.com'),
+            self.check('notifications[0].email.customEmails[1]', 'efg@example.com'),
+            self.check('notifications[0].email.customEmails[2]', 'opq@example.com'),
+            self.check('notifications[0].webhooks[0].serviceUri', 'https://www.contoso.com/alert'),
+            self.check('profiles[0].capacity.default', 3),
+            self.check('profiles[0].capacity.minimum', 3),
+            self.check('profiles[0].capacity.maximum', 3)
+        ])
+        self.cmd('monitor autoscale list -g {rg}',
+                 checks=self.check('length(@)', 1))
+        self.cmd('monitor autoscale show -g {rg} -n {vmss}')
+
+        # verify that count behaves correctly
+        self.cmd('monitor autoscale update -g {rg} -n {vmss} --count 2', checks=[
+            self.check('profiles[0].capacity.default', 2),
+            self.check('profiles[0].capacity.minimum', 2),
+            self.check('profiles[0].capacity.maximum', 2)
+        ])
+        self.cmd('monitor autoscale update -g {rg} -n {vmss} --min-count 1 --count 2 --max-count 4', checks=[
+            self.check('profiles[0].capacity.default', 2),
+            self.check('profiles[0].capacity.minimum', 1),
+            self.check('profiles[0].capacity.maximum', 4)
+        ])
+        self.cmd('monitor autoscale update -g {rg} -n {vmss} --remove-action email efg@example.com --remove-action webhook https://www.contoso.com/alert', checks=[
+            self.check('notifications[0].email.customEmails[0]', 'abc@example.com'),
+            self.check('notifications[0].email.customEmails[1]', 'opq@example.com'),
+            self.check('notifications[0].webhooks', []),
+        ])
+
+        self.cmd('monitor autoscale update -g {rg} -n {vmss} --add-action email 1@example.com', checks=[
+            self.check('notifications[0].email.customEmails[0]', 'abc@example.com'),
+            self.check('notifications[0].email.customEmails[1]', 'opq@example.com'),
+            self.check('notifications[0].email.customEmails[2]', '1@example.com'),
+        ])
+
+        self.cmd('monitor autoscale delete -g {rg} -n {vmss}')
+
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_rules')
     def test_monitor_autoscale_rules(self, resource_group):
         self.kwargs.update({
             'vmss': 'vmss1'
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --admin-username testadmin --admin-password TestTest12#$')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Ubuntu2204 --admin-username testadmin --admin-password TestTest12#$')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
 
         self.cmd('monitor autoscale create --resource {vmss_id} --min-count 1 --count 3 --max-count 5')
@@ -147,7 +193,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
             'vmss': 'vmss1'
         })
         self.cmd(
-            'vmss create -g {rg} -n {vmss} --image UbuntuLTS --admin-username testadmin --admin-password TestTest12#$ --instance-count 2')
+            'vmss create -g {rg} -n {vmss} --image Ubuntu2204 --admin-username testadmin --admin-password TestTest12#$ --instance-count 2')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
 
         self.cmd('monitor autoscale create --resource {vmss_id} --min-count 1 --count 3 --max-count 5')
@@ -164,10 +210,10 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
                 self.check('metricTrigger.timeAggregation', 'Average'),
                 self.check('metricTrigger.timeWindow', 'PT5M'),
                 self.check('metricTrigger.timeGrain', 'PT1M'),
-                self.check('metricTrigger.dimensions[0].dimensionName', 'VMName'),
-                self.check('metricTrigger.dimensions[0].operator', 'Equals'),
-                self.check('metricTrigger.dimensions[0].values[0]', 'cliname1'),
-                self.check('metricTrigger.dimensions[0].values[1]', 'cliname2'),
+                self.check('metricTrigger.dimensions[0].DimensionName', 'VMName'),
+                self.check('metricTrigger.dimensions[0].Operator', 'Equals'),
+                self.check('metricTrigger.dimensions[0].Values[0]', 'cliname1'),
+                self.check('metricTrigger.dimensions[0].Values[1]', 'cliname2'),
                 #self.check('metricTrigger.metricNamespace', 'Mynamespace.abcd'),
                 self.check('scaleAction.cooldown', 'PT5M'),
                 self.check('scaleAction.direction', 'None'),
@@ -185,10 +231,10 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
                 self.check('metricTrigger.timeAggregation', 'Average'),
                 self.check('metricTrigger.timeWindow', 'PT5M'),
                 self.check('metricTrigger.timeGrain', 'PT1M'),
-                self.check('metricTrigger.dimensions[0].dimensionName', 'VMName'),
-                self.check('metricTrigger.dimensions[0].operator', 'Equals'),
-                self.check('metricTrigger.dimensions[0].values[0]', 'cliname1'),
-                self.check('metricTrigger.dimensions[0].values[1]', 'cliname2'),
+                self.check('metricTrigger.dimensions[0].DimensionName', 'VMName'),
+                self.check('metricTrigger.dimensions[0].Operator', 'Equals'),
+                self.check('metricTrigger.dimensions[0].Values[0]', 'cliname1'),
+                self.check('metricTrigger.dimensions[0].Values[1]', 'cliname2'),
                 #self.check('metricTrigger.metricNamespace', 'Mynamespace.abcd'),
                 self.check('scaleAction.cooldown', 'PT5M'),
                 self.check('scaleAction.direction', 'None'),
@@ -206,10 +252,10 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
                 self.check('metricTrigger.timeAggregation', 'Average'),
                 self.check('metricTrigger.timeWindow', 'PT5M'),
                 self.check('metricTrigger.timeGrain', 'PT1M'),
-                self.check('metricTrigger.dimensions[0].dimensionName', 'VMName'),
-                self.check('metricTrigger.dimensions[0].operator', 'Equals'),
-                self.check('metricTrigger.dimensions[0].values[0]', 'cliname1'),
-                self.check('metricTrigger.dimensions[0].values[1]', 'cliname2'),
+                self.check('metricTrigger.dimensions[0].DimensionName', 'VMName'),
+                self.check('metricTrigger.dimensions[0].Operator', 'Equals'),
+                self.check('metricTrigger.dimensions[0].Values[0]', 'cliname1'),
+                self.check('metricTrigger.dimensions[0].Values[1]', 'cliname2'),
                 #self.check('metricTrigger.metricNamespace', 'Mynamespace.abcd'),
                 self.check('scaleAction.cooldown', 'PT5M'),
                 self.check('scaleAction.direction', 'None'),
@@ -227,7 +273,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
             'vmss': 'vmss1',
             'sched': 'Christmas'
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --admin-username testadmin --admin-password TestTest12#$')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Ubuntu2204 --admin-username testadmin --admin-password TestTest12#$')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
 
         self.cmd('monitor autoscale create --resource {vmss_id} --count 3')
@@ -236,8 +282,8 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
             self.check('capacity.default', 5),
             self.check('capacity.minimum', 5),
             self.check('capacity.maximum', 5),
-            self.check('fixedDate.end', '2018-12-26T00:00:00+00:00'),
-            self.check('fixedDate.start', '2018-12-24T00:00:00+00:00'),
+            self.check('fixedDate.end', '2018-12-26T00:00:00Z'),
+            self.check('fixedDate.start', '2018-12-24T00:00:00Z'),
             self.check('fixedDate.timeZone', 'Pacific Standard Time'),
             self.check('recurrence', None)
         ])
@@ -264,7 +310,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
         self.kwargs.update({
             'vmss': 'vmss1'
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --admin-username testname --admin-password TestTest12#$')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Ubuntu2204 --admin-username testname --admin-password TestTest12#$')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
 
         self.cmd('monitor autoscale create --resource {vmss_id} --count 3')
@@ -288,7 +334,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
         schedules = self.cmd('monitor autoscale profile list -g {rg} --autoscale-name {vmss}').get_output_in_json()
 
         def _is_default(val):
-            if not val['fixedDate'] and not val['recurrence']:
+            if not val.get('fixedDate', None) and not val.get('recurrence', None):
                 return True
             try:
                 json.loads(val['name'])
@@ -322,7 +368,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
             'new-scale-mode': 'ForecastOnly'
         })
         self.cmd(
-            'vmss create -g {rg} -n {vmss} --image UbuntuLTS --admin-username testadmin --admin-password TestTest12#$')
+            'vmss create -g {rg} -n {vmss} --image Ubuntu2204 --admin-username testadmin --admin-password TestTest12#$')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
 
         self.cmd('monitor autoscale create --resource {vmss_id} --count 3 --scale-mode {scale-mode}', checks=[
@@ -354,7 +400,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
             'scale-mode': 'Enabled',
         })
         self.cmd(
-            'vmss create -g {rg} -n {vmss} --image UbuntuLTS --admin-username testadmin --admin-password TestTest12#$')
+            'vmss create -g {rg} -n {vmss} --image Ubuntu2204 --admin-username testadmin --admin-password TestTest12#$')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
 
         self.cmd('monitor autoscale create --resource {vmss_id} --count 3 --max-count 5 --min-count 1 '

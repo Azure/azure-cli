@@ -138,6 +138,8 @@ class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
             template = 'az storage account create -n {} -g {} -l {} --sku {} --kind {} --https-only'
             if not self.allow_blob_public_access:
                 template += ' --allow-blob-public-access false'
+            else:
+                template += ' --allow-blob-public-access true'
             if self.hns:
                 template += ' --hns'
             self.live_only_execute(self.cli_ctx, template.format(
@@ -233,7 +235,7 @@ class KeyVaultPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 class ManagedHSMPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
     def __init__(self, certs_path, name_prefix='clitest', location='uksouth', key='hsm', name_len=24,
                  parameter_name='managed_hsm', resource_group_parameter_name='resource_group',
-                 administrators=None, roles=[], additional_params=None):
+                 administrators=None, roles=[], additional_params=None, skip_delete=False, skip_purge=False):
         super(ManagedHSMPreparer, self).__init__(name_prefix, name_len)
         self.cli_ctx = get_dummy_cli()
         self.location = location
@@ -244,6 +246,8 @@ class ManagedHSMPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         self.administrators = administrators
         self.roles = roles
         self.additional_params = additional_params
+        self.skip_delete = skip_delete
+        self.skip_purge = skip_purge
 
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
@@ -273,8 +277,11 @@ class ManagedHSMPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         security_domain = os.path.join(self.certs_path, f'{name}-SD.json').replace('\\', '\\\\')
         if os.path.exists(security_domain):
             os.remove(security_domain)
-        group = self._get_resource_group(**kwargs)
-        self.live_only_execute(self.cli_ctx, 'az keyvault delete --hsm-name {} -g {}'.format(name, group))
+        if not self.skip_delete:
+            group = self._get_resource_group(**kwargs)
+            self.live_only_execute(self.cli_ctx, 'az keyvault delete --hsm-name {} -g {}'.format(name, group))
+        if self.skip_purge:
+            return
         from azure.core.exceptions import HttpResponseError
         try:
             self.live_only_execute(self.cli_ctx, 'az keyvault purge --hsm-name {} -l {}'.format(name, self.location))
@@ -492,18 +499,33 @@ class VnetNicPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 
 class LogAnalyticsWorkspacePreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='laworkspace', location='eastus2euap', parameter_name='laworkspace',
-                 resource_group_parameter_name='resource_group', skip_delete=False):
+                 resource_group_parameter_name='resource_group', skip_delete=False, get_shared_key=False):
         super(LogAnalyticsWorkspacePreparer, self).__init__(name_prefix, 15)
         self.cli_ctx = get_dummy_cli()
         self.location = location
         self.parameter_name = parameter_name
         self.resource_group_parameter_name = resource_group_parameter_name
         self.skip_delete = skip_delete
+        self.get_shared_key = get_shared_key
 
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
         template = ('az monitor log-analytics workspace create -l {} -g {} -n {}')
-        self.live_only_execute(self.cli_ctx, template.format(self.location, group, name))
+        try:
+            customer_id = self.live_only_execute(self.cli_ctx, template.format(self.location, group, name)).get_output_in_json()["customerId"]
+        except AttributeError:  # live only execute returns None if playing from record
+            customer_id = None
+        if self.get_shared_key:
+            get_share_key_template = ('az monitor log-analytics workspace get-shared-keys -g {} -n {}')
+            try:
+                log_shared_key = self.live_only_execute(self.cli_ctx, get_share_key_template.format(group, name)).get_output_in_json()["primarySharedKey"]
+            except AttributeError:  # live only execute returns None if playing from record
+                log_shared_key = None
+
+            return {self.parameter_name: name,
+                    self.parameter_name + '_customer_id': (customer_id or 'veryFakedCustomerId=='),
+                    self.parameter_name + '_shared_key': (log_shared_key or 'veryFakedPrivateSharedKey==')}
+
         return {self.parameter_name: name}
 
     def remove_resource(self, name, **kwargs):

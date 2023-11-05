@@ -3,6 +3,18 @@
 Release History
 ===============
 
+2.53.1
+++++++
+* No changes
+
+2.53.0
+++++++
+* `aaz`: Fix command name case issue for aaz command table lazy load (#27344)
+
+2.52.0
+++++++
+* `aaz`: Support `configured_default` for `AAZBaseArg` (#27205)
+
 2.51.0
 ++++++
 * `aaz`: Add `--max-items` and `--next-token` for pagination (#26710)

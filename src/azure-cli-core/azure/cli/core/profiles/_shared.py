@@ -65,11 +65,10 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_RESOURCE_MANAGEDAPPLICATIONS = ('azure.mgmt.resource.managedapplications', 'ApplicationClient')
     MGMT_MONITOR = ('azure.mgmt.monitor', 'MonitorManagementClient')
     MGMT_MSI = ('azure.mgmt.msi', 'ManagedServiceIdentityClient')
-    DATA_KEYVAULT = ('azure.keyvault', 'KeyVaultClient')
     DATA_KEYVAULT_CERTIFICATES = ('azure.keyvault.certificates', 'CertificateClient')
     DATA_KEYVAULT_KEYS = ('azure.keyvault.keys', 'KeyClient')
     DATA_KEYVAULT_SECRETS = ('azure.keyvault.secrets', 'SecretClient')
-    DATA_PRIVATE_KEYVAULT = ('azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1', 'KeyVaultClient')
+    DATA_KEYVAULT = ('azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1', 'KeyVaultClient')
     DATA_KEYVAULT_ADMINISTRATION_BACKUP = ('azure.keyvault.administration', 'KeyVaultBackupClient')
     DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL = ('azure.keyvault.administration', 'KeyVaultAccessControlClient')
     DATA_KEYVAULT_ADMINISTRATION_SETTING = ('azure.keyvault.administration', 'KeyVaultSettingsClient')
@@ -99,10 +98,9 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_BOTSERVICE = ('azure.mgmt.botservice', None)
     MGMT_CDN = ('azure.mgmt.cdn', None)
     MGMT_COGNITIVESERVICES = ('azure.mgmt.cognitiveservices', None)
-    MGMT_CONSUMPTION = ('azure.mgmt.consumption', None)
     MGMT_CONTAINERINSTANCE = ('azure.mgmt.containerinstance', None)
     MGMT_COSMOSDB = ('azure.mgmt.cosmosdb', None)
-    MGMT_DATALAKE_ANALYTICS = ('azure.mgmt.datalake.analytics', None)
+    MGMT_DATALAKE_ANALYTICS = ('azure.cli.command_modules.dla.vendored_sdks.azure_mgmt_datalake_analytics', None)
     MGMT_DATALAKE_STORE = ('azure.mgmt.datalake.store', None)
     MGMT_DATAMIGRATION = ('azure.mgmt.datamigration', None)
     MGMT_EVENTGRID = ('azure.mgmt.eventgrid', None)
@@ -111,7 +109,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_POLICYINSIGHTS = ('azure.mgmt.policyinsights', None)
     MGMT_RDBMS = ('azure.mgmt.rdbms', None)
     MGMT_REDIS = ('azure.mgmt.redis', None)
-    MGMT_RELAY = ('azure.mgmt.relay', None)
     MGMT_SEARCH = ('azure.mgmt.search', None)
     MGMT_SERVICEFABRIC = ('azure.mgmt.servicefabric', None)
     MGMT_SIGNALR = ('azure.mgmt.signalr', None)
@@ -157,7 +154,7 @@ class SDKProfile:  # pylint: disable=too-few-public-methods
 
 AZURE_API_PROFILES = {
     'latest': {
-        ResourceType.MGMT_STORAGE: '2022-09-01',
+        ResourceType.MGMT_STORAGE: '2023-01-01',
         ResourceType.MGMT_NETWORK: '2022-01-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2022-11-01', {
             'resource_skus': '2019-04-01',
@@ -171,7 +168,7 @@ AZURE_API_PROFILES = {
             'gallery_applications': '2021-07-01',
             'gallery_application_versions': '2022-01-03',
             'shared_galleries': '2022-01-03',
-            'virtual_machine_scale_sets': '2023-03-01',
+            'virtual_machine_scale_sets': '2023-07-01',
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
@@ -191,7 +188,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_KEYVAULT: '2023-02-01',
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2022-04-01', {
             'classic_administrators': '2015-06-01',
-            'role_definitions': '2022-04-01',
+            'role_definitions': '2022-05-01-preview',
             'provider_operations_metadata': '2018-01-01-preview'
         }),
         ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2022-02-01-preview', {
@@ -210,7 +207,6 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_KEYVAULT_SECRETS: None,
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING: None,
         ResourceType.DATA_KEYVAULT: '7.0',
-        ResourceType.DATA_PRIVATE_KEYVAULT: '7.2',
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP: '7.4',
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL: '7.4',
         ResourceType.DATA_STORAGE: '2018-11-09',
@@ -256,16 +252,13 @@ AZURE_API_PROFILES = {
         }),
         ResourceType.MGMT_MSI: '2023-01-31',
         ResourceType.MGMT_APPSERVICE: '2022-03-01',
-        ResourceType.MGMT_IOTHUB: '2022-04-30-preview',
+        ResourceType.MGMT_IOTHUB: '2023-06-30-preview',
         ResourceType.MGMT_IOTDPS: '2021-10-15',
         ResourceType.MGMT_IOTCENTRAL: '2021-11-01-preview',
-        ResourceType.MGMT_ARO: '2022-09-04',
+        ResourceType.MGMT_ARO: '2023-09-04',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2023-06-01', {
-            'container_services': '2017-07-01',
-            'open_shift_managed_clusters': '2019-09-30-preview'
-        }),
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2023-08-01'),
         ResourceType.MGMT_APPCONTAINERS: '2022-10-01',
     },
     '2020-09-01-hybrid': {
