@@ -247,7 +247,7 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         }
         show.return_value = fake_data
         create_appserviceenvironment_arm(self.mock_cmd, resource_group_name=rg_name, name=ase_name,
-                                         subnet=subnet_name, vnet_name=vnet_name, kind='ASEv3',
+                                         subnet=subnet_name, vnet_name=vnet_name,
                                          location='westeurope')
 
         # Assert begin_create_or_update is called with correct rg and deployment name
@@ -289,7 +289,7 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         }
         show.return_value = fake_data
         create_appserviceenvironment_arm(self.mock_cmd, resource_group_name=rg_name, name=ase_name,
-                                         subnet=subnet_name, vnet_name=vnet_name, kind='ASEv3',
+                                         subnet=subnet_name, vnet_name=vnet_name,
                                          location='westeurope', zone_redundant=True)
 
         # Assert begin_create_or_update is called with correct rg and deployment name
