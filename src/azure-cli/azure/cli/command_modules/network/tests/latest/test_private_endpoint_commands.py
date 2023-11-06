@@ -55,11 +55,10 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
                  checks=self.check('@[0].properties.groupId', 'vault'))
 
     @ResourceGroupPreparer(name_prefix='cli_test_hsm_plr_rg')
-    @ManagedHSMPreparer(name_prefix='cli-test-hsm-plr-', certs_path=KV_CERTS_DIR, location='centraluseuap')
+    @ManagedHSMPreparer(name_prefix='cli-test-hsm-plr-', certs_path=KV_CERTS_DIR)
     def test_mhsm_private_link_resource(self, resource_group, managed_hsm):
         self.kwargs.update({
             'hsm': managed_hsm,
-            'loc': 'centraluseuap'
         })
         self.cmd('network private-link-resource list '
                  '--name {hsm} '
@@ -68,10 +67,10 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
                  checks=self.check('@[0].properties.groupId', 'managedhsm'))
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_pe')
-    @KeyVaultPreparer(name_prefix='cli-test-kv-pe-', location='centraluseuap')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-pe-', location='uksouth')
     def test_private_endpoint_connection_keyvault(self, resource_group):
         self.kwargs.update({
-            'loc': 'centraluseuap',
+            'loc': 'uksouth',
             'vnet': self.create_random_name('cli-vnet-', 24),
             'subnet': self.create_random_name('cli-subnet-', 24),
             'pe': self.create_random_name('cli-pe-', 24),
@@ -214,7 +213,7 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
         self.kwargs['pe_id'] = pe['id']
 
         # Show the connection at vault side
-        keyvault = self.cmd('keyvault show --hsm-name {hsm}',
+        keyvault = self.cmd('keyvault show --hsm-name {hsm} -g {rg}',
                             checks=self.check('length(properties.privateEndpointConnections)', 1)).get_output_in_json()
         self.kwargs['hsm_pe_id'] = keyvault['properties']['privateEndpointConnections'][0]['id']
 
