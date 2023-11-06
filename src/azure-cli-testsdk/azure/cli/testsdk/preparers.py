@@ -277,15 +277,16 @@ class ManagedHSMPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         security_domain = os.path.join(self.certs_path, f'{name}-SD.json').replace('\\', '\\\\')
         if os.path.exists(security_domain):
             os.remove(security_domain)
-        if not self.skip_delete:
-            group = self._get_resource_group(**kwargs)
-            self.live_only_execute(self.cli_ctx, 'az keyvault delete --hsm-name {} -g {}'.format(name, group))
-        if self.skip_purge:
-            return
         from azure.core.exceptions import HttpResponseError
         try:
+            if not self.skip_delete:
+                group = self._get_resource_group(**kwargs)
+                self.live_only_execute(self.cli_ctx, 'az keyvault delete --hsm-name {} -g {}'.format(name, group))
+            if self.skip_purge:
+                return
             self.live_only_execute(self.cli_ctx, 'az keyvault purge --hsm-name {} -l {}'.format(name, self.location))
         except HttpResponseError:
+            # delete operation will fail with HttpResponseError when there's ongoing updates
             # purge operation will fail with HttpResponseError when --enable-purge-protection
             pass
 
