@@ -1,7 +1,8 @@
-using 'sample_params.bicep'
+using './sample_params.bicep'
 
-param myArray = []
-param myObject = {}
-param myString = ''
-param myInt = 0
-param myBool = false
+param demoString = ''
+param demoInt = 0
+param demoBool = false
+param demoObject = {}
+param demoArray = []
+
