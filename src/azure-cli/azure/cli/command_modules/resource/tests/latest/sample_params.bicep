@@ -1,13 +1,7 @@
-param myArray array
-param myString string
-param myObject object
-param myInt int
-param myBool bool
+param demoString string
+param demoInt int
+param demoBool bool
+param demoObject object
+param demoArray array
 
-output all object = {
-  array: myArray
-  string: myString
-  object: myObject
-  int: myInt
-  bool: myBool
-}
+param location string = resourceGroup().location
