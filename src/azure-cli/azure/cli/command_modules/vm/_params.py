@@ -223,7 +223,7 @@ def load_arguments(self, _):
                    help="Create the disk for upload scenario. 'Upload' is for Standard disk only upload. 'UploadWithSecurityData' is for OS Disk upload along with VM Guest State. Please note the 'UploadWithSecurityData' is not valid for data disk upload, it only to be used for OS Disk upload at present.")
         c.argument('performance_plus', arg_type=get_three_state_flag(), min_api='2022-07-02', help='Set this flag to true to get a boost on the performance target of the disk deployed. This flag can only be set on disk creation time and cannot be disabled after enabled')
         c.argument('elastic_san_resource_id', min_api='2023-04-02', options_list=['--elastic-san-resource-id', '--elastic-san-id'],
-                   help='Required if createOption is CopyFromSanSnapshot. This is the ARM id of the source elastic san volume snapshot.')
+                   help='This is the ARM id of the source elastic san volume snapshot.')
     # endregion
 
     # region Snapshots
@@ -240,7 +240,7 @@ def load_arguments(self, _):
         c.argument('for_upload', arg_type=get_three_state_flag(), min_api='2018-09-30',
                    help='Create the snapshot for uploading blobs later on through storage commands. Run "az snapshot grant-access --access-level Write" to retrieve the snapshot\'s SAS token.')
         c.argument('elastic_san_resource_id', min_api='2023-04-02', options_list=['--elastic-san-resource-id', '--elastic-san-id'],
-                   help='Required if createOption is CopyFromSanSnapshot. This is the ARM id of the source elastic san volume snapshot.')
+                   help='This is the ARM id of the source elastic san volume snapshot.')
     # endregion
 
     # region Images
