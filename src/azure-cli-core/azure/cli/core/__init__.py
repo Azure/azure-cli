@@ -705,15 +705,22 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
                            'Import by string name instead.'.format(doc_string_source.__name__))
 
         model = doc_string_source
-        # print('kk doc string source', doc_string_source)
+        print('kk doc string source', doc_string_source)
+        # if doc_string_source is azure.mgmt.netapp.models#Snapshot, APIVersionException is raised
+        # if doc_string_source is azure.mgmt.keyvault.v2023_02_01.models#VaultProperties, ignored,
+        # self.get_models(doc_string_source) is always None
+        # TODO why some doc_string_source is blob#PageBlobService.get_blob_properties?
+        if doc_string_source == 'azure.mgmt.netapp.models#Snapshot':
+            pass
+        if doc_string_source == 'azure.mgmt.keyvault.v2023_02_01.models#VaultProperties':
+            pass
         try:
             model = self.get_models(doc_string_source, ignore=True)
         except APIVersionException:
+            print('wat')
             model = None
         if model:
             print('wat',doc_string_source)
-            import sys
-            sys.exit(0)
         if not model:
             from importlib import import_module
             (path, model_name) = doc_string_source.split('#', 1)
