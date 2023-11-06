@@ -158,10 +158,10 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_NETWORK: '2022-01-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2022-11-01', {
             'resource_skus': '2019-04-01',
-            'disks': '2022-07-02',
+            'disks': '2023-04-02',
             'disk_encryption_sets': '2022-03-02',
             'disk_accesses': '2020-05-01',
-            'snapshots': '2022-03-02',
+            'snapshots': '2023-04-02',
             'galleries': '2021-10-01',
             'gallery_images': '2021-10-01',
             'gallery_image_versions': '2022-03-03',
@@ -185,7 +185,10 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: '2019-07-01',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
         ResourceType.MGMT_NETWORK_PRIVATEDNS: None,
-        ResourceType.MGMT_KEYVAULT: '2023-02-01',
+        ResourceType.MGMT_KEYVAULT: SDKProfile('2023-07-01', {
+            'vaults': '2023-02-01',
+            'managed_hsms': '2023-07-01'
+        }),
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2022-04-01', {
             'classic_administrators': '2015-06-01',
             'role_definitions': '2022-05-01-preview',
@@ -207,7 +210,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_KEYVAULT_SECRETS: None,
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING: None,
         ResourceType.DATA_KEYVAULT: '7.0',
-        ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP: '7.4',
+        ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP: '7.5-preview.1',
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL: '7.4',
         ResourceType.DATA_STORAGE: '2018-11-09',
         ResourceType.DATA_STORAGE_BLOB: '2022-11-02',

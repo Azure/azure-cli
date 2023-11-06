@@ -99,6 +99,7 @@ def load_arguments(self, _):
         hyper_v_gen_sku = CLIArgumentType(arg_type=get_enum_type(HyperVGenerationTypes, default="V1"))
     else:
         hyper_v_gen_sku = CLIArgumentType(arg_type=get_enum_type(["V1", "V2"], default="V1"))
+    disk_snapshot_hyper_v_gen_sku = get_enum_type(HyperVGenerationTypes) if HyperVGenerationTypes else get_enum_type(["V1", "V2"])
 
     ultra_ssd_enabled_type = CLIArgumentType(
         arg_type=get_three_state_flag(), min_api='2018-06-01',
@@ -151,7 +152,7 @@ def load_arguments(self, _):
             c.argument('duration_in_seconds', help='Time duration in seconds until the SAS access expires', type=int)
             if self.supported_api_version(min_api='2018-09-30', operation_group='disks'):
                 c.argument('access_level', arg_type=get_enum_type(['Read', 'Write']), default='Read', help='access level')
-                c.argument('hyper_v_generation', arg_type=hyper_v_gen_sku, help='The hypervisor generation of the Virtual Machine. Applicable to OS disks only.')
+                c.argument('hyper_v_generation', arg_type=disk_snapshot_hyper_v_gen_sku, help='The hypervisor generation of the Virtual Machine. Applicable to OS disks only.')
             else:
                 c.ignore('access_level', 'for_upload', 'hyper_v_generation')
             c.argument('encryption_type', min_api='2019-07-01', arg_type=get_enum_type(self.get_models('EncryptionType', operation_group='disks')),
@@ -207,6 +208,9 @@ def load_arguments(self, _):
         c.argument('support_hibernation', arg_type=get_three_state_flag(), help='Indicate the OS on a disk supports hibernation.', min_api='2020-12-01')
         c.argument('architecture', arg_type=get_enum_type(self.get_models('Architecture', operation_group='disks')), min_api='2021-12-01', help='CPU architecture.')
         c.argument('data_access_auth_mode', arg_type=get_enum_type(['AzureActiveDirectory', 'None']), min_api='2021-12-01', help='Specify the auth mode when exporting or uploading to a disk or snapshot.')
+        c.argument('optimized_for_frequent_attach', arg_type=get_three_state_flag(), min_api='2023-04-02',
+                   help='Setting this property to true improves reliability and performance of data disks that are frequently (more than 5 times a day) by detached from one virtual machine and attached to another. '
+                        'This property should not be set for disks that are not detached and attached frequently as it causes the disks to not align with the fault domain of the virtual machine.')
     # endregion
 
     # region Disks
@@ -218,6 +222,8 @@ def load_arguments(self, _):
         c.argument('upload_type', arg_type=get_enum_type(['Upload', 'UploadWithSecurityData']), min_api='2018-09-30',
                    help="Create the disk for upload scenario. 'Upload' is for Standard disk only upload. 'UploadWithSecurityData' is for OS Disk upload along with VM Guest State. Please note the 'UploadWithSecurityData' is not valid for data disk upload, it only to be used for OS Disk upload at present.")
         c.argument('performance_plus', arg_type=get_three_state_flag(), min_api='2022-07-02', help='Set this flag to true to get a boost on the performance target of the disk deployed. This flag can only be set on disk creation time and cannot be disabled after enabled')
+        c.argument('elastic_san_resource_id', min_api='2023-04-02', options_list=['--elastic-san-resource-id', '--elastic-san-id'],
+                   help='This is the ARM id of the source elastic san volume snapshot.')
     # endregion
 
     # region Snapshots
@@ -233,6 +239,8 @@ def load_arguments(self, _):
         c.argument('architecture', arg_type=get_enum_type(self.get_models('Architecture', operation_group='snapshots')), min_api='2021-12-01', help='CPU architecture.')
         c.argument('for_upload', arg_type=get_three_state_flag(), min_api='2018-09-30',
                    help='Create the snapshot for uploading blobs later on through storage commands. Run "az snapshot grant-access --access-level Write" to retrieve the snapshot\'s SAS token.')
+        c.argument('elastic_san_resource_id', min_api='2023-04-02', options_list=['--elastic-san-resource-id', '--elastic-san-id'],
+                   help='This is the ARM id of the source elastic san volume snapshot.')
     # endregion
 
     # region Images
@@ -1594,6 +1602,12 @@ def load_arguments(self, _):
                    'included.')
         c.argument('source_restore_point', help='Resource Id of the source restore point from which a copy needs to be created')
         c.argument('consistency_mode', arg_type=get_enum_type(self.get_models('ConsistencyModeTypes')), is_preview=True, min_api='2021-07-01', help='Consistency mode of the restore point. Can be specified in the input while creating a restore point. For now, only CrashConsistent is accepted as a valid input. Please refer to https://aka.ms/RestorePoints for more details.')
+        c.argument('source_os_resource', help='Resource Id of the source OS disk')
+        c.argument('os_restore_point_encryption_set', help='Customer managed OS disk encryption set resource id')
+        c.argument('os_restore_point_encryption_type', arg_type=get_enum_type(self.get_models('RestorePointEncryptionType')), help='The type of key used to encrypt the data of the OS disk restore point.')
+        c.argument('source_data_disk_resource', nargs='+', help='Resource Id of the source data disk')
+        c.argument('data_disk_restore_point_encryption_set', nargs='+', help='Customer managed data disk encryption set resource id')
+        c.argument('data_disk_restore_point_encryption_type', nargs='+', arg_type=get_enum_type(self.get_models('RestorePointEncryptionType')), help='The type of key used to encrypt the data of the data disk restore point.')
 
     with self.argument_context('restore-point show') as c:
         c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],

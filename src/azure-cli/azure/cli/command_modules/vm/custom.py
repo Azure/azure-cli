@@ -355,7 +355,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         tier=None, enable_bursting=None, edge_zone=None, security_type=None, support_hibernation=None,
                         public_network_access=None, accelerated_network=None, architecture=None,
                         data_access_auth_mode=None, gallery_image_reference_type=None, security_data_uri=None,
-                        upload_type=None, secure_vm_disk_encryption_set=None, performance_plus=None):
+                        upload_type=None, secure_vm_disk_encryption_set=None, performance_plus=None,
+                        elastic_san_resource_id=None, optimized_for_frequent_attach=None):
 
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -378,6 +379,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         option = getattr(DiskCreateOption, 'upload_prepared_secure')
     elif image_reference or gallery_image_reference:
         option = getattr(DiskCreateOption, 'from_image')
+    elif elastic_san_resource_id:
+        option = getattr(DiskCreateOption, 'copy_from_san_snapshot')
     else:
         option = getattr(DiskCreateOption, 'empty')
 
@@ -450,7 +453,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                                  upload_size_bytes=upload_size_bytes,
                                  logical_sector_size=logical_sector_size,
                                  security_data_uri=security_data_uri,
-                                 performance_plus=performance_plus)
+                                 performance_plus=performance_plus,
+                                 elastic_san_resource_id=elastic_san_resource_id)
 
     if size_gb is None and option == DiskCreateOption.empty:
         raise RequiredArgumentMissingError(
@@ -526,6 +530,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
             disk.supported_capabilities.architecture = architecture
     if data_access_auth_mode is not None:
         disk.data_access_auth_mode = data_access_auth_mode
+    if optimized_for_frequent_attach is not None:
+        disk.optimized_for_frequent_attach = optimized_for_frequent_attach
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.disks.begin_create_or_update, resource_group_name, disk_name, disk)
@@ -670,7 +676,8 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
                     source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
                     hyper_v_generation=None, tags=None, no_wait=False, disk_encryption_set=None,
                     encryption_type=None, network_access_policy=None, disk_access=None, edge_zone=None,
-                    public_network_access=None, accelerated_network=None, architecture=None):
+                    public_network_access=None, accelerated_network=None, architecture=None,
+                    elastic_san_resource_id=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -686,13 +693,16 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
             option = getattr(DiskCreateOption, 'copy_start') if copy_start else getattr(DiskCreateOption, 'copy')
     elif for_upload:
         option = getattr(DiskCreateOption, 'upload')
+    elif elastic_san_resource_id:
+        option = getattr(DiskCreateOption, 'copy_from_san_snapshot')
     else:
         option = getattr(DiskCreateOption, 'empty')
 
     creation_data = CreationData(create_option=option, source_uri=source_blob_uri,
                                  image_reference=None,
                                  source_resource_id=source_disk or source_snapshot,
-                                 storage_account_id=source_storage_account_id)
+                                 storage_account_id=source_storage_account_id,
+                                 elastic_san_resource_id=elastic_san_resource_id)
 
     if size_gb is None and option == DiskCreateOption.empty:
         raise CLIError('Please supply size for the snapshots')
@@ -5649,6 +5659,12 @@ def restore_point_create(client,
                          exclude_disks=None,
                          source_restore_point=None,
                          consistency_mode=None,
+                         source_os_resource=None,
+                         os_restore_point_encryption_set=None,
+                         os_restore_point_encryption_type=None,
+                         source_data_disk_resource=None,
+                         data_disk_restore_point_encryption_set=None,
+                         data_disk_restore_point_encryption_type=None,
                          no_wait=False):
     parameters = {}
     if exclude_disks is not None:
@@ -5659,6 +5675,121 @@ def restore_point_create(client,
         parameters['sourceRestorePoint'] = {'id': source_restore_point}
     if consistency_mode is not None:
         parameters['consistencyMode'] = consistency_mode
+
+    storage_profile = {}
+    # Local restore point
+    if source_restore_point is None:
+        os_disk = {}
+        if source_os_resource is not None:
+            managed_disk = {
+                'id': source_os_resource
+            }
+            os_disk['managedDisk'] = managed_disk
+            if os_restore_point_encryption_set is None and os_restore_point_encryption_type is None:
+                raise ArgumentUsageError('usage error: --os-restore-point-encryption-set or --os-restore-point-encryption-type must be used together with --source-os-resource')
+
+        disk_restore_point = {}
+        if os_restore_point_encryption_set is not None or os_restore_point_encryption_type is not None:
+            encryption = {}
+            if os_restore_point_encryption_set is not None:
+                encryption['diskEncryptionSet'] = {
+                    'id': os_restore_point_encryption_set
+                }
+            if os_restore_point_encryption_type is not None:
+                encryption['type'] = os_restore_point_encryption_type
+
+            if encryption:
+                disk_restore_point['encryption'] = encryption
+
+        if disk_restore_point:
+            os_disk['diskRestorePoint'] = disk_restore_point
+
+        if os_disk:
+            storage_profile['osDisk'] = os_disk
+
+        data_disks = []
+        if source_data_disk_resource is not None:
+            if data_disk_restore_point_encryption_set is None and data_disk_restore_point_encryption_type is None:
+                raise ArgumentUsageError('usage error: --data-disk-restore-point-encryption-set or --data-disk-restore-point-encryption-type must be used together with --source-data-disk-resource')
+            if data_disk_restore_point_encryption_set is not None and (len(source_data_disk_resource) != len(data_disk_restore_point_encryption_set)):
+                raise ArgumentUsageError('Length of --source-data-disk-resource, --data-disk-restore-point-encryption-set must be same.')
+            if data_disk_restore_point_encryption_type is not None and (len(source_data_disk_resource) != len(data_disk_restore_point_encryption_type)):
+                raise ArgumentUsageError('Length of --source-data-disk-resource, --data-disk-restore-point-encryption-type must be same.')
+
+            for i in range(len(source_data_disk_resource)):
+                data_disks.append({
+                    'managedDisk': {
+                        'id': source_data_disk_resource[i]
+                    },
+                    'diskRestorePoint': {
+                        'encryption': {
+                            'disk_encryption_set': {
+                                'id': data_disk_restore_point_encryption_set[i] if data_disk_restore_point_encryption_set is not None else None
+                            },
+                            'type': data_disk_restore_point_encryption_type[i] if data_disk_restore_point_encryption_type is not None else None
+                        }
+                    }
+                })
+
+        if data_disks:
+            storage_profile['dataDisks'] = data_disks
+
+    # Remote restore point
+    if source_restore_point is not None:
+        os_disk = {}
+        disk_restore_point = {}
+        if source_os_resource is not None:
+            source_disk_restore_point = {
+                'id': source_os_resource
+            }
+            disk_restore_point['sourceDiskRestorePoint'] = source_disk_restore_point
+            if os_restore_point_encryption_set is None and os_restore_point_encryption_type is None:
+                raise ArgumentUsageError('usage error: --os-restore-point-encryption-set or --os-restore-point-encryption-type must be used together with --source-os-resource')
+
+        if os_restore_point_encryption_set is not None or os_restore_point_encryption_type is not None:
+            encryption = {}
+            if os_restore_point_encryption_set is not None:
+                encryption['diskEncryptionSet'] = {
+                    'id': os_restore_point_encryption_set
+                }
+            if os_restore_point_encryption_type is not None:
+                encryption['type'] = os_restore_point_encryption_type
+
+            if encryption:
+                disk_restore_point['encryption'] = encryption
+        if disk_restore_point:
+            os_disk['diskRestorePoint'] = disk_restore_point
+        if os_disk:
+            storage_profile['osDisk'] = os_disk
+
+        data_disks = []
+        if source_data_disk_resource is not None:
+            if data_disk_restore_point_encryption_set is None and data_disk_restore_point_encryption_type is None:
+                raise ArgumentUsageError('usage error: --data-disk-restore-point-encryption-set or --data-disk-restore-point-encryption-type must be used together with --source-data-disk-resource')
+            if data_disk_restore_point_encryption_set is not None and (len(source_data_disk_resource) != len(data_disk_restore_point_encryption_set)):
+                raise ArgumentUsageError('Length of --source-data-disk-resource, --data-disk-restore-point-encryption-set must be same.')
+            if data_disk_restore_point_encryption_type is not None and (len(source_data_disk_resource) != len(data_disk_restore_point_encryption_type)):
+                raise ArgumentUsageError('Length of --source-data-disk-resource, --data-disk-restore-point-encryption-type must be same.')
+
+            for i in range(len(source_data_disk_resource)):
+                data_disks.append({
+                    'diskRestorePoint': {
+                        'sourceDiskRestorePoint': {
+                            'id': source_data_disk_resource[i]
+                        },
+                        'encryption': {
+                            'disk_encryption_set': {
+                                'id': data_disk_restore_point_encryption_set[i] if data_disk_restore_point_encryption_set is not None else None
+                            },
+                            'type': data_disk_restore_point_encryption_type[i] if data_disk_restore_point_encryption_type is not None else None
+                        }
+                    }
+                })
+        if data_disks:
+            storage_profile['dataDisks'] = data_disks
+
+    if storage_profile:
+        parameters['sourceMetadata'] = {'storageProfile': storage_profile}
     return sdk_no_wait(no_wait,
                        client.begin_create,
                        resource_group_name=resource_group_name,

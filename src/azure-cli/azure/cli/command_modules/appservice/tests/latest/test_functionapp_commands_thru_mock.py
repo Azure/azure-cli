@@ -13,6 +13,7 @@ from azure.cli.command_modules.appservice.custom import (
     enable_zip_deploy,
     add_remote_build_app_settings,
     remove_remote_build_app_settings,
+    config_source_control,
     validate_app_settings_in_scm)
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.azclierror import (AzureInternalError, UnclassifiedUserFault)
@@ -544,3 +545,36 @@ class TestFunctionappMocked(unittest.TestCase):
         # assert
         update_app_settings_mock.assert_not_called()
         validate_app_settings_in_scm_mock.assert_not_called()
+
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_location_from_webapp')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.LongRunningOperation.__call__', autospec=True)
+    def test_config_source_control(self,
+                                   long_running_operation_mock,
+                                   site_op_mock,
+                                   location_mock,
+                                   web_client_factory_mock):
+        # prepare
+        client = mock.Mock()
+        web_client_factory_mock.return_value = client
+
+        location_mock.return_value = mock.MagicMock()
+
+        site_op_mock.return_value = mock.MagicMock()
+
+        cmd_mock = _get_test_cmd()
+
+        SiteSourceControl, GitHubActionConfiguration, GitHubActionContainerConfiguration = cmd_mock.get_models('SiteSourceControl', 'GitHubActionConfiguration', 'GitHubActionContainerConfiguration')
+        container_config = GitHubActionContainerConfiguration(username="username", password="password")
+        github_action_config = GitHubActionConfiguration(container_configuration=container_config)
+        source_control = SiteSourceControl(git_hub_action_configuration=github_action_config)
+
+        long_running_operation_mock.return_value = source_control
+
+        # action
+        response = config_source_control(cmd_mock, 'rg', 'functionapp', 'https://github.com/yugang/azure-site-test')
+
+        # assert
+        self.assertEqual(response.git_hub_action_configuration.container_configuration.password, None)

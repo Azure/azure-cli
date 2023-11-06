@@ -208,10 +208,12 @@ class KeyVaultPrivateEndpointConnectionScenarioTest(ScenarioTest):
 
 class KeyVaultHSMPrivateEndpointConnectionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_pec')
-    def test_hsm_private_endpoint_connection(self, resource_group):
+    @ManagedHSMPreparer(name_prefix='cli-test-hsm-pec-', certs_path=CERTS_DIR)
+    def test_hsm_private_endpoint_connection(self, resource_group, managed_hsm):
         self.kwargs.update({
-            'hsm': self.create_random_name('cli-test-hsm-pec-', 24),
-            'loc': 'centraluseuap',
+            'hsm': managed_hsm,
+            'hsm_id': f'/subscriptions/{self.get_subscription_id()}/resourceGroups/{resource_group}/providers/Microsoft.KeyVault/managedHSMs/{managed_hsm}',
+            'loc': 'uksouth',
             'vnet': self.create_random_name('cli-vnet-', 24),
             'subnet': self.create_random_name('cli-subnet-', 24),
             'pe': self.create_random_name('cli-pe-', 24),
@@ -219,8 +221,6 @@ class KeyVaultHSMPrivateEndpointConnectionScenarioTest(ScenarioTest):
         })
 
         # Prepare vault and network
-        hsm = _create_hsm(self).get_output_in_json()
-        self.kwargs['hsm_id'] = hsm['id']
         self.cmd('network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
                  checks=self.check('length(newVNet.subnets)', 1))
         self.cmd('network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
@@ -234,7 +234,7 @@ class KeyVaultHSMPrivateEndpointConnectionScenarioTest(ScenarioTest):
         self.kwargs['pe_id'] = pe['id']
 
         # Show the connection at vault side
-        hsm = self.cmd('keyvault show --hsm-name {hsm}',
+        hsm = self.cmd('keyvault show --hsm-name {hsm} -g {rg}',
                        checks=self.check('length(properties.privateEndpointConnections)', 1)).get_output_in_json()
         self.kwargs['hsm_pec_id'] = hsm['properties']['privateEndpointConnections'][0]['id']
         self.cmd('keyvault private-endpoint-connection show --id {hsm_pec_id}',
@@ -275,7 +275,6 @@ class KeyVaultHSMPrivateEndpointConnectionScenarioTest(ScenarioTest):
 
         # clear resources
         self.cmd('network private-endpoint delete -g {rg} -n {pe}')
-        _delete_and_purge_hsm(self)
 
 
 class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
@@ -499,6 +498,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
                  checks=[self.check('properties.enableSoftDelete', True),
                          self.check('properties.enablePurgeProtection', True)])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_list_deleted')
     @KeyVaultPreparer(name_prefix='cli-test-kv-mgmt-', location='eastus', skip_delete=True)
     @ManagedHSMPreparer(name_prefix='cli-test-hsm-mgmt-', certs_path=CERTS_DIR, location='eastus', skip_delete=True)
@@ -510,8 +510,8 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         })
 
         # delete resources
-        self.cmd('keyvault delete --name {kv}')
-        self.cmd('keyvault delete --hsm-name {hsm}')
+        self.cmd('keyvault delete --name {kv} -g {rg}')
+        self.cmd('keyvault delete --hsm-name {hsm} -g {rg}')
 
         # test list deleted vaults
         self.cmd('keyvault list-deleted --resource-type vault', checks=[
@@ -2634,39 +2634,20 @@ class KeyVaultPublicNetworkAccessScenarioTest(ScenarioTest):
 
 class KeyVaultMHSMRegionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_mhsm_region', location='eastus2')
-    def test_keyvault_mhsm_region(self, resource_group):
-        logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
-        logged_in_user = logged_in_user["id"] if logged_in_user is not None else "a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e"
+    @ManagedHSMPreparer(name_prefix='clitest-mhsm-', certs_path=CERTS_DIR, location='eastus2')
+    def test_keyvault_mhsm_region(self, resource_group, managed_hsm):
         self.kwargs.update({
-            'hsm_name': self.create_random_name('clitest-mhsm-', 24),
+            'hsm_name': managed_hsm,
             'loc': 'eastus2',
-            'init_admin': logged_in_user
         })
-        self.cmd('keyvault create --hsm-name {hsm_name} -g {rg} -l {loc} --administrators {init_admin} '
-                 '--retention-days 7')
-        cert_dir = os.path.join(TEST_DIR, 'certs')
-        tmp_dir = self.create_temp_dir()
-
-        self.kwargs.update({
-            'cert0': os.path.join(cert_dir, 'cert_0.cer').replace('\\', '\\\\'),
-            'cert1': os.path.join(cert_dir, 'cert_1.cer').replace('\\', '\\\\'),
-            'cert2': os.path.join(cert_dir, 'cert_2.cer').replace('\\', '\\\\'),
-            'security_domain': os.path.join(tmp_dir, 'clitest-mhsm-SD.json').replace('\\', '\\\\')
-        })
-
-        self.cmd('keyvault security-domain download --hsm-name {hsm_name} --sd-wrapping-keys {cert0} {cert1} {cert2} '
-                 '--sd-quorum 2 --security-domain-file {security_domain}')
-        time.sleep(180)
         with self.assertRaises(HttpResponseError):
             self.cmd('keyvault region add -g {rg} --hsm-name {hsm_name} -r testregion')
         self.cmd('keyvault region add -g {rg} --hsm-name {hsm_name} -r uksouth')
         self.cmd('keyvault region list -g {rg} --hsm-name {hsm_name}',
-                 checks=[self.check('[0].name', 'uksouth')])
+                 checks=[self.check('length(@)', 2)])
         with self.assertRaises(HttpResponseError):
             self.cmd('keyvault delete -g {rg} --hsm-name {hsm_name}')
         self.cmd('keyvault region remove -g {rg} --hsm-name {hsm_name} -r uksouth')
-        self.cmd('keyvault delete -g {rg} --hsm-name {hsm_name}')
-        self.cmd('keyvault purge --hsm-name {hsm_name}')
 
 
 if __name__ == '__main__':
