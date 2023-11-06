@@ -207,7 +207,7 @@ def load_arguments(self, _):
         c.argument('support_hibernation', arg_type=get_three_state_flag(), help='Indicate the OS on a disk supports hibernation.', min_api='2020-12-01')
         c.argument('architecture', arg_type=get_enum_type(self.get_models('Architecture', operation_group='disks')), min_api='2021-12-01', help='CPU architecture.')
         c.argument('data_access_auth_mode', arg_type=get_enum_type(['AzureActiveDirectory', 'None']), min_api='2021-12-01', help='Specify the auth mode when exporting or uploading to a disk or snapshot.')
-        c.argument('optimized_for_frequent_attach', arg_type=get_three_state_flag(), min_api='2023-04-02', options_list=['--optimized-for-frequent-attach', '--optimized'],
+        c.argument('optimized_for_frequent_attach', arg_type=get_three_state_flag(), min_api='2023-04-02',
                    help='Setting this property to true improves reliability and performance of data disks that are frequently (more than 5 times a day) by detached from one virtual machine and attached to another. '
                         'This property should not be set for disks that are not detached and attached frequently as it causes the disks to not align with the fault domain of the virtual machine.')
     # endregion
