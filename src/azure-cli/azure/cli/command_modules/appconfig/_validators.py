@@ -361,13 +361,13 @@ def validate_snapshot_filters(namespace):
 
 def validate_snapshot_export(namespace):
     if namespace.snapshot:
-        if any([namespace.key, namespace.label]):
-            raise MutuallyExclusiveArgumentError("'--snapshot' cannot be specified with '--key' or '--label' arguments.")
+        if any([namespace.key, namespace.label, namespace.skip_features, namespace.skip_keyvault]):
+            raise MutuallyExclusiveArgumentError("'--snapshot' cannot be specified with '--key',  '--label', '--skip-keyvault' or '--skip-features' arguments.")
 
 
 def validate_snapshot_import(namespace):
     if namespace.src_snapshot:
         if namespace.source != 'appconfig':
             raise InvalidArgumentValueError("--src-snapshot is only applicable when importing from a configuration store.")
-        if any([namespace.src_key, namespace.src_label]):
-            raise MutuallyExclusiveArgumentError("'--src-snapshot' cannot be specified with '--src-key' or '--src-label' arguments.")
+        if any([namespace.src_key, namespace.src_label, namespace.skip_features]):
+            raise MutuallyExclusiveArgumentError("'--src-snapshot' cannot be specified with '--src-key', '--src-label', or '--skip-features' arguments.")
