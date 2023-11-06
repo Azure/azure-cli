@@ -2954,7 +2954,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
     def test_azconfig_snapshot_mgmt(self, resource_group, location):
         config_store_name = self.create_random_name(prefix='SnapshotStore', length=24)
         snapshot_name = "TestSnapshot"
-        store_location = 'eastus2euap'
+        store_location = 'francecentral'
         sku = 'standard'
 
         self.kwargs.update({
