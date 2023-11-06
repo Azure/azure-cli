@@ -4723,7 +4723,6 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         name = generate_default_app_name(cmd)
 
     import os
-    import urllib3
 
     AppServicePlan = cmd.get_models('AppServicePlan')
     src_dir = os.getcwd()
