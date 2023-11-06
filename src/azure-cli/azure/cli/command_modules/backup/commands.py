@@ -31,6 +31,7 @@ def load_command_table(self, _):
 
     with self.command_group('backup vault', backup_vaults_sdk, client_factory=vaults_cf, exception_handler=backup_exception_handler) as g:
         g.custom_command('create', 'create_vault')
+        g.custom_command('update', 'update_vault')
         g.show_command('show', 'get')
         g.custom_command('list', 'list_vaults')
         g.custom_command('backup-properties show', 'get_backup_properties', client_factory=backup_storage_configs_non_crr_cf)
