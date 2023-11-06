@@ -498,6 +498,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
                  checks=[self.check('properties.enableSoftDelete', True),
                          self.check('properties.enablePurgeProtection', True)])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_list_deleted')
     @KeyVaultPreparer(name_prefix='cli-test-kv-mgmt-', location='eastus', skip_delete=True)
     @ManagedHSMPreparer(name_prefix='cli-test-hsm-mgmt-', certs_path=CERTS_DIR, location='eastus', skip_delete=True)

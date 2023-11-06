@@ -402,8 +402,10 @@ def recover_vault_or_hsm(cmd, client, resource_group_name=None, location=None, v
 def recover_hsm(cmd, client, hsm_name, resource_group_name, location, no_wait=False):
     from azure.cli.core._profile import Profile, _TENANT_ID
 
-    ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT, operation_group='managed_hsms')
-    ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_KEYVAULT, operation_group='managed_hsms')
+    ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT,
+                                operation_group='managed_hsms')
+    ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_KEYVAULT,
+                                   operation_group='managed_hsms')
 
     # tenantId and sku shouldn't be required
     profile = Profile(cli_ctx=cmd.cli_ctx)
@@ -508,7 +510,8 @@ def get_vault_or_hsm(cmd, client, resource_group_name, vault_name=None, hsm_name
     return hsm_client.get(resource_group_name=resource_group_name, name=hsm_name)
 
 
-def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
+# pylint: disable=too-many-locals
+def create_vault_or_hsm(cmd, client,
                         resource_group_name, vault_name=None, hsm_name=None,
                         administrators=None,
                         location=None, sku=None,
@@ -580,6 +583,7 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
             raise CLIError(error_msg)
 
 
+# pylint: disable=too-many-locals
 def create_hsm(cmd, client,
                resource_group_name, hsm_name, administrators, location=None, sku=None,
                enable_purge_protection=None,
@@ -589,7 +593,7 @@ def create_hsm(cmd, client,
                default_action=None,
                tags=None,
                user_identities=None,
-               no_wait=False):  # pylint: disable=unused-argument
+               no_wait=False):
 
     if not administrators:
         raise CLIError('Please specify --administrators')
@@ -601,9 +605,12 @@ def create_hsm(cmd, client,
     if not sku:
         sku = 'Standard_B1'
 
-    ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT, operation_group='managed_hsms')
-    ManagedHsmProperties = cmd.get_models('ManagedHsmProperties', resource_type=ResourceType.MGMT_KEYVAULT, operation_group='managed_hsms')
-    ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_KEYVAULT, operation_group='managed_hsms')
+    ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT,
+                                operation_group='managed_hsms')
+    ManagedHsmProperties = cmd.get_models('ManagedHsmProperties', resource_type=ResourceType.MGMT_KEYVAULT,
+                                          operation_group='managed_hsms')
+    ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_KEYVAULT,
+                                   operation_group='managed_hsms')
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
     tenant_id = profile.get_subscription(subscription=cmd.cli_ctx.data.get('subscription_id', None))[_TENANT_ID]
