@@ -2812,6 +2812,10 @@ def show_cors(cmd, resource_group_name, name, slot=None):
 
 
 def get_streaming_log(cmd, resource_group_name, name, provider=None, slot=None):
+    # ping the site first to ensure that the site container is running
+    # logsteam does not work if the site container is not running
+    # See https://github.com/Azure/azure-cli/issues/23058
+    ping_site(cmd, resource_group_name, name, slot)
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     streaming_url = scm_url + '/logstream'
     if provider:
@@ -2824,6 +2828,17 @@ def get_streaming_log(cmd, resource_group_name, name, provider=None, slot=None):
 
     while True:
         time.sleep(100)  # so that ctrl+c can stop the command
+
+
+def ping_site(cmd, resource_group_name, name, slot, timeout=230):
+    import urllib3
+    try:
+        site_url = _get_url(cmd, resource_group_name, name, slot)
+        http = urllib3.PoolManager(timeout=urllib3.Timeout(connect=timeout, read=timeout))
+        http.request('GET', site_url)
+    except Exception:  # pylint: disable=broad-except
+        logger.warning("Unable to reach the app.")
+        raise
 
 
 def download_historical_logs(cmd, resource_group_name, name, log_file=None, slot=None):
@@ -4890,14 +4905,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
 
     if logs:
         _configure_default_logging(cmd, rg_name, name)
-        # ping the site so that the site container is ready
-        # logsteam does not work if the site container has not started
-        # required for https://github.com/Azure/azure-cli/issues/23058
         try:
-            _url = _get_url(cmd, rg_name, name)
-            logger.warning("Waiting for the app to be ready ...")
-            http = urllib3.PoolManager(timeout=urllib3.Timeout(connect=230, read=230))
-            http.request('GET', _url)
             return get_streaming_log(cmd, rg_name, name)
         except Exception:  # pylint: disable=broad-except
             logger.warning("Unable to reach the app. Please run 'az webapp log tail' to view the logs.")
