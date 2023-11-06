@@ -114,6 +114,7 @@ def validate_registry_name(cmd, namespace):
             logger.warning("The login server endpoint suffix '%s' is automatically omitted.", acr_suffix)
             namespace.registry_name = registry[:pos]
     registry = namespace.registry_name
+    # Regex pattern to validate that registry name is alphanumeric and between 5 and 50 characters
     pattern = r'^[a-zA-Z0-9]{5,50}$'
     if not re.match(pattern, registry):
         raise InvalidArgumentValueError(BAD_REGISTRY_NAME)
