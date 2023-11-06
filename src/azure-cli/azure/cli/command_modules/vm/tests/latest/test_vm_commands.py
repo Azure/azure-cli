@@ -1152,8 +1152,8 @@ class VMManagedDiskScenarioTest(ScenarioTest):
                  checks=[self.check('creationData.createOption', 'Copy')])
         # in different region, it should default copyStart as True
         # TODO: should not throw exception after feature GA
-        from azure.core.exceptions import ResourceExistsError
-        with self.assertRaisesRegex(ResourceExistsError, 'CopyStart creation is not supported for this subscription'):
+        from azure.core.exceptions import ResourceNotFoundError
+        with self.assertRaises(ResourceNotFoundError):
             self.cmd('snapshot create -g {rg} -n {snapshot2} --source {disk} -l eastus')
 
     """ Disable temporarily
