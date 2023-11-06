@@ -12,16 +12,16 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "cdn custom-domain list",
+    "afd profile list",
 )
 class List(AAZCommand):
-    """List all of the existing custom domains within an endpoint.
+    """List all of the Azure Front Door Standard, Azure Front Door Premium, and CDN profiles within a resource group.
     """
 
     _aaz_info = {
         "version": "2023-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/endpoints/{}/customdomains", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles", "2023-05-01"],
         ]
     }
 
@@ -42,16 +42,6 @@ class List(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.endpoint_name = AAZStrArg(
-            options=["--endpoint-name"],
-            help="Name of the endpoint under the profile which is unique globally.",
-            required=True,
-        )
-        _args_schema.profile_name = AAZStrArg(
-            options=["--profile-name"],
-            help="Name of the CDN profile which is unique within the resource group.",
-            required=True,
-        )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
@@ -59,7 +49,7 @@ class List(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        self.CustomDomainsListByEndpoint(ctx=self.ctx)()
+        self.ProfilesListByResourceGroup(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -75,7 +65,7 @@ class List(AAZCommand):
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
 
-    class CustomDomainsListByEndpoint(AAZHttpOperation):
+    class ProfilesListByResourceGroup(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -89,7 +79,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/endpoints/{endpointName}/customDomains",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles",
                 **self.url_parameters
             )
 
@@ -104,14 +94,6 @@ class List(AAZCommand):
         @property
         def url_parameters(self):
             parameters = {
-                **self.serialize_url_param(
-                    "endpointName", self.ctx.args.endpoint_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "profileName", self.ctx.args.profile_name,
-                    required=True,
-                ),
                 **self.serialize_url_param(
                     "resourceGroupName", self.ctx.args.resource_group,
                     required=True,
@@ -174,35 +156,71 @@ class List(AAZCommand):
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
+            _element.identity = AAZObjectType()
+            _element.kind = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.location = AAZStrType(
+                flags={"required": True},
+            )
             _element.name = AAZStrType(
                 flags={"read_only": True},
             )
             _element.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
+            _element.sku = AAZObjectType(
+                flags={"required": True},
+            )
             _element.system_data = AAZObjectType(
                 serialized_name="systemData",
                 flags={"read_only": True},
             )
+            _element.tags = AAZDictType()
             _element.type = AAZStrType(
                 flags={"read_only": True},
             )
 
-            properties = cls._schema_on_200.value.Element.properties
-            properties.custom_https_parameters = AAZObjectType(
-                serialized_name="customHttpsParameters",
-            )
-            properties.custom_https_provisioning_state = AAZStrType(
-                serialized_name="customHttpsProvisioningState",
+            identity = cls._schema_on_200.value.Element.identity
+            identity.principal_id = AAZStrType(
+                serialized_name="principalId",
                 flags={"read_only": True},
             )
-            properties.custom_https_provisioning_substate = AAZStrType(
-                serialized_name="customHttpsProvisioningSubstate",
+            identity.tenant_id = AAZStrType(
+                serialized_name="tenantId",
                 flags={"read_only": True},
             )
-            properties.host_name = AAZStrType(
-                serialized_name="hostName",
+            identity.type = AAZStrType(
                 flags={"required": True},
+            )
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200.value.Element.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200.value.Element.properties
+            properties.extended_properties = AAZDictType(
+                serialized_name="extendedProperties",
+                flags={"read_only": True},
+            )
+            properties.front_door_id = AAZStrType(
+                serialized_name="frontDoorId",
+                flags={"read_only": True},
+            )
+            properties.origin_response_timeout_seconds = AAZIntType(
+                serialized_name="originResponseTimeoutSeconds",
             )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -212,77 +230,12 @@ class List(AAZCommand):
                 serialized_name="resourceState",
                 flags={"read_only": True},
             )
-            properties.validation_data = AAZStrType(
-                serialized_name="validationData",
-            )
 
-            custom_https_parameters = cls._schema_on_200.value.Element.properties.custom_https_parameters
-            custom_https_parameters.certificate_source = AAZStrType(
-                serialized_name="certificateSource",
-                flags={"required": True},
-            )
-            custom_https_parameters.minimum_tls_version = AAZStrType(
-                serialized_name="minimumTlsVersion",
-            )
-            custom_https_parameters.protocol_type = AAZStrType(
-                serialized_name="protocolType",
-                flags={"required": True},
-            )
+            extended_properties = cls._schema_on_200.value.Element.properties.extended_properties
+            extended_properties.Element = AAZStrType()
 
-            disc_azure_key_vault = cls._schema_on_200.value.Element.properties.custom_https_parameters.discriminate_by("certificate_source", "AzureKeyVault")
-            disc_azure_key_vault.certificate_source_parameters = AAZObjectType(
-                serialized_name="certificateSourceParameters",
-                flags={"required": True},
-            )
-
-            certificate_source_parameters = cls._schema_on_200.value.Element.properties.custom_https_parameters.discriminate_by("certificate_source", "AzureKeyVault").certificate_source_parameters
-            certificate_source_parameters.delete_rule = AAZStrType(
-                serialized_name="deleteRule",
-                flags={"required": True},
-            )
-            certificate_source_parameters.resource_group_name = AAZStrType(
-                serialized_name="resourceGroupName",
-                flags={"required": True},
-            )
-            certificate_source_parameters.secret_name = AAZStrType(
-                serialized_name="secretName",
-                flags={"required": True},
-            )
-            certificate_source_parameters.secret_version = AAZStrType(
-                serialized_name="secretVersion",
-            )
-            certificate_source_parameters.subscription_id = AAZStrType(
-                serialized_name="subscriptionId",
-                flags={"required": True},
-            )
-            certificate_source_parameters.type_name = AAZStrType(
-                serialized_name="typeName",
-                flags={"required": True},
-            )
-            certificate_source_parameters.update_rule = AAZStrType(
-                serialized_name="updateRule",
-                flags={"required": True},
-            )
-            certificate_source_parameters.vault_name = AAZStrType(
-                serialized_name="vaultName",
-                flags={"required": True},
-            )
-
-            disc_cdn = cls._schema_on_200.value.Element.properties.custom_https_parameters.discriminate_by("certificate_source", "Cdn")
-            disc_cdn.certificate_source_parameters = AAZObjectType(
-                serialized_name="certificateSourceParameters",
-                flags={"required": True},
-            )
-
-            certificate_source_parameters = cls._schema_on_200.value.Element.properties.custom_https_parameters.discriminate_by("certificate_source", "Cdn").certificate_source_parameters
-            certificate_source_parameters.certificate_type = AAZStrType(
-                serialized_name="certificateType",
-                flags={"required": True},
-            )
-            certificate_source_parameters.type_name = AAZStrType(
-                serialized_name="typeName",
-                flags={"required": True},
-            )
+            sku = cls._schema_on_200.value.Element.sku
+            sku.name = AAZStrType()
 
             system_data = cls._schema_on_200.value.Element.system_data
             system_data.created_at = AAZStrType(
@@ -303,6 +256,9 @@ class List(AAZCommand):
             system_data.last_modified_by_type = AAZStrType(
                 serialized_name="lastModifiedByType",
             )
+
+            tags = cls._schema_on_200.value.Element.tags
+            tags.Element = AAZStrType()
 
             return cls._schema_on_200
 

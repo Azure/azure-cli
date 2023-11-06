@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "cdn profile create",
+    "afd profile update",
 )
-class Create(AAZCommand):
-    """Create a new Azure Front Door Standard or Azure Front Door Premium or CDN profile with a profile name under the specified subscription and resource group.
+class Update(AAZCommand):
+    """Update a new Azure Front Door Standard or Azure Front Door Premium or CDN profile with a profile name under the specified subscription and resource group.
     """
 
     _aaz_info = {
@@ -26,6 +26,8 @@ class Create(AAZCommand):
     }
 
     AZ_SUPPORT_NO_WAIT = True
+
+    AZ_SUPPORT_GENERIC_UPDATE = True
 
     def _handler(self, command_args):
         super()._handler(command_args)
@@ -46,6 +48,7 @@ class Create(AAZCommand):
             options=["-n", "--name", "--profile-name"],
             help="Name of the Azure Front Door Standard or Azure Front Door Premium or CDN profile which is unique within the resource group.",
             required=True,
+            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -58,11 +61,11 @@ class Create(AAZCommand):
             options=["--identity"],
             arg_group="Profile",
             help="Managed service identity (system assigned and/or user assigned identities).",
+            nullable=True,
         )
         _args_schema.location = AAZResourceLocationArg(
             arg_group="Profile",
             help="Resource location.",
-            required=True,
             fmt=AAZResourceLocationArgFormat(
                 resource_group_arg="resource_group",
             ),
@@ -71,28 +74,29 @@ class Create(AAZCommand):
             options=["--sku"],
             arg_group="Profile",
             help="The pricing tier (defines Azure Front Door Standard or Premium or a CDN provider, feature list and rate) of the profile.",
-            required=True,
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
             arg_group="Profile",
             help="Resource tags.",
+            nullable=True,
         )
 
         identity = cls._args_schema.identity
         identity.type = AAZStrArg(
             options=["type"],
             help="Type of managed service identity (where both SystemAssigned and UserAssigned types are allowed).",
-            required=True,
             enum={"None": "None", "SystemAssigned": "SystemAssigned", "SystemAssigned, UserAssigned": "SystemAssigned, UserAssigned", "UserAssigned": "UserAssigned"},
         )
         identity.user_assigned_identities = AAZDictArg(
             options=["user-assigned-identities"],
             help="The set of user assigned identities associated with the resource. The userAssignedIdentities dictionary keys will be ARM resource ids in the form: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}. The dictionary values can be empty objects ({}) in requests.",
+            nullable=True,
         )
 
         user_assigned_identities = cls._args_schema.identity.user_assigned_identities
         user_assigned_identities.Element = AAZObjectArg(
+            nullable=True,
             blank={},
         )
 
@@ -100,11 +104,14 @@ class Create(AAZCommand):
         sku.name = AAZStrArg(
             options=["name"],
             help="Name of the pricing tier.",
+            nullable=True,
             enum={"Custom_Verizon": "Custom_Verizon", "Premium_AzureFrontDoor": "Premium_AzureFrontDoor", "Premium_Verizon": "Premium_Verizon", "StandardPlus_955BandWidth_ChinaCdn": "StandardPlus_955BandWidth_ChinaCdn", "StandardPlus_AvgBandWidth_ChinaCdn": "StandardPlus_AvgBandWidth_ChinaCdn", "StandardPlus_ChinaCdn": "StandardPlus_ChinaCdn", "Standard_955BandWidth_ChinaCdn": "Standard_955BandWidth_ChinaCdn", "Standard_Akamai": "Standard_Akamai", "Standard_AvgBandWidth_ChinaCdn": "Standard_AvgBandWidth_ChinaCdn", "Standard_AzureFrontDoor": "Standard_AzureFrontDoor", "Standard_ChinaCdn": "Standard_ChinaCdn", "Standard_Microsoft": "Standard_Microsoft", "Standard_Verizon": "Standard_Verizon"},
         )
 
         tags = cls._args_schema.tags
-        tags.Element = AAZStrArg()
+        tags.Element = AAZStrArg(
+            nullable=True,
+        )
 
         # define Arg Group "Properties"
 
@@ -113,6 +120,7 @@ class Create(AAZCommand):
             options=["--origin-response-timeout-seconds"],
             arg_group="Properties",
             help="Send and receive timeout on forwarding request to the origin. When timeout is reached, the request fails and returns.",
+            nullable=True,
             fmt=AAZIntArgFormat(
                 minimum=16,
             ),
@@ -121,6 +129,11 @@ class Create(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
+        self.ProfilesGet(ctx=self.ctx)()
+        self.pre_instance_update(self.ctx.vars.instance)
+        self.InstanceUpdateByJson(ctx=self.ctx)()
+        self.InstanceUpdateByGeneric(ctx=self.ctx)()
+        self.post_instance_update(self.ctx.vars.instance)
         yield self.ProfilesCreate(ctx=self.ctx)()
         self.post_operations()
 
@@ -132,9 +145,100 @@ class Create(AAZCommand):
     def post_operations(self):
         pass
 
+    @register_callback
+    def pre_instance_update(self, instance):
+        pass
+
+    @register_callback
+    def post_instance_update(self, instance):
+        pass
+
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
+
+    class ProfilesGet(AAZHttpOperation):
+        CLIENT_TYPE = "MgmtClient"
+
+        def __call__(self, *args, **kwargs):
+            request = self.make_request()
+            session = self.client.send_request(request=request, stream=False, **kwargs)
+            if session.http_response.status_code in [200]:
+                return self.on_200(session)
+
+            return self.on_error(session.http_response)
+
+        @property
+        def url(self):
+            return self.client.format_url(
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}",
+                **self.url_parameters
+            )
+
+        @property
+        def method(self):
+            return "GET"
+
+        @property
+        def error_format(self):
+            return "MgmtErrorFormat"
+
+        @property
+        def url_parameters(self):
+            parameters = {
+                **self.serialize_url_param(
+                    "profileName", self.ctx.args.profile_name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "resourceGroupName", self.ctx.args.resource_group,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "subscriptionId", self.ctx.subscription_id,
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def query_parameters(self):
+            parameters = {
+                **self.serialize_query_param(
+                    "api-version", "2023-05-01",
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Accept", "application/json",
+                ),
+            }
+            return parameters
+
+        def on_200(self, session):
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200
+            )
+
+        _schema_on_200 = None
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
+
+            cls._schema_on_200 = AAZObjectType()
+            _UpdateHelper._build_schema_profile_read(cls._schema_on_200)
+
+            return cls._schema_on_200
 
     class ProfilesCreate(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
@@ -222,8 +326,41 @@ class Create(AAZCommand):
         def content(self):
             _content_value, _builder = self.new_content_builder(
                 self.ctx.args,
-                typ=AAZObjectType,
-                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
+                value=self.ctx.vars.instance,
+            )
+
+            return self.serialize_content(_content_value)
+
+        def on_200_201(self, session):
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200_201
+            )
+
+        _schema_on_200_201 = None
+
+        @classmethod
+        def _build_schema_on_200_201(cls):
+            if cls._schema_on_200_201 is not None:
+                return cls._schema_on_200_201
+
+            cls._schema_on_200_201 = AAZObjectType()
+            _UpdateHelper._build_schema_profile_read(cls._schema_on_200_201)
+
+            return cls._schema_on_200_201
+
+    class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
+
+        def __call__(self, *args, **kwargs):
+            self._update_instance(self.ctx.vars.instance)
+
+        def _update_instance(self, instance):
+            _instance_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                value=instance,
+                typ=AAZObjectType
             )
             _builder.set_prop("identity", AAZObjectType, ".identity")
             _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
@@ -252,31 +389,19 @@ class Create(AAZCommand):
             if tags is not None:
                 tags.set_elements(AAZStrType, ".")
 
-            return self.serialize_content(_content_value)
+            return _instance_value
 
-        def on_200_201(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200_201
+    class InstanceUpdateByGeneric(AAZGenericInstanceUpdateOperation):
+
+        def __call__(self, *args, **kwargs):
+            self._update_instance_by_generic(
+                self.ctx.vars.instance,
+                self.ctx.generic_update_args
             )
 
-        _schema_on_200_201 = None
 
-        @classmethod
-        def _build_schema_on_200_201(cls):
-            if cls._schema_on_200_201 is not None:
-                return cls._schema_on_200_201
-
-            cls._schema_on_200_201 = AAZObjectType()
-            _CreateHelper._build_schema_profile_read(cls._schema_on_200_201)
-
-            return cls._schema_on_200_201
-
-
-class _CreateHelper:
-    """Helper class for Create"""
+class _UpdateHelper:
+    """Helper class for Update"""
 
     _schema_profile_read = None
 
@@ -417,4 +542,4 @@ class _CreateHelper:
         _schema.type = cls._schema_profile_read.type
 
 
-__all__ = ["Create"]
+__all__ = ["Update"]

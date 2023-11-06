@@ -12,17 +12,17 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "cdn endpoint delete",
+    "afd profile delete",
     confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
-    """Delete an existing CDN endpoint with the specified endpoint name under the specified subscription, resource group and profile.
+    """Delete an existing  Azure Front Door Standard or Azure Front Door Premium or CDN profile with the specified parameters. Deleting a profile will result in the deletion of all of the sub-resources including endpoints, origins and custom domains.
     """
 
     _aaz_info = {
         "version": "2023-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/endpoints/{}", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}", "2023-05-01"],
         ]
     }
 
@@ -43,15 +43,9 @@ class Delete(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.endpoint_name = AAZStrArg(
-            options=["-n", "--name", "--endpoint-name"],
-            help="Name of the endpoint under the profile which is unique globally.",
-            required=True,
-            id_part="child_name_1",
-        )
         _args_schema.profile_name = AAZStrArg(
-            options=["--profile-name"],
-            help="Name of the CDN profile which is unique within the resource group.",
+            options=["-n", "--name", "--profile-name"],
+            help="Name of the Azure Front Door Standard or Azure Front Door Premium or CDN profile which is unique within the resource group.",
             required=True,
             id_part="name",
         )
@@ -62,7 +56,7 @@ class Delete(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.EndpointsDelete(ctx=self.ctx)()
+        yield self.ProfilesDelete(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -73,7 +67,7 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class EndpointsDelete(AAZHttpOperation):
+    class ProfilesDelete(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -112,7 +106,7 @@ class Delete(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/endpoints/{endpointName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}",
                 **self.url_parameters
             )
 
@@ -127,10 +121,6 @@ class Delete(AAZCommand):
         @property
         def url_parameters(self):
             parameters = {
-                **self.serialize_url_param(
-                    "endpointName", self.ctx.args.endpoint_name,
-                    required=True,
-                ),
                 **self.serialize_url_param(
                     "profileName", self.ctx.args.profile_name,
                     required=True,

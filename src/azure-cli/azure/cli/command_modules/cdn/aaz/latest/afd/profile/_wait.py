@@ -12,24 +12,22 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "cdn origin-group list",
+    "afd profile wait",
 )
-class List(AAZCommand):
-    """List all of the existing origin groups within an endpoint.
+class Wait(AAZWaitCommand):
+    """Place the CLI in a waiting state until a condition is met.
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/endpoints/{}/origingroups", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}", "2023-05-01"],
         ]
     }
 
-    AZ_SUPPORT_PAGINATION = True
-
     def _handler(self, command_args):
         super()._handler(command_args)
-        return self.build_paging(self._execute_operations, self._output)
+        self._execute_operations()
+        return self._output()
 
     _args_schema = None
 
@@ -42,15 +40,11 @@ class List(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.endpoint_name = AAZStrArg(
-            options=["--endpoint-name"],
-            help="Name of the endpoint under the profile which is unique globally.",
-            required=True,
-        )
         _args_schema.profile_name = AAZStrArg(
-            options=["--profile-name"],
-            help="Name of the CDN profile which is unique within the resource group.",
+            options=["-n", "--name", "--profile-name"],
+            help="Name of the Azure Front Door Standard or Azure Front Door Premium or CDN profile which is unique within the resource group.",
             required=True,
+            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -59,7 +53,7 @@ class List(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        self.OriginGroupsListByEndpoint(ctx=self.ctx)()
+        self.ProfilesGet(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -71,11 +65,10 @@ class List(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
-        next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
-        return result, next_link
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
+        return result
 
-    class OriginGroupsListByEndpoint(AAZHttpOperation):
+    class ProfilesGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -89,7 +82,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/endpoints/{endpointName}/originGroups",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}",
                 **self.url_parameters
             )
 
@@ -104,10 +97,6 @@ class List(AAZCommand):
         @property
         def url_parameters(self):
             parameters = {
-                **self.serialize_url_param(
-                    "endpointName", self.ctx.args.endpoint_name,
-                    required=True,
-                ),
                 **self.serialize_url_param(
                     "profileName", self.ctx.args.profile_name,
                     required=True,
@@ -160,40 +149,74 @@ class List(AAZCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.next_link = AAZStrType(
-                serialized_name="nextLink",
-            )
-            _schema_on_200.value = AAZListType(
+            _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
-
-            value = cls._schema_on_200.value
-            value.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element
-            _element.id = AAZStrType(
+            _schema_on_200.identity = AAZObjectType()
+            _schema_on_200.kind = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.name = AAZStrType(
+            _schema_on_200.location = AAZStrType(
+                flags={"required": True},
+            )
+            _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.properties = AAZObjectType(
+            _schema_on_200.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
-            _element.system_data = AAZObjectType(
+            _schema_on_200.sku = AAZObjectType(
+                flags={"required": True},
+            )
+            _schema_on_200.system_data = AAZObjectType(
                 serialized_name="systemData",
                 flags={"read_only": True},
             )
-            _element.type = AAZStrType(
+            _schema_on_200.tags = AAZDictType()
+            _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
             )
 
-            properties = cls._schema_on_200.value.Element.properties
-            properties.health_probe_settings = AAZObjectType(
-                serialized_name="healthProbeSettings",
+            identity = cls._schema_on_200.identity
+            identity.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
             )
-            properties.origins = AAZListType(
+            identity.tenant_id = AAZStrType(
+                serialized_name="tenantId",
+                flags={"read_only": True},
+            )
+            identity.type = AAZStrType(
                 flags={"required": True},
+            )
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200.properties
+            properties.extended_properties = AAZDictType(
+                serialized_name="extendedProperties",
+                flags={"read_only": True},
+            )
+            properties.front_door_id = AAZStrType(
+                serialized_name="frontDoorId",
+                flags={"read_only": True},
+            )
+            properties.origin_response_timeout_seconds = AAZIntType(
+                serialized_name="originResponseTimeoutSeconds",
             )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -203,52 +226,14 @@ class List(AAZCommand):
                 serialized_name="resourceState",
                 flags={"read_only": True},
             )
-            properties.response_based_origin_error_detection_settings = AAZObjectType(
-                serialized_name="responseBasedOriginErrorDetectionSettings",
-            )
-            properties.traffic_restoration_time_to_healed_or_new_endpoints_in_minutes = AAZIntType(
-                serialized_name="trafficRestorationTimeToHealedOrNewEndpointsInMinutes",
-            )
 
-            health_probe_settings = cls._schema_on_200.value.Element.properties.health_probe_settings
-            health_probe_settings.probe_interval_in_seconds = AAZIntType(
-                serialized_name="probeIntervalInSeconds",
-            )
-            health_probe_settings.probe_path = AAZStrType(
-                serialized_name="probePath",
-            )
-            health_probe_settings.probe_protocol = AAZStrType(
-                serialized_name="probeProtocol",
-            )
-            health_probe_settings.probe_request_type = AAZStrType(
-                serialized_name="probeRequestType",
-            )
+            extended_properties = cls._schema_on_200.properties.extended_properties
+            extended_properties.Element = AAZStrType()
 
-            origins = cls._schema_on_200.value.Element.properties.origins
-            origins.Element = AAZObjectType()
+            sku = cls._schema_on_200.sku
+            sku.name = AAZStrType()
 
-            _element = cls._schema_on_200.value.Element.properties.origins.Element
-            _element.id = AAZStrType()
-
-            response_based_origin_error_detection_settings = cls._schema_on_200.value.Element.properties.response_based_origin_error_detection_settings
-            response_based_origin_error_detection_settings.http_error_ranges = AAZListType(
-                serialized_name="httpErrorRanges",
-            )
-            response_based_origin_error_detection_settings.response_based_detected_error_types = AAZStrType(
-                serialized_name="responseBasedDetectedErrorTypes",
-            )
-            response_based_origin_error_detection_settings.response_based_failover_threshold_percentage = AAZIntType(
-                serialized_name="responseBasedFailoverThresholdPercentage",
-            )
-
-            http_error_ranges = cls._schema_on_200.value.Element.properties.response_based_origin_error_detection_settings.http_error_ranges
-            http_error_ranges.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.response_based_origin_error_detection_settings.http_error_ranges.Element
-            _element.begin = AAZIntType()
-            _element.end = AAZIntType()
-
-            system_data = cls._schema_on_200.value.Element.system_data
+            system_data = cls._schema_on_200.system_data
             system_data.created_at = AAZStrType(
                 serialized_name="createdAt",
             )
@@ -268,11 +253,14 @@ class List(AAZCommand):
                 serialized_name="lastModifiedByType",
             )
 
+            tags = cls._schema_on_200.tags
+            tags.Element = AAZStrType()
+
             return cls._schema_on_200
 
 
-class _ListHelper:
-    """Helper class for List"""
+class _WaitHelper:
+    """Helper class for Wait"""
 
 
-__all__ = ["List"]
+__all__ = ["Wait"]

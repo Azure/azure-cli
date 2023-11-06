@@ -8,15 +8,16 @@
 # pylint: skip-file
 # flake8: noqa
 
-from .__cmd_group import *
-from ._create import *
-from ._delete import *
-from ._list import *
-from ._load import *
-from ._purge import *
-from ._show import *
-from ._start import *
-from ._stop import *
-from ._update import *
-from ._validate_custom_domain import *
-from ._wait import *
+from azure.cli.core.aaz import *
+
+
+@register_command_group(
+    "afd profile",
+)
+class __CMDGroup(AAZCommandGroup):
+    """Manage AFD profiles.
+    """
+    pass
+
+
+__all__ = ["__CMDGroup"]
