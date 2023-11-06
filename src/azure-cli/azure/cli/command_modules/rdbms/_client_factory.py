@@ -109,13 +109,14 @@ def get_postgresql_management_client(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, PostgreSQLManagementClient)
 
 
-def get_postgresql_flexible_management_client(cli_ctx, **_):
+def get_postgresql_flexible_management_client(cli_ctx, subscription_id=None, **_):
     from os import getenv
     from azure.mgmt.rdbms.postgresql_flexibleservers import PostgreSQLManagementClient
     # Allow overriding resource manager URI using environment variable
     # for testing purposes. Subscription id is also determined by environment
     # variable.
     rm_uri_override = getenv(RM_URI_OVERRIDE)
+    subscription = subscription_id if subscription_id is not None else getenv(SUB_ID_OVERRIDE)
     if rm_uri_override:
         client_id = getenv(AZURE_CLIENT_ID)
         if client_id:
@@ -125,11 +126,11 @@ def get_postgresql_flexible_management_client(cli_ctx, **_):
             credentials = Authentication()
 
         return PostgreSQLManagementClient(
-            subscription_id=getenv(SUB_ID_OVERRIDE),
+            subscription_id=subscription,
             base_url=rm_uri_override,
             credential=credentials)
     # Normal production scenario.
-    return get_mgmt_service_client(cli_ctx, PostgreSQLManagementClient)
+    return get_mgmt_service_client(cli_ctx, PostgreSQLManagementClient, subscription_id=subscription)
 
 
 def cf_mariadb_servers(cli_ctx, _):

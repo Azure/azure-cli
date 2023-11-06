@@ -73,7 +73,7 @@ class VmReimageTest(ScenarioTest):
             'vm': 'vm'
         })
 
-        self.cmd('vm create -g {rg} -n {vm} --image centos --admin-username centosadmin --admin-password testPassword0 '
+        self.cmd('vm create -g {rg} -n {vm} --image CentOS85Gen2 --admin-username centosadmin --admin-password testPassword0 '
                  '--authentication-type password --os-disk-delete-option Delete --nsg-rule NONE')
         vm_json_before_reimage = self.cmd('vm show -n {vm} -g {rg}').get_output_in_json()
         self.kwargs.update({
@@ -1152,8 +1152,8 @@ class VMManagedDiskScenarioTest(ScenarioTest):
                  checks=[self.check('creationData.createOption', 'Copy')])
         # in different region, it should default copyStart as True
         # TODO: should not throw exception after feature GA
-        from azure.core.exceptions import ResourceExistsError
-        with self.assertRaisesRegex(ResourceExistsError, 'CopyStart creation is not supported for this subscription'):
+        from azure.core.exceptions import ResourceNotFoundError
+        with self.assertRaises(ResourceNotFoundError):
             self.cmd('snapshot create -g {rg} -n {snapshot2} --source {disk} -l eastus')
 
     """ Disable temporarily
@@ -1184,7 +1184,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             'disk4': 'd4',
             'disk5': 'd5',
             'disk6': 'd6',
-            'image': '/Subscriptions/' + subs_id + '/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/0001-com-ubuntu-server-jammy/Skus/22_04-lts-gen2/Versions/22.04.202305160',
+            'image': '/Subscriptions/' + subs_id + '/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/0001-com-ubuntu-server-jammy/Skus/22_04-lts-gen2/Versions/22.04.202311010',
             'image2': 'image2',
             'g1': self.create_random_name('g1', 20),
             'vm': 'vm1'
@@ -2306,6 +2306,8 @@ class VMMonitorTestUpdateLinux(ScenarioTest):
             'nsg': self.create_random_name('clinsg', 20)
         })
         self.cmd('network nsg create -g {rg} -n {nsg}')
+        # use new migrated log-analystics workspace create instead of monitor sdk
+        self.cmd('monitor log-analytics workspace create -n {workspace1} -g {rg}')
         self.cmd('vm create -n {vm} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --nsg {nsg} --generate-ssh-keys --admin-username azureuser')
         with mock.patch('azure.cli.command_modules.vm.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('vm update -n {vm} -g {rg} --workspace {workspace1}')
@@ -4559,7 +4561,7 @@ class VMSSCustomDataScenarioTest(ScenarioTest):
             'ssh_key': TEST_SSH_KEY_PUB
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Debian --admin-username deploy --ssh-key-value "{ssh_key}"')
+        self.cmd('vmss create -n {vmss} -g {rg} --image Debian11 --admin-username deploy --ssh-key-value "{ssh_key}"')
         self.cmd('vmss update -n {vmss} -g {rg} --custom-data "#cloud-config\nhostname: myVMSShostname"')
         # custom data is write only, hence we have no automatic way to cross check. Here we just verify VM was provisioned
         self.cmd('vmss show -n {vmss} -g {rg}', checks=[
@@ -4771,6 +4773,11 @@ class MSIScenarioTest(ScenarioTest):
             # create a linux vm w/o identity and later enable it
             vm3_result = self.cmd('vm create -g {rg} -n {vm3} --image Debian:debian-10:10:latest --admin-username admin123 --admin-password PasswordPassword1! --nsg-rule NONE').get_output_in_json()
             self.assertIsNone(vm3_result.get('identity'))
+
+            with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope when assigning a role to the managed identity"):
+                self.cmd(
+                    'vm identity assign -g {rg} -n {vm3} --scope {vm1_id}')
+
             result = self.cmd('vm identity assign -g {rg} -n {vm3} --scope {vm1_id} --role reader', checks=[
                 self.check('role', 'reader'),
                 self.check('scope', '{vm1_id}'),
@@ -4816,6 +4823,10 @@ class MSIScenarioTest(ScenarioTest):
             # create a linux vm w/o identity and later enable it
             result = self.cmd('vmss create -g {rg} -n {vmss3} --image Debian:debian-10:10:latest --instance-count 1 --admin-username admin123 --admin-password PasswordPassword1!').get_output_in_json()['vmss']
             self.assertIsNone(result.get('identity'))
+
+            with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope when assigning a role to the managed identity"):
+                self.cmd(
+                    'vmss identity assign -g {rg} -n {vmss3} --scope "{vmss1_id}"')
 
             result = self.cmd('vmss identity assign -g {rg} -n {vmss3} --scope "{vmss1_id}" --role reader', checks=[
                 self.check('role', 'reader'),
@@ -5360,6 +5371,19 @@ class VMDiskEncryptionTest(ScenarioTest):
         self.cmd('vm encryption show -g {rg} -n {vm}', checks=[self.check('disks[0].statuses[0].code', 'EncryptionState/encrypted')])
         self.cmd('vm encryption disable -g {rg} -n {vm}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_encryption', location='eastus2')
+    @KeyVaultPreparer(name_prefix='vault', name_len=10, location='eastus2', key='vault', additional_params='--enabled-for-disk-encryption')
+    def test_vm_disk_encryption_with_key(self, resource_group, resource_group_location, key_vault):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'key': 'KEK'
+        })
+        self.cmd('vm create -g {rg} -n {vm} --image win2012datacenter --admin-username clitester1 --admin-password Test123456789! --nsg-rule NONE')
+        self.cmd('keyvault key create --vault-name {vault} --name {key} --protection software')
+        self.cmd('vm encryption enable -g {rg} -n {vm} --disk-encryption-keyvault {vault} --key-encryption-key {key}')
+        self.cmd('vm encryption show -g {rg} -n {vm}', checks=[self.check('disks[0].statuses[0].code', 'EncryptionState/encrypted')])
+        self.cmd('vm encryption disable -g {rg} -n {vm}')
+
     @ResourceGroupPreparer(name_prefix='cli_test_vm_encryption_at_host_', location='westus')
     def test_vm_encryption_at_host(self, resource_group):
         self.kwargs.update({
@@ -5531,7 +5555,7 @@ class VMSecretTest(ScenarioTest):
 
         self.kwargs['policy_path'] = os.path.join(TEST_DIR, 'keyvault', 'policy.json')
 
-        self.cmd('vm create -g {rg} -n {vm} --image rhel --generate-ssh-keys --admin-username rheladmin --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm} --image RHELRaw8LVMGen2 --generate-ssh-keys --admin-username rheladmin --nsg-rule NONE')
         time.sleep(60)  # ensure we don't hit the DNS exception (ignored under playback)
 
         self.cmd('keyvault certificate create --vault-name {vault} -n {cert} -p @"{policy_path}"')
@@ -9032,7 +9056,7 @@ class VMInstallPatchesScenarioTest(ScenarioTest):
 class VMTrustedLaunchScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vm_trusted_launch_', location='southcentralus')
     def test_vm_trusted_launch(self, resource_group):
-        self.cmd('vm create -g {rg} -n vm --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm true --admin-username azureuser --admin-password testPassword0 --nsg-rule None --disable-integrity-monitoring')
+        self.cmd('vm create -g {rg} -n vm --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm true --admin-username azureuser --admin-password testPassword0 --nsg-rule None')
         self.cmd('vm show -g {rg} -n vm', checks=[
             self.check('securityProfile.securityType', 'TrustedLaunch'),
             self.check('securityProfile.uefiSettings.secureBootEnabled', True),
@@ -9041,7 +9065,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_trusted_launch_update_', location='southcentralus')
     def test_vm_trusted_launch_update(self, resource_group):
-        self.cmd('vm create -g {rg} -n vm --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --admin-username azureuser --admin-password testPassword0 --nsg-rule None --disable-integrity-monitoring')
+        self.cmd('vm create -g {rg} -n vm --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --admin-username azureuser --admin-password testPassword0 --nsg-rule None')
         self.cmd('vm update -g {rg} -n vm --enable-secure-boot true --enable-vtpm true')
         self.cmd('vm show -g {rg} -n vm', checks=[
             self.check('securityProfile.securityType', 'TrustedLaunch'),
@@ -9152,7 +9176,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_trusted_launch_', location='southcentralus')
     def test_vmss_trusted(self, resource_group):
-        self.cmd('vmss create -g {rg} -n vm --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --admin-username azureuser --admin-password testPassword0 --disable-integrity-monitoring')
+        self.cmd('vmss create -g {rg} -n vm --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --admin-username azureuser --admin-password testPassword0')
         self.cmd('vmss update -g {rg} -n vm --enable-secure-boot true --enable-vtpm true')
         self.cmd('vmss show -g {rg} -n vm', checks=[
             self.check('virtualMachineProfile.securityProfile.securityType', 'TrustedLaunch'),
@@ -9175,7 +9199,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
 
         })
         self.cmd('identity create -g {rg} -n {id1}')
-        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --assign-identity {id1} [system] --admin-username azureuser -g {rg} -n {vm1} --enable-secure-boot --enable-vtpm')
+        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --assign-identity {id1} [system] --admin-username azureuser -g {rg} -n {vm1} --enable-secure-boot --enable-vtpm --enable-integrity-monitoring')
         self.cmd('vm show -g {rg} -n {vm1}', checks=[
             self.check('identity.type', 'SystemAssigned, UserAssigned'),
             self.check('resources[0].name', 'GuestAttestation'),
@@ -9185,7 +9209,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.uefiSettings.vTpmEnabled', True)
 
         ])
-        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --admin-username azureuser -g {rg} -n {vm2} --enable-secure-boot --enable-vtpm --disable-integrity-monitoring')
+        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --admin-username azureuser -g {rg} -n {vm2} --enable-secure-boot --enable-vtpm')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
             self.check('resources', None),
             self.check('identity', None),
@@ -9208,7 +9232,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.uefiSettings.vTpmEnabled', True),
             self.check('securityProfile.uefiSettings.secureBootEnabled', True)
         ])
-        self.cmd('vmss create -g {rg} -n {vmss1} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch --enable-secure-boot --enable-vtpm')
+        self.cmd('vmss create -g {rg} -n {vmss1} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch --enable-secure-boot --enable-vtpm --enable-integrity-monitoring')
         self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
             self.check('identity.type', 'SystemAssigned'),
             self.check('virtualMachineProfile.extensionProfile.extensions[0].name', 'GuestAttestation'),
@@ -9221,7 +9245,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('[0].resources[0].name', 'GuestAttestation'),
             self.check('[0].resources[0].publisher', 'Microsoft.Azure.Security.LinuxAttestation')
         ])
-        self.cmd('vmss create -g {rg} -n {vmss2} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch --enable-secure-boot --enable-vtpm --disable-integrity-monitoring')
+        self.cmd('vmss create -g {rg} -n {vmss2} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch --enable-secure-boot --enable-vtpm')
         self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
             self.check('identity', None),
             self.check('virtualMachineProfile.extensionProfile', 'None'),
@@ -9303,7 +9327,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             'vmss1': self.create_random_name('vmss1', 10),
             'vmss2': self.create_random_name('vmss2', 10),
         })
-        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch -g {rg} -n {vm1} --enable-secure-boot --enable-vtpm --admin-username azureuser --admin-password testPassword0 --generate-ssh-keys --nsg-rule NONE')
+        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch -g {rg} -n {vm1} --enable-secure-boot --enable-vtpm --enable-integrity-monitoring --admin-username azureuser --admin-password testPassword0 --generate-ssh-keys --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {vm1}', checks=[
             self.check('resources[0].name', 'GuestAttestation'),
             self.check('resources[0].publisher', 'Microsoft.Azure.Security.LinuxAttestation'),
@@ -9312,7 +9336,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.uefiSettings.secureBootEnabled', True),
             self.check('securityProfile.uefiSettings.vTpmEnabled', True)
         ])
-        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch -g {rg} -n {vm2} --enable-secure-boot --enable-vtpm --disable-integrity-monitoring-autoupgrade --admin-username azureuser --admin-password testPassword0 --generate-ssh-keys --nsg-rule NONE')
+        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch -g {rg} -n {vm2} --enable-secure-boot --enable-vtpm --enable-integrity-monitoring --disable-integrity-monitoring-autoupgrade --admin-username azureuser --admin-password testPassword0 --generate-ssh-keys --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
             self.check('resources[0].name', 'GuestAttestation'),
             self.check('resources[0].publisher', 'Microsoft.Azure.Security.LinuxAttestation'),
@@ -9321,7 +9345,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.uefiSettings.secureBootEnabled', True),
             self.check('securityProfile.uefiSettings.vTpmEnabled', True)
         ])
-        self.cmd('vmss create -g {rg} -n {vmss1} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch --enable-secure-boot --enable-vtpm --generate-ssh-keys')
+        self.cmd('vmss create -g {rg} -n {vmss1} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch --enable-secure-boot --enable-vtpm --enable-integrity-monitoring --generate-ssh-keys')
         self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
             self.check('virtualMachineProfile.extensionProfile.extensions[0].name', 'GuestAttestation'),
             self.check('virtualMachineProfile.extensionProfile.extensions[0].publisher',
@@ -9331,7 +9355,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True),
             self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True)
         ])
-        self.cmd('vmss create -g {rg} -n {vmss2} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch --enable-secure-boot --enable-vtpm --disable-integrity-monitoring-autoupgrade --generate-ssh-keys')
+        self.cmd('vmss create -g {rg} -n {vmss2} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch --enable-secure-boot --enable-vtpm --enable-integrity-monitoring --disable-integrity-monitoring-autoupgrade --generate-ssh-keys')
         self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
             self.check('virtualMachineProfile.extensionProfile.extensions[0].name', 'GuestAttestation'),
             self.check('virtualMachineProfile.extensionProfile.extensions[0].publisher',
@@ -10065,6 +10089,20 @@ class DiskRPTestScenario(ScenarioTest):
             self.check('creationData.sourceResourceId', '{disk_id}')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_disk_snapshot_hyper_v_generation_default_to_null', location='eastus2euap')
+    def test_disk_snapshot_hyper_v_generation_default_to_null(self, resource_group):
+        self.kwargs.update({
+            'disk': self.create_random_name('disk', 10),
+            'snapshot': self.create_random_name('snap', 10),
+        })
+
+        self.cmd('disk create -g {rg} -n {disk} --size-gb 4 ', checks=[
+            self.check('hyperVGeneration', None)
+        ])
+        self.cmd('snapshot create -n {snapshot} -g {rg} --source {disk}', checks=[
+            self.check('hyperVGeneration', None)
+        ])
+
 
 class RestorePointScenarioTest(ScenarioTest):
 
@@ -10178,7 +10216,7 @@ class RestorePointScenarioTest(ScenarioTest):
             'vm_name': self.create_random_name('vm_', 15)
         })
 
-        vm = self.cmd('vm create -n {vm_name} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username vmtest').get_output_in_json()
+        vm = self.cmd('vm create -n {vm_name} -g {rg} --image ubuntu2204 --admin-username vmtest').get_output_in_json()
         self.kwargs.update({
             'vm_id': vm['id']
         })
@@ -10202,6 +10240,188 @@ class RestorePointScenarioTest(ScenarioTest):
         self.cmd('restore-point create -g {rg} -n {point_name1} --collection-name {collection_name1} --source-restore-point {point_id}', checks=[
             self.check('sourceRestorePoint.id', '{point_id}')
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_restore_point_encryption_local', location='EastUS2EUAP')
+    def test_restore_point_encryption_local(self, resource_group):
+        self.kwargs.update({
+            'vault1': self.create_random_name('vault', 15),
+            'collection_name': self.create_random_name('coll', 10),
+            'vm_name': self.create_random_name('vm_', 15),
+            'key1': self.create_random_name('key', 15),
+            'point_name1': self.create_random_name('point_', 15),
+            'des1': self.create_random_name('des_', 10),
+            'des2': self.create_random_name('des_', 10),
+            'os_disk': self.create_random_name('disk_', 10),
+            'data_disk1': self.create_random_name('disk_', 10),
+            'data_disk2': self.create_random_name('disk_', 10),
+        })
+        self.cmd('keyvault create -g {rg} -n {vault1} --enabled-for-disk-encryption true --enable-purge-protection')
+        key1 = self.cmd('keyvault key create -n {key1} --vault {vault1} --protection software').get_output_in_json()
+        os_disk = self.cmd('disk create -g {rg} -n {os_disk} --size-gb 10').get_output_in_json()
+        data_disk1 = self.cmd('disk create -g {rg} -n {data_disk1} --size-gb 10').get_output_in_json()
+        data_disk2 = self.cmd('disk create -g {rg} -n {data_disk2} --size-gb 10').get_output_in_json()
+        self.kwargs.update({
+            'kid': key1['key']['kid'],
+            'os_disk_id': os_disk['id'],
+            'data_disk1_id': data_disk1['id'],
+            'data_disk2_id': data_disk2['id']
+        })
+        des1 = self.cmd('disk-encryption-set create -g {rg} -n {des1} --key-url {kid} --source-vault {vault1} --encryption-type EncryptionAtRestWithPlatformAndCustomerKeys').get_output_in_json()
+        des2 = self.cmd('disk-encryption-set create -g {rg} -n {des2} --key-url {kid} --source-vault {vault1} --encryption-type EncryptionAtRestWithPlatformAndCustomerKeys').get_output_in_json()
+
+        vm = self.cmd('vm create -g {rg} -n {vm_name} --attach-os-disk {os_disk} --attach-data-disk {data_disk1} {data_disk2} --os-type linux --nsg-rule NONE').get_output_in_json()
+        self.cmd('vm deallocate -g {rg} -n {vm_name}')
+        self.kwargs.update({
+            'des1_id': des1['id'],
+            'des2_id': des2['id'],
+            'des1_obj_id': des1['identity']['principalId'],
+            'des2_obj_id': des2['identity']['principalId'],
+            'vm_id': vm['id']
+        })
+        self.cmd('keyvault set-policy --name {vault1} -g {rg} --key-permissions wrapkey unwrapkey get --object-id {des1_obj_id}')
+        self.cmd('keyvault set-policy --name {vault1} -g {rg} --key-permissions wrapkey unwrapkey get --object-id {des2_obj_id}')
+
+        self.cmd('restore-point collection create -g {rg} --collection-name {collection_name} --source-id {vm_id}')
+        self.cmd('restore-point create -g {rg} -n {point_name1} --collection-name {collection_name} --source-os-resource {os_disk_id} '
+                 '--os-restore-point-encryption-set {des1_id} --source-data-disk-resource {data_disk1_id} {data_disk2_id} '
+                 '--data-disk-restore-point-encryption-set {des1_id} {des2_id}', checks=[
+            self.check('sourceMetadata.storageProfile.osDisk.managedDisk.id', '{os_disk_id}'),
+            self.check('sourceMetadata.storageProfile.dataDisks[0].managedDisk.id', '{data_disk1_id}'),
+            self.check('sourceMetadata.storageProfile.dataDisks[1].managedDisk.id', '{data_disk2_id}')
+        ])
+
+        message1 = 'usage error: --os-restore-point-encryption-set or --os-restore-point-encryption-type must be used together with --source-os-resource'
+        with self.assertRaisesRegex(ArgumentUsageError, message1):
+            self.cmd('restore-point create -g {rg} -n {point_name1} --collection-name {collection_name} --source-os-resource {os_disk_id} '
+                     '--source-data-disk-resource {data_disk1_id} {data_disk2_id} ')
+
+        message2 = 'usage error: --data-disk-restore-point-encryption-set or --data-disk-restore-point-encryption-type must be used together with --source-data-disk-resource'
+        with self.assertRaisesRegex(ArgumentUsageError, message2):
+            self.cmd('restore-point create -g {rg} -n {point_name1} --collection-name {collection_name} --source-os-resource {os_disk_id} '
+                     '--os-restore-point-encryption-set {des1_id} --source-data-disk-resource {data_disk1_id} {data_disk2_id}')
+
+        message3 = 'Length of --source-data-disk-resource, --data-disk-restore-point-encryption-set must be same.'
+        with self.assertRaisesRegex(ArgumentUsageError, message3):
+            self.cmd('restore-point create -g {rg} -n {point_name1} --collection-name {collection_name} --source-os-resource {os_disk_id} '
+                     '--os-restore-point-encryption-set {des1_id} --source-data-disk-resource {data_disk1_id} {data_disk2_id} '
+                     '--data-disk-restore-point-encryption-set {des1_id}')
+
+        message4 = 'Length of --source-data-disk-resource, --data-disk-restore-point-encryption-type must be same.'
+        with self.assertRaisesRegex(ArgumentUsageError, message4):
+            self.cmd('restore-point create -g {rg} -n {point_name1} --collection-name {collection_name} --source-os-resource {os_disk_id} '
+                     '--os-restore-point-encryption-set {des1_id} --source-data-disk-resource {data_disk1_id} {data_disk2_id} '
+                     '--data-disk-restore-point-encryption-type EncryptionAtRestWithCustomerKey')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_restore_point_encryption_remote', location='EastUS2EUAP')
+    def test_restore_point_encryption_remote(self, resource_group):
+        self.kwargs.update({
+            'vault1': self.create_random_name('vault', 15),
+            'collection_name': self.create_random_name('coll', 10),
+            'vm_name': self.create_random_name('vm_', 15),
+            'key1': self.create_random_name('key', 15),
+            'point_name1': self.create_random_name('point_', 15),
+            'des1': self.create_random_name('des_', 10),
+            'des2': self.create_random_name('des_', 10),
+            'os_disk': self.create_random_name('disk_', 10),
+            'data_disk1': self.create_random_name('disk_', 10),
+            'data_disk2': self.create_random_name('disk_', 10),
+        })
+        self.cmd('keyvault create -g {rg} -n {vault1} --enabled-for-disk-encryption true --enable-purge-protection')
+        key1 = self.cmd('keyvault key create -n {key1} --vault {vault1} --protection software').get_output_in_json()
+        os_disk = self.cmd('disk create -g {rg} -n {os_disk} --size-gb 10').get_output_in_json()
+        data_disk1 = self.cmd('disk create -g {rg} -n {data_disk1} --size-gb 10').get_output_in_json()
+        data_disk2 = self.cmd('disk create -g {rg} -n {data_disk2} --size-gb 10').get_output_in_json()
+        self.kwargs.update({
+            'kid': key1['key']['kid'],
+            'os_disk_id': os_disk['id'],
+            'data_disk1_id': data_disk1['id'],
+            'data_disk2_id': data_disk2['id']
+        })
+        des1 = self.cmd('disk-encryption-set create -g {rg} -n {des1} --key-url {kid} --source-vault {vault1} --encryption-type EncryptionAtRestWithPlatformAndCustomerKeys').get_output_in_json()
+        des2 = self.cmd('disk-encryption-set create -g {rg} -n {des2} --key-url {kid} --source-vault {vault1} --encryption-type EncryptionAtRestWithPlatformAndCustomerKeys').get_output_in_json()
+
+        vm = self.cmd('vm create -g {rg} -n {vm_name} --attach-os-disk {os_disk} --attach-data-disk {data_disk1} {data_disk2} --os-type linux --nsg-rule NONE').get_output_in_json()
+        self.cmd('vm deallocate -g {rg} -n {vm_name}')
+        self.kwargs.update({
+            'des1_id': des1['id'],
+            'des2_id': des2['id'],
+            'des1_obj_id': des1['identity']['principalId'],
+            'des2_obj_id': des2['identity']['principalId'],
+            'vm_id': vm['id']
+        })
+        self.cmd('keyvault set-policy --name {vault1} -g {rg} --key-permissions wrapkey unwrapkey get --object-id {des1_obj_id}')
+        self.cmd('keyvault set-policy --name {vault1} -g {rg} --key-permissions wrapkey unwrapkey get --object-id {des2_obj_id}')
+
+        source_collection = self.cmd('restore-point collection create -g {rg} --collection-name {collection_name} --source-id {vm_id}').get_output_in_json()
+        source_point = self.cmd('restore-point create -g {rg} -n {point_name1} --collection-name {collection_name} --source-os-resource {os_disk_id} '
+                                '--os-restore-point-encryption-set {des1_id} --source-data-disk-resource {data_disk1_id} {data_disk2_id} '
+                                '--data-disk-restore-point-encryption-set {des1_id} {des2_id}', checks=[
+                self.check('sourceMetadata.storageProfile.osDisk.managedDisk.id', '{os_disk_id}'),
+                self.check('sourceMetadata.storageProfile.dataDisks[0].managedDisk.id', '{data_disk1_id}'),
+                self.check('sourceMetadata.storageProfile.dataDisks[1].managedDisk.id', '{data_disk2_id}')
+            ]).get_output_in_json()
+
+        self.kwargs.update({
+            'remote_vault1': self.create_random_name('vault', 15),
+            'remote_collection_name': self.create_random_name('coll', 10),
+            'remote_key1': self.create_random_name('key', 15),
+            'remote_point_name1': self.create_random_name('point_', 15),
+            'remote_des1': self.create_random_name('des_', 10),
+            'remote_des2': self.create_random_name('des_', 10),
+            'source_collection_id': source_collection['id'],
+            'source_point_id': source_point['id']
+        })
+        self.cmd('keyvault create -g {rg} -n {remote_vault1} --enabled-for-disk-encryption true --enable-purge-protection -l CentralUSEUAP')
+        remote_key1 = self.cmd('keyvault key create -n {remote_key1} --vault {remote_vault1} --protection software').get_output_in_json()
+        self.kwargs.update({
+            'remote_kid': remote_key1['key']['kid']
+
+        })
+        remote_des1 = self.cmd('disk-encryption-set create -g {rg} -n {remote_des1} --key-url {remote_kid} --source-vault {remote_vault1} -l CentralUSEUAP').get_output_in_json()
+        remote_des2 = self.cmd('disk-encryption-set create -g {rg} -n {remote_des2} --key-url {remote_kid} --source-vault {remote_vault1} -l CentralUSEUAP').get_output_in_json()
+        self.kwargs.update({
+            'remote_des1_id': remote_des1['id'],
+            'remote_des2_id': remote_des2['id'],
+            'remote_des1_obj_id': remote_des1['identity']['principalId'],
+            'remote_des2_obj_id': remote_des2['identity']['principalId'],
+            'remote_os_disk_id': source_point['sourceMetadata']['storageProfile']['osDisk']['diskRestorePoint']['id'],
+            'remote_data_disk_id1': source_point['sourceMetadata']['storageProfile']['dataDisks'][0]['diskRestorePoint']['id'],
+            'remote_data_disk_id2': source_point['sourceMetadata']['storageProfile']['dataDisks'][1]['diskRestorePoint']['id']
+        })
+        self.cmd('keyvault set-policy --name {remote_vault1} -g {rg} --key-permissions wrapkey unwrapkey get --object-id {remote_des1_obj_id}')
+        self.cmd('keyvault set-policy --name {remote_vault1} -g {rg} --key-permissions wrapkey unwrapkey get --object-id {remote_des2_obj_id}')
+
+        self.cmd('restore-point collection create -g {rg} --collection-name {remote_collection_name} --source-id {source_collection_id} -l CentralUSEUAP')
+        self.cmd('restore-point create -g {rg} -n {remote_point_name1} --collection-name {remote_collection_name} --source-restore-point {source_point_id} '
+                 '--source-os-resource {remote_os_disk_id} --os-restore-point-encryption-set {remote_des1_id} --os-restore-point-encryption-type EncryptionAtRestWithCustomerKey --source-data-disk-resource {remote_data_disk_id1} {remote_data_disk_id2} '
+                 '--data-disk-restore-point-encryption-set {remote_des1_id} {remote_des2_id} --data-disk-restore-point-encryption-type EncryptionAtRestWithCustomerKey EncryptionAtRestWithCustomerKey', checks=[
+                self.check('sourceMetadata.storageProfile.osDisk.diskRestorePoint.sourceDiskRestorePoint.id', '{remote_os_disk_id}'),
+                self.check('sourceMetadata.storageProfile.dataDisks[0].diskRestorePoint.sourceDiskRestorePoint.id', '{remote_data_disk_id1}'),
+                self.check('sourceMetadata.storageProfile.dataDisks[1].diskRestorePoint.sourceDiskRestorePoint.id', '{remote_data_disk_id2}')
+            ])
+
+        message1 = 'usage error: --os-restore-point-encryption-set or --os-restore-point-encryption-type must be used together with --source-os-resource'
+        with self.assertRaisesRegex(ArgumentUsageError, message1):
+            self.cmd('restore-point create -g {rg} -n {remote_point_name1} --collection-name {remote_collection_name} --source-restore-point {source_point_id} '
+                     '--source-os-resource {remote_os_disk_id} --source-data-disk-resource {remote_data_disk_id1} {remote_data_disk_id2} '
+                     '--data-disk-restore-point-encryption-type EncryptionAtRestWithPlatformAndCustomerKeys EncryptionAtRestWithPlatformAndCustomerKeys')
+
+        message2 = 'usage error: --data-disk-restore-point-encryption-set or --data-disk-restore-point-encryption-type must be used together with --source-data-disk-resource'
+        with self.assertRaisesRegex(ArgumentUsageError, message2):
+            self.cmd('restore-point create -g {rg} -n {remote_point_name1} --collection-name {remote_collection_name} --source-restore-point {source_point_id} '
+                     '--source-os-resource {remote_os_disk_id} --os-restore-point-encryption-set {remote_des1_id} --source-data-disk-resource {remote_data_disk_id1} {remote_data_disk_id2} ')
+
+        message3 = 'Length of --source-data-disk-resource, --data-disk-restore-point-encryption-set must be same.'
+        with self.assertRaisesRegex(ArgumentUsageError, message3):
+            self.cmd('restore-point create -g {rg} -n {remote_point_name1} --collection-name {remote_collection_name} --source-restore-point {source_point_id} '
+                     '--source-os-resource {remote_os_disk_id} --os-restore-point-encryption-set {remote_des1_id} --source-data-disk-resource {remote_data_disk_id1} {remote_data_disk_id2} '
+                     '--data-disk-restore-point-encryption-set {remote_des1_id}')
+
+        message4 = 'Length of --source-data-disk-resource, --data-disk-restore-point-encryption-type must be same.'
+        with self.assertRaisesRegex(ArgumentUsageError, message4):
+            self.cmd('restore-point create -g {rg} -n {remote_point_name1} --collection-name {remote_collection_name} --source-restore-point {source_point_id} '
+                     '--source-os-resource {remote_os_disk_id} --os-restore-point-encryption-set {remote_des1_id} --source-data-disk-resource {remote_data_disk_id1} {remote_data_disk_id2} '
+                     '--data-disk-restore-point-encryption-type EncryptionAtRestWithPlatformAndCustomerKeys')
 
 
 class ArchitectureScenarioTest(ScenarioTest):
