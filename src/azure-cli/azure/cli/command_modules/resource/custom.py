@@ -177,7 +177,7 @@ def _get_parameter_type(template_obj, schema_node, visited=None):
     for segment in pointer.split('/'):
         state = state.get(unquote(segment).replace('~1', '/').replace('~0', '~').lower())
 
-    return _get_parameter_type(state.resolve(), visited)
+    return _get_parameter_type(template_obj, state.resolve(), visited)
 
 
 def _try_parse_key_value_object(parameters, template_obj, value):
@@ -195,7 +195,7 @@ def _try_parse_key_value_object(parameters, template_obj, value):
         raise CLIError("unrecognized template parameter '{}'. Allowed parameters: {}"
                         .format(key, ', '.join(sorted(template_obj.get('parameters', {}).keys()))))
 
-    param_type = _get_parameter_type(param)
+    param_type = _get_parameter_type(template_obj, param)
     if param_type:
         param_type = param_type.lower()
     if param_type in ['object', 'array', 'secureobject']:
