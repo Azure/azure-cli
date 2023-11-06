@@ -1776,10 +1776,19 @@ def flexible_server_ad_admin_show(client, resource_group_name, server_name):
 
 
 def flexible_gtid_reset(client, resource_group_name, server_name, gtid_set, no_wait=False, yes=False):
-    user_confirmation("Resetting GTID will invalidate all the automated, on-demand backups and geo-backups that were taken before the reset "
-                      "action. After GTID reset, you will not be able to perform PITR (point-in-time-restore) using fastest restore point "
-                      "or by custom restore point if the selected restore time is before the GTID reset time. And successful geo-restore will "
-                      "be possible only after 5 days. Do you want to continue?", yes=yes)
+    try:
+        server_object = client.get(resource_group_name, server_name)
+    except Exception as e:
+        raise ResourceNotFoundError(e)
+
+    if server_object.backup.geo_redundant_backup.lower() == "enabled":
+        raise CLIError("GTID reset can't be performed on a Geo-redundancy backup enabled server. Please disable Geo-redundancy to perform GTID reset on the server. "
+                       "You can enable Geo-redundancy option again after GTID reset. GTID reset action invalidates all the available backups and therefore, "
+                       "once Geo-redundancy is enabled again, it may take a day before geo-restore can be performed on the server.")
+
+    user_confirmation("Resetting GTID will invalidate all the automated/on-demand backups that were taken before the reset action and you will not be able "
+                      "to perform PITR (point-in-time-restore) using fastest restore point or by custom restore point if the selected restore time is before"
+                      " the GTID reset time. Do you want to continue?", yes=yes)
 
     parameters = mysql_flexibleservers.models.ServerGtidSetParameter(
         gtid_set=gtid_set

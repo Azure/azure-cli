@@ -82,7 +82,6 @@ class Create(AAZCommand):
             options=["--sync-mode"],
             arg_group="Properties",
             help="Backend address synchronous mode for the backend pool",
-            is_preview=True,
             enum={"Automatic": "Automatic", "Manual": "Manual"},
         )
         _args_schema.tunnel_interfaces = AAZListArg(

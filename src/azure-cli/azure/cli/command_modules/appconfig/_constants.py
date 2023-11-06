@@ -75,7 +75,7 @@ class ImportExportProfiles:
 
 
 class SnapshotConstants:
-    API_VERSION = "2023-10-01"
+    API_VERSION = "2022-11-01-preview"
 
 
 class JsonDiff:

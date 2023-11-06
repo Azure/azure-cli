@@ -686,9 +686,12 @@ class WebappConfigureTest(ScenarioTest):
         # site appsettings testing
         # update through key value pairs
         self.cmd('webapp config appsettings set -g {} -n {} --settings s1=foo s2=bar s3=bar2'.format(resource_group, webapp_name)).assert_with_checks([
-            JMESPathCheck("[?name=='s1']|[0].value", None),
-            JMESPathCheck("[?name=='s2']|[0].value", None),
-            JMESPathCheck("[?name=='s3']|[0].value", None)
+            JMESPathCheck("length([?name=='s1'])", 1),
+            JMESPathCheck("length([?name=='s2'])", 1),
+            JMESPathCheck("length([?name=='s3'])", 1),
+            JMESPathCheck("length([?value=='foo'])", 1),
+            JMESPathCheck("length([?value=='bar'])", 1),
+            JMESPathCheck("length([?value=='bar2'])", 1)
         ])
 
         # show
@@ -703,13 +706,9 @@ class WebappConfigureTest(ScenarioTest):
         # delete
         self.cmd('webapp config appsettings delete -g {} -n {} --setting-names s1 s2'
                  .format(resource_group, webapp_name)).assert_with_checks([
-                     JMESPathCheck("[?name=='s3']|[0].value", None),
-                     JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION']|[0].value", None)
-                 ])
-        self.cmd('webapp config appsettings list -g {} -n {}'.format(
-            resource_group, webapp_name)).assert_with_checks([
-                JMESPathCheck("length([?name=='s1'])", 0),
-                JMESPathCheck("length([?name=='s2'])", 0)])
+                     JMESPathCheck("length([?name=='s3'])", 1),
+                     JMESPathCheck("length([?name=='s1'])", 0),
+                     JMESPathCheck("length([?name=='s2'])", 0)])
 
         # hostnames
         self.cmd('webapp config hostname list -g {} --webapp-name {}'
@@ -735,8 +734,7 @@ class WebappConfigureTest(ScenarioTest):
         ])
         # add
         self.cmd(('webapp config storage-account add -g {} -n {} --custom-id Id --storage-type AzureFiles --account-name name '
-                  '--share-name sharename --access-key key --mount-path /path/to/mount')
-                  .format(resource_group, linux_webapp)).assert_with_checks([(JMESPathCheck("[?name=='Id']|[0].value.accessKey", None))])
+                  '--share-name sharename --access-key key --mount-path /path/to/mount').format(resource_group, linux_webapp))
         self.cmd('webapp config storage-account list -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
             JMESPathCheck('length(@)', 1),
             JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
@@ -746,7 +744,7 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck("[?name=='Id']|[0].value.mountPath", "/path/to/mount")])
         # update
         self.cmd('webapp config storage-account update -g {} -n {} --custom-id Id --mount-path /different/path'
-                 .format(resource_group, linux_webapp)).assert_with_checks([(JMESPathCheck("[?name=='Id']|[0].value.accessKey", None))])
+                 .format(resource_group, linux_webapp))
         self.cmd('webapp config storage-account list -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
             JMESPathCheck("length(@)", 1),
             JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
@@ -764,11 +762,7 @@ class WebappConfigureTest(ScenarioTest):
 
         # site connection string tests
         self.cmd('webapp config connection-string set -t mysql -g {} -n {} --settings c1="conn1" c2=conn2 '
-                 '--slot-settings c3=conn3'
-                 .format(resource_group, linux_webapp)).assert_with_checks([
-                     JMESPathCheck("[?name=='c1']|[0].value", None),
-                     JMESPathCheck("[?name=='c2']|[0].value", None)
-                     ])
+                 '--slot-settings c3=conn3'.format(resource_group, linux_webapp))
         self.cmd('webapp config connection-string list -g {} -n {}'
                  .format(resource_group, linux_webapp)).assert_with_checks([
                      JMESPathCheck('length([])', 3),
@@ -778,7 +772,7 @@ class WebappConfigureTest(ScenarioTest):
                      JMESPathCheck("[?name=='c2']|[0].slotSetting", False),
                      JMESPathCheck("[?name=='c3']|[0].slotSetting", True)])
         self.cmd('webapp config connection-string delete -g {} -n {} --setting-names c1 c3'
-                 .format(resource_group, linux_webapp)).assert_with_checks([JMESPathCheck("[?name=='c2']|[0].value", None)])
+                 .format(resource_group, linux_webapp))
         self.cmd('webapp config connection-string list -g {} -n {}'
                  .format(resource_group, linux_webapp)).assert_with_checks([
                      JMESPathCheck('length([])', 1),
@@ -788,11 +782,7 @@ class WebappConfigureTest(ScenarioTest):
         test_json = os.path.join(TEST_DIR, 'test.json')
         print(test_json)
         self.cmd('webapp config connection-string set -g {} -n {} --settings "@{}"'
-                 .format(resource_group, linux_webapp, test_json)).assert_with_checks([
-                     JMESPathCheck("[?name=='c1']|[0].value", None),
-                     JMESPathCheck("[?name=='c2']|[0].value", None),
-                     JMESPathCheck("[?name=='c3']|[0].value", None),
-                     JMESPathCheck("[?name=='c4']|[0].value", None),])
+                 .format(resource_group, linux_webapp, test_json))
         self.cmd('webapp config connection-string list -g {} -n {}'
                  .format(resource_group, linux_webapp)).assert_with_checks([
                      JMESPathCheck('length([])', 4),
@@ -845,11 +835,13 @@ class WebappConfigureTest(ScenarioTest):
 
         # site appsettings testing
         # update through key value pairs
-        self.cmd('webapp config appsettings set -g {} -n {} --settings s1=foo s2=bar s3=bar2'
-                 .format(resource_group, webapp_name)).assert_with_checks([
-            JMESPathCheck("[?name=='s1']|[0].value", None),
-            JMESPathCheck("[?name=='s2']|[0].value", None),
-            JMESPathCheck("[?name=='s3']|[0].value", None)
+        self.cmd('webapp config appsettings set -g {} -n {} --settings s1=foo s2=bar s3=bar2'.format(resource_group, webapp_name)).assert_with_checks([
+            JMESPathCheck("length([?name=='s1'])", 1),
+            JMESPathCheck("length([?name=='s2'])", 1),
+            JMESPathCheck("length([?name=='s3'])", 1),
+            JMESPathCheck("length([?value=='foo'])", 1),
+            JMESPathCheck("length([?value=='bar'])", 1),
+            JMESPathCheck("length([?value=='bar2'])", 1)
         ])
 
         # show
@@ -882,14 +874,8 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck('name', slot)
         ])
 
-        self.cmd('webapp config appsettings set -g {} -n {} --settings s=value "@{}"'.format(
-            resource_group, webapp_name, settings_file)).assert_with_checks([
-            JMESPathCheck("[?name=='s']|[0].value", None),
-            JMESPathCheck("[?name=='s2']|[0].value", None)
-        ])
-        
-        output = self.cmd('webapp config appsettings list -g {} -n {}'.format(
-            resource_group, webapp_name)).get_output_in_json()
+        output = self.cmd('webapp config appsettings set -g {} -n {} --settings s=value "@{}"'.format(
+            resource_group, webapp_name, settings_file)).get_output_in_json()
         output = [s for s in output if s['name'] in ['s', 's2']]
         output.sort(key=lambda s: s['name'])
         self.assertEqual(output[0], {
@@ -912,15 +898,8 @@ class WebappConfigureTest(ScenarioTest):
         with open(settings_file, 'w') as file:
             file.write(json.dumps(output))
 
-        self.cmd('webapp config appsettings set -g {} -n {} --settings "@{}"'.format(
-            resource_group, webapp_name, settings_file)).assert_with_checks([
-            JMESPathCheck("[?name=='s']|[0].value", None),
-            JMESPathCheck("[?name=='s2']|[0].value", None),
-            JMESPathCheck("[?name=='s3']|[0].value", None)
-        ])
-        
-        output = self.cmd('webapp config appsettings list -g {} -n {}'.format(
-            resource_group, webapp_name)).get_output_in_json()
+        output = self.cmd('webapp config appsettings set -g {} -n {} --settings "@{}"'.format(
+            resource_group, webapp_name, settings_file)).get_output_in_json()
         output = [s for s in output if s['name'] in ['s', 's2', 's3']]
         output.sort(key=lambda s: s['name'])
 
@@ -942,15 +921,8 @@ class WebappConfigureTest(ScenarioTest):
         with open(settings_file, 'w') as file:
             file.write(json.dumps(output))
 
-        self.cmd('webapp config appsettings set -g {} -n {} --slot {} --settings "@{}"'.format(
-            resource_group, webapp_name, slot, settings_file)).assert_with_checks([
-            JMESPathCheck("[?name=='s1']|[0].value", None),
-            JMESPathCheck("[?name=='s2']|[0].value", None),
-            JMESPathCheck("[?name=='s3']|[0].value", None)
-        ])
-        
-        output = self.cmd('webapp config appsettings list -g {} -n {}'.format(
-            resource_group, webapp_name)).get_output_in_json()
+        output = self.cmd('webapp config appsettings set -g {} -n {} --slot {} --settings "@{}"'.format(
+            resource_group, webapp_name, slot, settings_file)).get_output_in_json()
         output = [s for s in output if s['name'] in ['s', 's2', 's3']]
         output.sort(key=lambda s: s['name'])
 
@@ -971,15 +943,8 @@ class WebappConfigureTest(ScenarioTest):
         })
 
         # app settings set with --slot-settings
-        self.cmd('webapp config appsettings set -g {} -n {} --slot-settings "@{}"'.format(
-            resource_group, webapp_name, settings_file)).assert_with_checks([
-            JMESPathCheck("[?name=='s']|[0].value", None),
-            JMESPathCheck("[?name=='s2']|[0].value", None),
-            JMESPathCheck("[?name=='s3']|[0].value", None)
-        ])
-        
-        output = self.cmd('webapp config appsettings list -g {} -n {}'.format(
-            resource_group, webapp_name)).get_output_in_json()
+        output = self.cmd('webapp config appsettings set -g {} -n {} --slot-settings "@{}"'.format(
+            resource_group, webapp_name, settings_file)).get_output_in_json()
         output = [s for s in output if s['name'] in ['s', 's2', 's3']]
         output.sort(key=lambda s: s['name'])
 
@@ -999,15 +964,8 @@ class WebappConfigureTest(ScenarioTest):
             'slotSetting': True
         })
 
-        self.cmd('webapp config appsettings set -g {} -n {} --slot {} --slot-settings "@{}"'.format(
-            resource_group, webapp_name, slot, settings_file)).assert_with_checks([
-            JMESPathCheck("[?name=='s']|[0].value", None),
-            JMESPathCheck("[?name=='s2']|[0].value", None),
-            JMESPathCheck("[?name=='s3']|[0].value", None)
-        ])
-        
-        output = self.cmd('webapp config appsettings list -g {} -n {}'.format(
-            resource_group, webapp_name)).get_output_in_json()
+        output = self.cmd('webapp config appsettings set -g {} -n {} --slot {} --slot-settings "@{}"'.format(
+            resource_group, webapp_name, slot, settings_file)).get_output_in_json()
         output = [s for s in output if s['name'] in ['s', 's2', 's3']]
         output.sort(key=lambda s: s['name'])
 
@@ -1386,11 +1344,7 @@ class WebappSlotScenarioTest(ScenarioTest):
         test_git_repo = 'https://github.com/yugangw-msft/azure-site-test'
         test_php_version = '7.4'
         # create a few app-settings to test they can be cloned
-        self.cmd('webapp config appsettings set -g {} -n {} --settings s1=v1 --slot-settings s2=v2'
-                 .format(resource_group, webapp)).assert_with_checks([
-            JMESPathCheck("[?name=='s1']|[0].value", None),
-            JMESPathCheck("[?name=='s2']|[0].value", None)
-        ])
+        self.cmd('webapp config appsettings set -g {} -n {} --settings s1=v1 --slot-settings s2=v2'.format(resource_group, webapp))
         # create an empty slot
         self.cmd('webapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, webapp, slot), checks=[
             JMESPathCheck('name', slot)
@@ -1414,16 +1368,12 @@ class WebappSlotScenarioTest(ScenarioTest):
         self.cmd('webapp config show -g {} -n {} --slot {}'.format(resource_group, webapp, slot2), checks=[
             JMESPathCheck("phpVersion", test_php_version),
         ])
-        self.cmd('webapp config appsettings set -g {} -n {} --slot {} --settings s3=v3 --slot-settings s4=v4'
-                 .format(resource_group, webapp, slot2)).assert_with_checks([
-                     JMESPathCheck("[?name=='s3']|[0].value", None)
-                     ])
+        self.cmd('webapp config appsettings set -g {} -n {} --slot {} --settings s3=v3 --slot-settings s4=v4'.format(resource_group, webapp, slot2), checks=[
+            JMESPathCheck("[?name=='s4']|[0].slotSetting", True),
+            JMESPathCheck("[?name=='s3']|[0].slotSetting", False),
+        ])
 
-        self.cmd('webapp config connection-string set -g {} -n {} -t mysql --slot {} --settings c1=connection1 --slot-settings c2=connection2'
-                 .format(resource_group, webapp, slot2)).assert_with_checks([
-                     JMESPathCheck("[?name=='c1']|[0].value", None),
-                     JMESPathCheck("[?name=='c2']|[0].value", None)
-                 ])
+        self.cmd('webapp config connection-string set -g {} -n {} -t mysql --slot {} --settings c1=connection1 --slot-settings c2=connection2'.format(resource_group, webapp, slot2))
         # verify we can swap with non production slot
         self.cmd('webapp deployment slot swap -g {} -n {} --slot {} --target-slot {}'.format(
             resource_group, webapp, slot, slot2))
@@ -1548,19 +1498,13 @@ class WebappSlotSwapScenarioTest(ScenarioTest):
                                                               webapp, plan_result['name']))
         # You can create and use any repros with the 3 files under "./sample_web" and with a 'staging 'branch
         slot = 'staging'
-        self.cmd('webapp config appsettings set -g {} -n {} --slot-settings s1=prod'
-                 .format(resource_group, webapp)).assert_with_checks([
-                     JMESPathCheck("[?name=='s1']|[0].value", None)
-                     ])
+        self.cmd(
+            'webapp config appsettings set -g {} -n {} --slot-settings s1=prod'.format(resource_group, webapp))
         # create an empty slot
         self.cmd(
             'webapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, webapp, slot))
-        self.cmd('webapp config appsettings set -g {} -n {} --slot-settings s1=slot --slot {}'
-                 .format(resource_group, webapp, slot)).assert_with_checks([
-                     JMESPathCheck("[?name=='s1']|[0].value", None),
-                     JMESPathCheck("[?name=='s2']|[0].value", None),
-                     JMESPathCheck("[?name=='s3']|[0].value", None)
-                     ])
+        self.cmd('webapp config appsettings set -g {} -n {} --slot-settings s1=slot --slot {}'.format(
+            resource_group, webapp, slot))
         # swap with preview
         self.cmd('webapp deployment slot swap -g {} -n {} -s {} --action preview'.format(
             resource_group, webapp, slot))

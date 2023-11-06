@@ -662,7 +662,7 @@ def validate_key_id(entity_type):
 
 def validate_keyvault_resource_id(entity_type):
     def _validate(ns):
-        from azure.keyvault.keys._shared import parse_key_vault_id
+        from .vendored_sdks.azure_keyvault_t1.key_vault_id import KeyVaultIdentifier
 
         pure_entity_type = entity_type.replace('deleted', '')
         name = getattr(ns, pure_entity_type + '_name', None) or getattr(ns, 'name', None)
@@ -679,16 +679,16 @@ def validate_keyvault_resource_id(entity_type):
             if hsm_name:
                 raise CLIError('--hsm-name and --id are mutually exclusive.')
 
-            kv_resource_id = parse_key_vault_id(identifier)
+            ident = KeyVaultIdentifier(uri=identifier, collection=entity_type + 's')
             if getattr(ns, 'command', None) and 'key rotation-policy' in ns.command:
-                setattr(ns, 'key_name', kv_resource_id.name)
+                setattr(ns, 'key_name', ident.name)
             elif getattr(ns, 'command', None) and 'certificate' in ns.command:
-                setattr(ns, 'certificate_name', kv_resource_id.name)
+                setattr(ns, 'certificate_name', ident.name)
             else:
-                setattr(ns, 'name', kv_resource_id.name)
-            setattr(ns, 'vault_base_url', kv_resource_id.vault_url)
-            if kv_resource_id.version and (hasattr(ns, pure_entity_type + '_version') or hasattr(ns, 'version')):
-                setattr(ns, 'version', kv_resource_id.version)
+                setattr(ns, 'name', ident.name)
+            setattr(ns, 'vault_base_url', ident.vault)
+            if ident.version and (hasattr(ns, pure_entity_type + '_version') or hasattr(ns, 'version')):
+                setattr(ns, 'version', ident.version)
         elif not (name and vault):
             raise CLIError('incorrect usage: --id ID | --vault-name/--hsm-name VAULT/HSM '
                            '--name/-n NAME [--version VERSION]')

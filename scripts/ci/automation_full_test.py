@@ -471,6 +471,7 @@ def get_pipeline_result(test_result_fp, pipeline_result):
                         i['Status'] = 'Succeeded' if i['Status'] != 'Failed' else 'Failed'
                         break
 
+    print(json.dumps(pipeline_result, indent=4))
     return pipeline_result
 
 

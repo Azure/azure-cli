@@ -299,13 +299,11 @@ def set_staticsite_app_settings(cmd, name, setting_pairs, resource_group_name=No
         app_settings.properties[k] = v
 
     if not environment_name:
-        result = client.create_or_update_static_site_app_settings(
+        return client.create_or_update_static_site_app_settings(
             resource_group_name, name, app_settings=app_settings)
-    else:
-        result = client.create_or_update_static_site_build_app_settings(
-            resource_group_name, name, environment_name, app_settings=app_settings)
 
-    return _redact_appsettings(result)
+    return client.create_or_update_static_site_build_app_settings(
+        resource_group_name, name, environment_name, app_settings=app_settings)
 
 
 def delete_staticsite_app_settings(cmd, name, setting_names, resource_group_name=None, environment_name=None):
@@ -322,20 +320,11 @@ def delete_staticsite_app_settings(cmd, name, setting_names, resource_group_name
             logger.warning("key '%s' not found in app settings", key)
 
     if not environment_name:
-        result = client.create_or_update_static_site_app_settings(
+        return client.create_or_update_static_site_app_settings(
             resource_group_name, name, app_settings=app_settings)
-    else:
-        result = client.create_or_update_static_site_build_app_settings(
-            resource_group_name, name, environment_name, app_settings=app_settings)
 
-    return _redact_appsettings(result)
-
-
-def _redact_appsettings(payload):
-    logger.warning('App settings have been redacted. Use `az staticwebapp appsettings list` to view.')
-    for x in payload.properties:
-        payload.properties[x] = None
-    return payload
+    return client.create_or_update_static_site_build_app_settings(
+        resource_group_name, name, environment_name, app_settings=app_settings)
 
 
 def list_staticsite_users(cmd, name, resource_group_name=None, authentication_provider='all'):

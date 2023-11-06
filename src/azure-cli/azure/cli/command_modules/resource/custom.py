@@ -2334,23 +2334,22 @@ def create_deployment_stack_at_subscription(cmd, name, location, deny_settings_m
     except:  # pylint: disable=bare-except
         pass
 
+    if not deployment_resource_group:
+        deployment_scope = "/subscriptions/" + get_subscription_id(cmd.cli_ctx)
+    else:
+        deployment_scope = "/subscriptions/" + \
+            get_subscription_id(cmd.cli_ctx) + "/resourceGroups/" + deployment_resource_group
+
     action_on_unmanage_model = rcf.deployment_stacks.models.DeploymentStackPropertiesActionOnUnmanage(
         resources=delete_resources_enum, resource_groups=delete_resource_groups_enum)
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
     deny_settings_model = rcf.deployment_stacks.models.DenySettings(
         mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array, apply_to_child_scopes=apply_to_child_scopes)
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(
-        description=description, location=location, action_on_unmanage=action_on_unmanage_model, deny_settings=deny_settings_model, tags=tags)
-
-    if deployment_resource_group:
-        deployment_stack_model.deployment_scope = "/subscriptions/" + \
-            get_subscription_id(cmd.cli_ctx) + "/resourceGroups/" + deployment_resource_group
-        deployment_scope = 'resourceGroup'
-    else:
-        deployment_scope = 'subscription'
+        description=description, location=location, action_on_unmanage=action_on_unmanage_model, deployment_scope=deployment_scope, deny_settings=deny_settings_model, tags=tags)
 
     deployment_stack_model = _prepare_stacks_templates_and_parameters(
-        cmd, rcf, deployment_scope, deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
+        cmd, rcf, 'subscription', deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
 
     return sdk_no_wait(no_wait, rcf.deployment_stacks.begin_create_or_update_at_subscription, name, deployment_stack_model)
 
@@ -2586,22 +2585,21 @@ def create_deployment_stack_at_management_group(cmd, management_group_id, name, 
     except:  # pylint: disable=bare-except
         pass
 
+    if not deployment_subscription:
+        deployment_scope = "/subscriptions/" + get_subscription_id(cmd.cli_ctx)
+    else:
+        deployment_scope = "/subscriptions/" + deployment_subscription
+
     action_on_unmanage_model = rcf.deployment_stacks.models.DeploymentStackPropertiesActionOnUnmanage(
         resources=delete_resources_enum, resource_groups=delete_resource_groups_enum)
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
     deny_settings_model = rcf.deployment_stacks.models.DenySettings(
         mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array, apply_to_child_scopes=apply_to_child_scopes)
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(
-        description=description, location=location, action_on_unmanage=action_on_unmanage_model, deny_settings=deny_settings_model, tags=tags)
-
-    if deployment_subscription:
-        deployment_stack_model.deployment_scope = "/subscriptions/" + deployment_subscription
-        deployment_scope = 'subscription'
-    else:
-        deployment_scope = 'managementGroup'
+        description=description, location=location, action_on_unmanage=action_on_unmanage_model, deployment_scope=deployment_scope, deny_settings=deny_settings_model, tags=tags)
 
     deployment_stack_model = _prepare_stacks_templates_and_parameters(
-        cmd, rcf, deployment_scope, deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
+        cmd, rcf, 'managementGroup', deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
 
     return sdk_no_wait(no_wait, rcf.deployment_stacks.begin_create_or_update_at_management_group, management_group_id, name, deployment_stack_model)
 

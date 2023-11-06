@@ -47,7 +47,7 @@ def load_arguments(self, _):
                    validator=validate_cluster_resource_group)
         c.argument('fips_validated_modules', arg_type=get_three_state_flag(),
                    options_list=['--fips-validated-modules', '--fips'],
-                   help='Use FIPS validated cryptography modules. Default: False')
+                   help='Use FIPS validated cryptography modules.')
 
         c.argument('client_id',
                    help='Client ID of cluster service principal.',
@@ -69,22 +69,20 @@ def load_arguments(self, _):
                    validator=validate_cidr('service_cidr'))
 
         c.argument('outbound_type',
-                   help='Outbound type of cluster. Must be "Loadbalancer" or "UserDefinedRouting".',
+                   help='Outbound type of cluster. Must be "Loadbalancer" (default) or "UserDefinedRouting".',
                    validator=validate_outbound_type)
-        c.argument('enable_preconfigured_nsg', arg_type=get_three_state_flag(),
-                   help='Use Preconfigured NSGs. Default: False')
         c.argument('disk_encryption_set',
                    help='ResourceID of the DiskEncryptionSet to be used for master and worker VMs.',
                    validator=validate_disk_encryption_set)
         c.argument('master_encryption_at_host', arg_type=get_three_state_flag(),
                    options_list=['--master-encryption-at-host', '--master-enc-host'],
-                   help='Encryption at host flag for master VMs. Default: False')
+                   help='Encryption at host flag for master VMs.')
         c.argument('master_vm_size',
                    help='Size of master VMs.')
 
         c.argument('worker_encryption_at_host', arg_type=get_three_state_flag(),
                    options_list=['--worker-encryption-at-host', '--worker-enc-host'],
-                   help='Encryption at host flag for worker VMs. Default: False')
+                   help='Encryption at host flag for worker VMs.')
         c.argument('worker_vm_size',
                    help='Size of worker VMs.')
         c.argument('worker_vm_disk_size_gb',

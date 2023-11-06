@@ -1615,7 +1615,7 @@ def get_arch_for_cli_binary():
         )
     logger.warning(
         'The detected architecture of current device is "%s", and the binary for "%s" '
-        'will be downloaded. If the detection is wrong, please download and install '
+        'will be downloaded. If the detectiton is wrong, please download and install '
         'the binary corresponding to the appropriate architecture.',
         arch,
         formatted_arch,

@@ -4,15 +4,14 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-
-from msrestazure.tools import parse_resource_id
+import time
 
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, LogAnalyticsWorkspacePreparer)
 
 from azure.cli.command_modules.containerapp.tests.latest.common import TEST_LOCATION, write_test_file, \
     clean_up_test_file
-from .utils import create_containerapp_env, prepare_containerapp_env_for_app_e2e_tests
+from .utils import create_containerapp_env
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 # flake8: noqa
@@ -26,20 +25,26 @@ class ContainerAppJobsCRUDOperationsTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northcentralus")
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
     # test for CRUD operations on Container App Job resource with trigger type as manual
-    def test_containerapp_manualjob_crudoperations_e2e(self, resource_group):
+    def test_containerapp_manualjob_crudoperations_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         import requests
         
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
-        env_id = prepare_containerapp_env_for_app_e2e_tests(self)
-        env_rg = parse_resource_id(env_id).get('resource_group')
-        env_name = parse_resource_id(env_id).get('name')
+        env = self.create_random_name(prefix='env', length=24)
         job = self.create_random_name(prefix='job1', length=24)
+
+        create_containerapp_env(self, env, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
+
+        # create a container app environment for a Container App Job resource
+        self.cmd('containerapp env show -n {} -g {}'.format(env, resource_group), checks=[
+            JMESPathCheck('name', env)            
+        ])
 
         ## test for CRUD operations on Container App Job resource with trigger type as manual
         # create a Container App Job resource with trigger type as manual
-        self.cmd("az containerapp job create --resource-group {} --name {} --environment {} --replica-timeout 200 --replica-retry-limit 2 --trigger-type manual --parallelism 1 --replica-completion-count 1 --image mcr.microsoft.com/k8se/quickstart-jobs:latest --cpu '0.25' --memory '0.5Gi'".format(resource_group, job, env_id))
+        self.cmd("az containerapp job create --resource-group {} --name {} --environment {} --replica-timeout 200 --replica-retry-limit 2 --trigger-type manual --parallelism 1 --replica-completion-count 1 --image mcr.microsoft.com/k8se/quickstart-jobs:latest --cpu '0.25' --memory '0.5Gi'".format(resource_group, job, env))
 
         # verify the container app job resource
         self.cmd("az containerapp job show --resource-group {} --name {}".format(resource_group, job), checks=[
@@ -86,7 +91,7 @@ class ContainerAppJobsCRUDOperationsTest(ScenarioTest):
         job2 = self.create_random_name(prefix='job2', length=24)
 
         # create a Container App Job resource with trigger type as schedule
-        self.cmd("az containerapp job create --resource-group {} --name {} --environment {} --replica-timeout 200 --replica-retry-limit 2 --trigger-type schedule --parallelism 1 --replica-completion-count 1 --cron-expression '*/5 * * * *' --image mcr.microsoft.com/k8se/quickstart-jobs:latest --cpu '0.25' --memory '0.5Gi'".format(resource_group, job2, env_id))
+        self.cmd("az containerapp job create --resource-group {} --name {} --environment {} --replica-timeout 200 --replica-retry-limit 2 --trigger-type schedule --parallelism 1 --replica-completion-count 1 --cron-expression '*/5 * * * *' --image mcr.microsoft.com/k8se/quickstart-jobs:latest --cpu '0.25' --memory '0.5Gi'".format(resource_group, job2, env))
 
         # verify the container app job resource
         self.cmd("az containerapp job show --resource-group {} --name {}".format(resource_group, job2), checks=[
@@ -118,12 +123,14 @@ class ContainerAppJobsCRUDOperationsTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="westeurope")
-    def test_containerapp_manualjob_private_registry_port(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
+    def test_containerapp_manualjob_private_registry_port(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
+        env = self.create_random_name(prefix='env', length=24)
         acr = self.create_random_name(prefix='acr', length=24)
         image_source = "mcr.microsoft.com/k8se/quickstart:latest"
 
-        env_id = prepare_containerapp_env_for_app_e2e_tests(self)
+        create_containerapp_env(self, env, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
 
         self.cmd(f'acr create --sku basic -n {acr} -g {resource_group} --admin-enabled')
         self.cmd(f'acr import -n {acr} --source {image_source}')
@@ -133,7 +140,7 @@ class ContainerAppJobsCRUDOperationsTest(ScenarioTest):
         image_name = f"{acr}.azurecr.io:443/k8se/quickstart:latest"
 
         self.cmd(
-            f"containerapp job create -g {resource_group} -n {app} --image {image_name} --environment {env_id} --registry-server {acr}.azurecr.io:443 --registry-username {acr} --registry-password {password} --replica-timeout 200 --replica-retry-limit 2 --trigger-type schedule --parallelism 1 --replica-completion-count 1 --cron-expression '*/10 * * * *' ")
+            f"containerapp job create -g {resource_group} -n {app} --image {image_name} --environment {env} --registry-server {acr}.azurecr.io:443 --registry-username {acr} --registry-password {password} --replica-timeout 200 --replica-retry-limit 2 --trigger-type schedule --parallelism 1 --replica-completion-count 1 --cron-expression '*/10 * * * *' ")
 
         self.cmd(f'containerapp job show -g {resource_group} -n {app}', checks=[
             JMESPathCheck("properties.provisioningState", "Succeeded"),
@@ -144,13 +151,15 @@ class ContainerAppJobsCRUDOperationsTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="westeurope")
-    def test_containerapp_manualjob_registry_acr_look_up_credentical(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
+    def test_containerapp_manualjob_registry_acr_look_up_credentical(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
+        env = self.create_random_name(prefix='env', length=24)
         app = self.create_random_name(prefix='aca', length=24)
         acr = self.create_random_name(prefix='acr', length=24)
         image_source = "mcr.microsoft.com/k8se/quickstart:latest"
 
-        env_id = prepare_containerapp_env_for_app_e2e_tests(self)
+        create_containerapp_env(self, env, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
 
         self.cmd(f'acr create --sku basic -n {acr} -g {resource_group} --admin-enabled')
         self.cmd(f'acr import -n {acr} --source {image_source}')
@@ -159,7 +168,7 @@ class ContainerAppJobsCRUDOperationsTest(ScenarioTest):
         image_name = f"{acr}.azurecr.io/k8se/quickstart:latest"
 
         self.cmd(
-            f"containerapp job create -g {resource_group} -n {app} --image {image_name} --environment {env_id} --registry-server {acr}.azurecr.io --replica-timeout 200 --replica-retry-limit 2 --trigger-type schedule --parallelism 1 --replica-completion-count 1 --cron-expression '*/10 * * * *' ")
+            f"containerapp job create -g {resource_group} -n {app} --image {image_name} --environment {env} --registry-server {acr}.azurecr.io --replica-timeout 200 --replica-retry-limit 2 --trigger-type schedule --parallelism 1 --replica-completion-count 1 --cron-expression '*/10 * * * *' ")
 
         self.cmd(f'containerapp job show -g {resource_group} -n {app}', checks=[
             JMESPathCheck("properties.provisioningState", "Succeeded"),

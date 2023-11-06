@@ -5,7 +5,7 @@
 import os
 import unittest  # pylint: disable=unused-import
 
-from azure.cli.testsdk import (ResourceGroupPreparer)
+from azure.cli.testsdk import (ResourceGroupPreparer, LogAnalyticsWorkspacePreparer)
 from azure.cli.testsdk.decorators import serial_test
 from azure.cli.command_modules.containerapp.tests.latest.common import (
     ContainerappComposePreviewScenarioTest,  # pylint: disable=unused-import
@@ -13,9 +13,7 @@ from azure.cli.command_modules.containerapp.tests.latest.common import (
     clean_up_test_file,
     TEST_DIR, TEST_LOCATION)
 
-from .utils import prepare_containerapp_env_for_app_e2e_tests
-
-
+from .utils import create_containerapp_env
 # flake8: noqa
 # noqa
 # pylint: skip-file
@@ -27,7 +25,8 @@ class ContainerappComposePreviewSecretsScenarioTest(ContainerappComposePreviewSc
 
     @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_test_containerapp_preview', location='eastus')
-    def test_containerapp_compose_create_with_secrets(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
+    def test_containerapp_compose_create_with_secrets(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         compose_text = """
@@ -52,12 +51,15 @@ secrets:
         secrets_file_name = "./my_secret.txt"
         secrets_text = "Lorem Ipsum\n"
         write_test_file(secrets_file_name, secrets_text)
-        env_id = prepare_containerapp_env_for_app_e2e_tests(self)
+
+        env_name = self.create_random_name(prefix='containerapp-compose', length=24)
 
         self.kwargs.update({
-            'environment': env_id,
+            'environment': env_name,
             'compose': compose_file_name,
         })
+
+        create_containerapp_env(self, env_name, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
 
         command_string = 'containerapp compose create'
         command_string += ' --compose-file-path {compose}'
@@ -69,13 +71,14 @@ secrets:
             self.check('[?name==`foo`].properties.template.containers[0].env[0].name', ["redis-secret"]),
             self.check('[?name==`foo`].properties.template.containers[0].env[0].secretRef', ["redis-secret"])  # pylint: disable=C0301
         ])
-        self.cmd(f'containerapp delete -n foo -g {resource_group} --yes', expect_failure=False)
+
         clean_up_test_file(compose_file_name)
         clean_up_test_file(secrets_file_name)
 
     @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_test_containerapp_preview', location='eastus')
-    def test_containerapp_compose_create_with_secrets_and_existing_environment(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
+    def test_containerapp_compose_create_with_secrets_and_existing_environment(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         compose_text = """
@@ -107,12 +110,14 @@ secrets:
         secrets_text = "Lorem Ipsum\n"
         write_test_file(secrets_file_name, secrets_text)
 
-        env_id = prepare_containerapp_env_for_app_e2e_tests(self)
+        env_name = self.create_random_name(prefix='containerapp-compose', length=24)
 
         self.kwargs.update({
-            'environment': env_id,
+            'environment': env_name,
             'compose': compose_file_name,
         })
+
+        create_containerapp_env(self, env_name, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
 
         command_string = 'containerapp compose create'
         command_string += ' --compose-file-path {compose}'
@@ -122,13 +127,14 @@ secrets:
         self.cmd(command_string, checks=[
             self.check('length([?name==`foo`].properties.template.containers[0].env[].name)', 6),
         ])
-        self.cmd(f'containerapp delete -n foo -g {resource_group} --yes', expect_failure=False)
+
         clean_up_test_file(compose_file_name)
         clean_up_test_file(secrets_file_name)
 
     @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_test_containerapp_preview', location='eastus')
-    def test_containerapp_compose_create_with_secrets_and_existing_environment_conflict(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
+    def test_containerapp_compose_create_with_secrets_and_existing_environment_conflict(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         compose_text = """
@@ -150,12 +156,14 @@ secrets:
         secrets_text = "Lorem Ipsum\n"
         write_test_file(secrets_file_name, secrets_text)
 
-        env_id = prepare_containerapp_env_for_app_e2e_tests(self)
+        env_name = self.create_random_name(prefix='containerapp-compose', length=24)
 
         self.kwargs.update({
-            'environment': env_id,
+            'environment': env_name,
             'compose': compose_file_name,
         })
+
+        create_containerapp_env(self, env_name, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
         
         command_string = 'containerapp compose create'
         command_string += ' --compose-file-path {compose}'
@@ -164,6 +172,6 @@ secrets:
 
         # This test fails with duplicate environment variable names
         self.cmd(command_string, expect_failure=True)
-        self.cmd(f'containerapp delete -n foo -g {resource_group} --yes', expect_failure=False)
+
         clean_up_test_file(compose_file_name)
         clean_up_test_file(secrets_file_name)

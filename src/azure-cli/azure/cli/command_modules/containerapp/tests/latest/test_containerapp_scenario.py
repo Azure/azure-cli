@@ -8,12 +8,8 @@ import platform
 from unittest import mock
 import time
 import unittest
-
-from msrestazure.tools import parse_resource_id
-
 from azure.cli.command_modules.containerapp.custom import containerapp_ssh
-from azure.cli.command_modules.containerapp.tests.latest.utils import create_containerapp_env, \
-    prepare_containerapp_env_for_app_e2e_tests
+from azure.cli.command_modules.containerapp.tests.latest.utils import create_containerapp_env
 
 from azure.cli.testsdk.reverse_dependency import get_dummy_cli
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
@@ -36,15 +32,25 @@ class ContainerappScenarioTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="eastus2")
-    def test_containerapp_e2e(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
+    def test_containerapp_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
-        env = prepare_containerapp_env_for_app_e2e_tests(self)
+        env_name = self.create_random_name(prefix='containerapp-e2e-env', length=24)
+
+        self.cmd('containerapp env create -g {} -n {} --logs-workspace-id {} --logs-workspace-key {}'.format(resource_group, env_name, laworkspace_customer_id, laworkspace_shared_key))
+
+        # Ensure environment is completed
+        containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env_name)).get_output_in_json()
+
+        while containerapp_env["properties"]["provisioningState"].lower() == "waiting":
+            time.sleep(5)
+            containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env_name)).get_output_in_json()
 
         containerapp_name = self.create_random_name(prefix='containerapp-e2e', length=24)
 
         # Create basic Container App with default image
-        self.cmd('containerapp create -g {} -n {} --environment {}'.format(resource_group, containerapp_name, env), checks=[
+        self.cmd('containerapp create -g {} -n {} --environment {}'.format(resource_group, containerapp_name, env_name), checks=[
             JMESPathCheck('name', containerapp_name)
         ])
 
@@ -58,7 +64,7 @@ class ContainerappScenarioTest(ScenarioTest):
         ])
 
         # Create Container App with image, resource and replica limits
-        create_string = "containerapp create -g {} -n {} --environment {} --image nginx --cpu 0.5 --memory 1.0Gi --min-replicas 2 --max-replicas 4".format(resource_group, containerapp_name, env)
+        create_string = "containerapp create -g {} -n {} --environment {} --image nginx --cpu 0.5 --memory 1.0Gi --min-replicas 2 --max-replicas 4".format(resource_group, containerapp_name, env_name)
         self.cmd(create_string, checks=[
             JMESPathCheck('name', containerapp_name),
             JMESPathCheck('properties.template.containers[0].image', 'nginx'),
@@ -68,24 +74,25 @@ class ContainerappScenarioTest(ScenarioTest):
             JMESPathCheck('properties.template.scale.maxReplicas', '4')
         ])
 
-        self.cmd('containerapp create -g {} -n {} --environment {} --ingress external --target-port 8080'.format(resource_group, containerapp_name, env), checks=[
+        self.cmd('containerapp create -g {} -n {} --environment {} --ingress external --target-port 8080'.format(resource_group, containerapp_name, env_name), checks=[
             JMESPathCheck('properties.configuration.ingress.external', True),
             JMESPathCheck('properties.configuration.ingress.targetPort', 8080)
         ])
 
         # Container App with ingress should fail unless target port is specified
         with self.assertRaises(CLIError):
-            self.cmd('containerapp create -g {} -n {} --environment {} --ingress external'.format(resource_group, containerapp_name, env))
+            self.cmd('containerapp create -g {} -n {} --environment {} --ingress external'.format(resource_group, containerapp_name, env_name))
 
         # Create Container App with secrets and environment variables
         containerapp_name = self.create_random_name(prefix='containerapp-e2e', length=24)
         create_string = 'containerapp create -g {} -n {} --environment {} --secrets mysecret=secretvalue1 anothersecret="secret value 2" --env-vars GREETING="Hello, world" SECRETENV=secretref:anothersecret'.format(
-            resource_group, containerapp_name, env)
+            resource_group, containerapp_name, env_name)
         self.cmd(create_string, checks=[
             JMESPathCheck('name', containerapp_name),
             JMESPathCheck('length(properties.template.containers[0].env)', 2),
             JMESPathCheck('length(properties.configuration.secrets)', 2)
         ])
+
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="eastus2")
@@ -93,7 +100,16 @@ class ContainerappScenarioTest(ScenarioTest):
     def test_container_acr(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
-        env_id = prepare_containerapp_env_for_app_e2e_tests(self)
+        env_name = self.create_random_name(prefix='containerapp-e2e-env', length=24)
+
+        self.cmd('containerapp env create -g {} -n {} --logs-workspace-id {} --logs-workspace-key {}'.format(resource_group, env_name, laworkspace_customer_id, laworkspace_shared_key))
+
+        # Ensure environment is completed
+        containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env_name)).get_output_in_json()
+
+        while containerapp_env["properties"]["provisioningState"].lower() == "waiting":
+            time.sleep(5)
+            containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env_name)).get_output_in_json()
 
         containerapp_name = self.create_random_name(prefix='containerapp-e2e', length=24)
         registry_name = self.create_random_name(prefix='containerapp', length=24)
@@ -109,7 +125,7 @@ class ContainerappScenarioTest(ScenarioTest):
         # Create Container App with ACR
         containerapp_name = self.create_random_name(prefix='containerapp-e2e', length=24)
         create_string = 'containerapp create -g {} -n {} --environment {} --registry-username {} --registry-server {} --registry-password {}'.format(
-            resource_group, containerapp_name, env_id, registry_username, registry_server, registry_password)
+            resource_group, containerapp_name, env_name, registry_username, registry_server, registry_password)
         self.cmd(create_string, checks=[
             JMESPathCheck('name', containerapp_name),
             JMESPathCheck('properties.configuration.registries[0].server', registry_server),
@@ -121,14 +137,25 @@ class ContainerappScenarioTest(ScenarioTest):
     # TODO rename
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="westeurope")
-    def test_containerapp_update(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
+    def test_containerapp_update(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
-        env_id = prepare_containerapp_env_for_app_e2e_tests(self)
+
+        env_name = self.create_random_name(prefix='containerapp-e2e-env', length=24)
+
+        self.cmd('containerapp env create -g {} -n {} --logs-workspace-id {} --logs-workspace-key {}'.format(resource_group, env_name, laworkspace_customer_id, laworkspace_shared_key))
+
+        # Ensure environment is completed
+        containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env_name)).get_output_in_json()
+
+        while containerapp_env["properties"]["provisioningState"].lower() == "waiting":
+            time.sleep(5)
+            containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env_name)).get_output_in_json()
 
         # Create basic Container App with default image
         containerapp_name = self.create_random_name(prefix='containerapp-update', length=24)
 
-        self.cmd('containerapp create -g {} -n {} --environment {}'.format(resource_group, containerapp_name, env_id), checks=[
+        self.cmd('containerapp create -g {} -n {} --environment {}'.format(resource_group, containerapp_name, env_name), checks=[
             JMESPathCheck('name', containerapp_name),
             JMESPathCheck('length(properties.template.containers)', 1),
             JMESPathCheck('properties.template.containers[0].name', containerapp_name)
@@ -144,7 +171,7 @@ class ContainerappScenarioTest(ScenarioTest):
         ])
 
         # Create Container App with image, resource and replica limits
-        create_string = "containerapp create -g {} -n {} --environment {} --image nginx --cpu 0.5 --memory 1.0Gi --min-replicas 2 --max-replicas 4".format(resource_group, containerapp_name, env_id)
+        create_string = "containerapp create -g {} -n {} --environment {} --image nginx --cpu 0.5 --memory 1.0Gi --min-replicas 2 --max-replicas 4".format(resource_group, containerapp_name, env_name)
         self.cmd(create_string, checks=[
             JMESPathCheck('name', containerapp_name),
             JMESPathCheck('properties.template.containers[0].image', 'nginx'),
@@ -154,19 +181,19 @@ class ContainerappScenarioTest(ScenarioTest):
             JMESPathCheck('properties.template.scale.maxReplicas', '4')
         ])
 
-        self.cmd('containerapp create -g {} -n {} --environment {} --ingress external --target-port 8080'.format(resource_group, containerapp_name, env_id), checks=[
+        self.cmd('containerapp create -g {} -n {} --environment {} --ingress external --target-port 8080'.format(resource_group, containerapp_name, env_name), checks=[
             JMESPathCheck('properties.configuration.ingress.external', True),
             JMESPathCheck('properties.configuration.ingress.targetPort', 8080)
         ])
 
         # Container App with ingress should fail unless target port is specified
         with self.assertRaises(CLIError):
-            self.cmd('containerapp create -g {} -n {} --environment {} --ingress external'.format(resource_group, containerapp_name, env_id))
+            self.cmd('containerapp create -g {} -n {} --environment {} --ingress external'.format(resource_group, containerapp_name, env_name))
 
         # Create Container App with secrets and environment variables
         containerapp_name = self.create_random_name(prefix='containerapp-e2e', length=24)
         create_string = 'containerapp create -g {} -n {} --environment {} --secrets mysecret=secretvalue1 anothersecret="secret value 2" --env-vars GREETING="Hello, world" SECRETENV=secretref:anothersecret'.format(
-            resource_group, containerapp_name, env_id)
+            resource_group, containerapp_name, env_name)
         self.cmd(create_string, checks=[
             JMESPathCheck('name', containerapp_name),
             JMESPathCheck('length(properties.template.containers[0].env)', 2),
@@ -174,13 +201,25 @@ class ContainerappScenarioTest(ScenarioTest):
         ])
 
 
+    # TODO rename
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="eastus2")
-    def test_container_acr_env_var(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
+    def test_container_acr_env_var(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
-        env = prepare_containerapp_env_for_app_e2e_tests(self)
+        env_name = self.create_random_name(prefix='containerapp-e2e-env', length=24)
 
+        self.cmd('containerapp env create -g {} -n {} --logs-workspace-id {} --logs-workspace-key {}'.format(resource_group, env_name, laworkspace_customer_id, laworkspace_shared_key))
+
+        # Ensure environment is completed
+        containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env_name)).get_output_in_json()
+
+        while containerapp_env["properties"]["provisioningState"].lower() == "waiting":
+            time.sleep(5)
+            containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env_name)).get_output_in_json()
+
+        containerapp_name = self.create_random_name(prefix='containerapp-e2e', length=24)
         registry_name = self.create_random_name(prefix='containerapp', length=24)
 
         # Create ACR
@@ -194,7 +233,7 @@ class ContainerappScenarioTest(ScenarioTest):
         # Create Container App with ACR
         containerapp_name = self.create_random_name(prefix='containerapp-e2e', length=24)
         create_string = 'containerapp create -g {} -n {} --environment {} --registry-username {} --registry-server {} --registry-password {}'.format(
-            resource_group, containerapp_name, env, registry_username, registry_server, registry_password)
+            resource_group, containerapp_name, env_name, registry_username, registry_server, registry_password)
         self.cmd(create_string, checks=[
             JMESPathCheck('name', containerapp_name),
             JMESPathCheck('properties.configuration.registries[0].server', registry_server),
@@ -214,7 +253,7 @@ class ContainerappScenarioTest(ScenarioTest):
             JMESPathCheck('properties.template.scale.maxReplicas', '1'),
             JMESPathCheck('length(properties.template.containers[0].env)', 1),
             JMESPathCheck('properties.template.containers[0].env[0].name', "testenv"),
-            JMESPathCheck('properties.template.containers[0].env[0].value', None),
+            JMESPathCheck('properties.template.containers[0].env[0].value', "testing"),
         ])
 
         # Add secrets to Container App with ACR
@@ -244,7 +283,7 @@ class ContainerappScenarioTest(ScenarioTest):
             JMESPathCheck('properties.template.scale.maxReplicas', '1'),
             JMESPathCheck('length(properties.template.containers[0].env)', 1),
             JMESPathCheck('properties.template.containers[0].env[0].name', "testenv"),
-            JMESPathCheck('properties.template.containers[0].env[0].value', None),
+            JMESPathCheck('properties.template.containers[0].env[0].value', "testing2"),
         ])
         update_string = 'containerapp update -g {} -n {} --min-replicas 0 --max-replicas 1 --remove-env-vars testenv --remove-all-env-vars'.format(resource_group, containerapp_name)
         self.cmd(update_string, checks=[
@@ -256,17 +295,27 @@ class ContainerappScenarioTest(ScenarioTest):
             JMESPathCheck('properties.template.containers[0].env', None),
         ])
 
+    # TODO rename
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")
     @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
-    def test_containerapp_update_containers(self, resource_group):
+    def test_containerapp_update_containers(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
-        env = prepare_containerapp_env_for_app_e2e_tests(self)
+        env_name = self.create_random_name(prefix='containerapp-e2e-env', length=24)
+
+        self.cmd('containerapp env create -g {} -n {} --logs-workspace-id {} --logs-workspace-key {}'.format(resource_group, env_name, laworkspace_customer_id, laworkspace_shared_key))
+
+        # Ensure environment is completed
+        containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env_name)).get_output_in_json()
+
+        while containerapp_env["properties"]["provisioningState"].lower() == "waiting":
+            time.sleep(5)
+            containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env_name)).get_output_in_json()
 
         # Create basic Container App with default image
         containerapp_name = self.create_random_name(prefix='containerapp-update', length=24)
-        self.cmd('containerapp create -g {} -n {} --environment {}'.format(resource_group, containerapp_name, env), checks=[
+        self.cmd('containerapp create -g {} -n {} --environment {}'.format(resource_group, containerapp_name, env_name), checks=[
             JMESPathCheck('name', containerapp_name),
             JMESPathCheck('length(properties.template.containers)', 1),
             JMESPathCheck('properties.template.containers[0].name', containerapp_name)
@@ -384,35 +433,58 @@ class ContainerappScenarioTest(ScenarioTest):
             self.assertIn(line, expected_output)
 
     @ResourceGroupPreparer(location="northeurope")
-    def test_containerapp_logstream(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
+    def test_containerapp_logstream(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         containerapp_name = self.create_random_name(prefix='capp', length=24)
-        env = prepare_containerapp_env_for_app_e2e_tests(self)
+        env_name = self.create_random_name(prefix='env', length=24)
 
-        self.cmd(f'containerapp create -g {resource_group} -n {containerapp_name} --environment {env} --min-replicas 1 --ingress external --target-port 80')
+        self.cmd('containerapp env create -g {} -n {} --logs-workspace-id {} --logs-workspace-key {}'.format(resource_group, env_name, laworkspace_customer_id, laworkspace_shared_key))
+        containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env_name)).get_output_in_json()
+
+        while containerapp_env["properties"]["provisioningState"].lower() == "waiting":
+            time.sleep(5)
+            containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env_name)).get_output_in_json()
+
+        self.cmd(f'containerapp create -g {resource_group} -n {containerapp_name} --environment {env_name} --min-replicas 1 --ingress external --target-port 80')
 
         self.cmd(f'containerapp logs show -n {containerapp_name} -g {resource_group} --follow false --format json --tail 10', expect_failure=False)
 
     @ResourceGroupPreparer(location="northeurope")
-    def test_containerapp_eventstream(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
+    def test_containerapp_eventstream(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         containerapp_name = self.create_random_name(prefix='capp', length=24)
-        env_id = prepare_containerapp_env_for_app_e2e_tests(self)
-        env_rg = parse_resource_id(env_id).get('resource_group')
-        env_name = parse_resource_id(env_id).get('name')
+        env_name = self.create_random_name(prefix='env', length=24)
 
-        self.cmd(f'containerapp create -g {resource_group} -n {containerapp_name} --environment {env_id} --min-replicas 1 --ingress external --target-port 80')
+        self.cmd('containerapp env create -g {} -n {} --logs-workspace-id {} --logs-workspace-key {}'.format(resource_group, env_name, laworkspace_customer_id, laworkspace_shared_key))
+        containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env_name)).get_output_in_json()
+
+        while containerapp_env["properties"]["provisioningState"].lower() == "waiting":
+            time.sleep(5)
+            containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env_name)).get_output_in_json()
+
+        self.cmd(f'containerapp create -g {resource_group} -n {containerapp_name} --environment {env_name} --min-replicas 1 --ingress external --target-port 80')
 
         self.cmd(f'containerapp logs show -n {containerapp_name} -g {resource_group} --type system')
-        self.cmd(f'containerapp env logs show -n {env_name} -g {env_rg} --tail 15 --follow false')
+        self.cmd(f'containerapp env logs show -n {env_name} -g {resource_group} --tail 15 --follow false')
 
     @ResourceGroupPreparer(location="northeurope")
-    def test_containerapp_registry_msi(self, resource_group):
+    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
+    def test_containerapp_registry_msi(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
+        env = self.create_random_name(prefix='env', length=24)
         app = self.create_random_name(prefix='app', length=24)
         acr = self.create_random_name(prefix='acr', length=24)
-        env = prepare_containerapp_env_for_app_e2e_tests(self)
+
+        self.cmd(f'containerapp env create -g {resource_group} -n {env} --logs-workspace-id {laworkspace_customer_id} --logs-workspace-key {laworkspace_shared_key}')
+
+        containerapp_env = self.cmd(f'containerapp env show -g {resource_group} -n {env}').get_output_in_json()
+
+        while containerapp_env["properties"]["provisioningState"].lower() == "waiting":
+            time.sleep(5)
+            containerapp_env = self.cmd(f'containerapp env show -g {resource_group} -n {env}').get_output_in_json()
 
         self.cmd(f'containerapp create -g {resource_group} -n {app} --environment {env} --min-replicas 1 --ingress external --target-port 80')
         self.cmd(f'acr create -g {resource_group} -n {acr} --sku basic --admin-enabled')
