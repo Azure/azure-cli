@@ -5859,7 +5859,7 @@ class VMGalleryImage(ScenarioTest):
             'des1_id': des1_id
         })
 
-        self.cmd('keyvault set-policy -n {vault} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('keyvault set-policy -n {vault} -g {rg} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
 
         time.sleep(15)
 
@@ -6213,7 +6213,7 @@ class VMGalleryImage(ScenarioTest):
             'des1_sp_id': des1_sp_id
         })
 
-        self.cmd('keyvault set-policy -n {vault} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('keyvault set-policy -n {vault} -g {rg} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
 
         # Create Image Version using a DES, the DES must have the correct key management permissions and be in the same region as the edge zone
         self.cmd(
@@ -7549,9 +7549,9 @@ class DiskEncryptionSetTest(ScenarioTest):
             'des3_id': des3_id
         })
 
-        self.cmd('keyvault set-policy -n {vault} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
-        self.cmd('keyvault set-policy -n {vault} --object-id {des2_sp_id} --key-permissions wrapKey unwrapKey get')
-        self.cmd('keyvault set-policy -n {vault} --object-id {des3_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('keyvault set-policy -n {vault} -g {rg} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('keyvault set-policy -n {vault} -g {rg} --object-id {des2_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('keyvault set-policy -n {vault} -g {rg} --object-id {des3_sp_id} --key-permissions wrapKey unwrapKey get')
 
         time.sleep(15)
 
@@ -7628,9 +7628,9 @@ class DiskEncryptionSetTest(ScenarioTest):
         })
 
         self.cmd(
-            'keyvault set-policy -n {vault} --object-id {identity1_principalId} --key-permissions wrapKey unwrapKey get')
+            'keyvault set-policy -n {vault} -g {rg} --object-id {identity1_principalId} --key-permissions wrapKey unwrapKey get')
         self.cmd(
-            'keyvault set-policy -n {vault} --object-id {identity2_principalId} --key-permissions wrapKey unwrapKey get')
+            'keyvault set-policy -n {vault} -g {rg} --object-id {identity2_principalId} --key-permissions wrapKey unwrapKey get')
 
         # create disk encryption set with system and user assigned identity
         des1_principalId = \
@@ -7665,9 +7665,9 @@ class DiskEncryptionSetTest(ScenarioTest):
         })
 
         self.cmd(
-            'keyvault set-policy -n {vault} --object-id {des1_principalId} --key-permissions wrapKey unwrapKey get')
+            'keyvault set-policy -n {vault} -g {rg} --object-id {des1_principalId} --key-permissions wrapKey unwrapKey get')
         self.cmd(
-            'keyvault set-policy -n {vault} --object-id {des3_principalId} --key-permissions wrapKey unwrapKey get')
+            'keyvault set-policy -n {vault} -g {rg} --object-id {des3_principalId} --key-permissions wrapKey unwrapKey get')
 
         # clear federated client id of disk encryption set
         self.cmd('disk-encryption-set update -g {rg} -n {des1} --key-url {kid} --source-vault {vault} '
@@ -7771,7 +7771,7 @@ class DiskEncryptionSetTest(ScenarioTest):
             'des_id': des_id
         })
 
-        self.cmd('keyvault set-policy -n {vault2} --object-id {des_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('keyvault set-policy -n {vault2} -g {rg} --object-id {des_sp_id} --key-permissions wrapKey unwrapKey get')
         time.sleep(30)
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('role assignment create --assignee {des_sp_id} --role Reader --scope {vault2_id}')
@@ -7793,7 +7793,7 @@ class DiskEncryptionSetTest(ScenarioTest):
         self.kwargs.update({
             'des2_sp_id': des2_sp_id,
         })
-        self.cmd('keyvault set-policy -n {vault3} --object-id {des2_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('keyvault set-policy -n {vault3} -g {rg} --object-id {des2_sp_id} --key-permissions wrapKey unwrapKey get')
         self.cmd('disk-encryption-set update -g {rg} -n {des2} --source-vault {vault3}', checks=[
             self.check('activeKey.sourceVault.id', '{vault3_id}')
         ])
@@ -7809,12 +7809,12 @@ class DiskEncryptionSetTest(ScenarioTest):
         self.kwargs.update({
             'des2_sp_id': des2_sp_id,
         })
-        self.cmd('keyvault set-policy -n {vault2} --object-id {des2_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('keyvault set-policy -n {vault2} -g {rg} --object-id {des2_sp_id} --key-permissions wrapKey unwrapKey get')
         self.cmd('disk-encryption-set update -g {rg} -n {des2} --key-url {kid2}', checks=[
             self.check('activeKey.keyUrl', '{kid2}'),
             self.check('activeKey.sourceVault', None)
         ])
-        self.cmd('keyvault set-policy -n {vault3} --object-id {des2_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('keyvault set-policy -n {vault3} -g {rg} --object-id {des2_sp_id} --key-permissions wrapKey unwrapKey get')
         self.cmd('disk-encryption-set update -g {rg} -n {des2} --key-url {kid3} --source-vault {vault3} --enable-auto-key-rotation false', checks=[
             self.check('activeKey.keyUrl', '{kid3}'),
             self.check('activeKey.sourceVault.id', '{vault3_id}'),
@@ -7849,7 +7849,7 @@ class DiskEncryptionSetTest(ScenarioTest):
             'des1_id': des1_id
         })
 
-        self.cmd('keyvault set-policy -n {vault} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('keyvault set-policy -n {vault} -g {rg} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
 
         time.sleep(15)
 
@@ -7914,8 +7914,8 @@ class DiskEncryptionSetTest(ScenarioTest):
             'des2_id': des2_id
         })
 
-        self.cmd('keyvault set-policy -n {vault} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
-        self.cmd('keyvault set-policy -n {vault} --object-id {des2_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('keyvault set-policy -n {vault} -g {rg} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('keyvault set-policy -n {vault} -g {rg} --object-id {des2_sp_id} --key-permissions wrapKey unwrapKey get')
 
         time.sleep(15)
 
@@ -7974,7 +7974,7 @@ class DiskEncryptionSetTest(ScenarioTest):
             'des1_id': des1_id
         })
 
-        self.cmd('keyvault set-policy -n {vault} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('keyvault set-policy -n {vault} -g {rg} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
 
         time.sleep(15)
 

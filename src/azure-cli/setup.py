@@ -60,7 +60,7 @@ DEPENDENCIES = [
     'azure-graphrbac~=0.60.0',
     'azure-keyvault-administration==4.4.0b2',
     'azure-keyvault-certificates==4.7.0',
-    'azure-keyvault-keys==4.8.0b2',
+    'azure-keyvault-keys==4.9.0b3',
     'azure-keyvault-secrets==4.7.0',
     'azure-loganalytics~=0.1.0',
     'azure-mgmt-advisor==9.0.0',
