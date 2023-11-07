@@ -1082,8 +1082,9 @@ class FunctionAppWithDistributedTracing(ScenarioTest):
         self.cmd('functionapp create -g {} -n {} -p {} -s {} --runtime java --functions-version 4'
                  .format(resource_group, functionapp_name, plan, storage_account))
 
-        app_set = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group,
-                                                                                    functionapp_name)).get_output_in_json()
+        self.cmd('functionapp config appsettings set -g {} -n {} --settings FOO=BAR'.format(resource_group, functionapp_name))
+
+        app_set = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name)).get_output_in_json()
         self.assertTrue('APPLICATIONINSIGHTS_ENABLE_AGENT' in [
                         kp['name'] for kp in app_set])
 
@@ -1143,6 +1144,58 @@ class FunctionAppWithAppInsightsDefault(ScenarioTest):
                         kp['name'] for kp in app_set])
         self.assertTrue('AzureWebJobsDashboard' in [
                         kp['name'] for kp in app_set])
+
+
+class FunctionappAppInsightsWorkspace(ScenarioTest):
+    def __init__(self, method_name, config_file=None, recording_name=None, recording_processors=None, replay_processors=None, recording_patches=None, replay_patches=None, random_config_dir=False):
+        super().__init__(method_name, config_file, recording_name, recording_processors, replay_processors, recording_patches, replay_patches, random_config_dir)
+        self.cmd('extension add -n application-insights')
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_create_default_rg_and_workspace(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(prefix='functionappworkspaceai', length=40)
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4'.format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
+        subscription_id = 'dbf67cc6-6c57-44b8-97fc-4356f0d555b3'
+        default_rg_name = 'DefaultResourceGroup-PAR'
+        default_workspace_name = 'DefaultWorkspace-{}-PAR'.format(subscription_id)
+        workspace_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.OperationalInsights/workspaces/{}'.format(
+            self.get_subscription_id(),
+            default_rg_name,
+            default_workspace_name
+        )
+        self.cmd('monitor app-insights component show -g {} --app {}'.format(resource_group, functionapp_name), checks=[
+            self.check('workspaceResourceId', workspace_id)
+        ])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_existing_workspace(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(prefix='functionappworkspaceai', length=40)
+        existing_workspace_name = 'ExistingWorkspace-PAR'
+        workspace = self.cmd('monitor log-analytics workspace create -g {} -n {} -l {}'.format(resource_group, existing_workspace_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).get_output_in_json()
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --workspace {} --functions-version 4'.format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account, existing_workspace_name))
+        self.cmd('monitor app-insights component show -g {} --app {}'.format(resource_group, functionapp_name), checks=[
+            self.check('workspaceResourceId', workspace['id'])
+        ])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_existing_default_rg(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(prefix='functionappworkspaceai', length=40)
+        subscription_id = 'dbf67cc6-6c57-44b8-97fc-4356f0d555b3'
+        default_rg_name = 'DefaultResourceGroup-PAR'
+        self.cmd('group create -n {} -l {}'.format(default_rg_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+        default_workspace_name = 'DefaultWorkspace-{}-PAR'.format(subscription_id)
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4'.format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
+        workspace_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.OperationalInsights/workspaces/{}'.format(
+            self.get_subscription_id(),
+            default_rg_name,
+            default_workspace_name
+        )
+        self.cmd('monitor app-insights component show -g {} --app {}'.format(resource_group, functionapp_name), checks=[
+            self.check('workspaceResourceId', workspace_id)
+        ])
 
 
 class FunctionAppOnLinux(ScenarioTest):
@@ -1466,13 +1519,15 @@ class FunctionAppKeysTests(ScenarioTest):
         self.cmd('functionapp keys set -g {} -n {} --key-name {} --key-value {} --key-type {}'
                  .format(resource_group, functionapp_name, key_name, key_value, key_type)).assert_with_checks([
                      JMESPathCheck('name', key_name),
-                     JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys')])
+                     JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys'),
+                     JMESPathCheck('value', None)])
 
         key_value = "keyvalue1_changed"
         self.cmd('functionapp keys set -g {} -n {} --key-name {} --key-value {} --key-type {}'
                  .format(resource_group, functionapp_name, key_name, key_value, key_type)).assert_with_checks([
                      JMESPathCheck('name', key_name),
-                     JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys')])
+                     JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys'),
+                     JMESPathCheck('value', None)])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1491,7 +1546,8 @@ class FunctionAppKeysTests(ScenarioTest):
         self.cmd('functionapp keys set -g {} -n {} --key-name {} --key-value {} --key-type {}'
                  .format(resource_group, functionapp_name, key_name, key_value, key_type)).assert_with_checks([
                      JMESPathCheck('name', key_name),
-                     JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys')])
+                     JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys'),
+                     JMESPathCheck('value', None)])
 
         self.cmd('functionapp keys list -g {} -n {}'
                  .format(resource_group, functionapp_name)).assert_with_checks([
@@ -1514,7 +1570,8 @@ class FunctionAppKeysTests(ScenarioTest):
         self.cmd('functionapp keys set -g {} -n {} --key-name {} --key-value {} --key-type {}'
                  .format(resource_group, functionapp_name, key_name, key_value, key_type)).assert_with_checks([
                      JMESPathCheck('name', key_name),
-                     JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys')])
+                     JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys'),
+                     JMESPathCheck('value', None)])
 
         self.cmd('functionapp keys delete -g {} -n {} --key-name {} --key-type {}'
                  .format(resource_group, functionapp_name, key_name, key_type))
@@ -1546,13 +1603,15 @@ class FunctionAppKeysTests(ScenarioTest):
         self.cmd('functionapp keys set -g {} -n {} -s {} --key-name {} --key-value {} --key-type {}'
                  .format(resource_group, functionapp_name, slot_name, key_name, key_value, key_type)).assert_with_checks([
                      JMESPathCheck('name', key_name),
-                     JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys')])
+                     JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys'),
+                     JMESPathCheck('value', None)])
 
         key_value = "keyvalue1_changed"
         self.cmd('functionapp keys set -g {} -n {} -s {} --key-name {} --key-value {} --key-type {}'
                  .format(resource_group, functionapp_name, slot_name, key_name, key_value, key_type)).assert_with_checks([
                      JMESPathCheck('name', key_name),
-                     JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys')])
+                     JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys'),
+                     JMESPathCheck('value', None)])
 
 
 class FunctionAppFunctionKeysTests(LiveScenarioTest):
@@ -1567,7 +1626,7 @@ class FunctionAppFunctionKeysTests(LiveScenarioTest):
         key_value = "keyvalue1"
 
         self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet'.format(resource_group, functionapp_name, plan_name, storage_account))
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet --runtime-version 6 --functions-version 4'.format(resource_group, functionapp_name, plan_name, storage_account))
 
         requests.get('http://{}.scm.azurewebsites.net'.format(functionapp_name), timeout=240)
         time.sleep(30)
@@ -1583,12 +1642,14 @@ class FunctionAppFunctionKeysTests(LiveScenarioTest):
 
         self.cmd('functionapp function keys set -g {} -n {} --function-name {} --key-name {} --key-value {}'
                  .format(resource_group, functionapp_name, function_name, key_name, key_value)).assert_with_checks([
-                     JMESPathCheck('name', key_name)])
+                     JMESPathCheck('name', key_name),
+                     JMESPathCheck('value', None)])
 
         key_value = "keyvalue1_changed"
         self.cmd('functionapp function keys set -g {} -n {} --function-name {} --key-name {} --key-value {}'
                  .format(resource_group, functionapp_name, function_name, key_name, key_value)).assert_with_checks([
-                     JMESPathCheck('name', key_name)])
+                     JMESPathCheck('name', key_name),
+                     JMESPathCheck('value', None)])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1601,7 +1662,7 @@ class FunctionAppFunctionKeysTests(LiveScenarioTest):
         key_value = "keyvalue1"
 
         self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet'.format(resource_group, functionapp_name, plan_name, storage_account))
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet --runtime-version 6 --functions-version 4'.format(resource_group, functionapp_name, plan_name, storage_account))
 
         requests.get('http://{}.scm.azurewebsites.net'.format(functionapp_name), timeout=240)
         time.sleep(30)
@@ -1617,7 +1678,8 @@ class FunctionAppFunctionKeysTests(LiveScenarioTest):
 
         self.cmd('functionapp function keys set -g {} -n {} --function-name {} --key-name {} --key-value {}'
                  .format(resource_group, functionapp_name, function_name, key_name, key_value)).assert_with_checks([
-                     JMESPathCheck('name', key_name)
+                     JMESPathCheck('name', key_name),
+                     JMESPathCheck('value', None)
                      ])
 
         self.cmd('functionapp function keys list -g {} -n {} --function-name {}'
@@ -1636,7 +1698,7 @@ class FunctionAppFunctionKeysTests(LiveScenarioTest):
         key_value = "keyvalue1"
 
         self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet'.format(resource_group, functionapp_name, plan_name, storage_account))
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet --runtime-version 6 --functions-version 4'.format(resource_group, functionapp_name, plan_name, storage_account))
 
         requests.get('http://{}.scm.azurewebsites.net'.format(functionapp_name), timeout=240)
         time.sleep(30)
@@ -1654,7 +1716,8 @@ class FunctionAppFunctionKeysTests(LiveScenarioTest):
 
         self.cmd('functionapp function keys set -g {} -n {} --function-name {} --key-name {} --key-value {}'
                  .format(resource_group, functionapp_name, function_name, key_name, key_value)).assert_with_checks([
-                     JMESPathCheck('name', key_name)
+                     JMESPathCheck('name', key_name),
+                     JMESPathCheck('value', None)
                      ])
 
         self.cmd('functionapp function keys delete -g {} -n {} --function-name {} --key-name {}'
@@ -1847,6 +1910,13 @@ class FunctionappLinuxConsumptionZipDeploy(LiveScenarioTest):
 
         with self.assertRaises(ValidationError):
             self.cmd('functionapp deployment source config-zip -g {} -n {} --src "{}" --build-remote'.format(resource_group, functionapp_name, zip_file))
+
+
+class FunctionappDeploymentSourceScenarioTest(ScenarioTest):
+    def test_functionapp_deployment_source_update_token(self):
+        self.cmd('functionapp deployment source update-token --git-token password1234').assert_with_checks([
+            JMESPathCheck('token', None)
+        ])
 
 
 # LiveScenarioTest due to issue https://github.com/Azure/azure-cli/issues/10705

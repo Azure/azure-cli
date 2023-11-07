@@ -29,6 +29,9 @@ ACR_RUN_DEFAULT_TIMEOUT_IN_SEC = 60 * 60  # 60 minutes
 
 ACR_AUDIENCE_RESOURCE_NAME = "containerregistry"
 
+# Regex pattern to validate that registry name is alphanumeric and between 5 and 50 characters
+ACR_NAME_VALIDATION_REGEX = r'^[a-zA-Z0-9]{5,50}$'
+
 ALLOWED_TASK_FILE_TYPES = ('.yaml', '.yml', '.toml', '.json', '.sh', '.bash', '.zsh', '.ps1',
                            '.ps', '.cmd', '.bat', '.ts', '.js', '.php', '.py', '.rb', '.lua')
 

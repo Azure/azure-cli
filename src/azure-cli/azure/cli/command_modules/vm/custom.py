@@ -95,8 +95,7 @@ extension_mappings = {
 }
 
 remove_basic_option_msg = "It's recommended to create with `%s`. " \
-                          "Please be aware that the default %s will be changed from Basic to Standard " \
-                          "in the next release. Also note that Basic option will be removed in the future."
+                          "Please be aware that Basic option will be removed in the future."
 
 
 def _construct_identity_info(identity_scope, identity_role, implicit_identity, external_identities):
@@ -907,8 +906,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     # In order to avoid breaking change which has a big impact to users,
     # we use the hint to guide users to use Standard public IP to create VM in the first stage.
     if cmd.cli_ctx.cloud.profile == 'latest':
-        if public_ip_sku is None and public_ip_address_type == 'new' or public_ip_sku == "Basic":
-            logger.warning(remove_basic_option_msg, "--public-ip-sku Standard", "Public IP")
+        if public_ip_sku == "Basic":
+            logger.warning(remove_basic_option_msg, "--public-ip-sku Standard")
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     if os_disk_encryption_set is not None and not is_valid_resource_id(os_disk_encryption_set):
@@ -3165,8 +3164,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
     # The default load balancer will be expected to be changed from Basic to Standard, and Basic will be removed.
     # In order to avoid breaking change which has a big impact to users,
     # we use the hint to guide users to use Standard load balancer to create VMSS in the first stage.
-    if load_balancer_sku is None or load_balancer_sku == 'Basic':
-        logger.warning(remove_basic_option_msg, "--lb-sku Standard", "LB SKU")
+    if load_balancer_sku == 'Basic':
+        logger.warning(remove_basic_option_msg, "--lb-sku Standard")
 
     # Build up the ARM template
     master_template = ArmTemplateBuilder()
@@ -5649,6 +5648,12 @@ def restore_point_create(client,
                          exclude_disks=None,
                          source_restore_point=None,
                          consistency_mode=None,
+                         source_os_resource=None,
+                         os_restore_point_encryption_set=None,
+                         os_restore_point_encryption_type=None,
+                         source_data_disk_resource=None,
+                         data_disk_restore_point_encryption_set=None,
+                         data_disk_restore_point_encryption_type=None,
                          no_wait=False):
     parameters = {}
     if exclude_disks is not None:
@@ -5659,6 +5664,121 @@ def restore_point_create(client,
         parameters['sourceRestorePoint'] = {'id': source_restore_point}
     if consistency_mode is not None:
         parameters['consistencyMode'] = consistency_mode
+
+    storage_profile = {}
+    # Local restore point
+    if source_restore_point is None:
+        os_disk = {}
+        if source_os_resource is not None:
+            managed_disk = {
+                'id': source_os_resource
+            }
+            os_disk['managedDisk'] = managed_disk
+            if os_restore_point_encryption_set is None and os_restore_point_encryption_type is None:
+                raise ArgumentUsageError('usage error: --os-restore-point-encryption-set or --os-restore-point-encryption-type must be used together with --source-os-resource')
+
+        disk_restore_point = {}
+        if os_restore_point_encryption_set is not None or os_restore_point_encryption_type is not None:
+            encryption = {}
+            if os_restore_point_encryption_set is not None:
+                encryption['diskEncryptionSet'] = {
+                    'id': os_restore_point_encryption_set
+                }
+            if os_restore_point_encryption_type is not None:
+                encryption['type'] = os_restore_point_encryption_type
+
+            if encryption:
+                disk_restore_point['encryption'] = encryption
+
+        if disk_restore_point:
+            os_disk['diskRestorePoint'] = disk_restore_point
+
+        if os_disk:
+            storage_profile['osDisk'] = os_disk
+
+        data_disks = []
+        if source_data_disk_resource is not None:
+            if data_disk_restore_point_encryption_set is None and data_disk_restore_point_encryption_type is None:
+                raise ArgumentUsageError('usage error: --data-disk-restore-point-encryption-set or --data-disk-restore-point-encryption-type must be used together with --source-data-disk-resource')
+            if data_disk_restore_point_encryption_set is not None and (len(source_data_disk_resource) != len(data_disk_restore_point_encryption_set)):
+                raise ArgumentUsageError('Length of --source-data-disk-resource, --data-disk-restore-point-encryption-set must be same.')
+            if data_disk_restore_point_encryption_type is not None and (len(source_data_disk_resource) != len(data_disk_restore_point_encryption_type)):
+                raise ArgumentUsageError('Length of --source-data-disk-resource, --data-disk-restore-point-encryption-type must be same.')
+
+            for i in range(len(source_data_disk_resource)):
+                data_disks.append({
+                    'managedDisk': {
+                        'id': source_data_disk_resource[i]
+                    },
+                    'diskRestorePoint': {
+                        'encryption': {
+                            'disk_encryption_set': {
+                                'id': data_disk_restore_point_encryption_set[i] if data_disk_restore_point_encryption_set is not None else None
+                            },
+                            'type': data_disk_restore_point_encryption_type[i] if data_disk_restore_point_encryption_type is not None else None
+                        }
+                    }
+                })
+
+        if data_disks:
+            storage_profile['dataDisks'] = data_disks
+
+    # Remote restore point
+    if source_restore_point is not None:
+        os_disk = {}
+        disk_restore_point = {}
+        if source_os_resource is not None:
+            source_disk_restore_point = {
+                'id': source_os_resource
+            }
+            disk_restore_point['sourceDiskRestorePoint'] = source_disk_restore_point
+            if os_restore_point_encryption_set is None and os_restore_point_encryption_type is None:
+                raise ArgumentUsageError('usage error: --os-restore-point-encryption-set or --os-restore-point-encryption-type must be used together with --source-os-resource')
+
+        if os_restore_point_encryption_set is not None or os_restore_point_encryption_type is not None:
+            encryption = {}
+            if os_restore_point_encryption_set is not None:
+                encryption['diskEncryptionSet'] = {
+                    'id': os_restore_point_encryption_set
+                }
+            if os_restore_point_encryption_type is not None:
+                encryption['type'] = os_restore_point_encryption_type
+
+            if encryption:
+                disk_restore_point['encryption'] = encryption
+        if disk_restore_point:
+            os_disk['diskRestorePoint'] = disk_restore_point
+        if os_disk:
+            storage_profile['osDisk'] = os_disk
+
+        data_disks = []
+        if source_data_disk_resource is not None:
+            if data_disk_restore_point_encryption_set is None and data_disk_restore_point_encryption_type is None:
+                raise ArgumentUsageError('usage error: --data-disk-restore-point-encryption-set or --data-disk-restore-point-encryption-type must be used together with --source-data-disk-resource')
+            if data_disk_restore_point_encryption_set is not None and (len(source_data_disk_resource) != len(data_disk_restore_point_encryption_set)):
+                raise ArgumentUsageError('Length of --source-data-disk-resource, --data-disk-restore-point-encryption-set must be same.')
+            if data_disk_restore_point_encryption_type is not None and (len(source_data_disk_resource) != len(data_disk_restore_point_encryption_type)):
+                raise ArgumentUsageError('Length of --source-data-disk-resource, --data-disk-restore-point-encryption-type must be same.')
+
+            for i in range(len(source_data_disk_resource)):
+                data_disks.append({
+                    'diskRestorePoint': {
+                        'sourceDiskRestorePoint': {
+                            'id': source_data_disk_resource[i]
+                        },
+                        'encryption': {
+                            'disk_encryption_set': {
+                                'id': data_disk_restore_point_encryption_set[i] if data_disk_restore_point_encryption_set is not None else None
+                            },
+                            'type': data_disk_restore_point_encryption_type[i] if data_disk_restore_point_encryption_type is not None else None
+                        }
+                    }
+                })
+        if data_disks:
+            storage_profile['dataDisks'] = data_disks
+
+    if storage_profile:
+        parameters['sourceMetadata'] = {'storageProfile': storage_profile}
     return sdk_no_wait(no_wait,
                        client.begin_create,
                        resource_group_name=resource_group_name,
