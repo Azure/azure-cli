@@ -603,18 +603,20 @@ def trusted_launch_warning_log(namespace, generation_version, features):
 
 
 def validate_vm_disk_trusted_launch(namespace, disk_security_profile):
+    from ._constants import UPGRADE_SECURITY_HINT
+
     if disk_security_profile is None:
+        logger.warning(UPGRADE_SECURITY_HINT)
         return
 
-    from ._constants import UPGRADE_SECURITY_HINT
     security_type = disk_security_profile.security_type if hasattr(disk_security_profile, 'security_type') else None
-    if security_type.lower() != 'trustedlaunch':
+    if security_type.lower() == 'trustedlaunch':
         if namespace.enable_secure_boot is None:
             namespace.enable_secure_boot = True
         if namespace.enable_vtpm is None:
             namespace.enable_vtpm = True
         namespace.security_type = 'TrustedLaunch'
-    else:
+    elif security_type.lower() == 'standard':
         logger.warning(UPGRADE_SECURITY_HINT)
 
 
