@@ -8,6 +8,7 @@ import re
 from knack.util import CLIError
 from knack.log import get_logger
 from azure.cli.core.azclierror import FileOperationError, InvalidArgumentValueError
+from ._constants import ACR_NAME_VALIDATION_REGEX
 
 BAD_REPO_FQDN = "The positional parameter 'repo_id' must be a fully qualified repository specifier such"\
                 " as 'myregistry.azurecr.io/hello-world'."
@@ -114,9 +115,7 @@ def validate_registry_name(cmd, namespace):
             logger.warning("The login server endpoint suffix '%s' is automatically omitted.", acr_suffix)
             namespace.registry_name = registry[:pos]
     registry = namespace.registry_name
-    # Regex pattern to validate that registry name is alphanumeric and between 5 and 50 characters
-    pattern = r'^[a-zA-Z0-9]{5,50}$'
-    if not re.match(pattern, registry):
+    if not re.match(ACR_NAME_VALIDATION_REGEX, registry):
         raise InvalidArgumentValueError(BAD_REGISTRY_NAME)
 
 
