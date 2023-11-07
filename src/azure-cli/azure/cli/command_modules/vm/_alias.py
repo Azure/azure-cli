@@ -86,14 +86,14 @@ alias_json = """
           "Win2019Datacenter": {
             "publisher": "MicrosoftWindowsServer",
             "offer": "WindowsServer",
-            "sku": "2019-datacenter-gen2",
+            "sku": "2019-datacenter-gensecond",
             "version": "latest",
             "architecture": "x64"
           },
           "Win2016Datacenter": {
             "publisher": "MicrosoftWindowsServer",
             "offer": "WindowsServer",
-            "sku": "2016-datacenter-gen2",
+            "sku": "2016-datacenter-gensecond",
             "version": "latest",
             "architecture": "x64"
           },
