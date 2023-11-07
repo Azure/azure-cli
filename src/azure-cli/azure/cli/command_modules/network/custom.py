@@ -6081,6 +6081,7 @@ class VNetGatewayShow(_VNetGatewayShow):
 
         return result
 
+
 def generate_vpn_client(cmd, resource_group_name, virtual_network_gateway_name, processor_architecture=None,
                         authentication_method=None, radius_server_auth_certificate=None, client_root_certificates=None,
                         use_legacy=False):
