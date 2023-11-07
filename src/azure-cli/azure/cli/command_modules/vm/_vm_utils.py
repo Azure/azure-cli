@@ -614,7 +614,7 @@ def validate_vm_disk_trusted_launch(namespace, disk_security_profile):
         if namespace.enable_vtpm is None:
             namespace.enable_vtpm = True
         namespace.security_type = 'TrustedLaunch'
-    else:
+    elif security_type.lower() == 'standard':
         logger.warning(UPGRADE_SECURITY_HINT)
 
 

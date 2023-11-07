@@ -9101,7 +9101,8 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'disk': 'disk1',
-            'snapshot': 'snapshot1'
+            'snapshot': 'snapshot1',
+            'vm': 'vm1'
         })
 
         self.kwargs['disk_id'] = self.cmd('disk create -g {rg} -n {disk} --image-reference Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest --hyper-v-generation V2 --security-type TrustedLaunch', checks=[
@@ -9118,6 +9119,14 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
 
         self.cmd('snapshot show -g {rg} -n {snapshot}', checks=[
             self.check('securityProfile.securityType', 'TrustedLaunch')
+        ])
+
+        self.cmd('vm create -g {rg} -n {vm} --attach-os-disk {disk} --nsg-rule NONE --os-type linux')
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('securityProfile.securityType', 'TrustedLaunch'),
+            self.check('securityProfile.uefiSettings.secureBootEnabled', True),
+            self.check('securityProfile.uefiSettings.vTpmEnabled', True)
         ])
 
     @unittest.skip('vhd is not supported')
