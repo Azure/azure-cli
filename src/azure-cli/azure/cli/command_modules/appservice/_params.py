@@ -739,6 +739,7 @@ subscription than the app service environment, please use the resource ID for --
                    help='The container registry server password. Required for private registries.')
         c.argument('min_replicas', type=int, help="The minimum number of replicas when create funtion app on container app", is_preview=True)
         c.argument('max_replicas', type=int, help="The maximum number of replicas when create funtion app on container app", is_preview=True)
+        c.argument('workspace', help="Name of an existing log analytics workspace to be used for the application insights component")
 
     with self.argument_context('functionapp cors credentials') as c:
         c.argument('enable', help='enable/disable access-control-allow-credentials', arg_type=get_three_state_flag())
