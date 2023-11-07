@@ -26,8 +26,6 @@ ACR_CHECK_HEALTH_MSG = "Try running 'az acr check-health -n {} --yes' to diagnos
 RECOMMENDED_NOTARY_VERSION = "0.6.0"
 NOTARY_VERSION_REGEX = re.compile(r'Version:\s+([.\d]+)')
 DOCKER_PULL_WRONG_PLATFORM = 'cannot be used on this platform'
-IMAGE_INPUT_ERROR_MESSAGE = "The specified image tag was not found. Please check image name for --image."
-REPOSITORY_INPUT_ERROR_MESSAGE = "Invalid repository name. Please check repository name for --repository."
 
 # Utilities functions
 def print_pass(message):
@@ -66,6 +64,10 @@ def _subprocess_communicate(command_parts, shell=False):
         )
     return output, warning, stderr
 
+
+# Retrieve blob identified by digest - GET {url}/v2/{name}/blobs/{digest}
+def _get_blob(login_server, repository_name, digest):
+    return 'https://{}/v2/{}/blobs/{}'.format(login_server, repository_name, digest)
 
 # Checks for the environment
 # Checks docker command, docker daemon, docker version and docker pull
@@ -417,16 +419,26 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # py
 
 # Validate --image input
 def validate_image(cmd, registry_name, repository_name, image):
-    from .repository import get_access_credentials, acr_repository_show_tags, _get_manifest_path, _obtain_data_from_registry
-    from ._docker_utils import request_data_from_registry, get_manifest_authorization_header, RegistryException
-    from ._utils import get_resource_group_name_by_registry_name
     from difflib import get_close_matches
+    from ._utils import get_resource_group_name_by_registry_name
+    from .manifest import _get_v2_manifest_path
+
+    from ._docker_utils import (
+        request_data_from_registry,
+        get_manifest_authorization_header,
+        RegistryException
+    )
+
+    from .repository import (
+        get_access_credentials,
+        acr_repository_show_tags,
+        _get_manifest_path,
+        _obtain_data_from_registry
+    )
 
     rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, None)
-    registry, _ = get_registry_by_name(cmd.cli_ctx, registry_name, rg)  
+    registry, _ = get_registry_by_name(cmd.cli_ctx, registry_name, rg)
     login_server = registry.login_server.rstrip('/')
-
-    path = '/v2/' + repository_name + '/manifests/'+ image
 
      # Get the access credentials for the registry
     login_server, username, password = get_access_credentials(
@@ -442,17 +454,18 @@ def validate_image(cmd, registry_name, repository_name, image):
         request_data_from_registry(
             http_method='get',
             login_server=login_server,
-            path=path,
+            path=_get_v2_manifest_path(repository_name, image),
             username=username,
             password=password,
             json_payload=None,
             file_payload=None,
             manifest_headers=get_manifest_authorization_header(username, password),
             params=image)
-        
+
     except RegistryException as e:
         if e.status_code == 404:
             # If tag is used, get all tags
+            # TO DO: Make this into its own function and then call it
             if 'sha256' not in image:
                 tags = acr_repository_show_tags(
                     cmd,
@@ -461,41 +474,38 @@ def validate_image(cmd, registry_name, repository_name, image):
                     orderby=None,
                     username=username,
                     password=password)
-                # Get a list of tags that have at least 20% similarity with the inputted image name
-                matches = get_close_matches(image, tags, n=1, cutoff=0.2)
+                # Get a list of tags that have at least 80% similarity with the inputted image name
+                matches = get_close_matches(image, tags, n=1, cutoff=0.8)
                 if matches:
                     raise CLIError("Tag not found: {}. Did you mean to input '{}'?".format(image, matches[0]))
-                else:
-                    raise CLIError("Invalid tag: {}".format(str(e)))
-                
-            # If digest is used, get all digests
-            else:
-                image_digest_list = _obtain_data_from_registry(
-                    login_server=login_server,
-                    path=_get_manifest_path(repository_name),
-                    username=username,
-                    password=password,
-                    result_index='manifests',
-                    orderby=None)
-                
-                # Get a list of digests that have at least 20% similarity with the inputted image name
-                digests = [item['digest'] for item in image_digest_list]
-                matches = get_close_matches(image, digests, n=1, cutoff=0.2)
-                # if there is a match, give a suggestion on the intended image name
-                if matches:
-                    raise CLIError("Image '{}' not found. Did you mean to input '{}'?".format(image, matches[0]))
-                else:
-                    raise CLIError("Invalid image: {}".format(str(e)))
-        # if the error is not 404, raise the appropriate error from backend
-        else:
-            raise
+                raise CLIError("Invalid tag: {}".format(str(e)))
 
-# Validate if specific artifact can be pulled
-def _check_artifact(cmd,
-                    registry_name,
-                    repository_name,
-                    image):
-    
+            # If digest is used, get all digests
+            image_digest_list = _obtain_data_from_registry(
+                login_server=login_server,
+                path=_get_manifest_path(repository_name),
+                username=username,
+                password=password,
+                result_index='manifests',
+                orderby=None)
+
+            # Get a list of digests that have at least 20% similarity with the inputted image name
+            digests = [item['digest'] for item in image_digest_list]
+            matches = get_close_matches(image, digests, n=1, cutoff=0.2)
+            #TO DO: Need to change this to 80% match not 20%
+            # if there is a match, give a suggestion on the intended image name
+            if matches:
+                raise CLIError("Image '{}' not found. Did you mean to input '{}'?".format(image, matches[0]))
+            raise CLIError("Invalid image: {}".format(str(e)))
+        # if the error is not 404, raise the appropriate error from backend
+        raise
+
+# Validate if specific blob can be pulled
+def _check_blob(cmd,
+                registry_name,
+                repository_name,
+                image):
+
     import requests
     from .repository import get_access_credentials
     from ._utils import get_resource_group_name_by_registry_name
@@ -513,11 +523,11 @@ def _check_artifact(cmd,
         password=None,
         repository=repository_name,
         permission='pull')
-    
+
     # Get manifest
     # GET {url}/v2/{name}/manifests/{reference}
     manifest_url = 'https://{}/v2/{}/manifests/{}'.format(login_server, repository_name, image)
-    
+
     manifest_response = requests.get(
         manifest_url,
         headers={'Accept': 'application/vnd.oci.artifact.manifest.v1+json'
@@ -527,30 +537,26 @@ def _check_artifact(cmd,
             ', application/vnd.docker.distribution.manifest.v2+json'
             ', application/vnd.docker.distribution.manifest.list.v2+json'},
         auth=(username, password))
-    
+
     manifest = manifest_response.json()
 
     # Get the digest of the smallest blob for performance purposes
-    def get_smallest_artifact_digest(manifest):
-       
-        smallest_blob = min(manifest['layers'], key=lambda layer: layer['size'])
-        smallest_blob_digest = smallest_blob['digest']
+    smallest_blob = min(manifest['layers'], key=lambda layer: layer['size'])
+    digest = smallest_blob['digest']
 
-        return smallest_blob_digest
+    # Get blob
+   # request_url = 'https://' + login_server + '/v2/' + repository_name + '/blobs/' + digest
+    request_url = _get_blob(login_server, repository_name, digest)
 
-    digest = get_smallest_artifact_digest(manifest)
-
-    # Pull blob - GET {url}/v2/{name}/blobs/{digest}
-    request_url = 'https://' + login_server + '/v2/' + repository_name + '/blobs/' + digest
-    
     logger.debug(add_timestamp("Sending a HTTP GET request to {}".format(request_url)))
-    
+
     res = requests.get(request_url, auth=(username, password))
-    
-    if res.status_code < 400:
-        print_pass("Artifact identified by image '{}' is available to pull from registry '{}'".format(image, login_server))
+    if res.status_code < 400 and 'sha256' not in image:
+        print_pass("Blobs within the tag '{}' can be pulled from registry '{}'".format(image, login_server))
+    elif res.status_code < 400:
+        print_pass("Blobs in image '{}' can be pulled from registry '{}'".format(image, login_server))
     else:
-        raise CLIError("'Artifact identified by image '{}' cannot be pulled from registry '{}'".format(image, login_server)) 
+        raise CLIError("'Blobs in image '{}' cannot be pulled from registry '{}'".format(image, login_server))
 
 # General command
 def acr_check_health(cmd,  # pylint: disable useless-return
@@ -568,13 +574,13 @@ def acr_check_health(cmd,  # pylint: disable useless-return
     else:
         _get_docker_status_and_version(ignore_errors, yes)
         _get_cli_version()
-    
+
     _check_registry_health(cmd, registry_name, ignore_errors)
 
     # If repository and image are provided, validate image input
     if (image and repository_name):
         validate_image(cmd, registry_name, repository_name, image)
-        _check_artifact(cmd, registry_name, repository_name, image)
+        _check_blob(cmd, registry_name, repository_name, image)
 
     if vnet:
         _check_private_endpoint(cmd, registry_name, vnet)
