@@ -7900,7 +7900,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # update to enable cilium dataplane
-        update_cmd = 'aks update -g {resource_group} -n {name} --network-dataplane=cilium'
+        update_cmd = 'aks update -g {resource_group} -n {name} --network-dataplane=cilium --network-policy=cilium'
 
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
