@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import json
 from azure.cli.command_modules.acs.azuremonitormetrics.constants import ALERTS_API, RULES_API
+from azure.cli.command_modules.acs.azuremonitormetrics.recordingrules.common import truncate_rule_group_name
 from knack.util import CLIError
 
 
@@ -55,7 +56,7 @@ def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
     # with urllib.request.urlopen("https://defaultrulessc.blob.core.windows.net/defaultrules/ManagedPrometheusDefaultRecordingRules.json") as url:
     #     default_rules_template = json.loads(url.read().decode())
     default_rules_template = get_recording_rules_template(cmd, azure_monitor_workspace_resource_id)
-    default_rule_group_name = "NodeRecordingRulesRuleGroup-{0}".format(cluster_name[:232])
+    default_rule_group_name = truncate_rule_group_name("NodeRecordingRulesRuleGroup-{0}".format(cluster_name))
     default_rule_group_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{2}".format(
         cluster_subscription,
         cluster_resource_group_name,
@@ -74,7 +75,7 @@ def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
     )
     put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, cluster_resource_id, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, True, 0)
 
-    default_rule_group_name = "KubernetesRecordingRulesRuleGroup-{0}".format(cluster_name[:226])
+    default_rule_group_name = truncate_rule_group_name("KubernetesRecordingRulesRuleGroup-{0}".format(cluster_name))
     default_rule_group_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{2}".format(
         cluster_subscription,
         cluster_resource_group_name,
@@ -92,7 +93,7 @@ def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
     if enable_windows_recording_rules is not True:
         enable_windows_recording_rules = False
 
-    default_rule_group_name = "NodeRecordingRulesRuleGroup-Win-{0}".format(cluster_name[:228])
+    default_rule_group_name = truncate_rule_group_name("NodeRecordingRulesRuleGroup-Win-{0}".format(cluster_name))
     default_rule_group_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{2}".format(
         cluster_subscription,
         cluster_resource_group_name,
@@ -105,7 +106,7 @@ def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
     )
     put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, cluster_resource_id, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, enable_windows_recording_rules, 2)
 
-    default_rule_group_name = "NodeAndKubernetesRecordingRulesRuleGroup-Win-{0}".format(cluster_name[:215])
+    default_rule_group_name = truncate_rule_group_name("NodeAndKubernetesRecordingRulesRuleGroup-Win-{0}".format(cluster_name))
     default_rule_group_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{2}".format(
         cluster_subscription,
         cluster_resource_group_name,
