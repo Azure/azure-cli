@@ -70,7 +70,9 @@ from .utils import (_normalize_sku,
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
-                           detect_os_from_src, get_current_stack_from_runtime, generate_default_app_name)
+                           detect_os_from_src, get_current_stack_from_runtime, generate_default_app_name,
+                           get_or_create_default_workspace, get_or_create_default_resource_group,
+                           get_workspace)
 from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX,
                          FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD,
                          LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
@@ -3756,7 +3758,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        registry_server=None, registry_password=None, registry_username=None,
                        image=None, tags=None, assign_identities=None,
                        role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
-                       environment=None, min_replicas=None, max_replicas=None):
+                       environment=None, min_replicas=None, max_replicas=None, workspace=None):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
@@ -4027,7 +4029,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
     if create_app_insights:
         try:
-            try_create_application_insights(cmd, functionapp)
+            try_create_workspace_based_application_insights(cmd, functionapp, workspace)
             if should_enable_distributed_tracing(consumption_plan_location, matched_runtime, image):
                 update_app_settings(cmd, functionapp.resource_group, functionapp.name,
                                     ["APPLICATIONINSIGHTS_ENABLE_AGENT=true"])
@@ -4086,6 +4088,55 @@ def _get_content_share_name(app_name):
     share_name = app_name[0:50]
     suffix = str(uuid.uuid4()).split('-')[-1]
     return share_name.lower() + suffix
+
+
+def try_create_workspace_based_application_insights(cmd, functionapp, workspace_name):
+    creation_failed_warn = 'Unable to create the Application Insights for the Function App. ' \
+                           'Please use the Azure Portal to manually create and configure the Application Insights, ' \
+                           'if needed.'
+
+    ai_resource_group_name = functionapp.resource_group
+    ai_name = functionapp.name
+    ai_location = _normalize_location(cmd, functionapp.location)
+
+    workspace = get_workspace(cmd, workspace_name)
+
+    if workspace is None:
+        default_resource_group = get_or_create_default_resource_group(cmd, ai_location)
+        workspace = get_or_create_default_workspace(cmd, ai_location, default_resource_group.name)
+
+    app_insights_client = get_mgmt_service_client(
+        cmd.cli_ctx,
+        ApplicationInsightsManagementClient,
+        api_version='2020-02-02-preview'
+    )
+
+    ai_properties = {
+        "name": ai_name,
+        "location": ai_location,
+        "kind": "web",
+        "properties": {
+            "Application_Type": "web",
+            "WorkspaceResourceId": workspace.id
+        }
+    }
+
+    appinsights = app_insights_client.components.create_or_update(ai_resource_group_name, ai_name, ai_properties)
+    if appinsights is None or appinsights.instrumentation_key is None:
+        logger.warning(creation_failed_warn)
+        return
+
+    # We make this success message as a warning to no interfere with regular JSON output in stdout
+    logger.warning('Application Insights \"%s\" was created for this Function App. '
+                   'You can visit https://portal.azure.com/#resource%s/overview to view your '
+                   'Application Insights component', appinsights.name, appinsights.id)
+
+    if not is_centauri_functionapp(cmd, ai_resource_group_name, ai_name):
+        update_app_settings(cmd, functionapp.resource_group, functionapp.name,
+                            ['APPINSIGHTS_INSTRUMENTATIONKEY={}'.format(appinsights.instrumentation_key)])
+    else:
+        update_app_settings(cmd, functionapp.resource_group, functionapp.name,
+                            ['APPLICATIONINSIGHTS_CONNECTION_STRING={}'.format(appinsights.connection_string)])
 
 
 def try_create_application_insights(cmd, functionapp):
