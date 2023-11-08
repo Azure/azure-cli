@@ -88,7 +88,7 @@ class ContainerAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'app': 'servicelinker-mysql-aca',
+            'app': 'servicelinker-containerapp',
             'server': 'servicelinker-mysql',
             'database': 'mysqlDB'
         })
@@ -171,9 +171,9 @@ class ContainerAppConnectionScenarioTest(ScenarioTest):
     def test_containerapp_postgres_flexible_e2e_secretstore(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
-            'source_resource_group': 'tanyi',
+            'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'app': 'wctestaca',
+            'app': 'servicelinker-postgresql-aca',
             'server': 'servicelinker-flexiblepostgresql',
             'database': 'postgres',
             'vault': 'servicelinker-kv-ref'
