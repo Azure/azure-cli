@@ -1014,7 +1014,7 @@ subscription than the app service environment, please use the resource ID for --
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.SET],
                                                                  scopes=['appservice']))
         c.argument('kind', options_list=['--kind', '-k'], arg_type=get_enum_type(ASE_KINDS),
-                   default='ASEv2', help="Specify App Service Environment version")
+                   default='ASEv3', help="Specify App Service Environment version")
         c.argument('subnet', help='Name or ID of existing subnet. To create vnet and/or subnet \
                    use `az network vnet [subnet] create`')
         c.argument('vnet_name', help='Name of the vNet. Mandatory if only subnet name is specified.')

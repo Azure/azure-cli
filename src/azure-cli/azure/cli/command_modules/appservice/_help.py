@@ -2295,7 +2295,7 @@ helps['appservice ase create'] = """
     type: command
     short-summary: Create app service environment.
     examples:
-    - name: Create Resource Group, vNet and app service environment v2 with default values.
+    - name: Create resource group, Virtual Network and App Service Environment v3 with default values.
       text: |
           az group create -g MyResourceGroup --location westeurope
 
@@ -2303,35 +2303,19 @@ helps['appservice ase create'] = """
             --address-prefixes 10.0.0.0/16 --subnet-name MyAseSubnet --subnet-prefixes 10.0.0.0/24
 
           az appservice ase create -n MyAseName -g MyResourceGroup --vnet-name MyVirtualNetwork \\
-            --subnet MyAseSubnet
-    - name: Create External app service environments v2 with large front-ends and scale factor of 10 in existing resource group and vNet.
+            --subnet MyAseSubnet --kind asev3
+    - name: Create external App Service Environments v3 in existing resource group and Virtual Network.
       text: |
           az appservice ase create -n MyAseName -g MyResourceGroup --vnet-name MyVirtualNetwork \\
-            --subnet MyAseSubnet --front-end-sku I3 --front-end-scale-factor 10 --virtual-ip-type External
-    - name: Create vNet and app service environment v2, but do not create network security group and route table in existing resource group.
-      text: |
-          az network vnet create -g MyResourceGroup -n MyVirtualNetwork \\
-            --address-prefixes 10.0.0.0/16 --subnet-name MyAseSubnet --subnet-prefixes 10.0.0.0/24
-
-          az appservice ase create -n MyAseName -g MyResourceGroup --vnet-name MyVirtualNetwork \\
-            --subnet MyAseSubnet --ignore-network-security-group --ignore-route-table
-    - name: Create vNet and app service environment v2 in a smaller than recommended subnet in existing resource group.
+            --subnet MyAseSubnet --virtual-ip-type External --kind asev3
+    - name: Create Virtual Network and App Service Environment v3 in a smaller than recommended subnet in existing resource group.
       text: |
           az network vnet create -g MyResourceGroup -n MyVirtualNetwork \\
             --address-prefixes 10.0.0.0/16 --subnet-name MyAseSubnet --subnet-prefixes 10.0.0.0/26
 
           az appservice ase create -n MyAseName -g MyResourceGroup --vnet-name MyVirtualNetwork \\
-            --subnet MyAseSubnet --ignore-subnet-size-validation
-    - name: Create Resource Group, vNet and app service environment v3 with default values.
-      text: |
-          az group create -g ASEv3ResourceGroup --location westeurope
-
-          az network vnet create -g ASEv3ResourceGroup -n MyASEv3VirtualNetwork \\
-            --address-prefixes 10.0.0.0/16 --subnet-name MyASEv3Subnet --subnet-prefixes 10.0.0.0/24
-
-          az appservice ase create -n MyASEv3Name -g ASEv3ResourceGroup \\
-            --vnet-name MyASEv3VirtualNetwork --subnet MyASEv3Subnet --kind asev3
-    - name: Create External zone redundant app service environment v3 with default values.
+            --subnet MyAseSubnet --ignore-subnet-size-validation --kind asev3
+    - name: Create external zone redundant App Service Environment v3 with default values.
       text: |
           az appservice ase create -n MyASEv3Name -g ASEv3ResourceGroup \\
             --vnet-name MyASEv3VirtualNetwork --subnet MyASEv3Subnet --kind asev3 \\
