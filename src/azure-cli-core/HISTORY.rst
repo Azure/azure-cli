@@ -6,7 +6,7 @@ Release History
 2.54.0
 ++++++
 * `aaz`: Support data-plane clients (#27617)
-* Support disabling instance discovery by running `az config set core.instance_discovery=false` (#27494)
+* [PREVIEW] Support disabling instance discovery by running `az config set core.instance_discovery=false` (#27494)
 
 2.53.1
 ++++++

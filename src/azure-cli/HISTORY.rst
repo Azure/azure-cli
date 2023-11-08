@@ -16,7 +16,7 @@ Release History
 
 **AKS**
 
-* [BREAKING CHANGE] `aks create`: Make container log V2 as default and remove region dependency (#27615)
+* [BREAKING CHANGE] `az aks create`: Make container log V2 as default and remove region dependency (#27615)
 * `az aks create/update`: Support custom ips/ipprefixes and managed ips being assigned to aks cluster outbound resources together (#27414)
 * `az aks nodepool add/update/upgrade`: Add new parameter `--drain-timout` to slow down the upgrade (#27475)
 * `az aks update`: Fix bug where supportPlan can be reset to None (#27554)
@@ -41,10 +41,10 @@ Release History
 * [BREAKING CHANGE] `az functionapp`: Redact key value output on keys set (#27611)
 * [BREAKING CHANGE] Redact output on deployment source config (#27628)
 * [BREAKING CHANGE] `az webapp config`: Redact webapp config connection-string and storage-account values (#27629)
-* [BREAKING CHANGE] Redact tokens output on deployment source update-token (#27614)
+* [BREAKING CHANGE] `az functionapp/webapp deployment source update-token`: Redact tokens output on deployment source update-token (#27614)
 * [BREAKING CHANGE] `az appservice ase create`: Update the default App Service Environment to V3 (#27761)
 * `az appservice list-locations`: Add `--hyperv-workers-enabled` parameter to get regions which support hosting web apps on windows container workers (#27535)
-* `az functionapp deployment source config-zip`: Adding the deployer information to improve telemetry (#27427)
+* `az functionapp deployment source config-zip`: Add the deployer information to improve telemetry (#27427)
 * `az webapp up`: Fix `--logs` arg fails with an exception (#27471)
 * `az functionapp create`: Add new parameter `--workspace` to support creating workspace-based app insights components (#27407)
 
@@ -66,7 +66,6 @@ Release History
 
 **Backup**
 
-* Update help text for `check-vm` (#27569)
 * `az backup vault create`: Allow updates to immutability for vaults with Managed Identity set (#27743)
 * `az backup vault update`: Add new command to support updating vault properties without the `--location` parameter (#27743)
 
@@ -206,9 +205,9 @@ Release History
 
 **Storage**
 
-* `az storage file/directory`: add `--disallow-trailing-dot` (#27622)
-* `az storage share list-handle/close-handle`: add `--disallow-trailing-dot` (#27622)
-* `az storage file copy start/start-batch`: add `--disallow-source-trailing-dot` (#27622)
+* `az storage file/directory`: Add `--disallow-trailing-dot` (#27622)
+* `az storage share list-handle/close-handle`: Add `--disallow-trailing-dot` (#27622)
+* `az storage file copy start/start-batch`: Add `--disallow-source-trailing-dot` (#27622)
 * Fix #27590: `az storage fs directory download`: Check user sytem PATH for azcopy and use CLI config directory for new install (#27593)
 * `az storage account blob-inventory-policy create`: Add support for new filter `creationTime.lastNDays` in json (#27666)
 * `az storage account migration start/show`: Support customer inititated migration between replication options (#27692)
