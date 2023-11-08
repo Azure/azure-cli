@@ -4122,7 +4122,7 @@ def try_create_workspace_based_application_insights(cmd, functionapp, workspace_
     }
 
     appinsights = app_insights_client.components.create_or_update(ai_resource_group_name, ai_name, ai_properties)
-    if appinsights is None or appinsights.instrumentation_key is None:
+    if appinsights is None or appinsights.connection_string is None:
         logger.warning(creation_failed_warn)
         return
 
@@ -4131,12 +4131,8 @@ def try_create_workspace_based_application_insights(cmd, functionapp, workspace_
                    'You can visit https://portal.azure.com/#resource%s/overview to view your '
                    'Application Insights component', appinsights.name, appinsights.id)
 
-    if not is_centauri_functionapp(cmd, ai_resource_group_name, ai_name):
-        update_app_settings(cmd, functionapp.resource_group, functionapp.name,
-                            ['APPINSIGHTS_INSTRUMENTATIONKEY={}'.format(appinsights.instrumentation_key)])
-    else:
-        update_app_settings(cmd, functionapp.resource_group, functionapp.name,
-                            ['APPLICATIONINSIGHTS_CONNECTION_STRING={}'.format(appinsights.connection_string)])
+    update_app_settings(cmd, functionapp.resource_group, functionapp.name,
+                        ['APPLICATIONINSIGHTS_CONNECTION_STRING={}'.format(appinsights.connection_string)])
 
 
 def try_create_application_insights(cmd, functionapp):

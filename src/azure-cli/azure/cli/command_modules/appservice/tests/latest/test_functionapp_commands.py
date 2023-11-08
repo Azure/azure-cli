@@ -1120,7 +1120,7 @@ class FunctionAppWithAppInsightsDefault(ScenarioTest):
 
         app_set = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group,
                                                                                     functionapp_name)).get_output_in_json()
-        self.assertTrue('APPINSIGHTS_INSTRUMENTATIONKEY' in [
+        self.assertTrue('APPLICATIONINSIGHTS_CONNECTION_STRING' in [
                         kp['name'] for kp in app_set])
         self.assertTrue('AzureWebJobsDashboard' not in [
                         kp['name'] for kp in app_set])
@@ -1140,7 +1140,7 @@ class FunctionAppWithAppInsightsDefault(ScenarioTest):
 
         app_set = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group,
                                                                                     functionapp_name)).get_output_in_json()
-        self.assertTrue('APPINSIGHTS_INSTRUMENTATIONKEY' not in [
+        self.assertTrue('APPLICATIONINSIGHTS_CONNECTION_STRING' not in [
                         kp['name'] for kp in app_set])
         self.assertTrue('AzureWebJobsDashboard' in [
                         kp['name'] for kp in app_set])
