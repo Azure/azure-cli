@@ -18,7 +18,7 @@ _SCOPES = [f"{_DEEPPROMPT_APP}/.default"]
 _TIMEOUT = 180
 
 def request_error_assistance(command: str|None=None, error: str|None=None, cli_ctx=None) -> dict:
-    if error_enabled():
+    if _error_enabled():
         print("Generating error assistance. This may take a few seconds.")
 
         from azure.cli.core.azclierror import AuthenticationError
@@ -42,7 +42,7 @@ def request_error_assistance(command: str|None=None, error: str|None=None, cli_c
 
 def print_error_assistance(response) -> None:
     if response:
-        print_line()
+        _print_line()
 
         explanation = response["Explanation"]
 
@@ -50,7 +50,7 @@ def print_error_assistance(response) -> None:
             print_styled_text([(Style.ERROR, "Issue: ")])
             print(explanation)
 
-        suggested_command = validate_command(response["Suggestion"])
+        suggested_command = _validate_command(response["Suggestion"])
 
         if suggested_command:
             print_styled_text([(Style.ACTION, "Suggestion: ")])
@@ -62,10 +62,10 @@ def print_error_assistance(response) -> None:
             print_styled_text([(Style.PRIMARY, "Note: ")])
             print(note)
 
-        print_line()
+        _print_line()
 
 
-def validate_command(command_response):
+def _validate_command(command_response):
     # Incorporate syntax validation here
     # if command syntax is correct:
     return command_response
@@ -73,18 +73,18 @@ def validate_command(command_response):
     # return "No command available."
 
 
-def print_line():
+def _print_line():
     console_width = shutil.get_terminal_size().columns
     dashed_line = "-" * console_width
 
     print_styled_text([(Style.IMPORTANT, dashed_line)])
 
 
-def error_enabled():
-    return get_config()
+def _error_enabled():
+    return _get_config()
 
 
-def get_config():
+def _get_config():
     config = configparser.ConfigParser()
 
     try:
@@ -94,11 +94,11 @@ def get_config():
         print(f"Error reading config file: {exception}")
         return False
 
-    return str_to_bool(config.get('core', 'error_assistance', fallback=False)) \
-            or str_to_bool(config.get('interactive', 'error_assistance', fallback=False))
+    return _str_to_bool(config.get('core', 'error_assistance', fallback=False)) \
+            or _str_to_bool(config.get('interactive', 'error_assistance', fallback=False))
 
 
-def str_to_bool(string):
+def _str_to_bool(string):
     if string.casefold() == 'True'.casefold():
         return True
     return False
