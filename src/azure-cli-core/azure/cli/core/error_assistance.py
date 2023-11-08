@@ -3,22 +3,20 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import configparser
 import json
 import shutil
 import requests
 
-from azure.cli.core._config import GLOBAL_CONFIG_PATH
 from azure.cli.core.style import Style, print_styled_text
 
-_DEEPPROMPT_ENDPOINT = 'https://data-ai-dev.microsoft.com/deepprompt/api/v1'
+_DEEPPROMPT_ENDPOINT = "https://data-ai-dev.microsoft.com/deepprompt/api/v1"
 _DEEPPROMPT_APP = "7d78b7a3-e228-4b85-8fcf-5633fb326beb"
 _AAD_TENANT = "72f988bf-86f1-41af-91ab-2d7cd011db47"
 _SCOPES = [f"{_DEEPPROMPT_APP}/.default"]
 _TIMEOUT = 180
 
 def request_error_assistance(command: str|None=None, error: str|None=None, cli_ctx=None) -> dict:
-    if _error_enabled():
+    if _error_enabled(cli_ctx):
         print("Generating error assistance. This may take a few seconds.")
 
         from azure.cli.core.azclierror import AuthenticationError
@@ -80,22 +78,8 @@ def _print_line():
     print_styled_text([(Style.IMPORTANT, dashed_line)])
 
 
-def _error_enabled():
-    return _get_config()
-
-
-def _get_config():
-    config = configparser.ConfigParser()
-
-    try:
-        config.read(GLOBAL_CONFIG_PATH, encoding='utf-8')
-
-    except configparser.Error as exception:
-        print(f"Error reading config file: {exception}")
-        return False
-
-    return _str_to_bool(config.get('core', 'error_assistance', fallback=False)) \
-            or _str_to_bool(config.get('interactive', 'error_assistance', fallback=False))
+def _error_enabled(cli_ctx) -> bool:
+    return cli_ctx.config.getboolean("core", "error_assistance", fallback=False) or cli_ctx.config.getboolean("interactive", "error_assistance", fallback=False)
 
 
 def _str_to_bool(string):
