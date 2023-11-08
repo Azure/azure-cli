@@ -2206,6 +2206,12 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         return self._get_network_plugin(enable_validation=True)
 
+    def get_network_policy(self) -> Union[str, None]:
+        """Get the value of network_dataplane.
+        :return: str or None
+        """
+        return self.raw_param.get("network_policy")
+
     def get_network_dataplane(self) -> Union[str, None]:
         """Get the value of network_dataplane.
 
@@ -4706,17 +4712,13 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         :return: string or None
         """
-        # default to None
-        support_plan = None
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if self.mc and hasattr(self.mc, "support_plan") and self.mc.support_plan is not None:
-            support_plan = self.mc.support_plan
-
-        # if specified by customer, use the specified value
+        # take input
         support_plan = self.raw_param.get("k8s_support_plan")
+        if support_plan is None:
+            # user didn't update this property, load from existing ManagedCluster
+            if self.mc and hasattr(self.mc, "support_plan") and self.mc.support_plan is not None:
+                support_plan = self.mc.support_plan
 
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
         return support_plan
 
     def get_yes(self) -> bool:
@@ -6797,6 +6799,11 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         if pod_cidr:
             mc.network_profile.pod_cidr = pod_cidr
+
+        network_policy = self.context.get_network_policy()
+        if network_policy:
+            mc.network_profile.network_policy = network_policy
+
         return mc
 
     def update_http_proxy_config(self, mc: ManagedCluster) -> ManagedCluster:

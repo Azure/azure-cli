@@ -91,8 +91,11 @@ def add_source_resource_block(context, source, enable_id=True, validate_source_i
     for resource, args in SOURCE_RESOURCES_OPTIONAL_PARAMS.items():
         for arg in args:
             if resource == source:
+                deprecate_info = args.get(arg).get('deprecate_info')
                 context.argument(arg, options_list=args.get(arg).get(
-                    'options'), type=str, help=args.get(arg).get('help'))
+                    'options'), type=str,
+                    deprecate_info=context.deprecate() if deprecate_info else None,
+                    help=args.get(arg).get('help'))
             else:
                 context.ignore(arg)
 

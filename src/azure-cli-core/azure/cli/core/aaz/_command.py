@@ -216,7 +216,7 @@ class AAZCommand(CLICommand):
                         continue
 
                     if client_flatten and k_schema._flags.get('client_flatten', False):
-                        # flatten k when there are client_flatten flag in it's schema
+                        # flatten k when there are client_flatten flag in its schema
                         assert isinstance(k_schema, AAZObjectType) and isinstance(v, dict)
                         for sub_k, sub_v in v.items():
                             if sub_k in new_result:

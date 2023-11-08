@@ -21,8 +21,14 @@ class SecurityCenterPricingsTests(ScenarioTest):
 
         assert pricing["pricingTier"] == "Free"
 
-        self.cmd('az security pricing create -n VirtualMachines --tier standard')
+        self.cmd('az security pricing create -n VirtualMachines --tier standard --extensions name=MdeDesignatedSubscription isEnabled=False --extensions name=AgentlessVmScanning isEnabled=True')
 
         pricing = self.cmd('az security pricing show -n VirtualMachines').get_output_in_json()
 
         assert pricing["pricingTier"] == "Standard"
+        for extension in pricing['extensions']:
+            if extension["name"] == "MdeDesignatedSubscription":
+                assert extension["isEnabled"] == "False"
+            elif extension["name"] == "AgentlessVmScanning":
+                assert extension["isEnabled"] == "True"
+
