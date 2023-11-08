@@ -11,8 +11,8 @@ Release History
 * `az acr artifact-streaming`: Add new group to include a subgroup operation and the commands create/show/update (#27594)
 * `az acr artifact-streaming operation`: Add new group to help the user manage the artifact streaming creation with the commands cancel/show (#27594)
 * `az acr login`: Add additional parameter validation to check registry name is valid (#27762)
-* `az acr cache`: Add optional `resource-group` param (#27605)
-* `az acr credential-set`: Add optional `resource-group` param (#27605)
+* `az acr cache`: Add optional `--resource-group` parameter (#27605)
+* `az acr credential-set`: Add optional `--resource-group` parameter (#27605)
 
 **AKS**
 
