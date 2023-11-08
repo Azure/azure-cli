@@ -62,7 +62,6 @@ DEPENDENCIES = [
     'PyJWT>=2.1.0',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
     'requests[socks]',
-    'openai>=0.27.9',
     'configparser>=6.0.0'
 ]
 
