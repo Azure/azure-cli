@@ -180,7 +180,7 @@ Release History
 
 **Search**
 
-* Add 2023-11-01 support (#27632)
+* `az search service create`: Add `--semantic-search` argument. (#27632)
 
 **Security**
 
