@@ -650,9 +650,9 @@ def _get_attr(sdk_path, mod_attr_path, checked=True, ignore=False):
     # Then full_mod_path become azure.mgmt.keyvault.v2023_02_01.azure.mgmt.keyvault.v2023_02_01.models
     # We need to skip this import
     # Later _apply_doc_string will import the full path directly
-    if sdk_path.startswith('azure.') and mod_attr_path.startswith('azure.'):
-        print('ignore', sdk_path, mod_attr_path)
-        return None
+    # if sdk_path.startswith('azure.') and mod_attr_path.startswith('azure.'):
+    #     print('ignore', sdk_path, mod_attr_path)
+    #     return None
     try:
         attr_mod, attr_path = mod_attr_path.split('#') \
             if '#' in mod_attr_path else (mod_attr_path, '')

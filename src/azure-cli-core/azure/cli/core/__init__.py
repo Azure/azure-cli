@@ -709,18 +709,20 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
         # if doc_string_source is azure.mgmt.netapp.models#Snapshot, APIVersionException is raised
         # if doc_string_source is azure.mgmt.keyvault.v2023_02_01.models#VaultProperties, ignored,
         # self.get_models(doc_string_source) is always None
-        # TODO why some doc_string_source is blob#PageBlobService.get_blob_properties?
+        # doc_string_source is file#FileService.list_directories_and_files in azure stack
+        # it becomes _get_attr azure.multiapi.storage.v2017_04_17 file#FileService.list_directories_and_files
         if doc_string_source == 'azure.mgmt.netapp.models#Snapshot':
             pass
         if doc_string_source == 'azure.mgmt.keyvault.v2023_02_01.models#VaultProperties':
             pass
+        if doc_string_source == 'file#FileService.list_directories_and_files':
+            pass
         try:
             model = self.get_models(doc_string_source, ignore=True)
         except APIVersionException:
-            print('wat')
             model = None
         if model:
-            print('wat',doc_string_source)
+            print('wat model not empty', doc_string_source)
         if not model:
             from importlib import import_module
             (path, model_name) = doc_string_source.split('#', 1)
