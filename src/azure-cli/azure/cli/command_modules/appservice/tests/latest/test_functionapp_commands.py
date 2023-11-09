@@ -1047,6 +1047,22 @@ class FunctionAppWithAppInsightsKey(ScenarioTest):
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
 
+class FunctionAppWithAppInsightsConnString(ScenarioTest):
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_with_app_insights_conn_string(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(prefix='functionappwithappinsights', length=40)
+        workspace_name = self.create_random_name(prefix='existingworkspace', length=40)
+        app_insights_name = self.create_random_name(prefix='existingappinsights', length=40)
+        workspace = self.cmd('monitor log-analytics workspace create -g {} -n {} -l {}'.format(resource_group, workspace_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+        app_insights = self.cmd('monitor app-insights component create --app {} --location {} --kind web -g {} --application-type web'.format(app_insights_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, resource_group)).get_output_in_json()
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --app-insights {} --functions-version 4'.format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account, app_insights_name))
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
+            JMESPathCheck(
+                "[?name=='APPLICATIONINSIGHTS_CONNECTION_STRING'].value|[0]", app_insights['connectionString'])
+        ])
+
+
 class FunctionAppASPZoneRedundant(ScenarioTest):
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
     def test_functionapp_zone_redundant_plan(self, resource_group):
