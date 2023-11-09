@@ -69,7 +69,8 @@ def process_condition_parameter_for_alert(args):
 
     # Pick the strings at odd position and convert them into condition leaf.
     conditions = dict(_normalize_condition_for_alert(expression[i]) for i in range(0, len(expression), 2))
-    args.all_of = list(conditions.values())
+    for cond in list(conditions.values()):
+        args.all_of.append(cond)
 
 
 def process_webhook_properties(args):
@@ -165,10 +166,22 @@ class ActivityLogAlertCreate(_ActivityLogAlertCreate):
                 'The activity log alert {} already exists in resource group {}.'.format(args.activity_log_alert_name,
                                                                                         args.resource_group))
         if not has_value(args.all_of):
-            args.all_of = [{
+            args.all_of.append({
                 "field": "category",
                 "equals": "ServiceHealth",
-            }]
+            })
+        else:
+            current_all_of = args.all_of.to_serialized_data()
+            category_found = False
+            for item in current_all_of:
+                if item.get("field", None) == "category":
+                    category_found = True
+                    break
+            if not category_found:
+                args.all_of.append({
+                    "field": "category",
+                    "equals": "ServiceHealth",
+                })
         # Add action groups
         action_group_rids = set()
         if has_value(args.action_group_ids):
@@ -205,6 +218,23 @@ class ActivityLogAlertUpdate(_ActivityLogAlertUpdate):
     def pre_operations(self):
         args = self.ctx.args
         process_condition_parameter_for_alert(args)
+        if not has_value(args.all_of):
+            args.all_of.append({
+                "field": "category",
+                "equals": "ServiceHealth",
+            })
+        else:
+            current_all_of = args.all_of.to_serialized_data()
+            category_found = False
+            for item in current_all_of:
+                if item.get("field", None) == "category":
+                    category_found = True
+                    break
+            if not category_found:
+                args.all_of.append({
+                    "field": "category",
+                    "equals": "ServiceHealth",
+                })
 
 
 @register_command("monitor activity-log alert action-group add")
