@@ -2916,9 +2916,9 @@ def _get_log(url, headers, log_file=None):
                 if chunk:
                     # Extra encode() and decode for stdout which does not support 'utf-8'
                     logger.warning(chunk.decode(encoding='utf-8', errors='replace')
-                                .encode(std_encoding, errors='replace')
-                                .decode(std_encoding, errors='replace')
-                                .rstrip('\n\r'))  # each line of log has CRLF.
+                                   .encode(std_encoding, errors='replace')
+                                   .decode(std_encoding, errors='replace')
+                                   .rstrip('\n\r'))  # each line of log has CRLF.
         except:  # pylint: disable=bare-except
             logger.error("Log stream interrupted. Exiting live log stream.")
         finally:
