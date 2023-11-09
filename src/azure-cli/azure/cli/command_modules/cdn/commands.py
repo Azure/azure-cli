@@ -8,10 +8,7 @@ from knack.util import CLIError
 from azure.cli.core.commands import CliCommandType
 
 from ._client_factory import (cf_cdn, cf_custom_domain, cf_endpoints, cf_profiles, cf_origins, cf_resource_usage,
-                              cf_edge_nodes, cf_waf_policy, cf_waf_rule_set, cf_origin_groups, cf_afd_endpoints,
-                              cf_afd_origins, cf_afd_routes, cf_afd_rule_sets, cf_afd_rules, cf_afd_security_policies,
-                              cf_afd_secrets, cf_afd_log_analytics, cf_afd_origin_groups, cf_afd_custom_domain,
-                              cf_afd_profiles)
+                              cf_edge_nodes, cf_waf_policy, cf_waf_rule_set, cf_origin_groups, cf_afd_rules)
 
 
 def _not_found(message):
@@ -44,12 +41,7 @@ def load_command_table(self, _):
     origin_not_found_msg = _not_found_msg.format('Origin')
     origin_group_not_found_msg = _not_found_msg.format('Origin Group')
     waf_policy_not_found_msg = _not_found_msg.format('WAF Policy')
-    route_not_found_msg = _not_found_msg.format('Route')
-    rule_set_not_found_msg = _not_found_msg.format('Rule Set')
     rule_not_found_msg = _not_found_msg.format('Rule')
-    security_policy_not_found_msg = _not_found_msg.format('Security Policy')
-    secret_not_found_msg = _not_found_msg.format('Secret')
-    log_analytic_not_found_msg = _not_found_msg.format('Log Analytic')
 
     cdn_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.cdn#CdnManagementClient.{}',
@@ -102,64 +94,10 @@ def load_command_table(self, _):
         exception_handler=_not_found(waf_policy_not_found_msg)
     )
 
-    cdn_afd_endpoints_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.cdn.operations#AFDEndpointsOperations.{}',
-        client_factory=cf_afd_endpoints,
-        exception_handler=_not_found(endpoint_not_found_msg)
-    )
-
-    cdn_afd_origin_group_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.cdn.operations#AFDOriginGroupsOperations.{}',
-        client_factory=cf_afd_origin_groups,
-        exception_handler=_not_found(origin_group_not_found_msg)
-    )
-
-    cdn_afd_origin_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.cdn.operations#AFDOriginsOperations.{}',
-        client_factory=cf_afd_origins,
-        exception_handler=_not_found(origin_not_found_msg)
-    )
-
-    cdn_afd_route_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.cdn.operations#RoutesOperations.{}',
-        client_factory=cf_afd_routes,
-        exception_handler=_not_found(route_not_found_msg)
-    )
-
-    cdn_afd_rule_set_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.cdn.operations#RuleSetsOperations.{}',
-        client_factory=cf_afd_rule_sets,
-        exception_handler=_not_found(rule_set_not_found_msg)
-    )
-
     cdn_afd_rule_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.cdn.operations#RulesOperations.{}',
         client_factory=cf_afd_rules,
         exception_handler=_not_found(rule_not_found_msg)
-    )
-
-    cdn_afd_security_policy_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.cdn.operations#SecurityPoliciesOperations.{}',
-        client_factory=cf_afd_security_policies,
-        exception_handler=_not_found(security_policy_not_found_msg)
-    )
-
-    cdn_afd_domain_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.cdn.operations#AFDCustomDomainsOperations.{}',
-        client_factory=cf_afd_custom_domain,
-        exception_handler=_not_found(cd_not_found_msg)
-    )
-
-    cdn_afd_secret_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.cdn.operations#SecretsOperations.{}',
-        client_factory=cf_afd_secrets,
-        exception_handler=_not_found(secret_not_found_msg)
-    )
-
-    cdn_afd_log_analytic_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.cdn.operations#LogAnalyticsOperations.{}',
-        client_factory=cf_afd_log_analytics,
-        exception_handler=_not_found(log_analytic_not_found_msg)
     )
 
     with self.command_group('cdn', cdn_sdk) as g:
@@ -285,3 +223,24 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_waf_rate_limit_rule', client_factory=cf_waf_policy, confirmation=True)
         g.custom_command('list', 'list_waf_rate_limit_rules', client_factory=cf_waf_policy)
         g.custom_show_command('show', 'show_waf_rate_limit_rule', client_factory=cf_waf_policy)
+
+    with self.command_group('afd', is_preview=True):
+        pass
+
+    with self.command_group('afd rule condition',
+                            cdn_afd_rule_sdk,
+                            custom_command_type=get_custom_sdk(cf_afd_rules, _not_found(rule_not_found_msg))) as g:
+        g.custom_command('add', 'add_afd_rule_condition',
+                         doc_string_source='azure.mgmt.cdn.models#Rule')
+        g.custom_command('remove', 'remove_afd_rule_condition',
+                         doc_string_source='azure.mgmt.cdn.models#Rule')
+        g.custom_command('list', 'list_afd_rule_condition')
+
+    with self.command_group('afd rule action',
+                            cdn_afd_rule_sdk,
+                            custom_command_type=get_custom_sdk(cf_afd_rules, _not_found(rule_not_found_msg))) as g:
+        g.custom_command('add', 'add_afd_rule_action',
+                         doc_string_source='azure.mgmt.cdn.models#Rule')
+        g.custom_command('remove', 'remove_afd_rule_action',
+                         doc_string_source='azure.mgmt.cdn.models#Rule')
+        g.custom_command('list', 'list_afd_rule_action')
