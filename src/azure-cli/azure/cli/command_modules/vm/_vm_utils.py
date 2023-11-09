@@ -602,6 +602,34 @@ def trusted_launch_warning_log(namespace, generation_version, features):
             logger.warning(UPGRADE_SECURITY_HINT)
 
 
+def validate_vm_disk_trusted_launch(namespace, disk_security_profile):
+    from ._constants import UPGRADE_SECURITY_HINT
+
+    if disk_security_profile is None:
+        logger.warning(UPGRADE_SECURITY_HINT)
+        return
+
+    security_type = disk_security_profile.security_type if hasattr(disk_security_profile, 'security_type') else None
+    if security_type.lower() == 'trustedlaunch':
+        if namespace.enable_secure_boot is None:
+            namespace.enable_secure_boot = True
+        if namespace.enable_vtpm is None:
+            namespace.enable_vtpm = True
+        namespace.security_type = 'TrustedLaunch'
+    elif security_type.lower() == 'standard':
+        logger.warning(UPGRADE_SECURITY_HINT)
+
+
+def validate_image_trusted_launch(namespace):
+    from ._constants import UPGRADE_SECURITY_HINT
+
+    # set securityType to Standard by default if no inputs by end user
+    if namespace.security_type is None:
+        namespace.security_type = 'Standard'
+    if namespace.security_type.lower() != 'trustedlaunch':
+        logger.warning(UPGRADE_SECURITY_HINT)
+
+
 def validate_update_vm_trusted_launch_supported(cmd, vm, os_disk_resource_group, os_disk_name):
     from azure.cli.command_modules.vm._client_factory import _compute_client_factory
     from azure.cli.core.azclierror import InvalidArgumentValueError

@@ -4,9 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import re
 from knack.util import CLIError
 from knack.log import get_logger
 from azure.cli.core.azclierror import FileOperationError, InvalidArgumentValueError
+from ._constants import ACR_NAME_VALIDATION_REGEX
 
 BAD_REPO_FQDN = "The positional parameter 'repo_id' must be a fully qualified repository specifier such"\
                 " as 'myregistry.azurecr.io/hello-world'."
@@ -16,6 +18,7 @@ BAD_PERM_REPO_FQDN = "The positional parameter 'perm_repo_id' must be a fully qu
 BAD_MANIFEST_FQDN = "The positional parameter 'manifest_id' must be a fully qualified"\
                     " manifest specifier such as 'myregistry.azurecr.io/hello-world:latest' or"\
                     " 'myregistry.azurecr.io/hello-world@sha256:abc123'."
+BAD_REGISTRY_NAME = "Registry names may contain only alpha numeric characters and must be between 5 and 50 characters"
 
 logger = get_logger(__name__)
 
@@ -111,6 +114,9 @@ def validate_registry_name(cmd, namespace):
         if pos > 0:
             logger.warning("The login server endpoint suffix '%s' is automatically omitted.", acr_suffix)
             namespace.registry_name = registry[:pos]
+    registry = namespace.registry_name
+    if not re.match(ACR_NAME_VALIDATION_REGEX, registry):
+        raise InvalidArgumentValueError(BAD_REGISTRY_NAME)
 
 
 def validate_expiration_time(namespace):
