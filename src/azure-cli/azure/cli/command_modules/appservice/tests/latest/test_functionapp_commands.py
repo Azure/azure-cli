@@ -1048,6 +1048,10 @@ class FunctionAppWithAppInsightsKey(ScenarioTest):
 
 
 class FunctionAppWithAppInsightsConnString(ScenarioTest):
+    def __init__(self, method_name, config_file=None, recording_name=None, recording_processors=None, replay_processors=None, recording_patches=None, replay_patches=None, random_config_dir=False):
+        super().__init__(method_name, config_file, recording_name, recording_processors, replay_processors, recording_patches, replay_patches, random_config_dir)
+        self.cmd('extension add -n application-insights')
+
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_with_app_insights_conn_string(self, resource_group, storage_account):
