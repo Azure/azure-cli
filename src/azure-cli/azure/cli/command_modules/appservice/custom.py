@@ -14,6 +14,7 @@ from urllib.request import urlopen
 
 from binascii import hexlify
 from os import urandom
+from random import randint
 import datetime
 import json
 import ssl
@@ -3728,6 +3729,27 @@ def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux
     return client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def)
 
 
+def _generate_guid():
+    import random
+    import string
+    return ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
+
+
+def create_consumption_plan(cmd, resource_group_name, name, is_linux, location):
+    SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
+    client = web_client_factory(cmd.cli_ctx)
+    sku_def = SkuDescription(tier='Dynamic', name='Y1', size='Y1', family='Y')
+    plan_def = AppServicePlan(
+        location=location,
+        sku=sku_def,
+        reserved=is_linux,
+        kind='functionapp',
+        name=name
+    )
+    poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def)
+    return LongRunningOperation(cmd.cli_ctx)(poller)
+
+
 def is_plan_consumption(cmd, plan_info):
     SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
     if isinstance(plan_info, AppServicePlan):
@@ -4015,6 +4037,16 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
     elif not disable_app_insights and matched_runtime.app_insights:
         create_app_insights = True
+
+    # Create consumption plan
+    if consumption_plan_location is not None:
+        consumption_plan_name = 'ASP-{}-{}'.format(resource_group_name[:31], _generate_guid())
+        create_consumption_plan(cmd,
+                                resource_group_name,
+                                consumption_plan_name,
+                                is_linux,
+                                consumption_plan_location)
+        functionapp_def.server_farm_id = consumption_plan_name
 
     poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def)
     functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
