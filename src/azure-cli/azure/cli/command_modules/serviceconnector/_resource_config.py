@@ -73,6 +73,7 @@ class AUTH_TYPE(Enum):
 class CLIENT_TYPE(Enum):
     Dotnet = 'dotnet'
     DotnetConnectionString = 'dotnet-connectionString'
+    DotnetInternal = 'dotnet-internal'
     Java = 'java'
     Nodejs = 'nodejs'
     Python = 'python'
@@ -868,6 +869,7 @@ SUPPORTED_CLIENT_TYPE = {
     RESOURCE.WebApp: {
         RESOURCE.Postgres: [
             CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
@@ -880,6 +882,7 @@ SUPPORTED_CLIENT_TYPE = {
         ],
         RESOURCE.PostgresFlexible: [
             CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
@@ -892,6 +895,7 @@ SUPPORTED_CLIENT_TYPE = {
         ],
         RESOURCE.Mysql: [
             CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
@@ -904,6 +908,7 @@ SUPPORTED_CLIENT_TYPE = {
         ],
         RESOURCE.MysqlFlexible: [
             CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
@@ -916,6 +921,7 @@ SUPPORTED_CLIENT_TYPE = {
         ],
         RESOURCE.Sql: [
             CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
@@ -928,6 +934,7 @@ SUPPORTED_CLIENT_TYPE = {
         ],
         RESOURCE.Redis: [
             CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
@@ -937,6 +944,7 @@ SUPPORTED_CLIENT_TYPE = {
         ],
         RESOURCE.RedisEnterprise: [
             CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
@@ -946,6 +954,7 @@ SUPPORTED_CLIENT_TYPE = {
         ],
         RESOURCE.CosmosCassandra: [
             CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
@@ -955,6 +964,7 @@ SUPPORTED_CLIENT_TYPE = {
         ],
         RESOURCE.CosmosGremlin: [
             CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
@@ -963,6 +973,7 @@ SUPPORTED_CLIENT_TYPE = {
         ],
         RESOURCE.CosmosMongo: [
             CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Nodejs,
             CLIENT_TYPE.Go,
@@ -971,6 +982,7 @@ SUPPORTED_CLIENT_TYPE = {
         ],
         RESOURCE.CosmosTable: [
             CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
@@ -979,6 +991,7 @@ SUPPORTED_CLIENT_TYPE = {
         ],
         RESOURCE.CosmosSql: [
             CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
@@ -987,6 +1000,7 @@ SUPPORTED_CLIENT_TYPE = {
         ],
         RESOURCE.StorageBlob: [
             CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
@@ -995,6 +1009,7 @@ SUPPORTED_CLIENT_TYPE = {
         ],
         RESOURCE.StorageQueue: [
             CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
@@ -1003,6 +1018,7 @@ SUPPORTED_CLIENT_TYPE = {
         ],
         RESOURCE.StorageFile: [
             CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
@@ -1013,6 +1029,7 @@ SUPPORTED_CLIENT_TYPE = {
         ],
         RESOURCE.StorageTable: [
             CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
@@ -1020,6 +1037,7 @@ SUPPORTED_CLIENT_TYPE = {
         ],
         RESOURCE.KeyVault: [
             CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
@@ -1028,6 +1046,7 @@ SUPPORTED_CLIENT_TYPE = {
         ],
         RESOURCE.AppConfig: [
             CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
@@ -1035,6 +1054,7 @@ SUPPORTED_CLIENT_TYPE = {
         ],
         RESOURCE.EventHub: [
             CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
@@ -1045,6 +1065,7 @@ SUPPORTED_CLIENT_TYPE = {
         ],
         RESOURCE.ServiceBus: [
             CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
@@ -1054,10 +1075,12 @@ SUPPORTED_CLIENT_TYPE = {
         ],
         RESOURCE.SignalR: [
             CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
             CLIENT_TYPE.Blank
         ],
         RESOURCE.WebPubSub: [
             CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Nodejs,
@@ -1065,6 +1088,7 @@ SUPPORTED_CLIENT_TYPE = {
         ],
         RESOURCE.ConfluentKafka: [
             CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Go,
