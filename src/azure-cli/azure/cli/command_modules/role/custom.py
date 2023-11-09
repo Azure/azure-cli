@@ -46,10 +46,6 @@ ODATA_TYPE_TO_PRINCIPAL_TYPE = {
 # Object ID property name
 ID = 'id'
 
-CREDENTIAL_WARNING = (
-    "The output includes credentials that you must protect. Be sure that you do not include these credentials in "
-    "your code or check the credentials into your source control. For more information, see https://aka.ms/azadsp-cli")
-
 logger = get_logger(__name__)
 
 # pylint: disable=too-many-lines, protected-access
@@ -1264,8 +1260,6 @@ def create_service_principal_for_rbac(
                                        ex.response.headers)  # pylint: disable=no-member
                     raise
 
-    logger.warning(CREDENTIAL_WARNING)
-
     if show_auth_in_json:
         from azure.cli.core._profile import Profile
         profile = Profile(cli_ctx=cmd.cli_ctx)
@@ -1287,10 +1281,9 @@ def create_service_principal_for_rbac(
             cert_file)
         result['fileWithCertAndPrivateKey'] = cert_file
 
-    login_hint = ('To log in with this service principal, run:\n'
-                  f'az login --service-principal --username {app_id} --password {password or cert_file} '
-                  f'--tenant {graph_client.tenant}')
-    logger.info(login_hint)
+    from azure.cli.core.commands.constants import OUTPUT_WITH_SECRET
+    logger.warning(OUTPUT_WITH_SECRET)
+
     return result
 
 
@@ -1764,7 +1757,8 @@ def _reset_credential(cmd, graph_object, add_password_func, remove_password_func
     if cert_file:
         result['fileWithCertAndPrivateKey'] = cert_file
 
-    logger.warning(CREDENTIAL_WARNING)
+    from azure.cli.core.commands.constants import OUTPUT_WITH_SECRET
+    logger.warning(OUTPUT_WITH_SECRET)
     return result
 
 

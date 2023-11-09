@@ -5,6 +5,7 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.help_files import helps  # pylint: disable=unused-import
+from azure.cli.core.commands.constants import OUTPUT_WITH_SECRET_HELP
 # pylint: disable=line-too-long, too-many-lines
 
 helps['ad'] = """
@@ -107,16 +108,16 @@ examples:
   text: az ad app credential list --id 00000000-0000-0000-0000-000000000000 --cert
 """
 
-helps['ad app credential reset'] = """
+helps['ad app credential reset'] = f"""
 type: command
 short-summary: Reset an application's password or certificate credentials
 long-summary: >-
     By default, this command clears all passwords and keys, and let graph service generate a password credential.
 
 
-    The output includes credentials that you must protect. Be sure that you do not include these credentials
-    in your code or check the credentials into your source control. As an alternative, consider using
-    [managed identities](https://aka.ms/azadsp-managed-identities) if available to avoid the need to use credentials.
+    {OUTPUT_WITH_SECRET_HELP}
+    As an alternative, consider using [managed identities](https://aka.ms/azadsp-managed-identities) if available to 
+    avoid the need to use credentials.
 examples:
 - name: Reset an application's credential with a password
   text: az ad app credential reset --id 00000000-0000-0000-0000-000000000000
@@ -479,13 +480,13 @@ examples:
     crafted: true
 """
 
-helps['ad sp create-for-rbac'] = """
+helps['ad sp create-for-rbac'] = f"""
 type: command
 short-summary: Create a service principal and configure its access to Azure resources.
 long-summary: >-
-    The output includes credentials that you must protect. Be sure that you do not include these credentials
-    in your code or check the credentials into your source control. As an alternative, consider using
-    [managed identities](https://aka.ms/azadsp-managed-identities) if available to avoid the need to use credentials.
+    {OUTPUT_WITH_SECRET_HELP}
+    As an alternative, consider using [managed identities](https://aka.ms/azadsp-managed-identities) if available to 
+    avoid the need to use credentials.
 
 
     By default, this command does not assign any role to the service principal.

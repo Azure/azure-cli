@@ -30,3 +30,11 @@ CONFIRM_PARAM_NAME = 'yes'
 DEFAULT_QUERY_TIME_RANGE = 3600000
 
 BLOCKED_MODS = ['context', 'shell', 'documentdb', 'component']
+
+OUTPUT_WITH_SECRET = (
+    'The output of this command includes secrets that you must protect. '
+    'Be sure that you do not include these secrets in your source control. '
+    'Also verify that no secrets are present in the logs of the environment where you execute your command or script. '
+    'For additional information, see http://aka.ms/clisecrets.')
+
+OUTPUT_WITH_SECRET_HELP = f'[WARNING] {OUTPUT_WITH_SECRET}'

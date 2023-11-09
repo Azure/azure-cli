@@ -6,13 +6,7 @@
 
 from knack.help_files import helps  # pylint: disable=unused-import
 # pylint: disable=line-too-long, too-many-lines
-
-OUTPUT_WITH_SECRET = (
-    'The output includes secrets that you must protect. Be sure that you do not include these secrets in your '
-    'source control. Also verify that no secrets are present in the logs of your command or script. '
-    'For additional information, see http://aka.ms/clisecrets.')
-
-OUTPUT_WITH_SECRET_HELP = f'[WARNING] {OUTPUT_WITH_SECRET}'
+from azure.cli.core.commands.constants import OUTPUT_WITH_SECRET_HELP
 
 helps['batch'] = """
 type: group

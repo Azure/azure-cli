@@ -22,6 +22,12 @@ long-summary: >
 
 
     For passing JSON in PowerShell, see https://github.com/Azure/azure-cli/blob/dev/doc/quoting-issues-with-powershell.md
+
+
+    [WARNING] Depending on the REST API you call, the output of this command may include secrets that you must protect.
+    Be sure that you do not include these secrets in your source control.
+    Also verify that no secrets are present in the logs of the environment where you execute your command or script.
+    For additional information, see http://aka.ms/clisecrets.
 examples:
 - name: Get Audit log through Microsoft Graph
   text: >
