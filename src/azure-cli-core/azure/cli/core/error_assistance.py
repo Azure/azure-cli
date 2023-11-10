@@ -17,39 +17,45 @@ _TIMEOUT = 180
 
 _cached_token_session: tuple = ()
 
-def request_error_assistance(command: str|None=None, error: str|None=None, cli_ctx=None) -> dict:
+
+def request_error_assistance(command: str | None=None, error: str | None=None, cli_ctx=None) -> dict:  # noqa: E252
     if _error_enabled(cli_ctx):
         print("Generating error assistance. This may take a few seconds.")
 
         if not command:
-            print("command cannot be empty")
+            print("command cannot be empty.")
 
         from azure.cli.core.azclierror import AuthenticationError
         try:
-            global _cached_token_session
+            global _cached_token_session  # pylint: disable=global-statement
             if len(_cached_token_session) == 0:
                 _cached_token_session = _refresh_cached_token_session(cli_ctx)
 
             retry_count: int = 5
             current_retry: int = 0
 
-            while len(_cached_token_session) > 0 and current_retry < retry_count:
-                (deepprompt_token, session_id) = _cached_token_session
+            while len(_cached_token_session) < 2 and current_retry < retry_count:
+                # The while statement ensure there are at least two element in the tuple _cached_token_session
+
+                (deepprompt_token, session_id) = _cached_token_session  # pylint: disable=unbalanced-tuple-unpacking
                 response = _send_query(deepprompt_token, session_id, command, error)
 
                 if response.status_code == requests.codes.ok:
                     response_body = json.loads(response.json()["response_text"])
                     return response_body
-                elif (response.status_code == requests.codes.unauthorized or response.status_code == requests.codes.forbidden):
+
+                if (response.status_code == requests.codes.unauthorized or
+                        response.status_code == requests.codes.forbidden):
                     _cached_token_session = _refresh_cached_token_session(cli_ctx)
                     current_retry = current_retry + 1
                     continue
-                else:
-                    print(f"Failed to get the response: {response.status_code}.")
-                    break
+
+                print(f"Failed to get the response: {response.status_code}.")
+                break
         except AuthenticationError:
             print("Failed to authenticate to the service.")
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            # We just use this to catch all exception so that it doesn't crash the whole process
             print(f"Got an exception {e}")
 
     return {}
@@ -97,49 +103,41 @@ def _print_line():
 
 def _error_enabled(cli_ctx) -> bool:
     return cli_ctx and (cli_ctx.config.getboolean("core", "error_assistance", fallback=False) or
-                       cli_ctx.config.getboolean("interactive", "error_assistance", fallback=False))
+                        cli_ctx.config.getboolean("interactive", "error_assistance", fallback=False))
 
 
 def _exchange(aad_token: str) -> dict:
     return requests.post(
-            url=f"{_DEEPPROMPT_ENDPOINT}/exchange",
-            headers={
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-                },
-            json={
-                "token": aad_token,
-                "provider": "microsoft",
-                },
-            timeout=_TIMEOUT).json()
+        url=f"{_DEEPPROMPT_ENDPOINT}/exchange",
+        headers={
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        },
+        json={
+            "token": aad_token,
+            "provider": "microsoft",
+        },
+        timeout=_TIMEOUT).json()
 
-def _create_session(access_token: str) -> str:
-    return requests.post(
-            url=f"{_DEEPPROMPT_ENDPOINT}/create_session",
-            headers={
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-                "Authorization": f"Bearer {access_token}",
-                }).json()['session_id']
 
-def _send_query(access_token: str, session_id: str, command: str|None, error: str|None) -> requests.Response:
+def _send_query(access_token: str, session_id: str, command: str | None, error: str | None) -> requests.Response:
     return requests.post(
-            url=f"{_DEEPPROMPT_ENDPOINT}/query",
-            headers={
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-                "Authorization": f"Bearer {access_token}",
-                "DeepPrompt-Session-ID": session_id,
-                },
-            json={
-                "query": "Query errors and corrected command for Azure CLI",
-                "intent": "azure_error_recovery",
-                "context": {
-                    "command": command,
-                    "error": error,
-                    "language": "azurecli",
-                    }
-                })
+        url=f"{_DEEPPROMPT_ENDPOINT}/query",
+        headers={
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization": f"Bearer {access_token}",
+            "DeepPrompt-Session-ID": session_id,
+        },
+        json={
+            "query": "Query errors and corrected command for Azure CLI",
+            "intent": "azure_error_recovery",
+            "context": {
+                "command": command,
+                "error": error,
+                "language": "azurecli",
+            }
+        })
 
 
 def _refresh_cached_token_session(cli_ctx) -> tuple:

@@ -6,7 +6,7 @@
 import sys
 
 from azure.cli.core import telemetry
-from azure.cli.core.error_assistance import print_error_assistance, request_error_assistance 
+from azure.cli.core.error_assistance import print_error_assistance, request_error_assistance
 from knack.util import CLIError
 from knack.log import get_logger
 
