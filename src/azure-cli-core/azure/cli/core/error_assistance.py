@@ -15,25 +15,42 @@ _AAD_TENANT = "72f988bf-86f1-41af-91ab-2d7cd011db47"
 _SCOPES = [f"{_DEEPPROMPT_APP}/.default"]
 _TIMEOUT = 180
 
+_cached_token_session: tuple = ()
+
 def request_error_assistance(command: str|None=None, error: str|None=None, cli_ctx=None) -> dict:
     if _error_enabled(cli_ctx):
         print("Generating error assistance. This may take a few seconds.")
 
+        if not command:
+            print("command cannot be empty")
+
         from azure.cli.core.azclierror import AuthenticationError
         try:
-            from azure.cli.core._profile import Profile
-            profile = Profile(cli_ctx=cli_ctx)
-            aad_token = profile.get_raw_token(scopes=_SCOPES, tenant=_AAD_TENANT)[0][1]
-            exchanged_token = _exchange(aad_token)
-            session_id = exchanged_token["session_id"]
-            deepprompt_token = exchanged_token["access_token"]
-            response = _send_query(deepprompt_token, session_id, command, error)
+            global _cached_token_session
+            if len(_cached_token_session) == 0:
+                _cached_token_session = _refresh_cached_token_session(cli_ctx)
 
-            if response.status_code == requests.codes.ok:
-                response_body = json.loads(response.json()["response_text"])
-                return response_body
+            retry_count: int = 5
+            current_retry: int = 0
+
+            while len(_cached_token_session) > 0 and current_retry < retry_count:
+                (deepprompt_token, session_id) = _cached_token_session
+                response = _send_query(deepprompt_token, session_id, command, error)
+
+                if response.status_code == requests.codes.ok:
+                    response_body = json.loads(response.json()["response_text"])
+                    return response_body
+                elif (response.status_code == requests.codes.unauthorized or response.status_code == requests.codes.forbidden):
+                    _cached_token_session = _refresh_cached_token_session(cli_ctx)
+                    current_retry = current_retry + 1
+                    continue
+                else:
+                    print(f"Failed to get the response: {response.status_code}.")
+                    break
         except AuthenticationError:
-            pass
+            print("Failed to authenticate to the service.")
+        except Exception as e:
+            print(f"Got an exception {e}")
 
     return {}
 
@@ -79,13 +96,9 @@ def _print_line():
 
 
 def _error_enabled(cli_ctx) -> bool:
-    return cli_ctx.config.getboolean("core", "error_assistance", fallback=False) or cli_ctx.config.getboolean("interactive", "error_assistance", fallback=False)
+    return cli_ctx and (cli_ctx.config.getboolean("core", "error_assistance", fallback=False) or
+                       cli_ctx.config.getboolean("interactive", "error_assistance", fallback=False))
 
-
-def _str_to_bool(string):
-    if string.casefold() == 'True'.casefold():
-        return True
-    return False
 
 def _exchange(aad_token: str) -> dict:
     return requests.post(
@@ -127,3 +140,14 @@ def _send_query(access_token: str, session_id: str, command: str|None, error: st
                     "language": "azurecli",
                     }
                 })
+
+
+def _refresh_cached_token_session(cli_ctx) -> tuple:
+    from azure.cli.core._profile import Profile
+    profile = Profile(cli_ctx=cli_ctx)
+    aad_token = profile.get_raw_token(scopes=_SCOPES, tenant=_AAD_TENANT)[0][1]
+    exchanged_token = _exchange(aad_token)
+    session_id = exchanged_token["session_id"]
+    deepprompt_token = exchanged_token["access_token"]
+
+    return (deepprompt_token, session_id)
