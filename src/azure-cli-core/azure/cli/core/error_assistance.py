@@ -7,6 +7,7 @@ import json
 import shutil
 import requests
 
+from typing import Union
 from azure.cli.core.style import Style, print_styled_text
 
 _DEEPPROMPT_ENDPOINT = "https://data-ai-dev.microsoft.com/deepprompt/api/v1"
@@ -18,7 +19,9 @@ _TIMEOUT = 180
 _cached_token_session: tuple = ()
 
 
-def request_error_assistance(command: str | None=None, error: str | None=None, cli_ctx=None) -> dict:  # noqa: E252
+def request_error_assistance(command: Union[str, None] = None,
+                             error: Union[str, None] = None,
+                             cli_ctx=None) -> dict:
     if _error_enabled(cli_ctx):
         print("Generating error assistance. This may take a few seconds.")
 
@@ -120,7 +123,10 @@ def _exchange(aad_token: str) -> dict:
         timeout=_TIMEOUT).json()
 
 
-def _send_query(access_token: str, session_id: str, command: str | None, error: str | None) -> requests.Response:
+def _send_query(access_token: str,
+                session_id: str,
+                command: Union[str, None],
+                error: Union[str, None]) -> requests.Response:
     return requests.post(
         url=f"{_DEEPPROMPT_ENDPOINT}/query",
         headers={
