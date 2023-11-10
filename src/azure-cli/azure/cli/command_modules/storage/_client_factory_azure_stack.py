@@ -248,3 +248,9 @@ def cf_adls_directory(cli_ctx, kwargs):
 def cf_adls_file(cli_ctx, kwargs):
     return cf_adls_service(cli_ctx, kwargs).get_file_client(file_system=kwargs.pop('file_system_name', None),
                                                             file_path=kwargs.pop('path', None))
+
+
+def get_docs_tmpl(cli_ctx, resource_type):
+    from azure.cli.core.profiles import get_api_version
+    api_version = get_api_version(cli_ctx, resource_type, as_sdk_profile=True)
+    return 'azure.multiapi.storage.v{}.{{}}'.format(api_version.replace('-', '_').replace('.', '_'))

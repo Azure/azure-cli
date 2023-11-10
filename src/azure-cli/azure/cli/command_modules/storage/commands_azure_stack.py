@@ -11,7 +11,8 @@ from azure.cli.command_modules.storage._client_factory_azure_stack \
             cf_mgmt_policy, cf_blob_data_gen_update, cf_sa_for_keys,
             cf_mgmt_blob_services, cf_mgmt_file_shares,
             cf_private_link, cf_private_endpoint,
-            cf_mgmt_encryption_scope, cf_mgmt_file_services)
+            cf_mgmt_encryption_scope, cf_mgmt_file_services,
+            get_docs_tmpl)
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.arm import show_exception_handler
@@ -79,6 +80,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         operations_tmpl='azure.multiapi.storage.blob.blockblobservice#BlockBlobService.{}',
         client_factory=blob_data_service_factory,
         resource_type=ResourceType.DATA_STORAGE)
+
+    storage_docs_tmpl = get_docs_tmpl(self.cli_ctx, ResourceType.DATA_STORAGE)
 
     def get_custom_sdk(custom_module, client_factory, resource_type=ResourceType.DATA_STORAGE):
         """Returns a CliCommandType instance with specified operation template based on the given custom module name.
@@ -269,7 +272,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
         g.storage_custom_command_oauth('set-tier', 'set_blob_tier')
         g.storage_custom_command_oauth('upload', 'upload_blob',
-                                       doc_string_source='blob#BlockBlobService.create_blob_from_path')
+                                       doc_string_source=storage_docs_tmpl.format( 'blob#BlockBlobService.create_blob_from_path'))  # pylint: disable=line-too-long
         g.storage_custom_command_oauth('upload-batch', 'storage_blob_upload_batch',
                                        validator=process_blob_upload_batch_parameters)
         g.storage_custom_command_oauth('download-batch', 'storage_blob_download_batch',
@@ -278,7 +281,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                        validator=process_blob_delete_batch_parameters)
         g.storage_custom_command_oauth('show', 'show_blob', table_transformer=transform_blob_output,
                                        client_factory=page_blob_service_factory,
-                                       doc_string_source='blob#PageBlobService.get_blob_properties',
+                                       doc_string_source=storage_docs_tmpl.format('blob#PageBlobService.get_blob_properties'),  # pylint: disable=line-too-long
                                        exception_handler=show_exception_handler)
 
         g.storage_command_oauth(
@@ -489,7 +492,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                  transform=transform_file_directory_result(
                                      self.cli_ctx),
                                  table_transformer=transform_file_output,
-                                 doc_string_source='file#FileService.list_directories_and_files')
+                                 doc_string_source=storage_docs_tmpl.format('file#FileService.list_directories_and_files'))  # pylint: disable=line-too-long
 
     with self.command_group('storage file', command_type=file_sdk,
                             custom_command_type=get_custom_sdk('file_azure_stack', file_data_service_factory)) as g:
@@ -497,7 +500,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         from ._transformers_azure_stack import transform_url
         g.storage_custom_command('list', 'list_share_files', transform=transform_file_directory_result(self.cli_ctx),
                                  table_transformer=transform_file_output,
-                                 doc_string_source='file#FileService.list_directories_and_files')
+                                 doc_string_source=storage_docs_tmpl.format('file#FileService.list_directories_and_files'))  # pylint: disable=line-too-long
         g.storage_command('delete', 'delete_file', transform=create_boolean_result_output_transformer('deleted'),
                           table_transformer=transform_boolean_for_table)
         g.storage_command('resize', 'resize_file')

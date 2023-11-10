@@ -704,36 +704,35 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
             raise CLIError("command authoring error: applying doc_string_source '{}' directly will cause slowdown. "
                            'Import by string name instead.'.format(doc_string_source.__name__))
 
-        model = doc_string_source
-        print('kk doc string source', doc_string_source)
+        # print('kk doc string source', doc_string_source)
         # if doc_string_source is azure.mgmt.netapp.models#Snapshot, APIVersionException is raised
         # if doc_string_source is azure.mgmt.keyvault.v2023_02_01.models#VaultProperties, ignored,
         # self.get_models(doc_string_source) is always None
         # doc_string_source is file#FileService.list_directories_and_files in azure stack
-        # it becomes _get_attr azure.multiapi.storage.v2017_04_17 file#FileService.list_directories_and_files
+        # it becomes _get_attr azure.multiapi.storage.v2017_04_17.file#FileService.list_directories_and_files
         if doc_string_source == 'azure.mgmt.netapp.models#Snapshot':
             pass
         if doc_string_source == 'azure.mgmt.keyvault.v2023_02_01.models#VaultProperties':
             pass
         if doc_string_source == 'file#FileService.list_directories_and_files':
             pass
-        try:
-            model = self.get_models(doc_string_source, ignore=True)
-        except APIVersionException:
-            model = None
-        if model:
-            print('wat model not empty', doc_string_source)
-        if not model:
-            from importlib import import_module
-            (path, model_name) = doc_string_source.split('#', 1)
-            # print('fail to get', doc_string_source, 'use', path, model_name, 'instead')
-            method_name = None
-            if '.' in model_name:
-                (model_name, method_name) = model_name.split('.', 1)
-            module = import_module(path)
-            model = getattr(module, model_name)
-            if method_name:
-                model = getattr(model, method_name, None)
+        # try:
+        #     model = self.get_models(doc_string_source, ignore=True)
+        # except APIVersionException:
+        #     model = None
+        # if model:
+        #     print('wat model not empty', doc_string_source)
+        # if not model:
+        from importlib import import_module
+        (path, model_name) = doc_string_source.split('#', 1)
+        method_name = None
+        if '.' in model_name:
+            (model_name, method_name) = model_name.split('.', 1)
+        module = import_module(path)
+        # print('kk import module', module,'model_name',model_name)
+        model = getattr(module, model_name)
+        if method_name:
+            model = getattr(model, method_name, None)
         if not model:
             raise CLIError("command authoring error: source '{}' not found.".format(doc_string_source))
         dest.__doc__ = model.__doc__

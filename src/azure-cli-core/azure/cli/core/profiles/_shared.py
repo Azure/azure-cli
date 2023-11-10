@@ -643,7 +643,7 @@ def supported_resource_type(api_profile, resource_type):
         return False
 
 
-def _get_attr(sdk_path, mod_attr_path, checked=True, ignore=False):
+def _get_attr(sdk_path, mod_attr_path, checked=True):
     # print('_get_attr', sdk_path, mod_attr_path)
     # In _apply_doc_string, doc_string_source can be a full path and be passed as mod_attr_path
     # ex: azure.mgmt.keyvault.v2023_02_01.models#VaultProperties
@@ -665,6 +665,7 @@ def _get_attr(sdk_path, mod_attr_path, checked=True, ignore=False):
         return op
     except (ImportError, AttributeError) as ex:
         import traceback
+        logger.debug(traceback.format_exc())
         if checked:
             return None
         raise ex
