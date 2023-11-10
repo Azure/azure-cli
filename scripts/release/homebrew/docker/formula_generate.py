@@ -15,10 +15,11 @@ from collections import OrderedDict
 import bisect
 import argparse
 
-TEMPLATE_FILE_NAME='formula_template.txt'
-CLI_VERSION=os.environ['CLI_VERSION']
-HOMEBREW_UPSTREAM_URL=os.environ['HOMEBREW_UPSTREAM_URL']
-HOMEBREW_FORMULAR_LATEST="https://raw.githubusercontent.com/Homebrew/homebrew-core/master/Formula/azure-cli.rb"
+TEMPLATE_FILE_NAME = 'formula_template.txt'
+CLI_VERSION = os.environ['CLI_VERSION']
+HOMEBREW_UPSTREAM_URL = os.environ['HOMEBREW_UPSTREAM_URL']
+HOMEBREW_FORMULAR_LATEST = "https://raw.githubusercontent.com/Homebrew/homebrew-core/master/Formula/a/azure-cli.rb"
+PYTHON_VERSION = '3.11'
 
 
 def main():
@@ -26,9 +27,11 @@ def main():
 
     parser = argparse.ArgumentParser(prog='formula_generator.py')
     parser.set_defaults(func=generate_formula)
-    parser.add_argument('-b', dest='build_method', choices=['update_existing', 'use_template'], help='The build method, default is update_existing, the other option is use_template.')
+    parser.add_argument('-b', dest='build_method', choices=['update_existing', 'use_template'],
+                        help='The build method, default is update_existing, the other option is use_template.')
     args = parser.parse_args()
     args.func(**vars(args))
+
 
 def generate_formula(build_method: str, **_):
     content = ''
@@ -82,7 +85,8 @@ def collect_resources() -> str:
 
 def collect_resources_dict() -> dict:
     nodes = make_graph('azure-cli')
-    filtered_nodes = {nodes[node_name]['name']: nodes[node_name] for node_name in sorted(nodes) if resource_filter(node_name)}
+    filtered_nodes = {nodes[node_name]['name']: nodes[node_name] for node_name in sorted(nodes) if
+                      resource_filter(node_name)}
     return filtered_nodes
 
 
@@ -121,6 +125,10 @@ def update_formula() -> str:
     resp.raise_for_status()
     text = resp.text
 
+    # update python version
+    text = re.sub('depends_on "python@.*"', f'depends_on "python@{PYTHON_VERSION}"', text, 1)
+    text = re.sub(r'virtualenv_create\(libexec, "python.*"', f'virtualenv_create(libexec, "python{PYTHON_VERSION}"', text, 1)  # pylint: disable=line-too-long
+
     # update url and sha256 of azure-cli
     text = re.sub('url ".*"', 'url "{}"'.format(HOMEBREW_UPSTREAM_URL), text, 1)
     upstream_sha = compute_sha256(HOMEBREW_UPSTREAM_URL)
@@ -148,7 +156,7 @@ def update_formula() -> str:
                 node_index_dict[pack] = idx
         elif pack is not None:
             if line.startswith("    url"):
-                #update the url of package
+                # update the url of package
                 if pack in nodes.keys():
                     url_match = re.search(r'url "(.*)"', line)
                     if url_match is not None and nodes[pack]['url'] != url_match.group(1):
@@ -157,7 +165,7 @@ def update_formula() -> str:
                 else:
                     packs_to_remove.add(pack)
             elif line.startswith("    sha256"):
-                #update the sha256 of package
+                # update the sha256 of package
                 if pack in nodes.keys():
                     lines[idx] = re.sub('sha256 ".*"', 'sha256 "{}"'.format(nodes[pack]['checksum']), line, 1)
                     del nodes[pack]

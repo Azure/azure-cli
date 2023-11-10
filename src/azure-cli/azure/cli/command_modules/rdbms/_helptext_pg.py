@@ -199,6 +199,11 @@ examples:
 
       az postgres flexible-server create -g testGroup -n testServer --location testLocation --geo-redundant-backup Enabled \\
         --key $keyIdentifier --identity testIdentity --backup-key $geoKeyIdentifier --backup-identity geoIdentity
+
+
+      # create flexible server with storage auto-grow as Enabled. Accepted values Enabled / Disabled. Default value for storage auto-grow is "Disabled".
+
+      az postgres flexible-server create -g testGroup -n testServer --location testLocation --storage-auto-grow Enabled
 """
 
 helps['postgres flexible-server show'] = """
@@ -249,6 +254,8 @@ examples:
     text: az postgres flexible-server update --resource-group testGroup --name testserver --private-dns-zone testDNS2.postgres.database.azure.com
   - name: Update a flexible server to update private DNS zone for a VNET enabled server, using private DNS zone in the different resource group and subscription. Private DNS zone will be linked to the VNET if not already linked.
     text: az postgres flexible-server update --resource-group testGroup --name testserver --private-dns-zone /subscriptions/{SubId2}/resourceGroups/{testGroup2}/providers/Microsoft.Network/privateDnsZones/testDNS.postgres.database.azure.com
+  - name: Update a flexible server's storage to enable / disable storage auto-grow.
+    text: az postgres flexible-server update --resource-group testGroup --name testserver --storage-auto-grow Enabled
 """
 
 helps['postgres flexible-server restore'] = """
@@ -259,6 +266,19 @@ examples:
     text: az postgres flexible-server restore --resource-group testGroup --name testserverNew --source-server testserver --restore-time "2017-06-15T13:10:00Z"
   - name: Restore 'testserver' to current point-in-time as a new server 'testserverNew'.
     text: az postgres flexible-server restore --resource-group testGroup --name testserverNew --source-server testserver
+  - name: >
+      Restore 'testserver' to current point-in-time as a new server 'testserverNew' in a different resource group. \\
+      Here --restore-group is for the target server's resource group, and --source-server must be passed as resource ID.
+    text: >
+      az postgres flexible-server restore --resource-group testGroup --name testserverNew \\
+        --source-server /subscriptions/{testSubscription}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{sourceServerName}
+  - name: >
+      Restore 'testserver' to current point-in-time as a new server 'testserverNew' in a different subscription. \\
+      Here --restore-group is for the target server's resource group, and --source-server must be passed as resource ID. \\
+      This resource ID can be in a subscription different than the subscription used for az account set.
+    text: >
+      az postgres flexible-server restore --resource-group testGroup --name testserverNew \\
+        --source-server /subscriptions/{sourceSubscriptionId}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{sourceServerName}
 """
 
 helps['postgres flexible-server restart'] = """
@@ -612,6 +632,13 @@ examples:
         --source-server testserver --vnet newVnet --subnet newSubnet \\
         --address-prefixes 172.0.0.0/16 --subnet-prefixes 172.0.0.0/24 \\
         --private-dns-zone testDNS.postgres.database.azure.com --location newLocation
+  - name: >
+      Geo-restore 'testserver' to current point-in-time as a new server 'testserverNew' in a different subscription / resource group. \\
+      Here --restore-group is for the target server's resource group, and --source-server must be passed as resource ID. \\
+      This resource ID can be in a subscription different than the subscription used for az account set.
+    text: >
+      az postgres flexible-server geo-restore --resource-group testGroup --name testserverNew --location newLocation \\
+        --source-server /subscriptions/{sourceSubscriptionId}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{sourceServerName}
 """
 
 helps['postgres flexible-server revive-dropped'] = """

@@ -18,7 +18,7 @@ import yaml
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azure.keyvault.key_vault_id import KeyVaultIdentifier
+from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1.key_vault_id import KeyVaultIdentifier
 from azure.appconfiguration import ResourceReadOnlyError, ConfigurationSetting
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.util import user_confirmation
@@ -30,7 +30,7 @@ from azure.cli.core.azclierror import (FileOperationError,
                                        RequiredArgumentMissingError,
                                        ResourceNotFoundError)
 
-from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles, AppServiceConstants, JsonDiff, CompareFieldsMap, StatusCodes)
+from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles, AppServiceConstants, JsonDiff, CompareFieldsMap, StatusCodes, ImportMode)
 from ._diff_utils import get_serializer, KVComparer, print_preview, __print_diff
 from ._utils import prep_label_filter_for_url_encoding, is_json_content_type, validate_feature_flag_name, validate_feature_flag_key
 from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
@@ -829,7 +829,7 @@ def __compact_key_values(key_values):
 
 
 def __resolve_secret(keyvault_client, keyvault_reference):
-    from azure.keyvault.key_vault_id import SecretId
+    from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1.key_vault_id import SecretId
     try:
         secret_id = json.loads(keyvault_reference.value)["uri"]
         kv_identifier = SecretId(uri=secret_id)
@@ -845,7 +845,7 @@ def __resolve_secret(keyvault_client, keyvault_reference):
         raise CLIError(str(exception))
 
 
-def __import_kvset_from_file(client, path, strict, yes):
+def __import_kvset_from_file(client, path, strict, yes, import_mode=ImportMode.IGNORE_MATCH):
     new_kvset = __read_with_appropriate_encoding(file_path=path, format_='json')
     if KVSetConstants.KVSETRootElementName not in new_kvset:
         raise FileOperationError("file '{0}' is not in a valid '{1}' format.".format(path, ImportExportProfiles.KVSET))
@@ -878,9 +878,12 @@ def __import_kvset_from_file(client, path, strict, yes):
         __delete_configuration_setting_from_config_store(client, config_setting)
 
     # Create joint iterable from added and updated kvs
-    kvset_to_import_iter = chain(
-        diff.get(JsonDiff.ADD, []),
-        (update["new"] for update in diff.get(JsonDiff.UPDATE, [])))  # The value of diff update property is of the form List[{"new": KeyValue, "old": KeyValue}]
+    if import_mode == ImportMode.IGNORE_MATCH:
+        kvset_to_import_iter = chain(
+            diff.get(JsonDiff.ADD, []),
+            (update["new"] for update in diff.get(JsonDiff.UPDATE, [])))  # The value of diff update property is of the form List[{"new": KeyValue, "old": KeyValue}]
+    else:
+        kvset_to_import_iter = kvset_from_file
 
     for config_setting in kvset_to_import_iter:
         __write_configuration_setting_to_config_store(client, config_setting)

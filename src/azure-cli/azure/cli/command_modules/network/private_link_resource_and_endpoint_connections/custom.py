@@ -41,6 +41,8 @@ def register_providers():
     _register_one_provider('Microsoft.ElasticSan/elasticSans', '2022-12-01-preview', True)
     _register_one_provider('Microsoft.EventGrid/topics', '2020-04-01-preview', True)
     _register_one_provider('Microsoft.EventGrid/domains', '2020-04-01-preview', True)
+    _register_one_provider('Microsoft.EventGrid/partnerNamespaces', '2021-06-01-preview', True)
+    _register_one_provider('Microsoft.EventGrid/namespaces', '2023-06-01-preview', True)
     _register_one_provider("Microsoft.EventHub/namespaces", "2021-06-01-preview", True)
     _register_one_provider('Microsoft.HardwareSecurityModules/cloudHsmClusters', '2022-08-31-preview', True)
     _register_one_provider("Microsoft.HDInsight/clusters", '2018-06-01-preview', True)
@@ -78,6 +80,7 @@ def register_providers():
     _register_one_provider("Microsoft.OpenEnergyPlatform/energyServices", '2022-04-04-preview', True)
     _register_one_provider("Microsoft.MachineLearningServices/registries", '2022-10-01-preview', True)
     _register_one_provider('Microsoft.DBforMySQL/flexibleServers', '2022-09-30-privatepreview', False)
+    _register_one_provider("Microsoft.DocumentDB/mongoClusters", '2023-03-01-preview', True)
 
 
 def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None, support_connection_operation=True):  # pylint: disable=line-too-long
