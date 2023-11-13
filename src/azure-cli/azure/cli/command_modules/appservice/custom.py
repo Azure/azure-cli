@@ -2919,7 +2919,7 @@ def _get_log(url, headers, log_file=None):
                                    .encode(std_encoding, errors='replace')
                                    .decode(std_encoding, errors='replace')
                                    .rstrip('\n\r'))  # each line of log has CRLF.
-        except Exception as ex:  # pylint: disable=bare-except
+        except Exception as ex:  # pylint: disable=broad-except
             logger.error("Log stream interrupted. Exiting live log stream.")
             logger.debug(ex)
         finally:
