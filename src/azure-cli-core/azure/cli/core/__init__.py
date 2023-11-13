@@ -704,32 +704,12 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
             raise CLIError("command authoring error: applying doc_string_source '{}' directly will cause slowdown. "
                            'Import by string name instead.'.format(doc_string_source.__name__))
 
-        # print('kk doc string source', doc_string_source)
-        # if doc_string_source is azure.mgmt.netapp.models#Snapshot, APIVersionException is raised
-        # if doc_string_source is azure.mgmt.keyvault.v2023_02_01.models#VaultProperties, ignored,
-        # self.get_models(doc_string_source) is always None
-        # doc_string_source is file#FileService.list_directories_and_files in azure stack
-        # it becomes _get_attr azure.multiapi.storage.v2017_04_17.file#FileService.list_directories_and_files
-        if doc_string_source == 'azure.mgmt.netapp.models#Snapshot':
-            pass
-        if doc_string_source == 'azure.mgmt.keyvault.v2023_02_01.models#VaultProperties':
-            pass
-        if doc_string_source == 'file#FileService.list_directories_and_files':
-            pass
-        # try:
-        #     model = self.get_models(doc_string_source, ignore=True)
-        # except APIVersionException:
-        #     model = None
-        # if model:
-        #     print('wat model not empty', doc_string_source)
-        # if not model:
         from importlib import import_module
         (path, model_name) = doc_string_source.split('#', 1)
         method_name = None
         if '.' in model_name:
             (model_name, method_name) = model_name.split('.', 1)
         module = import_module(path)
-        # print('kk import module', module,'model_name',model_name)
         model = getattr(module, model_name)
         if method_name:
             model = getattr(model, method_name, None)
@@ -788,7 +768,6 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
         from azure.cli.core.profiles import get_sdk
         resource_type = kwargs.get('resource_type', self._get_resource_type())
         operation_group = kwargs.get('operation_group', self.module_kwargs.get('operation_group', None))
-        # print('get_models', resource_type, attr_args)
         return get_sdk(self.cli_ctx, resource_type, *attr_args, mod='models', operation_group=operation_group)
 
     def command_group(self, group_name, command_type=None, **kwargs):

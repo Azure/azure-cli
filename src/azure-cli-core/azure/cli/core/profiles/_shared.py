@@ -644,15 +644,6 @@ def supported_resource_type(api_profile, resource_type):
 
 
 def _get_attr(sdk_path, mod_attr_path, checked=True):
-    # print('_get_attr', sdk_path, mod_attr_path)
-    # In _apply_doc_string, doc_string_source can be a full path and be passed as mod_attr_path
-    # ex: azure.mgmt.keyvault.v2023_02_01.models#VaultProperties
-    # Then full_mod_path become azure.mgmt.keyvault.v2023_02_01.azure.mgmt.keyvault.v2023_02_01.models
-    # We need to skip this import
-    # Later _apply_doc_string will import the full path directly
-    # if sdk_path.startswith('azure.') and mod_attr_path.startswith('azure.'):
-    #     print('ignore', sdk_path, mod_attr_path)
-    #     return None
     try:
         attr_mod, attr_path = mod_attr_path.split('#') \
             if '#' in mod_attr_path else (mod_attr_path, '')
@@ -697,7 +688,6 @@ def get_versioned_sdk(api_profile, resource_type, *attr_args, **kwargs):
     sub_mod_prefix = kwargs.get('mod', None)
     operation_group = kwargs.get('operation_group', None)
     sdk_path = get_versioned_sdk_path(api_profile, resource_type, operation_group)
-    # print('get version sdk',  sdk_path, attr_args )
     if not attr_args:
         # No attributes to load. Return the versioned sdk
         return import_module(sdk_path)
