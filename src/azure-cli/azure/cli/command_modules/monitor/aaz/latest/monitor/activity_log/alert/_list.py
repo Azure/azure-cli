@@ -19,10 +19,10 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2017-04-01",
+        "version": "2020-10-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.insights/activitylogalerts", "2017-04-01"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.insights/activitylogalerts", "2017-04-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.insights/activitylogalerts", "2020-10-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.insights/activitylogalerts", "2020-10-01"],
         ]
     }
 
@@ -42,9 +42,7 @@ class List(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.resource_group = AAZResourceGroupNameArg(
-            help="Name of the resource group under which the activity log alert rules are                           being listed. If it is omitted, all the activity log alert rules under the current subscription are listed.",
-        )
+        _args_schema.resource_group = AAZResourceGroupNameArg()
         return cls._args_schema
 
     def _execute_operations(self):
@@ -83,7 +81,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.insights/activityLogAlerts",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/activityLogAlerts",
                 **self.url_parameters
             )
 
@@ -113,7 +111,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2017-04-01",
+                    "api-version", "2020-10-01",
                     required=True,
                 ),
             }
@@ -158,9 +156,7 @@ class List(AAZCommand):
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.location = AAZStrType(
-                flags={"required": True},
-            )
+            _element.location = AAZStrType()
             _element.name = AAZStrType(
                 flags={"read_only": True},
             )
@@ -215,12 +211,30 @@ class List(AAZCommand):
             all_of.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element.properties.condition.all_of.Element
-            _element.equals = AAZStrType(
-                flags={"required": True},
+            _element.any_of = AAZListType(
+                serialized_name="anyOf",
             )
-            _element.field = AAZStrType(
-                flags={"required": True},
+            _element.contains_any = AAZListType(
+                serialized_name="containsAny",
             )
+            _element.equals = AAZStrType()
+            _element.field = AAZStrType()
+
+            any_of = cls._schema_on_200.value.Element.properties.condition.all_of.Element.any_of
+            any_of.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.condition.all_of.Element.any_of.Element
+            _element.contains_any = AAZListType(
+                serialized_name="containsAny",
+            )
+            _element.equals = AAZStrType()
+            _element.field = AAZStrType()
+
+            contains_any = cls._schema_on_200.value.Element.properties.condition.all_of.Element.any_of.Element.contains_any
+            contains_any.Element = AAZStrType()
+
+            contains_any = cls._schema_on_200.value.Element.properties.condition.all_of.Element.contains_any
+            contains_any.Element = AAZStrType()
 
             scopes = cls._schema_on_200.value.Element.properties.scopes
             scopes.Element = AAZStrType()
@@ -244,7 +258,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/microsoft.insights/activityLogAlerts",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/activityLogAlerts",
                 **self.url_parameters
             )
 
@@ -270,7 +284,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2017-04-01",
+                    "api-version", "2020-10-01",
                     required=True,
                 ),
             }
@@ -315,9 +329,7 @@ class List(AAZCommand):
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.location = AAZStrType(
-                flags={"required": True},
-            )
+            _element.location = AAZStrType()
             _element.name = AAZStrType(
                 flags={"read_only": True},
             )
@@ -372,12 +384,30 @@ class List(AAZCommand):
             all_of.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element.properties.condition.all_of.Element
-            _element.equals = AAZStrType(
-                flags={"required": True},
+            _element.any_of = AAZListType(
+                serialized_name="anyOf",
             )
-            _element.field = AAZStrType(
-                flags={"required": True},
+            _element.contains_any = AAZListType(
+                serialized_name="containsAny",
             )
+            _element.equals = AAZStrType()
+            _element.field = AAZStrType()
+
+            any_of = cls._schema_on_200.value.Element.properties.condition.all_of.Element.any_of
+            any_of.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.condition.all_of.Element.any_of.Element
+            _element.contains_any = AAZListType(
+                serialized_name="containsAny",
+            )
+            _element.equals = AAZStrType()
+            _element.field = AAZStrType()
+
+            contains_any = cls._schema_on_200.value.Element.properties.condition.all_of.Element.any_of.Element.contains_any
+            contains_any.Element = AAZStrType()
+
+            contains_any = cls._schema_on_200.value.Element.properties.condition.all_of.Element.contains_any
+            contains_any.Element = AAZStrType()
 
             scopes = cls._schema_on_200.value.Element.properties.scopes
             scopes.Element = AAZStrType()
