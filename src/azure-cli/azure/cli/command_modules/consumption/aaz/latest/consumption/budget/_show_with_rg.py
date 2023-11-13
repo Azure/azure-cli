@@ -20,9 +20,9 @@ class ShowWithRg(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2018-01-31",
+        "version": "2023-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.consumption/budgets/{}", "2018-01-31"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.consumption/budgets/{}", "2023-05-01"],
         ]
     }
 
@@ -118,7 +118,7 @@ class ShowWithRg(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2018-01-31",
+                    "api-version", "2023-05-01",
                     required=True,
                 ),
             }
