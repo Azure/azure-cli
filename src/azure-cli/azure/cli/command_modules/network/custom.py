@@ -5263,7 +5263,7 @@ class PublicIpPrefixCreate(_PublicIpPrefixCreate):
 
     def pre_operations(self):
         args = self.ctx.args
-        args.sku = {'name': 'Standard'}
+        args.sku = 'Standard'
         if has_value(args.edge_zone):
             args.type = 'EdgeZone'
         if has_value(args.ip_tags):
