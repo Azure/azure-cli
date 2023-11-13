@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 import time
 import datetime
@@ -108,6 +109,30 @@ class RedisCacheTests(ScenarioTest):
         ]).get_output_in_json()
         self.check(result['redisVersion'].split('.')[0], '{redis_version}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_redis')
+    def test_redis_cache_create_with_aad(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        
+        self.kwargs = {
+            'rg': resource_group,
+            'name': self.create_random_name(prefix=name_prefix, length=24),
+            'location': location,
+            'sku': premium_sku,
+            'size': premium_size,
+            'redis-configuration': os.path.join(curr_dir, 'config_enable-aad.json').replace('\\', '\\\\')         
+        } 
+
+        # Create aad enabled cache        
+        self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size} --redis-configuration @"{redis-configuration}"')
+        result = self.cmd('az redis show -n {name} -g {rg}').get_output_in_json()
+        
+        # Verify cache is aad enabled
+        self.assertTrue(result['provisioningState'] == 'Succeeded')             
+        self.assertTrue(result['redisConfiguration']['aadEnabled'] == "true")    
+
+        # List access polices
+        self.cmd('az redis list')
+                
     @ResourceGroupPreparer(name_prefix='cli_test_redis')
     def test_redis_cache_list_works(self, resource_group):
         self.cmd('az redis list')
