@@ -713,8 +713,6 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
         model = getattr(module, model_name)
         if method_name:
             model = getattr(model, method_name, None)
-        if not model:
-            raise CLIError("command authoring error: source '{}' not found.".format(doc_string_source))
         dest.__doc__ = model.__doc__
 
     def _get_resource_type(self):
