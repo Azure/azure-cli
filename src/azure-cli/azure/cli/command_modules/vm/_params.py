@@ -99,6 +99,7 @@ def load_arguments(self, _):
         hyper_v_gen_sku = CLIArgumentType(arg_type=get_enum_type(HyperVGenerationTypes, default="V1"))
     else:
         hyper_v_gen_sku = CLIArgumentType(arg_type=get_enum_type(["V1", "V2"], default="V1"))
+    disk_snapshot_hyper_v_gen_sku = get_enum_type(HyperVGenerationTypes) if HyperVGenerationTypes else get_enum_type(["V1", "V2"])
 
     ultra_ssd_enabled_type = CLIArgumentType(
         arg_type=get_three_state_flag(), min_api='2018-06-01',
@@ -151,7 +152,7 @@ def load_arguments(self, _):
             c.argument('duration_in_seconds', help='Time duration in seconds until the SAS access expires', type=int)
             if self.supported_api_version(min_api='2018-09-30', operation_group='disks'):
                 c.argument('access_level', arg_type=get_enum_type(['Read', 'Write']), default='Read', help='access level')
-                c.argument('hyper_v_generation', arg_type=hyper_v_gen_sku, help='The hypervisor generation of the Virtual Machine. Applicable to OS disks only.')
+                c.argument('hyper_v_generation', arg_type=disk_snapshot_hyper_v_gen_sku, help='The hypervisor generation of the Virtual Machine. Applicable to OS disks only.')
             else:
                 c.ignore('access_level', 'for_upload', 'hyper_v_generation')
             c.argument('encryption_type', min_api='2019-07-01', arg_type=get_enum_type(self.get_models('EncryptionType', operation_group='disks')),
@@ -720,7 +721,7 @@ def load_arguments(self, _):
         c.argument('application_security_groups', resource_type=ResourceType.MGMT_COMPUTE, min_api='2018-06-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
         c.argument('computer_name_prefix', help='Computer name prefix for all of the virtual machines in the scale set. Computer name prefixes must be 1 to 15 characters long')
         c.argument('orchestration_mode', help='Choose how virtual machines are managed by the scale set. In Uniform mode, you define a virtual machine model and Azure will generate identical instances based on that model. In Flexible mode, you manually create and add a virtual machine of any configuration to the scale set or generate identical instances based on virtual machine model defined for the scale set.',
-                   arg_type=get_enum_type(['Uniform', 'Flexible']))
+                   arg_type=get_enum_type(['Uniform', 'Flexible']), default='Flexible')
         c.argument('scale_in_policy', scale_in_policy_type)
         c.argument('automatic_repairs_grace_period', min_api='2018-10-01',
                    help='The amount of time (in minutes, between 30 and 90) for which automatic repairs are suspended due to a state change on VM.')
@@ -757,8 +758,8 @@ def load_arguments(self, _):
         c.argument('load_balancer', help='Name to use when creating a new load balancer (default) or referencing an existing one. Can also reference an existing load balancer by ID or specify "" for none.', options_list=['--load-balancer', '--lb'])
         c.argument('load_balancer_sku', resource_type=ResourceType.MGMT_NETWORK, min_api='2017-08-01', max_api='2021-02-01', options_list=['--lb-sku'], arg_type=get_enum_type(['Basic', 'Standard']),
                    help="Sku of the Load Balancer to create. Default to 'Standard' when single placement group is turned off; otherwise, default to 'Basic'. The public IP is supported to be created on edge zone only when it is 'Standard'")
-        c.argument('load_balancer_sku', resource_type=ResourceType.MGMT_NETWORK, min_api='2021-02-01', options_list=['--lb-sku'], arg_type=get_enum_type(['Basic', 'Standard', 'Gateway']),
-                   help="Sku of the Load Balancer to create. Default to 'Standard' when single placement group is turned off; otherwise, default to 'Basic'. The public IP is supported to be created on edge zone only when it is 'Standard'")
+        c.argument('load_balancer_sku', resource_type=ResourceType.MGMT_NETWORK, min_api='2021-02-01', options_list=['--lb-sku'], arg_type=get_enum_type(['Basic', 'Standard', 'Gateway'], default='Standard'),
+                   help="Sku of the Load Balancer to create. The public IP is supported to be created on edge zone only when it is 'Standard'")
         c.argument('nat_pool_name', help='Name to use for the NAT pool when creating a new load balancer.', options_list=['--lb-nat-pool-name', '--nat-pool-name'], deprecate_info=c.deprecate(target='--nat-pool-name', redirect='--nat-rule-name', hide=True))
         c.argument('nat_rule_name', help='Name to use for the NAT rule v2 when creating a new load balancer. (NAT rule V2 is used to replace NAT pool)', options_list=['--lb-nat-rule-name', '--nat-rule-name'])
 
@@ -1015,7 +1016,8 @@ def load_arguments(self, _):
             c.ignore('aux_subscriptions')
             c.argument('edge_zone', edge_zone_type)
             c.argument('accept_term', action='store_true', help="Accept the license agreement and privacy statement.")
-            c.argument('disable_integrity_monitoring', action='store_true', min_api='2020-12-01', help='Disable the default behavior of installing guest attestation extension and enabling System Assigned Identity for Trusted Launch enabled VMs and VMSS.')
+            c.argument('disable_integrity_monitoring', action='store_true', min_api='2020-12-01', help='Disable installing guest attestation extension and enabling System Assigned Identity for Trusted Launch enabled VMs and VMSS. It will become the default behavior, so it will become useless', deprecate_info=c.deprecate(hide=True))
+            c.argument('enable_integrity_monitoring', action='store_true', min_api='2020-12-01', help='Enable installing Microsoft propietary and not security supported guest attestation extension and enabling System Assigned Identity for Trusted Launch enabled VMs and VMSS.')
             c.argument('os_disk_security_encryption_type', arg_type=get_enum_type(self.get_models('SecurityEncryptionTypes')), min_api='2021-11-01', help='Specify the encryption type of the OS managed disk.')
             c.argument('os_disk_secure_vm_disk_encryption_set', min_api='2021-11-01', help='Specify the customer managed disk encryption set resource ID or name for the managed disk that is used for customer managed key encrypted Confidential VM OS disk and VM guest blob.')
             c.argument('disable_integrity_monitoring_autoupgrade', action='store_true', min_api='2020-12-01', help='Disable auto upgrade of guest attestation extension for Trusted Launch enabled VMs and VMSS.')
@@ -1075,9 +1077,11 @@ def load_arguments(self, _):
             c.argument('public_ip_address', help='Name of the public IP address when creating one (default) or referencing an existing one. Can also reference an existing public IP by ID or specify "" for None (\'""\' in Azure CLI using PowerShell or --% operator). For Azure CLI using powershell core edition 7.3.4, specify '' or "" (--public-ip-address '' or --public-ip-address "")')
             c.argument('public_ip_address_allocation', help=None, default=None, arg_type=get_enum_type(['dynamic', 'static']))
             c.argument('public_ip_address_dns_name', help='Globally unique DNS name for a newly created public IP.')
+
             if self.supported_api_version(min_api='2017-08-01', resource_type=ResourceType.MGMT_NETWORK):
-                c.argument('public_ip_sku', help='Public IP SKU. It is set to Basic by default. The public IP is supported to be created on edge zone only when it is \'Standard\'',
-                           default=None, arg_type=get_enum_type(['Basic', 'Standard']))
+                c.argument('public_ip_sku', help='Public IP SKU. The public IP is supported to be created on edge zone only when it is \'Standard\'',
+                           default='Standard', arg_type=get_enum_type(['Basic', 'Standard']))
+
             c.argument('nic_delete_option', nargs='+', min_api='2021-03-01',
                        help='Specify what happens to the network interface when the VM is deleted. Use a singular '
                        'value to apply on all resources, or use <Name>=<Value> to configure '
@@ -1104,10 +1108,7 @@ def load_arguments(self, _):
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
             c.argument('identity_role', options_list=['--role'],
-                       help='Role name or id the system assigned identity will have. '
-                            'Please note that the default value "Contributor" will be removed in the breaking change '
-                            'release of the fall, so please specify "--role" and "--scope" at the same time '
-                            'when assigning a role to the managed identity')
+                       help='Role name or id the system assigned identity will have.')
 
     with self.argument_context('vm auto-shutdown') as c:
         c.argument('off', action='store_true', help='Turn off auto-shutdown for VM. Configuration will be cleared.')
@@ -1596,6 +1597,12 @@ def load_arguments(self, _):
                    'included.')
         c.argument('source_restore_point', help='Resource Id of the source restore point from which a copy needs to be created')
         c.argument('consistency_mode', arg_type=get_enum_type(self.get_models('ConsistencyModeTypes')), is_preview=True, min_api='2021-07-01', help='Consistency mode of the restore point. Can be specified in the input while creating a restore point. For now, only CrashConsistent is accepted as a valid input. Please refer to https://aka.ms/RestorePoints for more details.')
+        c.argument('source_os_resource', help='Resource Id of the source OS disk')
+        c.argument('os_restore_point_encryption_set', help='Customer managed OS disk encryption set resource id')
+        c.argument('os_restore_point_encryption_type', arg_type=get_enum_type(self.get_models('RestorePointEncryptionType')), help='The type of key used to encrypt the data of the OS disk restore point.')
+        c.argument('source_data_disk_resource', nargs='+', help='Resource Id of the source data disk')
+        c.argument('data_disk_restore_point_encryption_set', nargs='+', help='Customer managed data disk encryption set resource id')
+        c.argument('data_disk_restore_point_encryption_type', nargs='+', arg_type=get_enum_type(self.get_models('RestorePointEncryptionType')), help='The type of key used to encrypt the data of the data disk restore point.')
 
     with self.argument_context('restore-point show') as c:
         c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],

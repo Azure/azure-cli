@@ -535,9 +535,9 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('slot', options_list=['--slot', '-s'],
                    help="the name of the slot. Default to the productions slot if not specified")
     with self.argument_context('webapp config storage-account add') as c:
-        c.argument('slot_setting', options_list=['--slot-setting'], help="slot setting")
+        c.argument('slot_setting', options_list=['--slot-setting'], help="With slot setting you can decide to make BYOS configuration sticky to a slot, meaning that when that slot is swapped, the storage account stays with that slot.")
     with self.argument_context('webapp config storage-account update') as c:
-        c.argument('slot_setting', options_list=['--slot-setting'], help="slot setting")
+        c.argument('slot_setting', options_list=['--slot-setting'], help="With slot setting you can decide to make BYOS configuration sticky to a slot, meaning that when that slot is swapped, the storage account stays with that slot.")
 
     with self.argument_context('webapp config backup') as c:
         c.argument('storage_account_url', help='URL with SAS token to the blob storage container',
@@ -754,6 +754,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('dapr_http_read_buffer_size', type=int, options_list=['--dapr-http-read-buffer-size', '--dhrbs'], help="Max size of http header read buffer in KB to handle when sending multi-KB headers.")
         c.argument('dapr_log_level', options_list=['--dapr-log-level'], help="The log level for the Dapr sidecar", arg_type=get_enum_type(DAPR_LOG_LEVELS))
         c.argument('dapr_enable_api_logging', options_list=['--dapr-enable-api-logging', '--dal'], help="Enable/Disable API logging for the Dapr sidecar.", arg_type=get_three_state_flag(return_label=True))
+        c.argument('workspace', help="Name of an existing log analytics workspace to be used for the application insights component")
 
     with self.argument_context('functionapp cors credentials') as c:
         c.argument('enable', help='enable/disable access-control-allow-credentials', arg_type=get_three_state_flag())
@@ -1028,7 +1029,7 @@ subscription than the app service environment, please use the resource ID for --
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.SET],
                                                                  scopes=['appservice']))
         c.argument('kind', options_list=['--kind', '-k'], arg_type=get_enum_type(ASE_KINDS),
-                   default='ASEv2', help="Specify App Service Environment version")
+                   default='ASEv3', help="Specify App Service Environment version")
         c.argument('subnet', help='Name or ID of existing subnet. To create vnet and/or subnet \
                    use `az network vnet [subnet] create`')
         c.argument('vnet_name', help='Name of the vNet. Mandatory if only subnet name is specified.')

@@ -395,7 +395,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         )
 
         pg_version_upgrade_arg_type = CLIArgumentType(
-            arg_type=get_enum_type(['12', '13', '14']),
+            arg_type=get_enum_type(['12', '13', '14', '15']),
             options_list=['--version', '-v'],
             help='Server major version.'
         )

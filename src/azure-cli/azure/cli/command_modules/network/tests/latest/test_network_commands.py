@@ -4526,7 +4526,7 @@ class NetworkNicConvenienceCommandsScenarioTest(ScenarioTest):
     def test_network_nic_convenience_commands(self, resource_group):
 
         self.kwargs['vm'] = 'conveniencevm1'
-        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --admin-username myusername --admin-password aBcD1234!@#$ --authentication-type password --nsg-rule None')
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username myusername --admin-password aBcD1234!@#$ --authentication-type password --nsg-rule None')
         self.kwargs['nic_id'] = self.cmd('vm show -g {rg} -n {vm} --query "networkProfile.networkInterfaces[0].id"').get_output_in_json()
         self.cmd('network nic list-effective-nsg --ids {nic_id}',
                  checks=self.greater_than('length(@)', 0))
@@ -6132,7 +6132,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'private-ip': '10.0.0.9'
         })
 
-        vm = self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {nsg} --nsg-rule None --private-ip-address {private-ip}').get_output_in_json()
+        vm = self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {nsg} --nsg-rule None --private-ip-address {private-ip}').get_output_in_json()
         self.kwargs['vm_id'] = vm['id']
         self.cmd('vm extension set -g {rg} --vm-name {vm} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
 
@@ -6156,7 +6156,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'capture2': 'capture2'
         })
 
-        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {vm} --nsg-rule None')
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {vm} --nsg-rule None')
         self.cmd('vm extension set -g {rg} --vm-name {vm} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
 
         self.cmd('network watcher packet-capture create -g {rg} --vm {vm} -n {capture1} --file-path capture/capture.cap')
@@ -6181,7 +6181,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'capture1': 'captureVMSS1',
             'capture2': 'captureVMSS2'
         })
-        self.cmd('vmss create -g {rg} --name {vmss} --image UbuntuLTS --location {loc} --admin-username azureuser --generate-ssh-keys --upgrade-policy-mode Automatic')
+        self.cmd('vmss create -g {rg} --name {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --location {loc} --admin-username azureuser --generate-ssh-keys --upgrade-policy-mode Automatic')
         self.cmd('vmss extension set --name NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher --resource-group {rg} --vmss-name  {vmss}')
 
         self.cmd('network watcher packet-capture create -g {rg} --target {vmss} -n {capture} --target-type AzureVMSS --file-path capture/capture.cap', checks=[
@@ -6325,6 +6325,7 @@ class NetworkVirtualNetworkGatewayNatRule(ScenarioTest):
         self.cmd('network vnet-gateway create -g {rg} -n {vg} --vnet {vnet} --public-ip-address {ip}  --sku {sku} '
                  '--nat-rule name=nat internal-mappings=10.4.0.0/24 external-mappings=192.168.21.0/24 ',
                  checks=[self.check('length(vnetGateway.natRules)', 1)])
+        self.cmd("network vnet-gateway show -n {vg} -g {rg}")
 
         # minimal parameters(ip-config-id can only be set when type is Dynamic, and only allowlist sub-ids support Dynamic)
         self.cmd('network public-ip create -g {rg} -n {ip1}')
@@ -6500,6 +6501,133 @@ class NetworkVirtualApplianceScenarioTest(ScenarioTest):
         self.cmd('network virtual-appliance site delete -n {site} -g {rg} --appliance-name {name} -y')
         self.cmd('network virtual-appliance delete -n {name} -g {rg} -y')
 
+class NetworkVirtualApplianceIdentityScenarioTest(ScenarioTest):
+    @live_only()
+    @ResourceGroupPreparer(location='westcentralus', name_prefix='test_network_virtual_appliance_identity')
+    @AllowLargeResponse(size_kb=9999)
+    def test_network_virtual_appliance_identity(self, resource_group):
+        from time import sleep
+        self.kwargs.update({
+            'vwan': 'clitestvwan',
+            'vhub': 'clittestvhub',
+            'nva_name1': 'cli-virtual-appliance1',
+            'nva_name2': 'cli-virtual-appliance2',
+            'nva_name3': 'cli-virtual-appliance3',
+            'nva_name4': 'cli-virtual-appliance4',
+            'nva_name5': 'cli-virtual-appliance5',
+            'nva_name6': 'cli-virtual-appliance6',
+            'rg': resource_group,
+            'ua_Identity1': 'cli-ua-identity1',
+            'ua_Identity2': 'cli-ua-identity2'
+        })
+        self.cmd('extension add -n virtual-wan')
+        self.cmd('network vwan create -n {vwan} -g {rg} --type Standard')
+        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan} --address-prefix 10.5.0.0/16 --sku Standard')
+        routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
+        retry_count = 0
+        while routing_state != 'Provisioned':
+            if retry_count == 20:
+                break
+            retry_count += 1
+            sleep(360)
+            routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
+        identityProperty1 = '{"type":"SystemAssigned"}'
+        self.kwargs.update({
+            'identityProperty1': identityProperty1
+        })
+        self.cmd('network virtual-appliance create -n {nva_name3} -g {rg} --vhub {vhub} --vendor "checkpoint" '
+                 '--scale-unit 2 -v latest --asn 64512 --init-config "echo $abc" ',
+                 checks=[
+                     self.check('name', '{nva_name3}'),
+                     self.check('virtualApplianceAsn', 64512),
+                     self.check('cloudInitConfiguration', 'echo $abc')
+                     ])
+        self.cmd('network virtual-appliance show -g {rg} -n {nva_name3}', 
+                 checks=[
+                     self.check('name', '{nva_name3}'),
+                     self.check('virtualApplianceAsn', 64512),
+                     self.check('cloudInitConfiguration', 'echo $abc')
+                     ])
+        self.cmd('network virtual-appliance create -n {nva_name4} -g {rg} --vhub {vhub} --vendor "checkpoint" '
+                 '--scale-unit 2 -v latest --asn 64512 --init-config "echo $abc" ',
+                 checks=[
+                     self.check('name', '{nva_name4}'),
+                     self.check('virtualApplianceAsn', 64512),
+                     self.check('cloudInitConfiguration', 'echo $abc')
+                 ])
+        self.cmd('network virtual-appliance show -g {rg} -n {nva_name4}', 
+                 checks=[
+                     self.check('name', '{nva_name4}'),
+                     self.check('virtualApplianceAsn', 64512),
+                     self.check('cloudInitConfiguration', 'echo $abc')
+                     ])
+        self.cmd('network virtual-appliance create -n {nva_name1} -g {rg} --vhub {vhub} --vendor "checkpoint" '
+                 '--scale-unit 2 -v latest --asn 64512 --init-config "echo $abc" --identity {identityProperty1}',
+                 checks=[
+                     self.check('name', '{nva_name1}'),
+                     self.check('virtualApplianceAsn', 64512),
+                     self.check('cloudInitConfiguration', 'echo $abc'),
+                     self.check('identity.type', 'SystemAssigned')
+                     ])
+        self.cmd('network virtual-appliance show -g {rg} -n {nva_name1}', 
+                 checks=[
+                     self.check('name', '{nva_name1}'),
+                     self.check('virtualApplianceAsn', 64512),
+                     self.check('cloudInitConfiguration', 'echo $abc'),
+                     self.check('identity.type', 'SystemAssigned')
+                     ])
+        self.cmd('network virtual-appliance delete -n {nva_name1} -g {rg} -y')
+        self.cmd('identity create -g {rg} -n {ua_Identity1}').get_output_in_json()
+        subscriptionId = self.get_subscription_id()
+        uaIdentity1 = self.kwargs.get('ua_Identity1')
+        resourceGroup = self.kwargs.get('rg')
+        identityProperty2 = '{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/"' + subscriptionId + '"/resourceGroups/"' + resourceGroup + '"/providers/Microsoft.ManagedIdentity/userAssignedIdentities/"' + uaIdentity1 + ':{}}}'
+        self.kwargs.update({
+            'identityProperty2': identityProperty2
+        })
+        self.cmd('network virtual-appliance create -n {nva_name2} -g {rg} --vhub {vhub} --vendor "checkpoint" '
+                 '--scale-unit 2 -v latest --asn 64512 --init-config "echo $abc" --identity {identityProperty2} ',
+                 checks=[
+                     self.check('name', '{nva_name2}'),
+                     self.check('virtualApplianceAsn', 64512),
+                     self.check('cloudInitConfiguration', 'echo $abc'),
+                     self.check('identity.type', 'UserAssigned')
+                     ])
+        self.cmd('network virtual-appliance show -g {rg} -n {nva_name2}', 
+                 checks=[
+                     self.check('name', '{nva_name2}'),
+                     self.check('virtualApplianceAsn', 64512),
+                     self.check('cloudInitConfiguration', 'echo $abc'),
+                     self.check('identity.type', 'UserAssigned')
+                     ])
+        self.cmd('network virtual-appliance delete -n {nva_name2} -g {rg} -y')
+        identityProperty3 = '{"type":"SystemAssigned"}'
+        self.kwargs.update({
+            'identityProperty3': identityProperty3
+        })
+        self.cmd('network virtual-appliance update -g {rg} -n {nva_name3} --identity {identityProperty3}',
+                 checks=[
+                     self.check('name', '{nva_name3}'),
+                     self.check('virtualApplianceAsn', 64512),
+                     self.check('cloudInitConfiguration', 'echo $abc'),
+                     self.check('identity.type', 'SystemAssigned')
+                 ])
+        self.cmd('network virtual-appliance delete -n {nva_name3} -g {rg} -y')
+
+        self.cmd('identity create -g {rg} -n {ua_Identity2}').get_output_in_json()
+        uaIdentity2 = self.kwargs.get('ua_Identity2')
+        identityProperty4 = '{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/"' + subscriptionId + '"/resourceGroups/"' + resourceGroup + '"/providers/Microsoft.ManagedIdentity/userAssignedIdentities/"' + uaIdentity2 + ':{}}}'
+        self.kwargs.update({
+            'identityProperty4': identityProperty4
+        })
+        self.cmd('network virtual-appliance update -g {rg} -n {nva_name4} --identity {identityProperty4}',
+                 checks=[
+                     self.check('name', '{nva_name4}'),
+                     self.check('virtualApplianceAsn', 64512),
+                     self.check('cloudInitConfiguration', 'echo $abc'),
+                     self.check('identity.type', 'UserAssigned')
+                 ])
+        self.cmd('network virtual-appliance delete -n {nva_name4} -g {rg} -y')
 
 class NetworkExtendedLocation(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_network_lb_edge_zone', location='eastus2euap')

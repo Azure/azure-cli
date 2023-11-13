@@ -402,8 +402,10 @@ def recover_vault_or_hsm(cmd, client, resource_group_name=None, location=None, v
 def recover_hsm(cmd, client, hsm_name, resource_group_name, location, no_wait=False):
     from azure.cli.core._profile import Profile, _TENANT_ID
 
-    ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT)
-    ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_KEYVAULT)
+    ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT,
+                                operation_group='managed_hsms')
+    ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_KEYVAULT,
+                                   operation_group='managed_hsms')
 
     # tenantId and sku shouldn't be required
     profile = Profile(cli_ctx=cmd.cli_ctx)
@@ -508,7 +510,8 @@ def get_vault_or_hsm(cmd, client, resource_group_name, vault_name=None, hsm_name
     return hsm_client.get(resource_group_name=resource_group_name, name=hsm_name)
 
 
-def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
+# pylint: disable=too-many-locals
+def create_vault_or_hsm(cmd, client,
                         resource_group_name, vault_name=None, hsm_name=None,
                         administrators=None,
                         location=None, sku=None,
@@ -527,6 +530,7 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                         tags=None,
                         no_wait=False,
                         public_network_access=None,
+                        user_identities=None,
                         ):
     if is_azure_stack_profile(cmd) or vault_name:
         return create_vault(cmd=cmd,
@@ -568,6 +572,7 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                               bypass=bypass,
                               default_action=default_action,
                               tags=tags,
+                              user_identities=user_identities,
                               no_wait=no_wait)
         except ValidationError as ex:
             error_msg = str(ex)
@@ -578,6 +583,7 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
             raise CLIError(error_msg)
 
 
+# pylint: disable=too-many-locals
 def create_hsm(cmd, client,
                resource_group_name, hsm_name, administrators, location=None, sku=None,
                enable_purge_protection=None,
@@ -586,7 +592,8 @@ def create_hsm(cmd, client,
                bypass=None,
                default_action=None,
                tags=None,
-               no_wait=False):  # pylint: disable=unused-argument
+               user_identities=None,
+               no_wait=False):
 
     if not administrators:
         raise CLIError('Please specify --administrators')
@@ -598,9 +605,12 @@ def create_hsm(cmd, client,
     if not sku:
         sku = 'Standard_B1'
 
-    ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT)
-    ManagedHsmProperties = cmd.get_models('ManagedHsmProperties', resource_type=ResourceType.MGMT_KEYVAULT)
-    ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_KEYVAULT)
+    ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT,
+                                operation_group='managed_hsms')
+    ManagedHsmProperties = cmd.get_models('ManagedHsmProperties', resource_type=ResourceType.MGMT_KEYVAULT,
+                                          operation_group='managed_hsms')
+    ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_KEYVAULT,
+                                   operation_group='managed_hsms')
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
     tenant_id = profile.get_subscription(subscription=cmd.cli_ctx.data.get('subscription_id', None))[_TENANT_ID]
@@ -615,6 +625,15 @@ def create_hsm(cmd, client,
                             tags=tags,
                             sku=ManagedHsmSku(name=sku, family='B'),
                             properties=properties)
+
+    if user_identities:
+        ManagedServiceIdentity = cmd.get_models('ManagedServiceIdentity', resource_type=ResourceType.MGMT_KEYVAULT,
+                                                operation_group='managed_hsms')
+        if len(user_identities) == 1 and user_identities[0].lower() == 'none':
+            parameters.identity = ManagedServiceIdentity(type='None')
+        else:
+            identities = {i: {} for i in user_identities}
+            parameters.identity = ManagedServiceIdentity(type='UserAssigned', user_assigned_identities=identities)
 
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name=resource_group_name,
@@ -789,7 +808,7 @@ def update_vault_setter(cmd, client, parameters, resource_group_name, vault_name
 
 
 def update_hsm_setter(cmd, client, parameters, resource_group_name, name, no_wait=False):
-    ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT)
+    ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT, operation_group='managed_hsms')
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name=resource_group_name,
                        name=name,
@@ -797,6 +816,7 @@ def update_hsm_setter(cmd, client, parameters, resource_group_name, name, no_wai
                            sku=parameters.sku,
                            tags=parameters.tags,
                            location=parameters.location,
+                           identity=parameters.identity,
                            properties=parameters.properties))
 
 
@@ -848,7 +868,8 @@ def update_hsm(cmd, instance,
                bypass=None,
                default_action=None,
                secondary_locations=None,
-               public_network_access=None):
+               public_network_access=None,
+               user_identities=None):
     if enable_purge_protection is not None:
         instance.properties.enable_purge_protection = enable_purge_protection
 
@@ -867,6 +888,14 @@ def update_hsm(cmd, instance,
                 instance.properties.network_acls.bypass = bypass
             if default_action:
                 instance.properties.network_acls.default_action = default_action
+    if user_identities:
+        ManagedServiceIdentity = cmd.get_models('ManagedServiceIdentity', resource_type=ResourceType.MGMT_KEYVAULT,
+                                                operation_group='managed_hsms')
+        if len(user_identities) == 1 and user_identities[0].lower() == 'none':
+            instance.identity = ManagedServiceIdentity(type='None')
+        else:
+            identities = {i: {} for i in user_identities}
+            instance.identity = ManagedServiceIdentity(type='UserAssigned', user_assigned_identities=identities)
     return instance
 
 
@@ -1120,6 +1149,21 @@ def create_key(client, name=None, protection=None,  # pylint: disable=unused-arg
                              release_policy=release_policy)
 
 
+def list_keys(client, maxresults=None, include_managed=False):
+    result = client.list_properties_of_keys(max_page_size=maxresults)
+    if not include_managed:
+        return [_ for _ in result if not getattr(_, 'managed')] if result else result
+    return result
+
+
+def delete_key(client, name):
+    return client.begin_delete_key(name).result()
+
+
+def recover_key(client, name):
+    return client.begin_recover_deleted_key(name).result()
+
+
 def encrypt_key(cmd, client, algorithm, value, iv=None, aad=None, name=None, version=None):
     EncryptionAlgorithm = cmd.loader.get_sdk('EncryptionAlgorithm', mod='crypto._enums',
                                              resource_type=ResourceType.DATA_KEYVAULT_KEYS)
@@ -1159,22 +1203,20 @@ def verify_key(cmd, client, algorithm, digest, signature, name=None, version=Non
                                 base64.b64decode(signature.encode('utf-8')))
 
 
-def backup_key(client, file_path, vault_base_url=None,
-               key_name=None, hsm_name=None, identifier=None):  # pylint: disable=unused-argument
-    backup = client.backup_key(vault_base_url, key_name).value
+def backup_key(client, file_path, name):
+    backup = client.backup_key(name)
     with open(file_path, 'wb') as output:
         output.write(backup)
 
 
-def restore_key(cmd, client, file_path=None, vault_base_url=None, hsm_name=None,
-                identifier=None, storage_resource_uri=None,  # pylint: disable=unused-argument
+def restore_key(cmd, client, name=None, file_path=None, storage_resource_uri=None,  # pylint: disable=unused-argument
                 storage_account_name=None, blob_container_name=None,
-                token=None, backup_folder=None, key_name=None, no_wait=False):
+                token=None, backup_folder=None, no_wait=False):
     if file_path:
         if any([storage_account_name, blob_container_name, token, backup_folder]):
             raise MutuallyExclusiveArgumentError('Do not use --file/-f with any of --storage-account-name/'
                                                  '--blob-container-name/--storage-container-SAS-token/--backup-folder')
-        if key_name:
+        if name:
             raise MutuallyExclusiveArgumentError('Please do not specify --name/-n when using --file/-f')
 
         if no_wait:
@@ -1187,9 +1229,7 @@ def restore_key(cmd, client, file_path=None, vault_base_url=None, hsm_name=None,
     if file_path:
         with open(file_path, 'rb') as file_in:
             data = file_in.read()
-        if hsm_name is None:  # TODO: use a more graceful way to implement.
-            hsm_name = vault_base_url
-        return client.restore_key(hsm_name, data)
+        return client.restore_key_backup(data)
 
     if not token:
         raise RequiredArgumentMissingError('Please specify --storage-container-SAS-token/-t')
@@ -1202,12 +1242,12 @@ def restore_key(cmd, client, file_path=None, vault_base_url=None, hsm_name=None,
             cmd.cli_ctx.cloud.suffixes.storage_endpoint, storage_account_name, blob_container_name)
 
     backup_client = get_client_factory(
-        ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)(cmd.cli_ctx, {'hsm_name': hsm_name})
+        ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)(cmd.cli_ctx, {'vault_base_url': client.vault_url})
     return sdk_no_wait(
         no_wait, backup_client.begin_selective_restore,
         folder_url='{}/{}'.format(storage_resource_uri, backup_folder),
         sas_token=token,
-        key_name=key_name
+        key_name=name
     )
 
 
@@ -1409,13 +1449,12 @@ def _export_public_key_to_pem(k):
     return _export_public_key(k, encoding=Encoding.PEM)
 
 
-def download_key(client, file_path, hsm_name=None, identifier=None,  # pylint: disable=unused-argument
-                 vault_base_url=None, key_name=None, key_version='', encoding=None):
+def download_key(client, file_path, name, version='', encoding=None):
     """ Download a key from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
 
-    key = client.get_key(vault_base_url, key_name, key_version)
+    key = client.get_key(name=name, version=version)
     json_web_key = _jwk_to_dict(key.key)
     key_type = json_web_key['kty']
     pub_key = ''
@@ -1692,21 +1731,6 @@ def delete_certificate_issuer_admin(client, issuer_name, email):
     else:
         organization_id = issuer.organization_id
         client.update_issuer(issuer_name, organization_id=organization_id)
-# endregion
-
-
-# region storage_account
-def backup_storage_account(client, file_path, vault_base_url=None,
-                           storage_account_name=None, identifier=None):  # pylint: disable=unused-argument
-    backup = client.backup_storage_account(vault_base_url, storage_account_name).value
-    with open(file_path, 'wb') as output:
-        output.write(backup)
-
-
-def restore_storage_account(client, vault_base_url, file_path):
-    with open(file_path, 'rb') as file_in:
-        data = file_in.read()
-        return client.restore_storage_account(vault_base_url, data)
 # endregion
 
 
@@ -2142,23 +2166,25 @@ def storage_account_parameters_check(storage_resource_uri, storage_account_name,
                                            '--storage-account-name & --blob-container-name')
 
 
-def full_backup(cmd, client, token, storage_resource_uri=None, storage_account_name=None, blob_container_name=None,
-                hsm_name=None):  # pylint: disable=unused-argument
+def full_backup(cmd, client, storage_resource_uri=None, storage_account_name=None, blob_container_name=None,
+                token=None, use_managed_identity=None, hsm_name=None):  # pylint: disable=unused-argument
     storage_account_parameters_check(storage_resource_uri, storage_account_name, blob_container_name)
     if not storage_resource_uri:
         storage_resource_uri = construct_storage_uri(
             cmd.cli_ctx.cloud.suffixes.storage_endpoint, storage_account_name, blob_container_name)
-    return client.begin_backup(storage_resource_uri, token)
+    return client.begin_backup(storage_resource_uri, sas_token=token, use_managed_identity=use_managed_identity)
 
 
-def full_restore(cmd, client, token, folder_to_restore, storage_resource_uri=None, storage_account_name=None,
-                 blob_container_name=None, key_name=None, hsm_name=None):  # pylint: disable=unused-argument
+def full_restore(cmd, client, folder_to_restore,
+                 storage_resource_uri=None, storage_account_name=None, blob_container_name=None,
+                 token=None, use_managed_identity=None, key_name=None, hsm_name=None):  # pylint: disable=unused-argument
     storage_account_parameters_check(storage_resource_uri, storage_account_name, blob_container_name)
     if not storage_resource_uri:
         storage_resource_uri = construct_storage_uri(
             cmd.cli_ctx.cloud.suffixes.storage_endpoint, storage_account_name, blob_container_name)
     folder_url = '{}/{}'.format(storage_resource_uri, folder_to_restore)
-    return client.begin_restore(folder_url, token, key_name=key_name)
+    return client.begin_restore(folder_url, sas_token=token, key_name=key_name,
+                                use_managed_identity=use_managed_identity)
 # endregion
 
 
