@@ -158,12 +158,6 @@ class Create(AAZCommand):
             arg_group="SharedPrivateLinkResource",
             help="The request message for requesting approval of the shared private link resource.",
         )
-        _args_schema.status = AAZStrArg(
-            options=["--status"],
-            arg_group="SharedPrivateLinkResource",
-            help="Status of the shared private link resource. Can be Pending, Approved, Rejected, Disconnected, or Timeout.",
-            enum={"Approved": "Approved", "Disconnected": "Disconnected", "Pending": "Pending", "Rejected": "Rejected", "Timeout": "Timeout"},
-        )
         return cls._args_schema
 
     _args_resource_reference_create = None
@@ -319,7 +313,6 @@ class Create(AAZCommand):
                 shared_private_link_resource.set_prop("privateLink", AAZObjectType)
                 shared_private_link_resource.set_prop("privateLinkLocation", AAZStrType, ".private_link_location")
                 shared_private_link_resource.set_prop("requestMessage", AAZStrType, ".private_link_request_message")
-                shared_private_link_resource.set_prop("status", AAZStrType, ".status")
 
             private_link = _builder.get(".properties.sharedPrivateLinkResource.privateLink")
             if private_link is not None:

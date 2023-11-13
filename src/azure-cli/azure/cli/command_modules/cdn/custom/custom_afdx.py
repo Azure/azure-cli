@@ -76,6 +76,7 @@ def default_content_types():
             "text/x-component",
             "text/x-java-source"]
 
+
 def add_afd_rule_condition(cmd, resource_group_name, profile_name, rule_set_name,
                            rule_name, match_variable, operator, match_values=None, selector=None,
                            negate_condition=None, transforms=None):
@@ -221,7 +222,16 @@ def list_afd_rule_action(cmd, resource_group_name,
 
 from azure.cli.command_modules.cdn.aaz.latest.afd.origin import Create as _AFDOriginCreate
 class AFDOriginCreate(_AFDOriginCreate):
-    
     @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema =  super()._build_arguments_schema(*args, **kwargs)
+    def pre_operations(self):
+        args = self.ctx.args
+        if args.enable_private_link:
+                args.private_link_location = args.private_link_location
+                args.private_link_resource = args.private_link_resource
+                args.private_link_request_message = args.private_link_request_message
+                args.private_link_sub_resource_type = args.private_link_sub_resource_type
+        else:
+                args.private_link_location = None
+                args.private_link_resource = None
+                args.private_link_request_message = None
+                args.private_link_sub_resource_type = None
