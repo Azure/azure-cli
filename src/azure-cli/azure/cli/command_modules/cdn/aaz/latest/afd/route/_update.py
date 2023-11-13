@@ -66,15 +66,47 @@ class Update(AAZCommand):
             id_part="child_name_2",
         )
 
+        # define Arg Group "CacheConfiguration"
+
+        _args_schema = cls._args_schema
+        _args_schema.query_parameters = AAZStrArg(
+            options=["--query-parameters"],
+            arg_group="CacheConfiguration",
+            help="query parameters to include or exclude (comma separated).",
+            nullable=True,
+        )
+        _args_schema.query_string_caching_behavior = AAZStrArg(
+            options=["--query-string-caching-behavior"],
+            arg_group="CacheConfiguration",
+            help="Defines how Frontdoor caches requests that include query strings. You can ignore any query strings when caching, ignore specific query strings, cache every request with a unique URL, or cache specific query strings.",
+            nullable=True,
+            enum={"IgnoreQueryString": "IgnoreQueryString", "IgnoreSpecifiedQueryStrings": "IgnoreSpecifiedQueryStrings", "IncludeSpecifiedQueryStrings": "IncludeSpecifiedQueryStrings", "UseQueryString": "UseQueryString"},
+        )
+
+        # define Arg Group "CompressionSettings"
+
+        _args_schema = cls._args_schema
+        _args_schema.content_types_to_compress = AAZListArg(
+            options=["--content-types-to-compress"],
+            arg_group="CompressionSettings",
+            help="List of content types on which compression applies. The value should be a valid MIME type.",
+            nullable=True,
+        )
+        _args_schema.enable_compression = AAZBoolArg(
+            options=["--enable-compression"],
+            arg_group="CompressionSettings",
+            help="Indicates whether content compression is enabled on AzureFrontDoor. Default value is false. If compression is enabled, content will be served as compressed if user requests for a compressed version. Content won't be compressed on AzureFrontDoor when requested content is smaller than 1 byte or larger than 1 MB.",
+            nullable=True,
+        )
+
+        content_types_to_compress = cls._args_schema.content_types_to_compress
+        content_types_to_compress.Element = AAZStrArg(
+            nullable=True,
+        )
+
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.cache_configuration = AAZObjectArg(
-            options=["--cache-configuration"],
-            arg_group="Properties",
-            help="The caching configuration for this route. To disable caching, do not provide a cacheConfiguration object.",
-            nullable=True,
-        )
         _args_schema.custom_domains = AAZListArg(
             options=["--custom-domains"],
             arg_group="Properties",
@@ -137,41 +169,6 @@ class Update(AAZCommand):
             options=["--supported-protocols"],
             arg_group="Properties",
             help="List of supported protocols for this route.",
-            nullable=True,
-        )
-
-        cache_configuration = cls._args_schema.cache_configuration
-        cache_configuration.compression_settings = AAZObjectArg(
-            options=["compression-settings"],
-            help="compression settings.",
-            nullable=True,
-        )
-        cache_configuration.query_parameters = AAZStrArg(
-            options=["query-parameters"],
-            help="query parameters to include or exclude (comma separated).",
-            nullable=True,
-        )
-        cache_configuration.query_string_caching_behavior = AAZStrArg(
-            options=["query-string-caching-behavior"],
-            help="Defines how Frontdoor caches requests that include query strings. You can ignore any query strings when caching, ignore specific query strings, cache every request with a unique URL, or cache specific query strings.",
-            nullable=True,
-            enum={"IgnoreQueryString": "IgnoreQueryString", "IgnoreSpecifiedQueryStrings": "IgnoreSpecifiedQueryStrings", "IncludeSpecifiedQueryStrings": "IncludeSpecifiedQueryStrings", "UseQueryString": "UseQueryString"},
-        )
-
-        compression_settings = cls._args_schema.cache_configuration.compression_settings
-        compression_settings.content_types_to_compress = AAZListArg(
-            options=["content-types-to-compress"],
-            help="List of content types on which compression applies. The value should be a valid MIME type.",
-            nullable=True,
-        )
-        compression_settings.is_compression_enabled = AAZBoolArg(
-            options=["is-compression-enabled"],
-            help="Indicates whether content compression is enabled on AzureFrontDoor. Default value is false. If compression is enabled, content will be served as compressed if user requests for a compressed version. Content won't be compressed on AzureFrontDoor when requested content is smaller than 1 byte or larger than 1 MB.",
-            nullable=True,
-        )
-
-        content_types_to_compress = cls._args_schema.cache_configuration.compression_settings.content_types_to_compress
-        content_types_to_compress.Element = AAZStrArg(
             nullable=True,
         )
 
@@ -477,7 +474,7 @@ class Update(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("cacheConfiguration", AAZObjectType, ".cache_configuration")
+                properties.set_prop("cacheConfiguration", AAZObjectType)
                 properties.set_prop("customDomains", AAZListType, ".custom_domains")
                 properties.set_prop("enabledState", AAZStrType, ".enabled_state")
                 properties.set_prop("forwardingProtocol", AAZStrType, ".forwarding_protocol")
@@ -491,14 +488,14 @@ class Update(AAZCommand):
 
             cache_configuration = _builder.get(".properties.cacheConfiguration")
             if cache_configuration is not None:
-                cache_configuration.set_prop("compressionSettings", AAZObjectType, ".compression_settings")
+                cache_configuration.set_prop("compressionSettings", AAZObjectType)
                 cache_configuration.set_prop("queryParameters", AAZStrType, ".query_parameters")
                 cache_configuration.set_prop("queryStringCachingBehavior", AAZStrType, ".query_string_caching_behavior")
 
             compression_settings = _builder.get(".properties.cacheConfiguration.compressionSettings")
             if compression_settings is not None:
                 compression_settings.set_prop("contentTypesToCompress", AAZListType, ".content_types_to_compress")
-                compression_settings.set_prop("isCompressionEnabled", AAZBoolType, ".is_compression_enabled")
+                compression_settings.set_prop("isCompressionEnabled", AAZBoolType, ".enable_compression")
 
             content_types_to_compress = _builder.get(".properties.cacheConfiguration.compressionSettings.contentTypesToCompress")
             if content_types_to_compress is not None:

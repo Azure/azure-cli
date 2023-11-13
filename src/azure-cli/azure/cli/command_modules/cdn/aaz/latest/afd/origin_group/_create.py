@@ -56,19 +56,58 @@ class Create(AAZCommand):
             required=True,
         )
 
+        # define Arg Group "HealthProbeSettings"
+
+        _args_schema = cls._args_schema
+        _args_schema.probe_interval_in_seconds = AAZIntArg(
+            options=["--probe-interval-in-seconds"],
+            arg_group="HealthProbeSettings",
+            help="The number of seconds between health probes.Default is 240sec.",
+            fmt=AAZIntArgFormat(
+                maximum=255,
+                minimum=1,
+            ),
+        )
+        _args_schema.probe_path = AAZStrArg(
+            options=["--probe-path"],
+            arg_group="HealthProbeSettings",
+            help="The path relative to the origin that is used to determine the health of the origin.",
+        )
+        _args_schema.probe_protocol = AAZStrArg(
+            options=["--probe-protocol"],
+            arg_group="HealthProbeSettings",
+            help="Protocol to use for health probe.",
+            enum={"Http": "Http", "Https": "Https", "NotSet": "NotSet"},
+        )
+        _args_schema.probe_request_type = AAZStrArg(
+            options=["--probe-request-type"],
+            arg_group="HealthProbeSettings",
+            help="The type of health probe request that is made.",
+            enum={"GET": "GET", "HEAD": "HEAD", "NotSet": "NotSet"},
+        )
+
+        # define Arg Group "LoadBalancingSettings"
+
+        _args_schema = cls._args_schema
+        _args_schema.additional_latency_in_milliseconds = AAZIntArg(
+            options=["--additional-latency-in-milliseconds"],
+            arg_group="LoadBalancingSettings",
+            help="The additional latency in milliseconds for probes to fall into the lowest latency bucket",
+        )
+        _args_schema.sample_size = AAZIntArg(
+            options=["--sample-size"],
+            arg_group="LoadBalancingSettings",
+            help="The number of samples to consider for load balancing decisions",
+        )
+        _args_schema.successful_samples_required = AAZIntArg(
+            options=["--successful-samples-required"],
+            arg_group="LoadBalancingSettings",
+            help="The number of samples within the sample period that must succeed",
+        )
+
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.health_probe_settings = AAZObjectArg(
-            options=["--health-probe-settings"],
-            arg_group="Properties",
-            help="Health probe settings to the origin that is used to determine the health of the origin.",
-        )
-        _args_schema.load_balancing_settings = AAZObjectArg(
-            options=["--load-balancing-settings"],
-            arg_group="Properties",
-            help="Load balancing settings for a backend pool",
-        )
         _args_schema.session_affinity_state = AAZStrArg(
             options=["--session-affinity-state"],
             arg_group="Properties",
@@ -83,44 +122,6 @@ class Create(AAZCommand):
                 maximum=50,
                 minimum=0,
             ),
-        )
-
-        health_probe_settings = cls._args_schema.health_probe_settings
-        health_probe_settings.probe_interval_in_seconds = AAZIntArg(
-            options=["probe-interval-in-seconds"],
-            help="The number of seconds between health probes.Default is 240sec.",
-            fmt=AAZIntArgFormat(
-                maximum=255,
-                minimum=1,
-            ),
-        )
-        health_probe_settings.probe_path = AAZStrArg(
-            options=["probe-path"],
-            help="The path relative to the origin that is used to determine the health of the origin.",
-        )
-        health_probe_settings.probe_protocol = AAZStrArg(
-            options=["probe-protocol"],
-            help="Protocol to use for health probe.",
-            enum={"Http": "Http", "Https": "Https", "NotSet": "NotSet"},
-        )
-        health_probe_settings.probe_request_type = AAZStrArg(
-            options=["probe-request-type"],
-            help="The type of health probe request that is made.",
-            enum={"GET": "GET", "HEAD": "HEAD", "NotSet": "NotSet"},
-        )
-
-        load_balancing_settings = cls._args_schema.load_balancing_settings
-        load_balancing_settings.additional_latency_in_milliseconds = AAZIntArg(
-            options=["additional-latency-in-milliseconds"],
-            help="The additional latency in milliseconds for probes to fall into the lowest latency bucket",
-        )
-        load_balancing_settings.sample_size = AAZIntArg(
-            options=["sample-size"],
-            help="The number of samples to consider for load balancing decisions",
-        )
-        load_balancing_settings.successful_samples_required = AAZIntArg(
-            options=["successful-samples-required"],
-            help="The number of samples within the sample period that must succeed",
         )
         return cls._args_schema
 
@@ -238,8 +239,8 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("healthProbeSettings", AAZObjectType, ".health_probe_settings")
-                properties.set_prop("loadBalancingSettings", AAZObjectType, ".load_balancing_settings")
+                properties.set_prop("healthProbeSettings", AAZObjectType)
+                properties.set_prop("loadBalancingSettings", AAZObjectType)
                 properties.set_prop("sessionAffinityState", AAZStrType, ".session_affinity_state")
                 properties.set_prop("trafficRestorationTimeToHealedOrNewEndpointsInMinutes", AAZIntType, ".traffic_restoration_time_to_healed_or_new_endpoints_in_minutes")
 

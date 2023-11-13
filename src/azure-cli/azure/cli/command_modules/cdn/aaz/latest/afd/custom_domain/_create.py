@@ -81,32 +81,31 @@ class Create(AAZCommand):
             help="Resource reference to the Azure resource where custom domain ownership was prevalidated",
         )
         cls._build_args_resource_reference_create(_args_schema.pre_validated_custom_domain_resource_id)
-        _args_schema.tls_settings = AAZObjectArg(
-            options=["--tls-settings"],
-            arg_group="Properties",
-            help="The configuration specifying how to enable HTTPS for the domain - using AzureFrontDoor managed certificate or user's own certificate. If not specified, enabling ssl uses AzureFrontDoor managed certificate by default.",
-        )
 
         extended_properties = cls._args_schema.extended_properties
         extended_properties.Element = AAZStrArg()
 
-        tls_settings = cls._args_schema.tls_settings
-        tls_settings.certificate_type = AAZStrArg(
-            options=["certificate-type"],
+        # define Arg Group "TlsSettings"
+
+        _args_schema = cls._args_schema
+        _args_schema.certificate_type = AAZStrArg(
+            options=["--certificate-type"],
+            arg_group="TlsSettings",
             help="Defines the source of the SSL certificate.",
-            required=True,
             enum={"AzureFirstPartyManagedCertificate": "AzureFirstPartyManagedCertificate", "CustomerCertificate": "CustomerCertificate", "ManagedCertificate": "ManagedCertificate"},
         )
-        tls_settings.minimum_tls_version = AAZStrArg(
-            options=["minimum-tls-version"],
+        _args_schema.minimum_tls_version = AAZStrArg(
+            options=["--minimum-tls-version"],
+            arg_group="TlsSettings",
             help="TLS protocol version that will be used for Https",
             enum={"TLS10": "TLS10", "TLS12": "TLS12"},
         )
-        tls_settings.secret = AAZObjectArg(
-            options=["secret"],
+        _args_schema.secret = AAZObjectArg(
+            options=["--secret"],
+            arg_group="TlsSettings",
             help="Resource reference to the secret. ie. subs/rg/profile/secret",
         )
-        cls._build_args_resource_reference_create(tls_settings.secret)
+        cls._build_args_resource_reference_create(_args_schema.secret)
         return cls._args_schema
 
     _args_resource_reference_create = None
@@ -245,7 +244,7 @@ class Create(AAZCommand):
                 properties.set_prop("extendedProperties", AAZDictType, ".extended_properties")
                 properties.set_prop("hostName", AAZStrType, ".host_name", typ_kwargs={"flags": {"required": True}})
                 _CreateHelper._build_schema_resource_reference_create(properties.set_prop("preValidatedCustomDomainResourceId", AAZObjectType, ".pre_validated_custom_domain_resource_id"))
-                properties.set_prop("tlsSettings", AAZObjectType, ".tls_settings")
+                properties.set_prop("tlsSettings", AAZObjectType)
 
             extended_properties = _builder.get(".properties.extendedProperties")
             if extended_properties is not None:
