@@ -272,7 +272,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
         g.storage_custom_command_oauth('set-tier', 'set_blob_tier')
         g.storage_custom_command_oauth('upload', 'upload_blob',
-                                       doc_string_source=storage_docs_tmpl.format( 'blob#BlockBlobService.create_blob_from_path'))  # pylint: disable=line-too-long
+                                       doc_string_source=storage_docs_tmpl.format('blob#BlockBlobService.create_blob_from_path'))  # pylint: disable=line-too-long
         g.storage_custom_command_oauth('upload-batch', 'storage_blob_upload_batch',
                                        validator=process_blob_upload_batch_parameters)
         g.storage_custom_command_oauth('download-batch', 'storage_blob_download_batch',
