@@ -696,7 +696,6 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
                 command.update_argument(argument_name, overrides)
 
     def _apply_doc_string(self, dest, command_kwargs):
-        from azure.cli.core.profiles._shared import APIVersionException
         doc_string_source = command_kwargs.get('doc_string_source', None)
         if not doc_string_source:
             return
@@ -713,6 +712,8 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
         model = getattr(module, model_name)
         if method_name:
             model = getattr(model, method_name, None)
+        if not model:
+            raise CLIError("command authoring error: source '{}' not found.".format(doc_string_source))
         dest.__doc__ = model.__doc__
 
     def _get_resource_type(self):
