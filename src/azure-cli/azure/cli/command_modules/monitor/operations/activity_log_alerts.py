@@ -69,7 +69,8 @@ def process_condition_parameter_for_alert(args):
 
     # Pick the strings at odd position and convert them into condition leaf.
     conditions = dict(_normalize_condition_for_alert(expression[i]) for i in range(0, len(expression), 2))
-    args.all_of = list(conditions.values())
+    for cond in list(conditions.values()):
+        args.all_of.append(cond)
 
 
 def process_webhook_properties(args):
@@ -94,7 +95,6 @@ class ActivityLogAlertCreate(_ActivityLogAlertCreate):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.enabled._registered = False
         args_schema.location._registered = False
-        args_schema.all_of._registered = False
         args_schema.action_groups._registered = False
         args_schema.scopes._registered = False
         args_schema.scope_ui = AAZListArg(
@@ -166,10 +166,22 @@ class ActivityLogAlertCreate(_ActivityLogAlertCreate):
                 'The activity log alert {} already exists in resource group {}.'.format(args.activity_log_alert_name,
                                                                                         args.resource_group))
         if not has_value(args.all_of):
-            args.all_of = [{
+            args.all_of.append({
                 "field": "category",
                 "equals": "ServiceHealth",
-            }]
+            })
+        else:
+            current_all_of = args.all_of.to_serialized_data()
+            category_found = False
+            for item in current_all_of:
+                if item.get("field", None) == "category":
+                    category_found = True
+                    break
+            if not category_found:
+                args.all_of.append({
+                    "field": "category",
+                    "equals": "ServiceHealth",
+                })
         # Add action groups
         action_group_rids = set()
         if has_value(args.action_group_ids):
@@ -178,7 +190,7 @@ class ActivityLogAlertCreate(_ActivityLogAlertCreate):
         for i in action_group_rids:
             args.action_groups.append({
                 "action_group_id": i,
-                "webhook_properties_raw": webhook_properties
+                "webhook_properties": webhook_properties
             })
         if has_value(args.disable):
             args.enabled = not args.disable
@@ -189,7 +201,6 @@ class ActivityLogAlertUpdate(_ActivityLogAlertUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.all_of._registered = False
         args_schema.action_groups._registered = False
         args_schema.scopes._registered = False
         args_schema.condition = AAZCustomListArg(
@@ -207,6 +218,23 @@ class ActivityLogAlertUpdate(_ActivityLogAlertUpdate):
     def pre_operations(self):
         args = self.ctx.args
         process_condition_parameter_for_alert(args)
+        if not has_value(args.all_of):
+            args.all_of.append({
+                "field": "category",
+                "equals": "ServiceHealth",
+            })
+        else:
+            current_all_of = args.all_of.to_serialized_data()
+            category_found = False
+            for item in current_all_of:
+                if item.get("field", None) == "category":
+                    category_found = True
+                    break
+            if not category_found:
+                args.all_of.append({
+                    "field": "category",
+                    "equals": "ServiceHealth",
+                })
 
 
 @register_command("monitor activity-log alert action-group add")
