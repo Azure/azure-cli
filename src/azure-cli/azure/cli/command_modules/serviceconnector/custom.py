@@ -37,8 +37,7 @@ from ._utils import (
     get_local_conn_auth_info,
     _get_azext_module,
     _get_or_add_extension,
-    springboot_migration_warning,
-    decorate_springboot_cosmossql_config
+    springboot_migration_warning
 )
 from ._credential_free import is_passwordless_command
 # pylint: disable=unused-argument,unsubscriptable-object,unsupported-membership-test,too-many-statements,too-many-locals
@@ -181,8 +180,6 @@ def connection_list_configuration(client,
     configurations = auto_register(client.list_configurations,
                                    resource_uri=source_id,
                                    linker_name=connection_name)
-
-    decorate_springboot_cosmossql_config(configurations)
 
     return configurations
 

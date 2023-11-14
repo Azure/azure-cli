@@ -474,20 +474,3 @@ Learn more at https://spring.io/projects/spring-cloud-azure#overview"
         warning_message += both_version_message
 
     return warning_message
-
-
-def decorate_springboot_cosmossql_config(configs):
-    is_springboot_cosmossql = False
-    require_update = True
-
-    for config in configs.configurations:
-        if config.name.startswith("azure.cosmos."):
-            is_springboot_cosmossql = True
-            config.note = "This configuration property is used in Spring Cloud Azure version 3.x and below."
-        elif config.name.startswith("spring.cloud.azure.cosmos."):
-            is_springboot_cosmossql = True
-            require_update = False
-            config.note = "This configuration property is used in Spring Cloud Azure version 4.0 and above."
-
-    if is_springboot_cosmossql:
-        logger.warning(springboot_migration_warning(require_update=require_update))
