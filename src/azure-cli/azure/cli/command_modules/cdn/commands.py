@@ -247,3 +247,6 @@ def load_command_table(self, _):
 
     from .custom.custom_afdx import AFDOriginCreate
     self.command_table['afd origin create'] = AFDOriginCreate(loader=self)
+
+    from .custom.custom_afdx import AFDOriginUpdate
+    self.command_table['afd origin update'] = AFDOriginUpdate(loader=self)

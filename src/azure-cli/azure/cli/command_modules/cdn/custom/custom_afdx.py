@@ -244,3 +244,28 @@ class AFDOriginCreate(_AFDOriginCreate):
                 args.private_link_resource = None
                 args.private_link_request_message = None
                 args.private_link_sub_resource_type = None
+
+from azure.cli.command_modules.cdn.aaz.latest.afd.origin import Update as _AFDOriginUpdate
+class AFDOriginUpdate(_AFDOriginUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZFileArg, AAZBoolArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.enable_private_link = AAZFileArg(options=['--enable-private-link'],
+                                                  help="Indicates whether private link is enanbled on that origin.",
+                                                  required=True,
+                                                  fmt=AAZBoolArgFormat,)
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if args.enable_private_link:
+                args.private_link_location = args.private_link_location
+                args.private_link_resource = args.private_link_resource
+                args.private_link_request_message = args.private_link_request_message
+                args.private_link_sub_resource_type = args.private_link_sub_resource_type
+        else:
+                args.private_link_location = None
+                args.private_link_resource = None
+                args.private_link_request_message = None
+                args.private_link_sub_resource_type = None
