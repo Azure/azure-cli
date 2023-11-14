@@ -4756,8 +4756,9 @@ class NetworkPrivateLinkMongoClustersTest(ScenarioTest):
             state = self.get_provisioning_state_for_mongocluster_resource()
         print("creation succeeded!")
 
+
 class NetworkPrivateLinkPostgreSQLFlexibleServerScenarioTest(ScenarioTest):
-    
+
     @ResourceGroupPreparer(name_prefix='cli_test_fspg', random_name_length=18, location='eastus2euap')
     def test_private_link_resource_postgres_flexible_server(self, resource_group):
         password = "aBcD1234!@#$"
@@ -4770,14 +4771,15 @@ class NetworkPrivateLinkPostgreSQLFlexibleServerScenarioTest(ScenarioTest):
         })
 
         response = self.cmd('az rest --method "PUT" --headers "{headers}" \
-                        --url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{server_name}?api-version=2023-03-01-preview" \
+                        --url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{server_name}?api-version=2023-06-01-preview" \
                         --body "{body}"')
 
         self.check_provisioning_state_for_postgresql_flexible_server()
 
         self.cmd('az network private-link-resource list --name {server_name} --resource-group {rg} --type Microsoft.DBforPostgreSQL/flexibleServers',
                  checks=[self.check('length(@)', 1), self.check('[0].properties.groupId', 'postgresqlServer')])
-                 
+
+
     @ResourceGroupPreparer(name_prefix='cli_test_fspg', random_name_length=18, location='eastus2euap')
     def test_private_endpoint_connection_postgres_flexible_server(self, resource_group):
         from azure.mgmt.core.tools import resource_id
@@ -4815,7 +4817,7 @@ class NetworkPrivateLinkPostgreSQLFlexibleServerScenarioTest(ScenarioTest):
                  checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
 
         response = self.cmd('az rest --method "PUT" --headers "{headers}" \
-                        --url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{server_name}?api-version=2023-03-01-preview" \
+                        --url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{server_name}?api-version=2023-06-01-preview" \
                         --body "{body}"')
         self.check_provisioning_state_for_postgresql_flexible_server()
 
@@ -4872,13 +4874,15 @@ class NetworkPrivateLinkPostgreSQLFlexibleServerScenarioTest(ScenarioTest):
         # Test delete
         self.cmd('az network private-endpoint-connection delete --id {pec_id} -y')
 
+
     def get_provisioning_state_for_postgresql_flexible_server(self):
         # get provisioning state
         response = self.cmd('az rest --method "GET" \
-                        --url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{server_name}?api-version=2023-03-01-preview" \
+                        --url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{server_name}?api-version=2023-06-01-preview" \
                         ').get_output_in_json()
 
         return response['properties']['state']
+
 
     def check_provisioning_state_for_postgresql_flexible_server(self):
 
