@@ -872,7 +872,7 @@ def load_arguments(self, _):
 
         with self.argument_context('{} run-command invoke'.format(scope)) as c:
             c.argument('parameters', nargs='+', help="space-separated parameters in the format of '[name=]value'")
-            c.argument('scripts', nargs='+', help="Space-separated script lines. Use @{file} to load script from a file")
+            c.argument('scripts', nargs='+', help="Space-separated script lines. Use @(file) to load script from a file")
 
         with self.argument_context('{} stop'.format(scope)) as c:
             c.argument('skip_shutdown', action='store_true', help='Skip shutdown and power-off immediately.', min_api='2019-03-01')
