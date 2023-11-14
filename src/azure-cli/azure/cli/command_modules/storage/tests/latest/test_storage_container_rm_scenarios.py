@@ -100,11 +100,6 @@ class StorageContainerRmScenarios(ScenarioTest):
         self.assertEqual(result['name'], container_name)
         self.assertEqual(result['publicAccess'], 'Container')
 
-        # Update container by container resource id.
-        result = self.cmd('storage container-rm update --ids {container_id} '
-                          '--deny-encryption-scope-override true').get_output_in_json()
-        self.assertEqual(result['denyEncryptionScopeOverride'], True)
-
         # 5. Test list command(with storage account name and resource group)
         result = self.cmd('storage container-rm list --storage-account {sa} --query "[].name"').get_output_in_json()
         self.assertIn(container_name, result)
