@@ -141,8 +141,7 @@ examples:
 
 helps['account management-group list'] = """
 type: command
-short-summary: List all management groups.
-long-summary: List of all management groups in the current tenant.
+short-summary: List of all management groups in the current tenant.
 examples:
   - name: List all management groups
     text: >
@@ -151,8 +150,7 @@ examples:
 
 helps['account management-group show'] = """
 type: command
-short-summary: Get a specific management group.
-long-summary: Get the details of the management group.
+short-summary: Get the details of the management group.
 parameters:
   - name: --name -n
     type: string
