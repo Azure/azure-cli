@@ -2687,7 +2687,7 @@ def show_ingress_sticky_session(cmd, name, resource_group_name):
         raise ValidationError("Ingress must be enabled to enable sticky sessions. Try running `az containerapp ingress -h` for more info.") from e
 
 
-def enable_cors_policy(cmd, name, resource_group_name, allowed_origins, allowed_methods=None, allowed_headers=None, expose_headers=None, allow_credentials=False, max_age=None, no_wait=False):
+def enable_cors_policy(cmd, name, resource_group_name, allowed_origins, allowed_methods=None, allowed_headers=None, expose_headers=None, allow_credentials=None, max_age=None, no_wait=False):
     _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
 
     if not allowed_origins:
@@ -2702,13 +2702,27 @@ def enable_cors_policy(cmd, name, resource_group_name, allowed_origins, allowed_
     if not containerapp_def:
         raise ResourceNotFoundError(f"The containerapp '{name}' does not exist in group '{resource_group_name}'")
 
+    reset_max_age = False
+    if max_age == "":
+        reset_max_age = True
+
     containerapp_patch = {}
-    safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowedOrigins", value=allowed_origins)
-    safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowedMethods", value=allowed_methods)
-    safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowedHeaders", value=allowed_headers)
-    safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "exposeHeaders", value=expose_headers)
-    safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowCredentials", value=allow_credentials)
-    safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "maxAge", value=max_age)
+    if allowed_origins is not None:
+        safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowedOrigins", value=allowed_origins)
+    if allowed_methods is not None:
+        safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowedMethods", value=allowed_methods)
+    if allowed_headers is not None:
+        safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowedHeaders", value=allowed_headers)
+    if expose_headers is not None:
+        safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "exposeHeaders", value=expose_headers)
+    if allow_credentials is not None:
+        safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowCredentials", value=allow_credentials)
+    if max_age is not None:
+        if reset_max_age:
+            safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "maxAge", value=None)
+        else:
+            safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "maxAge", value=max_age)
+
     try:
         r = ContainerAppClient.update(
             cmd=cmd, resource_group_name=resource_group_name, name=name, container_app_envelope=containerapp_patch, no_wait=no_wait)
