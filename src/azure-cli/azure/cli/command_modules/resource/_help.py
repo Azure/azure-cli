@@ -141,7 +141,7 @@ examples:
 
 helps['account management-group list'] = """
 type: command
-short-summary: List of all management groups in the current tenant.
+short-summary: List all management groups in the current tenant.
 examples:
   - name: List all management groups
     text: >
@@ -2717,7 +2717,7 @@ helps['bicep'] = """
 type: group
 short-summary: Bicep CLI command group.
 long-summary: |
-  Bicep CLI command group. There are two configurations that can be set for the command group, including bicep.check_version and bicep.use_binary_from_path:
+  There are two configurations that can be set for the command group, including bicep.check_version and bicep.use_binary_from_path:
 
   [1] az config set bicep.check_version=True/False
       Turn on/off Bicep CLI version check when executing az bicep commands.
