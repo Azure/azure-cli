@@ -5419,20 +5419,23 @@ def _make_onedeploy_request(params):
                                                           params.webapp_name, deployment_status_url, params.slot)
                 if deployment_id is None:
                     raise CLIError("Unable to fetch deployment id for this deployment. "
-                                   "Try deploying the app without --track-deployment param.")
+                                   "Try deploying the app without --track-runtime-status param.")
                 deploymentstatusapi_url = _build_deploymentstatus_url(params, deployment_id)
                 response_body = _track_deployment_runtime_status(params,
                                                                  deploymentstatusapi_url, params.timeout)
             else:
                 response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
                                                              deployment_status_url, params.slot, params.timeout)
-            logger.info('Async deployment complete. Server response: %s', response_body)
+            logger.info('Server response: %s', response_body)
         else:
             if 'application/json' in response.headers.get('content-type', ""):
                 state = response.json().get("properties", {}).get("provisioningState")
                 if state:
                     logger.warning("Deployment status is: \"%s\"", state)
                 response_body = response.json().get("properties", {})
+        logger.warning("Deployment has completed successfully")
+        logger.warning("You can visit your webapp at: %s", _get_url(params.cmd, params.resource_group_name,
+                                                                    params.webapp_name, params.slot))
         return response_body
 
     # API not available yet!
@@ -5460,7 +5463,6 @@ def _perform_onedeploy_internal(params):
     # Now make the OneDeploy API call
     logger.warning("Initiating deployment")
     response = _make_onedeploy_request(params)
-    logger.warning("Deployment has completed successfully")
     return response
 
 
