@@ -4203,18 +4203,19 @@ def _get_latest_deployment_id(cmd, rg_name, name, deployment_status_url, slot):
     return None
 
 
-def _track_deployment_using_deploymentstatus_api(params, deploymentstatusapi_url, timeout=None):
+def _track_deployment_runtime_status(params, deploymentstatusapi_url, timeout=None):
     total_trials = (int(timeout) // 5) if timeout else 200
     num_trials = 0
     runtime_successful = False
     start_time = time.time()
+    logger.warning("Current deployment status:")
     while num_trials < total_trials:
         time.sleep(5)
         response_body = send_raw_request(params.cmd.cli_ctx, "GET", deploymentstatusapi_url,
                                          disable_request_response_logging=True).json()
         deployment_status = response_body.get('properties').get('status')
         time_elapseed = int(time.time() - start_time)
-        logger.info("Current deployment status: %s. %s sec(s)", deployment_status, time_elapseed)
+        logger.warning("%s %ssec(s)", deployment_status, time_elapseed)
         if deployment_status == "RuntimeSuccessful":
             runtime_successful = True
             break
@@ -5101,7 +5102,7 @@ def perform_onedeploy(cmd,
                       ignore_stack=None,
                       timeout=None,
                       slot=None,
-                      track_deployment=False):
+                      track_runtime_status=False):
     params = OneDeployParams()
 
     params.cmd = cmd
@@ -5117,7 +5118,7 @@ def perform_onedeploy(cmd,
     params.should_ignore_stack = ignore_stack
     params.timeout = timeout
     params.slot = slot
-    params.track_deployment = track_deployment
+    params.track_runtime_status = track_runtime_status
 
     return _perform_onedeploy_internal(params)
 
@@ -5139,7 +5140,7 @@ class OneDeployParams:
         self.should_ignore_stack = None
         self.timeout = None
         self.slot = None
-        self.track_deployment = False
+        self.track_runtime_status = False
 # pylint: enable=too-many-instance-attributes,too-few-public-methods
 
 
@@ -5226,7 +5227,7 @@ def _get_onedeploy_request_body(params):
     import os
 
     if params.src_path:
-        logger.info('Deploying from local path: %s', params.src_path)
+        logger.warning('Deploying from local path: %s', params.src_path)
         try:
             with open(os.path.realpath(os.path.expanduser(params.src_path)), 'rb') as fs:
                 body = fs.read()
@@ -5234,7 +5235,7 @@ def _get_onedeploy_request_body(params):
             raise ResourceNotFoundError("Either '{}' is not a valid local file path or you do not have permissions to "
                                         "access it".format(params.src_path)) from e
     elif params.src_url:
-        logger.info('Deploying from URL: %s', params.src_url)
+        logger.warning('Deploying from URL: %s', params.src_url)
         body = {
             "properties": {
                 "packageUri": params.src_url,
@@ -5296,8 +5297,8 @@ def _make_onedeploy_request(params):
     if response.status_code == 202 or response.status_code == 200:
         response_body = None
         if poll_async_deployment_for_debugging:
-            logger.info('Polling the status of async deployment')
-            if params.track_deployment is not None and params.track_deployment:
+            logger.warning('Polling the status of async deployment')
+            if params.track_runtime_status is not None and params.track_runtime_status:
                 # once deploymentstatus/latest is available, we can use it to track the deployment
                 deployment_id = _get_latest_deployment_id(params.cmd, params.resource_group_name,
                                                           params.webapp_name, deployment_status_url, params.slot)
@@ -5305,8 +5306,8 @@ def _make_onedeploy_request(params):
                     raise CLIError("Unable to fetch deployment id for this deployment. "
                                    "Try deploying the app without --track-deployment param.")
                 deploymentstatusapi_url = _build_deploymentstatus_url(params, deployment_id)
-                response_body = _track_deployment_using_deploymentstatus_api(params,
-                                                                             deploymentstatusapi_url, params.timeout)
+                response_body = _track_deployment_runtime_status(params,
+                                                                 deploymentstatusapi_url, params.timeout)
             else:
                 response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
                                                              deployment_status_url, params.slot, params.timeout)
@@ -5342,9 +5343,9 @@ def _perform_onedeploy_internal(params):
     _update_artifact_type(params)
 
     # Now make the OneDeploy API call
-    logger.info("Initiating deployment")
+    logger.warning("Initiating deployment")
     response = _make_onedeploy_request(params)
-    logger.info("Deployment has completed successfully")
+    logger.warning("Deployment has completed successfully")
     return response
 
 
