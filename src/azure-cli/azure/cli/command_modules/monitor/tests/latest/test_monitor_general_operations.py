@@ -5,12 +5,14 @@
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only, JMESPathCheck
 from azure.cli.testsdk.constants import AUX_SUBSCRIPTION
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from unittest import mock
 import unittest
 from msrestazure.tools import resource_id
 
 
 class MonitorCloneVMScenarios(ScenarioTest):
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location='eastus')
     def test_monitor_clone_vm_metric_alerts_scenario(self, resource_group):
         self.kwargs.update({

@@ -96,7 +96,7 @@ from .aaz.latest.network.vnet import Create as _VNetCreate, Update as _VNetUpdat
 from .aaz.latest.network.vnet.peering import Create as _VNetPeeringCreate
 from .aaz.latest.network.vnet.subnet import Create as _VNetSubnetCreate, Update as _VNetSubnetUpdate
 from .aaz.latest.network.vnet_gateway import Create as _VnetGatewayCreate, Update as _VnetGatewayUpdate, \
-    DisconnectVpnConnections as _VnetGatewayVpnConnectionsDisconnect
+    DisconnectVpnConnections as _VnetGatewayVpnConnectionsDisconnect, Show as _VNetGatewayShow
 from .aaz.latest.network.vnet_gateway.aad import Assign as _VnetGatewayAadAssign
 from .aaz.latest.network.vnet_gateway.ipsec_policy import Add as _VnetGatewayIpsecPolicyAdd
 from .aaz.latest.network.vnet_gateway.nat_rule import Add as _VnetGatewayNatRuleAdd, List as _VnetGatewayNatRuleShow, \
@@ -139,8 +139,7 @@ logger = get_logger(__name__)
 RULESET_VERSION = {"0.1": "0.1", "1.0": "1.0", "2.2.9": "2.2.9", "3.0": "3.0", "3.1": "3.1", "3.2": "3.2"}
 
 remove_basic_option_msg = "It's recommended to create with `%s`. " \
-                          "Please be aware that the default %s will be changed from Basic to Standard " \
-                          "in the next release. Also note that Basic option will be removed in the future."
+                          "Please be aware that Basic option will be removed in the future."
 
 
 # region Utility methods
@@ -3960,7 +3959,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
             "in the future."
         )
 
-    if sku is None or sku.lower() == "basic":
+    if sku.lower() == "basic":
         logger.warning(remove_basic_option_msg, "--sku standard", "LB SKU")
 
     tags = tags or {}
@@ -4865,7 +4864,7 @@ def _create_network_watchers(cmd, resource_group_name, locations, tags):
     from .aaz.latest.network.watcher import Create
     for location in locations:
         Create(cli_ctx=cmd.cli_ctx)(command_args={
-            'name': '{}-watcher'.format(location),
+            'name': 'NetworkWatcher_{}'.format(location),
             'resource_group': resource_group_name,
             'location': location,
             'tags': tags
@@ -5155,7 +5154,7 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         tier = pip_obj['sku']['tier']
         zone = pip_obj['zones'] if 'zones' in pip_obj else None
 
-    if sku is None or sku.lower() == "basic":
+    if sku.lower() == "basic":
         logger.warning(remove_basic_option_msg, "--sku standard", "Public IP SKU")
 
     if not allocation_method:
@@ -6063,6 +6062,23 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
             elif not instance.properties.active_active and active:
                 logger.info('Placing gateway in active-active mode.')
             args.active = active
+
+
+class VNetGatewayShow(_VNetGatewayShow):
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined
+
+        # resolve flatten conflict
+        # when the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+        props = self.ctx.vars.instance.properties
+        if has_value(props.nat_rules):
+            for rule in props.nat_rules:
+                if has_value(rule.properties) and has_value(rule.properties.type):
+                    rule.properties.type = AAZUndefined
+
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+
+        return result
 
 
 def generate_vpn_client(cmd, resource_group_name, virtual_network_gateway_name, processor_architecture=None,

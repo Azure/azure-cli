@@ -34,11 +34,9 @@ LABEL maintainer="Microsoft" \
 
 ARG JP_VERSION="0.2.1"
 
-WORKDIR azure-cli
-COPY . /azure-cli
-RUN apk add --no-cache ca-certificates bash bash-completion libintl icu-libs libc6-compat jq openssh-keygen \
+RUN --mount=type=bind,target=/azure-cli,source=./,rw apk add --no-cache ca-certificates bash bash-completion libintl icu-libs libc6-compat jq openssh-keygen \
     && apk add --no-cache --virtual .build-deps gcc musl-dev linux-headers libffi-dev curl \
-    && update-ca-certificates && ./scripts/install_full.sh && python ./scripts/trim_sdk.py \
+    && update-ca-certificates && cd /azure-cli && ./scripts/install_full.sh && python ./scripts/trim_sdk.py \
     && cat /azure-cli/az.completion > ~/.bashrc \
     && dos2unix /root/.bashrc /usr/local/bin/az \
     && arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && curl -L https://github.com/jmespath/jp/releases/download/${JP_VERSION}/jp-linux-$arch -o /usr/local/bin/jp \

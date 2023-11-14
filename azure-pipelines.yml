@@ -264,7 +264,7 @@ jobs:
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
-        Alpine ${{ arch.name }}:
+        ${{ arch.name }}:
           pool: ${{ arch.pool }}
           artifactName: docker-${{ arch.value }}
           dockerfile: alpine.dockerfile
@@ -300,7 +300,7 @@ jobs:
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
-        Alpine ${{ arch.name }}:
+        ${{ arch.name }}:
           pool: ${{ arch.pool }}
           artifactName: docker-${{ arch.name }}
   pool:
