@@ -42,8 +42,8 @@ class Usage(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.origin_group_name = AAZStrArg(
-            options=["--origin-group-name"],
+        _args_schema.ids = AAZStrArg(
+            options=["--ids"],
             help="Name of the origin group which is unique within the endpoint.",
             required=True,
         )
@@ -105,7 +105,7 @@ class Usage(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "originGroupName", self.ctx.args.origin_group_name,
+                    "originGroupName", self.ctx.args.ids,
                     required=True,
                 ),
                 **self.serialize_url_param(
