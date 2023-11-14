@@ -4760,10 +4760,12 @@ class NetworkPrivateLinkPostgreSQLFlexibleServerScenarioTest(ScenarioTest):
     
     @ResourceGroupPreparer(name_prefix='cli_test_fspg', random_name_length=18, location='eastus2euap')
     def test_private_link_resource_postgres_flexible_server(self, resource_group):
+        password = "aBcD1234!@#$"
+        username = "admin123"
         self.kwargs.update({
             'server_name': self.create_random_name(prefix='clitest', length=15),
             'sub': self.get_subscription_id(),
-            'body': '{\\"location\\": \\"eastus2euap\\", \\"sku\\": {\\"name\\": \\"Standard_D2ds_v4\\", \\"tier\\": \\"GeneralPurpose\\"}, \\"properties\\": {\\"administratorLogin\\": \\"admin123\\", \\"administratorLoginPassword\\": \\"aBcD1234!@#$\\", \\"version\\": \\"15\\", \\"storage\\": {\\"storageSizeGB\\": 64, \\"autoGrow\\": \\"Disabled\\"}, \\"authConfig\\": {\\"activeDirectoryAuth\\": \\"Disabled\\", \\"passwordAuth\\": \\"Enabled\\",  \\"tenantId\\": \\"\\"}, \\"backup\\": {\\"backupRetentionDays\\": 7, \\"geoRedundantBackup\\": \\"Disabled\\"}, \\"highAvailability\\": {\\"mode\\": \\"Disabled\\"}, \\"createMode\\": \\"Create\\"}}',
+            'body': f"""{{\\"location\\": \\"eastus2euap\\", \\"sku\\": {{\\"name\\": \\"Standard_D2ds_v4\\", \\"tier\\": \\"GeneralPurpose\\"}}, \\"properties\\": {{\\"administratorLogin\\": \\"{username}\\", \\"administratorLoginPassword\\": \\"{password}\\", \\"version\\": \\"15\\", \\"storage\\": {{\\"storageSizeGB\\": 64, \\"autoGrow\\": \\"Disabled\\"}}, \\"authConfig\\": {{\\"activeDirectoryAuth\\": \\"Disabled\\", \\"passwordAuth\\": \\"Enabled\\",  \\"tenantId\\": \\"\\"}}, \\"backup\\": {{\\"backupRetentionDays\\": 7, \\"geoRedundantBackup\\": \\"Disabled\\"}}, \\"highAvailability\\": {{\\"mode\\": \\"Disabled\\"}}, \\"createMode\\": \\"Create\\"}}}}""",
             'headers': '{\\"Content-Type\\":\\"application/json\\"}'
         })
 
@@ -4789,19 +4791,20 @@ class NetworkPrivateLinkPostgreSQLFlexibleServerScenarioTest(ScenarioTest):
             type=instance_type,
             name=resource_name,
         )
+        password = "aBcD1234!@#$"
+        username = "admin123"
         self.kwargs.update({
             'server_name': resource_name,
             'target_resource_id': target_resource_id,
             'location': 'eastus2euap',
             'storage': 64,
-            'pass': 'aBcD1234!@#$',
             'resource_type': 'Microsoft.DBforPostgreSQL/flexibleServers',
             'vnet': self.create_random_name('cli-vnet-', 24),
             'subnet': self.create_random_name('cli-subnet-', 24),
             'pe': self.create_random_name('cli-pe-', 24),
             'pe_connection': self.create_random_name('cli-pec-', 24),
             'sub': self.get_subscription_id(),
-            'body': '{\\"location\\": \\"eastus2euap\\", \\"sku\\": {\\"name\\": \\"Standard_D2ds_v4\\", \\"tier\\": \\"GeneralPurpose\\"}, \\"properties\\": {\\"administratorLogin\\": \\"admin123\\", \\"administratorLoginPassword\\": \\"aBcD1234!@#$\\", \\"version\\": \\"15\\", \\"storage\\": {\\"storageSizeGB\\": 64, \\"autoGrow\\": \\"Disabled\\"}, \\"authConfig\\": {\\"activeDirectoryAuth\\": \\"Disabled\\", \\"passwordAuth\\": \\"Enabled\\",  \\"tenantId\\": \\"\\"}, \\"backup\\": {\\"backupRetentionDays\\": 7, \\"geoRedundantBackup\\": \\"Disabled\\"}, \\"highAvailability\\": {\\"mode\\": \\"Disabled\\"}, \\"createMode\\": \\"Create\\"}}',
+            'body': f"""{{\\"location\\": \\"eastus2euap\\", \\"sku\\": {{\\"name\\": \\"Standard_D2ds_v4\\", \\"tier\\": \\"GeneralPurpose\\"}}, \\"properties\\": {{\\"administratorLogin\\": \\"{username}\\", \\"administratorLoginPassword\\": \\"{password}\\", \\"version\\": \\"15\\", \\"storage\\": {{\\"storageSizeGB\\": 64, \\"autoGrow\\": \\"Disabled\\"}}, \\"authConfig\\": {{\\"activeDirectoryAuth\\": \\"Disabled\\", \\"passwordAuth\\": \\"Enabled\\",  \\"tenantId\\": \\"\\"}}, \\"backup\\": {{\\"backupRetentionDays\\": 7, \\"geoRedundantBackup\\": \\"Disabled\\"}}, \\"highAvailability\\": {{\\"mode\\": \\"Disabled\\"}}, \\"createMode\\": \\"Create\\"}}}}""",
             'headers': '{\\"Content-Type\\":\\"application/json\\"}'
         })
 
