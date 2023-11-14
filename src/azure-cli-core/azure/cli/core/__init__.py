@@ -122,7 +122,7 @@ class AzCli(CLI):
         print(ver_string)
         show_updates(updates_available_components)
 
-    def exception_handler(self, ex, command):  # pylint: disable=no-self-use
+    def exception_handler(self, ex, command=None):  # pylint: disable=no-self-use
         from azure.cli.core.util import handle_exception
         return handle_exception(ex, self, command)
 

@@ -9,6 +9,9 @@ import requests
 
 from typing import Union
 from azure.cli.core.style import Style, print_styled_text
+from knack.log import get_logger
+
+logger = get_logger(__name__)
 
 _DEEPPROMPT_ENDPOINT = "https://data-ai-dev.microsoft.com/deepprompt/api/v1"
 _DEEPPROMPT_APP = "7d78b7a3-e228-4b85-8fcf-5633fb326beb"
@@ -22,44 +25,47 @@ _cached_token_session: tuple = ()
 def request_error_assistance(command: Union[str, None] = None,
                              error: Union[str, None] = None,
                              cli_ctx=None) -> dict:
-    if _error_enabled(cli_ctx):
-        print("Generating error assistance. This may take a few seconds.")
+    if not _error_enabled(cli_ctx):
+        return {}
 
-        if not command:
-            print("command cannot be empty.")
+    if not command:
+        logger.error("command cannot be empty.")
+        return {}
 
-        from azure.cli.core.azclierror import AuthenticationError
-        try:
-            global _cached_token_session  # pylint: disable=global-statement
-            if len(_cached_token_session) == 0:
+    print("Generating error assistance. This may take a few seconds.")
+
+    from azure.cli.core.azclierror import AuthenticationError
+    try:
+        global _cached_token_session  # pylint: disable=global-statement
+        if len(_cached_token_session) == 0:
+            _cached_token_session = _refresh_cached_token_session(cli_ctx)
+
+        retry_count: int = 5
+        current_retry: int = 0
+
+        while len(_cached_token_session) < 2 and current_retry < retry_count:
+            # The while statement ensure there are at least two element in the tuple _cached_token_session
+
+            (deepprompt_token, session_id) = _cached_token_session  # pylint: disable=unbalanced-tuple-unpacking
+            response = _send_query(deepprompt_token, session_id, command, error)
+
+            if response.status_code == requests.codes.ok:
+                response_body = json.loads(response.json()["response_text"])
+                return response_body
+
+            if (response.status_code == requests.codes.unauthorized or
+                    response.status_code == requests.codes.forbidden):
                 _cached_token_session = _refresh_cached_token_session(cli_ctx)
+                current_retry = current_retry + 1
+                continue
 
-            retry_count: int = 5
-            current_retry: int = 0
-
-            while len(_cached_token_session) < 2 and current_retry < retry_count:
-                # The while statement ensure there are at least two element in the tuple _cached_token_session
-
-                (deepprompt_token, session_id) = _cached_token_session  # pylint: disable=unbalanced-tuple-unpacking
-                response = _send_query(deepprompt_token, session_id, command, error)
-
-                if response.status_code == requests.codes.ok:
-                    response_body = json.loads(response.json()["response_text"])
-                    return response_body
-
-                if (response.status_code == requests.codes.unauthorized or
-                        response.status_code == requests.codes.forbidden):
-                    _cached_token_session = _refresh_cached_token_session(cli_ctx)
-                    current_retry = current_retry + 1
-                    continue
-
-                print(f"Failed to get the response: {response.status_code}.")
-                break
-        except AuthenticationError:
-            print("Failed to authenticate to the service.")
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            # We just use this to catch all exception so that it doesn't crash the whole process
-            print(f"Got an exception {e}")
+            logger.error("Failed to get the response: %d.", response.status_code)
+            break
+    except AuthenticationError:
+        logger.error("Failed to authenticate to the service.")
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        # We just use this to catch all exception so that it doesn't crash the whole process
+        logger.error("Got an exception %s.", e)
 
     return {}
 
@@ -106,7 +112,7 @@ def _print_line():
 
 def _error_enabled(cli_ctx) -> bool:
     return cli_ctx and (cli_ctx.config.getboolean("core", "error_assistance", fallback=False) or
-                        cli_ctx.config.getboolean("interactive", "error_assistance", fallback=False))
+                        cli_ctx.config.getboolean("interactive", "error_assistance", fallback=True))
 
 
 def _exchange(aad_token: str) -> dict:

@@ -75,12 +75,10 @@ def handle_exception(ex, cli_ctx=None, command=None):  # pylint: disable=too-man
 
     if isinstance(ex, azclierror.AzCLIError):
         az_error = ex
-        az_error.request_error_assistance(cli_ctx)
 
     elif isinstance(ex, JMESPathError):
         error_msg = "Invalid jmespath query supplied for `--query`: {}".format(error_msg)
         az_error = azclierror.InvalidArgumentValueError(error_msg, command=command_string)
-        az_error.request_error_assistance(cli_ctx)
         az_error.set_recommendation(QUERY_REFERENCE)
 
     # SSLError is raised when making HTTP requests with 'requests' lib behind a proxy that intercepts HTTPS traffic.
@@ -97,33 +95,27 @@ def handle_exception(ex, cli_ctx=None, command=None):  # pylint: disable=too-man
         status_code = str(getattr(ex, 'status_code', 'Unknown Code'))
         AzCLIErrorType = get_error_type_by_status_code(status_code)
         az_error = AzCLIErrorType(error_msg, command=command_string)
-        az_error.request_error_assistance(cli_ctx)
 
     elif isinstance(ex, ValidationError):
         az_error = azclierror.ValidationError(error_msg, command=command_string)
-        az_error.request_error_assistance(cli_ctx)
 
     elif isinstance(ex, azclierror.HTTPError):
         # For resources that don't support CAE - 401 can't be handled
         if ex.response.status_code == 401 and 'WWW-Authenticate' in ex.response.headers:
             az_error = azclierror.AuthenticationError(ex, command=command_string)
-            az_error.request_error_assistance(cli_ctx)
             az_error.set_recommendation("Interactive authentication is needed. Please run:\naz logout\naz login")
         else:
             az_error = azclierror.UnclassifiedUserFault(ex, command=command_string)
-            az_error.request_error_assistance(cli_ctx)
 
     elif isinstance(ex, CLIError):
         # TODO: Fine-grained analysis here
         az_error = azclierror.UnclassifiedUserFault(error_msg, command=command_string)
-        az_error.request_error_assistance(cli_ctx)
 
     elif isinstance(ex, AzureError):
         if extract_common_error_message(ex):
             error_msg = extract_common_error_message(ex)
         AzCLIErrorType = get_error_type_by_azure_error(ex)
         az_error = AzCLIErrorType(error_msg, command=command_string)
-        az_error.request_error_assistance(cli_ctx)
 
     elif isinstance(ex, AzureException):
         if is_azure_connection_error(error_msg):
@@ -131,8 +123,6 @@ def handle_exception(ex, cli_ctx=None, command=None):  # pylint: disable=too-man
         else:
             # TODO: Fine-grained analysis here for Unknown error
             az_error = azclierror.UnknownError(error_msg, command=command_string)
-
-        az_error.request_error_assistance(cli_ctx)
 
     elif isinstance(ex, ClientRequestError):
         if is_azure_connection_error(error_msg):
@@ -144,8 +134,6 @@ def handle_exception(ex, cli_ctx=None, command=None):  # pylint: disable=too-man
         else:
             az_error = azclierror.ClientRequestError(error_msg, command=command_string)
 
-        az_error.request_error_assistance(cli_ctx)
-
     elif isinstance(ex, HttpOperationError):
         message, _ = extract_http_operation_error(ex)
         if message:
@@ -153,13 +141,11 @@ def handle_exception(ex, cli_ctx=None, command=None):  # pylint: disable=too-man
         status_code = str(getattr(ex.response, 'status_code', 'Unknown Code'))
         AzCLIErrorType = get_error_type_by_status_code(status_code)
         az_error = AzCLIErrorType(error_msg, command=command_string)
-        az_error.request_error_assistance(cli_ctx)
 
     elif isinstance(ex, HTTPError):
         status_code = str(getattr(ex.response, 'status_code', 'Unknown Code'))
         AzCLIErrorType = get_error_type_by_status_code(status_code, command=command_string)
         az_error = AzCLIErrorType(error_msg)
-        az_error.request_error_assistance(cli_ctx)
 
     elif isinstance(ex, KeyboardInterrupt):
         error_msg = 'Keyboard interrupt is captured.'
@@ -168,7 +154,6 @@ def handle_exception(ex, cli_ctx=None, command=None):  # pylint: disable=too-man
     elif isinstance(ex, PersistenceError):
         # errno is already in strerror. str(ex) gives duplicated errno.
         az_error = azclierror.CLIInternalError(ex.strerror, command=command_string)
-        az_error.request_error_assistance(cli_ctx)
 
         if ex.errno == 0:
             az_error.set_recommendation(
@@ -183,7 +168,6 @@ def handle_exception(ex, cli_ctx=None, command=None):  # pylint: disable=too-man
     else:
         error_msg = "The command failed with an unexpected error. Here is the traceback:"
         az_error = azclierror.CLIInternalError(error_msg, command=command_string)
-        az_error.request_error_assistance(cli_ctx)
         az_error.set_exception_trace(ex)
         az_error.set_recommendation(
             "To check existing issues, please visit: https://github.com/Azure/azure-cli/issues")
@@ -191,6 +175,7 @@ def handle_exception(ex, cli_ctx=None, command=None):  # pylint: disable=too-man
     if isinstance(az_error, azclierror.ResourceNotFoundError):
         exit_code = 3
 
+    az_error.request_error_assistance(cli_ctx)
     az_error.print_error()
     az_error.send_telemetry()
 
