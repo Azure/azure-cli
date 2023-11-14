@@ -525,7 +525,16 @@ class AutomaticScheduling(object):
     def get_all_modules(self):
         result = get_path_table()
         # only get modules and core, ignore extensions
-        self.modules = {**result['mod'], **result['core']}
+        from collections import OrderedDict
+        result_mod = result['mod']
+        result_core = result['core']
+
+        # make sure the dictionary is in order, otherwise job assignments will be random.
+        ordered_mod = OrderedDict(sorted(result_mod.items()))
+        ordered_core = OrderedDict(sorted(result_core.items()))
+
+        # merge two ordered dictionaries
+        self.modules = OrderedDict(list(ordered_mod.items()) + list(ordered_core.items()))
         logger.info(json.dumps(self.modules, indent=2))
 
     def get_extension_modules(self):
