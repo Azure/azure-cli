@@ -234,16 +234,11 @@ class AFDOriginCreate(_AFDOriginCreate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if args.enable_private_link:
-                args.private_link_location = args.private_link_location
-                args.private_link_resource = args.private_link_resource
-                args.private_link_request_message = args.private_link_request_message
-                args.private_link_sub_resource_type = args.private_link_sub_resource_type
-        else:
-                args.private_link_location = None
-                args.private_link_resource = None
-                args.private_link_request_message = None
-                args.private_link_sub_resource_type = None
+        if args.enable_private_link is None:
+            args.private_link_location = None
+            args.private_link_resource = None
+            args.private_link_request_message = None
+            args.private_link_sub_resource_type = None
 
 from azure.cli.command_modules.cdn.aaz.latest.afd.origin import Update as _AFDOriginUpdate
 class AFDOriginUpdate(_AFDOriginUpdate):
@@ -259,13 +254,44 @@ class AFDOriginUpdate(_AFDOriginUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if args.enable_private_link:
-                args.private_link_location = args.private_link_location
-                args.private_link_resource = args.private_link_resource
-                args.private_link_request_message = args.private_link_request_message
-                args.private_link_sub_resource_type = args.private_link_sub_resource_type
-        else:
-                args.private_link_location = None
-                args.private_link_resource = None
-                args.private_link_request_message = None
-                args.private_link_sub_resource_type = None
+        if args.enable_private_link is None:
+            args.private_link_location = None
+            args.private_link_resource = None
+            args.private_link_request_message = None
+            args.private_link_sub_resource_type = None
+
+from azure.cli.command_modules.cdn.aaz.latest.afd.route import Create as _AFDRouteCreate
+class AFDRouteCreate(_AFDRouteCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZFileArg, AAZBoolArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.enable_caching = AAZFileArg(options=['--enable-caching'],
+                                                  help="Indicates whether caching is enanbled on that route.",
+                                                  required=True,
+                                                  fmt=AAZBoolArgFormat,)
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if args.enable_caching is None:
+            args.query_string_caching_behavior = None
+            args.query_parameters = None
+
+from azure.cli.command_modules.cdn.aaz.latest.afd.route import Update as _AFDRouteUpdate
+class AFDRouteUpdate(_AFDRouteUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZFileArg, AAZBoolArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.enable_caching = AAZFileArg(options=['--enable-caching'],
+                                                  help="Indicates whether caching is enanbled on that route.",
+                                                  required=True,
+                                                  fmt=AAZBoolArgFormat,)
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if args.enable_caching is None:
+            args.query_string_caching_behavior = None
+            args.query_parameters = None
