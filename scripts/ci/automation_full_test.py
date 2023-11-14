@@ -526,7 +526,7 @@ class AutomaticScheduling(object):
         result = get_path_table()
         # only get modules and core, ignore extensions
         self.modules = {**result['mod'], **result['core']}
-        logger.info(self.modules)
+        logger.info(json.dumps(self.modules, indent=2))
 
     def get_extension_modules(self):
         out = subprocess.Popen(['azdev', 'extension', 'list', '-o', 'tsv'], stdout=subprocess.PIPE)
@@ -570,7 +570,7 @@ class AutomaticScheduling(object):
             self.works[idx][k] = v
         # instance_idx: 1~n, python list index: 0~n-1
         self.instance_idx -= 1
-        logger.info(self.works)
+        logger.info(json.dumps(self.works, indent=2))
         return self.works[self.instance_idx]
 
     def run_instance_modules(self, instance_modules):
