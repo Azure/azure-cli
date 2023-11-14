@@ -618,6 +618,20 @@ class ContainerappIngressTests(ScenarioTest):
             JMESPathCheck('maxAge', 0),
         ])
 
+        self.cmd(
+            'containerapp ingress cors enable -g {} -n {} --allowed-origins "*"  --allow-credentials True --max-age "" '.format(
+                resource_group, ca_name), checks=[
+                JMESPathCheck('length(allowedOrigins)', 1),
+                JMESPathCheck('allowedOrigins[0]', "*"),
+                JMESPathCheck('length(allowedMethods)', 1),
+                JMESPathCheck('allowedMethods[0]', "GET"),
+                JMESPathCheck('length(allowedHeaders)', 1),
+                JMESPathCheck('allowedHeaders[0]', "header1"),
+                JMESPathCheck('exposeHeaders', None),
+                JMESPathCheck('allowCredentials', True),
+                JMESPathCheck('maxAge', None),
+            ])
+
         self.cmd('containerapp ingress cors disable -g {} -n {}'.format(resource_group, ca_name), checks=[
             JMESPathCheck('corsPolicy', None),
         ])
