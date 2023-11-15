@@ -59,13 +59,15 @@ def request_error_assistance(command: Union[str, None] = None,
                 current_retry = current_retry + 1
                 continue
 
-            logger.error("Failed to get the response: %d.", response.status_code)
+            response_error = f"Failed to get the response: {response.status_code}."
+            logger.error(response_error)
             break
     except AuthenticationError:
         logger.error("Failed to authenticate to the service.")
     except Exception as e:  # pylint: disable=broad-exception-caught
         # We just use this to catch all exception so that it doesn't crash the whole process
-        logger.error("Got an exception %s.", e)
+        exception_error = f"Got an exception {e}."
+        logger.error(exception_error)
 
     return {}
 
