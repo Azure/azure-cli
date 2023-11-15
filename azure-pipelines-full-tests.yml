@@ -25,8 +25,8 @@ jobs:
     matrix:
       Python39:
         python.version: '3.9'
-      Python310:
-        python.version: '3.10'
+      Python311:
+        python.version: '3.11'
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
@@ -44,8 +44,8 @@ jobs:
     matrix:
       Python39:
         python.version: '3.9'
-      Python310:
-        python.version: '3.10'
+      Python311:
+        python.version: '3.11'
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
@@ -63,8 +63,8 @@ jobs:
     matrix:
       Python39:
         python.version: '3.9'
-      Python310:
-        python.version: '3.10'
+      Python311:
+        python.version: '3.11'
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
@@ -107,8 +107,8 @@ jobs:
       fullTest: true
       jobName: 'FullTest'
 
-- job: AutomationFullTestPython310ProfileLatest
-  displayName: Automation Full Test Python310 Profile Latest
+- job: AutomationFullTestPython311ProfileLatest
+  displayName: Automation Full Test Python311 Profile Latest
   timeoutInMinutes: 9999
   strategy:
     maxParallel: 8
@@ -134,7 +134,7 @@ jobs:
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
-      pythonVersion: '3.10'
+      pythonVersion: '3.11'
       profile: 'latest'
       instance_cnt: '8'
       instance_idx: '$(Instance_idx)'
@@ -147,16 +147,16 @@ jobs:
     - AutomationTest20190301
     - AutomationTest20180301
     - AutomationFullTestPython39ProfileLatest
-    - AutomationFullTestPython310ProfileLatest
+    - AutomationFullTestPython311ProfileLatest
   condition: and(failed(), in(variables['Build.Reason'], 'BatchedCI'))
   displayName: Notify CI Errors
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.10'
+    displayName: 'Use Python 3.11'
     inputs:
-      versionSpec: 3.10
+      versionSpec: 3.11
   - task: AzureCLI@2
     inputs:
       azureSubscription: 'Azure CLI'

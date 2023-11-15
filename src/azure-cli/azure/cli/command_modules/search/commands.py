@@ -44,11 +44,15 @@ def load_command_table(self, _):
     with self.command_group('search service', search_services_sdk) as g:
         # right now list_by_resource_group is the only way to list, so directly map to list_by_resource_group.
         g.command('list', 'list_by_resource_group')
-        g.show_command('show', 'get')
-        g.command('delete', 'delete', confirmation=True)
-        g.generic_update_command('update', supports_no_wait=True, custom_func_name='update_search_service', setter_name='begin_create_or_update', setter_arg_name='service')
-        g.custom_command('create', 'create_search_service', supports_no_wait=True)
-        g.wait_command('wait')
+        # g.show_command('show', 'get')
+        # g.command('delete', 'delete', confirmation=True)
+        # g.generic_update_command('update', supports_no_wait=True, custom_func_name='update_search_service', setter_name='begin_create_or_update', setter_arg_name='service')
+        # g.custom_command('create', 'create_search_service', supports_no_wait=True)
+        # g.wait_command('wait')
+
+    from .custom import SearchServiceCreate, SearchServiceUpdate
+    self.command_table["search service create"] = SearchServiceCreate(loader=self)
+    self.command_table["search service update"] = SearchServiceUpdate(loader=self)
 
     with self.command_group('search private-endpoint-connection', search_private_endpoint_connections_sdk) as g:
         g.command('list', 'list_by_service')

@@ -36,7 +36,6 @@ class ProfileCommandsLoader(AzCommandsLoader):
             g.command('set', 'set_active_subscription')
             g.show_command('show', 'show_subscription')
             g.command('clear', 'account_clear')
-            g.command('list-locations', 'list_locations')
             g.command('get-access-token', 'get_access_token')
 
         return self.command_table

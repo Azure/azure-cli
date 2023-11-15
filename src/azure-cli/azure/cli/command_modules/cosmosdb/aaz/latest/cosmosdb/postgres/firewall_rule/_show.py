@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "cosmosdb postgres firewall-rule show",
-    is_preview=True,
 )
 class Show(AAZCommand):
     """Get information about a cluster firewall rule.

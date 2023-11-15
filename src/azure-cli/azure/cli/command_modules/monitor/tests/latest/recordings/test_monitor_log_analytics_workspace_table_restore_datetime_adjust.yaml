@@ -1,0 +1,747 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.51.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.6 (macOS-13.5-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_table000001?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_table000001","name":"cli_test_monitor_workspace_table000001","type":"Microsoft.Resources/resourceGroups","location":"westeurope","tags":{"product":"azurecli","cause":"automation","test":"test_monitor_log_analytics_workspace_table_restore_datetime_adjust","date":"2023-08-16T08:38:49Z","module":"monitor"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '453'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Aug 2023 08:38:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westeurope", "properties": {"publicNetworkAccessForIngestion":
+      "Enabled", "publicNetworkAccessForQuery": "Enabled", "retentionInDays": 30,
+      "sku": {"name": "PerGB2018"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '183'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.5-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_table000001/providers/Microsoft.OperationalInsights/workspaces/ws-000002?api-version=2022-10-01
+  response:
+    body:
+      string: '{"properties":{"customerId":"16485966-92c8-4a05-950f-6c1d1d9d8dd6","provisioningState":"Creating","sku":{"name":"PerGB2018","lastSkuUpdate":"2023-08-16T08:38:57.8062875Z"},"retentionInDays":30,"features":{"legacy":0,"searchVersion":1,"enableLogAccessUsingOnlyResourcePermissions":true},"workspaceCapping":{"dailyQuotaGb":-1.0,"quotaNextResetTime":"2023-08-16T16:00:00Z","dataIngestionStatus":"RespectQuota"},"publicNetworkAccessForIngestion":"Enabled","publicNetworkAccessForQuery":"Enabled","createdDate":"2023-08-16T08:38:57.8062875Z","modifiedDate":"2023-08-16T08:38:57.8062875Z"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_table000001/providers/Microsoft.OperationalInsights/workspaces/ws-000002","name":"ws-000002","type":"Microsoft.OperationalInsights/workspaces"}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2020-08-01, 2020-10-01, 2021-06-01, 2022-10-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '851'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Aug 2023 08:38:58 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_table000001/providers/Microsoft.OperationalInsights/workspaces/ws-000002?api-version=2022-10-01
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:c7ec48f5-2684-46e8-accb-45e7dbec242b
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.5-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_table000001/providers/Microsoft.OperationalInsights/workspaces/ws-000002?api-version=2022-10-01
+  response:
+    body:
+      string: '{"properties":{"customerId":"16485966-92c8-4a05-950f-6c1d1d9d8dd6","provisioningState":"Succeeded","sku":{"name":"PerGB2018","lastSkuUpdate":"2023-08-16T08:38:57.8062875Z"},"retentionInDays":30,"features":{"legacy":0,"searchVersion":1,"enableLogAccessUsingOnlyResourcePermissions":true},"workspaceCapping":{"dailyQuotaGb":-1.0,"quotaNextResetTime":"2023-08-16T16:00:00Z","dataIngestionStatus":"RespectQuota"},"publicNetworkAccessForIngestion":"Enabled","publicNetworkAccessForQuery":"Enabled","createdDate":"2023-08-16T08:38:57.8062875Z","modifiedDate":"2023-08-16T08:38:59.1913653Z"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_table000001/providers/Microsoft.OperationalInsights/workspaces/ws-000002","name":"ws-000002","type":"Microsoft.OperationalInsights/workspaces"}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2020-08-01, 2020-10-01, 2021-06-01, 2022-10-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '852'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Aug 2023 08:38:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:c7ec48f5-2684-46e8-accb-45e7dbec242b
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"plan": "Analytics", "retentionInDays": 45, "schema": {"columns":
+      [{"name": "col1", "type": "guid"}, {"name": "TimeGenerated", "type": "datetime"}],
+      "name": "TB000003_CL"}, "totalRetentionInDays": 70}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace table create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '217'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --workspace-name --retention-time --total-retention-time --plan --columns
+      User-Agent:
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.5-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_table000001/providers/Microsoft.OperationalInsights/workspaces/ws-000002/tables/TB000003_CL?api-version=2022-10-01
+  response:
+    body:
+      string: ''
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2015-11-01-preview, 2017-01-01-preview, 2017-03-03-preview, 2017-03-15-preview,
+        2017-04-26-preview, 2020-03-01-preview, 2020-08-01, 2020-10-01, 2021-03-01-privatepreview,
+        2021-07-01-privatepreview, 2021-12-01-preview, 2022-09-01-privatepreview,
+        2022-10-01, 2023-01-01-preview
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westeurope/operationstatuses/64cdf57f-3cea-45d2-b1ce-32e0a4634ee8?api-version=2022-10-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 16 Aug 2023 08:39:01 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_table000001/providers/Microsoft.OperationalInsights/workspaces/ws-000002/tables/TB000003_CL/operationresults/64cdf57f-3cea-45d2-b1ce-32e0a4634ee8?api-version=2022-10-01
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:c7ec48f5-2684-46e8-accb-45e7dbec242b
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace table create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --workspace-name --retention-time --total-retention-time --plan --columns
+      User-Agent:
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.5-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westeurope/operationstatuses/64cdf57f-3cea-45d2-b1ce-32e0a4634ee8?api-version=2022-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westeurope/operationstatuses/64cdf57f-3cea-45d2-b1ce-32e0a4634ee8","name":"64cdf57f-3cea-45d2-b1ce-32e0a4634ee8","status":"Updating","startTime":"2023-08-16T08:39:02.0920001Z"}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '285'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Aug 2023 08:39:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:c7ec48f5-2684-46e8-accb-45e7dbec242b
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace table create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --workspace-name --retention-time --total-retention-time --plan --columns
+      User-Agent:
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.5-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westeurope/operationstatuses/64cdf57f-3cea-45d2-b1ce-32e0a4634ee8?api-version=2022-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westeurope/operationstatuses/64cdf57f-3cea-45d2-b1ce-32e0a4634ee8","name":"64cdf57f-3cea-45d2-b1ce-32e0a4634ee8","status":"Succeeded","startTime":"2023-08-16T08:39:02.0920001Z","endTime":"2023-08-16T08:39:03.4648333Z","properties":{}}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '343'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Aug 2023 08:39:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:c7ec48f5-2684-46e8-accb-45e7dbec242b
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace table create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --workspace-name --retention-time --total-retention-time --plan --columns
+      User-Agent:
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.5-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_table000001/providers/Microsoft.OperationalInsights/workspaces/ws-000002/tables/TB000003_CL?api-version=2022-10-01
+  response:
+    body:
+      string: '{"properties":{"totalRetentionInDays":70,"archiveRetentionInDays":25,"plan":"Analytics","lastPlanModifiedDate":"2023-08-16T08:39:02.0913359Z","retentionInDaysAsDefault":false,"totalRetentionInDaysAsDefault":false,"schema":{"tableSubType":"DataCollectionRuleBased","name":"TB000003_CL","tableType":"CustomLog","columns":[{"name":"col1","type":"guid","isDefaultDisplay":false,"isHidden":false},{"name":"TimeGenerated","type":"datetime","isDefaultDisplay":false,"isHidden":false}],"standardColumns":[{"name":"TenantId","type":"guid","isDefaultDisplay":false,"isHidden":false}],"solutions":["LogManagement"],"isTroubleshootingAllowed":true},"provisioningState":"Succeeded","retentionInDays":45},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_table000001/providers/Microsoft.OperationalInsights/workspaces/ws-000002/tables/TB000003_CL","name":"TB000003_CL"}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2015-11-01-preview, 2017-01-01-preview, 2017-03-03-preview, 2017-03-15-preview,
+        2017-04-26-preview, 2020-03-01-preview, 2020-08-01, 2020-10-01, 2021-03-01-privatepreview,
+        2021-07-01-privatepreview, 2021-12-01-preview, 2022-09-01-privatepreview,
+        2022-10-01, 2023-01-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '905'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Aug 2023 08:39:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:c7ec48f5-2684-46e8-accb-45e7dbec242b
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace table show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --workspace-name
+      User-Agent:
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.5-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_table000001/providers/Microsoft.OperationalInsights/workspaces/ws-000002/tables/TB000003_CL?api-version=2022-10-01
+  response:
+    body:
+      string: '{"properties":{"totalRetentionInDays":70,"archiveRetentionInDays":25,"plan":"Analytics","lastPlanModifiedDate":"2023-08-16T08:39:02.0913359Z","retentionInDaysAsDefault":false,"totalRetentionInDaysAsDefault":false,"schema":{"tableSubType":"DataCollectionRuleBased","name":"TB000003_CL","tableType":"CustomLog","columns":[{"name":"col1","type":"guid","isDefaultDisplay":false,"isHidden":false},{"name":"TimeGenerated","type":"datetime","isDefaultDisplay":false,"isHidden":false}],"standardColumns":[{"name":"TenantId","type":"guid","isDefaultDisplay":false,"isHidden":false}],"solutions":["LogManagement"],"isTroubleshootingAllowed":true},"provisioningState":"Succeeded","retentionInDays":45},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_table000001/providers/Microsoft.OperationalInsights/workspaces/ws-000002/tables/TB000003_CL","name":"TB000003_CL"}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2015-11-01-preview, 2017-01-01-preview, 2017-03-03-preview, 2017-03-15-preview,
+        2017-04-26-preview, 2020-03-01-preview, 2020-08-01, 2020-10-01, 2021-03-01-privatepreview,
+        2021-07-01-privatepreview, 2021-12-01-preview, 2022-09-01-privatepreview,
+        2022-10-01, 2023-01-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '905'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Aug 2023 08:39:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:c7ec48f5-2684-46e8-accb-45e7dbec242b
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"restoredLogs": {"endRestoreTime": "2023-08-17T00:00:00.000Z",
+      "sourceTable": "TB000003_CL", "startRestoreTime": "2023-08-11T00:00:00.000Z"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace table restore create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '158'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --workspace-name --restore-source-table --start-restore-time --end-restore-time
+      User-Agent:
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.5-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_table000001/providers/Microsoft.OperationalInsights/workspaces/ws-000002/tables/TB000004_RST?api-version=2022-10-01
+  response:
+    body:
+      string: ''
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2015-11-01-preview, 2017-01-01-preview, 2017-03-03-preview, 2017-03-15-preview,
+        2017-04-26-preview, 2020-03-01-preview, 2020-08-01, 2020-10-01, 2021-03-01-privatepreview,
+        2021-07-01-privatepreview, 2021-12-01-preview, 2022-09-01-privatepreview,
+        2022-10-01, 2023-01-01-preview
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westeurope/operationstatuses/472dd292-5b0f-4bb6-832b-7f375cbbfcdc?api-version=2022-10-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 16 Aug 2023 08:39:39 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_table000001/providers/Microsoft.OperationalInsights/workspaces/ws-000002/tables/TB000004_RST/operationresults/472dd292-5b0f-4bb6-832b-7f375cbbfcdc?api-version=2022-10-01
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:c7ec48f5-2684-46e8-accb-45e7dbec242b
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace table restore create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --workspace-name --restore-source-table --start-restore-time --end-restore-time
+      User-Agent:
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.5-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westeurope/operationstatuses/472dd292-5b0f-4bb6-832b-7f375cbbfcdc?api-version=2022-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westeurope/operationstatuses/472dd292-5b0f-4bb6-832b-7f375cbbfcdc","name":"472dd292-5b0f-4bb6-832b-7f375cbbfcdc","status":"Updating","startTime":"2023-08-16T08:39:39.7746337Z"}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '285'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Aug 2023 08:39:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:c7ec48f5-2684-46e8-accb-45e7dbec242b
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace table restore create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --workspace-name --restore-source-table --start-restore-time --end-restore-time
+      User-Agent:
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.5-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westeurope/operationstatuses/472dd292-5b0f-4bb6-832b-7f375cbbfcdc?api-version=2022-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westeurope/operationstatuses/472dd292-5b0f-4bb6-832b-7f375cbbfcdc","name":"472dd292-5b0f-4bb6-832b-7f375cbbfcdc","status":"Failed","startTime":"2023-08-16T08:39:39.7746337Z","endTime":"2023-08-16T08:39:41.0802495Z","error":{"code":"CreateSchemaFatalError","message":"HttpClient:
+        Response status code does not indicate success - 400 (Bad Request), for request
+        - cms/apiv2/workspaces/16485966-92c8-4a05-950f-6c1d1d9d8dd6/tables/TB000004_RST,
+        due to reason - [Table validation failed with following errors: Table TB000003_CL
+        has no data on the specified date range: [8/11/2023 12:00:00 AM +00:00-8/17/2023
+        12:00:00 AM +00:00]]."}}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '736'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Aug 2023 08:40:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:c7ec48f5-2684-46e8-accb-45e7dbec242b
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace table delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n --workspace-name -y
+      User-Agent:
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.5-x86_64-i386-64bit)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_table000001/providers/Microsoft.OperationalInsights/workspaces/ws-000002/tables/TB000003_CL?api-version=2022-10-01
+  response:
+    body:
+      string: ''
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2015-11-01-preview, 2017-01-01-preview, 2017-03-03-preview, 2017-03-15-preview,
+        2017-04-26-preview, 2020-03-01-preview, 2020-08-01, 2020-10-01, 2021-03-01-privatepreview,
+        2021-07-01-privatepreview, 2021-12-01-preview, 2022-09-01-privatepreview,
+        2022-10-01, 2023-01-01-preview
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westeurope/operationstatuses/eac46a73-b996-420b-8867-0a9ea9566379?api-version=2022-10-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 16 Aug 2023 08:40:12 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_table000001/providers/Microsoft.OperationalInsights/workspaces/ws-000002/tables/TB000003_CL/operationresults/eac46a73-b996-420b-8867-0a9ea9566379?api-version=2022-10-01
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:c7ec48f5-2684-46e8-accb-45e7dbec242b
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace table delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --workspace-name -y
+      User-Agent:
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.5-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westeurope/operationstatuses/eac46a73-b996-420b-8867-0a9ea9566379?api-version=2022-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westeurope/operationstatuses/eac46a73-b996-420b-8867-0a9ea9566379","name":"eac46a73-b996-420b-8867-0a9ea9566379","status":"Deleting","startTime":"2023-08-16T08:40:12.9115671Z"}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '285'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Aug 2023 08:40:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:c7ec48f5-2684-46e8-accb-45e7dbec242b
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace table delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --workspace-name -y
+      User-Agent:
+      - AZURECLI/2.51.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.5-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westeurope/operationstatuses/eac46a73-b996-420b-8867-0a9ea9566379?api-version=2022-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/westeurope/operationstatuses/eac46a73-b996-420b-8867-0a9ea9566379","name":"eac46a73-b996-420b-8867-0a9ea9566379","status":"Succeeded","startTime":"2023-08-16T08:40:12.9115671Z","endTime":"2023-08-16T08:40:14.2087789Z","properties":{}}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '343'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Aug 2023 08:40:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:c7ec48f5-2684-46e8-accb-45e7dbec242b
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+version: 1

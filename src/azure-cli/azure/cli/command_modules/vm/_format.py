@@ -107,9 +107,14 @@ transform_extension_show_table_output = '{Name:name, ProvisioningState:provision
                                         'Version:typeHandlerVersion, AutoUpgradeMinorVersion:autoUpgradeMinorVersion}'
 
 
+transform_disk_create_table_output = '{Name:name, ResourceGroup:resourceGroup, Location:location, Zones: ' \
+                                     '(!zones && \' \') || join(` `, zones), Sku:sku.name, OsType:osType, ' \
+                                     'SizeGb:diskSizeGb, ProvisioningState:provisioningState}'
+
+
 transform_disk_show_table_output = '{Name:name, ResourceGroup:resourceGroup, Location:location, Zones: ' \
                                    '(!zones && \' \') || join(` `, zones), Sku:sku.name, OsType:osType, ' \
-                                   'SizeGb:diskSizeGb, ProvisioningState:provisioningState}'
+                                   'SizeGb:diskSizeGB, ProvisioningState:provisioningState}'
 
 
 def get_vmss_table_output_transformer(loader, for_list=True):
@@ -118,6 +123,16 @@ def get_vmss_table_output_transformer(loader, for_list=True):
     transform = transform.replace('$zone$', 'Zones: (!zones && \' \') || join(\' \', zones), '
                                   if loader.supported_api_version(min_api='2017-03-30') else ' ')
     return transform if not for_list else '[].' + transform
+
+
+transform_vmss_list_with_zones_table_output = '[].{Name:name, ResourceGroup:resourceGroup, Location:location, ' \
+                                              'Zones: (!zones && \' \') || join(\' \', zones), ' \
+                                              'Capacity:sku.capacity, Overprovision:overprovision, ' \
+                                              'UpgradePolicy:upgradePolicy.mode}'
+
+transform_vmss_list_without_zones_table_output = '[].{Name:name, ResourceGroup:resourceGroup, Location:location, ' \
+                                                 'Capacity:sku.capacity, Overprovision:overprovision, ' \
+                                                 'UpgradePolicy:upgradePolicy.mode}'
 
 
 def transform_vm_encryption_show_table_output(result):

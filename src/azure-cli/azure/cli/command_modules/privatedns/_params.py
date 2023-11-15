@@ -30,7 +30,7 @@ def load_arguments(self, _):
 
     for item in ['', 'a', 'aaaa', 'cname', 'mx', 'ptr', 'srv', 'txt']:
         with self.argument_context('network private-dns record-set {} create'.format(item)) as c:
-            c.argument('ttl', help='Record set TTL (time-to-live)')
+            c.argument('ttl', type=int, help='Record set TTL (time-to-live)')
 
     for item in ['a', 'aaaa', 'cname', 'mx', 'ptr', 'srv', 'txt']:
         with self.argument_context('network private-dns record-set {} add-record'.format(item)) as c:
@@ -65,16 +65,16 @@ def load_arguments(self, _):
     with self.argument_context('network private-dns record-set soa') as c:
         c.argument('host', options_list=('--host', '-t'), help='Host name.')
         c.argument('email', options_list=('--email', '-e'), help='Email address.')
-        c.argument('expire_time', options_list=('--expire-time', '-x'), help='Expire time (seconds).')
-        c.argument('minimum_ttl', options_list=('--minimum-ttl', '-m'), help='Minimum TTL (time-to-live, seconds).')
-        c.argument('refresh_time', options_list=('--refresh-time', '-f'), help='Refresh value (seconds).')
-        c.argument('retry_time', options_list=('--retry-time', '-r'), help='Retry time (seconds).')
-        c.argument('serial_number', options_list=('--serial-number', '-s'), help='Serial number.')
+        c.argument('expire_time', type=int, options_list=('--expire-time', '-x'), help='Expire time (seconds).')
+        c.argument('minimum_ttl', type=int, options_list=('--minimum-ttl', '-m'), help='Minimum TTL (time-to-live, seconds).')
+        c.argument('refresh_time', type=int, options_list=('--refresh-time', '-f'), help='Refresh value (seconds).')
+        c.argument('retry_time', type=int, options_list=('--retry-time', '-r'), help='Retry time (seconds).')
+        c.argument('serial_number', type=int, options_list=('--serial-number', '-s'), help='Serial number.')
 
     with self.argument_context('network private-dns record-set srv') as c:
-        c.argument('priority', options_list=('--priority', '-p'), help='Priority metric.')
-        c.argument('weight', options_list=('--weight', '-w'), help='Weight metric.')
-        c.argument('port', options_list=('--port', '-r'), help='Service port.')
+        c.argument('priority', type=int, options_list=('--priority', '-p'), help='Priority metric.')
+        c.argument('weight', type=int, options_list=('--weight', '-w'), help='Weight metric.')
+        c.argument('port', type=int, options_list=('--port', '-r'), help='Service port.')
         c.argument('target', options_list=('--target', '-t'), help='Target domain name.')
 
     with self.argument_context('network private-dns record-set txt') as c:

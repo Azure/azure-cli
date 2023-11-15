@@ -26,7 +26,8 @@ import azure.cli.core.azclierror as CLIErrors
 from ._constants import (FeatureFlagConstants, KeyVaultConstants,
                          SearchFilterOptions, StatusCodes,
                          ImportExportProfiles, CompareFieldsMap,
-                         JsonDiff)
+                         JsonDiff, ImportMode)
+from ._featuremodels import map_keyvalue_to_featureflag
 from ._models import (convert_configurationsetting_to_keyvalue, convert_keyvalue_to_configurationsetting)
 from ._utils import get_appconfig_data_client, prep_label_filter_for_url_encoding, resolve_store_metadata, get_store_endpoint_from_connection_string, is_json_content_type
 
@@ -54,6 +55,7 @@ def import_config(cmd,
                   content_type=None,
                   auth_mode="key",
                   endpoint=None,
+                  import_mode=ImportMode.IGNORE_MATCH,
                   # from-file parameters
                   path=None,
                   format_=None,
@@ -66,11 +68,13 @@ def import_config(cmd,
                   src_connection_string=None,
                   src_key=None,
                   src_label=None,
+                  src_snapshot=None,
                   preserve_labels=False,
                   src_auth_mode="key",
                   src_endpoint=None,
                   # from-appservice parameters
                   appservice_account=None):
+
     src_features = []
     dest_features = []
     dest_kvs = []
@@ -83,7 +87,7 @@ def import_config(cmd,
     # fetch key values from source
     if source == 'file':
         if profile == ImportExportProfiles.KVSET:
-            __import_kvset_from_file(client=azconfig_client, path=path, strict=strict, yes=yes)
+            __import_kvset_from_file(client=azconfig_client, path=path, strict=strict, yes=yes, import_mode=import_mode)
             return
         if format_ and content_type:
             # JSON content type is only supported with JSON format.
@@ -122,25 +126,31 @@ def import_config(cmd,
 
         src_kvs = __read_kv_from_config_store(src_azconfig_client,
                                               key=src_key,
+                                              snapshot=src_snapshot,
                                               label=src_label if src_label else SearchFilterOptions.EMPTY_LABEL,
                                               prefix_to_add=prefix)
-        # We need to separate KV from feature flags
-        __discard_features_from_retrieved_kv(src_kvs)
 
         if not skip_features:
-            # Get all Feature flags with matching label
-            all_features = __read_kv_from_config_store(src_azconfig_client,
-                                                       key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + '*',
-                                                       label=src_label if src_label else SearchFilterOptions.EMPTY_LABEL)
+            if src_snapshot:
+                all_features = [kv for kv in src_kvs if kv.key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX)]
+            else:
+                # Get all Feature flags with matching label
+                all_features = __read_kv_from_config_store(src_azconfig_client,
+                                                           key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + '*',
+                                                           label=src_label if src_label else SearchFilterOptions.EMPTY_LABEL)
+
             for feature in all_features:
                 if feature.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
                     src_features.append(feature)
+
+        # We need to separate KV from feature flags
+        __discard_features_from_retrieved_kv(src_kvs)
 
     elif source == 'appservice':
         src_kvs = __read_kv_from_app_service(
             cmd, appservice_account=appservice_account, prefix_to_add=prefix, content_type=content_type)
 
-    if strict or not yes:
+    if strict or not yes or import_mode == ImportMode.IGNORE_MATCH:
         # fetch key values from user's configstore
         dest_kvs = __read_kv_from_config_store(azconfig_client,
                                                key=prefix + SearchFilterOptions.ANY_KEY if prefix else SearchFilterOptions.ANY_KEY,
@@ -201,8 +211,20 @@ def import_config(cmd,
             __delete_configuration_setting_from_config_store(azconfig_client, kv)
 
     # import into configstore
+    # write only added and updated kvs
+    if import_mode == ImportMode.IGNORE_MATCH:
+        kvs_to_write = []
+        kvs_to_write.extend(kv_diff.get(JsonDiff.ADD, []))
+        kvs_to_write.extend(ff_diff.get(JsonDiff.ADD, []))
+        kvs_to_write.extend((update["new"] for update in kv_diff.get(JsonDiff.UPDATE, [])))
+        kvs_to_write.extend((update["new"] for update in ff_diff.get(JsonDiff.UPDATE, [])))
+
+    # write all kvs
+    else:
+        kvs_to_write = src_kvs
+
     __write_kv_and_features_to_config_store(azconfig_client,
-                                            key_values=src_kvs,
+                                            key_values=kvs_to_write,
                                             label=label,
                                             preserve_labels=preserve_labels,
                                             content_type=content_type)
@@ -220,6 +242,7 @@ def export_config(cmd,
                   skip_keyvault=False,
                   auth_mode="key",
                   endpoint=None,
+                  snapshot=None,
                   # to-file parameters
                   path=None,
                   format_=None,
@@ -237,6 +260,7 @@ def export_config(cmd,
                   # to-app-service parameters
                   appservice_account=None,
                   export_as_reference=False):
+
     src_features = []
     dest_features = []
     dest_kvs = []
@@ -262,10 +286,32 @@ def export_config(cmd,
                                           key=key,
                                           label=label if label else SearchFilterOptions.EMPTY_LABEL,
                                           prefix_to_remove=prefix if not export_as_reference else "",
+                                          snapshot=snapshot,
                                           cli_ctx=cmd.cli_ctx if resolve_keyvault else None)
 
     if skip_keyvault:
         src_kvs = [keyvalue for keyvalue in src_kvs if keyvalue.content_type != KeyVaultConstants.KEYVAULT_CONTENT_TYPE]
+
+    if not skip_features:
+        # Get all Feature flags with matching label
+        if (destination == 'file' and format_ == 'properties') or destination == 'appservice':
+            skip_features = True
+            logger.warning("Exporting feature flags to properties file or appservice is currently not supported.")
+        else:
+            if snapshot:
+                src_features = [map_keyvalue_to_featureflag(
+                    kv) for kv in src_kvs if kv.key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX)]
+
+            # src_features is a list of FeatureFlag objects
+            else:
+                src_features = list_feature(cmd,
+                                            feature='*',
+                                            label=label if label else SearchFilterOptions.EMPTY_LABEL,
+                                            name=name,
+                                            connection_string=connection_string,
+                                            all_=True,
+                                            auth_mode=auth_mode,
+                                            endpoint=endpoint)
 
     # We need to separate KV from feature flags for the default export profile and only need to discard
     # if skip_features is true for the appconfig/kvset export profile.
@@ -282,22 +328,6 @@ def export_config(cmd,
             endpoint = get_store_endpoint_from_connection_string(connection_string) or resolve_store_metadata(cmd, name)[1]
 
         src_kvs = [__map_to_appservice_config_reference(kv, endpoint, prefix) for kv in src_kvs]
-
-    if not skip_features:
-        # Get all Feature flags with matching label
-        if (destination == 'file' and format_ == 'properties') or destination == 'appservice':
-            skip_features = True
-            logger.warning("Exporting feature flags to properties file or appservice is currently not supported.")
-        else:
-            # src_features is a list of FeatureFlag objects
-            src_features = list_feature(cmd,
-                                        feature='*',
-                                        label=label if label else SearchFilterOptions.EMPTY_LABEL,
-                                        name=name,
-                                        connection_string=connection_string,
-                                        all_=True,
-                                        auth_mode=auth_mode,
-                                        endpoint=endpoint)
 
     if destination == 'appconfig':
         # dest_kvs contains features and KV that match the label

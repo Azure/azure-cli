@@ -75,7 +75,7 @@ class ImportExportProfiles:
 
 
 class SnapshotConstants:
-    API_VERSION = "2022-11-01-preview"
+    API_VERSION = "2023-10-01"
 
 
 class JsonDiff:
@@ -100,3 +100,8 @@ CompareFieldsMap = {
     "kvset": (CompareFields.CONTENT_TYPE, CompareFields.VALUE, CompareFields.TAGS),
     "restore": (CompareFields.VALUE, CompareFields.CONTENT_TYPE, CompareFields.LOCKED, CompareFields.TAGS)
 }
+
+
+class ImportMode:
+    ALL = "all"
+    IGNORE_MATCH = "ignore-match"

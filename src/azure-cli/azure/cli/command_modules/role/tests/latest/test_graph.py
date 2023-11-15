@@ -9,7 +9,7 @@ from unittest import mock
 
 from azure.cli.testsdk import MSGraphNameReplacer
 from ..util import MSGraphUpnReplacer
-from azure.cli.testsdk import ScenarioTest
+from azure.cli.testsdk import ScenarioTest, LiveScenarioTest
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
@@ -768,9 +768,6 @@ class UserScenarioTest(GraphScenarioTestBase):
         self.cmd('ad user get-member-groups --id {user1_id}',
                  checks=self.check('[0].displayName', self.kwargs['group']))
 
-        # list
-        self.cmd('ad user list')
-
         # delete
         self.cmd('ad user delete --id {user1_id}')
 
@@ -992,6 +989,13 @@ class MiscellaneousScenarioTest(GraphScenarioTestBase):
                  checks=self.is_empty())
 
         self.cmd('ad user delete --id {upn}')
+
+
+class GraphLiveScenarioTest(LiveScenarioTest):
+    # Only test list commands in live mode to avoid recording tenant information
+
+    def test_user_list(self):
+        self.cmd('ad user list')
 
 
 def _get_id_from_value(permissions, value):

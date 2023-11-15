@@ -68,6 +68,7 @@ def cli_redis_update(cmd, instance, sku=None, vm_size=None):
         shard_count=instance.shard_count,
         minimum_tls_version=instance.minimum_tls_version,
         redis_version=instance.redis_version,
+        public_network_access=instance.public_network_access,
         sku=instance.sku,
         tags=instance.tags
     )
@@ -222,7 +223,9 @@ def cli_redis_identity_assign(client, resource_group_name, cache_name, mi_system
             for user_id in old_user_identity:
                 mi_user_assigned.append(user_id)
     update_params = RedisUpdateParameters(
-        identity=build_identity(mi_system_assigned, mi_user_assigned))
+        identity=build_identity(mi_system_assigned, mi_user_assigned),
+        public_network_access=None
+    )
     redis_resourse = client.begin_update(resource_group_name, cache_name, update_params).result()
     return redis_resourse.identity
 
@@ -253,7 +256,8 @@ def cli_redis_identity_remove(client, resource_group_name, cache_name, mi_system
         if len(user_assigned) == 0:
             user_assigned = None
     update_params = RedisUpdateParameters(
-        identity=build_identity(system_assigned, user_assigned)
+        identity=build_identity(system_assigned, user_assigned),
+        public_network_access=None
     )
     updated_resourse = client.begin_update(resource_group_name, cache_name, update_params).result()
     if updated_resourse.identity is None:

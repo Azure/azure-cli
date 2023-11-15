@@ -1,0 +1,45 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "languageVersion": "2.0",
+  "contentVersion": "1.0.0.0",
+  "definitions": {
+    "objectType": {
+      "type": "object"
+    },
+    "object!type~/with~weird name": {
+      "$ref": "#/definitions/object",
+      "properties": {
+        "fOo": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "parameters": {
+    "stringParam": {
+      "$ref": "#/dEfInItIoNs/ObJeCt%26tYpE~~1WiTh~0wEiRd%20NaMe/properties/foo"
+    },
+    "intParam": {
+      "$ref": "#/parameters/tupleParam/prefixItems/0"
+    },
+    "boolParam": {
+      "$ref": "#/outputs/anOutput/additionalProperties"
+    },
+    "tupleParam": {
+      "type": "array",
+      "prefixItems": [
+        {"type": "int"}
+      ],
+      "defaultValue": [1]
+    }
+  },
+  "resources": {},
+  "outputs": {
+    "anOutput": {
+      "type": "object",
+      "additionalproperties": {
+        "type": "bool"
+      }
+    }
+  }
+}

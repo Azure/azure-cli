@@ -13,7 +13,8 @@ from azure.cli.command_modules.mysql._client_factory import (
     cf_mysql_flexible_location_capabilities,
     cf_mysql_flexible_log,
     cf_mysql_flexible_backups,
-    cf_mysql_flexible_adadmin)
+    cf_mysql_flexible_adadmin,
+    cf_mysql_flexible_export)
 from ._transformers import (
     table_transform_output,
     table_transform_output_list_servers,
@@ -64,6 +65,11 @@ def load_command_table(self, _):
     mysql_flexible_backups_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#BackupsOperations.{}',
         client_factory=cf_mysql_flexible_backups
+    )
+
+    mysql_flexible_export_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#BackupAndExportOperations.{}',
+        client_factory=cf_mysql_flexible_export
     )
 
     mysql_flexible_adadmin_sdk = CliCommandType(
@@ -118,6 +124,7 @@ def load_command_table(self, _):
                             client_factory=cf_mysql_flexible_config,
                             table_transformer=table_transform_output_parameters) as g:
         g.custom_command('set', 'flexible_parameter_update')
+        g.custom_command('set-batch', 'flexible_parameter_update_batch')
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
 
@@ -161,6 +168,11 @@ def load_command_table(self, _):
         g.command('create', 'put', transform=transform_backup)
         g.command('list', 'list_by_server', transform=transform_backups_list)
         g.show_command('show', 'get', transform=transform_backup)
+
+    with self.command_group('mysql flexible-server export', mysql_flexible_export_sdk,
+                            custom_command_type=mysql_custom,
+                            client_factory=cf_mysql_flexible_export) as g:
+        g.custom_command('create', 'flexible_server_export_create')
 
     with self.command_group('mysql flexible-server identity', mysql_flexible_servers_sdk,
                             custom_command_type=mysql_custom,

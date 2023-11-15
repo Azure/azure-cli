@@ -222,11 +222,11 @@ class AcrCommandsTests(ScenarioTest):
                  checks=[self.check('name', '{cs_name}'),
                          self.check('provisioningState', 'Succeeded')])
 
-        self.cmd('acr credential-set list -r {registry_name}',
+        self.cmd('acr credential-set list -r {registry_name} -g {rg}',
                  checks=[self.check('[0].name', '{cs_name}'),
                          self.check('[0].provisioningState', 'Succeeded')])
 
-        self.cmd('acr credential-set show -n {cs_name} -r {registry_name}',
+        self.cmd('acr credential-set show -n {cs_name} -r {registry_name} -g {rg}',
                  checks=[self.check('name', '{cs_name}'),
                          self.check('provisioningState', 'Succeeded')])
 
@@ -239,11 +239,11 @@ class AcrCommandsTests(ScenarioTest):
                  checks=[self.check('name', '{cr_name}'),
                          self.check('provisioningState', 'Succeeded')])
 
-        self.cmd('acr cache list -r {registry_name}',
+        self.cmd('acr cache list -r {registry_name} -g {rg}',
                  checks=[self.check('[0].name', '{cr_name}'),
                          self.check('[0].provisioningState', 'Succeeded')])
 
-        self.cmd('acr cache show -n {cr_name} -r {registry_name}',
+        self.cmd('acr cache show -n {cr_name} -r {registry_name} -g {rg}',
                  checks=[self.check('name', '{cr_name}'),
                          self.check('provisioningState', 'Succeeded')])
 

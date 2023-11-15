@@ -27,7 +27,7 @@ class Create(AAZCommand):
         az network lb create -g MyResourceGroup -n MyLb --sku Basic --public-ip-zone 2
 
     :example: Create a standard zone flavored public-facing load balancer, through provisioning a zonal frontend ip configuration and Vnet.
-        az etwork lb create -g MyResourceGroup -n MyLb --sku Standard --frontend-ip-zone 1 --vnet-name MyVnet --subnet MySubnet
+        az network lb create -g MyResourceGroup -n MyLb --sku Standard --frontend-ip-zone 1 --vnet-name MyVnet --subnet MySubnet
     """
 
     _aaz_info = {

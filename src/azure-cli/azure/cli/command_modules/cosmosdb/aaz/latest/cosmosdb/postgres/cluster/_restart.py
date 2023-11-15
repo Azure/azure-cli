@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "cosmosdb postgres cluster restart",
-    is_preview=True,
 )
 class Restart(AAZCommand):
     """Restarts all nodes in the cluster.

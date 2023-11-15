@@ -536,9 +536,9 @@ class ImageCleanerNamespace:
         disable_image_cleaner=False,
         image_cleaner_interval_hours=None,
     ):
-        self.enable_image_cleaner = enable_image_cleaner 
-        self.disable_image_cleaner = disable_image_cleaner 
-        self.image_cleaner_interval_hours = image_cleaner_interval_hours 
+        self.enable_image_cleaner = enable_image_cleaner
+        self.disable_image_cleaner = disable_image_cleaner
+        self.image_cleaner_interval_hours = image_cleaner_interval_hours
 
 class TestValidateImageCleanerEnableDiasble(unittest.TestCase):
     def test_invalid_image_cleaner_enable_disable_not_existing_together(self):
@@ -550,6 +550,27 @@ class TestValidateImageCleanerEnableDiasble(unittest.TestCase):
 
         with self.assertRaises(CLIError) as cm:
             validators.validate_image_cleaner_enable_disable_mutually_exclusive(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+class ForceUpgradeNamespace:
+    def __init__(
+        self,
+        enable_force_upgrade=False,
+        disable_force_upgrade=False,
+    ):
+        self.enable_force_upgrade = enable_force_upgrade
+        self.disable_force_upgrade = disable_force_upgrade
+
+class TestValidateForceUpgradeEnableDiasble(unittest.TestCase):
+    def test_invalid_force_upgrade_enable_disable_not_existing_together(self):
+        namespace = ForceUpgradeNamespace(
+            enable_force_upgrade=True,
+            disable_force_upgrade=True,
+        )
+        err = 'Providing both --disable-force-upgrade and --enable-force-upgrade flags is invalid'
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_force_upgrade_disable_and_enable_parameters(namespace)
         self.assertEqual(str(cm.exception), err)
 
 class AzureKeyVaultKmsKeyVaultResourceIdNamespace:

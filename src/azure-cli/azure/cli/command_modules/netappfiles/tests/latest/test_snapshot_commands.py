@@ -9,8 +9,8 @@ from knack.util import CLIError
 
 POOL_DEFAULT = "--service-level 'Premium' --size 4"
 VOLUME_DEFAULT = "--service-level 'Premium' --usage-threshold 100"
-LOCATION = "eastus2"
-VNET_LOCATION = "eastus2"
+LOCATION = "eastus"
+VNET_LOCATION = "eastus"
 
 # No tidy up of tests required. The resource group is automatically removed
 

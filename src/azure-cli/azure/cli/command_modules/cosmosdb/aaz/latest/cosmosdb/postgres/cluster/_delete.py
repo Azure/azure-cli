@@ -13,11 +13,10 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "cosmosdb postgres cluster delete",
-    is_preview=True,
     confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
-    """Delete a cluster together with servers in it.
+    """Delete a cluster together with nodes in it.
 
     :example: Delete the cluster
         az cosmosdb postgres cluster delete -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff"

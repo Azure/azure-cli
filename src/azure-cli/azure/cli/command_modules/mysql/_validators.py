@@ -107,7 +107,8 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
                               public_access=None, version=None, auto_grow=None, replication_role=None, subnet=None,
                               byok_identity=None, backup_byok_identity=None, byok_key=None, geo_redundant_backup=None,
                               disable_data_encryption=None, iops=None, auto_io_scaling=None, instance=None,
-                              data_source_type=None, mode=None):
+                              data_source_type=None, mode=None,
+                              data_source_backup_dir=None, data_source_sas_token=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforMySQL/flexibleServers')
 
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location, server_name=instance.name if instance else None)
@@ -132,21 +133,33 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
     _mysql_byok_validator(byok_identity, backup_byok_identity, byok_key, backup_byok_key,
                           disable_data_encryption, geo_redundant_backup, instance)
     _mysql_iops_validator(iops, auto_io_scaling, instance)
-    _mysql_import_data_source_type_validator(data_source_type)
+    _mysql_import_data_source_type_validator(data_source_type, data_source_backup_dir, data_source_sas_token)
     _mysql_import_mode_validator(mode)
 
 
-def _mysql_import_data_source_type_validator(data_source_type):
-    allowed_values = ['mysql_single']
+def _mysql_import_data_source_type_validator(data_source_type, data_source_backup_dir=None, data_source_sas_token=None):
+    allowed_values = ['mysql_single', 'azure_blob']
     if data_source_type is not None and data_source_type.lower() not in allowed_values:
         raise InvalidArgumentValueError('Incorrect value for --data-source-type. Allowed values : {}'
                                         .format(allowed_values))
+    if data_source_type is not None and data_source_type.lower() == 'mysql_single':
+        if data_source_backup_dir is not None or data_source_sas_token is not None:
+            raise CLIError('Incorrect usage: --data-source-backup-dir and --data-source-sas-token. '
+                           'These parameters are not valid for data_source_type mysql_single. '
+                           'Make sure to provide correct parameters. Read more at help section. ')
 
 
 def _mysql_import_mode_validator(mode):
     allowed_values = ['offline']
     if mode is not None and mode.lower() not in allowed_values:
         raise InvalidArgumentValueError('Incorrect value for --mode. Allowed values : {}'.format(allowed_values))
+
+
+def mysql_import_single_server_ready_validator(source_single_server_object):
+    if source_single_server_object.user_visible_state != 'Ready':
+        raise CLIError('The source server should be in {} state for migration. Instead it is in {} state. '
+                       'Please start the server and try again.'
+                       .format('Ready', source_single_server_object.user_visible_state))
 
 
 def mysql_retention_validator(backup_retention, sku_info, tier):
@@ -169,6 +182,13 @@ def mysql_storage_validator(storage_gb, sku_info, tier, instance):
         if not max(min_mysql_storage, storage_sizes[0]) <= storage_gb <= storage_sizes[1]:
             raise CLIError('Incorrect value for --storage-size. Allowed values(in GiB) : Integers ranging {}-{}'
                            .format(max(min_mysql_storage, storage_sizes[0]), storage_sizes[1]))
+
+
+def mysql_import_storage_validator(source_storage_mb, user_storage_gb):
+    if source_storage_mb > user_storage_gb * 1024:
+        raise CLIError('The target server storage {} GiB is smaller than the source server storage {} GiB. '
+                       'Storage size of the target server must be larger than the source server.'
+                       .format(user_storage_gb, source_storage_mb // 1024))
 
 
 def mysql_georedundant_backup_validator(geo_redundant_backup, geo_paired_regions):
@@ -202,6 +222,20 @@ def _mysql_version_validator(version, sku_info, tier, instance):
         versions = get_mysql_versions(sku_info, tier)
         if version not in versions:
             raise CLIError('Incorrect value for --version. Allowed values : {}'.format(versions))
+
+
+def mysql_import_version_validator(source_single_server_object, target_version):
+    allowed_single_server_source_version = ['5.7', '8.0']
+    source_single_server_version = source_single_server_object.version
+    if source_single_server_version not in allowed_single_server_source_version:
+        raise CLIError('Unsupported source server version {}. Only 5.7 and 8.0 servers can be migrated.'
+                       .format(source_single_server_version))
+    if source_single_server_version == '8.0':
+        source_single_server_version = '8.0.21'
+    if source_single_server_version != target_version:
+        raise CLIError('The source server version {} is different from the target server version {}. '
+                       'Target server must have the same version as the source server.'
+                       .format(source_single_server_object.version, target_version))
 
 
 def mysql_auto_grow_validator(auto_grow, replication_role, high_availability, instance):
@@ -371,10 +405,10 @@ def _valid_range(addr_range):
 
 
 def firewall_rule_name_validator(ns):
-    if not re.search(r'^[a-zA-Z0-9][-_a-zA-Z0-9]{1,126}[_a-zA-Z0-9]$', ns.firewall_rule_name):
+    if not re.search(r'^[a-zA-Z0-9][-_a-zA-Z0-9]{0,79}(?<!-)$', ns.firewall_rule_name):
         raise ValidationError("The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. "
-                              "Additionally, the name of the firewall rule must be at least 3 characters "
-                              "and no more than 128 characters in length. ")
+                              "Additionally, the name of the firewall rule must be at least 1 character "
+                              "and no more than 80 characters in length. ")
 
 
 def validate_server_name(db_context, server_name, type_):

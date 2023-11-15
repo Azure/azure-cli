@@ -22,9 +22,9 @@ class Delete(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-05-01",
+        "version": "2023-06-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2022-05-01", "properties.listeners[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2023-06-01", "properties.listeners[]"],
         ]
     }
 
@@ -159,7 +159,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-05-01",
+                    "api-version", "2023-06-01",
                     required=True,
                 ),
             }
@@ -258,7 +258,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-05-01",
+                    "api-version", "2023-06-01",
                     required=True,
                 ),
             }
@@ -583,6 +583,9 @@ class _DeleteHelper:
         )
         properties.custom_error_configurations = AAZListType(
             serialized_name="customErrorConfigurations",
+        )
+        properties.default_predefined_ssl_policy = AAZStrType(
+            serialized_name="defaultPredefinedSslPolicy",
         )
         properties.enable_fips = AAZBoolType(
             serialized_name="enableFips",
@@ -983,6 +986,9 @@ class _DeleteHelper:
             serialized_name="frontendPort",
         )
         cls._build_schema_sub_resource_read(properties.frontend_port)
+        properties.host_names = AAZListType(
+            serialized_name="hostNames",
+        )
         properties.protocol = AAZStrType()
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
@@ -996,6 +1002,9 @@ class _DeleteHelper:
             serialized_name="sslProfile",
         )
         cls._build_schema_sub_resource_read(properties.ssl_profile)
+
+        host_names = _schema_application_gateway_read.properties.listeners.Element.properties.host_names
+        host_names.Element = AAZStrType()
 
         load_distribution_policies = _schema_application_gateway_read.properties.load_distribution_policies
         load_distribution_policies.Element = AAZObjectType()
@@ -2064,9 +2073,16 @@ class _DeleteHelper:
             serialized_name="provisioningState",
             flags={"read_only": True},
         )
+        properties.sync_mode = AAZStrType(
+            serialized_name="syncMode",
+        )
         properties.tunnel_interfaces = AAZListType(
             serialized_name="tunnelInterfaces",
         )
+        properties.virtual_network = AAZObjectType(
+            serialized_name="virtualNetwork",
+        )
+        cls._build_schema_sub_resource_read(properties.virtual_network)
 
         backend_ip_configurations = _schema_network_interface_ip_configuration_read.properties.load_balancer_backend_address_pools.Element.properties.backend_ip_configurations
         backend_ip_configurations.Element = AAZObjectType()
@@ -2309,6 +2325,9 @@ class _DeleteHelper:
         properties.auxiliary_mode = AAZStrType(
             serialized_name="auxiliaryMode",
         )
+        properties.auxiliary_sku = AAZStrType(
+            serialized_name="auxiliarySku",
+        )
         properties.disable_tcp_state_tracking = AAZBoolType(
             serialized_name="disableTcpStateTracking",
         )
@@ -2541,6 +2560,10 @@ class _DeleteHelper:
             serialized_name="privateEndpoint",
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
+        properties.private_endpoint_location = AAZStrType(
+            serialized_name="privateEndpointLocation",
+            flags={"read_only": True},
+        )
         properties.private_link_service_connection_state = AAZObjectType(
             serialized_name="privateLinkServiceConnectionState",
         )
@@ -3066,6 +3089,9 @@ class _DeleteHelper:
         dns_settings.domain_name_label = AAZStrType(
             serialized_name="domainNameLabel",
         )
+        dns_settings.domain_name_label_scope = AAZStrType(
+            serialized_name="domainNameLabelScope",
+        )
         dns_settings.fqdn = AAZStrType()
         dns_settings.reverse_fqdn = AAZStrType(
             serialized_name="reverseFqdn",
@@ -3211,7 +3237,9 @@ class _DeleteHelper:
         properties.direction = AAZStrType(
             flags={"required": True},
         )
-        properties.priority = AAZIntType()
+        properties.priority = AAZIntType(
+            flags={"required": True},
+        )
         properties.protocol = AAZStrType(
             flags={"required": True},
         )
@@ -3309,7 +3337,10 @@ class _DeleteHelper:
             serialized_name="addressPrefixes",
         )
         properties.application_gateway_ip_configurations = AAZListType(
-            serialized_name="applicationGatewayIpConfigurations",
+            serialized_name="applicationGatewayIPConfigurations",
+        )
+        properties.default_outbound_access = AAZBoolType(
+            serialized_name="defaultOutboundAccess",
         )
         properties.delegations = AAZListType()
         properties.ip_allocations = AAZListType(

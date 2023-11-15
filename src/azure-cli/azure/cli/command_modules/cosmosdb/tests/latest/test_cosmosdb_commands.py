@@ -48,7 +48,7 @@ class CosmosDBTests(ScenarioTest):
             'network_acl_bypass_resource_id': network_acl_bypass_resource_id
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-automatic-failover --default-consistency-level ConsistentPrefix --network-acl-bypass AzureServices --network-acl-bypass-resource-ids {network_acl_bypass_resource_id} --backup-interval 480 --backup-retention 8')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-automatic-failover --default-consistency-level ConsistentPrefix --network-acl-bypass AzureServices --network-acl-bypass-resource-ids {network_acl_bypass_resource_id} --backup-interval 480 --backup-retention 8 --minimal-tls-version Tls11')
         self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             self.check('enableAutomaticFailover', True),
             self.check('consistencyPolicy.defaultConsistencyLevel', 'ConsistentPrefix'),
@@ -58,6 +58,7 @@ class CosmosDBTests(ScenarioTest):
             self.check('backupPolicy.periodicModeProperties.backupIntervalInMinutes', '480'),
             self.check('backupPolicy.periodicModeProperties.backupRetentionIntervalInHours', '8'),
             self.check('backupPolicy.type', 'Periodic'),
+            self.check('minimalTlsVersion', 'Tls11'),
         ])
 
         self.cmd('az cosmosdb update -n {acc} -g {rg} --enable-automatic-failover false --default-consistency-level Session --disable-key-based-metadata-write-access --public-network-access "DISABLED" --network-acl-bypass None')
@@ -98,11 +99,12 @@ class CosmosDBTests(ScenarioTest):
             self.check('enableFreeTier', 'False'),
         ])
 
-        self.cmd('az cosmosdb update -n {acc} -g {rg} --capabilities EnableAggregationPipeline --server-version 3.2')
+        self.cmd('az cosmosdb update -n {acc} -g {rg} --capabilities EnableAggregationPipeline --server-version 3.2 --minimal-tls-version Tls12')
         account = self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             JMESPathCheck('kind', 'MongoDB'),
             self.check('ipRules[0].ipAddressOrRange', "20.10.10.10"),
-            self.check('apiProperties.serverVersion', '3.2')
+            self.check('apiProperties.serverVersion', '3.2'),
+            self.check('minimalTlsVersion', 'Tls12')
         ]).get_output_in_json()
         assert len(account['capabilities']) == 1
         assert account['capabilities'][0]['name'] == "EnableAggregationPipeline"
@@ -1507,9 +1509,12 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az keyvault set-policy -n {kv_name} -g {rg} --spn a232010e-820c-4083-83bb-3ace5fc29d0b --key-permissions get unwrapKey wrapKey')
         self.cmd('az keyvault key create -n {key_name} --kty RSA --size 3072 --vault-name {kv_name}')
 
-        cmk_output = self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName={location} failoverPriority=0 --key-uri {key_uri}').get_output_in_json()
-
+        cmk_output = self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName={location} failoverPriority=0 --key-uri {key_uri}').get_output_in_json()        
         assert cmk_output["keyVaultKeyUri"] == key_uri
+
+        self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
+            self.check('customerManagedKeyStatus', "Access to the configured customer managed key confirmed. ")
+        ])
 
     @unittest.skip('Cannot record due to https://github.com/Azure/azure-cli/issues/22174')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_managed_service_identity')

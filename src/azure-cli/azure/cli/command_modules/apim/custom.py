@@ -285,7 +285,7 @@ def apim_api_create(client, resource_group_name, service_name, api_id, descripti
                     api_type=None, subscription_required=False, no_wait=False):
     """Creates a new API. """
 
-    if authorization_server_id is not None and authorization_scope is not None:
+    if authorization_server_id is not None:
         o_auth2 = OAuth2AuthenticationSettingsContract(
             authorization_server_id=authorization_server_id,
             scope=authorization_scope

@@ -1039,9 +1039,9 @@ def acr_task_list_runs(cmd,
     if image:
         from .repository import get_image_digest
         try:
-            repository, _, manifest = get_image_digest(cmd, registry_name, image)
+            repository, digest = get_image_digest(cmd, registry_name, image)
             filter_str = _add_run_filter(
-                filter_str, 'OutputImageManifests', '{}@{}'.format(repository, manifest), 'contains')
+                filter_str, 'OutputImageManifests', '{}@{}'.format(repository, digest), 'contains')
         except CLIError as e:
             raise CLIError("Could not find image '{}'. {}".format(image, e))
 

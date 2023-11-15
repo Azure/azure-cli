@@ -19,6 +19,9 @@ class Create(AAZCommand):
 
     :example: Create an application gateway WAF policy custom rule.
         az network application-gateway waf-policy custom-rule create --action Allow --name MyWafPolicyRule --policy-name MyPolicy --priority 500 --resource-group MyResourceGroup --rule-type MatchRule
+
+    :example: Create an application gateway WAF policy custom rule with user session identifier.
+        az network application-gateway waf-policy custom-rule create -g MyResourceGroup --policy-name MyPolicy -n MyRule --priority 3 --action Block --rule-type RateLimitRule --rate-limit-duration FiveMins --rate-limit-threshold 15 --group-by-user-session "[{group-by-variables:[{variable-name:GeoLocation}]}]"
     """
 
     _aaz_info = {
@@ -88,23 +91,30 @@ class Create(AAZCommand):
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
 
-        # define Arg Group "Parameters.properties.customRules[]"
+        # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
         _args_schema.group_by_user_session = AAZListArg(
             options=["--group-by-user-session"],
-            arg_group="Parameters.properties.customRules[]",
+            arg_group="Properties",
             help="List of user session identifier group by clauses.",
+        )
+        _args_schema.match_conditions = AAZListArg(
+            options=["--match-conditions"],
+            arg_group="Properties",
+            help="List of match conditions.",
+            required=True,
+            default=[],
         )
         _args_schema.rate_limit_duration = AAZStrArg(
             options=["--rate-limit-duration"],
-            arg_group="Parameters.properties.customRules[]",
+            arg_group="Properties",
             help="Duration over which Rate Limit policy will be applied. Applies only when ruleType is RateLimitRule.",
             enum={"FiveMins": "FiveMins", "OneMin": "OneMin"},
         )
         _args_schema.rate_limit_threshold = AAZIntArg(
             options=["--rate-limit-threshold"],
-            arg_group="Parameters.properties.customRules[]",
+            arg_group="Properties",
             help="Rate Limit threshold to apply in case ruleType is RateLimitRule. Must be greater than or equal to 1",
         )
 
@@ -127,17 +137,6 @@ class Create(AAZCommand):
             help="User Session clause variable.",
             required=True,
             enum={"ClientAddr": "ClientAddr", "GeoLocation": "GeoLocation", "None": "None"},
-        )
-
-        # define Arg Group "Properties"
-
-        _args_schema = cls._args_schema
-        _args_schema.match_conditions = AAZListArg(
-            options=["--match-conditions"],
-            arg_group="Properties",
-            help="List of match conditions.",
-            required=True,
-            default=[],
         )
 
         match_conditions = cls._args_schema.match_conditions

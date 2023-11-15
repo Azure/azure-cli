@@ -10,7 +10,6 @@ from knack.help_files import helps  # pylint: disable=unused-import
 helps['iot'] = """
 type: group
 short-summary: Manage Internet of Things (IoT) assets.
-long-summary: Comprehensive IoT data-plane functionality is available in the Azure IoT CLI Extension. For more info and install guide go to https://github.com/Azure/azure-iot-cli-extension
 """
 
 helps['iot dps'] = """

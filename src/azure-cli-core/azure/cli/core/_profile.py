@@ -861,5 +861,8 @@ def _create_identity_instance(cli_ctx, *args, **kwargs):
     from .telemetry import set_broker_info
     set_broker_info(allow_broker=allow_broker)
 
+    # PREVIEW: In Azure Stack environment, use core.instance_discovery=false to disable MSAL's instance discovery.
+    instance_discovery = cli_ctx.config.getboolean('core', 'instance_discovery', True)
+
     return Identity(*args, encrypt=encrypt, use_msal_http_cache=use_msal_http_cache, allow_broker=allow_broker,
-                    **kwargs)
+                    instance_discovery=instance_discovery, **kwargs)

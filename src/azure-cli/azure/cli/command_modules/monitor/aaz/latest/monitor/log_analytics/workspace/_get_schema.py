@@ -67,11 +67,11 @@ class GetSchema(AAZCommand):
         self.SchemaGet(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
@@ -247,6 +247,10 @@ class GetSchema(AAZCommand):
             owner_type.Element = AAZStrType()
 
             return cls._schema_on_200
+
+
+class _GetSchemaHelper:
+    """Helper class for GetSchema"""
 
 
 __all__ = ["GetSchema"]

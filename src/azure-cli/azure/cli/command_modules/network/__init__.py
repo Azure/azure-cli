@@ -106,7 +106,8 @@ class AzureStackNetworkCommandsLoader(AzCommandsLoader):
             profile.load_arguments(self, command)
 
     def get_module_name_by_profile(self, module_name):
-        profile_module_name = self.cli_ctx.cloud.profile.lower().replace('-', '_')
+        from azure.cli.core.aaz.utils import get_aaz_profile_module_name
+        profile_module_name = get_aaz_profile_module_name(profile_name=self.cli_ctx.cloud.profile)
         if module_name:
             return f'azure.cli.command_modules.network.azure_stack.{profile_module_name}.{module_name}'
         return f'azure.cli.command_modules.network.azure_stack.{profile_module_name}'

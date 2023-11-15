@@ -1,0 +1,79 @@
+---
+# exclusions for the vm module
+
+containerapp env create:
+  parameters:
+    infrastructure_subnet_resource_id:
+      rule_exclusions:
+      - option_length_too_long
+    instrumentation_key:
+      rule_exclusions:
+      - option_length_too_long
+    platform_reserved_dns_ip:
+      rule_exclusions:
+      - option_length_too_long
+
+containerapp exec:
+  rule_exclusions:
+    - missing_command_test_coverage
+  parameters:
+    container:
+      rule_exclusions:
+        - missing_parameter_test_coverage
+    replica:
+      rule_exclusions:
+        - missing_parameter_test_coverage
+    revision:
+      rule_exclusions:
+        - missing_parameter_test_coverage
+    command:
+      rule_exclusions:
+        - missing_parameter_test_coverage
+    name:
+      rule_exclusions:
+        - missing_parameter_test_coverage
+    resource-group-name:
+      rule_exclusions:
+        - missing_parameter_test_coverage
+
+containerapp github-action show:
+  rule_exclusions:
+    - missing_command_test_coverage
+
+containerapp github-action delete:
+  rule_exclusions:
+    - missing_command_test_coverage
+
+containerapp github-action add:
+  rule_exclusions:
+    - missing_command_test_coverage
+  parameters:
+    service_principal_client_id:
+      rule_exclusions:
+        - option_length_too_long
+    service_principal_client_secret:
+      rule_exclusions:
+        - option_length_too_long
+    service_principal_tenant_id:
+      rule_exclusions:
+        - option_length_too_long
+
+containerapp:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+containerapp env storage:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+containerapp env:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+containerapp identity:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+containerapp job identity:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+containerapp job:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+...

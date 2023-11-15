@@ -177,6 +177,7 @@ def load_arguments(self, _):
         c.argument('model_name', help='Cognitive Services account deployment model name.')
         c.argument('model_format', help='Cognitive Services account deployment model format.')
         c.argument('model_version', help='Cognitive Services account deployment model version.')
+        c.argument('model_source', help='Cognitive Services account deployment model source.')
 
     with self.argument_context('cognitiveservices account deployment', arg_group='DeploymentScaleSettings') as c:
         c.argument(

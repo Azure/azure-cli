@@ -139,9 +139,11 @@ class MainModuleCompactor:
         _LOGGER.info("Compacting {} folder:".format(self._get_aaz_folder()))
         self._create_compact_aaz_folder()
         from azure.cli.core.profiles import AZURE_API_PROFILES
+        from azure.cli.core.aaz.utils import get_aaz_profile_module_name
         for profile in AZURE_API_PROFILES:
             _LOGGER.info("Compacting profile {}".format(profile))
-            profile_mod_name = profile.lower().replace('-', '_')
+
+            profile_mod_name = get_aaz_profile_module_name(profile)
             profile_path = self._get_aaz_rg_path(profile_mod_name)
             if not os.path.exists(profile_path):
                 continue

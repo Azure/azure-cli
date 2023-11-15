@@ -13,21 +13,21 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.48.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_basic_2000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic_2000001","name":"img_tmpl_basic_2000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","test":"test_image_builder_basic_sig","date":"2023-04-26T04:50:24Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic_2000001","name":"img_tmpl_basic_2000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","test":"test_image_builder_basic_sig","date":"2023-10-13T06:09:36Z","module":"vm"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '361'
+      - '375'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Apr 2023 04:50:30 GMT
+      - Fri, 13 Oct 2023 06:09:41 GMT
       expires:
       - '-1'
       pragma:
@@ -59,12 +59,12 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.48.0 azsdk-python-azure-mgmt-msi/7.0.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-msi/7.0.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic_2000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1?api-version=2023-01-31
   response:
     body:
-      string: '{"location":"westus2","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_basic_2000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1","name":"ide1","type":"Microsoft.ManagedIdentity/userAssignedIdentities","properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"20b3c364-a21a-43db-b869-9854549d2742","clientId":"94858b3a-6a81-41dc-acef-a2615e4cd167"}}'
+      string: '{"location":"westus2","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_basic_2000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1","name":"ide1","type":"Microsoft.ManagedIdentity/userAssignedIdentities","properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"67fd7b5f-6fdc-4d01-b441-348546bd57bd","clientId":"0211f163-3634-49be-b3bb-5dd047de41bc"}}'
     headers:
       cache-control:
       - no-cache
@@ -73,7 +73,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Apr 2023 04:50:35 GMT
+      - Fri, 13 Oct 2023 06:09:49 GMT
       expires:
       - '-1'
       location:
@@ -85,7 +85,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -103,13 +103,13 @@ interactions:
       ParameterSetName:
       - --assignee --role --scope
       User-Agent:
-      - python/3.10.0 (Windows-10-10.0.22621-SP0) AZURECLI/2.48.0
+      - python/3.10.9 (Windows-10-10.0.22621-SP0) AZURECLI/2.53.0
     method: GET
-    uri: https://graph.microsoft.com/v1.0/servicePrincipals?$filter=servicePrincipalNames%2Fany%28c%3Ac%20eq%20%2794858b3a-6a81-41dc-acef-a2615e4cd167%27%29
+    uri: https://graph.microsoft.com/v1.0/servicePrincipals?$filter=servicePrincipalNames%2Fany%28c%3Ac%20eq%20%270211f163-3634-49be-b3bb-5dd047de41bc%27%29
   response:
     body:
-      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#servicePrincipals","value":[{"id":"20b3c364-a21a-43db-b869-9854549d2742","deletedDateTime":null,"accountEnabled":true,"alternativeNames":["isExplicit=True","/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_basic_2000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1"],"appDisplayName":null,"appDescription":null,"appId":"94858b3a-6a81-41dc-acef-a2615e4cd167","applicationTemplateId":null,"appOwnerOrganizationId":null,"appRoleAssignmentRequired":false,"createdDateTime":"2023-04-26T04:50:34Z","description":null,"disabledByMicrosoftStatus":null,"displayName":"ide1","homepage":null,"loginUrl":null,"logoutUrl":null,"notes":null,"notificationEmailAddresses":[],"preferredSingleSignOnMode":null,"preferredTokenSigningKeyThumbprint":null,"replyUrls":[],"servicePrincipalNames":["94858b3a-6a81-41dc-acef-a2615e4cd167","https://identity.azure.net/+NS4ogYWZdtPhI2loyXeWSfxM69C3dXJEVm/8UaJYkY="],"servicePrincipalType":"ManagedIdentity","signInAudience":null,"tags":[],"tokenEncryptionKeyId":null,"info":null,"samlSingleSignOnSettings":null,"addIns":[],"appRoles":[],"keyCredentials":[{"customKeyIdentifier":"78A98A5067A63644C6EBC4A83C79DA563F55C825","displayName":"CN=94858b3a-6a81-41dc-acef-a2615e4cd167,
-        DC=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","endDateTime":"2023-07-25T04:45:00Z","key":null,"keyId":"ab204d7d-229a-4ad5-9245-e030124849b1","startDateTime":"2023-04-26T04:45:00Z","type":"AsymmetricX509Cert","usage":"Verify"}],"oauth2PermissionScopes":[],"passwordCredentials":[],"resourceSpecificApplicationPermissions":[],"verifiedPublisher":{"displayName":null,"verifiedPublisherId":null,"addedDateTime":null}}]}'
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#servicePrincipals","value":[{"id":"67fd7b5f-6fdc-4d01-b441-348546bd57bd","deletedDateTime":null,"accountEnabled":true,"alternativeNames":["isExplicit=True","/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_basic_2000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1"],"appDisplayName":null,"appDescription":null,"appId":"0211f163-3634-49be-b3bb-5dd047de41bc","applicationTemplateId":null,"appOwnerOrganizationId":null,"appRoleAssignmentRequired":false,"createdDateTime":"2023-10-13T06:09:48Z","description":null,"disabledByMicrosoftStatus":null,"displayName":"ide1","homepage":null,"loginUrl":null,"logoutUrl":null,"notes":null,"notificationEmailAddresses":[],"preferredSingleSignOnMode":null,"preferredTokenSigningKeyThumbprint":null,"replyUrls":[],"servicePrincipalNames":["0211f163-3634-49be-b3bb-5dd047de41bc","https://identity.azure.net/uujwr0JhAV8W5brGv0h6blecuOZT49dV9oU1UrO8d4k="],"servicePrincipalType":"ManagedIdentity","signInAudience":null,"tags":[],"tokenEncryptionKeyId":null,"info":null,"samlSingleSignOnSettings":null,"addIns":[],"appRoles":[],"keyCredentials":[{"customKeyIdentifier":"412EDBA4DD414C68C3AE157FBE9D8AB7BD1240CF","displayName":"CN=0211f163-3634-49be-b3bb-5dd047de41bc,
+        DC=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","endDateTime":"2024-01-11T06:04:00Z","key":null,"keyId":"47de56c0-fb15-4887-a8af-8a7055284731","startDateTime":"2023-10-13T06:04:00Z","type":"AsymmetricX509Cert","usage":"Verify"}],"oauth2PermissionScopes":[],"passwordCredentials":[],"resourceSpecificApplicationPermissions":[],"verifiedPublisher":{"displayName":null,"verifiedPublisherId":null,"addedDateTime":null}}]}'
     headers:
       cache-control:
       - no-cache
@@ -118,11 +118,11 @@ interactions:
       content-type:
       - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
       date:
-      - Wed, 26 Apr 2023 04:51:23 GMT
+      - Fri, 13 Oct 2023 06:10:35 GMT
       odata-version:
       - '4.0'
       request-id:
-      - 32d7a8a8-3b08-4290-aee3-7873f0012955
+      - 4ecea4a5-407b-43e0-a113-cacc05ac4c84
       strict-transport-security:
       - max-age=31536000
       transfer-encoding:
@@ -130,7 +130,7 @@ interactions:
       vary:
       - Accept-Encoding
       x-ms-ags-diagnostic:
-      - '{"ServerInfo":{"DataCenter":"Korea Central","Slice":"E","Ring":"3","ScaleUnit":"001","RoleInstance":"SE1PEPF00005C05"}}'
+      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"SI1PEPF00012160"}}'
       x-ms-resource-unit:
       - '1'
     status:
@@ -150,24 +150,24 @@ interactions:
       ParameterSetName:
       - --assignee --role --scope
       User-Agent:
-      - AZURECLI/2.48.0 azsdk-python-azure-mgmt-authorization/3.0.0 Python/3.10.0
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-authorization/4.0.0 Python/3.10.9
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic_2000001/providers/Microsoft.Authorization/roleDefinitions?$filter=roleName%20eq%20%27Contributor%27&api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic_2000001/providers/Microsoft.Authorization/roleDefinitions?$filter=roleName%20eq%20%27Contributor%27&api-version=2022-05-01-preview
   response:
     body:
       string: '{"value":[{"properties":{"roleName":"Contributor","type":"BuiltInRole","description":"Grants
         full access to manage all resources, but does not allow you to assign roles
-        in Azure RBAC, manage assignments in Azure Blueprints, or share image galleries.","assignableScopes":["/"],"permissions":[{"actions":["*"],"notActions":["Microsoft.Authorization/*/Delete","Microsoft.Authorization/*/Write","Microsoft.Authorization/elevateAccess/Action","Microsoft.Blueprint/blueprintAssignments/write","Microsoft.Blueprint/blueprintAssignments/delete","Microsoft.Compute/galleries/share/action"],"dataActions":[],"notDataActions":[]}],"createdOn":"2015-02-02T21:55:09.8806423Z","updatedOn":"2021-11-11T20:13:28.6061853Z","createdBy":null,"updatedBy":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","type":"Microsoft.Authorization/roleDefinitions","name":"b24988ac-6180-42a0-ab88-20f7382dd24c"}]}'
+        in Azure RBAC, manage assignments in Azure Blueprints, or share image galleries.","assignableScopes":["/"],"permissions":[{"actions":["*"],"notActions":["Microsoft.Authorization/*/Delete","Microsoft.Authorization/*/Write","Microsoft.Authorization/elevateAccess/Action","Microsoft.Blueprint/blueprintAssignments/write","Microsoft.Blueprint/blueprintAssignments/delete","Microsoft.Compute/galleries/share/action","Microsoft.Purview/consents/write","Microsoft.Purview/consents/delete"],"dataActions":[],"notDataActions":[]}],"createdOn":"2015-02-02T21:55:09.8806423Z","updatedOn":"2023-07-07T20:27:50.9966612Z","createdBy":null,"updatedBy":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","type":"Microsoft.Authorization/roleDefinitions","name":"b24988ac-6180-42a0-ab88-20f7382dd24c"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '984'
+      - '1055'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Apr 2023 04:51:24 GMT
+      - Fri, 13 Oct 2023 06:10:35 GMT
       expires:
       - '-1'
       pragma:
@@ -187,7 +187,7 @@ interactions:
       message: OK
 - request:
     body: '{"properties": {"roleDefinitionId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
-      "principalId": "20b3c364-a21a-43db-b869-9854549d2742", "principalType": "ServicePrincipal"}}'
+      "principalId": "67fd7b5f-6fdc-4d01-b441-348546bd57bd", "principalType": "ServicePrincipal"}}'
     headers:
       Accept:
       - application/json
@@ -206,13 +206,13 @@ interactions:
       ParameterSetName:
       - --assignee --role --scope
       User-Agent:
-      - AZURECLI/2.48.0 azsdk-python-azure-mgmt-authorization/3.0.0 Python/3.10.0
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-authorization/4.0.0 Python/3.10.9
         (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic_2000001/providers/Microsoft.Authorization/roleAssignments/88888888-0000-0000-0000-000000000001?api-version=2022-04-01
   response:
     body:
-      string: '{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"20b3c364-a21a-43db-b869-9854549d2742","principalType":"ServicePrincipal","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic_2000001","condition":null,"conditionVersion":null,"createdOn":"2023-04-26T04:51:24.8305458Z","updatedOn":"2023-04-26T04:51:25.9053547Z","createdBy":null,"updatedBy":"0581142e-ae8f-4bc0-9a0d-ffb7cbad05b2","delegatedManagedIdentityResourceId":null,"description":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic_2000001/providers/Microsoft.Authorization/roleAssignments/88888888-0000-0000-0000-000000000001","type":"Microsoft.Authorization/roleAssignments","name":"88888888-0000-0000-0000-000000000001"}'
+      string: '{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"67fd7b5f-6fdc-4d01-b441-348546bd57bd","principalType":"ServicePrincipal","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic_2000001","condition":null,"conditionVersion":null,"createdOn":"2023-10-13T06:10:36.2099475Z","updatedOn":"2023-10-13T06:10:36.8859581Z","createdBy":null,"updatedBy":"d44a2991-98c6-47c3-b59b-2b30d72cfcc2","delegatedManagedIdentityResourceId":null,"description":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic_2000001/providers/Microsoft.Authorization/roleAssignments/88888888-0000-0000-0000-000000000001","type":"Microsoft.Authorization/roleAssignments","name":"88888888-0000-0000-0000-000000000001"}'
     headers:
       cache-control:
       - no-cache
@@ -221,7 +221,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Apr 2023 04:51:28 GMT
+      - Fri, 13 Oct 2023 06:10:38 GMT
       expires:
       - '-1'
       pragma:
@@ -249,21 +249,21 @@ interactions:
       ParameterSetName:
       - -g --gallery-name
       User-Agent:
-      - AZURECLI/2.48.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_basic_2000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic_2000001","name":"img_tmpl_basic_2000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","test":"test_image_builder_basic_sig","date":"2023-04-26T04:50:24Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic_2000001","name":"img_tmpl_basic_2000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","test":"test_image_builder_basic_sig","date":"2023-10-13T06:09:36Z","module":"vm","Creator":"v-jingszhang@microsoft.com","DateCreated":"2023-10-13T06:10:26Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '361'
+      - '451'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Apr 2023 04:51:29 GMT
+      - Fri, 13 Oct 2023 06:10:39 GMT
       expires:
       - '-1'
       pragma:
@@ -295,7 +295,7 @@ interactions:
       ParameterSetName:
       - -g --gallery-name
       User-Agent:
-      - AZURECLI/2.48.0 azsdk-python-azure-mgmt-compute/29.1.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic_2000001/providers/Microsoft.Compute/galleries/sig1000003?api-version=2021-10-01
   response:
@@ -303,11 +303,11 @@ interactions:
       string: "{\r\n  \"name\": \"sig1000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic_2000001/providers/Microsoft.Compute/galleries/sig1000003\"\
         ,\r\n  \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"westus2\"\
         ,\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"identifier\": {\r\n \
-        \     \"uniqueName\": \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-SIG1I5MEBE\"\r\
+        \     \"uniqueName\": \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-SIG1EDAQ2S\"\r\
         \n    },\r\n    \"provisioningState\": \"Creating\"\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/capsOperations/62edaa42-d50a-46fe-ba87-a669f47c833c?api-version=2021-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/capsOperations/45fea4c6-e0ba-4596-a61a-6ef9f572026f?api-version=2021-10-01
       cache-control:
       - no-cache
       content-length:
@@ -315,7 +315,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Apr 2023 04:51:33 GMT
+      - Fri, 13 Oct 2023 06:10:45 GMT
       expires:
       - '-1'
       pragma:
@@ -330,7 +330,7 @@ interactions:
       x-ms-ratelimit-remaining-resource:
       - Microsoft.Compute/CreateUpdateGallery3Min;49,Microsoft.Compute/CreateUpdateGallery30Min;299
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1197'
     status:
       code: 201
       message: Created
@@ -348,23 +348,23 @@ interactions:
       ParameterSetName:
       - -g --gallery-name
       User-Agent:
-      - AZURECLI/2.48.0 azsdk-python-azure-mgmt-compute/29.1.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/capsOperations/62edaa42-d50a-46fe-ba87-a669f47c833c?api-version=2021-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/capsOperations/45fea4c6-e0ba-4596-a61a-6ef9f572026f?api-version=2021-10-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2023-04-26T04:51:33.5739812+00:00\",\r\n  \"\
-        endTime\": \"2023-04-26T04:51:33.9177316+00:00\",\r\n  \"status\": \"Succeeded\"\
-        ,\r\n  \"name\": \"62edaa42-d50a-46fe-ba87-a669f47c833c\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2023-10-13T06:10:45.4692023+00:00\",\r\n  \"\
+        status\": \"InProgress\",\r\n  \"name\": \"45fea4c6-e0ba-4596-a61a-6ef9f572026f\"\
+        \r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '184'
+      - '134'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Apr 2023 04:51:34 GMT
+      - Fri, 13 Oct 2023 06:10:46 GMT
       expires:
       - '-1'
       pragma:
@@ -399,25 +399,23 @@ interactions:
       ParameterSetName:
       - -g --gallery-name
       User-Agent:
-      - AZURECLI/2.48.0 azsdk-python-azure-mgmt-compute/29.1.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic_2000001/providers/Microsoft.Compute/galleries/sig1000003?api-version=2021-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/capsOperations/45fea4c6-e0ba-4596-a61a-6ef9f572026f?api-version=2021-10-01
   response:
     body:
-      string: "{\r\n  \"name\": \"sig1000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic_2000001/providers/Microsoft.Compute/galleries/sig1000003\"\
-        ,\r\n  \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"westus2\"\
-        ,\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"identifier\": {\r\n \
-        \     \"uniqueName\": \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-SIG1I5MEBE\"\r\
-        \n    },\r\n    \"provisioningState\": \"Succeeded\"\r\n  }\r\n}"
+      string: "{\r\n  \"startTime\": \"2023-10-13T06:10:45.4692023+00:00\",\r\n  \"\
+        endTime\": \"2023-10-13T06:10:46.8285054+00:00\",\r\n  \"status\": \"Succeeded\"\
+        ,\r\n  \"name\": \"45fea4c6-e0ba-4596-a61a-6ef9f572026f\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '425'
+      - '184'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Apr 2023 04:51:34 GMT
+      - Fri, 13 Oct 2023 06:11:17 GMT
       expires:
       - '-1'
       pragma:
@@ -434,7 +432,60 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetGallery3Min;349,Microsoft.Compute/GetGallery30Min;2499
+      - Microsoft.Compute/GetOperationStatus3Min;1197,Microsoft.Compute/GetOperationStatus30Min;4197
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --gallery-name
+      User-Agent:
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic_2000001/providers/Microsoft.Compute/galleries/sig1000003?api-version=2021-10-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"sig1000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic_2000001/providers/Microsoft.Compute/galleries/sig1000003\"\
+        ,\r\n  \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"westus2\"\
+        ,\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"identifier\": {\r\n \
+        \     \"uniqueName\": \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-SIG1EDAQ2S\"\r\
+        \n    },\r\n    \"provisioningState\": \"Succeeded\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '425'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 13 Oct 2023 06:11:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetGallery3Min;346,Microsoft.Compute/GetGallery30Min;2496
     status:
       code: 200
       message: OK
@@ -452,21 +503,21 @@ interactions:
       ParameterSetName:
       - -g --gallery-name --gallery-image-definition --os-type -p -f -s
       User-Agent:
-      - AZURECLI/2.48.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_basic_2000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic_2000001","name":"img_tmpl_basic_2000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","test":"test_image_builder_basic_sig","date":"2023-04-26T04:50:24Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic_2000001","name":"img_tmpl_basic_2000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","test":"test_image_builder_basic_sig","date":"2023-10-13T06:09:36Z","module":"vm","Creator":"v-jingszhang@microsoft.com","DateCreated":"2023-10-13T06:10:26Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '361'
+      - '451'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Apr 2023 04:51:35 GMT
+      - Fri, 13 Oct 2023 06:11:17 GMT
       expires:
       - '-1'
       pragma:
@@ -500,7 +551,7 @@ interactions:
       ParameterSetName:
       - -g --gallery-name --gallery-image-definition --os-type -p -f -s
       User-Agent:
-      - AZURECLI/2.48.0 azsdk-python-azure-mgmt-compute/29.1.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic_2000001/providers/Microsoft.Compute/galleries/sig1000003/images/image1?api-version=2021-10-01
   response:
@@ -514,7 +565,7 @@ interactions:
         \r\n    },\r\n    \"provisioningState\": \"Creating\"\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/capsOperations/7ece541f-c0f9-4bde-854c-bbf75261f70f?api-version=2021-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/capsOperations/909cdfe6-d26a-45aa-8640-7c427c5e6bc9?api-version=2021-10-01
       cache-control:
       - no-cache
       content-length:
@@ -522,7 +573,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Apr 2023 04:51:40 GMT
+      - Fri, 13 Oct 2023 06:11:25 GMT
       expires:
       - '-1'
       pragma:
@@ -555,14 +606,14 @@ interactions:
       ParameterSetName:
       - -g --gallery-name --gallery-image-definition --os-type -p -f -s
       User-Agent:
-      - AZURECLI/2.48.0 azsdk-python-azure-mgmt-compute/29.1.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/capsOperations/7ece541f-c0f9-4bde-854c-bbf75261f70f?api-version=2021-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/capsOperations/909cdfe6-d26a-45aa-8640-7c427c5e6bc9?api-version=2021-10-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2023-04-26T04:51:39.8083865+00:00\",\r\n  \"\
-        endTime\": \"2023-04-26T04:51:39.9646542+00:00\",\r\n  \"status\": \"Succeeded\"\
-        ,\r\n  \"name\": \"7ece541f-c0f9-4bde-854c-bbf75261f70f\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2023-10-13T06:11:24.3439703+00:00\",\r\n  \"\
+        endTime\": \"2023-10-13T06:11:24.5314945+00:00\",\r\n  \"status\": \"Succeeded\"\
+        ,\r\n  \"name\": \"909cdfe6-d26a-45aa-8640-7c427c5e6bc9\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -571,7 +622,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Apr 2023 04:51:40 GMT
+      - Fri, 13 Oct 2023 06:11:25 GMT
       expires:
       - '-1'
       pragma:
@@ -588,7 +639,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperationStatus3Min;1198,Microsoft.Compute/GetOperationStatus30Min;4198
+      - Microsoft.Compute/GetOperationStatus3Min;1196,Microsoft.Compute/GetOperationStatus30Min;4196
     status:
       code: 200
       message: OK
@@ -606,7 +657,7 @@ interactions:
       ParameterSetName:
       - -g --gallery-name --gallery-image-definition --os-type -p -f -s
       User-Agent:
-      - AZURECLI/2.48.0 azsdk-python-azure-mgmt-compute/29.1.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-compute/30.0.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic_2000001/providers/Microsoft.Compute/galleries/sig1000003/images/image1?api-version=2021-10-01
   response:
@@ -626,7 +677,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Apr 2023 04:51:41 GMT
+      - Fri, 13 Oct 2023 06:11:26 GMT
       expires:
       - '-1'
       pragma:
@@ -643,7 +694,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetGalleryImage3Min;599,Microsoft.Compute/GetGalleryImage30Min;2999
+      - Microsoft.Compute/GetGalleryImage3Min;598,Microsoft.Compute/GetGalleryImage30Min;2998
     status:
       code: 200
       message: OK
@@ -661,21 +712,21 @@ interactions:
       ParameterSetName:
       - -n -g --scripts --image-source --shared-image-destinations --identity
       User-Agent:
-      - AZURECLI/2.48.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_basic_2000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic_2000001","name":"img_tmpl_basic_2000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","test":"test_image_builder_basic_sig","date":"2023-04-26T04:50:24Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic_2000001","name":"img_tmpl_basic_2000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","test":"test_image_builder_basic_sig","date":"2023-10-13T06:09:36Z","module":"vm","Creator":"v-jingszhang@microsoft.com","DateCreated":"2023-10-13T06:10:26Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '361'
+      - '451'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Apr 2023 04:51:42 GMT
+      - Fri, 13 Oct 2023 06:11:26 GMT
       expires:
       - '-1'
       pragma:
@@ -703,7 +754,7 @@ interactions:
       ParameterSetName:
       - -n -g --scripts --image-source --shared-image-destinations --identity
       User-Agent:
-      - AZURECLI/2.48.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/locations?api-version=2019-11-01
   response:
@@ -829,7 +880,12 @@ interactions:
         regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\"\
         :\"Europe\",\"longitude\":\"8.682127\",\"latitude\":\"50.110924\",\"physicalLocation\"\
         :\"Frankfurt\",\"pairedRegion\":[{\"name\":\"germanynorth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germanynorth\"\
-        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwayeast\"\
+        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/italynorth\"\
+        ,\"name\":\"italynorth\",\"displayName\":\"Italy North\",\"regionalDisplayName\"\
+        :\"(Europe) Italy North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
+        :\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"9.18109\",\"\
+        latitude\":\"45.46888\",\"physicalLocation\":\"Milan\",\"pairedRegion\":[]}},{\"\
+        id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwayeast\"\
         ,\"name\":\"norwayeast\",\"displayName\":\"Norway East\",\"regionalDisplayName\"\
         :\"(Europe) Norway East\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
         :\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"10.752245\"\
@@ -864,13 +920,12 @@ interactions:
         :\"Recommended\",\"geographyGroup\":\"US\",\"longitude\":\"-93.6208\",\"latitude\"\
         :\"41.5908\",\"physicalLocation\":\"\",\"pairedRegion\":[{\"name\":\"eastus2euap\"\
         ,\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2euap\"\
-        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2euap\"\
-        ,\"name\":\"eastus2euap\",\"displayName\":\"East US 2 EUAP\",\"regionalDisplayName\"\
-        :\"(US) East US 2 EUAP\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
-        :\"Recommended\",\"geographyGroup\":\"US\",\"longitude\":\"-78.3889\",\"latitude\"\
-        :\"36.6681\",\"physicalLocation\":\"\",\"pairedRegion\":[{\"name\":\"centraluseuap\"\
-        ,\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centraluseuap\"\
-        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/qatarcentral\"\
+        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/israelcentral\"\
+        ,\"name\":\"israelcentral\",\"displayName\":\"Israel Central\",\"regionalDisplayName\"\
+        :\"(Middle East) Israel Central\",\"metadata\":{\"regionType\":\"Physical\"\
+        ,\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Middle East\",\"\
+        longitude\":\"33.4506633\",\"latitude\":\"31.2655698\",\"physicalLocation\"\
+        :\"Israel\",\"pairedRegion\":[]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/qatarcentral\"\
         ,\"name\":\"qatarcentral\",\"displayName\":\"Qatar Central\",\"regionalDisplayName\"\
         :\"(Middle East) Qatar Central\",\"metadata\":{\"regionType\":\"Physical\"\
         ,\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Middle East\",\"\
@@ -913,10 +968,7 @@ interactions:
         }},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/canada\"\
         ,\"name\":\"canada\",\"displayName\":\"Canada\",\"regionalDisplayName\":\"\
         Canada\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"\
-        }},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/chilecentral\"\
-        ,\"name\":\"chilecentral\",\"displayName\":\"Chile Central\",\"regionalDisplayName\"\
-        :\"Chile Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
-        :\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/europe\"\
+        }},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/europe\"\
         ,\"name\":\"europe\",\"displayName\":\"Europe\",\"regionalDisplayName\":\"\
         Europe\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"\
         }},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/france\"\
@@ -931,28 +983,13 @@ interactions:
         }},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/india\"\
         ,\"name\":\"india\",\"displayName\":\"India\",\"regionalDisplayName\":\"India\"\
         ,\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"\
-        id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/israelcentral\"\
-        ,\"name\":\"israelcentral\",\"displayName\":\"Israel Central\",\"regionalDisplayName\"\
-        :\"Israel Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
-        :\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/israelnorthwest\"\
-        ,\"name\":\"israelnorthwest\",\"displayName\":\"Israel Northwest\",\"regionalDisplayName\"\
-        :\"Israel Northwest\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
-        :\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/italynorth\"\
-        ,\"name\":\"italynorth\",\"displayName\":\"Italy North\",\"regionalDisplayName\"\
-        :\"Italy North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
-        :\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/japan\"\
+        id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/japan\"\
         ,\"name\":\"japan\",\"displayName\":\"Japan\",\"regionalDisplayName\":\"Japan\"\
         ,\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"\
         id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/korea\"\
         ,\"name\":\"korea\",\"displayName\":\"Korea\",\"regionalDisplayName\":\"Korea\"\
         ,\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"\
-        id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/malaysiasouth\"\
-        ,\"name\":\"malaysiasouth\",\"displayName\":\"Malaysia South\",\"regionalDisplayName\"\
-        :\"Malaysia South\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
-        :\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/mexicocentral\"\
-        ,\"name\":\"mexicocentral\",\"displayName\":\"Mexico Central\",\"regionalDisplayName\"\
-        :\"Mexico Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
-        :\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norway\"\
+        id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norway\"\
         ,\"name\":\"norway\",\"displayName\":\"Norway\",\"regionalDisplayName\":\"\
         Norway\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"\
         }},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/singapore\"\
@@ -961,18 +998,9 @@ interactions:
         :\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafrica\"\
         ,\"name\":\"southafrica\",\"displayName\":\"South Africa\",\"regionalDisplayName\"\
         :\"South Africa\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\"\
-        :\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/spaincentral\"\
-        ,\"name\":\"spaincentral\",\"displayName\":\"Spain Central\",\"regionalDisplayName\"\
-        :\"Spain Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
         :\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerland\"\
         ,\"name\":\"switzerland\",\"displayName\":\"Switzerland\",\"regionalDisplayName\"\
         :\"Switzerland\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\"\
-        :\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/taiwannorth\"\
-        ,\"name\":\"taiwannorth\",\"displayName\":\"Taiwan North\",\"regionalDisplayName\"\
-        :\"Taiwan North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
-        :\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/taiwannorthwest\"\
-        ,\"name\":\"taiwannorthwest\",\"displayName\":\"Taiwan Northwest\",\"regionalDisplayName\"\
-        :\"Taiwan Northwest\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
         :\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uae\"\
         ,\"name\":\"uae\",\"displayName\":\"United Arab Emirates\",\"regionalDisplayName\"\
         :\"United Arab Emirates\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\"\
@@ -998,8 +1026,7 @@ interactions:
         :\"(South America) Brazil US\",\"metadata\":{\"regionType\":\"Physical\",\"\
         regionCategory\":\"Other\",\"geographyGroup\":\"South America\",\"longitude\"\
         :\"0\",\"latitude\":\"0\",\"physicalLocation\":\"\",\"pairedRegion\":[{\"\
-        name\":\"Brazil Southeast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/Brazil\
-        \ Southeast\"},{\"name\":\"brazilus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilus\"\
+        name\":\"brazilsoutheast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsoutheast\"\
         }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastusstg\"\
         ,\"name\":\"eastusstg\",\"displayName\":\"East US STG\",\"regionalDisplayName\"\
         :\"(US) East US STG\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
@@ -1024,6 +1051,12 @@ interactions:
         ,\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia Pacific\",\"longitude\"\
         :\"70.05773\",\"latitude\":\"22.470701\",\"physicalLocation\":\"Jamnagar\"\
         ,\"pairedRegion\":[{\"name\":\"jioindiacentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/jioindiacentral\"\
+        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2euap\"\
+        ,\"name\":\"eastus2euap\",\"displayName\":\"East US 2 EUAP\",\"regionalDisplayName\"\
+        :\"(US) East US 2 EUAP\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
+        :\"Other\",\"geographyGroup\":\"US\",\"longitude\":\"-78.3889\",\"latitude\"\
+        :\"36.6681\",\"physicalLocation\":\"\",\"pairedRegion\":[{\"name\":\"centraluseuap\"\
+        ,\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centraluseuap\"\
         }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralusstg\"\
         ,\"name\":\"southcentralusstg\",\"displayName\":\"South Central US STG\",\"\
         regionalDisplayName\":\"(US) South Central US STG\",\"metadata\":{\"regionType\"\
@@ -1047,14 +1080,14 @@ interactions:
         :\"(Asia Pacific) Australia Central\",\"metadata\":{\"regionType\":\"Physical\"\
         ,\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia Pacific\",\"longitude\"\
         :\"149.1244\",\"latitude\":\"-35.3075\",\"physicalLocation\":\"Canberra\"\
-        ,\"pairedRegion\":[{\"name\":\"australiacentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral\"\
+        ,\"pairedRegion\":[{\"name\":\"australiacentral2\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral2\"\
         }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral2\"\
         ,\"name\":\"australiacentral2\",\"displayName\":\"Australia Central 2\",\"\
         regionalDisplayName\":\"(Asia Pacific) Australia Central 2\",\"metadata\"\
         :{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\"\
         :\"Asia Pacific\",\"longitude\":\"149.1244\",\"latitude\":\"-35.3075\",\"\
-        physicalLocation\":\"Canberra\",\"pairedRegion\":[{\"name\":\"australiacentral2\"\
-        ,\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral2\"\
+        physicalLocation\":\"Canberra\",\"pairedRegion\":[{\"name\":\"australiacentral\"\
+        ,\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral\"\
         }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiasoutheast\"\
         ,\"name\":\"australiasoutheast\",\"displayName\":\"Australia Southeast\",\"\
         regionalDisplayName\":\"(Asia Pacific) Australia Southeast\",\"metadata\"\
@@ -1116,12 +1149,6 @@ interactions:
         :\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"5.733107\",\"latitude\"\
         :\"58.969975\",\"physicalLocation\":\"Norway\",\"pairedRegion\":[{\"name\"\
         :\"norwayeast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwayeast\"\
-        }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/swedensouth\"\
-        ,\"name\":\"swedensouth\",\"displayName\":\"Sweden South\",\"regionalDisplayName\"\
-        :\"(Europe) Sweden South\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\"\
-        :\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"13.0007\",\"latitude\"\
-        :\"55.6059\",\"physicalLocation\":\"Malmo\",\"pairedRegion\":[{\"name\":\"\
-        swedencentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/swedencentral\"\
         }]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandwest\"\
         ,\"name\":\"switzerlandwest\",\"displayName\":\"Switzerland West\",\"regionalDisplayName\"\
         :\"(Europe) Switzerland West\",\"metadata\":{\"regionType\":\"Physical\",\"\
@@ -1151,11 +1178,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '33879'
+      - '31907'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Apr 2023 04:51:43 GMT
+      - Fri, 13 Oct 2023 06:11:29 GMT
       expires:
       - '-1'
       pragma:
@@ -1195,7 +1222,7 @@ interactions:
       ParameterSetName:
       - -n -g --scripts --image-source --shared-image-destinations --identity
       User-Agent:
-      - AZURECLI/2.48.0 azsdk-python-mgmt-imagebuilder/1.2.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-imagebuilder/1.2.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic_2000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01?api-version=2022-07-01
   response:
@@ -1220,7 +1247,7 @@ interactions:
         \n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus2/operations/1012794b-6cef-4def-ad8d-55bf07161587?api-version=2022-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus2/operations/702440bf-6238-4cc0-a617-fbb3e8080fbd?api-version=2022-07-01&t=638327742960626755&c=MIIHHjCCBgagAwIBAgITfwHPGb2PGVTN4z3FUwAEAc8ZvTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDIwHhcNMjMwODAyMDYzNjM2WhcNMjQwNzI3MDYzNjM2WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALA8WMmmEO1CwTnKvAtvibQoh9fKt-nYVdbvRtzIlm4z19BYYfDibvj6l1viYhNR3bs53c9d8fIWknmMKcHdJpnnDk-sfLAVWjMNWlp_buwQ0wqnDDMi-_nqhutQ0ONUbruFxD0-bGPA3RLD9MxnV3XQGNGjXFzj7hqAQauMfHafpxwgDIEYAcWfBtE32aGB9_bxZrY8E2slVewgeS6yws88svVeMAmGPQEGqIrOrqphrXLbmWMcWg6Ixey-FyuliVC6n2ECOpeUOnI3zd3u2YXwLZrTeYxh6zaRuU-ht2zLmkisse4EaaJvcnYB1ET9IBE-LI8SxLbutQtDAe4kiSkCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MB0GA1UdDgQWBBQBTTHZD8UzTofzBwHZRpdtw5XpXjAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBSuecJrXSWIEwb2BwnDl3x7l48dVTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAD3Zm_z6dHneGOQPVVe1FxHrV2xvtqbjaKZAuH5rSpWUw_DJdOSV4cWnP6mHzxkPNq64LVAwgyif18NOtR825NodQN7r_Il0fGIykE4rt-M_xIqddJaoXHzIGUQ0uCofzHWG-wdvSYVhlbFFtTckqYtEA9-qW-eTU2K1wu1OQ8ry_XahL8OpgJsribT6ANlH0I5odhgLdzGhwvBWfM1-xaqN8ieQA5l7FdmYeOrZYwzX4Lc-478HHPVhkKgLr6pn1L-WJJ1mMn_PPXo4c6q34Uw6i0kyVgPeot9rO0FSHhj-YxHTde4eXuk4k1VEx6v56KK89p9N2LCqwkWf75r3Vdk&s=HkKaaJxdwFarcZRdb9zvZoi_FKgzaqSpEKuqlH30ieosOi5g3YU-yWR8MN8iF0zQYRCd4I50PZDXeNtflNDpl1TpRdV3fTtMB0lAzdKaBKig2IOq4XkJ2isEMk7y4fWfjNj5o-iIej1N_0Rey43TIUwFW2n-0IHeoxxsnjOpWYP0TfPSQjL8gYrHIiS11yJ7HWJjm0-JHW08L2PhEwLEyKiJcyUMhnSMWJTlK-9gWxJY5t-mMb14Rv1Wi6RaVJemFcy6QSJleyM0Tzszojo_uQezeoNU7OyaJEbs19r--Uu-Ja_VkiwHt4Xhj8zc15Gwjvxi4cbA3SAgruLaED6mGg&h=fy1o6iEuXC3jR0PoFYid0Tc7wB449Ey3GX1rAYMpCrs
       cache-control:
       - no-cache
       content-length:
@@ -1228,7 +1255,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 26 Apr 2023 04:51:51 GMT
+      - Fri, 13 Oct 2023 06:11:35 GMT
       expires:
       - '-1'
       pragma:
@@ -1258,13 +1285,13 @@ interactions:
       ParameterSetName:
       - -n -g --scripts --image-source --shared-image-destinations --identity
       User-Agent:
-      - AZURECLI/2.48.0 azsdk-python-mgmt-imagebuilder/1.2.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-imagebuilder/1.2.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus2/operations/1012794b-6cef-4def-ad8d-55bf07161587?api-version=2022-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus2/operations/702440bf-6238-4cc0-a617-fbb3e8080fbd?api-version=2022-07-01&t=638327742960626755&c=MIIHHjCCBgagAwIBAgITfwHPGb2PGVTN4z3FUwAEAc8ZvTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDIwHhcNMjMwODAyMDYzNjM2WhcNMjQwNzI3MDYzNjM2WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALA8WMmmEO1CwTnKvAtvibQoh9fKt-nYVdbvRtzIlm4z19BYYfDibvj6l1viYhNR3bs53c9d8fIWknmMKcHdJpnnDk-sfLAVWjMNWlp_buwQ0wqnDDMi-_nqhutQ0ONUbruFxD0-bGPA3RLD9MxnV3XQGNGjXFzj7hqAQauMfHafpxwgDIEYAcWfBtE32aGB9_bxZrY8E2slVewgeS6yws88svVeMAmGPQEGqIrOrqphrXLbmWMcWg6Ixey-FyuliVC6n2ECOpeUOnI3zd3u2YXwLZrTeYxh6zaRuU-ht2zLmkisse4EaaJvcnYB1ET9IBE-LI8SxLbutQtDAe4kiSkCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MB0GA1UdDgQWBBQBTTHZD8UzTofzBwHZRpdtw5XpXjAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBSuecJrXSWIEwb2BwnDl3x7l48dVTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAD3Zm_z6dHneGOQPVVe1FxHrV2xvtqbjaKZAuH5rSpWUw_DJdOSV4cWnP6mHzxkPNq64LVAwgyif18NOtR825NodQN7r_Il0fGIykE4rt-M_xIqddJaoXHzIGUQ0uCofzHWG-wdvSYVhlbFFtTckqYtEA9-qW-eTU2K1wu1OQ8ry_XahL8OpgJsribT6ANlH0I5odhgLdzGhwvBWfM1-xaqN8ieQA5l7FdmYeOrZYwzX4Lc-478HHPVhkKgLr6pn1L-WJJ1mMn_PPXo4c6q34Uw6i0kyVgPeot9rO0FSHhj-YxHTde4eXuk4k1VEx6v56KK89p9N2LCqwkWf75r3Vdk&s=HkKaaJxdwFarcZRdb9zvZoi_FKgzaqSpEKuqlH30ieosOi5g3YU-yWR8MN8iF0zQYRCd4I50PZDXeNtflNDpl1TpRdV3fTtMB0lAzdKaBKig2IOq4XkJ2isEMk7y4fWfjNj5o-iIej1N_0Rey43TIUwFW2n-0IHeoxxsnjOpWYP0TfPSQjL8gYrHIiS11yJ7HWJjm0-JHW08L2PhEwLEyKiJcyUMhnSMWJTlK-9gWxJY5t-mMb14Rv1Wi6RaVJemFcy6QSJleyM0Tzszojo_uQezeoNU7OyaJEbs19r--Uu-Ja_VkiwHt4Xhj8zc15Gwjvxi4cbA3SAgruLaED6mGg&h=fy1o6iEuXC3jR0PoFYid0Tc7wB449Ey3GX1rAYMpCrs
   response:
     body:
-      string: "{\n \"name\": \"1012794B-6CEF-4DEF-AD8D-55BF07161587\",\n \"status\"\
-        : \"InProgress\",\n \"startTime\": \"2023-04-26T04:51:50.4198562Z\"\n}"
+      string: "{\n \"name\": \"702440BF-6238-4CC0-A617-FBB3E8080FBD\",\n \"status\"\
+        : \"InProgress\",\n \"startTime\": \"2023-10-13T06:11:34.8270299Z\"\n}"
     headers:
       cache-control:
       - no-cache
@@ -1273,7 +1300,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 26 Apr 2023 04:51:52 GMT
+      - Fri, 13 Oct 2023 06:11:35 GMT
       expires:
       - '-1'
       pragma:
@@ -1305,13 +1332,13 @@ interactions:
       ParameterSetName:
       - -n -g --scripts --image-source --shared-image-destinations --identity
       User-Agent:
-      - AZURECLI/2.48.0 azsdk-python-mgmt-imagebuilder/1.2.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-imagebuilder/1.2.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus2/operations/1012794b-6cef-4def-ad8d-55bf07161587?api-version=2022-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus2/operations/702440bf-6238-4cc0-a617-fbb3e8080fbd?api-version=2022-07-01&t=638327742960626755&c=MIIHHjCCBgagAwIBAgITfwHPGb2PGVTN4z3FUwAEAc8ZvTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDIwHhcNMjMwODAyMDYzNjM2WhcNMjQwNzI3MDYzNjM2WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALA8WMmmEO1CwTnKvAtvibQoh9fKt-nYVdbvRtzIlm4z19BYYfDibvj6l1viYhNR3bs53c9d8fIWknmMKcHdJpnnDk-sfLAVWjMNWlp_buwQ0wqnDDMi-_nqhutQ0ONUbruFxD0-bGPA3RLD9MxnV3XQGNGjXFzj7hqAQauMfHafpxwgDIEYAcWfBtE32aGB9_bxZrY8E2slVewgeS6yws88svVeMAmGPQEGqIrOrqphrXLbmWMcWg6Ixey-FyuliVC6n2ECOpeUOnI3zd3u2YXwLZrTeYxh6zaRuU-ht2zLmkisse4EaaJvcnYB1ET9IBE-LI8SxLbutQtDAe4kiSkCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MB0GA1UdDgQWBBQBTTHZD8UzTofzBwHZRpdtw5XpXjAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBSuecJrXSWIEwb2BwnDl3x7l48dVTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAD3Zm_z6dHneGOQPVVe1FxHrV2xvtqbjaKZAuH5rSpWUw_DJdOSV4cWnP6mHzxkPNq64LVAwgyif18NOtR825NodQN7r_Il0fGIykE4rt-M_xIqddJaoXHzIGUQ0uCofzHWG-wdvSYVhlbFFtTckqYtEA9-qW-eTU2K1wu1OQ8ry_XahL8OpgJsribT6ANlH0I5odhgLdzGhwvBWfM1-xaqN8ieQA5l7FdmYeOrZYwzX4Lc-478HHPVhkKgLr6pn1L-WJJ1mMn_PPXo4c6q34Uw6i0kyVgPeot9rO0FSHhj-YxHTde4eXuk4k1VEx6v56KK89p9N2LCqwkWf75r3Vdk&s=HkKaaJxdwFarcZRdb9zvZoi_FKgzaqSpEKuqlH30ieosOi5g3YU-yWR8MN8iF0zQYRCd4I50PZDXeNtflNDpl1TpRdV3fTtMB0lAzdKaBKig2IOq4XkJ2isEMk7y4fWfjNj5o-iIej1N_0Rey43TIUwFW2n-0IHeoxxsnjOpWYP0TfPSQjL8gYrHIiS11yJ7HWJjm0-JHW08L2PhEwLEyKiJcyUMhnSMWJTlK-9gWxJY5t-mMb14Rv1Wi6RaVJemFcy6QSJleyM0Tzszojo_uQezeoNU7OyaJEbs19r--Uu-Ja_VkiwHt4Xhj8zc15Gwjvxi4cbA3SAgruLaED6mGg&h=fy1o6iEuXC3jR0PoFYid0Tc7wB449Ey3GX1rAYMpCrs
   response:
     body:
-      string: "{\n \"name\": \"1012794B-6CEF-4DEF-AD8D-55BF07161587\",\n \"status\"\
-        : \"InProgress\",\n \"startTime\": \"2023-04-26T04:51:50.4198562Z\"\n}"
+      string: "{\n \"name\": \"702440BF-6238-4CC0-A617-FBB3E8080FBD\",\n \"status\"\
+        : \"InProgress\",\n \"startTime\": \"2023-10-13T06:11:34.8270299Z\"\n}"
     headers:
       cache-control:
       - no-cache
@@ -1320,7 +1347,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 26 Apr 2023 04:52:22 GMT
+      - Fri, 13 Oct 2023 06:12:06 GMT
       expires:
       - '-1'
       pragma:
@@ -1352,14 +1379,14 @@ interactions:
       ParameterSetName:
       - -n -g --scripts --image-source --shared-image-destinations --identity
       User-Agent:
-      - AZURECLI/2.48.0 azsdk-python-mgmt-imagebuilder/1.2.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-imagebuilder/1.2.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus2/operations/1012794b-6cef-4def-ad8d-55bf07161587?api-version=2022-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus2/operations/702440bf-6238-4cc0-a617-fbb3e8080fbd?api-version=2022-07-01&t=638327742960626755&c=MIIHHjCCBgagAwIBAgITfwHPGb2PGVTN4z3FUwAEAc8ZvTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDIwHhcNMjMwODAyMDYzNjM2WhcNMjQwNzI3MDYzNjM2WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALA8WMmmEO1CwTnKvAtvibQoh9fKt-nYVdbvRtzIlm4z19BYYfDibvj6l1viYhNR3bs53c9d8fIWknmMKcHdJpnnDk-sfLAVWjMNWlp_buwQ0wqnDDMi-_nqhutQ0ONUbruFxD0-bGPA3RLD9MxnV3XQGNGjXFzj7hqAQauMfHafpxwgDIEYAcWfBtE32aGB9_bxZrY8E2slVewgeS6yws88svVeMAmGPQEGqIrOrqphrXLbmWMcWg6Ixey-FyuliVC6n2ECOpeUOnI3zd3u2YXwLZrTeYxh6zaRuU-ht2zLmkisse4EaaJvcnYB1ET9IBE-LI8SxLbutQtDAe4kiSkCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MB0GA1UdDgQWBBQBTTHZD8UzTofzBwHZRpdtw5XpXjAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBSuecJrXSWIEwb2BwnDl3x7l48dVTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAD3Zm_z6dHneGOQPVVe1FxHrV2xvtqbjaKZAuH5rSpWUw_DJdOSV4cWnP6mHzxkPNq64LVAwgyif18NOtR825NodQN7r_Il0fGIykE4rt-M_xIqddJaoXHzIGUQ0uCofzHWG-wdvSYVhlbFFtTckqYtEA9-qW-eTU2K1wu1OQ8ry_XahL8OpgJsribT6ANlH0I5odhgLdzGhwvBWfM1-xaqN8ieQA5l7FdmYeOrZYwzX4Lc-478HHPVhkKgLr6pn1L-WJJ1mMn_PPXo4c6q34Uw6i0kyVgPeot9rO0FSHhj-YxHTde4eXuk4k1VEx6v56KK89p9N2LCqwkWf75r3Vdk&s=HkKaaJxdwFarcZRdb9zvZoi_FKgzaqSpEKuqlH30ieosOi5g3YU-yWR8MN8iF0zQYRCd4I50PZDXeNtflNDpl1TpRdV3fTtMB0lAzdKaBKig2IOq4XkJ2isEMk7y4fWfjNj5o-iIej1N_0Rey43TIUwFW2n-0IHeoxxsnjOpWYP0TfPSQjL8gYrHIiS11yJ7HWJjm0-JHW08L2PhEwLEyKiJcyUMhnSMWJTlK-9gWxJY5t-mMb14Rv1Wi6RaVJemFcy6QSJleyM0Tzszojo_uQezeoNU7OyaJEbs19r--Uu-Ja_VkiwHt4Xhj8zc15Gwjvxi4cbA3SAgruLaED6mGg&h=fy1o6iEuXC3jR0PoFYid0Tc7wB449Ey3GX1rAYMpCrs
   response:
     body:
-      string: "{\n \"name\": \"1012794B-6CEF-4DEF-AD8D-55BF07161587\",\n \"status\"\
-        : \"Succeeded\",\n \"startTime\": \"2023-04-26T04:51:50.4198562Z\",\n \"endTime\"\
-        : \"2023-04-26T04:52:32.0886864Z\"\n}"
+      string: "{\n \"name\": \"702440BF-6238-4CC0-A617-FBB3E8080FBD\",\n \"status\"\
+        : \"Succeeded\",\n \"startTime\": \"2023-10-13T06:11:34.8270299Z\",\n \"endTime\"\
+        : \"2023-10-13T06:12:09.1529283Z\"\n}"
     headers:
       cache-control:
       - no-cache
@@ -1368,7 +1395,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 26 Apr 2023 04:52:52 GMT
+      - Fri, 13 Oct 2023 06:12:36 GMT
       expires:
       - '-1'
       pragma:
@@ -1400,7 +1427,7 @@ interactions:
       ParameterSetName:
       - -n -g --scripts --image-source --shared-image-destinations --identity
       User-Agent:
-      - AZURECLI/2.48.0 azsdk-python-mgmt-imagebuilder/1.2.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-imagebuilder/1.2.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic_2000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01?api-version=2022-07-01
   response:
@@ -1419,11 +1446,11 @@ interactions:
         versioning\": null\n   }\n  ],\n  \"provisioningState\": \"Succeeded\",\n\
         \  \"buildTimeoutInMinutes\": 0,\n  \"vmProfile\": {\n   \"vmSize\": \"\"\
         ,\n   \"osDiskSizeGB\": 0\n  },\n  \"stagingResourceGroup\": \"\",\n  \"exactStagingResourceGroup\"\
-        : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/IT_img_tmpl_basic_2l2z4acze2byjerrm3tn62kx4_016c3b7a-ff3a-4c0a-8cc7-4bbcd03738ca\"\
+        : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/IT_img_tmpl_basic_2tncn4tyv3dp2zrgw4k3he2ef_a9f3e403-4d3e-4a07-b083-41228e689494\"\
         \n },\n \"identity\": {\n  \"type\": \"UserAssigned\",\n  \"userAssignedIdentities\"\
         : {\n   \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic_2000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1\"\
-        : {\n    \"principalId\": \"20b3c364-a21a-43db-b869-9854549d2742\",\n    \"\
-        clientId\": \"94858b3a-6a81-41dc-acef-a2615e4cd167\"\n   }\n  }\n },\n \"\
+        : {\n    \"principalId\": \"67fd7b5f-6fdc-4d01-b441-348546bd57bd\",\n    \"\
+        clientId\": \"0211f163-3634-49be-b3bb-5dd047de41bc\"\n   }\n  }\n },\n \"\
         tags\": {},\n \"location\": \"westus2\",\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_basic_2000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01\"\
         ,\n \"name\": \"template01\",\n \"type\": \"Microsoft.VirtualMachineImages/imageTemplates\"\
         \n}"
@@ -1435,7 +1462,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 26 Apr 2023 04:52:53 GMT
+      - Fri, 13 Oct 2023 06:12:37 GMT
       expires:
       - '-1'
       pragma:

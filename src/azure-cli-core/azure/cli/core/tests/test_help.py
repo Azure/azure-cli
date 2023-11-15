@@ -130,7 +130,6 @@ class HelpTest(unittest.TestCase):
         except SystemExit:
             pass
         cmd_tbl = cli.invocation.commands_loader.command_table
-        cli.invocation.parser.load_command_table(cli.invocation.commands_loader)
         for cmd in cmd_tbl:
             try:
                 cmd_tbl[cmd].loader.command_name = cmd
@@ -140,7 +139,6 @@ class HelpTest(unittest.TestCase):
         cli.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, register_global_subscription_argument)
         cli.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, register_ids_argument)
         cli.raise_event(events.EVENT_INVOKER_CMD_TBL_LOADED, command_table=cmd_tbl)
-        cli.invocation.parser.load_command_table(cli.invocation.commands_loader)
         _store_parsers(cli.invocation.parser, parser_dict)
 
         # TODO: do we want to update this as it doesn't actually load all help.

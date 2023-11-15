@@ -954,7 +954,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         v_cpus_per_core=None, os_disk_security_encryption_type=None,
                         os_disk_secure_vm_disk_encryption_set=None, os_disk_delete_option=None,
                         regular_priority_count=None, regular_priority_percentage=None, disk_controller_type=None,
-                        enable_osimage_notification=None, max_surge=None):
+                        enable_osimage_notification=None, max_surge=None, enable_hibernation=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1420,6 +1420,11 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if orchestration_mode and cmd.supported_api_version(min_api='2020-06-01',
                                                         operation_group='virtual_machine_scale_sets'):
         vmss_properties['orchestrationMode'] = orchestration_mode
+
+    if enable_hibernation is not None:
+        if not vmss_properties.get('additionalCapabilities'):
+            vmss_properties['additionalCapabilities'] = {}
+        vmss_properties['additionalCapabilities']['hibernationEnabled'] = enable_hibernation
 
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',

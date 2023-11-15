@@ -16,7 +16,7 @@ class ResourceDeleteTests(ScenarioTest):
         username = 'ubuntu'
         password = self.create_random_name('Password#1', 30)
 
-        self.cmd('vm create -n {} -g {} --image UbuntuLTS --tag {} '
+        self.cmd('vm create -n {} -g {} --image Canonical:UbuntuServer:18.04-LTS:latest --tag {} '
                  '--admin-username {} --admin-password {} --authentication-type {} --nsg-rule None'
                  .format(vm_name, resource_group, tag_name, username, password, 'password'))
 

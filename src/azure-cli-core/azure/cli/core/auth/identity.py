@@ -54,7 +54,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     _service_principal_store_instance = None
 
     def __init__(self, authority, tenant_id=None, client_id=None, encrypt=False, use_msal_http_cache=True,
-                 allow_broker=None):
+                 allow_broker=None, instance_discovery=None):
         """
         :param authority: Authentication authority endpoint. For example,
             - AAD: https://login.microsoftonline.com
@@ -70,6 +70,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         self._encrypt = encrypt
         self._use_msal_http_cache = use_msal_http_cache
         self._allow_broker = allow_broker
+        self._instance_discovery = instance_discovery
 
         # Build the authority in MSAL style
         self._msal_authority, self._is_adfs = _get_authority_url(authority, tenant_id)
@@ -85,7 +86,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
     @property
     def _msal_app_kwargs(self):
-        """kwargs for creating UserCredential or ServicePrincipalCredential.
+        """kwargs for creating ClientApplication (including its subclass ConfidentialClientApplication).
         MSAL token cache and HTTP cache are lazily created.
         """
         if not Identity._msal_token_cache:
@@ -98,10 +99,16 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             "authority": self._msal_authority,
             "token_cache": Identity._msal_token_cache,
             "http_cache": Identity._msal_http_cache,
-            "allow_broker": self._allow_broker,
+            "instance_discovery": self._instance_discovery,
             # CP1 means we can handle claims challenges (CAE)
             "client_capabilities": None if "AZURE_IDENTITY_DISABLE_CP1" in os.environ else ["CP1"]
         }
+
+    @property
+    def _msal_public_app_kwargs(self):
+        """kwargs for creating PublicClientApplication."""
+        # allow_broker can only be used on PublicClientApplication.
+        return {**self._msal_app_kwargs, "allow_broker": self._allow_broker}
 
     @property
     def _msal_app(self):
@@ -109,7 +116,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         The instance is lazily created.
         """
         if not self._msal_app_instance:
-            self._msal_app_instance = PublicClientApplication(self.client_id, **self._msal_app_kwargs)
+            self._msal_app_instance = PublicClientApplication(self.client_id, **self._msal_public_app_kwargs)
         return self._msal_app_instance
 
     def _load_msal_token_cache(self):
@@ -222,7 +229,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         return accounts
 
     def get_user_credential(self, username):
-        return UserCredential(self.client_id, username, **self._msal_app_kwargs)
+        return UserCredential(self.client_id, username, **self._msal_public_app_kwargs)
 
     def get_service_principal_credential(self, client_id):
         entry = self._service_principal_store.load_entry(client_id, self.tenant_id)

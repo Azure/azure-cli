@@ -37,7 +37,15 @@ class ProfileCommandTest(unittest.TestCase):
         cmd = mock.MagicMock()
         cmd.cli_ctx = DummyCli()
 
-        get_raw_token_mock.return_value = (['bearer', 'token123', {'expiresOn': '2100-01-01'}], 'sub123', 'tenant123')
+        timestamp = 1695270561
+        datetime_local = '2023-09-21 04:29:21.000000'
+
+        token_entry = {
+            'accessToken': 'token123',
+            'expires_on': timestamp,
+            'expiresOn': datetime_local
+        }
+        get_raw_token_mock.return_value = (('bearer', 'token123', token_entry), 'sub123',  'tenant123')
 
         result = get_access_token(cmd)
 
@@ -46,7 +54,8 @@ class ProfileCommandTest(unittest.TestCase):
         expected_result = {
             'tokenType': 'bearer',
             'accessToken': 'token123',
-            'expiresOn': '2100-01-01',
+            'expires_on': timestamp,
+            'expiresOn': datetime_local,
             'subscription': 'sub123',
             'tenant': 'tenant123'
         }
@@ -55,8 +64,7 @@ class ProfileCommandTest(unittest.TestCase):
         # assert it takes customized resource, subscription
         resource = 'https://graph.microsoft.com/'
         subscription_id = '00000001-0000-0000-0000-000000000000'
-        get_raw_token_mock.return_value = (['bearer', 'token123', {'expiresOn': '2100-01-01'}], subscription_id,
-                                           'tenant123')
+        get_raw_token_mock.return_value = (('bearer', 'token123', token_entry), subscription_id, 'tenant123')
         result = get_access_token(cmd, subscription=subscription_id, resource=resource)
         get_raw_token_mock.assert_called_with(mock.ANY, resource, None, subscription_id, None)
 
@@ -67,12 +75,13 @@ class ProfileCommandTest(unittest.TestCase):
 
         # test get token with tenant
         tenant_id = '00000000-0000-0000-0000-000000000000'
-        get_raw_token_mock.return_value = (['bearer', 'token123', {'expiresOn': '2100-01-01'}], None, tenant_id)
+        get_raw_token_mock.return_value = (('bearer', 'token123', token_entry), None, tenant_id)
         result = get_access_token(cmd, tenant=tenant_id)
         expected_result = {
             'tokenType': 'bearer',
             'accessToken': 'token123',
-            'expiresOn': '2100-01-01',
+            'expires_on': timestamp,
+            'expiresOn': datetime_local,
             'tenant': tenant_id
         }
         self.assertEqual(result, expected_result)

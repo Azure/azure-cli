@@ -25,9 +25,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2021-12-01-preview",
+        "version": "2022-10-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}", "2021-12-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}", "2022-10-01"],
         ]
     }
 
@@ -64,8 +64,35 @@ class Update(AAZCommand):
                 min_length=4,
             ),
         )
+
+        # define Arg Group "Identity"
+
+        _args_schema = cls._args_schema
+        _args_schema.identity_type = AAZStrArg(
+            options=["--identity-type"],
+            arg_group="Identity",
+            help="Type of managed service identity.",
+            enum={"None": "None", "SystemAssigned": "SystemAssigned", "UserAssigned": "UserAssigned"},
+        )
+        _args_schema.user_assigned = AAZDictArg(
+            options=["--user-assigned"],
+            arg_group="Identity",
+            help="The list of user identities associated with the resource. The user identity dictionary key references will be ARM resource ids in the form: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}'.",
+            nullable=True,
+        )
+
+        user_assigned = cls._args_schema.user_assigned
+        user_assigned.Element = AAZObjectArg(
+            nullable=True,
+            blank={},
+        )
+
+        # define Arg Group "Parameters"
+
+        _args_schema = cls._args_schema
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
+            arg_group="Parameters",
             help="Resource tags.",
             nullable=True,
         )
@@ -133,19 +160,19 @@ class Update(AAZCommand):
         yield self.WorkspacesCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def pre_instance_update(self, instance):
         pass
 
-    # @register_callback
+    @register_callback
     def post_instance_update(self, instance):
         pass
 
@@ -201,7 +228,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-12-01-preview",
+                    "api-version", "2022-10-01",
                     required=True,
                 ),
             }
@@ -232,7 +259,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _build_schema_workspace_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_workspace_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -300,7 +327,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-12-01-preview",
+                    "api-version", "2022-10-01",
                     required=True,
                 ),
             }
@@ -343,7 +370,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _build_schema_workspace_read(cls._schema_on_200_201)
+            _UpdateHelper._build_schema_workspace_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
@@ -358,8 +385,18 @@ class Update(AAZCommand):
                 value=instance,
                 typ=AAZObjectType
             )
+            _builder.set_prop("identity", AAZObjectType)
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
+
+            identity = _builder.get(".identity")
+            if identity is not None:
+                identity.set_prop("type", AAZStrType, ".identity_type", typ_kwargs={"flags": {"required": True}})
+                identity.set_prop("userAssignedIdentities", AAZDictType, ".user_assigned")
+
+            user_assigned_identities = _builder.get(".identity.userAssignedIdentities")
+            if user_assigned_identities is not None:
+                user_assigned_identities.set_elements(AAZObjectType, ".")
 
             properties = _builder.get(".properties")
             if properties is not None:
@@ -393,191 +430,213 @@ class Update(AAZCommand):
             )
 
 
-_schema_workspace_read = None
+class _UpdateHelper:
+    """Helper class for Update"""
 
+    _schema_workspace_read = None
 
-def _build_schema_workspace_read(_schema):
-    global _schema_workspace_read
-    if _schema_workspace_read is not None:
-        _schema.e_tag = _schema_workspace_read.e_tag
-        _schema.id = _schema_workspace_read.id
-        _schema.location = _schema_workspace_read.location
-        _schema.name = _schema_workspace_read.name
-        _schema.properties = _schema_workspace_read.properties
-        _schema.system_data = _schema_workspace_read.system_data
-        _schema.tags = _schema_workspace_read.tags
-        _schema.type = _schema_workspace_read.type
-        return
+    @classmethod
+    def _build_schema_workspace_read(cls, _schema):
+        if cls._schema_workspace_read is not None:
+            _schema.etag = cls._schema_workspace_read.etag
+            _schema.id = cls._schema_workspace_read.id
+            _schema.identity = cls._schema_workspace_read.identity
+            _schema.location = cls._schema_workspace_read.location
+            _schema.name = cls._schema_workspace_read.name
+            _schema.properties = cls._schema_workspace_read.properties
+            _schema.system_data = cls._schema_workspace_read.system_data
+            _schema.tags = cls._schema_workspace_read.tags
+            _schema.type = cls._schema_workspace_read.type
+            return
 
-    _schema_workspace_read = AAZObjectType()
+        cls._schema_workspace_read = _schema_workspace_read = AAZObjectType()
 
-    workspace_read = _schema_workspace_read
-    workspace_read.e_tag = AAZStrType(
-        serialized_name="eTag",
-    )
-    workspace_read.id = AAZStrType(
-        flags={"read_only": True},
-    )
-    workspace_read.location = AAZStrType(
-        flags={"required": True},
-    )
-    workspace_read.name = AAZStrType(
-        flags={"read_only": True},
-    )
-    workspace_read.properties = AAZObjectType(
-        flags={"client_flatten": True},
-    )
-    workspace_read.system_data = AAZObjectType(
-        serialized_name="systemData",
-        flags={"read_only": True},
-    )
-    workspace_read.tags = AAZDictType()
-    workspace_read.type = AAZStrType(
-        flags={"read_only": True},
-    )
+        workspace_read = _schema_workspace_read
+        workspace_read.etag = AAZStrType()
+        workspace_read.id = AAZStrType(
+            flags={"read_only": True},
+        )
+        workspace_read.identity = AAZObjectType()
+        workspace_read.location = AAZStrType(
+            flags={"required": True},
+        )
+        workspace_read.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        workspace_read.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+        workspace_read.system_data = AAZObjectType(
+            serialized_name="systemData",
+            flags={"read_only": True},
+        )
+        workspace_read.tags = AAZDictType()
+        workspace_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
 
-    properties = _schema_workspace_read.properties
-    properties.created_date = AAZStrType(
-        serialized_name="createdDate",
-        flags={"read_only": True},
-    )
-    properties.customer_id = AAZStrType(
-        serialized_name="customerId",
-        flags={"read_only": True},
-    )
-    properties.default_data_collection_rule_resource_id = AAZStrType(
-        serialized_name="defaultDataCollectionRuleResourceId",
-    )
-    properties.features = AAZObjectType()
-    properties.force_cmk_for_query = AAZBoolType(
-        serialized_name="forceCmkForQuery",
-    )
-    properties.modified_date = AAZStrType(
-        serialized_name="modifiedDate",
-        flags={"read_only": True},
-    )
-    properties.private_link_scoped_resources = AAZListType(
-        serialized_name="privateLinkScopedResources",
-        flags={"read_only": True},
-    )
-    properties.provisioning_state = AAZStrType(
-        serialized_name="provisioningState",
-        flags={"read_only": True},
-    )
-    properties.public_network_access_for_ingestion = AAZStrType(
-        serialized_name="publicNetworkAccessForIngestion",
-    )
-    properties.public_network_access_for_query = AAZStrType(
-        serialized_name="publicNetworkAccessForQuery",
-    )
-    properties.retention_in_days = AAZIntType(
-        serialized_name="retentionInDays",
-        nullable=True,
-    )
-    properties.sku = AAZObjectType()
-    properties.workspace_capping = AAZObjectType(
-        serialized_name="workspaceCapping",
-    )
+        identity = _schema_workspace_read.identity
+        identity.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+        identity.tenant_id = AAZStrType(
+            serialized_name="tenantId",
+            flags={"read_only": True},
+        )
+        identity.type = AAZStrType(
+            flags={"required": True},
+        )
+        identity.user_assigned_identities = AAZDictType(
+            serialized_name="userAssignedIdentities",
+        )
 
-    features = _schema_workspace_read.properties.features
-    features.cluster_resource_id = AAZStrType(
-        serialized_name="clusterResourceId",
-        nullable=True,
-    )
-    features.disable_local_auth = AAZBoolType(
-        serialized_name="disableLocalAuth",
-        nullable=True,
-    )
-    features.enable_data_export = AAZBoolType(
-        serialized_name="enableDataExport",
-        nullable=True,
-    )
-    features.enable_log_access_using_only_resource_permissions = AAZBoolType(
-        serialized_name="enableLogAccessUsingOnlyResourcePermissions",
-        nullable=True,
-    )
-    features.immediate_purge_data_on30_days = AAZBoolType(
-        serialized_name="immediatePurgeDataOn30Days",
-        nullable=True,
-    )
+        user_assigned_identities = _schema_workspace_read.identity.user_assigned_identities
+        user_assigned_identities.Element = AAZObjectType()
 
-    private_link_scoped_resources = _schema_workspace_read.properties.private_link_scoped_resources
-    private_link_scoped_resources.Element = AAZObjectType(
-        flags={"read_only": True},
-    )
+        _element = _schema_workspace_read.identity.user_assigned_identities.Element
+        _element.client_id = AAZStrType(
+            serialized_name="clientId",
+            flags={"read_only": True},
+        )
+        _element.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
 
-    _element = _schema_workspace_read.properties.private_link_scoped_resources.Element
-    _element.resource_id = AAZStrType(
-        serialized_name="resourceId",
-        flags={"read_only": True},
-    )
-    _element.scope_id = AAZStrType(
-        serialized_name="scopeId",
-        flags={"read_only": True},
-    )
+        properties = _schema_workspace_read.properties
+        properties.created_date = AAZStrType(
+            serialized_name="createdDate",
+            flags={"read_only": True},
+        )
+        properties.customer_id = AAZStrType(
+            serialized_name="customerId",
+            flags={"read_only": True},
+        )
+        properties.default_data_collection_rule_resource_id = AAZStrType(
+            serialized_name="defaultDataCollectionRuleResourceId",
+        )
+        properties.features = AAZObjectType()
+        properties.force_cmk_for_query = AAZBoolType(
+            serialized_name="forceCmkForQuery",
+        )
+        properties.modified_date = AAZStrType(
+            serialized_name="modifiedDate",
+            flags={"read_only": True},
+        )
+        properties.private_link_scoped_resources = AAZListType(
+            serialized_name="privateLinkScopedResources",
+            flags={"read_only": True},
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
+        properties.public_network_access_for_ingestion = AAZStrType(
+            serialized_name="publicNetworkAccessForIngestion",
+        )
+        properties.public_network_access_for_query = AAZStrType(
+            serialized_name="publicNetworkAccessForQuery",
+        )
+        properties.retention_in_days = AAZIntType(
+            serialized_name="retentionInDays",
+            nullable=True,
+        )
+        properties.sku = AAZObjectType()
+        properties.workspace_capping = AAZObjectType(
+            serialized_name="workspaceCapping",
+        )
 
-    sku = _schema_workspace_read.properties.sku
-    sku.capacity_reservation_level = AAZIntType(
-        serialized_name="capacityReservationLevel",
-    )
-    sku.last_sku_update = AAZStrType(
-        serialized_name="lastSkuUpdate",
-        flags={"read_only": True},
-    )
-    sku.name = AAZStrType(
-        flags={"required": True},
-    )
+        features = _schema_workspace_read.properties.features
+        features.cluster_resource_id = AAZStrType(
+            serialized_name="clusterResourceId",
+            nullable=True,
+        )
+        features.disable_local_auth = AAZBoolType(
+            serialized_name="disableLocalAuth",
+            nullable=True,
+        )
+        features.enable_data_export = AAZBoolType(
+            serialized_name="enableDataExport",
+            nullable=True,
+        )
+        features.enable_log_access_using_only_resource_permissions = AAZBoolType(
+            serialized_name="enableLogAccessUsingOnlyResourcePermissions",
+            nullable=True,
+        )
+        features.immediate_purge_data_on30_days = AAZBoolType(
+            serialized_name="immediatePurgeDataOn30Days",
+            nullable=True,
+        )
 
-    workspace_capping = _schema_workspace_read.properties.workspace_capping
-    workspace_capping.daily_quota_gb = AAZFloatType(
-        serialized_name="dailyQuotaGb",
-    )
-    workspace_capping.data_ingestion_status = AAZStrType(
-        serialized_name="dataIngestionStatus",
-        flags={"read_only": True},
-    )
-    workspace_capping.quota_next_reset_time = AAZStrType(
-        serialized_name="quotaNextResetTime",
-        flags={"read_only": True},
-    )
+        private_link_scoped_resources = _schema_workspace_read.properties.private_link_scoped_resources
+        private_link_scoped_resources.Element = AAZObjectType()
 
-    system_data = _schema_workspace_read.system_data
-    system_data.created_at = AAZStrType(
-        serialized_name="createdAt",
-        flags={"read_only": True},
-    )
-    system_data.created_by = AAZStrType(
-        serialized_name="createdBy",
-        flags={"read_only": True},
-    )
-    system_data.created_by_type = AAZStrType(
-        serialized_name="createdByType",
-        flags={"read_only": True},
-    )
-    system_data.last_modified_at = AAZStrType(
-        serialized_name="lastModifiedAt",
-        flags={"read_only": True},
-    )
-    system_data.last_modified_by = AAZStrType(
-        serialized_name="lastModifiedBy",
-        flags={"read_only": True},
-    )
-    system_data.last_modified_by_type = AAZStrType(
-        serialized_name="lastModifiedByType",
-        flags={"read_only": True},
-    )
+        _element = _schema_workspace_read.properties.private_link_scoped_resources.Element
+        _element.resource_id = AAZStrType(
+            serialized_name="resourceId",
+        )
+        _element.scope_id = AAZStrType(
+            serialized_name="scopeId",
+        )
 
-    tags = _schema_workspace_read.tags
-    tags.Element = AAZStrType()
+        sku = _schema_workspace_read.properties.sku
+        sku.capacity_reservation_level = AAZIntType(
+            serialized_name="capacityReservationLevel",
+        )
+        sku.last_sku_update = AAZStrType(
+            serialized_name="lastSkuUpdate",
+            flags={"read_only": True},
+        )
+        sku.name = AAZStrType(
+            flags={"required": True},
+        )
 
-    _schema.e_tag = _schema_workspace_read.e_tag
-    _schema.id = _schema_workspace_read.id
-    _schema.location = _schema_workspace_read.location
-    _schema.name = _schema_workspace_read.name
-    _schema.properties = _schema_workspace_read.properties
-    _schema.system_data = _schema_workspace_read.system_data
-    _schema.tags = _schema_workspace_read.tags
-    _schema.type = _schema_workspace_read.type
+        workspace_capping = _schema_workspace_read.properties.workspace_capping
+        workspace_capping.daily_quota_gb = AAZFloatType(
+            serialized_name="dailyQuotaGb",
+        )
+        workspace_capping.data_ingestion_status = AAZStrType(
+            serialized_name="dataIngestionStatus",
+            flags={"read_only": True},
+        )
+        workspace_capping.quota_next_reset_time = AAZStrType(
+            serialized_name="quotaNextResetTime",
+            flags={"read_only": True},
+        )
+
+        system_data = _schema_workspace_read.system_data
+        system_data.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
+        )
+
+        tags = _schema_workspace_read.tags
+        tags.Element = AAZStrType()
+
+        _schema.etag = cls._schema_workspace_read.etag
+        _schema.id = cls._schema_workspace_read.id
+        _schema.identity = cls._schema_workspace_read.identity
+        _schema.location = cls._schema_workspace_read.location
+        _schema.name = cls._schema_workspace_read.name
+        _schema.properties = cls._schema_workspace_read.properties
+        _schema.system_data = cls._schema_workspace_read.system_data
+        _schema.tags = cls._schema_workspace_read.tags
+        _schema.type = cls._schema_workspace_read.type
 
 
 __all__ = ["Update"]

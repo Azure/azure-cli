@@ -58,7 +58,7 @@ class TestWebappMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom.get_site_availability')
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_app_details')
-    def test_webapp_github_actions_add(self, get_app_details_mock, web_client_factory_mock, site_availability_mock,  *args):
+    def test_webapp_github_actions_add(self, get_app_details_mock, web_client_factory_mock, site_availability_mock, *args):
         runtime = "python:3.9"
         rg = "group"
         is_linux = True
@@ -71,7 +71,6 @@ class TestWebappMocked(unittest.TestCase):
         with mock.patch('azure.cli.command_modules.appservice.custom._runtime_supports_github_actions', autospec=True) as m:
             add_github_actions(cmd, rg, "name", "repo", runtime, "token")
             m.assert_called_with(cmd, runtime.replace(":", "|"), is_linux)
-
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_set_deployment_user_creds(self, client_factory_mock):
@@ -102,7 +101,7 @@ class TestWebappMocked(unittest.TestCase):
         result = update_git_token(cmd_mock, 'veryNiceToken')
 
         # assert things gets wired up
-        self.assertEqual(result.token, 'veryNiceToken')
+        self.assertEqual(result.token, None)
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_set_domain_name(self, client_factory_mock):
@@ -129,7 +128,7 @@ class TestWebappMocked(unittest.TestCase):
         # assert
         self.assertEqual(result.domain_id, domain)
 
-         # action- Slot
+        # action- Slot
         result = add_hostname(cmd_mock, 'g1', webapp.name, domain, 'slot1')
 
         # assert
@@ -283,8 +282,9 @@ class TestWebappMocked(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers', return_value={"auth": "1245!"})
     @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.ping_site', autospec=True)
     @mock.patch('threading.Thread', autospec=True)
-    def test_log_stream_supply_cli_ctx(self, threading_mock, get_scm_url_mock, get_scm_site_headers_mock):
+    def test_log_stream_supply_cli_ctx(self, threading_mock, ping_site_mock, get_scm_url_mock, get_scm_site_headers_mock):
 
         # test exception to exit the streaming loop
         class ErrorToExitInfiniteLoop(Exception):
@@ -292,6 +292,7 @@ class TestWebappMocked(unittest.TestCase):
 
         threading_mock.side_effect = ErrorToExitInfiniteLoop('Expected error to exit early')
         get_scm_url_mock.return_value = 'http://great_url'
+        ping_site_mock.return_value = None
         cmd_mock = mock.MagicMock()
         cli_ctx_mock = mock.MagicMock()
         cmd_mock.cli_ctx = cli_ctx_mock
@@ -305,6 +306,24 @@ class TestWebappMocked(unittest.TestCase):
         except ErrorToExitInfiniteLoop:
             # assert
             get_scm_site_headers_mock.assert_called_with(cli_ctx_mock, app_name, rg_name, None)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_url', autospec=True)
+    def test_log_stream_ping_site_failed(self, get_site_url_mock):
+        import urllib3
+        get_site_url_mock.return_value = 'http://unreachable-url'
+        cmd_mock = mock.MagicMock()
+        cli_ctx_mock = mock.MagicMock()
+        cmd_mock.cli_ctx = cli_ctx_mock
+        rg_name = "rg"
+        app_name = "web1"
+
+        try:
+            # action
+            get_streaming_log(cmd_mock, rg_name, app_name)
+            self.fail('Exception not thrown even when site ping should fail')
+        except urllib3.exceptions.MaxRetryError:
+            # assert
+            get_site_url_mock.assert_called_with(cmd_mock, rg_name, app_name, None)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     def test_restore_deleted_webapp(self, site_op_mock):

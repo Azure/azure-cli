@@ -13,10 +13,9 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "cosmosdb postgres cluster server show",
-    is_preview=True,
 )
 class Show(AAZCommand):
-    """Get information about a server in cluster.
+    """Get information about a node in cluster.
 
     :example: Show the server of cluster
         az cosmosdb postgres cluster server show -n "test-cluster-c" --cluster-name "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff"

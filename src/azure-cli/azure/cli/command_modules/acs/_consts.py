@@ -86,6 +86,11 @@ CONST_PATCH_UPGRADE_CHANNEL = "patch"
 CONST_NODE_IMAGE_UPGRADE_CHANNEL = "node-image"
 CONST_NONE_UPGRADE_CHANNEL = "none"
 
+# consts for node os upgrade channel
+CONST_NODE_OS_CHANNEL_NODE_IMAGE = "NodeImage"
+CONST_NODE_OS_CHANNEL_NONE = "None"
+CONST_NODE_OS_CHANNEL_UNMANAGED = "Unmanaged"
+
 # network plugin
 CONST_NETWORK_PLUGIN_KUBENET = "kubenet"
 CONST_NETWORK_PLUGIN_AZURE = "azure"
@@ -97,6 +102,12 @@ CONST_NETWORK_PLUGIN_MODE_OVERLAY = "overlay"
 # network dataplane
 CONST_NETWORK_DATAPLANE_AZURE = "azure"
 CONST_NETWORK_DATAPLANE_CILIUM = "cilium"
+
+# network policy
+CONST_NETWORK_POLICY_AZURE = "azure"
+CONST_NETWORK_POLICY_CILIUM = "cilium"
+CONST_NETWORK_POLICY_CALICO = "calico"
+CONST_NETWORK_POLICY_NONE = "none"
 
 # consts for addons
 # http application routing

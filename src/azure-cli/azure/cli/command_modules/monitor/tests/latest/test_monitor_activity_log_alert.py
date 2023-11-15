@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from time import sleep
-
+import unittest
 from knack.util import CLIError
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, JMESPathCheck
@@ -39,6 +39,32 @@ class TestMonitorActivityLogAlert(ScenarioTest):
                          JMESPathCheck('condition.allOf[0].field', 'category')])
 
     @ResourceGroupPreparer(location='southcentralus')
+    def test_monitor_create_update_activity_log_alert_anyof_conditon(self, resource_group):
+        name = self.create_random_name('clialert', 32)
+        create_cmd = 'az monitor activity-log alert create -n {} -g {} --disable'.format(name, resource_group)  + ' --all-of "[{{any-of:[{{field:level,equals:Informational}}]}}]"'
+        self.cmd(create_cmd,
+                 checks=[JMESPathCheck('name', name),
+                         JMESPathCheck('enabled', False),
+                         JMESPathCheck('location', 'Global'),
+                         JMESPathCheck('length(scopes)', 1),
+                         JMESPathCheck('length(condition.allOf)', 2),
+                         JMESPathCheck('length(actions.actionGroups)', 0),
+                         JMESPathCheck('condition.allOf[0].anyOf[0].field', 'level'),
+                         JMESPathCheck('condition.allOf[0].anyOf[0].equals', 'Informational'),
+                         JMESPathCheck('condition.allOf[1].field', 'category'),
+                         JMESPathCheck('condition.allOf[1].equals', 'ServiceHealth'),
+                         ])
+        update_cmd = 'az monitor activity-log alert update -n {} -g {}'.format(name, resource_group) + ' --all-of "[{{any-of:[{{field:level,equals:Error}}]}}]"'
+        self.cmd(update_cmd,
+                 checks=[
+                     JMESPathCheck('length(condition.allOf)', 2),
+                     JMESPathCheck('condition.allOf[0].anyOf[0].field', 'level'),
+                     JMESPathCheck('condition.allOf[0].anyOf[0].equals', 'Error'),
+                     JMESPathCheck('condition.allOf[1].field', 'category'),
+                     JMESPathCheck('condition.allOf[1].equals', 'ServiceHealth'),
+                 ])
+
+    @ResourceGroupPreparer(location='southcentralus')
     def test_monitor_create_full_fledged_activity_log_alert(self, resource_group):
         scope = self.cmd('az group show -n {} -ojson'.format(resource_group)).get_output_in_json()['id']
 
@@ -56,7 +82,7 @@ class TestMonitorActivityLogAlert(ScenarioTest):
                          JMESPathCheck('length(condition.allOf)', 2),
                          JMESPathCheck('length(actions.actionGroups)', 1),
                          JMESPathCheck('scopes[0]', scope),
-                         JMESPathCheck('actions.actionGroups[0].actionGroupId', action_rid)])
+                         JMESPathCheck('actions.actionGroups[0].actionGroupId', action_rid, case_sensitive=False)])
 
         # test monitor activity-log alert list
         self.cmd('az monitor activity-log alert list -g {} -ojson'.format(resource_group),
@@ -83,7 +109,8 @@ class TestMonitorActivityLogAlert(ScenarioTest):
         self.cmd('az monitor activity-log alert action-group add -n {} -g {} -a {} --reset -ojson'
                  .format(name, resource_group, action_names[1]),
                  checks=[JMESPathCheck('length(actions.actionGroups)', 1),
-                         JMESPathCheck('actions.actionGroups[0].actionGroupId', action_rid[1])])
+                         JMESPathCheck('actions.actionGroups[0].actionGroupId', action_rid[1], case_sensitive=False)])
+        # action-group generated id's subscriptionid is uppercase while local action_rid generated is lowercase...
 
         # add two action groups
         self.cmd('az monitor activity-log alert action-group add -n {} -g {} -a {} {} -ojson'
@@ -100,7 +127,7 @@ class TestMonitorActivityLogAlert(ScenarioTest):
                          .format(name, resource_group)).get_output_in_json()
 
         for action_group in state['actions']['actionGroups']:
-            self.assertIsNone(action_group['webhookProperties'])
+            self.assertEqual(action_group['webhookProperties'], {})
 
         # update one action's webhook properties
         state = self.cmd('az monitor activity-log alert action-group add -n {} -g {} -a {} -w purpose=test -ojson'
@@ -108,10 +135,10 @@ class TestMonitorActivityLogAlert(ScenarioTest):
                          checks=[JMESPathCheck('length(actions.actionGroups)', 3)]).get_output_in_json()
 
         for action_group in state['actions']['actionGroups']:
-            if action_group['actionGroupId'] == action_rid[0]:
+            if action_group['actionGroupId'].lower() == action_rid[0].lower():
                 self.assertEqual(action_group['webhookProperties']['purpose'], 'test')
             else:
-                self.assertIsNone(action_group['webhookProperties'])
+                self.assertEqual(action_group['webhookProperties'], {})
 
         # update webhook properties in strict mode render error
         with self.assertRaises(ValueError):
@@ -163,19 +190,24 @@ class TestMonitorActivityLogAlert(ScenarioTest):
     @ResourceGroupPreparer(location='southcentralus')
     def test_monitor_activity_log_alert_update_scope(self, resource_group):
         name, scope, _ = self._create_and_test_default_alert(resource_group)
+        self.cmd('az monitor activity-log alert update -n {} -g {} -c level=Error and category=Security'.format(name, resource_group))
 
-        self.cmd('az monitor activity-log alert scope add -n {} -g {} -s {}'.format(name, resource_group, scope[:-1]),
+        resource_group_id = self.cmd("az group show -n {} --query id -otsv".format(resource_group)).output.strip()
+
+        action_group_id = self.cmd('az monitor action-group create -n {} -g {} --query id -otsv'.format(name, resource_group)).output.strip()
+
+        self.cmd('az monitor activity-log alert scope add -n {} -g {} -s {}'.format(name, resource_group, resource_group_id),
                  checks=[JMESPathCheck('length(scopes)', 2)])
 
-        self.cmd('az monitor activity-log alert scope add -n {} -g {} -s {}'.format(name, resource_group, scope[:-2]),
+        self.cmd('az monitor activity-log alert scope add -n {} -g {} -s {}'.format(name, resource_group, action_group_id),
                  checks=[JMESPathCheck('length(scopes)', 3)])
 
         self.cmd('az monitor activity-log alert scope add -n {} -g {} -s {} --reset'
-                 .format(name, resource_group, scope[:-2]),
+                 .format(name, resource_group, action_group_id),
                  checks=[JMESPathCheck('length(scopes)', 1)])
 
         self.cmd('az monitor activity-log alert scope add -n {} -g {} -s {} {} {} --reset'
-                 .format(name, resource_group, scope, scope[:-1], scope[:-2]),
+                 .format(name, resource_group, scope, resource_group_id, action_group_id),
                  checks=[JMESPathCheck('length(scopes)', 3)])
 
         self.cmd('az monitor activity-log alert scope remove -n {} -g {} -s {}'
@@ -184,7 +216,7 @@ class TestMonitorActivityLogAlert(ScenarioTest):
 
     def _create_and_test_default_alert(self, rg):
         name = self.create_random_name('clialert', 32)
-        scope = self.cmd('az group show -n {} -ojson'.format(rg)).get_output_in_json()['id']
+        scope = self.cmd('az group show -n {} -ojson'.format(rg)).get_output_in_json()['id'].split("/resourceGroups")[0]
         self.cmd('az monitor activity-log alert create -n {} -g {} -ojson'.format(name, rg),
                  checks=[JMESPathCheck('name', name),
                          JMESPathCheck('enabled', True),
@@ -192,7 +224,7 @@ class TestMonitorActivityLogAlert(ScenarioTest):
                          JMESPathCheck('length(scopes)', 1),
                          JMESPathCheck('length(condition.allOf)', 1),
                          JMESPathCheck('length(actions.actionGroups)', 0),
-                         JMESPathCheck('scopes[0]', scope),  # default scope is this rg id
+                         JMESPathCheck('scopes[0]', scope),  # default scope is this rg id, this changed, default is subid
                          JMESPathCheck('condition.allOf[0].equals', 'ServiceHealth'),
                          JMESPathCheck('condition.allOf[0].field', 'category')]).get_output_in_json()
 

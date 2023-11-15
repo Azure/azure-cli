@@ -13,25 +13,32 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "cosmosdb postgres cluster update",
-    is_preview=True,
 )
 class Update(AAZCommand):
     """Update an existing cluster. The request body can contain one or several properties from the cluster definition.
 
-    :example: Scale compute up or down
+    Use the following reference to determine supported values for various parameters for Azure Cosmos DB for PostgreSQL clusters and nodes CLI commands: https://learn.microsoft.com/rest/api/postgresqlhsc/#values
+
+    :example: Scale worker node compute up or down
         az cosmosdb postgres cluster update -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --node-v-cores 16
 
     :example: Scale out: Add new worker nodes
         az cosmosdb postgres cluster update -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --node-count 2
 
-    :example: Scale up storage
-        az cosmosdb postgres cluster update -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --coordinator-storage 2097152
+    :example: Scale up worker node storage
+        az cosmosdb postgres cluster update -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --node-storage 2097152
 
     :example: Update multiple configuration settings of the cluster
-        az cosmosdb postgres cluster update -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --node-v-cores 16 --node-count 4 coordinator-v-cores 16 --login-password "newPassword"
+        az cosmosdb postgres cluster update -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --node-v-cores 16 --node-count 4 coordinator-v-cores 16 --administrator-login-password "newPassword"
 
     :example: Update or define maintenance window
         az cosmosdb postgres cluster update -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --maintenance-window day-of-week=1 start-hour=2 --start-minute=0 custom-window="Enabled"
+
+    :example: Upgrade PostgreSQL major version
+        az cosmosdb postgres cluster update -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --postgresql-version "15"
+
+    :example: Scale up coordinator storage
+        az cosmosdb postgres cluster update -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --coordinator-storage 2097152
     """
 
     _aaz_info = {
@@ -114,12 +121,12 @@ class Update(AAZCommand):
         _args_schema.coordinator_storage_quota_in_mb = AAZIntArg(
             options=["--coordinator-storage", "--coordinator-storage-quota-in-mb"],
             arg_group="Properties",
-            help="The storage of a server in MB. Required for creation. See https://learn.microsoft.com/azure/cosmos-db/postgresql/resources-compute for more information.",
+            help="The storage of a server in MB. Required for creation. See https://learn.microsoft.com/rest/api/postgresqlhsc/#values for more information.",
         )
         _args_schema.coordinator_v_cores = AAZIntArg(
             options=["--coordinator-v-cores"],
             arg_group="Properties",
-            help="The vCores count of the coordinator (max: 96).",
+            help="The vCores count of a server (max: 96). Required for creation. See https://learn.microsoft.com/rest/api/postgresqlhsc/#values for more information.",
         )
         _args_schema.enable_ha = AAZBoolArg(
             options=["--enable-ha"],
@@ -144,17 +151,17 @@ class Update(AAZCommand):
         _args_schema.node_server_edition = AAZStrArg(
             options=["--node-server-edition"],
             arg_group="Properties",
-            help="The edition of a node (default: MemoryOptimized).",
+            help="The edition of a node server (default: MemoryOptimized).",
         )
         _args_schema.node_storage_quota_in_mb = AAZIntArg(
             options=["--node-storage", "--node-storage-quota-in-mb"],
             arg_group="Properties",
-            help="The storage in MB on each worker node. See https://learn.microsoft.com/azure/cosmos-db/postgresql/resources-compute for more information.",
+            help="The storage in MB on each worker node. See https://learn.microsoft.com/rest/api/postgresqlhsc/#values for more information.",
         )
         _args_schema.node_v_cores = AAZIntArg(
             options=["--node-v-cores"],
             arg_group="Properties",
-            help="The compute in vCores on each worker node (max: 104).",
+            help="The compute in vCores on each worker node (max: 104). See https://learn.microsoft.com/rest/api/postgresqlhsc/#values for more information.",
         )
         _args_schema.postgresql_version = AAZStrArg(
             options=["--postgresql-version"],

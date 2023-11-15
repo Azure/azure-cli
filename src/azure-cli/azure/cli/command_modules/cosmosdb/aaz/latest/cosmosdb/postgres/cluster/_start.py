@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "cosmosdb postgres cluster start",
-    is_preview=True,
 )
 class Start(AAZCommand):
     """Starts stopped compute on all cluster nodes.

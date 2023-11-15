@@ -53,9 +53,10 @@ class Reimage(AAZCommand):
         )
         _args_schema.vm_name = AAZStrArg(
             options=["-n", "--name", "--vm-name"],
-            help="The name of the virtual machine.",
+            help="The name of the Virtual Machine. You can configure the default using `az configure --defaults vm=<name>`",
             required=True,
             id_part="name",
+            configured_default="vm",
         )
 
         # define Arg Group "OsProfile"

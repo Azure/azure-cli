@@ -91,8 +91,8 @@ def transform_vnet_table_output(result):
         item['NumSubnets'] = len(result.get('subnets', []))
         item['Prefixes'] = ', '.join(result['addressSpace']['addressPrefixes']) or ' '
         item['DnsServers'] = ', '.join((result.get('dhcpOptions') or {}).get('dnsServers', [])) or ' '
-        item['DDOSProtection'] = result['enableDdosProtection']
-        item['VMProtection'] = result['enableVmProtection']
+        item["DDOSProtection"] = result.get("enableDdosProtection", " ")
+        item["VMProtection"] = result.get("enableVmProtection", " ")
         return item
     if isinstance(result, list):
         return [_transform(r) for r in result]

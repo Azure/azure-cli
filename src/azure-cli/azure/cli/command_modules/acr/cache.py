@@ -11,9 +11,10 @@ from azure.core.serialization import NULL as AzureCoreNull
 def acr_cache_show(cmd,
                    client,
                    registry_name,
-                   name):
+                   name,
+                   resource_group_name=None):
 
-    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, None)
+    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
 
     return client.get(resource_group_name=rg,
                       registry_name=registry_name,
@@ -22,9 +23,10 @@ def acr_cache_show(cmd,
 
 def acr_cache_list(cmd,
                    client,
-                   registry_name):
+                   registry_name,
+                   resource_group_name=None):
 
-    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, None)
+    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
 
     return client.list(resource_group_name=rg,
                        registry_name=registry_name)
@@ -33,9 +35,10 @@ def acr_cache_list(cmd,
 def acr_cache_delete(cmd,
                      client,
                      registry_name,
-                     name):
+                     name,
+                     resource_group_name=None):
 
-    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, None)
+    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
 
     return client.begin_delete(resource_group_name=rg,
                                registry_name=registry_name,
@@ -48,9 +51,10 @@ def acr_cache_create(cmd,
                      name,
                      source_repo,
                      target_repo,
+                     resource_group_name=None,
                      cred_set=None):
 
-    registry, rg = get_registry_by_name(cmd.cli_ctx, registry_name, None)
+    registry, rg = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
 
     cred_set_id = AzureCoreNull if not cred_set else f'{registry.id}/credentialSets/{cred_set}'
 
@@ -71,13 +75,14 @@ def acr_cache_create(cmd,
 def acr_cache_update_custom(cmd,
                             instance,
                             registry_name,
+                            resource_group_name=None,
                             cred_set=None,
                             remove_cred_set=False):
 
     if cred_set is None and remove_cred_set is False:
         raise InvalidArgumentValueError("You must either update the credential set ID or remove it.")
 
-    registry, _ = get_registry_by_name(cmd.cli_ctx, registry_name, None)
+    registry, _ = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
 
     cred_set_id = AzureCoreNull if remove_cred_set else f'{registry.id}/credentialSets/{cred_set}'
 
@@ -99,9 +104,10 @@ def acr_cache_update_set(cmd,
                          client,
                          registry_name,
                          name,
+                         resource_group_name=None,
                          parameters=None):
 
-    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name)
+    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
     return client.begin_update(resource_group_name=rg,
                                registry_name=registry_name,
                                cache_rule_name=name,

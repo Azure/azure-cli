@@ -54,8 +54,8 @@ def connection_list(client,
                     source_resource_group=None,
                     source_id=None,
                     cluster=None,
-                    site=None,
-                    spring=None, app=None, deployment='default'):
+                    site=None, slot=None,
+                    spring=None, app=None, deployment=None):
     if not source_id:
         raise RequiredArgumentMissingError(err_msg.format('--source-id'))
     return auto_register(client.list, resource_uri=source_id)
@@ -108,8 +108,8 @@ def connection_show(client,
                     source_id=None,
                     indentifier=None,
                     cluster=None,
-                    site=None,
-                    spring=None, app=None, deployment='default'):
+                    site=None, slot=None,
+                    spring=None, app=None, deployment=None):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(
             err_msg.format('--source-id, --connection'))
@@ -138,8 +138,8 @@ def connection_delete(client,
                       source_id=None,
                       indentifier=None,
                       cluster=None,
-                      site=None,
-                      spring=None, app=None, deployment='default',
+                      site=None, slot=None,
+                      spring=None, app=None, deployment=None,
                       no_wait=False):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
@@ -174,8 +174,8 @@ def connection_list_configuration(client,
                                   source_id=None,
                                   indentifier=None,
                                   cluster=None,
-                                  site=None,
-                                  spring=None, app=None, deployment='default'):
+                                  site=None, slot=None,
+                                  spring=None, app=None, deployment=None):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
     configurations = auto_register(client.list_configurations,
@@ -252,8 +252,8 @@ def connection_validate(cmd, client,
                         source_id=None,
                         indentifier=None,
                         cluster=None,
-                        site=None,
-                        spring=None, app=None, deployment='default'):
+                        site=None, slot=None,
+                        spring=None, app=None, deployment=None):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
 
@@ -299,8 +299,8 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       customized_keys=None,
                       new_addon=False, no_wait=False,
                       cluster=None, scope=None, enable_csi=False,            # Resource.KubernetesCluster
-                      site=None,                                             # Resource.WebApp
-                      spring=None, app=None, deployment='default',           # Resource.SpringCloud
+                      site=None, slot=None,                                  # Resource.WebApp
+                      spring=None, app=None, deployment=None,                # Resource.SpringCloud
                       server=None, database=None,                            # Resource.*Postgres, Resource.*Sql*
                       vault=None,                                            # Resource.KeyVault
                       account=None,                                          # Resource.Storage*
@@ -364,8 +364,8 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
                            store_in_connection_string=False,
                            new_addon=False, no_wait=False,
                            cluster=None, scope=None, enable_csi=False,            # Resource.KubernetesCluster
-                           site=None,                                             # Resource.WebApp
-                           spring=None, app=None, deployment='default',           # Resource.SpringCloud
+                           site=None, slot=None,                                  # Resource.WebApp
+                           spring=None, app=None, deployment=None,                # Resource.SpringCloud
                            # Resource.*Postgres, Resource.*Sql*
                            server=None, database=None,
                            vault=None,                                            # Resource.KeyVault
@@ -610,8 +610,8 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
                       no_wait=False,
                       scope=None,
                       cluster=None, enable_csi=False,                         # Resource.Kubernetes
-                      site=None,                                              # Resource.WebApp
-                      spring=None, app=None, deployment='default',            # Resource.SpringCloud
+                      site=None, slot=None,                                   # Resource.WebApp
+                      spring=None, app=None, deployment=None,                 # Resource.SpringCloud
                       customized_keys=None,
                       ):
 
@@ -996,8 +996,8 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
                             source_id=None,
                             customized_keys=None,
                             cluster=None, scope=None,          # Resource.Kubernetes
-                            site=None,                         # Resource.WebApp
-                            deployment='default',
+                            site=None, slot=None,              # Resource.WebApp
+                            deployment=None,
                             spring=None, app=None):            # Resource.SpringCloud
 
     from ._transformers import transform_linker_properties
@@ -1091,8 +1091,8 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
                             source_id=None,
                             customized_keys=None,
                             cluster=None,
-                            site=None,                         # Resource.WebApp
-                            deployment='default',
+                            site=None, slot=None,              # Resource.WebApp
+                            deployment=None,
                             spring=None, app=None):            # Resource.SpringCloud
 
     # use the suffix to decide the connection type

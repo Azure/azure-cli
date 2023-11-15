@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import CliCommandType
-from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus,\
+from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus, \
     cf_deleted_accounts, cf_deployments, cf_commitment_plans, cf_commitment_tiers, cf_models, cf_usages
 
 

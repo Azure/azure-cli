@@ -91,13 +91,14 @@ def _validate_deployment_name(namespace):
 def process_deployment_create_namespace(namespace):
     try:
         if [bool(namespace.template_uri), bool(namespace.template_file),
-                bool(namespace.template_spec)].count(True) != 1:
-            raise CLIError('incorrect usage: Chose only one of'
+                bool(namespace.template_spec)].count(True) > 1:
+            raise CLIError('incorrect usage: Choose only one of'
                            ' --template-file FILE | --template-uri URI | --template-spec ID to pass in')
     except Exception:  # pylint: disable=broad-except
-        if [bool(namespace.template_uri), bool(namespace.template_file)].count(True) != 1:
-            raise CLIError('incorrect usage: Chose only one of'
+        if [bool(namespace.template_uri), bool(namespace.template_file)].count(True) > 1:
+            raise CLIError('incorrect usage: Choose only one of'
                            ' --template-file FILE | --template-uri URI')
+
     if (bool(namespace.template_uri) or bool(namespace.template_file)):
         _validate_deployment_name(namespace)
     else:

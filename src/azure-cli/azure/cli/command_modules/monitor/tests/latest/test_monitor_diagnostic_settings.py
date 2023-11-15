@@ -78,9 +78,9 @@ class TestMonitorDiagnosticSettings(ScenarioTest):
         self.cmd('network nsg create -n {nsg} -g {rg}')
 
         #self.kwargs['mp_id'] = self.cmd('network nsg show -n {nsg} -g {rg}').get_output_in_json()['id']
-        #self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --admin-username testadmin --admin-password TestTest12#$')
+        #self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username testadmin --admin-password TestTest12#$')
         #self.kwargs['mp_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
-        # self.kwargs['mp_id'] = self.cmd('vm create -g {rg} -n {vm1} --image UbuntuLTS --admin-password TestPassword11!! '
+        # self.kwargs['mp_id'] = self.cmd('vm create -g {rg} -n {vm1} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-password TestPassword11!! '
         #                     '--admin-username testadmin --authentication-type password').get_output_in_json()['id']
 
         self.cmd('monitor log-analytics workspace create -g {rg} -n {ws}')

@@ -35,6 +35,9 @@ vmss create:
         disable_integrity_monitoring:
             rule_exclusions:
             - option_length_too_long
+        enable_integrity_monitoring:
+            rule_exclusions:
+            - option_length_too_long
         os_disk_security_encryption_type:
             rule_exclusions:
                 - option_length_too_long
@@ -95,6 +98,9 @@ vm create:
             rule_exclusions:
             - missing_parameter_help
         disable_integrity_monitoring:
+            rule_exclusions:
+                - option_length_too_long
+        enable_integrity_monitoring:
             rule_exclusions:
                 - option_length_too_long
         os_disk_security_encryption_type:
@@ -169,4 +175,21 @@ sig image-version undelete:
         allow_replicated_location_deletion:
             rule_exclusions:
             - option_length_too_long
+restore-point create:
+    parameters:
+        data_disk_restore_point_encryption_set:
+            rule_exclusions:
+                - option_length_too_long
+        data_disk_restore_point_encryption_type:
+            rule_exclusions:
+                - option_length_too_long
+        os_restore_point_encryption_set:
+            rule_exclusions:
+                - option_length_too_long
+        os_restore_point_encryption_type:
+            rule_exclusions:
+                - option_length_too_long
+        source_data_disk_resource:
+            rule_exclusions:
+                - option_length_too_long
 ...

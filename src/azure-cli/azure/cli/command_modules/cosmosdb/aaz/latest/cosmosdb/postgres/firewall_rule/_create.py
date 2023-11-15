@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "cosmosdb postgres firewall-rule create",
-    is_preview=True,
 )
 class Create(AAZCommand):
     """Create a new cluster firewall rule or updates an existing cluster firewall rule.

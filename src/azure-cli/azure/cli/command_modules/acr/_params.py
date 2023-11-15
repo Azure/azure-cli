@@ -169,6 +169,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('read_enabled', help='Indicates whether read operation is allowed.', arg_type=get_three_state_flag())
         c.argument('write_enabled', help='Indicates whether write or delete operation is allowed.', arg_type=get_three_state_flag())
 
+    with self.argument_context('acr artifact-streaming') as c:
+        c.argument('repository', help="The name of the repository.", required=True)
+        c.argument('image', arg_type=image_by_tag_or_digest_type, required=True)
+        c.argument('enable_streaming', help="Indicates whether artifact streaming is enabled for a repository.", required=True, arg_type=get_three_state_flag())
+
+    with self.argument_context('acr artifact-streaming operation') as c:
+        c.argument('repository', help="The name of the repository.", required=False)
+        c.argument('image', arg_type=image_by_tag_or_digest_type, required=False)
+        c.argument('operation_id', options_list=['--id'], required=False, help="The ID returned when creating a streaming artifact.")
+
     with self.argument_context('acr manifest') as c:
         c.argument('registry_name', options_list=['--registry', '-r'], help='The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr', validator=validate_registry_name)
         c.argument('top', type=int, help='Limit the number of items in the results.')
@@ -430,8 +440,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('description', options_list=['--description'], help='Description for the scope map. Maximum 256 characters are allowed.', required=False)
         c.argument('scope_map_name', options_list=['--name', '-n'], help='The name of the scope map.', required=True)
 
-    repo_valid_actions = "Valid actions are {}".format({action.value for action in RepoScopeMapActions})
-    gateway_valid_actions = "Valid actions are {}".format({action.value for action in GatewayScopeMapActions})
+    # Action strings generated this way to ensure consistent ordering each time the help text is generated.
+    repo_valid_actions = "Valid actions are {}".format(sorted(action.value for action in RepoScopeMapActions))
+    gateway_valid_actions = "Valid actions are {}".format(sorted(action.value for action in GatewayScopeMapActions))
     with self.argument_context('acr scope-map update') as c:
         c.argument('add_repository', options_list=['--add-repository', c.deprecate(target='--add', redirect='--add-repository', hide=True)], nargs='+', action='append', required=False,
                    help='repository permissions to be added. Use the format "--add-repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)

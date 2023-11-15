@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "cosmosdb postgres firewall-rule update",
-    is_preview=True,
 )
 class Update(AAZCommand):
     """Update an existing cluster firewall rule.

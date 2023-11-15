@@ -6,6 +6,7 @@
 """
 Generate index.html of testing results HTML pages.
 """
+import datetime
 import traceback
 import os
 import re
@@ -17,7 +18,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_TARGET):
+def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_TARGET, ACCOUNT_KEY, USER_REPO_EXT, USER_BRANCH_EXT):
     """
     Generate index.html. Upload it to storage account
     :param container:
@@ -45,18 +46,21 @@ def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_
                 data.append({'name': name, 'url': url})
         break
     logger.warning(data)
-    html = render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE)
+    html = render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_REPO_EXT, USER_BRANCH_EXT)
     with open('index.html', 'w') as f:
         f.write(html)
 
     # Upload to storage account
-    cmd = 'az storage blob upload -f index.html -c {} -n index.html --account-name clitestresultstac --overwrite'.format(container)
+    cmd = 'az storage blob upload -f index.html -c {} -n index.html --account-name clitestresultstac --account-key {} --overwrite'.format(container, ACCOUNT_KEY)
     logger.warning('Running: ' + cmd)
     os.system(cmd)
 
     # Upload to latest container if it is a full live test of official repo dev branch
-    if USER_REPO == 'https://github.com/Azure/azure-cli.git' and USER_BRANCH == 'dev' and USER_TARGET == '' and USER_LIVE == '--live':
-        cmd = 'az storage blob upload -f index.html -c latest -n index.html --account-name clitestresultstac --overwrite'
+    if USER_TARGET.lower() in ['all', ''] \
+            and USER_REPO == 'https://github.com/Azure/azure-cli.git' \
+            and USER_REPO_EXT == 'https://github.com/Azure/azure-cli-extensions.git' \
+            and USER_BRANCH == 'dev' and USER_BRANCH_EXT == 'main' and USER_LIVE == '--live':
+        cmd = 'az storage blob upload -f index.html -c latest -n index.html --account-name clitestresultstac --account-key {} --overwrite'.format(ACCOUNT_KEY)
         logger.warning('Running: ' + cmd)
         os.system(cmd)
 
@@ -64,7 +68,16 @@ def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_
     return html
 
 
-def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE):
+def sort_by_module_name(item):
+    # Sort test data by module name,
+    # and modules starting with `ext-` need to be placed after modules not starting with `ext-`,
+    if item[0].startswith("ext-"):
+        return 1, item[0][4:]  # sort with higher priority
+    else:
+        return 0, item[0]  # sort with lower priority
+
+
+def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_REPO_EXT, USER_BRANCH_EXT):
     """
     Return a HTML string
     :param data:
@@ -95,17 +108,19 @@ def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COM
     """
 
     live = 'True' if USER_LIVE == '--live' else 'False'
-    date = container.split('-')[0]
+    date = datetime.date.today()
 
     content += """
     <p>
     Repository: {}<br>
     Branch: {}<br>
+    Repository of extension: {}<br>
+    Branch of extension: {}<br>
     Commit: {}<br>
     Live: {}<br>
     Date: {}
     </p>
-    """.format(USER_REPO, USER_BRANCH, COMMIT_ID, live, date)
+    """.format(USER_REPO, USER_BRANCH, USER_REPO_EXT, USER_BRANCH_EXT, COMMIT_ID, live, date)
 
     content += """
     <p>
@@ -148,17 +163,19 @@ def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COM
       </tr>
     """.format(testdata.total[1], testdata.total[2], testdata.total[3])
 
-    for module, passed, failed, rate in testdata.modules:
+    sorted_modules = sorted(testdata.modules, key=sort_by_module_name)
+
+    for module, passed, failed, rate in sorted_modules:
         reports = ''
         for x in data:
             name = x['name']
             url = x['url']
             if name.startswith(module + '.'):
                 display_name = 'report'
-                if 'parallel' in name:
-                    display_name = 'parallel'
-                elif 'sequential' in name:
-                    display_name = 'sequential'
+                # if 'parallel' in name:
+                #     display_name = 'parallel'
+                # elif 'sequential' in name:
+                #     display_name = 'sequential'
                 try:
                     html = requests.get(url).content.__str__()
                     pattern = re.compile('\\d+ tests ran in')

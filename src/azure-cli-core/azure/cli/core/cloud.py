@@ -294,8 +294,15 @@ class Cloud:  # pylint: disable=too-few-public-methods
                    suffixes=CloudSuffixes(**json_str['suffixes']))
 
 
+class CloudNameEnum:  # pylint: disable=too-few-public-methods
+    AzureCloud = 'AzureCloud'
+    AzureChinaCloud = 'AzureChinaCloud'
+    AzureUSGovernment = 'AzureUSGovernment'
+    AzureGermanCloud = 'AzureGermanCloud'
+
+
 AZURE_PUBLIC_CLOUD = Cloud(
-    'AzureCloud',
+    CloudNameEnum.AzureCloud,
     endpoints=CloudEndpoints(
         management='https://management.core.windows.net/',
         resource_manager='https://management.azure.com/',
@@ -332,7 +339,7 @@ AZURE_PUBLIC_CLOUD = Cloud(
         attestation_endpoint='.attest.azure.net'))
 
 AZURE_CHINA_CLOUD = Cloud(
-    'AzureChinaCloud',
+    CloudNameEnum.AzureChinaCloud,
     endpoints=CloudEndpoints(
         management='https://management.core.chinacloudapi.cn/',
         resource_manager='https://management.chinacloudapi.cn',
@@ -363,7 +370,7 @@ AZURE_CHINA_CLOUD = Cloud(
         synapse_analytics_endpoint='.dev.azuresynapse.azure.cn'))
 
 AZURE_US_GOV_CLOUD = Cloud(
-    'AzureUSGovernment',
+    CloudNameEnum.AzureUSGovernment,
     endpoints=CloudEndpoints(
         management='https://management.core.usgovcloudapi.net/',
         resource_manager='https://management.usgovcloudapi.net/',
@@ -395,7 +402,7 @@ AZURE_US_GOV_CLOUD = Cloud(
         synapse_analytics_endpoint='.dev.azuresynapse.usgovcloudapi.net'))
 
 AZURE_GERMAN_CLOUD = Cloud(
-    'AzureGermanCloud',
+    CloudNameEnum.AzureGermanCloud,
     endpoints=CloudEndpoints(
         management='https://management.core.cloudapi.de/',
         resource_manager='https://management.microsoftazure.de',
@@ -482,8 +489,8 @@ def get_active_cloud_name(cli_ctx):
 
 def get_default_cloud_name():
     """ Pick AzureCloud as the default cloud if it is available, otherwise pick the first in the list"""
-    if AZURE_PUBLIC_CLOUD.name.lower() in [c.name.lower() for c in KNOWN_CLOUDS]:
-        return AZURE_PUBLIC_CLOUD.name
+    if CloudNameEnum.AzureCloud.lower() in [c.name.lower() for c in KNOWN_CLOUDS]:
+        return CloudNameEnum.AzureCloud
     return KNOWN_CLOUDS[0].name
 
 

@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command_group(
     "cosmosdb postgres configuration",
-    is_preview=True,
 )
 class __CMDGroup(AAZCommandGroup):
     """Manage Azure Cosmos DB for PostgreSQL configurations.

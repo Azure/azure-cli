@@ -126,31 +126,25 @@ def load_accounts_command_groups(self, netappfiles_accounts_sdk):
                          supports_no_wait=True,
                          doc_string_source='azure.mgmt.netapp.models#NetAppAccount',
                          exception_handler=netappfiles_exception_handler)
-        g.generic_update_command('update',
-                                 setter_name='begin_update',
-                                 supports_no_wait=True,
-                                 custom_func_name='patch_account',
-                                 setter_arg_name='body',
-                                 doc_string_source='azure.mgmt.netapp.models#NetAppAccountPatch',
-                                 exception_handler=netappfiles_exception_handler)
+        g.custom_command('update', 'patch_account_custom',
+                         client_factory=accounts_mgmt_client_factory,
+                         supports_no_wait=True,
+                         doc_string_source='azure.mgmt.netapp.models#NetAppAccountPatch',
+                         exception_handler=netappfiles_exception_handler)
         g.command('renew-credentials', 'begin_renew_credentials', supports_no_wait=True, is_preview=True)
         g.wait_command('wait')
 
     with self.command_group('netappfiles account ad', netappfiles_accounts_sdk) as g:
-        g.generic_update_command('add',
-                                 setter_name='begin_update',
-                                 supports_no_wait=True,
-                                 custom_func_name='add_active_directory',
-                                 setter_arg_name='body',
-                                 doc_string_source='azure.mgmt.netapp.models#NetAppAccountPatch',
-                                 exception_handler=netappfiles_exception_handler)
-        g.generic_update_command('update',
-                                 setter_name='begin_update',
-                                 supports_no_wait=True,
-                                 custom_func_name='update_active_directory',
-                                 setter_arg_name='body',
-                                 doc_string_source='azure.mgmt.netapp.models#NetAppAccountPatch',
-                                 exception_handler=netappfiles_exception_handler)
+        g.custom_command('add', 'add_active_directory_custom',
+                         client_factory=accounts_mgmt_client_factory,
+                         supports_no_wait=True,
+                         doc_string_source='azure.mgmt.netapp.models#NetAppAccountPatch',
+                         exception_handler=netappfiles_exception_handler)
+        g.custom_command('update', 'update_active_directory_custom',
+                         client_factory=accounts_mgmt_client_factory,
+                         supports_no_wait=True,
+                         doc_string_source='azure.mgmt.netapp.models#NetAppAccountPatch',
+                         exception_handler=netappfiles_exception_handler)
         g.custom_command('list', 'list_active_directories',
                          client_factory=accounts_mgmt_client_factory,
                          doc_string_source='azure.mgmt.netapp.models#NetAppAccount',
@@ -201,13 +195,19 @@ def load_pools_command_groups(self, netappfiles_pools_sdk):
                          supports_no_wait=True,
                          doc_string_source='azure.mgmt.netapp.models#CapacityPool',
                          exception_handler=netappfiles_exception_handler)
-        g.generic_update_command('update',
-                                 setter_name='begin_update',
-                                 custom_func_name='patch_pool',
-                                 supports_no_wait=True,
-                                 setter_arg_name='body',
-                                 doc_string_source='azure.mgmt.netapp.models#CapacityPoolPatch',
-                                 exception_handler=netappfiles_exception_handler)
+        g.custom_command('update', 'patch_pool_custom',
+                         client_factory=pools_mgmt_client_factory,
+                         supports_no_wait=True,
+                         doc_string_source='azure.mgmt.netapp.models#CapacityPoolPatch',
+                         exception_handler=netappfiles_exception_handler)
+        # g.generic_update_command('update',
+        #                          getter_name='get',
+        #                          setter_name='begin_update',
+        #                          custom_func_name='patch_pool',
+        #                          supports_no_wait=True,
+        #                          setter_arg_name='body',
+        #                          doc_string_source='azure.mgmt.netapp.models#CapacityPoolPatch',
+        #                          exception_handler=netappfiles_exception_handler)
         g.wait_command('wait')
 
 
@@ -221,13 +221,11 @@ def load_volumes_command_groups(self, netappfiles_volumes_sdk):
                          supports_no_wait=True,
                          doc_string_source='azure.mgmt.netapp.models#Volume',
                          exception_handler=netappfiles_exception_handler)
-        g.generic_update_command('update',
-                                 setter_name='begin_update',
-                                 custom_func_name='patch_volume',
-                                 supports_no_wait=True,
-                                 setter_arg_name='body',
-                                 doc_string_source='azure.mgmt.netapp.models#VolumePatch',
-                                 exception_handler=netappfiles_exception_handler)
+        g.custom_command('update', 'patch_volume',
+                         client_factory=volumes_mgmt_client_factory,
+                         supports_no_wait=True,
+                         doc_string_source='azure.mgmt.netapp.models#VolumePatch',
+                         exception_handler=netappfiles_exception_handler)
         g.custom_command('revert', 'volume_revert',
                          client_factory=volumes_mgmt_client_factory,
                          supports_no_wait=True,
@@ -248,16 +246,19 @@ def load_volumes_command_groups(self, netappfiles_volumes_sdk):
                          doc_string_source='azure.mgmt.netapp.models#BreakFileLocksRequest',
                          exception_handler=netappfiles_exception_handler,
                          confirmation=True)
+        g.custom_command('get-groupid-list-for-ldapuser', 'volume_getgroupidlist_ldapuser',
+                         client_factory=volumes_mgmt_client_factory,
+                         supports_no_wait=True,
+                         doc_string_source='azure.mgmt.netapp.models#GetGroupIdListForLDAPUserRequest',
+                         exception_handler=netappfiles_exception_handler)
         g.wait_command('wait')
 
     with self.command_group('netappfiles volume export-policy', netappfiles_volumes_sdk) as g:
-        g.generic_update_command('add',
-                                 setter_name='begin_update',
-                                 custom_func_name='add_export_policy_rule',
-                                 supports_no_wait=True,
-                                 setter_arg_name='body',
-                                 doc_string_source='azure.mgmt.netapp.models#VolumePatch',
-                                 exception_handler=netappfiles_exception_handler)
+        g.custom_command('add', 'add_export_policy_rule_custom',
+                         client_factory=volumes_mgmt_client_factory,
+                         supports_no_wait=True,
+                         doc_string_source='azure.mgmt.netapp.models#VolumePatch',
+                         exception_handler=netappfiles_exception_handler)
         g.custom_command('list', 'list_export_policy_rules',
                          client_factory=volumes_mgmt_client_factory,
                          doc_string_source='azure.mgmt.netapp.models#Volume',
@@ -310,6 +311,11 @@ def load_backups_command_groups(self, netappfiles_backups_sdk):
                          supports_no_wait=True,
                          doc_string_source='azure.mgmt.netapp.models#Backup',
                          exception_handler=netappfiles_exception_handler)
+        g.custom_command('restore-files', 'backup_restore_files',
+                         client_factory=backups_mgmt_client_factory,
+                         supports_no_wait=True,
+                         doc_string_source='azure.mgmt.netapp.models#BackupRestoreFiles',
+                         exception_handler=netappfiles_exception_handler)
         g.wait_command('wait')
 
 
@@ -338,13 +344,11 @@ def load_snapshots_policies_command_groups(self, netappfiles_snapshot_policies_s
         g.command('list', 'list')
         g.command('volumes', 'list_volumes')
         g.command('delete', 'begin_delete', supports_no_wait=True)
-        g.generic_update_command('update',
-                                 setter_name='begin_update',
-                                 custom_func_name='patch_snapshot_policy',
-                                 supports_no_wait=True,
-                                 setter_arg_name='body',
-                                 doc_string_source='azure.mgmt.netapp.models#SnapshotPolicyPatch',
-                                 exception_handler=netappfiles_exception_handler)
+        g.custom_command('update', 'patch_snapshot_policy',
+                         client_factory=snapshot_policies_mgmt_client_factory,
+                         supports_no_wait=True,
+                         doc_string_source='azure.mgmt.netapp.models#SnapshotPolicyPatch',
+                         exception_handler=netappfiles_exception_handler)
         g.custom_command('create', 'create_snapshot_policy',
                          client_factory=snapshot_policies_mgmt_client_factory,
                          doc_string_source='azure.mgmt.netapp.models#SnapshotPolicy',

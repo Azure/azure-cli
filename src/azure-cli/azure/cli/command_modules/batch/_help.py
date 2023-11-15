@@ -7,6 +7,13 @@
 from knack.help_files import helps  # pylint: disable=unused-import
 # pylint: disable=line-too-long, too-many-lines
 
+OUTPUT_WITH_SECRET = (
+    'The output includes secrets that you must protect. Be sure that you do not include these secrets in your '
+    'source control. Also verify that no secrets are present in the logs of your command or script. '
+    'For additional information, see http://aka.ms/clisecrets.')
+
+OUTPUT_WITH_SECRET_HELP = f'[WARNING] {OUTPUT_WITH_SECRET}'
+
 helps['batch'] = """
 type: group
 short-summary: Manage Azure Batch.
@@ -51,12 +58,25 @@ examples:
     crafted: true
 """
 
-helps['batch account keys renew'] = """
+helps['batch account keys renew'] = f"""
 type: command
 short-summary: Renew keys for a Batch account.
+long-summary: >
+    {OUTPUT_WITH_SECRET_HELP}
 examples:
   - name: Renew keys for a Batch account.
     text: az batch account keys renew --name MyBatchAccount --resource-group MyResourceGroup --key-name primary
+"""
+
+helps['batch account keys list'] = f"""
+type: command
+short-summary: Gets the account keys for the specified Batch account.
+        This operation applies only to Batch accounts with allowedAuthenticationModes containing
+        'SharedKey'. If the Batch account doesn't contain 'SharedKey' in its
+        allowedAuthenticationMode, clients cannot use shared keys to authenticate, and must use
+        another allowedAuthenticationModes instead. In this case, getting the keys will fail.
+long-summary: >
+    {OUTPUT_WITH_SECRET_HELP}
 """
 
 helps['batch account show'] = """
@@ -106,9 +126,11 @@ examples:
         az batch account identity remove --name MyBatchAccount --resource-group MyResourceGroup --user-assigned
 """
 
-helps['batch account identity show'] = """
+helps['batch account identity show'] = f"""
 type: command
 short-summary: Display managed identities of a batch account.
+long-summary: >
+    {OUTPUT_WITH_SECRET_HELP}
 examples:
   - name: Display managed identities of a batch account.
     text: |

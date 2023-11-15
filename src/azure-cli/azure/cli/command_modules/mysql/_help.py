@@ -192,24 +192,66 @@ helps['mysql flexible-server import create'] = """
 type: command
 short-summary: Create a new import workflow for flexible server.
 long-summary: >
-    Migrate a MySQL single server to flexible server with custom or default configuration. For more information for network configuration, see
+    This command is used for following two purposes:
+
+    To Migrate an external MySQL server to Azure MySQL Flexible server whose backup is stored on an Azure Blob Container.
+
+    To Migrate a Azure MySQL single server to Azure MySQL Flexible server. For more information for network configuration, see
+
+    - Migrate Azure Database for MySQL - Single Server to Flexible Server using Azure MySQL Import CLI
+
+    https://learn.microsoft.com/en-us/azure/mysql/migrate/migrate-single-flexible-mysql-import-cli
 
     - Configure public access
+
     https://docs.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-firewall-cli
 
     - Configure private access
+
     https://docs.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-virtual-network-cli
 
 examples:
   - name: >
-      Trigger a Import from single server to flexible server
+      Trigger a Import from azure mysql single server.
     text: >
         az mysql flexible-server import create --data-source-type mysql_single \\
           --data-source test-single-server --resource-group test-rg \\
           --location northeurope --name testserver \\
-          --admin-user username --admin-password password \\
           --sku-name Standard_B1ms --tier Burstable --public-access 0.0.0.0 \\
           --storage-size 32 --tags "key=value" --version 5.7 --high-availability ZoneRedundant \\
+          --zone 1 --standby-zone 3 --storage-auto-grow Enabled --iops 500
+  - name: >
+      Trigger a Import from source backup stored in azure blob container.
+    text: >
+        az mysql flexible-server import create --data-source-type "azure_blob" \\
+          --data-source "https://teststorage.blob.windows.net/backupcontainer" \\
+          --resource-group test-rg --name testserver --version 5.7 --location northeurope \\
+          --admin-user "username" --admin-password "password" \\
+          --sku-name Standard_D2ds_v4 --tier GeneralPurpose --public-access 0.0.0.0 \\
+          --storage-size 32 --tags "key=value" --high-availability ZoneRedundant \\
+          --zone 1 --standby-zone 3 --storage-auto-grow Enabled --iops 500
+  - name: >
+      Trigger import from source backup stored in azure blob container. (Backup files not present in container root. Instead present in backupdata/data/)
+    text: >
+        az mysql flexible-server import create --data-source-type "azure_blob" \\
+          --data-source "https://teststorage.blob.windows.net/backupcontainer" \\
+          --data-source-backup-dir "backupdata/data/" \\
+          --resource-group test-rg --name testserver --version 5.7 --location northeurope \\
+          --admin-user "username" --admin-password "password" \\
+          --sku-name Standard_D2ds_v4 --tier GeneralPurpose --public-access 0.0.0.0 \\
+          --storage-size 32 --tags "key=value" --high-availability ZoneRedundant \\
+          --zone 1 --standby-zone 3 --storage-auto-grow Enabled --iops 500
+  - name: >
+      Trigger import from source backup stored in azure blob container.
+      (Backup files present in container root and blob storage accessible through sas token with Read and List permissions. Please pass '--%' in the command with SAS token.)
+    text: >
+        az mysql flexible-server import create --data-source-type "azure_blob" \\
+          --data-source "https://teststorage.blob.windows.net/backupcontainer" \\
+          --data-source-sas-token "sp=r&st=2023-07-20T10:30:07Z..."  \\
+          --resource-group test-rg --name testserver --version 5.7 --location northeurope \\
+          --admin-user "username" --admin-password "password" \\
+          --sku-name Standard_D2ds_v4 --tier GeneralPurpose --public-access 0.0.0.0 \\
+          --storage-size 32 --tags "key=value" --high-availability ZoneRedundant \\
           --zone 1 --standby-zone 3 --storage-auto-grow Enabled --iops 500
 """
 
@@ -502,6 +544,14 @@ examples:
     text: az mysql flexible-server parameter set --resource-group testGroup --server-name testserver --name parameterName
 """
 
+helps['mysql flexible-server parameter set-batch'] = """
+type: command
+short-summary: Batch update parameters of a flexible server.
+examples:
+  - name: Batch set parameters.
+    text: az mysql flexible-server parameter set-batch --resource-group testGroup --server-name testserver --source "user-override" --args key1="value1" key2="value2"
+"""
+
 helps['mysql flexible-server parameter show'] = """
 type: command
 short-summary: Get the parameter for a flexible server."
@@ -745,4 +795,17 @@ short-summary: Resets GTID on a server.
 examples:
   - name: Resets GTID '3E11FA47-71CA-11E1-9E33-C80AA9429562:23' on server 'testsvr'.
     text: az mysql flexible-server gtid reset -g testgroup -s testsvr --gtid-set 3E11FA47-71CA-11E1-9E33-C80AA9429562:23
+"""
+
+helps['mysql flexible-server export'] = """
+type: group
+short-summary: Manage export backup on a server.
+"""
+
+helps['mysql flexible-server export create'] = """
+type: command
+short-summary: Create an export backup for a given server with specified backup name.
+examples:
+  - name: Create a export backup for 'testsvr' with backup name 'testbackup'.
+    text: az mysql flexible-server export create -g testgroup -n testsvr -b testbackup -u destsasuri
 """

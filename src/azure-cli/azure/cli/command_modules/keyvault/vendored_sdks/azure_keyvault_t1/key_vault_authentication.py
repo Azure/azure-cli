@@ -9,10 +9,10 @@ import threading
 from collections import namedtuple
 
 import requests
-from azure.keyvault import http_bearer_challenge_cache as ChallengeCache
-from azure.keyvault.http_challenge import HttpChallenge
-from azure.keyvault.http_message_security import HttpMessageSecurity
-from azure.keyvault._internal import _RsaKey
+from . import http_bearer_challenge_cache as ChallengeCache
+from .http_challenge import HttpChallenge
+from .http_message_security import HttpMessageSecurity
+from ._internal import _RsaKey
 from msrest.authentication import OAuthTokenAuthentication
 from requests.auth import AuthBase
 from requests.cookies import extract_cookies_to_jar
@@ -59,7 +59,7 @@ class KeyVaultAuthBase(AuthBase):
     # for backwards compatibility we need to support callbacks which don't accept the scheme
     def _auth_callback_compat(self, server, resource, scope, scheme):
         return self._user_callback(server, resource, scope) \
-            if len(inspect.getargspec(self._user_callback).args) == 3 \
+            if len(inspect.getfullargspec(self._user_callback).args) == 3 \
             else self._user_callback(server, resource, scope, scheme)
 
     def __call__(self, request):
