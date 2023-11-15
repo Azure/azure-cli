@@ -5205,18 +5205,18 @@ def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=No
 
 
 def perform_onedeploy_functionapp(cmd,
-                      resource_group_name,
-                      name,
-                      src_path=None,
-                      src_url=None,
-                      target_path=None,
-                      artifact_type=None,
-                      is_async=None,
-                      restart=None,
-                      clean=None,
-                      ignore_stack=None,
-                      timeout=None,
-                      slot=None):
+                                  resource_group_name,
+                                  name,
+                                  src_path=None,
+                                  src_url=None,
+                                  target_path=None,
+                                  artifact_type=None,
+                                  is_async=None,
+                                  restart=None,
+                                  clean=None,
+                                  ignore_stack=None,
+                                  timeout=None,
+                                  slot=None):
     params = OneDeployParams()
 
     params.cmd = cmd
@@ -5238,19 +5238,19 @@ def perform_onedeploy_functionapp(cmd,
 
 
 def perform_onedeploy_webapp(cmd,
-                      resource_group_name,
-                      name,
-                      src_path=None,
-                      src_url=None,
-                      target_path=None,
-                      artifact_type=None,
-                      is_async=None,
-                      restart=None,
-                      clean=None,
-                      ignore_stack=None,
-                      timeout=None,
-                      slot=None,
-                      track_runtime_status=False):
+                             resource_group_name,
+                             name,
+                             src_path=None,
+                             src_url=None,
+                             target_path=None,
+                             artifact_type=None,
+                             is_async=None,
+                             restart=None,
+                             clean=None,
+                             ignore_stack=None,
+                             timeout=None,
+                             slot=None,
+                             track_runtime_status=False):
     params = OneDeployParams()
 
     params.cmd = cmd
@@ -5468,7 +5468,7 @@ def _make_onedeploy_request(params):
                 response_body = response.json().get("properties", {})
         logger.warning("Deployment has completed successfully")
         logger.warning("You can visit your app at: %s", _get_url(params.cmd, params.resource_group_name,
-                                                                    params.webapp_name, params.slot))
+                                                                 params.webapp_name, params.slot))
         return response_body
 
     # API not available yet!
