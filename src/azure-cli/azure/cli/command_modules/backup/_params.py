@@ -22,10 +22,10 @@ from azure.cli.command_modules.backup._validators import \
 
 allowed_container_types = ['AzureIaasVM']
 allowed_workload_types = ['VM', 'AzureFileShare', 'SAPHANA', 'MSSQL', 'SAPHanaDatabase', 'SQLDataBase', 'SAPHanaDBInstance']
-allowed_azure_workload_types = ['MSSQL', 'SAPHANA', 'SAPASE', 'SAPHanaDatabase', 'SQLDataBase']
+allowed_azure_workload_types = ['MSSQL', 'SAPHANA', 'SAPASE', 'SAPHanaDatabase', 'SQLDataBase', 'SAPHanaDBInstance']
 allowed_backup_management_types = ['AzureIaasVM', 'AzureStorage', 'AzureWorkload']
 allowed_extended_backup_management_types = allowed_backup_management_types + ['MAB']
-allowed_protectable_item_type = ['SQLAG', 'SQLInstance', 'SQLDatabase', 'HANAInstance', 'SAPHanaDatabase', 'SAPHanaSystem']
+allowed_protectable_item_type = ['SQLAG', 'SQLInstance', 'SQLDatabase', 'HANAInstance', 'SAPHanaDatabase', 'SAPHanaSystem', 'SAPHanaDBInstance']
 allowed_target_tier_type_chk_archivable = ['VaultArchive']
 allowed_tier_type = ['VaultStandard', 'Snapshot', 'VaultArchive', 'VaultStandardRehydrated', 'SnapshotAndVaultStandard', 'SnapshotAndVaultArchive']
 allowed_rehyd_priority_type = ['Standard', 'High']

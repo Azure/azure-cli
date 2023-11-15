@@ -436,10 +436,10 @@ def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name,
     # Get protectable item.
     protectable_item_object = protectable_item
     protectable_item_type = protectable_item_object.properties.protectable_item_type
-    if protectable_item_type.lower() not in ["sqldatabase", "sqlinstance", "saphanadatabase", "saphanasystem"]:
+    if protectable_item_type.lower() not in ["sqldatabase", "sqlinstance", "saphanadatabase", "saphanasystem", "saphanadbinstance"]:
         raise CLIError(
             """
-            Protectable Item must be either of type SQLDataBase, HANADatabase, HANAInstance or SQLInstance.
+            Protectable Item must be of type SQLDataBase, HANADatabase, HANAInstance, SAPHanaDBInstance, or SQLInstance.
             """)
 
     item_name = protectable_item_object.name
