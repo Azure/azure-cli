@@ -5204,7 +5204,40 @@ def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=No
             time.sleep(5)
 
 
-def perform_onedeploy(cmd,
+def perform_onedeploy_functionapp(cmd,
+                      resource_group_name,
+                      name,
+                      src_path=None,
+                      src_url=None,
+                      target_path=None,
+                      artifact_type=None,
+                      is_async=None,
+                      restart=None,
+                      clean=None,
+                      ignore_stack=None,
+                      timeout=None,
+                      slot=None):
+    params = OneDeployParams()
+
+    params.cmd = cmd
+    params.resource_group_name = resource_group_name
+    params.webapp_name = name
+    params.src_path = src_path
+    params.src_url = src_url
+    params.target_path = target_path
+    params.artifact_type = artifact_type
+    params.is_async_deployment = is_async
+    params.should_restart = restart
+    params.is_clean_deployment = clean
+    params.should_ignore_stack = ignore_stack
+    params.timeout = timeout
+    params.slot = slot
+    params.track_runtime_status = False
+
+    return _perform_onedeploy_internal(params)
+
+
+def perform_onedeploy_webapp(cmd,
                       resource_group_name,
                       name,
                       src_path=None,
@@ -5434,7 +5467,7 @@ def _make_onedeploy_request(params):
                     logger.warning("Deployment status is: \"%s\"", state)
                 response_body = response.json().get("properties", {})
         logger.warning("Deployment has completed successfully")
-        logger.warning("You can visit your webapp at: %s", _get_url(params.cmd, params.resource_group_name,
+        logger.warning("You can visit your app at: %s", _get_url(params.cmd, params.resource_group_name,
                                                                     params.webapp_name, params.slot))
         return response_body
 
