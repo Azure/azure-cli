@@ -5053,7 +5053,7 @@ class BicepScenarioTest(ScenarioTest):
             self.greater_than('length(@)', 0)
         ])
 
-class BicepDecompileParamsTest(LiveScenarioTest):
+class BicepDecompileParamsTest(ScenarioTest):
     def setup(self):
         super().setup()
         self.cmd('az bicep uninstall')
@@ -5076,7 +5076,7 @@ class BicepDecompileParamsTest(LiveScenarioTest):
         if os.path.exists(params_path):
             os.remove(params_path)
 
-class BicepBuildParamsTest(LiveScenarioTest):
+class BicepBuildParamsTest(ScenarioTest):
     def setup(self):
         super().setup()
         self.cmd('az bicep uninstall')
@@ -5114,7 +5114,7 @@ class BicepBuildParamsTest(LiveScenarioTest):
             os.remove(params_path)
 
 # Because don't want to record bicep cli binary
-class BicepBuildTest(LiveScenarioTest):
+class BicepBuildTest(ScenarioTest):
 
     def setup(self):
         super().setup()
@@ -5144,7 +5144,7 @@ class BicepBuildTest(LiveScenarioTest):
         if os.path.exists(decompile_path):
             os.remove(decompile_path)
 
-class BicepGenerateParamsTest(LiveScenarioTest):
+class BicepGenerateParamsTest(ScenarioTest):
     def setup(self):
         super().setup()
         self.cmd('az bicep uninstall')
@@ -5195,7 +5195,7 @@ class BicepGenerateParamsTest(LiveScenarioTest):
         if os.path.exists(params_path):
             os.remove(params_path)
 
-class BicepLintTest(LiveScenarioTest):
+class BicepLintTest(ScenarioTest):
     def setup(self):
         super().setup()
         self.cmd('az bicep uninstall')
@@ -5228,7 +5228,7 @@ class BicepLintTest(LiveScenarioTest):
 
         self.cmd('az bicep lint -f {tf} --diagnostics-format sarif')
 
-class BicepInstallationTest(LiveScenarioTest):
+class BicepInstallationTest(ScenarioTest):
     def setup(self):
         super().setup()
         self.cmd('az bicep uninstall')
@@ -5259,7 +5259,7 @@ class BicepInstallationTest(LiveScenarioTest):
         self.cmd('az bicep version')
 
 
-class BicepRestoreTest(LiveScenarioTest):
+class BicepRestoreTest(ScenarioTest):
 
     def setup(self):
         super().setup()
@@ -5286,7 +5286,7 @@ class BicepRestoreTest(LiveScenarioTest):
             os.remove(out_path)
 
 
-class BicepFormatTest(LiveScenarioTest):
+class BicepFormatTest(ScenarioTest):
 
     def setup(self):
         super().setup()
@@ -5311,7 +5311,7 @@ class BicepFormatTest(LiveScenarioTest):
             os.remove(out_file)
 
 
-class DeploymentWithBicepScenarioTest(LiveScenarioTest):
+class DeploymentWithBicepScenarioTest(ScenarioTest):
 
     def setup(self):
         super.setup()
