@@ -8,7 +8,10 @@ from knack.util import CLIError
 from azure.cli.core.commands import CliCommandType
 
 from ._client_factory import (cf_cdn, cf_custom_domain, cf_endpoints, cf_profiles, cf_origins, cf_resource_usage,
-                              cf_edge_nodes, cf_waf_policy, cf_waf_rule_set, cf_origin_groups, cf_afd_rules)
+                              cf_edge_nodes, cf_waf_policy, cf_waf_rule_set, cf_origin_groups, cf_afd_endpoints,
+                              cf_afd_origins, cf_afd_routes, cf_afd_rule_sets, cf_afd_rules, cf_afd_security_policies,
+                              cf_afd_secrets, cf_afd_log_analytics, cf_afd_origin_groups, cf_afd_custom_domain,
+                              cf_afd_profiles)
 
 
 def _not_found(message):
@@ -226,6 +229,11 @@ def load_command_table(self, _):
 
     with self.command_group('afd', is_preview=True):
         pass
+
+    with self.command_group('afd rule', cdn_afd_rule_sdk,
+                            client_factory=cf_afd_rules) as g:
+        g.custom_command('create', 'create_afd_rule')
+        g.command('delete', 'begin_delete', confirmation=True)
 
     with self.command_group('afd rule condition',
                             cdn_afd_rule_sdk,
