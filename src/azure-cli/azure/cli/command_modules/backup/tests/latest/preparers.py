@@ -7,11 +7,13 @@ import json
 import os
 from datetime import datetime, timedelta
 
+from knack.log import get_logger
 from azure.cli.testsdk import CliTestError, ResourceGroupPreparer
 from azure.cli.testsdk.preparers import AbstractPreparer, SingleValueReplacer, KeyVaultPreparer
 from azure.cli.testsdk.base import execute
 # pylint: disable=line-too-long
 
+logger = get_logger(__name__)
 
 class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=too-many-instance-attributes
     def __init__(self, name_prefix='clitest-vault', parameter_name='vault_name',
@@ -612,7 +614,7 @@ class AFSItemPreparer(AbstractPreparer, SingleValueReplacer):
         try:
             execute(self.cli_ctx, command_string)
         except Exception:
-            print('Warning: Unable to unregister AFS item during AFS Item test cleanup.')
+            logger.warning('Warning: Unable to unregister AFS item during AFS Item test cleanup.')
 
         command_string = 'az backup container unregister'
         command_string += ' --vault-name {} --resource-group {} --container-name {} --backup-management-type AzureStorage --yes'
@@ -620,7 +622,7 @@ class AFSItemPreparer(AbstractPreparer, SingleValueReplacer):
         try:
             execute(self.cli_ctx, command_string)
         except Exception:
-            print('Warning: Unable to unregister storage container during AFS Item test cleanup.')
+            logger.warning('Warning: Unable to unregister storage container during AFS Item test cleanup.')
 
 
 class AFSRPPreparer(AbstractPreparer, SingleValueReplacer):
