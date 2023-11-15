@@ -51,7 +51,7 @@ def flexible_server_create(cmd, client,
                            private_dns_zone_arguments=None, public_access=None,
                            high_availability=None, zone=None, standby_availability_zone=None,
                            geo_redundant_backup=None, byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
-                           active_directory_auth=None, password_auth=None, auto_grow=None, yes=False):
+                           active_directory_auth=None, password_auth=None, auto_grow=None, storage_type=None, iops=None, throughput=None, yes=False):
 
     # Generate missing parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
@@ -73,6 +73,9 @@ def flexible_server_create(cmd, client,
                            sku_name=sku_name,
                            storage_gb=storage_gb,
                            auto_grow=auto_grow,
+                           storage_type=storage_type,
+                           iops=iops,
+                           throughput=throughput,
                            high_availability=high_availability,
                            standby_availability_zone=standby_availability_zone,
                            zone=zone,
@@ -100,7 +103,7 @@ def flexible_server_create(cmd, client,
                                                                            subnet_address_prefix=subnet_address_prefix,
                                                                            yes=yes)
 
-    storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb, auto_grow=auto_grow)
+    storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb, auto_grow=auto_grow, storage_type=storage_type, iops=iops, throughput=throughput)
 
     backup = postgresql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
                                                       geo_redundant_backup=geo_redundant_backup)
@@ -265,6 +268,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        private_dns_zone_arguments=None,
                                        tags=None,
                                        auto_grow=None,
+                                       storage_type=None,
+                                       iops=None,
+                                       throughput=None,
                                        yes=False):
 
     # validator
@@ -282,6 +288,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
                            storage_gb=storage_gb,
                            auto_grow=auto_grow,
                            replication_role=instance.replication_role if auto_grow is not None else None,
+                           storage_type=storage_type,
+                           iops=iops,
+                           throughput=throughput,
                            high_availability=high_availability,
                            zone=instance.availability_zone,
                            standby_availability_zone=standby_availability_zone,
@@ -320,6 +329,12 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     if auto_grow:
         instance.storage.auto_grow = auto_grow
+
+    if iops:
+        instance.storage.iops = iops
+
+    if throughput:
+        instance.storage.throughput = throughput
 
     if backup_retention:
         instance.backup.backup_retention_days = backup_retention

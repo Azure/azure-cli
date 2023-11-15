@@ -38,6 +38,14 @@ examples:
           --tags "key=value" --version 13 --high-availability Enabled --zone 1 \\
           --standby-zone 3
   - name: >
+      Create a PostgreSQL flexible server using Premium SSD v2 Disks.
+    text: >
+      # set storage type to "PremiumV2_LRS" and provide values for Storage size (in GiB), IOPS (operations/sec), and Throughput (MB/sec).
+
+      az postgres flexible-server create --location northeurope --resource-group testGroup \\
+          --name testserver --admin-user username --admin-password password \\
+          --sku-name Standard_B1ms --tier Burstable --storage-type PremiumV2_LRS --storage-size 128 --iops 3000 --throughput 125
+  - name: >
       Create a PostgreSQL flexible server with default parameters and public access enabled by default. \
       Resource group, server name, username, password, and default database will be created by CLI
     text: >
@@ -199,8 +207,9 @@ examples:
 
       az postgres flexible-server create -g testGroup -n testServer --location testLocation --geo-redundant-backup Enabled \\
         --key $keyIdentifier --identity testIdentity --backup-key $geoKeyIdentifier --backup-identity geoIdentity
-
-
+  - name: >
+      Create a PostgreSQL flexible server with Storage Auto grow.
+    text: >
       # create flexible server with storage auto-grow as Enabled. Accepted values Enabled / Disabled. Default value for storage auto-grow is "Disabled".
 
       az postgres flexible-server create -g testGroup -n testServer --location testLocation --storage-auto-grow Enabled

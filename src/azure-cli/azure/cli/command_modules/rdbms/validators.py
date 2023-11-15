@@ -297,7 +297,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                            standby_availability_zone=None, high_availability=None, subnet=None, public_access=None,
                            version=None, instance=None, geo_redundant_backup=None,
                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
-                           auto_grow=None, replication_role=None):
+                           auto_grow=None, storage_type=None, iops=None, throughput=None, replication_role=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
     if not instance:
         list_location_capability_info = get_postgres_location_capability_info(
@@ -318,7 +318,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     if geo_redundant_backup is None and instance is not None:
         geo_redundant_backup = instance.backup.geo_redundant_backup
     _pg_georedundant_backup_validator(geo_redundant_backup, geo_backup_supported)
-    _pg_storage_validator(storage_gb, sku_info, tier, instance)
+    _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throughput, instance)
     pg_auto_grow_validator(auto_grow, replication_role, high_availability, instance)
     _pg_sku_name_validator(sku_name, sku_info, tier, instance)
     _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance)
@@ -326,18 +326,27 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, instance)
 
 
-def _pg_storage_validator(storage_gb, sku_info, tier, instance):
+def _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throughput, instance):
     if storage_gb is not None:
         if instance is not None:
             original_size = instance.storage.storage_size_gb
             if original_size > storage_gb:
                 raise CLIError('Updating storage cannot be smaller than '
-                               'the original storage size {} GiB.'.format(original_size))
+                            'the original storage size {} GiB.'.format(original_size))
         storage_sizes = get_postgres_storage_sizes(sku_info, tier)
         if storage_gb not in storage_sizes:
             storage_sizes = sorted([int(size) for size in storage_sizes])
             raise CLIError('Incorrect value for --storage-size : Allowed values(in GiB) : {}'
-                           .format(storage_sizes))
+                        .format(storage_sizes))
+    if storage_type == "PremiumV2_LRS" and (iops is None or throughput is None):
+        raise CLIError('Incorrect usage : --storage-type. Please provide --iops and --throughput with --storage-type.')
+    if storage_type != "PremiumV2_LRS" and (throughput is not None or iops is not None):
+        raise CLIError('Please set "--storage-type" to "PremiumV2_LRS" and provide values for both --iops and --throughput.')
+    if instance is not None:
+        if instance.storage.type != "PremiumV2_LRS" and throughput is not None:
+            raise CLIError('Incorrect usage : --throughput. Server is not created with premium SSD v2.')
+        if instance.storage.type != "PremiumV2_LRS" and iops is not None:
+            raise CLIError('Incorrect usage : --iops. Server is not created with premium SSD v2.')
 
 
 def _pg_tier_validator(tier, sku_info):
