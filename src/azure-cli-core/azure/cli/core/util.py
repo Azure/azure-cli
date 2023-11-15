@@ -144,8 +144,8 @@ def handle_exception(ex, cli_ctx=None, command=None):  # pylint: disable=too-man
 
     elif isinstance(ex, HTTPError):
         status_code = str(getattr(ex.response, 'status_code', 'Unknown Code'))
-        AzCLIErrorType = get_error_type_by_status_code(status_code, command=command_string)
-        az_error = AzCLIErrorType(error_msg)
+        AzCLIErrorType = get_error_type_by_status_code(status_code)
+        az_error = AzCLIErrorType(error_msg, command=command_string)
 
     elif isinstance(ex, KeyboardInterrupt):
         error_msg = 'Keyboard interrupt is captured.'
