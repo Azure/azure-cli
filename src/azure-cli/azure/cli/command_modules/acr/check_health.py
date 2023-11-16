@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import re
+
 from knack.util import CLIError
 from knack.log import get_logger
 from .custom import get_docker_command
@@ -68,6 +69,52 @@ def _subprocess_communicate(command_parts, shell=False):
 # Retrieve blob identified by digest - GET {url}/v2/{name}/blobs/{digest}
 def _get_blob(login_server, repository_name, digest):
     return 'https://{}/v2/{}/blobs/{}'.format(login_server, repository_name, digest)
+
+# Checks inputted image or tag for possible matches
+def _check_image_match(cmd,
+                       registry_name,
+                       repository_name,
+                       login_server,
+                       username,
+                       password,
+                       image):
+    from difflib import get_close_matches
+    from .manifest import _get_manifest_path
+    from .repository import(
+        acr_repository_show_tags,
+        _obtain_data_from_registry)
+
+    if 'sha256' not in image:
+        tags = acr_repository_show_tags(
+            cmd,
+            registry_name=registry_name,
+            repository=repository_name,
+            orderby=None,
+            username=username,
+            password=password)
+        # Get a list of tags that have at least 80% similarity with the inputted image name
+        matches = get_close_matches(image, tags, n=1, cutoff=0.8)
+
+        if matches:
+            raise CLIError("Tag '{}' not found. Did you mean to input '{}'?".format(image, matches[0]))
+        return
+
+    # If digest is used, get all digests
+    image_digest_list = _obtain_data_from_registry(
+        login_server=login_server,
+        path=_get_manifest_path(repository_name),
+        username=username,
+        password=password,
+        result_index='manifests',
+        orderby=None)
+
+    # Get a list of digests that have at least 80% similarity with the inputted image name
+    digests = [item['digest'] for item in image_digest_list]
+    matches = get_close_matches(image, digests, n=1, cutoff=0.8)
+
+    if matches:
+        raise CLIError("Image '{}' not found. Did you mean to input '{}'?".format(image, matches[0]))
+    return
 
 # Checks for the environment
 # Checks docker command, docker daemon, docker version and docker pull
@@ -293,28 +340,12 @@ def _get_endpoint_and_token_status(cmd, login_server, ignore_errors):
     print_pass("Fetch refresh token for registry '{}'".format(login_server))
     print_pass("Fetch access token for registry '{}'".format(login_server))
 
-def _check_registry_health(cmd, registry_name, ignore_errors):
+def _check_registry_health(cmd,
+                           registry_name,
+                           registry,
+                           login_server,
+                           ignore_errors):
     from azure.cli.core.profiles import ResourceType
-
-    if registry_name is None:
-        logger.warning("Registry name must be provided to check connectivity.")
-        return
-
-    registry = None
-    # Connectivity
-    try:
-        registry, _ = get_registry_by_name(cmd.cli_ctx, registry_name)
-        login_server = registry.login_server.rstrip('/')
-    except CLIError:
-        from ._docker_utils import get_login_server_suffix
-        suffix = get_login_server_suffix(cmd.cli_ctx)
-
-        if not suffix:
-            from ._errors import LOGIN_SERVER_ERROR
-            _handle_error(LOGIN_SERVER_ERROR.format_error_message(registry_name), ignore_errors)
-            return
-
-        login_server = registry_name + suffix
 
     status_validated = _get_registry_status(login_server, registry_name, ignore_errors)
     if status_validated:
@@ -341,17 +372,15 @@ def _check_registry_health(cmd, registry_name, ignore_errors):
                 _handle_error(CMK_MANAGED_IDENTITY_ERROR.format_error_message(registry_name), ignore_errors)
 
 
-def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # pylint: disable=too-many-locals, too-many-statements
+def _check_private_endpoint(cmd,
+                            registry_name,
+                            registry,
+                            vnet_of_private_endpoint):  # pylint: disable=too-many-locals, too-many-statements
     import socket
     from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
     if registry_name is None:
         raise CLIError("Registry name must be provided to verify DNS routings of its private endpoints")
-
-    registry = None
-
-    # retrieve registry
-    registry, _ = get_registry_by_name(cmd.cli_ctx, registry_name)
 
     if not registry.private_endpoint_connections:
         raise CLIError('Registry "{}" doesn\'t have private endpoints to verify DNS routings.'.format(registry_name))
@@ -418,9 +447,13 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # py
         raise CLIError('DNS routing verification failed')
 
 # Validate --image input
-def validate_image(cmd, registry_name, repository_name, image):
-    from difflib import get_close_matches
-    from ._utils import get_resource_group_name_by_registry_name
+def validate_image(cmd,
+                   registry_name,
+                   repository_name,
+                   login_server,
+                   username,
+                   password,
+                   image):
     from .manifest import _get_v2_manifest_path
 
     from ._docker_utils import (
@@ -428,27 +461,6 @@ def validate_image(cmd, registry_name, repository_name, image):
         get_manifest_authorization_header,
         RegistryException
     )
-
-    from .repository import (
-        get_access_credentials,
-        acr_repository_show_tags,
-        _get_manifest_path,
-        _obtain_data_from_registry
-    )
-
-    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, None)
-    registry, _ = get_registry_by_name(cmd.cli_ctx, registry_name, rg)
-    login_server = registry.login_server.rstrip('/')
-
-     # Get the access credentials for the registry
-    login_server, username, password = get_access_credentials(
-        cmd,
-        registry_name=registry_name,
-        tenant_suffix=None,
-        username=None,
-        password=None,
-        repository=repository_name,
-        permission='pull')
 
     try:
         request_data_from_registry(
@@ -464,65 +476,24 @@ def validate_image(cmd, registry_name, repository_name, image):
 
     except RegistryException as e:
         if e.status_code == 404:
-            # If tag is used, get all tags
-            # TO DO: Make this into its own function and then call it
-            if 'sha256' not in image:
-                tags = acr_repository_show_tags(
-                    cmd,
-                    registry_name=registry_name,
-                    repository=repository_name,
-                    orderby=None,
-                    username=username,
-                    password=password)
-                # Get a list of tags that have at least 80% similarity with the inputted image name
-                matches = get_close_matches(image, tags, n=1, cutoff=0.8)
-                if matches:
-                    raise CLIError("Tag not found: {}. Did you mean to input '{}'?".format(image, matches[0]))
-                raise CLIError("Invalid tag: {}".format(str(e)))
+            _check_image_match(cmd,
+                               registry_name,
+                               repository_name,
+                               login_server,
+                               username,
+                               password,
+                               image)
+        raise CLIError("{} Please check if image/tag was inputted correctly.".format(str(e)))
 
-            # If digest is used, get all digests
-            image_digest_list = _obtain_data_from_registry(
-                login_server=login_server,
-                path=_get_manifest_path(repository_name),
-                username=username,
-                password=password,
-                result_index='manifests',
-                orderby=None)
-
-            # Get a list of digests that have at least 20% similarity with the inputted image name
-            digests = [item['digest'] for item in image_digest_list]
-            matches = get_close_matches(image, digests, n=1, cutoff=0.2)
-            #TO DO: Need to change this to 80% match not 20%
-            # if there is a match, give a suggestion on the intended image name
-            if matches:
-                raise CLIError("Image '{}' not found. Did you mean to input '{}'?".format(image, matches[0]))
-            raise CLIError("Invalid image: {}".format(str(e)))
-        # if the error is not 404, raise the appropriate error from backend
-        raise
-
-# Validate if specific blob can be pulled
-def _check_blob(cmd,
-                registry_name,
-                repository_name,
+# Validate if blob layer can be pulled
+def _check_blob(repository_name,
+                login_server,
+                username,
+                password,
                 image):
 
     import requests
-    from .repository import get_access_credentials
-    from ._utils import get_resource_group_name_by_registry_name
-
-    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, None)
-    registry, _ = get_registry_by_name(cmd.cli_ctx, registry_name, rg)
-    login_server = registry.login_server.rstrip('/')
-
-    # Get the access credentials for the registry
-    registry_name, username, password = get_access_credentials(
-        cmd,
-        registry_name=registry_name,
-        tenant_suffix=None,
-        username=None,
-        password=None,
-        repository=repository_name,
-        permission='pull')
+    from ._docker_utils import get_manifest_authorization_header, parse_error_message
 
     # Get manifest
     # GET {url}/v2/{name}/manifests/{reference}
@@ -530,13 +501,7 @@ def _check_blob(cmd,
 
     manifest_response = requests.get(
         manifest_url,
-        headers={'Accept': 'application/vnd.oci.artifact.manifest.v1+json'
-            ', application/vnd.cncf.oras.artifact.manifest.v1+json'
-            ', application/vnd.oci.image.manifest.v1+json'
-            ', application/vnd.oci.image.index.v1+json'
-            ', application/vnd.docker.distribution.manifest.v2+json'
-            ', application/vnd.docker.distribution.manifest.list.v2+json'},
-        auth=(username, password))
+        headers=get_manifest_authorization_header(username, password))
 
     manifest = manifest_response.json()
 
@@ -545,18 +510,19 @@ def _check_blob(cmd,
     digest = smallest_blob['digest']
 
     # Get blob
-   # request_url = 'https://' + login_server + '/v2/' + repository_name + '/blobs/' + digest
     request_url = _get_blob(login_server, repository_name, digest)
-
     logger.debug(add_timestamp("Sending a HTTP GET request to {}".format(request_url)))
 
     res = requests.get(request_url, auth=(username, password))
+
+    # Return server error message; if server error not available, will return error message below
+    if res.status_code >= 400:
+        raise CLIError(parse_error_message('Could not get the requested data.', res), res.status_code)
+    # Check if image or tag was inputted and return appropriate message
     if res.status_code < 400 and 'sha256' not in image:
-        print_pass("Blobs within the tag '{}' can be pulled from registry '{}'".format(image, login_server))
-    elif res.status_code < 400:
-        print_pass("Blobs in image '{}' can be pulled from registry '{}'".format(image, login_server))
+        print_pass("Blobs referenced by tag '{}' can be pulled from registry '{}'".format(image, login_server))
     else:
-        raise CLIError("'Blobs in image '{}' cannot be pulled from registry '{}'".format(image, login_server))
+        print_pass("Blobs in image '{}' can be pulled from registry '{}'".format(image, login_server))
 
 # General command
 def acr_check_health(cmd,  # pylint: disable useless-return
@@ -565,8 +531,38 @@ def acr_check_health(cmd,  # pylint: disable useless-return
                      yes=False,
                      registry_name=None,
                      repository_name=None,
-                     image=None):
+                     image=None,
+                     resource_group_name=None):
     from azure.cli.core.util import in_cloud_console
+    from .repository import get_access_credentials
+    from ._utils import get_resource_group_name_by_registry_name
+
+    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
+
+    registry = None
+
+    # Connectivity
+    try:
+        registry, _ = get_registry_by_name(cmd.cli_ctx, registry_name, rg)
+        login_server = registry.login_server.rstrip('/')
+    except CLIError:
+        from ._docker_utils import get_login_server_suffix
+        suffix = get_login_server_suffix(cmd.cli_ctx)
+
+        if not suffix:
+            from ._errors import LOGIN_SERVER_ERROR
+            _handle_error(LOGIN_SERVER_ERROR.format_error_message(registry_name), ignore_errors)
+            return
+
+    # Get the access credentials for the registry
+    login_server, username, password = get_access_credentials(
+        cmd,
+        registry_name=registry_name,
+        tenant_suffix=None,
+        username=None,
+        password=None,
+        repository=repository_name,
+        permission='pull')
 
     in_cloud_console = in_cloud_console()
     if in_cloud_console:
@@ -575,12 +571,27 @@ def acr_check_health(cmd,  # pylint: disable useless-return
         _get_docker_status_and_version(ignore_errors, yes)
         _get_cli_version()
 
-    _check_registry_health(cmd, registry_name, ignore_errors)
+    _check_registry_health(cmd,
+                           registry_name,
+                           registry,
+                           login_server,
+                           ignore_errors)
 
     # If repository and image are provided, validate image input
+    # Then check if blob layer can be pulled
     if (image and repository_name):
-        validate_image(cmd, registry_name, repository_name, image)
-        _check_blob(cmd, registry_name, repository_name, image)
+        validate_image(cmd,
+                       registry_name,
+                       repository_name,
+                       login_server,
+                       username,
+                       password,
+                       image)
+        _check_blob(repository_name,
+                    login_server,
+                    username,
+                    password,
+                    image)
 
     if vnet:
         _check_private_endpoint(cmd, registry_name, vnet)
