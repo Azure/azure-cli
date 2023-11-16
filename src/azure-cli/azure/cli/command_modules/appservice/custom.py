@@ -4045,20 +4045,20 @@ def _validate_cpu_momory_functionapp(cpu=None, memory=None):
         return
     
     if cpu is not None and memory is None:
-        raise ArgumentUsageError("--memory input is required with --cpu. Please provide both or none.")
+        raise ArgumentUsageError("The --memory argument is required with --cpu. Please provide both or none.")
     
     if cpu is None and memory is not None:
-        raise ArgumentUsageError("--cpu input is required with --memory. Please provide both or none.")
+        raise ArgumentUsageError("The --cpu argument is required with --memory. Please provide both or none.")
     
     # validate that memory is number and ends with Gi
     if memory is not None and not memory.lower().endswith("gi"):
-        raise ValidationError("--memory input should end with Gi. Please provide a correct value. e.g. 4.0Gi.")
+        raise ValidationError("The --memory argument should end with Gi. Please provide a correct value. e.g. 4.0Gi.")
     
     if memory is not None:
         try:
             float(memory[:-2])
         except ValueError:
-            raise ValidationError("--memory input is not valid. Please provide a correct value. e.g. 4.0Gi.")
+            raise ValidationError("The --memory argument is not valid. Please provide a correct value. e.g. 4.0Gi.")
         
     return
 
