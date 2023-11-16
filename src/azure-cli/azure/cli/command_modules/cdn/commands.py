@@ -264,3 +264,9 @@ def load_command_table(self, _):
 
     from .custom.custom_afdx import AFDRouteUpdate
     self.command_table['afd route update'] = AFDRouteUpdate(loader=self)
+
+    from .custom.custom_afdx import AFDSecretCreate
+    self.command_table['afd secret create'] = AFDSecretCreate(loader=self)
+
+    from .custom.custom_afdx import AFDSecretUpdate
+    self.command_table['afd secret update'] = AFDSecretUpdate(loader=self)

@@ -29,6 +29,7 @@ from knack.log import get_logger
 from msrest.polling import LROPoller, NoPolling
 
 from .custom import _update_mapper
+from azure.cli.core.aaz._base import has_value
 
 logger = get_logger(__name__)
 
@@ -80,12 +81,11 @@ from azure.cli.command_modules.cdn.aaz.latest.afd.origin import Create as _AFDOr
 class AFDOriginCreate(_AFDOriginCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZFileArg, AAZBoolArgFormat
+        from azure.cli.core.aaz import AAZBoolArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.enable_private_link = AAZFileArg(options=['--enable-private-link'],
+        args_schema.enable_private_link = AAZBoolArg(options=['--enable-private-link'],
                                                   help="Indicates whether private link is enanbled on that origin.",
-                                                  required=True,
-                                                  fmt=AAZBoolArgFormat,)
+                                                  required=True)
         return args_schema
 
     def pre_operations(self):
@@ -100,12 +100,11 @@ from azure.cli.command_modules.cdn.aaz.latest.afd.origin import Update as _AFDOr
 class AFDOriginUpdate(_AFDOriginUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZFileArg, AAZBoolArgFormat
+        from azure.cli.core.aaz import AAZBoolArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.enable_private_link = AAZFileArg(options=['--enable-private-link'],
+        args_schema.enable_private_link = AAZBoolArg(options=['--enable-private-link'],
                                                   help="Indicates whether private link is enanbled on that origin.",
-                                                  required=True,
-                                                  fmt=AAZBoolArgFormat,)
+                                                  required=True)
         return args_schema
 
     def pre_operations(self):
@@ -120,12 +119,11 @@ from azure.cli.command_modules.cdn.aaz.latest.afd.route import Create as _AFDRou
 class AFDRouteCreate(_AFDRouteCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZFileArg, AAZBoolArgFormat
+        from azure.cli.core.aaz import AAZBoolArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.enable_caching = AAZFileArg(options=['--enable-caching'],
+        args_schema.enable_caching = AAZBoolArg(options=['--enable-caching'],
                                                   help="Indicates whether caching is enanbled on that route.",
-                                                  required=True,
-                                                  fmt=AAZBoolArgFormat,)
+                                                  required=True)
         return args_schema
 
     def pre_operations(self):
@@ -138,12 +136,11 @@ from azure.cli.command_modules.cdn.aaz.latest.afd.route import Update as _AFDRou
 class AFDRouteUpdate(_AFDRouteUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZFileArg, AAZBoolArgFormat
+        from azure.cli.core.aaz import AAZBoolArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.enable_caching = AAZFileArg(options=['--enable-caching'],
+        args_schema.enable_caching = AAZBoolArg(options=['--enable-caching'],
                                                   help="Indicates whether caching is enanbled on that route.",
-                                                  required=True,
-                                                  fmt=AAZBoolArgFormat,)
+                                                  required=True)
         return args_schema
 
     def pre_operations(self):
@@ -315,7 +312,6 @@ def remove_afd_rule_action(cmd, resource_group_name, profile_name, rule_set_name
 def list_afd_rule_condition(cmd, resource_group_name,
                             profile_name, rule_set_name,
                             rule_name):
-
     rule = RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "profile_name": profile_name,
@@ -329,8 +325,6 @@ def list_afd_rule_condition(cmd, resource_group_name,
 def list_afd_rule_action(cmd, resource_group_name,
                          profile_name, rule_set_name,
                          rule_name):
-    from azure.cli.command_modules.cdn.aaz.latest.afd.rule import Show
-
     rule = RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "profile_name": profile_name,
@@ -339,3 +333,75 @@ def list_afd_rule_action(cmd, resource_group_name,
     })
     
     return rule["actions"]
+
+from azure.cli.command_modules.cdn.aaz.latest.afd.secret import Create as _AFDSecretCreate
+class AFDSecretCreate(_AFDSecretCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg, AAZBoolArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.secret_source = AAZStrArg(options=['--secret-source'],
+                                                  help="Resource ID of the Azure Key Vault certificate, expected format is like /subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/vault1/secrets/cert1.",
+                                                  required=True)
+        args_schema.secret_version = AAZStrArg(options=['--secret-version'],
+                                                  help="Version of the certificate to be used.",
+                                                  required=False)
+        args_schema.use_latest_version = AAZBoolArg(options=['--use-latest-version'],
+                                                  help="Whether to use the latest version for the certificate.",
+                                                  required=False)
+        return args_schema
+    def pre_operations(self):
+        args = self.ctx.args
+        args.parameters.customer_certificate.secret_source = args.secret_source
+        if has_value(args.secret_version):
+            args.parameters.customer_certificate.secret_version = args.secret_version
+        if has_value(args.use_latest_version):
+            args.parameters.customer_certificate.use_latest_version = args.use_latest_version
+            
+from azure.cli.command_modules.cdn.aaz.latest.afd.secret import Update as _AFDSecretCreate
+class AFDSecretCreate(_AFDSecretCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg, AAZBoolArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.secret_source = AAZStrArg(options=['--secret-source'],
+                                                  help="Resource ID of the Azure Key Vault certificate, expected format is like /subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/vault1/secrets/cert1.",
+                                                  required=True)
+        args_schema.secret_version = AAZStrArg(options=['--secret-version'],
+                                                  help="Version of the certificate to be used.",
+                                                  required=False)
+        args_schema.use_latest_version = AAZBoolArg(options=['--use-latest-version'],
+                                                  help="Whether to use the latest version for the certificate.",
+                                                  required=False)
+        return args_schema
+    def pre_operations(self):
+        args = self.ctx.args
+        args.parameters.customer_certificate.secret_source = args.secret_source
+        if has_value(args.secret_version):
+            args.parameters.customer_certificate.secret_version = args.secret_version
+        if has_value(args.use_latest_version):
+            args.parameters.customer_certificate.use_latest_version = args.use_latest_version
+
+from azure.cli.command_modules.cdn.aaz.latest.afd.secret import Update as _AFDSecretUpdate
+class AFDSecretUpdate(_AFDSecretUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg, AAZBoolArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.secret_source = AAZStrArg(options=['--secret-source'],
+                                                  help="Resource ID of the Azure Key Vault certificate, expected format is like /subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/vault1/secrets/cert1.",
+                                                  required=True)
+        args_schema.secret_version = AAZStrArg(options=['--secret-version'],
+                                                  help="Version of the certificate to be used.",
+                                                  required=False)
+        args_schema.use_latest_version = AAZBoolArg(options=['--use-latest-version'],
+                                                  help="Whether to use the latest version for the certificate.",
+                                                  required=False)
+        return args_schema
+    def pre_operations(self):
+        args = self.ctx.args
+        args.parameters.customer_certificate.secret_source = args.secret_source
+        if has_value(args.secret_version):
+            args.parameters.customer_certificate.secret_version = args.secret_version
+        if has_value(args.use_latest_version):
+            args.parameters.customer_certificate.use_latest_version = args.use_latest_version
