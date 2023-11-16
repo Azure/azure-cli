@@ -43,7 +43,7 @@ def request_error_assistance(command: Union[str, None] = None,
         retry_count: int = 5
         current_retry: int = 0
 
-        while len(_cached_token_session) < 2 and current_retry < retry_count:
+        while len(_cached_token_session) == 2 and current_retry < retry_count:
             # The while statement ensure there are at least two element in the tuple _cached_token_session
 
             (deepprompt_token, session_id) = _cached_token_session  # pylint: disable=unbalanced-tuple-unpacking
@@ -113,8 +113,14 @@ def _print_line():
 
 
 def _error_enabled(cli_ctx) -> bool:
-    return cli_ctx and (cli_ctx.config.getboolean("core", "error_assistance", fallback=False) or
-                        cli_ctx.config.getboolean("interactive", "error_assistance", fallback=True))
+    if not cli_ctx:
+        return False
+
+    # "az_interactive_active" is set by the interactive extension.
+    if cli_ctx.data["az_interactive_active"]:
+        return cli_ctx.config.getboolean("interactive", "error_assistance", fallback=True)
+
+    return cli_ctx.config.getboolean("core", "error_assistance", fallback=False)
 
 
 def _exchange(aad_token: str) -> dict:
