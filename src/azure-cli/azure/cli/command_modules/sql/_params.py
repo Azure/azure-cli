@@ -1697,7 +1697,8 @@ def load_arguments(self, _):
                 'license_type',
                 'subnet_id',
                 'vcores',
-                'tags'
+                'tags',
+                'maintenance_configuration_id'
             ])
 
         c.argument('vcores',
@@ -1711,6 +1712,9 @@ def load_arguments(self, _):
             required=True,
             help='Name or ID of the subnet that allows access to an Instance Pool. '
                  'If subnet name is provided, --vnet-name must be provided.')
+
+        c.argument('maintenance_configuration_id',
+            arg_type=maintenance_configuration_id_param_type)
 
         # Create args that will be used to build up the Instance Pool's Sku object
         create_args_for_complex_type(

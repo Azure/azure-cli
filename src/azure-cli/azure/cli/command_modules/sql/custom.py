@@ -3917,12 +3917,30 @@ def instance_pool_create(
 
 def instance_pool_update(
         instance,
+        vcores=None,
+        sku=None,
+        maintenance_configuration_id=None,
+        license_type=None,
         tags=None):
     '''
     Updates a instance pool
     '''
 
-    instance.tags = tags
+    if tags is not None:
+        instance.tags = tags
+
+    if maintenance_configuration_id is not None:
+        instance.maintenance_configuration_id = _complete_maintenance_configuration_id(cmd.cli_ctx, maintenance_configuration_id)
+
+    if vcores is not None:
+        instance.vcores = vcores
+
+    if license_type is not None:
+        instance.license_type = license_type
+
+    # Update SKU
+    if sku is not None:
+        instance.sku = _find_instance_pool_sku_from_capabilities(cmd.cli_ctx, instance.location, sku)
 
     return instance
 
