@@ -1435,7 +1435,7 @@ examples:
     text: az storage container-rm update --storage-account myaccount --name mycontainer --public-access blob
   - name: Update the metadata for a container under the specified storage account(account id).
     text: az storage container-rm update --storage-account myaccountid --name mycontainer --metadata newkey1=newvalue1 newkey2=newvalue2
-  - name: Update the default encryption scope for a container by resource id.
+  - name: Update the public access level for a container by resource id.
     text: az storage container-rm update --ids mycontainerid --public-access blob
 """
 
