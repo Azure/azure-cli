@@ -60,39 +60,32 @@ class Update(AAZCommand):
             id_part="child_name_1",
         )
 
-        # define Arg Group "Properties"
+        # define Arg Group "Parameters"
 
         _args_schema = cls._args_schema
-        _args_schema.parameters = AAZObjectArg(
-            options=["--parameters"],
-            arg_group="Properties",
-            help="object which contains security policy parameters",
-            nullable=True,
+        _args_schema.web_application_firewall = AAZObjectArg(
+            options=["--web-application-firewall"],
+            arg_group="Parameters",
         )
 
-        parameters = cls._args_schema.parameters
-        parameters.web_application_firewall = AAZObjectArg(
-            options=["web-application-firewall"],
-        )
-
-        web_application_firewall = cls._args_schema.parameters.web_application_firewall
+        web_application_firewall = cls._args_schema.web_application_firewall
         web_application_firewall.associations = AAZListArg(
             options=["associations"],
             help="Waf associations",
             nullable=True,
         )
-        web_application_firewall.waf_policy = AAZObjectArg(
+        web_application_firewall.waf_policy = AAZStrArg(
             options=["waf-policy"],
             help="Resource ID.",
             nullable=True,
         )
 
-        associations = cls._args_schema.parameters.web_application_firewall.associations
+        associations = cls._args_schema.web_application_firewall.associations
         associations.Element = AAZObjectArg(
             nullable=True,
         )
 
-        _element = cls._args_schema.parameters.web_application_firewall.associations.Element
+        _element = cls._args_schema.web_application_firewall.associations.Element
         _element.domains = AAZListArg(
             options=["domains"],
             help="List of domains.",
@@ -104,27 +97,20 @@ class Update(AAZCommand):
             nullable=True,
         )
 
-        domains = cls._args_schema.parameters.web_application_firewall.associations.Element.domains
+        domains = cls._args_schema.web_application_firewall.associations.Element.domains
         domains.Element = AAZObjectArg(
             nullable=True,
         )
 
-        _element = cls._args_schema.parameters.web_application_firewall.associations.Element.domains.Element
+        _element = cls._args_schema.web_application_firewall.associations.Element.domains.Element
         _element.id = AAZStrArg(
             options=["id"],
             help="Resource ID.",
             nullable=True,
         )
 
-        patterns_to_match = cls._args_schema.parameters.web_application_firewall.associations.Element.patterns_to_match
+        patterns_to_match = cls._args_schema.web_application_firewall.associations.Element.patterns_to_match
         patterns_to_match.Element = AAZStrArg(
-            nullable=True,
-        )
-
-        waf_policy = cls._args_schema.parameters.web_application_firewall.waf_policy
-        waf_policy.id = AAZStrArg(
-            options=["id"],
-            help="Resource ID.",
             nullable=True,
         )
         return cls._args_schema
@@ -376,7 +362,7 @@ class Update(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("parameters", AAZObjectType, ".parameters")
+                properties.set_prop("parameters", AAZObjectType)
 
             parameters = _builder.get(".properties.parameters")
             if parameters is not None:
@@ -386,7 +372,7 @@ class Update(AAZCommand):
             disc_web_application_firewall = _builder.get(".properties.parameters{type:WebApplicationFirewall}")
             if disc_web_application_firewall is not None:
                 disc_web_application_firewall.set_prop("associations", AAZListType, ".web_application_firewall.associations")
-                disc_web_application_firewall.set_prop("wafPolicy", AAZObjectType, ".web_application_firewall.waf_policy")
+                disc_web_application_firewall.set_prop("wafPolicy", AAZObjectType)
 
             associations = _builder.get(".properties.parameters{type:WebApplicationFirewall}.associations")
             if associations is not None:
@@ -411,7 +397,7 @@ class Update(AAZCommand):
 
             waf_policy = _builder.get(".properties.parameters{type:WebApplicationFirewall}.wafPolicy")
             if waf_policy is not None:
-                waf_policy.set_prop("id", AAZStrType, ".id")
+                waf_policy.set_prop("id", AAZStrType, ".web_application_firewall.waf_policy")
 
             return _instance_value
 

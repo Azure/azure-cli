@@ -358,7 +358,7 @@ class AFDSecretCreate(_AFDSecretCreate):
         if has_value(args.use_latest_version):
             args.parameters.customer_certificate.use_latest_version = args.use_latest_version
             
-from azure.cli.command_modules.cdn.aaz.latest.afd.secret import Update as _AFDSecretCreate
+from azure.cli.command_modules.cdn.aaz.latest.afd.secret import Create as _AFDSecretCreate
 class AFDSecretCreate(_AFDSecretCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -405,3 +405,49 @@ class AFDSecretUpdate(_AFDSecretUpdate):
             args.parameters.customer_certificate.secret_version = args.secret_version
         if has_value(args.use_latest_version):
             args.parameters.customer_certificate.use_latest_version = args.use_latest_version
+
+from azure.cli.command_modules.cdn.aaz.latest.afd.security_policy import Create as _AFDSecurityPolicyCreate
+from azure.cli.core.aaz.utils import assign_aaz_list_arg
+class AFDSecurityPolicyCreate(_AFDSecurityPolicyCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.domains = AAZListArg(options=['--domains'],
+                                                  help="The domains to associate with the WAF policy. Could either be the ID of an endpoint (default domain will be used in that case) or ID of a custom domain.",
+                                                  required=True)
+        args_schema.domains.Element = AAZStrArg()
+        args_schema.waf_policy = AAZStrArg(options=['--waf-policy'],
+                                                  help="The ID of Front Door WAF policy.",
+                                                  required=True)
+        return args_schema
+    def pre_operations(self):
+        args = self.ctx.args
+        args.web_application_firewall.waf_policy = args.waf_policy
+        args.web_application_firewall.associations[0].domains = assign_aaz_list_arg(
+            args.web_application_firewall.associations[0].domains,
+            args.domains,
+            element_transformer=lambda _, domains_id: {"id": domains_id})
+    
+from azure.cli.command_modules.cdn.aaz.latest.afd.security_policy import Update as _AFDSecurityPolicyUpdate
+class AFDSecurityPolicyUpdate(_AFDSecurityPolicyUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.domains = AAZListArg(options=['--domains'],
+                                                  help="The domains to associate with the WAF policy. Could either be the ID of an endpoint (default domain will be used in that case) or ID of a custom domain.",
+                                                  required=True)
+        args_schema.domains.Element = AAZStrArg()
+        
+        args_schema.waf_policy = AAZStrArg(options=['--waf-policy'],
+                                                  help="The ID of Front Door WAF policy.",
+                                                  required=True)
+        return args_schema
+    def pre_operations(self):
+        args = self.ctx.args
+        args.web_application_firewall.waf_policy = args.waf_policy
+        args.web_application_firewall.associations[0].domains = assign_aaz_list_arg(
+            args.web_application_firewall.associations[0].domains,
+            args.domains,
+            element_transformer=lambda _, domains_id: {"id": domains_id})

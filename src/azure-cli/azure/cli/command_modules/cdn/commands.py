@@ -270,3 +270,9 @@ def load_command_table(self, _):
 
     from .custom.custom_afdx import AFDSecretUpdate
     self.command_table['afd secret update'] = AFDSecretUpdate(loader=self)
+
+    from .custom.custom_afdx import AFDSecurityPolicyCreate
+    self.command_table['afd security-policy create'] = AFDSecurityPolicyCreate(loader=self)
+
+    from .custom.custom_afdx import AFDSecurityPolicyUpdate
+    self.command_table['afd security-policy update'] = AFDSecurityPolicyUpdate(loader=self)
