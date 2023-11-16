@@ -26,3 +26,9 @@ def cf_linked_server(cli_ctx, _):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.redis import RedisManagementClient
     return get_mgmt_service_client(cli_ctx, RedisManagementClient).linked_server
+
+
+def cf_access_policy(cli_ctx, _):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.redis import RedisManagementClient
+    return get_mgmt_service_client(cli_ctx, RedisManagementClient).access_policy

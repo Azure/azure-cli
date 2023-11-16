@@ -224,3 +224,33 @@ helps['redis identity show'] = """
 type: command
 short-summary: Show the identity assigned for Azure cache for Redis.
 """
+
+helps['redis access-policy'] = """
+type: group
+short-summary: Manage access policies for Redis Cache
+"""
+
+helps['redis access-policy create'] = """
+type: group
+short-summary: Adds an access policy to the Redis Cache
+"""
+
+helps['redis access-policy update'] = """
+type: group
+short-summary: Updates an access policy of the Redis Cache
+"""
+
+helps['redis access-policy delete'] = """
+type: group
+short-summary: Deletes an access policy from the Redis Cache
+"""
+
+helps['redis access-policy show'] = """
+type: group
+short-summary: Gets the detailed information about an access policy of the Redis Cache
+"""
+
+helps['redis access-policy list'] = """
+type: group
+short-summary: Gets the list of access policies associated with the Redis Cache
+"""
