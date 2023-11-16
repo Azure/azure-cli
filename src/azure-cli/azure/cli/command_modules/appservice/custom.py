@@ -3731,7 +3731,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        environment=None, min_replicas=None, max_replicas=None, workload_profile_name=None, 
                        cpu=None, memory=None):
     
-    logger.warning("Khuram Test: %s", "workload_profile_name")
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
@@ -3857,9 +3856,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
     site_config_dict = matched_runtime.site_config_dict
     app_settings_dict = matched_runtime.app_settings_dict
-
-    # validate either both cup and momory
-    _validate_cpu_momory_functionapp(cpu, memory)
     
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 
@@ -3934,11 +3930,14 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functionapp_def.is_xenon = None
         functionapp_def.type = 'Microsoft.Web/sites'
         
+        # validate either both cup and momory
+        _validate_cpu_momory_functionapp(cpu, memory)
+        
         if (workload_profile_name is not None):
             functionapp_def.workload_profile_name = workload_profile_name
            
-        functionapp_def.resource_config = ResourceConfig() 
-        if (cpu is not None and memory is None):
+        if (cpu is not None and memory is not None):
+            functionapp_def.resource_config = ResourceConfig() 
             functionapp_def.resource_config.cpu = cpu
             functionapp_def.resource_config.memory = memory
 
@@ -3955,7 +3954,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             site_config.function_app_scale_limit = max_replicas
 
         managed_environment = get_managed_environment(cmd, resource_group_name, environment)
-        location = managed_environment.location
+        location = "East Asia (Stage)" #managed_environment.location
         functionapp_def.location = location
 
         functionapp_def.enable_additional_properties_sending()
@@ -4003,6 +4002,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
     poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def)
     functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
+    
+    if environment is not None and (workload_profile_name is not None or cpu is not None or memory is not None):
+        functionapp = client.web_apps.get(resource_group_name, name)
 
     if consumption_plan_location and is_linux:
         logger.warning("Your Linux function app '%s', that uses a consumption plan has been successfully "
