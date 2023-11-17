@@ -25,7 +25,7 @@ _cached_token_session: tuple = ()
 
 def request_error_assistance(command: Union[str, None] = None,
                              error: Union[str, None] = None,
-                             cli_ctx: AzCli | None = None) -> dict:
+                             cli_ctx: Union[AzCli, None] = None) -> dict:
     if not _error_enabled(cli_ctx):
         return {}
 
