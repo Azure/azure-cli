@@ -483,15 +483,19 @@ class FunctionWorkloadProfile(ScenarioTest):
             storage_account,
             managed_environment_name,
             workload_profile_name
-        ))
+        )).assert_with_checks([
+            JMESPathCheck('resourceConfig.cpu', 1.0),
+            JMESPathCheck('resourceConfig.memory', '1Gi'),
+            JMESPathCheck('workloadProfileName', workload_profile_name)
+            ])
         
         self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
             JMESPathCheck('resourceConfig.cpu', 1.0),
-            JMESPathCheck('resourceConfig.memory', '1.0Gi'),
+            JMESPathCheck('resourceConfig.memory', '1Gi'),
             JMESPathCheck('workloadProfileName', workload_profile_name),
         ])
 
-        self.cmd('functionapp config container set -g {} -n {} --workload-profile-name {} --cpu 0.75 --memory 1.0Gi'.format(
+        self.cmd('functionapp config container set -g {} -n {} --workload-profile-name {} --cpu 0.75 --memory 2.0Gi'.format(
             resource_group,
             functionapp_name,
             workload_profile_name
@@ -499,7 +503,7 @@ class FunctionWorkloadProfile(ScenarioTest):
 
         self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
             JMESPathCheck('resourceConfig.cpu', 0.75),
-            JMESPathCheck('resourceConfig.memory', '1.0Gi'),
+            JMESPathCheck('resourceConfig.memory', '2Gi'),
             JMESPathCheck('workloadProfileName', workload_profile_name),
         ])
 
