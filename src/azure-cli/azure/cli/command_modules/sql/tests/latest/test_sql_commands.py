@@ -5466,6 +5466,11 @@ class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
 
 class SqlManagedInstancePoolScenarioTest(ScenarioTest):
     # Instance pool test should be deprecated and also it takes more then 5 hours to record.
+
+    def _get_full_maintenance_id(self, name):
+        return "/subscriptions/{}/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/{}".format(
+            self.get_subscription_id(), name)
+
     @live_only()
     @ManagedInstancePreparer()
     def test_sql_instance_pool(self, mi, rg):
@@ -5478,6 +5483,7 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
         edition = ManagedInstancePreparer.edition
         family = ManagedInstancePreparer.family
         resource_group = rg
+        maintenance_id = 'SQL_{}_MI_1'.format(ManagedInstancePreparer.location)
 
         subnet = ManagedInstancePreparer.subnet
         num_pools = len(self.cmd('sql instance-pool list -g {}'.format(resource_group)).get_output_in_json())
@@ -5485,15 +5491,16 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
         # test create sql managed_instance
         self.cmd(
             'sql instance-pool create -g {} -n {} -l {} '
-            '--subnet {} --license-type {} --capacity {} -e {} -f {}'.format(
-                resource_group, instance_pool_name_1, location, subnet, license_type, v_cores, edition, family),
+            '--subnet {} --license-type {} --capacity {} -e {} -f {} -m {}'.format(
+                resource_group, instance_pool_name_1, location, subnet, license_type, v_cores, edition, family, maintenance_id),
             checks=[
                 JMESPathCheck('name', instance_pool_name_1),
                 JMESPathCheck('resourceGroup', resource_group),
                 JMESPathCheck('vCores', v_cores),
                 JMESPathCheck('licenseType', license_type),
                 JMESPathCheck('sku.tier', edition),
-                JMESPathCheck('sku.family', family)])
+                JMESPathCheck('sku.family', family),
+                JMESPathCheck('sku.maintenanceConfigurationId', maintenance_id)])
 
         # test show sql instance pool
         self.cmd('sql instance-pool show -g {} -n {}'
@@ -5519,6 +5526,14 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
                      JMESPathCheck('name', instance_pool_name_1),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('tags', {})])
+
+        # test updating vcore of an instance pool
+        self.cmd('sql instance-pool update -g {} -n {} --capacity {}'
+                 .format(resource_group, instance_pool_name_1, 8),
+                 checks=[
+                     JMESPathCheck('name', instance_pool_name_1),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('vCores', 8)])
 
         # Instance Pool 2
         self.cmd(
@@ -5557,6 +5572,14 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
                      JMESPathCheck('name', instance_pool_name_2),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('tags', {})])
+
+        # test updating maintanace conf id of an instance pool
+        self.cmd('sql instance-pool update -g {} -n {} -m {} ""'
+                 .format(resource_group, instance_pool_name_2, maintenance_id),
+                 checks=[
+                     JMESPathCheck('name', instance_pool_name_2),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('sku.maintenanceConfigurationId', maintenance_id)])
 
         self.cmd('sql instance-pool list -g {}'
                  .format(resource_group),

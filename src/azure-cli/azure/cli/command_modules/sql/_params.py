@@ -1742,6 +1742,20 @@ def load_arguments(self, _):
                 'maintenance_configuration_id'
             ])
 
+        c.argument('tier',
+                   arg_type=tier_param_type,
+                   help='The edition component of the sku. Allowed values include: '
+                   'GeneralPurpose, BusinessCritical.')
+
+        c.argument('family',
+                   arg_type=family_param_type,
+                   help='The compute generation component of the sku. '
+                   'Allowed values include: Gen4, Gen5.')
+
+        c.argument('vcores',
+                   arg_type=capacity_param_type,
+                   help='Capacity of the instance pool in vcores.')
+
         c.argument('maintenance_configuration_id',
                    options_list=['--maint-config-id', '-m'],
                    help='Assign maintenance configuration to this managed instance.')
