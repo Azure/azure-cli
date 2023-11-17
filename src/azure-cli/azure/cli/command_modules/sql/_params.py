@@ -1744,11 +1744,13 @@ def load_arguments(self, _):
 
         c.argument('tier',
                    arg_type=tier_param_type,
+                   required=False,
                    help='The edition component of the sku. Allowed values include: '
                    'GeneralPurpose, BusinessCritical.')
 
         c.argument('family',
                    arg_type=family_param_type,
+                   required=False,
                    help='The compute generation component of the sku. '
                    'Allowed values include: Gen4, Gen5.')
 

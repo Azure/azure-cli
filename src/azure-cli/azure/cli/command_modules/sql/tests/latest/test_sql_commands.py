@@ -5491,7 +5491,7 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
         # test create sql managed_instance
         self.cmd(
             'sql instance-pool create -g {} -n {} -l {} '
-            '--subnet {} --license-type {} --capacity {} -e {} -f {} -m {}'.format(
+            '--subnet {} --license-type {} --capacity {} -e {} -f {} --maintenance-configuration-id {}'.format(
                 resource_group, instance_pool_name_1, location, subnet, license_type, v_cores, edition, family, maintenance_configuration_id),
             checks=[
                 JMESPathCheck('name', instance_pool_name_1),
@@ -5527,13 +5527,15 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('tags', {})])
 
-        # test updating vcore of an instance pool
-        self.cmd('sql instance-pool update -g {} -n {} --capacity {}'
-                 .format(resource_group, instance_pool_name_1, 8),
+        # test updating vcore/edition/family of an instance pool
+        self.cmd('sql instance-pool update -g {} -n {} --capacity {} -e {} -f {}'
+                 .format(resource_group, instance_pool_name_1, 8, edition, family),
                  checks=[
                      JMESPathCheck('name', instance_pool_name_1),
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('vCores', 8)])
+                     JMESPathCheck('vCores', 8),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('sku.family', family)])
 
         # Instance Pool 2
         self.cmd(
@@ -5574,8 +5576,8 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
                      JMESPathCheck('tags', {})])
 
         # test updating maintanace conf id of an instance pool
-        self.cmd('sql instance-pool update -g {} -n {} -m {} ""'
-                 .format(resource_group, instance_pool_name_2, maintenance_id),
+        self.cmd('sql instance-pool update -g {} -n {} -maintenance-configuration-id {} ""'
+                 .format(resource_group, instance_pool_name_2, maintenance_configuration_id),
                  checks=[
                      JMESPathCheck('name', instance_pool_name_2),
                      JMESPathCheck('resourceGroup', resource_group),
