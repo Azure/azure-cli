@@ -5483,7 +5483,7 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
         edition = ManagedInstancePreparer.edition
         family = ManagedInstancePreparer.family
         resource_group = rg
-        maintenance_id = 'SQL_{}_MI_1'.format(ManagedInstancePreparer.location)
+        maintenance_configuration_id = self._get_full_maintenance_id("SQL_WestCentralUS_MI_1")
 
         subnet = ManagedInstancePreparer.subnet
         num_pools = len(self.cmd('sql instance-pool list -g {}'.format(resource_group)).get_output_in_json())
@@ -5492,7 +5492,7 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
         self.cmd(
             'sql instance-pool create -g {} -n {} -l {} '
             '--subnet {} --license-type {} --capacity {} -e {} -f {} -m {}'.format(
-                resource_group, instance_pool_name_1, location, subnet, license_type, v_cores, edition, family, maintenance_id),
+                resource_group, instance_pool_name_1, location, subnet, license_type, v_cores, edition, family, maintenance_configuration_id),
             checks=[
                 JMESPathCheck('name', instance_pool_name_1),
                 JMESPathCheck('resourceGroup', resource_group),
@@ -5500,7 +5500,7 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
                 JMESPathCheck('licenseType', license_type),
                 JMESPathCheck('sku.tier', edition),
                 JMESPathCheck('sku.family', family),
-                JMESPathCheck('sku.maintenanceConfigurationId', maintenance_id)])
+                JMESPathCheck('sku.maintenanceConfigurationId', maintenance_configuration_id)])
 
         # test show sql instance pool
         self.cmd('sql instance-pool show -g {} -n {}'
@@ -5579,7 +5579,7 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('name', instance_pool_name_2),
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('sku.maintenanceConfigurationId', maintenance_id)])
+                     JMESPathCheck('sku.maintenanceConfigurationId', maintenance_configuration_id)])
 
         self.cmd('sql instance-pool list -g {}'
                  .format(resource_group),
