@@ -6,7 +6,7 @@
 from azure.cli.core.commands import CliCommandType
 
 # pylint: disable=line-too-long
-from azure.cli.command_modules.redis._client_factory import cf_redis, cf_patch_schedules, cf_firewall_rule, cf_linked_server, cf_access_policy
+from azure.cli.command_modules.redis._client_factory import cf_redis, cf_patch_schedules, cf_firewall_rule, cf_linked_server, cf_access_policy, cf_access_policy_assignment
 
 
 def load_command_table(self, _):
@@ -26,6 +26,10 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.redis.operations#AccessPolicyOperations.{}',
         client_factory=cf_access_policy)    
 
+    redis_access_policy_assignments = CliCommandType(
+        operations_tmpl='azure.mgmt.redis.operations#AccessPolicyAssignmentOperations.{}',
+        client_factory=cf_access_policy_assignment)
+
     redis_linked_server = CliCommandType(
         operations_tmpl='azure.mgmt.redis.operations#LinkedServerOperations.{}',
         client_factory=cf_linked_server)
@@ -41,7 +45,10 @@ def load_command_table(self, _):
         client_factory=cf_firewall_rule)
     redis_access_policies_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.redis.custom#{}',
-        client_factory=cf_access_policy)  
+        client_factory=cf_access_policy)
+    redis_access_policy_assignments_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.redis.custom#{}',
+        client_factory=cf_access_policy_assignment)
     redis_linked_server_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.redis.custom#{}',
         client_factory=cf_linked_server)
@@ -83,9 +90,19 @@ def load_command_table(self, _):
         g.custom_command('assign', 'cli_redis_identity_assign')
         g.custom_command('remove', 'cli_redis_identity_remove')
 
-    with self.command_group('redis access-policy', redis_access_policies, custom_command_type=redis_access_policies_custom) as g:
+    with self.command_group('redis access-policy', redis_access_policies,
+                            custom_command_type=redis_access_policies_custom) as g:
         g.custom_command('create', 'cli_redis_access_policy_create')
         g.custom_command('update', 'cli_redis_access_policy_create')
         g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.command('list', 'list')
+
+    with self.command_group('redis access-policy-assignment', redis_access_policy_assignments,
+                            custom_command_type=redis_access_policy_assignments_custom) as g:
+        g.custom_command('create', 'cli_redis_access_policy_assignment_create')
+        g.custom_command('update', 'cli_redis_access_policy_assignment_create')
+        g.command('delete', 'begin_delete')
+        g.show_command('show', 'get')
+        g.command('list', 'list')
+

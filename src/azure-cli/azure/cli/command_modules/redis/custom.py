@@ -289,4 +289,14 @@ def cli_redis_access_policy_create(client, resource_group_name, cache_name, acce
     from azure.mgmt.redis.models import RedisCacheAccessPolicy
     param = RedisCacheAccessPolicy(permissions=permissions)
     return client.begin_create_update(resource_group_name, cache_name, access_policy_name, param)
+
+
+def cli_redis_access_policy_assignment_create(client, resource_group_name, cache_name, access_policy_assignment_name,
+                                              access_policy_name, object_id, object_id_alias):
+    from azure.mgmt.redis.models import RedisCacheAccessPolicyAssignment
+    param = RedisCacheAccessPolicyAssignment(object_id=object_id,
+                                             object_id_alias=object_id_alias,
+                                             access_policy_name=access_policy_name)
+    return client.begin_create_update(resource_group_name, cache_name, access_policy_assignment_name, param)
+
 # endregion
