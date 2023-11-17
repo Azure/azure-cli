@@ -76,7 +76,7 @@ class Update(AAZCommand):
         )
         web_application_firewall.waf_policy = AAZStrArg(
             options=["waf-policy"],
-            help="Resource ID.",
+            help="The ID of Front Door WAF policy.",
             nullable=True,
         )
 

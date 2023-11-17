@@ -67,12 +67,6 @@ class Create(AAZCommand):
                 resource_group_arg="resource_group",
             ),
         )
-        _args_schema.sku = AAZObjectArg(
-            options=["--sku"],
-            arg_group="Profile",
-            help="The pricing tier (defines Azure Front Door Standard or Premium or a CDN provider, feature list and rate) of the profile.",
-            required=True,
-        )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
             arg_group="Profile",
@@ -96,13 +90,6 @@ class Create(AAZCommand):
             blank={},
         )
 
-        sku = cls._args_schema.sku
-        sku.name = AAZStrArg(
-            options=["name"],
-            help="Name of the pricing tier.",
-            enum={"Custom_Verizon": "Custom_Verizon", "Premium_AzureFrontDoor": "Premium_AzureFrontDoor", "Premium_Verizon": "Premium_Verizon", "StandardPlus_955BandWidth_ChinaCdn": "StandardPlus_955BandWidth_ChinaCdn", "StandardPlus_AvgBandWidth_ChinaCdn": "StandardPlus_AvgBandWidth_ChinaCdn", "StandardPlus_ChinaCdn": "StandardPlus_ChinaCdn", "Standard_955BandWidth_ChinaCdn": "Standard_955BandWidth_ChinaCdn", "Standard_Akamai": "Standard_Akamai", "Standard_AvgBandWidth_ChinaCdn": "Standard_AvgBandWidth_ChinaCdn", "Standard_AzureFrontDoor": "Standard_AzureFrontDoor", "Standard_ChinaCdn": "Standard_ChinaCdn", "Standard_Microsoft": "Standard_Microsoft", "Standard_Verizon": "Standard_Verizon"},
-        )
-
         tags = cls._args_schema.tags
         tags.Element = AAZStrArg()
 
@@ -116,6 +103,16 @@ class Create(AAZCommand):
             fmt=AAZIntArgFormat(
                 minimum=16,
             ),
+        )
+
+        # define Arg Group "Sku"
+
+        _args_schema = cls._args_schema
+        _args_schema.sku = AAZStrArg(
+            options=["--sku"],
+            arg_group="Sku",
+            help="Name of the pricing tier.",
+            enum={"Custom_Verizon": "Custom_Verizon", "Premium_AzureFrontDoor": "Premium_AzureFrontDoor", "Premium_Verizon": "Premium_Verizon", "StandardPlus_955BandWidth_ChinaCdn": "StandardPlus_955BandWidth_ChinaCdn", "StandardPlus_AvgBandWidth_ChinaCdn": "StandardPlus_AvgBandWidth_ChinaCdn", "StandardPlus_ChinaCdn": "StandardPlus_ChinaCdn", "Standard_955BandWidth_ChinaCdn": "Standard_955BandWidth_ChinaCdn", "Standard_Akamai": "Standard_Akamai", "Standard_AvgBandWidth_ChinaCdn": "Standard_AvgBandWidth_ChinaCdn", "Standard_AzureFrontDoor": "Standard_AzureFrontDoor", "Standard_ChinaCdn": "Standard_ChinaCdn", "Standard_Microsoft": "Standard_Microsoft", "Standard_Verizon": "Standard_Verizon"},
         )
         return cls._args_schema
 
@@ -228,7 +225,7 @@ class Create(AAZCommand):
             _builder.set_prop("identity", AAZObjectType, ".identity")
             _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _builder.set_prop("sku", AAZObjectType, ".sku", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("sku", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
 
             identity = _builder.get(".identity")
@@ -246,7 +243,7 @@ class Create(AAZCommand):
 
             sku = _builder.get(".sku")
             if sku is not None:
-                sku.set_prop("name", AAZStrType, ".name")
+                sku.set_prop("name", AAZStrType, ".sku")
 
             tags = _builder.get(".tags")
             if tags is not None:
