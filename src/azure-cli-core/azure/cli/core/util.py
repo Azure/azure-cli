@@ -76,6 +76,11 @@ def handle_exception(ex, cli_ctx=None, command=None):  # pylint: disable=too-man
     if isinstance(ex, azclierror.AzCLIError):
         az_error = ex
 
+        # The `command` may not always be set when a `AzCLIError` is created. In that case, we set it to the command from the 
+        # invocation.
+        if not az_error.command:
+            az_error.command = command_string
+
     elif isinstance(ex, JMESPathError):
         error_msg = "Invalid jmespath query supplied for `--query`: {}".format(error_msg)
         az_error = azclierror.InvalidArgumentValueError(error_msg, command=command_string)

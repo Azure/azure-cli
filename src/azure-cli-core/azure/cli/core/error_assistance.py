@@ -8,6 +8,7 @@ import shutil
 import requests
 
 from typing import Union
+from azure.cli.core import AzCli
 from azure.cli.core.style import Style, print_styled_text
 from knack.log import get_logger
 
@@ -24,7 +25,7 @@ _cached_token_session: tuple = ()
 
 def request_error_assistance(command: Union[str, None] = None,
                              error: Union[str, None] = None,
-                             cli_ctx=None) -> dict:
+                             cli_ctx: AzCli | None = None) -> dict:
     if not _error_enabled(cli_ctx):
         return {}
 
