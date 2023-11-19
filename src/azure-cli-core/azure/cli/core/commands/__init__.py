@@ -1343,6 +1343,7 @@ class AzCommandGroup(CommandGroup):
             getter_op_path=getter_op_path,
             setter_op_path=setter_op_path,
             setter_arg_name=setter_arg_name,
+
             custom_function_op_path=custom_function_op_path,
             child_collection_prop_name=child_collection_prop_name,
             child_collection_key=child_collection_key,

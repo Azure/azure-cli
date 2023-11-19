@@ -24,7 +24,7 @@ def load_command_table(self, _):
 
     redis_access_policies = CliCommandType(
         operations_tmpl='azure.mgmt.redis.operations#AccessPolicyOperations.{}',
-        client_factory=cf_access_policy)    
+        client_factory=cf_access_policy)
 
     redis_access_policy_assignments = CliCommandType(
         operations_tmpl='azure.mgmt.redis.operations#AccessPolicyAssignmentOperations.{}',
@@ -105,4 +105,3 @@ def load_command_table(self, _):
         g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.command('list', 'list')
-
