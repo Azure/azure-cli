@@ -3933,7 +3933,7 @@ def instance_pool_update(
 
     instance.tags = (tags or instance.tags)
     instance.maintenance_configuration_id = _complete_maintenance_configuration_id(
-        cmd.cli_ctx, maintenance_configuration_id)
+            cmd.cli_ctx, maintenance_configuration_id or instance.maintenance_configuration_id)
 
     instance.v_cores = (vcores or instance.v_cores)
     instance.license_type = (license_type or instance.license_type)
