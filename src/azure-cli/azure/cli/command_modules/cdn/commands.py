@@ -230,10 +230,6 @@ def load_command_table(self, _):
     with self.command_group('afd', is_preview=True):
         pass
 
-    with self.command_group('afd rule', cdn_afd_rule_sdk,
-                            client_factory=cf_afd_rules) as g:
-        g.custom_command('create', 'create_afd_rule')
-
     with self.command_group('afd rule condition',
                             cdn_afd_rule_sdk,
                             custom_command_type=get_custom_sdk(cf_afd_rules, _not_found(rule_not_found_msg))) as g:
@@ -263,6 +259,9 @@ def load_command_table(self, _):
 
     from .custom.custom_afdx import AFDRouteUpdate
     self.command_table['afd route update'] = AFDRouteUpdate(loader=self)
+
+    from .custom.custom_afdx import AFDRuleCreate
+    self.command_table['afd rule create'] = AFDRuleCreate(loader=self)
 
     from .custom.custom_afdx import AFDSecretCreate
     self.command_table['afd secret create'] = AFDSecretCreate(loader=self)
