@@ -366,11 +366,11 @@ def is_cloud_shell_system_extension(ext_path):
 def is_preview_from_semantic_version(version):
     """
     pre = [a, b] -> preview
-    >>> print(Version("1.2.3").pre)
+    >>> print(parse("1.2.3").pre)
     None
-    >>> Version("1.2.3a1").pre
+    >>> parse("1.2.3a1").pre
     ('a', 1)
-    >>> Version("1.2.3b1").pre
+    >>> parse("1.2.3b1").pre
     ('b', 1)
     """
     parsed_version = parse(version)
