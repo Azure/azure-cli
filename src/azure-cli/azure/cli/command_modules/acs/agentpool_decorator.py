@@ -963,7 +963,7 @@ class AKSAgentPoolContext(BaseAKSContext):
             if (
                 self.agentpool and
                 self.agentpool.upgrade_settings and
-                self.agentpool.upgrade_settings.node_soak_duration is not None
+                self.agentpool.upgrade_settings.node_soak_duration_in_minutes is not None
             ):
                 node_soak_duration = self.agentpool.upgrade_settings.node_soak_duration_in_minutes
 
