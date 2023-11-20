@@ -20,9 +20,10 @@ from packaging.version import parse
 from azure.cli.core import CommandIndex
 from azure.cli.core.util import CLIError, reload_module, rmtree_with_retry
 from azure.cli.core.extension import (extension_exists, build_extension_path, get_extensions, get_extension_modname,
-                                      get_extension, ext_compat_with_cli, _is_preview_from_version,
+                                      get_extension, ext_compat_with_cli,
                                       EXT_METADATA_ISPREVIEW, EXT_METADATA_ISEXPERIMENTAL,
                                       WheelExtension, DevExtension, ExtensionNotInstalledException, WHEEL_INFO_RE)
+from azure.cli.core.extension._resolve import _is_preview_from_semantic_version
 from azure.cli.core.telemetry import set_extension_management_detail
 
 from knack.log import get_logger
@@ -465,9 +466,10 @@ def list_available_extensions(index_url=None, show_details=False, cli_ctx=None):
             'name': name,
             'version': latest['metadata']['version'],
             'summary': latest['metadata']['summary'],
-            'preview': latest['metadata'].get(EXT_METADATA_ISPREVIEW, False)
-                       or _is_preview_from_version(latest['metadata']['version']),
-            'experimental': latest['metadata'].get(EXT_METADATA_ISEXPERIMENTAL, False),
+            'preview': latest['metadata'].get(EXT_METADATA_ISPREVIEW, False) or
+                       latest['metadata'].get(EXT_METADATA_ISEXPERIMENTAL, False) or
+                       _is_preview_from_semantic_version(latest['metadata']['version']),
+            'experimental': False,
             'installed': installed
         })
     return results
@@ -503,9 +505,10 @@ def list_versions(extension_name, index_url=None, cli_ctx=None):
         results.append({
             'name': extension_name,
             'version': version,
-            'preview': ext['metadata'].get(EXT_METADATA_ISPREVIEW, False)
-                       or _is_preview_from_version(ext['metadata']['version']),
-            'experimental': ext['metadata'].get(EXT_METADATA_ISEXPERIMENTAL, False),
+            'preview': ext['metadata'].get(EXT_METADATA_ISPREVIEW, False) or
+                       ext['metadata'].get(EXT_METADATA_ISEXPERIMENTAL, False) or
+                       _is_preview_from_semantic_version(ext['metadata']['version']),
+            'experimental': False,
             'installed': installed,
             'compatible': compatible
         })
