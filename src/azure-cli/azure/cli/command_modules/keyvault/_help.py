@@ -875,6 +875,11 @@ examples:
     crafted: true
 """
 
+helps['keyvault check-name'] = """
+type: command
+short-summary: Check that the given name is valid and is not already in use.
+"""
+
 helps['keyvault wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of the Vault is met.
