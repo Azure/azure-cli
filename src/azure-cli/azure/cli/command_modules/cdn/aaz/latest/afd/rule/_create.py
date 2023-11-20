@@ -64,8 +64,8 @@ class Create(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.action_name = AAZListArg(
-            options=["--action-name"],
+        _args_schema.actions = AAZListArg(
+            options=["--actions"],
             arg_group="Properties",
             help="A list of actions that are executed when all the conditions of a rule are satisfied.",
         )
@@ -87,10 +87,10 @@ class Create(AAZCommand):
             help="The order in which the rules are applied for the endpoint. Possible values {0,1,2,3,â€¦â€¦â€¦}. A rule with a lesser order will be applied before a rule with a greater order. Rule with order 0 is a special rule. It does not require any condition and actions listed in it will always be applied.",
         )
 
-        action_name = cls._args_schema.action_name
-        action_name.Element = AAZObjectArg()
+        actions = cls._args_schema.actions
+        actions.Element = AAZObjectArg()
 
-        _element = cls._args_schema.action_name.Element
+        _element = cls._args_schema.actions.Element
         _element.cache_expiration = AAZObjectArg(
             options=["cache-expiration"],
         )
@@ -119,14 +119,14 @@ class Create(AAZCommand):
             options=["url-signing"],
         )
 
-        cache_expiration = cls._args_schema.action_name.Element.cache_expiration
+        cache_expiration = cls._args_schema.actions.Element.cache_expiration
         cache_expiration.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the action.",
             required=True,
         )
 
-        parameters = cls._args_schema.action_name.Element.cache_expiration.parameters
+        parameters = cls._args_schema.actions.Element.cache_expiration.parameters
         parameters.cache_behavior = AAZStrArg(
             options=["cache-behavior"],
             help="Caching behavior for the requests",
@@ -150,14 +150,14 @@ class Create(AAZCommand):
             enum={"DeliveryRuleCacheExpirationActionParameters": "DeliveryRuleCacheExpirationActionParameters"},
         )
 
-        cache_key_query_string = cls._args_schema.action_name.Element.cache_key_query_string
+        cache_key_query_string = cls._args_schema.actions.Element.cache_key_query_string
         cache_key_query_string.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the action.",
             required=True,
         )
 
-        parameters = cls._args_schema.action_name.Element.cache_key_query_string.parameters
+        parameters = cls._args_schema.actions.Element.cache_key_query_string.parameters
         parameters.query_parameters = AAZStrArg(
             options=["query-parameters"],
             help="query parameters to include or exclude (comma separated).",
@@ -175,7 +175,7 @@ class Create(AAZCommand):
             enum={"DeliveryRuleCacheKeyQueryStringBehaviorActionParameters": "DeliveryRuleCacheKeyQueryStringBehaviorActionParameters"},
         )
 
-        modify_request_header = cls._args_schema.action_name.Element.modify_request_header
+        modify_request_header = cls._args_schema.actions.Element.modify_request_header
         modify_request_header.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the action.",
@@ -183,7 +183,7 @@ class Create(AAZCommand):
         )
         cls._build_args_header_action_parameters_create(modify_request_header.parameters)
 
-        modify_response_header = cls._args_schema.action_name.Element.modify_response_header
+        modify_response_header = cls._args_schema.actions.Element.modify_response_header
         modify_response_header.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the action.",
@@ -191,14 +191,14 @@ class Create(AAZCommand):
         )
         cls._build_args_header_action_parameters_create(modify_response_header.parameters)
 
-        origin_group_override = cls._args_schema.action_name.Element.origin_group_override
+        origin_group_override = cls._args_schema.actions.Element.origin_group_override
         origin_group_override.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the action.",
             required=True,
         )
 
-        parameters = cls._args_schema.action_name.Element.origin_group_override.parameters
+        parameters = cls._args_schema.actions.Element.origin_group_override.parameters
         parameters.origin_group = AAZObjectArg(
             options=["origin-group"],
             help="defines the OriginGroup that would override the DefaultOriginGroup.",
@@ -211,14 +211,14 @@ class Create(AAZCommand):
             enum={"DeliveryRuleOriginGroupOverrideActionParameters": "DeliveryRuleOriginGroupOverrideActionParameters"},
         )
 
-        route_configuration_override = cls._args_schema.action_name.Element.route_configuration_override
+        route_configuration_override = cls._args_schema.actions.Element.route_configuration_override
         route_configuration_override.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the action.",
             required=True,
         )
 
-        parameters = cls._args_schema.action_name.Element.route_configuration_override.parameters
+        parameters = cls._args_schema.actions.Element.route_configuration_override.parameters
         parameters.cache_configuration = AAZObjectArg(
             options=["cache-configuration"],
             help="The caching configuration associated with this rule. To disable caching, do not provide a cacheConfiguration object.",
@@ -233,7 +233,7 @@ class Create(AAZCommand):
             enum={"DeliveryRuleRouteConfigurationOverrideActionParameters": "DeliveryRuleRouteConfigurationOverrideActionParameters"},
         )
 
-        cache_configuration = cls._args_schema.action_name.Element.route_configuration_override.parameters.cache_configuration
+        cache_configuration = cls._args_schema.actions.Element.route_configuration_override.parameters.cache_configuration
         cache_configuration.cache_behavior = AAZStrArg(
             options=["cache-behavior"],
             help="Caching behavior for the requests",
@@ -258,7 +258,7 @@ class Create(AAZCommand):
             enum={"IgnoreQueryString": "IgnoreQueryString", "IgnoreSpecifiedQueryStrings": "IgnoreSpecifiedQueryStrings", "IncludeSpecifiedQueryStrings": "IncludeSpecifiedQueryStrings", "UseQueryString": "UseQueryString"},
         )
 
-        origin_group_override = cls._args_schema.action_name.Element.route_configuration_override.parameters.origin_group_override
+        origin_group_override = cls._args_schema.actions.Element.route_configuration_override.parameters.origin_group_override
         origin_group_override.forwarding_protocol = AAZStrArg(
             options=["forwarding-protocol"],
             help="Protocol this rule will use when forwarding traffic to backends.",
@@ -270,14 +270,14 @@ class Create(AAZCommand):
         )
         cls._build_args_resource_reference_create(origin_group_override.origin_group)
 
-        url_redirect = cls._args_schema.action_name.Element.url_redirect
+        url_redirect = cls._args_schema.actions.Element.url_redirect
         url_redirect.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the action.",
             required=True,
         )
 
-        parameters = cls._args_schema.action_name.Element.url_redirect.parameters
+        parameters = cls._args_schema.actions.Element.url_redirect.parameters
         parameters.custom_fragment = AAZStrArg(
             options=["custom-fragment"],
             help="Fragment to add to the redirect URL. Fragment is the part of the URL that comes after #. Do not include the #.",
@@ -311,14 +311,14 @@ class Create(AAZCommand):
             enum={"DeliveryRuleUrlRedirectActionParameters": "DeliveryRuleUrlRedirectActionParameters"},
         )
 
-        url_rewrite = cls._args_schema.action_name.Element.url_rewrite
+        url_rewrite = cls._args_schema.actions.Element.url_rewrite
         url_rewrite.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the action.",
             required=True,
         )
 
-        parameters = cls._args_schema.action_name.Element.url_rewrite.parameters
+        parameters = cls._args_schema.actions.Element.url_rewrite.parameters
         parameters.destination = AAZStrArg(
             options=["destination"],
             help="Define the relative URL to which the above requests will be rewritten by.",
@@ -339,14 +339,14 @@ class Create(AAZCommand):
             enum={"DeliveryRuleUrlRewriteActionParameters": "DeliveryRuleUrlRewriteActionParameters"},
         )
 
-        url_signing = cls._args_schema.action_name.Element.url_signing
+        url_signing = cls._args_schema.actions.Element.url_signing
         url_signing.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the action.",
             required=True,
         )
 
-        parameters = cls._args_schema.action_name.Element.url_signing.parameters
+        parameters = cls._args_schema.actions.Element.url_signing.parameters
         parameters.algorithm = AAZStrArg(
             options=["algorithm"],
             help="Algorithm to use for URL signing",
@@ -362,10 +362,10 @@ class Create(AAZCommand):
             enum={"DeliveryRuleUrlSigningActionParameters": "DeliveryRuleUrlSigningActionParameters"},
         )
 
-        parameter_name_override = cls._args_schema.action_name.Element.url_signing.parameters.parameter_name_override
+        parameter_name_override = cls._args_schema.actions.Element.url_signing.parameters.parameter_name_override
         parameter_name_override.Element = AAZObjectArg()
 
-        _element = cls._args_schema.action_name.Element.url_signing.parameters.parameter_name_override.Element
+        _element = cls._args_schema.actions.Element.url_signing.parameters.parameter_name_override.Element
         _element.param_indicator = AAZStrArg(
             options=["param-indicator"],
             help="Indicates the purpose of the parameter",
@@ -1416,7 +1416,7 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("actions", AAZListType, ".action_name", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("actions", AAZListType, ".actions", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("conditions", AAZListType, ".conditions")
                 properties.set_prop("matchProcessingBehavior", AAZStrType, ".match_processing_behavior")
                 properties.set_prop("order", AAZIntType, ".order", typ_kwargs={"flags": {"required": True}})

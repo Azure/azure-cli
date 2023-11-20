@@ -233,7 +233,6 @@ def load_command_table(self, _):
     with self.command_group('afd rule', cdn_afd_rule_sdk,
                             client_factory=cf_afd_rules) as g:
         g.custom_command('create', 'create_afd_rule')
-        g.command('delete', 'begin_delete', confirmation=True)
 
     with self.command_group('afd rule condition',
                             cdn_afd_rule_sdk,
