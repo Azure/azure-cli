@@ -182,6 +182,14 @@ class ReplayableTest(IntegrationTestBase):  # pylint: disable=too-many-instance-
         if self.disable_recording:
             return None
 
+        skip_vcr_paths = [
+            "https://downloads.bicep.azure.com",
+            "https://aka.ms/BicepLatestRelease"
+        ]
+        for skip_vcr_path in skip_vcr_paths:
+            if skip_vcr_path in request.url:
+                return None
+
         if self.in_recording:
             for processor in self.recording_processors + self.recording_post_processors:
                 request = processor.process_request(request)

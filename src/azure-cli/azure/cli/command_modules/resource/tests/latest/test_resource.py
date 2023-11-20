@@ -5056,7 +5056,7 @@ class BicepScenarioTest(ScenarioTest):
 class BicepDecompileParamsTest(ScenarioTest):
     def setup(self):
         super().setup()
-        self.cmd('az bicep uninstall')
+        self.cmd('az bicep install')
 
     def tearDown(self):
         super().tearDown()
@@ -5079,7 +5079,7 @@ class BicepDecompileParamsTest(ScenarioTest):
 class BicepBuildParamsTest(ScenarioTest):
     def setup(self):
         super().setup()
-        self.cmd('az bicep uninstall')
+        self.cmd('az bicep install')
 
     def tearDown(self):
         super().tearDown()
@@ -5118,7 +5118,7 @@ class BicepBuildTest(ScenarioTest):
 
     def setup(self):
         super().setup()
-        self.cmd('az bicep uninstall')
+        self.cmd('az bicep install')
 
     def tearDown(self):
         super().tearDown()
@@ -5147,7 +5147,7 @@ class BicepBuildTest(ScenarioTest):
 class BicepGenerateParamsTest(ScenarioTest):
     def setup(self):
         super().setup()
-        self.cmd('az bicep uninstall')
+        self.cmd('az bicep install')
 
     def tearDown(self):
         super().tearDown()
@@ -5198,7 +5198,7 @@ class BicepGenerateParamsTest(ScenarioTest):
 class BicepLintTest(ScenarioTest):
     def setup(self):
         super().setup()
-        self.cmd('az bicep uninstall')
+        self.cmd('az bicep install')
 
     def tearDown(self):
         super().tearDown()
@@ -5231,7 +5231,7 @@ class BicepLintTest(ScenarioTest):
 class BicepInstallationTest(ScenarioTest):
     def setup(self):
         super().setup()
-        self.cmd('az bicep uninstall')
+        self.cmd('az bicep install')
 
     def tearDown(self):
         super().tearDown()
@@ -5263,7 +5263,7 @@ class BicepRestoreTest(ScenarioTest):
 
     def setup(self):
         super().setup()
-        self.cmd('az bicep uninstall')
+        self.cmd('az bicep install')
 
     def tearDown(self):
         super().tearDown()
@@ -5290,7 +5290,7 @@ class BicepFormatTest(ScenarioTest):
 
     def setup(self):
         super().setup()
-        self.cmd('az bicep uninstall')
+        self.cmd('az bicep install')
 
     def tearDown(self):
         super().tearDown()
@@ -5315,7 +5315,7 @@ class DeploymentWithBicepScenarioTest(ScenarioTest):
 
     def setup(self):
         super.setup()
-        self.cmd('az bicep uninstall')
+        self.cmd('az bicep install')
 
     def tearDown(self):
         super().tearDown()
