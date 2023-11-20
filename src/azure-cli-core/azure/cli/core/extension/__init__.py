@@ -14,6 +14,7 @@ import pkginfo
 from knack.config import CLIConfig
 from knack.log import get_logger
 from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
+from azure.cli.core.extension._resolve import _is_preview_from_version
 
 az_config = CLIConfig(config_dir=GLOBAL_CONFIG_DIR, config_env_var_prefix=ENV_VAR_PREFIX)
 _CUSTOM_EXT_DIR = az_config.get('extension', 'dir', None)
@@ -101,7 +102,8 @@ class Extension:
         """
         try:
             if not isinstance(self._preview, bool):
-                self._preview = bool(self.metadata.get(EXT_METADATA_ISPREVIEW))
+                self._preview = bool(self.metadata.get(EXT_METADATA_ISPREVIEW)) \
+                                or _is_preview_from_version(self._version)
         except Exception:  # pylint: disable=broad-except
             logger.debug("Unable to get extension preview status: %s", traceback.format_exc())
         return self._preview

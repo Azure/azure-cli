@@ -67,6 +67,11 @@ def _get_latest_version(candidates: List[dict]) -> List[dict]:
     return [max(candidates, key=lambda c: parse(c['metadata']['version']))]
 
 
+def _is_preview_from_version(version):
+    parsed_version = parse(version)
+    return parsed_version.pre and parsed_version.pre[0] == "b"
+
+
 def _get_version_compatibility_feedback(candidates: List[dict]) -> str:
     from .operations import check_version_compatibility
 
