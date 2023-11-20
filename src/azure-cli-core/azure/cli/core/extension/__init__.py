@@ -14,7 +14,6 @@ import pkginfo
 from knack.config import CLIConfig
 from knack.log import get_logger
 from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
-from azure.cli.core.extension._resolve import _is_preview_from_version
 
 az_config = CLIConfig(config_dir=GLOBAL_CONFIG_DIR, config_env_var_prefix=ENV_VAR_PREFIX)
 _CUSTOM_EXT_DIR = az_config.get('extension', 'dir', None)
@@ -100,10 +99,12 @@ class Extension:
         Lazy load preview status.
         Returns the preview status of the extension.
         """
+        from ._resolve import _is_preview_from_semantic_version
         try:
             if not isinstance(self._preview, bool):
-                self._preview = bool(self.metadata.get(EXT_METADATA_ISPREVIEW)) \
-                                or _is_preview_from_version(self._version)
+                self._preview = bool(self.metadata.get(EXT_METADATA_ISPREVIEW)) or \
+                                bool(self.metadata.get(EXT_METADATA_ISEXPERIMENTAL)) or \
+                                _is_preview_from_semantic_version(self._version)
         except Exception:  # pylint: disable=broad-except
             logger.debug("Unable to get extension preview status: %s", traceback.format_exc())
         return self._preview
@@ -111,14 +112,8 @@ class Extension:
     @property
     def experimental(self):
         """
-        Lazy load experimental status.
-        Returns the experimental status of the extension.
+        In extension semantic versioning, experimental = preview, experimental deprecated
         """
-        try:
-            if not isinstance(self._experimental, bool):
-                self._experimental = bool(self.metadata.get(EXT_METADATA_ISEXPERIMENTAL))
-        except Exception:  # pylint: disable=broad-except
-            logger.debug("Unable to get extension experimental status: %s", traceback.format_exc())
         return self._experimental
 
     def get_version(self):

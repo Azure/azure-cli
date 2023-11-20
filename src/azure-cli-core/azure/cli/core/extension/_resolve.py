@@ -67,9 +67,18 @@ def _get_latest_version(candidates: List[dict]) -> List[dict]:
     return [max(candidates, key=lambda c: parse(c['metadata']['version']))]
 
 
-def _is_preview_from_version(version):
+def _is_preview_from_semantic_version(version):
+    """The preview segment of the version.
+    pre = [a, b] -> preview
+    >>> print(Version("1.2.3").pre)
+    None
+    >>> Version("1.2.3a1").pre
+    ('a', 1)
+    >>> Version("1.2.3b1").pre
+    ('b', 1)
+    """
     parsed_version = parse(version)
-    return parsed_version.pre and parsed_version.pre[0] == "b"
+    return parsed_version.pre and parsed_version.pre[0] in ["a", "b"]
 
 
 def _get_version_compatibility_feedback(candidates: List[dict]) -> str:
