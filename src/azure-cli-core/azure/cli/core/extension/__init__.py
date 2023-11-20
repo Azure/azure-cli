@@ -99,12 +99,12 @@ class Extension:
         Lazy load preview status.
         Returns the preview status of the extension.
         """
-        from ._resolve import _is_preview_from_semantic_version
+        from .operations import is_preview_from_semantic_version
         try:
             if not isinstance(self._preview, bool):
                 self._preview = bool(self.metadata.get(EXT_METADATA_ISPREVIEW)) or \
                                 bool(self.metadata.get(EXT_METADATA_ISEXPERIMENTAL)) or \
-                                _is_preview_from_semantic_version(self._version)
+                                is_preview_from_semantic_version(self._version)
         except Exception:  # pylint: disable=broad-except
             logger.debug("Unable to get extension preview status: %s", traceback.format_exc())
         return self._preview

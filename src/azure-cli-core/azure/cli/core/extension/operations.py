@@ -23,7 +23,6 @@ from azure.cli.core.extension import (extension_exists, build_extension_path, ge
                                       get_extension, ext_compat_with_cli,
                                       EXT_METADATA_ISPREVIEW, EXT_METADATA_ISEXPERIMENTAL,
                                       WheelExtension, DevExtension, ExtensionNotInstalledException, WHEEL_INFO_RE)
-from azure.cli.core.extension._resolve import _is_preview_from_semantic_version
 from azure.cli.core.telemetry import set_extension_management_detail
 
 from knack.log import get_logger
@@ -364,6 +363,20 @@ def is_cloud_shell_system_extension(ext_path):
     return False
 
 
+def is_preview_from_semantic_version(version):
+    """
+    pre = [a, b] -> preview
+    >>> print(Version("1.2.3").pre)
+    None
+    >>> Version("1.2.3a1").pre
+    ('a', 1)
+    >>> Version("1.2.3b1").pre
+    ('b', 1)
+    """
+    parsed_version = parse(version)
+    return parsed_version.pre and parsed_version.pre[0] in ["a", "b"]
+
+
 def remove_extension(extension_name):
     try:
         # Get the extension and it will raise an error if it doesn't exist
@@ -468,7 +481,7 @@ def list_available_extensions(index_url=None, show_details=False, cli_ctx=None):
             'summary': latest['metadata']['summary'],
             'preview': latest['metadata'].get(EXT_METADATA_ISPREVIEW, False) or
                        latest['metadata'].get(EXT_METADATA_ISEXPERIMENTAL, False) or
-                       _is_preview_from_semantic_version(latest['metadata']['version']),
+                       is_preview_from_semantic_version(latest['metadata']['version']),
             'experimental': False,
             'installed': installed
         })
@@ -507,7 +520,7 @@ def list_versions(extension_name, index_url=None, cli_ctx=None):
             'version': version,
             'preview': ext['metadata'].get(EXT_METADATA_ISPREVIEW, False) or
                        ext['metadata'].get(EXT_METADATA_ISEXPERIMENTAL, False) or
-                       _is_preview_from_semantic_version(ext['metadata']['version']),
+                       is_preview_from_semantic_version(ext['metadata']['version']),
             'experimental': False,
             'installed': installed,
             'compatible': compatible
