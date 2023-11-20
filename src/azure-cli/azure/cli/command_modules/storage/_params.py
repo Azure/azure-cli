@@ -1698,28 +1698,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                    resource_type=ResourceType.MGMT_STORAGE) as c:
             from ._validators import validate_container_nfsv3_squash
             t_root_squash = self.get_models('RootSquashType', resource_type=ResourceType.MGMT_STORAGE)
-            c.argument('default_encryption_scope', options_list=['--default-encryption-scope', '-d'],
-                       arg_group='Encryption Policy', min_api='2019-06-01',
-                       help='Default the container to use specified encryption scope for all writes.')
-            c.argument('deny_encryption_scope_override',
-                       options_list=['--deny-encryption-scope-override', '--deny-override'],
-                       arg_type=get_three_state_flag(), arg_group='Encryption Policy', min_api='2019-06-01',
-                       help='Block override of encryption scope from the container default.')
             c.extra('root_squash', arg_type=get_enum_type(t_root_squash), min_api='2021-06-01',
                     help='Enable NFSv3 squash on blob container.', validator=validate_container_nfsv3_squash)
             c.ignore('enable_nfs_v3_root_squash')
             c.ignore('enable_nfs_v3_all_squash')
 
-    with self.argument_context('storage container-rm update', resource_type=ResourceType.MGMT_STORAGE) as c:
+    with self.argument_context('storage container-rm create', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('default_encryption_scope', options_list=['--default-encryption-scope', '-d'],
                    arg_group='Encryption Policy', min_api='2019-06-01',
-                   help='Default the container to use specified encryption scope for all writes.',
-                   deprecate_info=c.deprecate(hide=True, target='--default-encryption-scope', expiration="2.54"))
+                   help='Default the container to use specified encryption scope for all writes.')
         c.argument('deny_encryption_scope_override',
                    options_list=['--deny-encryption-scope-override', '--deny-override'],
                    arg_type=get_three_state_flag(), arg_group='Encryption Policy', min_api='2019-06-01',
-                   help='Block override of encryption scope from the container default.',
-                   deprecate_info=c.deprecate(hide=True, target='--deny-encryption-scope-override', expiration="2.54"))
+                   help='Block override of encryption scope from the container default.')
 
     with self.argument_context('storage container-rm list', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('account_name', storage_account_type, id_part=None)

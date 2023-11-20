@@ -655,6 +655,7 @@ def aks_update(
     enable_local_accounts=False,
     network_plugin_mode=None,
     network_dataplane=None,
+    network_policy=None,
     pod_cidr=None,
     load_balancer_managed_outbound_ip_count=None,
     load_balancer_managed_outbound_ipv6_count=None,
@@ -1615,7 +1616,7 @@ def get_arch_for_cli_binary():
         )
     logger.warning(
         'The detected architecture of current device is "%s", and the binary for "%s" '
-        'will be downloaded. If the detectiton is wrong, please download and install '
+        'will be downloaded. If the detection is wrong, please download and install '
         'the binary corresponding to the appropriate architecture.',
         arch,
         formatted_arch,

@@ -50,10 +50,6 @@ CREDENTIAL_WARNING = (
     "The output includes credentials that you must protect. Be sure that you do not include these credentials in "
     "your code or check the credentials into your source control. For more information, see https://aka.ms/azadsp-cli")
 
-SCOPE_WARNING = (
-    "--scope argument will become required for creating a role assignment in the breaking change release of the fall "
-    "of 2023. Please explicitly specify --scope.")
-
 logger = get_logger(__name__)
 
 # pylint: disable=too-many-lines, protected-access
@@ -148,13 +144,11 @@ def _search_role_definitions(cli_ctx, definitions_client, name, scopes, custom_r
     return []
 
 
-def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, resource_group_name=None,
-                           scope=None, assignee_principal_type=None, description=None,
+def create_role_assignment(cmd, role, scope,
+                           assignee=None, assignee_object_id=None,
+                           assignee_principal_type=None, description=None,
                            condition=None, condition_version=None, assignment_name=None):
     """Check parameters are provided correctly, then call _create_role_assignment."""
-    if not scope:
-        logger.warning(SCOPE_WARNING)
-
     if bool(assignee) == bool(assignee_object_id):
         raise CLIError('usage error: --assignee STRING | --assignee-object-id GUID')
 
@@ -183,13 +177,13 @@ def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, re
             principal_type = _get_principal_type_from_object_id(cmd.cli_ctx, assignee_object_id)
 
     try:
-        return _create_role_assignment(cmd.cli_ctx, role, object_id, resource_group_name, scope, resolve_assignee=False,
+        return _create_role_assignment(cmd.cli_ctx, role, object_id, scope=scope, resolve_assignee=False,
                                        assignee_principal_type=principal_type, description=description,
                                        condition=condition, condition_version=condition_version,
                                        assignment_name=assignment_name)
     except Exception as ex:  # pylint: disable=broad-except
         if _error_caused_by_role_assignment_exists(ex):  # for idempotent
-            return list_role_assignments(cmd, assignee, role, resource_group_name, scope)[0]
+            return list_role_assignments(cmd, assignee=assignee, role=role, scope=scope)[0]
         raise
 
 

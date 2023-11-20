@@ -6,12 +6,14 @@
 import os
 import time
 
+from msrestazure.tools import parse_resource_id
+
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, LogAnalyticsWorkspacePreparer)
 from azure.cli.command_modules.containerapp.tests.latest.common import (write_test_file, clean_up_test_file)
 
 from azure.cli.command_modules.containerapp.tests.latest.common import TEST_LOCATION
-from .utils import create_containerapp_env
+from .utils import create_containerapp_env, prepare_containerapp_env_for_app_e2e_tests
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 # flake8: noqa
@@ -25,24 +27,23 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northcentralus")
-    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
-    def test_containerapp_job_executionstest_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
+    def test_containerapp_job_executionstest_e2e(self, resource_group):
         import requests
         
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
-
-        env = self.create_random_name(prefix='env', length=24)
         job = self.create_random_name(prefix='job2', length=24)
 
-        create_containerapp_env(self, env, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
+        env_id = prepare_containerapp_env_for_app_e2e_tests(self)
+        env_rg = parse_resource_id(env_id).get('resource_group')
+        env_name = parse_resource_id(env_id).get('name')
 
         # create a container app environment for a Container App Job resource
-        self.cmd('containerapp env show -n {} -g {}'.format(env, resource_group), checks=[
-            JMESPathCheck('name', env)            
+        self.cmd('containerapp env show -n {} -g {}'.format(env_name, env_rg), checks=[
+            JMESPathCheck('name', env_name)
         ])
 
         # create a Container App Job resource
-        self.cmd("az containerapp job create --resource-group {} --name {} --environment {} --replica-timeout 200 --replica-retry-limit 1 --trigger-type manual --replica-completion-count 1 --parallelism 1 --image mcr.microsoft.com/k8se/quickstart:latest --cpu '0.25' --memory '0.5Gi'".format(resource_group, job, env))
+        self.cmd("az containerapp job create --resource-group {} --name {} --environment {} --replica-timeout 200 --replica-retry-limit 1 --trigger-type manual --replica-completion-count 1 --parallelism 1 --image mcr.microsoft.com/k8se/quickstart:latest --cpu '0.25' --memory '0.5Gi'".format(resource_group, job, env_id))
 
         # wait for 60s for the job to be provisioned
         jobProvisioning = True
@@ -88,25 +89,25 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northcentralus")
-    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
-    def test_containerapp_job_custom_executionstest_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
+    def test_containerapp_job_custom_executionstest_e2e(self, resource_group):
         import requests
 
         TEST_LOCATION = "northcentralusstage"
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
-        env = self.create_random_name(prefix='env', length=24)
         job = self.create_random_name(prefix='job3', length=24)
 
-        create_containerapp_env(self, env, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
+        env_id = prepare_containerapp_env_for_app_e2e_tests(self)
+        env_rg = parse_resource_id(env_id).get('resource_group')
+        env_name = parse_resource_id(env_id).get('name')
 
         # create a container app environment for a Container App Job resource
-        self.cmd('containerapp env show -n {} -g {}'.format(env, resource_group), checks=[
-            JMESPathCheck('name', env)            
+        self.cmd('containerapp env show -n {} -g {}'.format(env_name, env_rg), checks=[
+            JMESPathCheck('name', env_name)
         ])
 
         # create a Container App Job resource
-        self.cmd("az containerapp job create --resource-group {} --name {} --environment {} --replica-timeout 200 --replica-retry-limit 1 --trigger-type manual --replica-completion-count 1 --parallelism 1 --image mcr.microsoft.com/k8se/quickstart:latest --cpu '0.25' --memory '0.5Gi'".format(resource_group, job, env))
+        self.cmd("az containerapp job create --resource-group {} --name {} --environment {} --replica-timeout 200 --replica-retry-limit 1 --trigger-type manual --replica-completion-count 1 --parallelism 1 --image mcr.microsoft.com/k8se/quickstart:latest --cpu '0.25' --memory '0.5Gi'".format(resource_group, job, env_id))
 
         # wait for 60s for the job to be provisioned
         jobProvisioning = True
@@ -555,8 +556,8 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
                             replicaCompletionCount: 2
                             parallelism: 2
                             scale:
-                                minExecutions: 1
-                                maxExecutions: 9
+                                minExecutions: 5
+                                maxExecutions: 95
                                 rules:
                                 - name: github-runner-testv2
                                   type: github-runner
@@ -587,8 +588,8 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
             JMESPathCheck('properties.template.containers[0].image', "mcr.microsoft.com/k8se/quickstart-jobs:latest"),
             JMESPathCheck('properties.configuration.eventTriggerConfig.replicaCompletionCount', 2),
             JMESPathCheck('properties.configuration.eventTriggerConfig.parallelism', 2),
-            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.minExecutions', 1),
-            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.maxExecutions', 9),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.minExecutions', 5),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.maxExecutions', 95),
             JMESPathCheck('properties.configuration.eventTriggerConfig.scale.rules[0].name', "github-runner-testv2"),
             JMESPathCheck('properties.configuration.eventTriggerConfig.scale.rules[0].metadata.runnerScope', "repo"),
             JMESPathCheck('properties.configuration.eventTriggerConfig.scale.rules[0].metadata.owner', "test_org_1"),

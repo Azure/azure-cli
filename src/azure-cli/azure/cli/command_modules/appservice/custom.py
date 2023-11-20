@@ -70,7 +70,9 @@ from .utils import (_normalize_sku,
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
-                           detect_os_from_src, get_current_stack_from_runtime, generate_default_app_name)
+                           detect_os_from_src, get_current_stack_from_runtime, generate_default_app_name,
+                           get_or_create_default_workspace, get_or_create_default_resource_group,
+                           get_workspace)
 from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX,
                          FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD,
                          LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
@@ -453,7 +455,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
         app_settings_slot_cfg_names = slot_cfg_names.app_setting_names
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
-    return _build_app_settings_output(result.properties, app_settings_slot_cfg_names)
+    return _build_app_settings_output(result.properties, app_settings_slot_cfg_names, redact=True)
 
 
 # TODO: Update manual polling to use LongRunningOperation once backend API & new SDK supports polling
@@ -503,7 +505,7 @@ def add_azure_storage_account(cmd, resource_group_name, name, custom_id, storage
             slot_cfg_names.azure_storage_config_names.append(custom_id)
             client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
-    return result.properties
+    return _redact_storage_accounts(result.properties)
 
 
 def update_azure_storage_account(cmd, resource_group_name, name, custom_id, storage_type=None, account_name=None,
@@ -542,7 +544,7 @@ def update_azure_storage_account(cmd, resource_group_name, name, custom_id, stor
             slot_cfg_names.azure_storage_config_names.append(custom_id)
             client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
-    return result.properties
+    return _redact_storage_accounts(result.properties)
 
 
 def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_remote=False, timeout=None, slot=None):
@@ -594,7 +596,10 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     except ValueError:
         raise ResourceNotFoundError('Failed to fetch scm url for function app')
 
-    zip_url = scm_url + '/api/zipdeploy?isAsync=true'
+    client = web_client_factory(cmd.cli_ctx)
+    app = client.web_apps.get(resource_group_name, name)
+    deployer = '&Deployer=az_cli_functions' if is_functionapp(app) else ''
+    zip_url = scm_url + '/api/zipdeploy?isAsync=true' + deployer
     deployment_status_url = scm_url + '/api/deployments/latest'
 
     additional_headers = {"Content-Type": "application/octet-stream", "Cache-Control": "no-cache"}
@@ -1561,7 +1566,10 @@ def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None
         result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
                                              'update_application_settings',
                                              app_settings, slot, client)
-    return _build_app_settings_output(result.properties, slot_cfg_names.app_setting_names if slot_cfg_names else [])
+
+    return _build_app_settings_output(result.properties,
+                                      slot_cfg_names.app_setting_names if slot_cfg_names else [],
+                                      redact=True)
 
 
 def delete_azure_storage_accounts(cmd, resource_group_name, name, custom_id, slot=None):
@@ -1584,7 +1592,15 @@ def delete_azure_storage_accounts(cmd, resource_group_name, name, custom_id, slo
                                          'update_azure_storage_accounts', azure_storage_accounts,
                                          slot, client)
 
-    return result.properties
+    return _redact_storage_accounts(result.properties)
+
+
+def _redact_storage_accounts(properties):
+    logger.warning('Storage account access keys have been redacted. '
+                   'Use `az webapp config storage-account list` to view.')
+    for account in properties:
+        properties[account].accessKey = None
+    return properties
 
 
 def _ssl_context():
@@ -1597,11 +1613,20 @@ def _ssl_context():
     return ssl.create_default_context()
 
 
-def _build_app_settings_output(app_settings, slot_cfg_names):
+def _build_app_settings_output(app_settings, slot_cfg_names, redact=False):
     slot_cfg_names = slot_cfg_names or []
     return [{'name': p,
              'value': app_settings[p],
-             'slotSetting': p in slot_cfg_names} for p in _mask_creds_related_appsettings(app_settings)]
+             'slotSetting': p in slot_cfg_names} for p in (_redact_appsettings(app_settings) if redact
+                                                           else _mask_creds_related_appsettings(app_settings))]
+
+
+def _redact_appsettings(settings):
+    logger.warning('App settings have been redacted. '
+                   'Use `az webapp/logicapp/functionapp config appsettings list` to view.')
+    for x in settings:
+        settings[x] = None
+    return settings
 
 
 def _build_app_settings_input(settings, connection_string_type):
@@ -1667,7 +1692,7 @@ def update_connection_strings(cmd, resource_group_name, name, connection_string_
         slot_cfg_names.connection_string_names -= rm_sticky_slot_settings
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
-    return result.properties
+    return _redact_connection_strings(result.properties)
 
 
 def delete_connection_strings(cmd, resource_group_name, name, setting_names, slot=None):
@@ -1686,9 +1711,19 @@ def delete_connection_strings(cmd, resource_group_name, name, setting_names, slo
     if is_slot_settings:
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
-    return _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
-                                       'update_connection_strings',
-                                       conn_strings, slot, client)
+    result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
+                                         'update_connection_strings',
+                                         conn_strings, slot, client)
+    _redact_connection_strings(result.properties)
+    return result
+
+
+def _redact_connection_strings(properties):
+    logger.warning('Connection string values have been redacted. '
+                   'Use `az webapp config connection-string list` to view.')
+    for setting in properties:
+        properties[setting].value = None
+    return properties
 
 
 CONTAINER_APPSETTING_NAMES = ['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME',
@@ -2039,7 +2074,14 @@ def config_source_control(cmd, resource_group_name, name, repo_url, repository_t
             poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                              'begin_create_or_update_source_control',
                                              slot, source_control)
-            return LongRunningOperation(cmd.cli_ctx)(poller)
+            response = LongRunningOperation(cmd.cli_ctx)(poller)
+            if response.git_hub_action_configuration and \
+                response.git_hub_action_configuration.container_configuration and \
+                    response.git_hub_action_configuration.container_configuration.password:
+                logger.warning("GitHub action password has been redacted. Use "
+                               "`az webapp/functionapp deployment source show` to view.")
+                response.git_hub_action_configuration.container_configuration.password = None
+            return response
         except Exception as ex:  # pylint: disable=broad-except
             ex = ex_handler_factory(no_throw=True)(ex)
             # for non server errors(50x), just throw; otherwise retry 4 times
@@ -2052,12 +2094,17 @@ def config_source_control(cmd, resource_group_name, name, repo_url, repository_t
 def update_git_token(cmd, git_token=None):
     '''
     Update source control token cached in Azure app service. If no token is provided,
-    the command will clean up existing token.
+    the command will clean up existing token. Note that tokens are now redacted in the result.
     '''
     client = web_client_factory(cmd.cli_ctx)
     from azure.mgmt.web.models import SourceControl
     sc = SourceControl(name='not-really-needed', source_control_name='GitHub', token=git_token or '')
-    return client.update_source_control('GitHub', sc)
+    response = client.update_source_control('GitHub', sc)
+    logger.warning('Tokens have been redacted.')
+    response.refresh_token = None
+    response.token = None
+    response.token_secret = None
+    return response
 
 
 def show_source_control(cmd, resource_group_name, name, slot=None):
@@ -2140,7 +2187,7 @@ app service environment, please use --location parameter and specify the region 
 has been deployed ".format(app_service_environment)
                 raise ResourceNotFoundError(err_msg)
         if hyper_v and ase.kind in ('ASEV1', 'ASEV2'):
-            raise ArgumentUsageError('Windows containers are only supported on v3 App Service Environments v3 or newer')
+            raise ArgumentUsageError('Windows containers are only supported on App Service Environment v3')
     else:  # Non-ASE
         ase_def = None
         if location is None:
@@ -2767,6 +2814,10 @@ def show_cors(cmd, resource_group_name, name, slot=None):
 
 
 def get_streaming_log(cmd, resource_group_name, name, provider=None, slot=None):
+    # ping the site first to ensure that the site container is running
+    # logsteam does not work if the site container is not running
+    # See https://github.com/Azure/azure-cli/issues/23058
+    ping_site(cmd, resource_group_name, name, slot)
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     streaming_url = scm_url + '/logstream'
     if provider:
@@ -2779,6 +2830,17 @@ def get_streaming_log(cmd, resource_group_name, name, provider=None, slot=None):
 
     while True:
         time.sleep(100)  # so that ctrl+c can stop the command
+
+
+def ping_site(cmd, resource_group_name, name, slot, timeout=230):
+    import urllib3
+    try:
+        site_url = _get_url(cmd, resource_group_name, name, slot)
+        http = urllib3.PoolManager(timeout=urllib3.Timeout(connect=timeout, read=timeout))
+        http.request('GET', site_url)
+    except Exception:  # pylint: disable=broad-except
+        logger.warning("Unable to reach the app.")
+        raise
 
 
 def download_historical_logs(cmd, resource_group_name, name, log_file=None, slot=None):
@@ -3696,7 +3758,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        registry_server=None, registry_password=None, registry_username=None,
                        image=None, tags=None, assign_identities=None,
                        role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
-                       environment=None, min_replicas=None, max_replicas=None):
+                       environment=None, min_replicas=None, max_replicas=None, workspace=None):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
@@ -3967,7 +4029,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
     if create_app_insights:
         try:
-            try_create_application_insights(cmd, functionapp)
+            try_create_workspace_based_application_insights(cmd, functionapp, workspace)
             if should_enable_distributed_tracing(consumption_plan_location, matched_runtime, image):
                 update_app_settings(cmd, functionapp.resource_group, functionapp.name,
                                     ["APPLICATIONINSIGHTS_ENABLE_AGENT=true"])
@@ -4026,6 +4088,55 @@ def _get_content_share_name(app_name):
     share_name = app_name[0:50]
     suffix = str(uuid.uuid4()).split('-')[-1]
     return share_name.lower() + suffix
+
+
+def try_create_workspace_based_application_insights(cmd, functionapp, workspace_name):
+    creation_failed_warn = 'Unable to create the Application Insights for the Function App. ' \
+                           'Please use the Azure Portal to manually create and configure the Application Insights, ' \
+                           'if needed.'
+
+    ai_resource_group_name = functionapp.resource_group
+    ai_name = functionapp.name
+    ai_location = _normalize_location(cmd, functionapp.location)
+
+    workspace = get_workspace(cmd, workspace_name)
+
+    if workspace is None:
+        default_resource_group = get_or_create_default_resource_group(cmd, ai_location)
+        workspace = get_or_create_default_workspace(cmd, ai_location, default_resource_group.name)
+
+    app_insights_client = get_mgmt_service_client(
+        cmd.cli_ctx,
+        ApplicationInsightsManagementClient,
+        api_version='2020-02-02-preview'
+    )
+
+    ai_properties = {
+        "name": ai_name,
+        "location": ai_location,
+        "kind": "web",
+        "properties": {
+            "Application_Type": "web",
+            "WorkspaceResourceId": workspace.id
+        }
+    }
+
+    appinsights = app_insights_client.components.create_or_update(ai_resource_group_name, ai_name, ai_properties)
+    if appinsights is None or appinsights.instrumentation_key is None:
+        logger.warning(creation_failed_warn)
+        return
+
+    # We make this success message as a warning to no interfere with regular JSON output in stdout
+    logger.warning('Application Insights \"%s\" was created for this Function App. '
+                   'You can visit https://portal.azure.com/#resource%s/overview to view your '
+                   'Application Insights component', appinsights.name, appinsights.id)
+
+    if not is_centauri_functionapp(cmd, ai_resource_group_name, ai_name):
+        update_app_settings(cmd, functionapp.resource_group, functionapp.name,
+                            ['APPINSIGHTS_INSTRUMENTATIONKEY={}'.format(appinsights.instrumentation_key)])
+    else:
+        update_app_settings(cmd, functionapp.resource_group, functionapp.name,
+                            ['APPLICATIONINSIGHTS_CONNECTION_STRING={}'.format(appinsights.connection_string)])
 
 
 def try_create_application_insights(cmd, functionapp):
@@ -4663,6 +4774,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         name = generate_default_app_name(cmd)
 
     import os
+
     AppServicePlan = cmd.get_models('AppServicePlan')
     src_dir = os.getcwd()
     _src_path_escaped = "{}".format(src_dir.replace(os.sep, os.sep + os.sep))
@@ -4843,7 +4955,10 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
 
     if logs:
         _configure_default_logging(cmd, rg_name, name)
-        return get_streaming_log(cmd, rg_name, name)
+        try:
+            return get_streaming_log(cmd, rg_name, name)
+        except Exception:  # pylint: disable=broad-except
+            logger.warning("Unable to reach the app. Please run 'az webapp log tail' to view the logs.")
 
     _set_webapp_up_default_args(cmd, rg_name, sku, plan, loc, name)
 
@@ -5381,15 +5496,21 @@ def update_host_key(cmd, resource_group_name, name, key_type, key_name, key_valu
     }
     client = web_client_factory(cmd.cli_ctx)
     if slot:
-        return client.web_apps.create_or_update_host_secret_slot(resource_group_name,
-                                                                 name,
-                                                                 key_type,
-                                                                 key_name,
-                                                                 slot, key=key_info)
-    return client.web_apps.create_or_update_host_secret(resource_group_name,
-                                                        name,
-                                                        key_type,
-                                                        key_name, key=key_info)
+        response = client.web_apps.create_or_update_host_secret_slot(resource_group_name,
+                                                                     name,
+                                                                     key_type,
+                                                                     key_name,
+                                                                     slot,
+                                                                     key=key_info)
+    else:
+        response = client.web_apps.create_or_update_host_secret(resource_group_name,
+                                                                name,
+                                                                key_type,
+                                                                key_name,
+                                                                key=key_info)
+    logger.warning('Keys have been redacted. Use `az functionapp keys list` to view.')
+    response.value = None
+    return response
 
 
 def list_host_keys(cmd, resource_group_name, name, slot=None):
@@ -5434,17 +5555,21 @@ def update_function_key(cmd, resource_group_name, name, function_name, key_name,
     }
     client = web_client_factory(cmd.cli_ctx)
     if slot:
-        return client.web_apps.create_or_update_function_secret_slot(resource_group_name,
-                                                                     name,
-                                                                     function_name,
-                                                                     key_name,
-                                                                     slot,
-                                                                     key_info)
-    return client.web_apps.create_or_update_function_secret(resource_group_name,
-                                                            name,
-                                                            function_name,
-                                                            key_name,
-                                                            key_info)
+        response = client.web_apps.create_or_update_function_secret_slot(resource_group_name,
+                                                                         name,
+                                                                         function_name,
+                                                                         key_name,
+                                                                         slot,
+                                                                         key_info)
+    else:
+        response = client.web_apps.create_or_update_function_secret(resource_group_name,
+                                                                    name,
+                                                                    function_name,
+                                                                    key_name,
+                                                                    key_info)
+    logger.warning('Keys have been redacted. Use `az functionapp function keys list` to view.')
+    response.value = None
+    return response
 
 
 def list_function_keys(cmd, resource_group_name, name, function_name, slot=None):
