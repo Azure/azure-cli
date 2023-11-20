@@ -14,7 +14,8 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_postgres_flexible_backups,
     cf_postgres_flexible_replica,
     cf_postgres_flexible_adadmin,
-    cf_postgres_flexible_migrations)
+    cf_postgres_flexible_migrations,
+    cf_postgres_flexible_virtual_endpoints)
 
 from ._transformers import (
     table_transform_output,
@@ -76,6 +77,11 @@ def load_flexibleserver_command_table(self, _):
         client_factory=cf_postgres_flexible_migrations
     )
 
+    postgres_flexible_virtual_endpoints_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#VirtualEndpointsOperations.{}',
+        client_factory=cf_postgres_flexible_virtual_endpoints
+    )
+
     # MERU COMMANDS
     flexible_server_custom_common = CliCommandType(
         operations_tmpl='azure.cli.command_modules.rdbms.flexible_server_custom_common#{}')
@@ -126,6 +132,15 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('list', 'migration_list_func', custom_command_type=flexible_servers_custom_postgres)
         g.custom_command('update', 'migration_update_func', custom_command_type=flexible_servers_custom_postgres)
         g.custom_command('check-name-availability', 'migration_check_name_availability', custom_command_type=flexible_servers_custom_postgres)
+
+    with self.command_group('postgres flexible-server virtual-endpoints', postgres_flexible_virtual_endpoints_sdk,
+                            custom_command_type=flexible_servers_custom_postgres,
+                            client_factory=cf_postgres_flexible_virtual_endpoints) as g:
+        g.custom_command('create', 'virtual_endpoints_create_func', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('delete', 'virtual_endpoints_delete_func', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_show_command('show', 'virtual_endpoints_show_func', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('list', 'virtual_endpoints_list_func', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('update', 'virtual_endpoints_update_func', custom_command_type=flexible_servers_custom_postgres)
 
     with self.command_group('postgres flexible-server parameter', postgres_flexible_config_sdk,
                             custom_command_type=flexible_servers_custom_postgres,

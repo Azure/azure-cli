@@ -512,6 +512,13 @@ def _valid_range(addr_range):
     return False
 
 
+def virtual_endpoint_name_validator(ns):
+    if not re.search(r'^[a-zA-Z0-9][-_a-zA-Z0-9]{1,62}(?<!-)$', ns.virtual_endpoint_name):
+        raise ValidationError("The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. "
+                              "Additionally, the name of the firewall rule must be at least 1 character "
+                              "and no more than 63 characters in length. ")
+
+
 def firewall_rule_name_validator(ns):
     if not re.search(r'^[a-zA-Z0-9][-_a-zA-Z0-9]{1,126}[_a-zA-Z0-9]$', ns.firewall_rule_name):
         raise ValidationError("The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. "
