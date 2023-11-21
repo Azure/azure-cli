@@ -1506,15 +1506,26 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         # dynamic completion for create mode only
         if self.decorator_mode == DecoratorMode.CREATE:
+            # if user does not specify service principal or client secret,
+            # backfill the value of enable_managed_identity to True
             (
                 service_principal,
                 client_secret,
             ) = self._get_service_principal_and_client_secret(read_only=True)
-            if not read_from_mc and service_principal and client_secret:
-                enable_managed_identity = False
+            if not(service_principal or client_secret) and not enable_managed_identity:
+                enable_managed_identity = True
 
         # validation
         if enable_validation:
+            if self.decorator_mode == DecoratorMode.CREATE:
+                (
+                    service_principal,
+                    client_secret,
+                ) = self._get_service_principal_and_client_secret(read_only=True)
+                if (service_principal or client_secret) and enable_managed_identity:
+                    raise MutuallyExclusiveArgumentError(
+                        "Cannot specify --enable-managed-identity and --service-principal/--client-secret at same time"
+                    )
             if not enable_managed_identity and self._get_assign_identity(enable_validation=False):
                 raise RequiredArgumentMissingError(
                     "--assign-identity can only be specified when --enable-managed-identity is specified"
