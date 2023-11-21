@@ -479,9 +479,9 @@ def list_available_extensions(index_url=None, show_details=False, cli_ctx=None):
             'name': name,
             'version': latest['metadata']['version'],
             'summary': latest['metadata']['summary'],
-            'preview': latest['metadata'].get(EXT_METADATA_ISPREVIEW, False) or
+            'preview': (latest['metadata'].get(EXT_METADATA_ISPREVIEW, False) or
                        latest['metadata'].get(EXT_METADATA_ISEXPERIMENTAL, False) or
-                       is_preview_from_semantic_version(latest['metadata']['version']),
+                       is_preview_from_semantic_version(latest['metadata']['version'])),
             'experimental': False,
             'installed': installed
         })
@@ -518,9 +518,9 @@ def list_versions(extension_name, index_url=None, cli_ctx=None):
         results.append({
             'name': extension_name,
             'version': version,
-            'preview': ext['metadata'].get(EXT_METADATA_ISPREVIEW, False) or
+            'preview': (ext['metadata'].get(EXT_METADATA_ISPREVIEW, False) or
                        ext['metadata'].get(EXT_METADATA_ISEXPERIMENTAL, False) or
-                       is_preview_from_semantic_version(ext['metadata']['version']),
+                       is_preview_from_semantic_version(ext['metadata']['version'])),
             'experimental': False,
             'installed': installed,
             'compatible': compatible
