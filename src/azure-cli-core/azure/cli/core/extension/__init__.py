@@ -103,8 +103,8 @@ class Extension:
         try:
             if not isinstance(self._preview, bool):
                 self._preview = (bool(self.metadata.get(EXT_METADATA_ISPREVIEW)) or
-                                 bool(self.metadata.get(EXT_METADATA_ISEXPERIMENTAL))
-                                 or is_preview_from_semantic_version(self._version))
+                                 bool(self.metadata.get(EXT_METADATA_ISEXPERIMENTAL)) or
+                                 is_preview_from_semantic_version(self._version))
         except Exception:  # pylint: disable=broad-except
             logger.debug("Unable to get extension preview status: %s", traceback.format_exc())
         return self._preview
