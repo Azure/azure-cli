@@ -15,12 +15,13 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-storage/21.1.0 Python/3.10.13 (Linux-5.15.0-1047-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2022-09-01&$expand=kerb
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2023-01-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"creationTime":"2023-11-20T22:55:15.2978077Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2023-11-20T22:55:15.2978077Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2023-10-19T07:29:37.1340850Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2023-10-19T07:29:37.1340850Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
@@ -29,21 +30,19 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 20 Nov 2023 22:55:37 GMT
+      - Thu, 19 Oct 2023 07:29:58 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11999'
-      x-msedge-ref:
-      - 'Ref A: BDA63657D6A94A13B03474B920FFD370 Ref B: CO6AA3150217033 Ref C: 2023-11-20T22:55:37Z'
+      - '11996'
     status:
       code: 200
       message: OK
@@ -65,12 +64,13 @@ interactions:
       ParameterSetName:
       - -g -n --key
       User-Agent:
-      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-storage/21.1.0 Python/3.10.13 (Linux-5.15.0-1047-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/regenerateKey?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/regenerateKey?api-version=2023-01-01
   response:
     body:
-      string: '{"keys":[{"creationTime":"2023-11-20T22:55:37.8918093Z","keyName":"key1","value":"HJ7OmeXlzhQo5Dna1uI9imWThHHIQxGf7yWZsJy4uNJsVLyAeT093Yzodd6/pmDtIaCFmcjRw166+ASttNds6Q==","permissions":"FULL"},{"creationTime":"2023-11-20T22:55:15.2978077Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2023-10-19T07:29:58.9468318Z","keyName":"key1","value":"hc/JIKX6WCoVOIftVaCiG/6/ijUogRBKZSb/bZrYmD33CZzzMXdhSSe/Q3CWTxVQKJTqvOYTOGzY+AStwco6Vw==","permissions":"FULL"},{"creationTime":"2023-10-19T07:29:37.1340850Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
@@ -79,21 +79,23 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 20 Nov 2023 22:55:37 GMT
+      - Thu, 19 Oct 2023 07:29:58 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
-      x-msedge-ref:
-      - 'Ref A: 0A6CD108FABB478BBD7C69D30FD57A52 Ref B: CO6AA3150217011 Ref C: 2023-11-20T22:55:37Z'
     status:
       code: 200
       message: OK
@@ -115,12 +117,13 @@ interactions:
       ParameterSetName:
       - -g -n --key
       User-Agent:
-      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-storage/21.1.0 Python/3.10.13 (Linux-5.15.0-1047-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/regenerateKey?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/regenerateKey?api-version=2023-01-01
   response:
     body:
-      string: '{"keys":[{"creationTime":"2023-11-20T22:55:37.8918093Z","keyName":"key1","value":"HJ7OmeXlzhQo5Dna1uI9imWThHHIQxGf7yWZsJy4uNJsVLyAeT093Yzodd6/pmDtIaCFmcjRw166+ASttNds6Q==","permissions":"FULL"},{"creationTime":"2023-11-20T22:55:38.2824419Z","keyName":"key2","value":"OohnlawTwrgr8V308sbp+fGVPuTQfq+clmuGGxyC/yY1tYXWIXqnZcMK8ckAgxQhuZbV/Q8TxXBM+AStLMsloA==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2023-10-19T07:29:58.9468318Z","keyName":"key1","value":"hc/JIKX6WCoVOIftVaCiG/6/ijUogRBKZSb/bZrYmD33CZzzMXdhSSe/Q3CWTxVQKJTqvOYTOGzY+AStwco6Vw==","permissions":"FULL"},{"creationTime":"2023-10-19T07:29:59.5092903Z","keyName":"key2","value":"9yxPWQaCyoN3DEnzbe2c6Ctct64mRZTGMad9Kj9cQkEtLBoaJ35D2s/U+1I6EkWrMPMN0jD1kfEg+ASt6DgnVA==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
@@ -129,21 +132,23 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 20 Nov 2023 22:55:37 GMT
+      - Thu, 19 Oct 2023 07:29:59 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
-      x-msedge-ref:
-      - 'Ref A: 2FBF82DED80443D3ADBF7FD930E68AB3 Ref B: CO6AA3150217017 Ref C: 2023-11-20T22:55:38Z'
     status:
       code: 200
       message: OK
