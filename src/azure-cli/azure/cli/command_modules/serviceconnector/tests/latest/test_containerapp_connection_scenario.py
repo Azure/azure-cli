@@ -173,10 +173,10 @@ class ContainerAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'app': 'servicelinker-postgresql-aca',
-            'server': 'servicelinker-flexiblepostgresql',
+            'app': 'testkvref',
+            'server': 'serviceconnector-pg-flex',
             'database': 'postgres',
-            'vault': 'servicelinker-kv-ref'
+            'vault': 'sc-kv-reader'
         })
 
         # prepare password
@@ -203,6 +203,14 @@ class ContainerAppConnectionScenarioTest(ScenarioTest):
                 self.check('[1].clientType', 'dotnet')
             ]
         ).get_output_in_json()
+
+        # list connection configuration
+        connection_id = connections[1].get('id')
+        self.cmd('containerapp connection list-configuration --id {}'.format(connection_id), 
+            checks = [
+                self.check('configurations[0].name', 'AZURE_POSTGRESQL_CONNECTIONSTRING'),
+                self.check('configurations[0].description', 'Key vault secret.'),
+            ])
 
         # delete connections
         for connection in connections:
