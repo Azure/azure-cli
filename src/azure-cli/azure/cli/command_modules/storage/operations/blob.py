@@ -622,6 +622,7 @@ def upload_blob(cmd, client, file_path=None, container_name=None, blob_name=None
     if blob_type == 'append':
         if client.exists(timeout=timeout):
             client.get_blob_properties(lease=lease_id, timeout=timeout, **check_blob_args)
+        upload_args['max_concurrency'] = 1
     else:
         upload_args['if_modified_since'] = if_modified_since
         upload_args['if_unmodified_since'] = if_unmodified_since
