@@ -305,7 +305,7 @@ def check_version_compatibility(azext_metadata):
 
 def add_extension(cmd=None, source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument, too-many-statements
                   pip_extra_index_urls=None, pip_proxy=None, system=None,
-                  version=None, cli_ctx=None, upgrade=None):
+                  version=None, cli_ctx=None, upgrade=None, allow_preview=None):
     ext_sha256 = None
     update_to_latest = version == 'latest' and not source
 
@@ -314,7 +314,7 @@ def add_extension(cmd=None, source=None, extension_name=None, index_url=None, ye
     if extension_name:
         cmd_cli_ctx.get_progress_controller().add(message='Searching')
         try:
-            source, ext_sha256 = resolve_from_index(extension_name, index_url=index_url, target_version=version, cli_ctx=cmd_cli_ctx)
+            source, ext_sha256 = resolve_from_index(extension_name, index_url=index_url, target_version=version, cli_ctx=cmd_cli_ctx, allow_preview=allow_preview)
         except NoExtensionCandidatesError as err:
             logger.debug(err)
             err = "{}\n\nUse --debug for more information".format(err.args[0])
@@ -352,6 +352,20 @@ def add_extension(cmd=None, source=None, extension_name=None, index_url=None, ye
         CommandIndex().invalidate()
     except ExtensionNotInstalledException:
         pass
+
+
+def is_preview_from_semantic_version(version):
+    """
+    pre = [a, b] -> preview
+    >>> print(parse("1.2.3").pre)
+    None
+    >>> parse("1.2.3a1").pre
+    ('a', 1)
+    >>> parse("1.2.3b1").pre
+    ('b', 1)
+    """
+    parsed_version = parse(version)
+    return parsed_version.pre and parsed_version.pre[0] in ["a", "b"]
 
 
 def is_cloud_shell_system_extension(ext_path):
@@ -398,7 +412,7 @@ def show_extension(extension_name):
         raise CLIError(e)
 
 
-def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_index_urls=None, pip_proxy=None, cli_ctx=None, version=None, download_url=None, ext_sha256=None):
+def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_index_urls=None, pip_proxy=None, allow_preview=None, cli_ctx=None, version=None, download_url=None, ext_sha256=None):
     try:
         cmd_cli_ctx = cli_ctx or cmd.cli_ctx
         ext = get_extension(extension_name, ext_type=WheelExtension)
@@ -408,7 +422,7 @@ def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_in
         cur_version = ext.get_version()
         try:
             if not download_url:
-                download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url, target_version=version, cli_ctx=cmd_cli_ctx)
+                download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url, target_version=version, cli_ctx=cmd_cli_ctx, allow_preview=allow_preview)
             _, ext_version = _get_extension_info_from_source(download_url)
             set_extension_management_detail(extension_name, ext_version)
         except NoExtensionCandidatesError as err:

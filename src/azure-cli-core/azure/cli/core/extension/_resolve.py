@@ -5,8 +5,10 @@
 from packaging.version import parse
 from typing import Callable, List, NamedTuple, Union
 
-from azure.cli.core.extension import ext_compat_with_cli, WHEEL_INFO_RE
+from azure.cli.core.extension import ext_compat_with_cli, WHEEL_INFO_RE, EXT_METADATA_ISPREVIEW, \
+    EXT_METADATA_ISEXPERIMENTAL
 from azure.cli.core.extension._index import get_index_extensions
+from azure.cli.core.extension.operations import is_preview_from_semantic_version
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -48,6 +50,12 @@ def _is_compatible_with_cli_version(item):
     return False
 
 
+def _is_stable_from_metadata(item):
+    return not (item["metadata"].get(EXT_METADATA_ISPREVIEW, False) or
+                item["metadata"].get(EXT_METADATA_ISEXPERIMENTAL, False) or
+                is_preview_from_semantic_version(item["metadata"]['version']))
+
+
 def _is_greater_than_cur_version(cur_version):
     if not cur_version:
         return None
@@ -77,7 +85,8 @@ def _get_version_compatibility_feedback(candidates: List[dict]) -> str:
         return e.args[0]
 
 
-def resolve_from_index(extension_name, cur_version=None, index_url=None, target_version=None, cli_ctx=None):
+def resolve_from_index(extension_name, cur_version=None, index_url=None, target_version=None, cli_ctx=None,
+                       allow_preview=None):
     """Gets the download Url and digest for the matching extension
 
     Args:
@@ -86,6 +95,7 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None, target_
         index_url (str, optional):  Defaults to None.
         target_version (str, optional): Version of extension to install. Defaults to latest version.
         cli_ctx (, optional): CLI Context. Defaults to None.
+        allow_preview(bool, optional): Flag to allow installing preview extensions. Default to None.
 
     Raises:
         NoExtensionCandidatesError when an extension:
@@ -138,6 +148,14 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None, target_
             on_empty_results_message=f"No suitable extensions found for '{extension_name}'."
         )
     ]
+
+    if not allow_preview:
+        candidate_filters += [
+            _ExtensionFilter(
+                filter=list_filter(_is_stable_from_metadata),
+                on_empty_results_message=f"No suitable stable version of '{extension_name}' to install. "
+                                         f"Add `--allow-preview` to try preview versions"
+            )]
 
     for candidate_filter, on_empty_results_message in candidate_filters:
         logger.debug("Candidates %s", [c['filename'] for c in candidates])
