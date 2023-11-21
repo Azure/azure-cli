@@ -330,6 +330,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
         if instance.storage.type == "": 
             instance.storage.type = None
             instance.storage.iops = None
+            if performance_tier is None:
+                instance.storage.tier = None
 
     if backup_retention:
         instance.backup.backup_retention_days = backup_retention
@@ -382,6 +384,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
         params.high_availability = high_availability_param
 
+    print(params)
     return params
 
 
