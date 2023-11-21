@@ -1494,11 +1494,9 @@ class AKSManagedClusterContext(BaseAKSContext):
         # read the original value passed by the command
         enable_managed_identity = self.raw_param.get("enable_managed_identity")
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object
-        read_from_mc = False
         if self.decorator_mode == DecoratorMode.CREATE:
             if self.mc and self.mc.identity:
                 enable_managed_identity = check_is_msi_cluster(self.mc)
-                read_from_mc = True
 
         # skip dynamic completion & validation if option read_only is specified
         if read_only:
@@ -1512,7 +1510,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                 service_principal,
                 client_secret,
             ) = self._get_service_principal_and_client_secret(read_only=True)
-            if not(service_principal or client_secret) and not enable_managed_identity:
+            if not (service_principal or client_secret) and not enable_managed_identity:
                 enable_managed_identity = True
 
         # validation
