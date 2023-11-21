@@ -18,13 +18,12 @@ interactions:
       ParameterSetName:
       - -i --account-name -g -n
       User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-storage/21.1.0 Python/3.10.13 (Linux-5.15.0-1047-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/myencryption?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/myencryption?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/myencryption","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"myencryption","properties":{"source":"Microsoft.Storage","keyVaultProperties":{},"creationTime":"2023-10-19T09:43:04.0156846Z","lastModifiedTime":"2023-10-19T09:43:04.0156846Z","state":"Enabled","requireInfrastructureEncryption":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/myencryption","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"myencryption","properties":{"source":"Microsoft.Storage","keyVaultProperties":{},"creationTime":"2023-11-20T23:16:08.7480699Z","lastModifiedTime":"2023-11-20T23:16:08.7480699Z","state":"Enabled","requireInfrastructureEncryption":true}}'
     headers:
       cache-control:
       - no-cache
@@ -33,119 +32,123 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 19 Oct 2023 09:43:04 GMT
+      - Mon, 20 Nov 2023 23:16:08 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1190'
+      x-msedge-ref:
+      - 'Ref A: 4F479634826D495186AA5D506EFB5911 Ref B: CO6AA3150218023 Ref C: 2023-11-20T23:16:08Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"properties": {"source": "Microsoft.Storage", "requireInfrastructureEncryption":
+      true}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account encryption-scope create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '88'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -i --account-name -g -n
+      User-Agent:
+      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption1?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption1","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"testencryption1","properties":{"source":"Microsoft.Storage","keyVaultProperties":{},"creationTime":"2023-11-20T23:16:09.0868735Z","lastModifiedTime":"2023-11-20T23:16:09.0868735Z","state":"Enabled","requireInfrastructureEncryption":true}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '509'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Nov 2023 23:16:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+      x-msedge-ref:
+      - 'Ref A: 4F227261DAF34FF782E7A56E5D008F07 Ref B: CO6AA3150220019 Ref C: 2023-11-20T23:16:08Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"properties": {"source": "Microsoft.Storage", "requireInfrastructureEncryption":
+      true}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account encryption-scope create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '88'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -i --account-name -g -n
+      User-Agent:
+      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption2?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption2","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"testencryption2","properties":{"source":"Microsoft.Storage","keyVaultProperties":{},"creationTime":"2023-11-20T23:16:09.5406091Z","lastModifiedTime":"2023-11-20T23:16:09.5406091Z","state":"Enabled","requireInfrastructureEncryption":true}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '509'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Nov 2023 23:16:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
       - '1193'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: '{"properties": {"source": "Microsoft.Storage", "requireInfrastructureEncryption":
-      true}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage account encryption-scope create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '88'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - -i --account-name -g -n
-      User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-storage/21.1.0 Python/3.10.13 (Linux-5.15.0-1047-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption1?api-version=2023-01-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption1","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"testencryption1","properties":{"source":"Microsoft.Storage","keyVaultProperties":{},"creationTime":"2023-10-19T09:43:06.2233618Z","lastModifiedTime":"2023-10-19T09:43:06.2233618Z","state":"Enabled","requireInfrastructureEncryption":true}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '509'
-      content-type:
-      - application/json
-      date:
-      - Thu, 19 Oct 2023 09:43:06 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: '{"properties": {"source": "Microsoft.Storage", "requireInfrastructureEncryption":
-      true}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage account encryption-scope create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '88'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - -i --account-name -g -n
-      User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-storage/21.1.0 Python/3.10.13 (Linux-5.15.0-1047-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption2?api-version=2023-01-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption2","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"testencryption2","properties":{"source":"Microsoft.Storage","keyVaultProperties":{},"creationTime":"2023-10-19T09:43:06.7560430Z","lastModifiedTime":"2023-10-19T09:43:06.7560430Z","state":"Enabled","requireInfrastructureEncryption":true}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '509'
-      content-type:
-      - application/json
-      date:
-      - Thu, 19 Oct 2023 09:43:06 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1187'
+      x-msedge-ref:
+      - 'Ref A: E428568B301349068C376955A8D679E2 Ref B: CO6AA3150218053 Ref C: 2023-11-20T23:16:09Z'
     status:
       code: 201
       message: Created
@@ -167,13 +170,12 @@ interactions:
       ParameterSetName:
       - --account-name -g -n --state
       User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-storage/21.1.0 Python/3.10.13 (Linux-5.15.0-1047-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption2?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption2?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption2","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"testencryption2","properties":{"source":"Microsoft.Storage","creationTime":"2023-10-19T09:43:06.7560430Z","lastModifiedTime":"2023-10-19T09:43:07.2387540Z","state":"Disabled","requireInfrastructureEncryption":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption2","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"testencryption2","properties":{"source":"Microsoft.Storage","creationTime":"2023-11-20T23:16:09.5406091Z","lastModifiedTime":"2023-11-20T23:16:09.9343807Z","state":"Disabled","requireInfrastructureEncryption":true}}'
     headers:
       cache-control:
       - no-cache
@@ -182,23 +184,21 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 19 Oct 2023 09:43:06 GMT
+      - Mon, 20 Nov 2023 23:16:09 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1189'
+      - '1193'
+      x-msedge-ref:
+      - 'Ref A: 28D7302EC7E34EA7A40B184944112FA7 Ref B: CO6AA3150218031 Ref C: 2023-11-20T23:16:09Z'
     status:
       code: 200
       message: OK
@@ -216,13 +216,12 @@ interactions:
       ParameterSetName:
       - --account-name -g
       User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-storage/21.1.0 Python/3.10.13 (Linux-5.15.0-1047-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes?api-version=2022-09-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/myencryption","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"myencryption","properties":{"source":"Microsoft.Storage","creationTime":"2023-10-19T09:43:04.0156846Z","lastModifiedTime":"2023-10-19T09:43:04.0156846Z","state":"Enabled","requireInfrastructureEncryption":true}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption1","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"testencryption1","properties":{"source":"Microsoft.Storage","creationTime":"2023-10-19T09:43:06.2233618Z","lastModifiedTime":"2023-10-19T09:43:06.2233618Z","state":"Enabled","requireInfrastructureEncryption":true}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption2","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"testencryption2","properties":{"source":"Microsoft.Storage","creationTime":"2023-10-19T09:43:06.7560430Z","lastModifiedTime":"2023-10-19T09:43:07.2387540Z","state":"Disabled","requireInfrastructureEncryption":true}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/myencryption","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"myencryption","properties":{"source":"Microsoft.Storage","creationTime":"2023-11-20T23:16:08.7480699Z","lastModifiedTime":"2023-11-20T23:16:08.7480699Z","state":"Enabled","requireInfrastructureEncryption":true}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption1","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"testencryption1","properties":{"source":"Microsoft.Storage","creationTime":"2023-11-20T23:16:09.0868735Z","lastModifiedTime":"2023-11-20T23:16:09.0868735Z","state":"Enabled","requireInfrastructureEncryption":true}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption2","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"testencryption2","properties":{"source":"Microsoft.Storage","creationTime":"2023-11-20T23:16:09.5406091Z","lastModifiedTime":"2023-11-20T23:16:09.9343807Z","state":"Disabled","requireInfrastructureEncryption":true}}]}'
     headers:
       cache-control:
       - no-cache
@@ -231,17 +230,19 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 19 Oct 2023 09:43:06 GMT
+      - Mon, 20 Nov 2023 23:16:09 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: D8DF83CEA40E470ABCBCE3E447E97EDC Ref B: CO6AA3150220017 Ref C: 2023-11-20T23:16:10Z'
     status:
       code: 200
       message: OK
@@ -259,13 +260,12 @@ interactions:
       ParameterSetName:
       - --account-name -g --include
       User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-storage/21.1.0 Python/3.10.13 (Linux-5.15.0-1047-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes?api-version=2023-01-01&$include=Disabled
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes?api-version=2022-09-01&$include=Disabled
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption2","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"testencryption2","properties":{"source":"Microsoft.Storage","creationTime":"2023-10-19T09:43:06.7560430Z","lastModifiedTime":"2023-10-19T09:43:07.2387540Z","state":"Disabled","requireInfrastructureEncryption":true}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption2","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"testencryption2","properties":{"source":"Microsoft.Storage","creationTime":"2023-11-20T23:16:09.5406091Z","lastModifiedTime":"2023-11-20T23:16:09.9343807Z","state":"Disabled","requireInfrastructureEncryption":true}}]}'
     headers:
       cache-control:
       - no-cache
@@ -274,21 +274,19 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 19 Oct 2023 09:43:06 GMT
+      - Mon, 20 Nov 2023 23:16:10 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 83776AAF1DF54E3298305272A2208715 Ref B: CO6AA3150218025 Ref C: 2023-11-20T23:16:10Z'
     status:
       code: 200
       message: OK
@@ -306,13 +304,12 @@ interactions:
       ParameterSetName:
       - --account-name -g --filter
       User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-storage/21.1.0 Python/3.10.13 (Linux-5.15.0-1047-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes?api-version=2023-01-01&$filter=startswith%28name%2C%20test%29
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes?api-version=2022-09-01&$filter=startswith%28name%2C%20test%29
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption1","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"testencryption1","properties":{"source":"Microsoft.Storage","creationTime":"2023-10-19T09:43:06.2233618Z","lastModifiedTime":"2023-10-19T09:43:06.2233618Z","state":"Enabled","requireInfrastructureEncryption":true}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption2","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"testencryption2","properties":{"source":"Microsoft.Storage","creationTime":"2023-10-19T09:43:06.7560430Z","lastModifiedTime":"2023-10-19T09:43:07.2387540Z","state":"Disabled","requireInfrastructureEncryption":true}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption1","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"testencryption1","properties":{"source":"Microsoft.Storage","creationTime":"2023-11-20T23:16:09.0868735Z","lastModifiedTime":"2023-11-20T23:16:09.0868735Z","state":"Enabled","requireInfrastructureEncryption":true}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption2","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"testencryption2","properties":{"source":"Microsoft.Storage","creationTime":"2023-11-20T23:16:09.5406091Z","lastModifiedTime":"2023-11-20T23:16:09.9343807Z","state":"Disabled","requireInfrastructureEncryption":true}}]}'
     headers:
       cache-control:
       - no-cache
@@ -321,21 +318,19 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 19 Oct 2023 09:43:07 GMT
+      - Mon, 20 Nov 2023 23:16:09 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 3ADE87D1FE2143DFBE146A8C2495C42F Ref B: CO6AA3150218033 Ref C: 2023-11-20T23:16:10Z'
     status:
       code: 200
       message: OK
@@ -353,13 +348,12 @@ interactions:
       ParameterSetName:
       - --account-name -g --maxpagesize
       User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-storage/21.1.0 Python/3.10.13 (Linux-5.15.0-1047-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes?api-version=2023-01-01&$maxpagesize=2
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes?api-version=2022-09-01&$maxpagesize=2
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/myencryption","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"myencryption","properties":{"source":"Microsoft.Storage","creationTime":"2023-10-19T09:43:04.0156846Z","lastModifiedTime":"2023-10-19T09:43:04.0156846Z","state":"Enabled","requireInfrastructureEncryption":true}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption1","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"testencryption1","properties":{"source":"Microsoft.Storage","creationTime":"2023-10-19T09:43:06.2233618Z","lastModifiedTime":"2023-10-19T09:43:06.2233618Z","state":"Enabled","requireInfrastructureEncryption":true}}],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes?api-version=2023-01-01&$maxpagesize=2&$skipToken=testencryption2"}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/myencryption","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"myencryption","properties":{"source":"Microsoft.Storage","creationTime":"2023-11-20T23:16:08.7480699Z","lastModifiedTime":"2023-11-20T23:16:08.7480699Z","state":"Enabled","requireInfrastructureEncryption":true}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption1","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"testencryption1","properties":{"source":"Microsoft.Storage","creationTime":"2023-11-20T23:16:09.0868735Z","lastModifiedTime":"2023-11-20T23:16:09.0868735Z","state":"Enabled","requireInfrastructureEncryption":true}}],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes?api-version=2022-09-01&$maxpagesize=2&$skipToken=testencryption2"}'
     headers:
       cache-control:
       - no-cache
@@ -368,21 +362,19 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 19 Oct 2023 09:43:07 GMT
+      - Mon, 20 Nov 2023 23:16:10 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 9A63E2DA73E449F0B99DAC2470CDE21E Ref B: CO6AA3150218047 Ref C: 2023-11-20T23:16:10Z'
     status:
       code: 200
       message: OK
@@ -400,13 +392,12 @@ interactions:
       ParameterSetName:
       - --account-name -g --maxpagesize --marker
       User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-storage/21.1.0 Python/3.10.13 (Linux-5.15.0-1047-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.8.10 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes?api-version=2023-01-01&$maxpagesize=2&$skipToken=testencryption2
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes?api-version=2022-09-01&$maxpagesize=2&$skipToken=testencryption2
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption2","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"testencryption2","properties":{"source":"Microsoft.Storage","creationTime":"2023-10-19T09:43:06.7560430Z","lastModifiedTime":"2023-10-19T09:43:07.2387540Z","state":"Disabled","requireInfrastructureEncryption":true}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_storage_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption2","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"testencryption2","properties":{"source":"Microsoft.Storage","creationTime":"2023-11-20T23:16:09.5406091Z","lastModifiedTime":"2023-11-20T23:16:09.9343807Z","state":"Disabled","requireInfrastructureEncryption":true}}]}'
     headers:
       cache-control:
       - no-cache
@@ -415,21 +406,19 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 19 Oct 2023 09:43:08 GMT
+      - Mon, 20 Nov 2023 23:16:10 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 4E718A6EBF3B410F96355208932CEAF6 Ref B: CO6AA3150217053 Ref C: 2023-11-20T23:16:11Z'
     status:
       code: 200
       message: OK
