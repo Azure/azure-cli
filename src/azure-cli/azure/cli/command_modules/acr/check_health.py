@@ -44,12 +44,14 @@ def _handle_error(error, ignore_errors):
 def _subprocess_communicate(command_parts, shell=False):
     from subprocess import PIPE, Popen, CalledProcessError
     output, stderr = "", ""
+    succeeded = False
 
     try:
         p = Popen(command_parts, stdout=PIPE, stderr=PIPE, shell=shell)
         output, stderr = p.communicate()
         output = output.decode('UTF-8').rstrip()
         stderr = stderr.decode('UTF-8').rstrip()
+        exit_code = p.returncode
     except CalledProcessError as e:
         stderr = str(e)
 
@@ -58,12 +60,16 @@ def _subprocess_communicate(command_parts, shell=False):
         warning = stderr
         stderr = None
 
+    if exit_code == 0:
+        succeeded = True
+        stderr = None
+
     if stderr:
         stderr = "Failed to run command '{}'. {}".format(
             ' '.join(command_parts),
             stderr
         )
-    return output, warning, stderr
+    return output, warning, stderr, succeeded
 
 
 # Checks for the environment
@@ -85,10 +91,10 @@ def _get_docker_status_and_version(ignore_errors, yes):
         logger.warning("Docker daemon status: available")
 
     # Docker version check
-    output, warning, stderr = _subprocess_communicate(
+    output, warning, stderr, succeeded = _subprocess_communicate(
         [docker_command, "version", "--format", "'Docker version {{.Server.Version}}, "
          "build {{.Server.GitCommit}}, platform {{.Server.Os}}/{{.Server.Arch}}'"])
-    if stderr:
+    if succeeded == False:
         _handle_error(DOCKER_VERSION_ERROR.append_error_message(stderr), ignore_errors)
     else:
         if warning:
@@ -104,9 +110,9 @@ def _get_docker_status_and_version(ignore_errors, yes):
                 logger.warning("Skipping pull check.")
                 return
 
-        output, warning, stderr = _subprocess_communicate([docker_command, "pull", IMAGE])
+        output, warning, stderr, succeeded = _subprocess_communicate([docker_command, "pull", IMAGE])
 
-        if stderr:
+        if succeeded == False:
             if DOCKER_PULL_WRONG_PLATFORM in stderr:
                 print_pass("Docker pull of '{}'".format(IMAGE))
                 logger.warning("Image '%s' can be pulled but cannot be used on this platform", IMAGE)
@@ -141,9 +147,9 @@ def _get_helm_version(ignore_errors):
         return
 
     # Helm version check
-    output, warning, stderr = _subprocess_communicate([helm_command, "version", "--client"])
+    output, warning, stderr, succeeded = _subprocess_communicate([helm_command, "version", "--client"])
 
-    if stderr:
+    if succeeded == False:
         _handle_error(HELM_VERSION_ERROR.append_error_message(stderr), ignore_errors)
         return
 
@@ -178,9 +184,9 @@ def _get_notary_version(ignore_errors):
         return
 
     # Notary version check
-    output, warning, stderr = _subprocess_communicate([notary_command, "version"])
+    output, warning, stderr, succeeded = _subprocess_communicate([notary_command, "version"])
 
-    if stderr:
+    if succeeded == False:
         _handle_error(NOTARY_VERSION_ERROR.append_error_message(stderr), ignore_errors)
         return
 
