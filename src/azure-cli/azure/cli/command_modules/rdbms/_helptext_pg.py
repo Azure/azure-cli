@@ -201,6 +201,13 @@ examples:
         --key $keyIdentifier --identity testIdentity --backup-key $geoKeyIdentifier --backup-identity geoIdentity
 
 
+      # create flexible server with custom storage performance tier. Accepted values "P4", "P6", "P10", "P15", "P20", "P30", \\
+      "P40", "P50", "P60", "P70", "P80". Actual allowed values depend on the --storage-size selection for flexible server creation. 
+      Default value for storage performance tier depends on the --storage-size selected for flexible server creation.
+
+      az postgres flexible-server create -g testGroup -n testServer --location testLocation --performance-tier P15
+
+
       # create flexible server with storage auto-grow as Enabled. Accepted values Enabled / Disabled. Default value for storage auto-grow is "Disabled".
 
       az postgres flexible-server create -g testGroup -n testServer --location testLocation --storage-auto-grow Enabled
@@ -256,6 +263,8 @@ examples:
     text: az postgres flexible-server update --resource-group testGroup --name testserver --private-dns-zone /subscriptions/{SubId2}/resourceGroups/{testGroup2}/providers/Microsoft.Network/privateDnsZones/testDNS.postgres.database.azure.com
   - name: Update a flexible server's storage to enable / disable storage auto-grow.
     text: az postgres flexible-server update --resource-group testGroup --name testserver --storage-auto-grow Enabled
+  - name: Update a flexible server's storage to set custom storage performance tier.
+    text: az postgres flexible-server update --resource-group testGroup --name testserver --performance-tier P15
 """
 
 helps['postgres flexible-server restore'] = """
@@ -599,6 +608,8 @@ examples:
         replica location which is different from source server, if available, else will pick up zone same as source server \\
         in the replica location if available, else will set the zone as None, i.e. No preference
     text: az postgres flexible-server replica create --replica-name testReplicaServer -g testGroup --source-server testserver --location testLocation
+  - name: Create a read replica 'testReplicaServer' for 'testserver' with custom --storage-size and --sku.
+    text: az postgres flexible-server replica create --replica-name testReplicaServer -g testGroup --source-server testserver --sku-name Standard_D4ds_v5 --storage-size 256
 """
 
 helps['postgres flexible-server replica list'] = """
