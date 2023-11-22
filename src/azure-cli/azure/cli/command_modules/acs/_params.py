@@ -67,7 +67,8 @@ from azure.cli.command_modules.acs._validators import (
     validate_snapshot_name, validate_spot_max_price, validate_ssh_key,
     validate_nodepool_taints, validate_vm_set_type, validate_vnet_subnet_id, validate_k8s_support_plan,
     validate_utc_offset, validate_start_date, validate_start_time,
-    validate_force_upgrade_disable_and_enable_parameters)
+    validate_force_upgrade_disable_and_enable_parameters,
+    validate_allowed_host_ports, validate_application_security_groups)
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
     get_resource_name_completion_list, get_three_state_flag, name_type,
@@ -329,6 +330,8 @@ def load_arguments(self, _):
         c.argument('enable_windows_recording_rules', action='store_true')
         # misc
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
+        c.argument('nodepool_allowed_host_ports', validator=validate_allowed_host_ports, help="allowed host ports for agentpool")
+        c.argument('nodepool_asg_ids', validator=validate_application_security_groups, help="application security groups for agentpool")
 
     with self.argument_context('aks update') as c:
         # managed cluster paramerters
@@ -567,6 +570,8 @@ def load_arguments(self, _):
         c.argument('linux_os_config')
         c.argument('host_group_id', validator=validate_host_group_id)
         c.argument('gpu_instance_profile', arg_type=get_enum_type(gpu_instance_profiles))
+        c.argument('allowed_host_ports', validator=validate_allowed_host_ports)
+        c.argument('asg_ids', validator=validate_application_security_groups)
 
     with self.argument_context('aks nodepool update', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='agent_pools') as c:
         c.argument('enable_cluster_autoscaler', options_list=[
@@ -584,6 +589,8 @@ def load_arguments(self, _):
         c.argument('drain_timeout', type=int)
         c.argument('mode', get_enum_type(node_mode_types))
         c.argument('scale_down_mode', arg_type=get_enum_type(scale_down_modes))
+        c.argument('allowed_host_ports', validator=validate_allowed_host_ports)
+        c.argument('asg_ids', validator=validate_application_security_groups)
 
     with self.argument_context('aks nodepool upgrade') as c:
         c.argument('max_surge', validator=validate_max_surge)

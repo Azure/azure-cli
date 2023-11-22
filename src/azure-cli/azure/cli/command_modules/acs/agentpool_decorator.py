@@ -48,6 +48,7 @@ logger = get_logger(__name__)
 # type variables
 AgentPool = TypeVar("AgentPool")
 AgentPoolsOperations = TypeVar("AgentPoolsOperations")
+PortRange = TypeVar("PortRange")
 Snapshot = TypeVar("Snapshot")
 KubeletConfig = TypeVar("KubeletConfig")
 LinuxOSConfig = TypeVar("LinuxOSConfig")
@@ -1255,6 +1256,49 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return gpu_instance_profile
+    
+    def get_asg_ids(self) -> Union[List[str], None]:
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            asg_ids = self.raw_param.get('nodepool_asg_ids')
+        else:
+            asg_ids = self.raw_param.get('asg_ids')
+
+        if asg_ids is None:
+            return None
+        if asg_ids == '':
+            return []
+
+        return asg_ids.split(',')
+
+    def get_allowed_host_ports(self) -> Union[List[PortRange], None]:
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            ports = self.raw_param.get('nodepool_allowed_host_ports')
+        else:
+            ports = self.raw_param.get('allowed_host_ports')
+
+        if ports is None:
+            return None
+        if ports == '':
+            return []
+
+        ports = ports.split(',')
+        port_ranges = []
+        import re
+        regex = re.compile(r'^((\d+)|((\d+)-(\d+)))/(tcp|udp)$')
+        for port in ports:
+            r = regex.findall(port)
+            if r[0][1] != '':
+                # single port
+                port_start, port_end = int(r[0][1]), int(r[0][1])
+            else:
+                # port range
+                port_start, port_end = int(r[0][3]), int(r[0][4])
+            port_ranges.append(self.models.PortRange(
+                port_start=port_start,
+                port_end=port_end,
+                protocol=r[0][5].upper(),
+            ))
+        return port_ranges
 
 
 class AKSAgentPoolAddDecorator:
@@ -1539,6 +1583,18 @@ class AKSAgentPoolAddDecorator:
 
         agentpool.gpu_instance_profile = self.context.get_gpu_instance_profile()
         return agentpool
+    
+    def set_up_agentpool_network_profile(self, agentpool: AgentPool) -> AgentPool:
+        self._ensure_agentpool(agentpool)
+
+        asg_ids = self.context.get_asg_ids()
+        allowed_host_ports = self.context.get_allowed_host_ports()
+        if asg_ids and allowed_host_ports:
+            agentpool.network_profile = self.models.AgentPoolNetworkProfile(
+                application_security_groups=asg_ids,
+                allowed_host_ports=allowed_host_ports,
+            )
+        return agentpool
 
     def construct_agentpool_profile_default(self, bypass_restore_defaults: bool = False) -> AgentPool:
         """The overall controller used to construct the AgentPool profile by default.
@@ -1574,6 +1630,8 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_custom_node_config(agentpool)
         # set up gpu instance profile
         agentpool = self.set_up_gpu_properties(agentpool)
+        # set up agentpool network profile
+        agentpool = self.set_up_agentpool_network_profile(agentpool)
         # restore defaults
         if not bypass_restore_defaults:
             agentpool = self._restore_defaults_in_agentpool(agentpool)
@@ -1777,6 +1835,19 @@ class AKSAgentPoolUpdateDecorator:
             agentpool.mode = mode
         return agentpool
 
+    def update_network_profile(self, agentpool: AgentPool) -> AgentPool:
+        self._ensure_agentpool(agentpool)
+
+        asg_ids = self.context.get_asg_ids()
+        allowed_host_ports = self.context.get_allowed_host_ports()
+        if asg_ids or allowed_host_ports:
+            agentpool.network_profile = self.models.AgentPoolNetworkProfile()
+        if asg_ids is not None:
+            agentpool.network_profile.application_security_groups = asg_ids
+        if allowed_host_ports is not None:
+            agentpool.network_profile.allowed_host_ports = allowed_host_ports
+        return agentpool
+
     def update_agentpool_profile_default(self, agentpools: List[AgentPool] = None) -> AgentPool:
         """The overall controller used to update AgentPool profile by default.
 
@@ -1795,6 +1866,8 @@ class AKSAgentPoolUpdateDecorator:
         agentpool = self.update_upgrade_settings(agentpool)
         # update misc vm properties
         agentpool = self.update_vm_properties(agentpool)
+        # update network profile
+        agentpool = self.update_network_profile(agentpool)
         return agentpool
 
     def update_agentpool(self, agentpool: AgentPool) -> AgentPool:
