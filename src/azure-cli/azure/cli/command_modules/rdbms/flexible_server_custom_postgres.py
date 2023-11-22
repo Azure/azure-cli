@@ -996,7 +996,7 @@ def migration_check_name_availability(cmd, client, resource_group_name, server_n
     return get_postgresql_flexible_management_client(cmd.cli_ctx).check_migration_name_availability(subscription_id, resource_group_name, server_name, migration_name_availability_parammeters)
 
 
-def virtual_endpoints_create_func(client, resource_group_name, server_name, virtual_endpoint_name, endpoint_type, members):
+def virtual_endpoint_create_func(client, resource_group_name, server_name, virtual_endpoint_name, endpoint_type, members):
     parameters = {
         'name': virtual_endpoint_name,
         'endpoint_type': endpoint_type,
@@ -1010,7 +1010,7 @@ def virtual_endpoints_create_func(client, resource_group_name, server_name, virt
         parameters)
 
 
-def virtual_endpoints_show_func(client, resource_group_name, server_name, virtual_endpoint_name):
+def virtual_endpoint_show_func(client, resource_group_name, server_name, virtual_endpoint_name):
 
     return client.get(
         resource_group_name,
@@ -1018,14 +1018,14 @@ def virtual_endpoints_show_func(client, resource_group_name, server_name, virtua
         virtual_endpoint_name)
 
 
-def virtual_endpoints_list_func(client, resource_group_name, server_name):
+def virtual_endpoint_list_func(client, resource_group_name, server_name):
 
     return client.list_by_server(
         resource_group_name,
         server_name)
 
 
-def virtual_endpoints_delete_func(client, resource_group_name, server_name, virtual_endpoint_name):
+def virtual_endpoint_delete_func(client, resource_group_name, server_name, virtual_endpoint_name):
 
     return client.begin_delete(
         resource_group_name,
@@ -1033,7 +1033,7 @@ def virtual_endpoints_delete_func(client, resource_group_name, server_name, virt
         virtual_endpoint_name)
 
 
-def virtual_endpoints_update_func(client, resource_group_name, server_name, virtual_endpoint_name, endpoint_type, members):
+def virtual_endpoint_update_func(client, resource_group_name, server_name, virtual_endpoint_name, endpoint_type, members):
     parameters = {
         'name': virtual_endpoint_name,
         'endpoint_type': endpoint_type,

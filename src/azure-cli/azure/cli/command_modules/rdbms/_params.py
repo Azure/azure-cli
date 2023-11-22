@@ -743,21 +743,21 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         # virtual-endpoint
         for scope in ['create', 'delete', 'list', 'show', 'update']:
-            argument_context_string = '{} flexible-server virtual-endpoints {}'.format(command_group, scope)
+            argument_context_string = '{} flexible-server virtual-endpoint {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('resource_group_name', arg_type=resource_group_name_type)
                 c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
                 c.argument('virtual_endpoint_name', options_list=['--name', '-n'], arg_type=virtual_endpoint_arg_type, validator=virtual_endpoint_name_validator)
 
         for scope in ['create', 'update']:
-            argument_context_string = '{} flexible-server virtual-endpoints {}'.format(command_group, scope)
+            argument_context_string = '{} flexible-server virtual-endpoint {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('endpoint_type', options_list=['--endpoint-type', '-t'], arg_type=endpoint_type_arg_type,
                            help='Virtual Endpoints offer two distinct types of connection points. Writer endpoint (Read/Write), this endpoint always points to the current primary server. Read-only endpoint, This endpoint can point to either a read replica or primary server. ')
                 c.argument('members', options_list=['--members', '-m'], arg_type=members_type,
                            help='The read replicas the virtual endpoints point to. ')
 
-        with self.argument_context('{} flexible-server virtual-endpoints delete'.format(command_group)) as c:
+        with self.argument_context('{} flexible-server virtual-endpoint delete'.format(command_group)) as c:
             c.argument('yes', arg_type=yes_arg_type)
 
         with self.argument_context('{} flexible-server replica list'.format(command_group)) as c:

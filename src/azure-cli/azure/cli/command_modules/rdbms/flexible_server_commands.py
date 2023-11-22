@@ -133,14 +133,14 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('update', 'migration_update_func', custom_command_type=flexible_servers_custom_postgres)
         g.custom_command('check-name-availability', 'migration_check_name_availability', custom_command_type=flexible_servers_custom_postgres)
 
-    with self.command_group('postgres flexible-server virtual-endpoints', postgres_flexible_virtual_endpoints_sdk,
+    with self.command_group('postgres flexible-server virtual-endpoint', postgres_flexible_virtual_endpoints_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
                             client_factory=cf_postgres_flexible_virtual_endpoints) as g:
-        g.custom_command('create', 'virtual_endpoints_create_func', custom_command_type=flexible_servers_custom_postgres)
-        g.custom_command('delete', 'virtual_endpoints_delete_func', custom_command_type=flexible_servers_custom_postgres)
-        g.custom_show_command('show', 'virtual_endpoints_show_func', custom_command_type=flexible_servers_custom_postgres)
-        g.custom_command('list', 'virtual_endpoints_list_func', custom_command_type=flexible_servers_custom_postgres)
-        g.custom_command('update', 'virtual_endpoints_update_func', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('create', 'virtual_endpoint_create_func', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('delete', 'virtual_endpoint_delete_func', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_show_command('show', 'virtual_endpoint_show_func', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('list', 'virtual_endpoint_list_func', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('update', 'virtual_endpoint_update_func', custom_command_type=flexible_servers_custom_postgres)
 
     with self.command_group('postgres flexible-server parameter', postgres_flexible_config_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
