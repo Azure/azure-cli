@@ -1194,7 +1194,7 @@ class FlexibleServerVirtualEndpointSwitchoverMgmtScenarioTest(ScenarioTest):  # 
                  checks=[JMESPathCheck('length(members)', 1)]).get_output_in_json()
 
         # test virtual-endpoint show
-        self.cmd('{} flexible-server virtual-endpoint list -g {} --server-name {} --name {}'
+        self.cmd('{} flexible-server virtual-endpoint show -g {} --server-name {} --name {}'
                  .format(database_engine, resource_group, master_server, virtual_endpoint_name),
                  checks=[JMESPathCheck('members', update_check['members'])])
 
