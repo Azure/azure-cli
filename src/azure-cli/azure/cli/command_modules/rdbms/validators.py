@@ -371,9 +371,11 @@ def _pg_storage_performance_tier_validator(performance_tier, sku_info, tier=None
             if storage_size is None:
                 performance_tiers = get_performance_tiers(sku_info[tier]["storage_edition"])
             else:
-                performance_tiers = get_performance_tiers_for_storage(sku_info[tier]["storage_edition"], storage_size=storage_size)
+                performance_tiers = get_performance_tiers_for_storage(sku_info[tier]["storage_edition"], 
+                                                                      storage_size=storage_size)
             if performance_tier not in performance_tiers:
-                raise CLIError('Incorrect value for --performance-tier for storage-size: {}. Allowed values : {}'.format(storage_size, performance_tiers))
+                raise CLIError('Incorrect value for --performance-tier for storage-size: {}.'
+                               ' Allowed values : {}'.format(storage_size, performance_tiers))
 
 
 def _pg_version_validator(version, versions):

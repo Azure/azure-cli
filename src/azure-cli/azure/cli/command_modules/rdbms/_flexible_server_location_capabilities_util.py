@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long, import-outside-toplevel, raise-missing-from
-from knack.util import CLIError
 from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.core.paging import ItemPaged
 from ._client_factory import cf_postgres_flexible_location_capabilities, cf_postgres_flexible_server_capabilities
@@ -23,7 +22,7 @@ def get_postgres_server_capability_info(cmd, resource_group, server_name):
 
 
 def get_performance_tiers_for_storage(storage_edition, storage_size):
-    performance_tiers = list()
+    performance_tiers = []
     storage_size_mb = None if storage_size is None else storage_size * 1024
     for storage_info in storage_edition.supported_storage_mb:
         if storage_size_mb == storage_info.storage_size_mb:
@@ -33,7 +32,7 @@ def get_performance_tiers_for_storage(storage_edition, storage_size):
 
 
 def get_performance_tiers(storage_edition):
-    performance_tiers = list()
+    performance_tiers = []
     for storage_info in storage_edition.supported_storage_mb:
         for performance_tier in storage_info.supported_iops_tiers:
             if performance_tier.name not in performance_tiers:
