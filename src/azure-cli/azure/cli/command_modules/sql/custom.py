@@ -3909,6 +3909,9 @@ def instance_pool_create(
     kwargs['sku'] = _find_instance_pool_sku_from_capabilities(
         cmd.cli_ctx, kwargs['location'], sku)
 
+    kwargs['maintenance_configuration_id'] = _complete_maintenance_configuration_id(
+        cmd.cli_ctx, kwargs['maintenance_configuration_id'])
+
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        instance_pool_name=instance_pool_name,
                        resource_group_name=resource_group_name,
@@ -3916,13 +3919,33 @@ def instance_pool_create(
 
 
 def instance_pool_update(
+        cmd,
         instance,
+        vcores=None,
+        tier=None,
+        family=None,
+        maintenance_configuration_id=None,
+        license_type=None,
         tags=None):
     '''
     Updates a instance pool
     '''
 
-    instance.tags = tags
+    instance.tags = (tags or instance.tags)
+    instance.maintenance_configuration_id = _complete_maintenance_configuration_id(
+        cmd.cli_ctx, maintenance_configuration_id or instance.maintenance_configuration_id)
+
+    instance.v_cores = (vcores or instance.v_cores)
+    instance.license_type = (license_type or instance.license_type)
+
+    instance.sku.name = None
+    instance.sku.tier = (tier or instance.sku.tier)
+    instance.sku.family = (family or instance.sku.family)
+
+    instance.sku = _find_instance_pool_sku_from_capabilities(
+        cmd.cli_ctx,
+        instance.location,
+        instance.sku)
 
     return instance
 
