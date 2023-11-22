@@ -736,6 +736,7 @@ def validate_force_upgrade_disable_and_enable_parameters(namespace):
     if namespace.disable_force_upgrade and namespace.enable_force_upgrade:
         raise MutuallyExclusiveArgumentError('Providing both --disable-force-upgrade and --enable-force-upgrade flags is invalid')
 
+
 def validate_allowed_host_ports(namespace):
     if hasattr(namespace, "nodepool_allowed_host_ports"):
         host_ports = namespace.nodepool_allowed_host_ports

@@ -1256,7 +1256,7 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return gpu_instance_profile
-    
+
     def get_asg_ids(self) -> Union[List[str], None]:
         if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
             asg_ids = self.raw_param.get('nodepool_asg_ids')
@@ -1583,7 +1583,7 @@ class AKSAgentPoolAddDecorator:
 
         agentpool.gpu_instance_profile = self.context.get_gpu_instance_profile()
         return agentpool
-    
+
     def set_up_agentpool_network_profile(self, agentpool: AgentPool) -> AgentPool:
         self._ensure_agentpool(agentpool)
 
