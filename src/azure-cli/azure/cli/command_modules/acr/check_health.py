@@ -94,7 +94,7 @@ def _get_docker_status_and_version(ignore_errors, yes):
     output, warning, stderr, succeeded = _subprocess_communicate(
         [docker_command, "version", "--format", "'Docker version {{.Server.Version}}, "
          "build {{.Server.GitCommit}}, platform {{.Server.Os}}/{{.Server.Arch}}'"])
-    if succeeded == False:
+    if not succeeded:
         _handle_error(DOCKER_VERSION_ERROR.append_error_message(stderr), ignore_errors)
     else:
         if warning:
@@ -112,7 +112,7 @@ def _get_docker_status_and_version(ignore_errors, yes):
 
         output, warning, stderr, succeeded = _subprocess_communicate([docker_command, "pull", IMAGE])
 
-        if succeeded == False:
+        if not succeeded:
             if DOCKER_PULL_WRONG_PLATFORM in stderr:
                 print_pass("Docker pull of '{}'".format(IMAGE))
                 logger.warning("Image '%s' can be pulled but cannot be used on this platform", IMAGE)
@@ -149,7 +149,7 @@ def _get_helm_version(ignore_errors):
     # Helm version check
     output, warning, stderr, succeeded = _subprocess_communicate([helm_command, "version", "--client"])
 
-    if succeeded == False:
+    if not succeeded:
         _handle_error(HELM_VERSION_ERROR.append_error_message(stderr), ignore_errors)
         return
 
@@ -186,7 +186,7 @@ def _get_notary_version(ignore_errors):
     # Notary version check
     output, warning, stderr, succeeded = _subprocess_communicate([notary_command, "version"])
 
-    if succeeded == False:
+    if not succeeded:
         _handle_error(NOTARY_VERSION_ERROR.append_error_message(stderr), ignore_errors)
         return
 
