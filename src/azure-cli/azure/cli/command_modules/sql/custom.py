@@ -807,6 +807,23 @@ def _get_managed_instance_resource_id(
         namespace='Microsoft.Sql', type='managedInstances',
         name=managed_instance_name))
 
+def _get_managed_instance_pool_resource_id(
+        cli_ctx,
+        resource_group_name,
+        instance_pool_name,
+        subscription_id=None):
+    '''
+    Gets instance pool resource id in this Azure environment.
+    '''
+
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import resource_id
+
+    return (resource_id(
+        subscription=subscription_id if subscription_id else get_subscription_id(cli_ctx),
+        resource_group=resource_group_name,
+        namespace='Microsoft.Sql', type='instancePools',
+        name=instance_pool_name))
 
 def db_show_conn_str(
         cmd,
@@ -4883,6 +4900,7 @@ def managed_instance_create(
         external_admin_name=None,
         service_principal_type=None,
         zone_redundant=None,
+        instance_pool_name=None,
         **kwargs):
     '''
     Creates a managed instance.
@@ -4936,6 +4954,9 @@ def managed_instance_create(
         sid=external_admin_sid,
         azure_ad_only_authentication=ad_only,
         tenant_id=tenant_id)
+
+    if instance_pool_name is not None and instance_pool_name != '':
+        kwargs['instance_pool_id'] = _get_managed_instance_pool_resource_id(cmd.cli_ctx, resource_group_name, instance_pool_name)
 
     # Create
     return client.begin_create_or_update(
@@ -5004,7 +5025,8 @@ def managed_instance_update(
         virtual_network_subnet_id=None,
         yes=None,
         service_principal_type=None,
-        zone_redundant=None):
+        zone_redundant=None,
+        instance_pool_name=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -5073,6 +5095,12 @@ def managed_instance_update(
 
     if zone_redundant is not None:
         instance.zone_redundant = zone_redundant
+
+    if instance_pool_name is not None:
+        if instance_pool_name != '':
+            instance.instance_pool_id = _get_managed_instance_pool_resource_id(cmd.cli_ctx, instance.resource_group_name, instance_pool_name)
+        else:
+            instance.instance_pool_id = instance_pool_name
 
     return instance
 

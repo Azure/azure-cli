@@ -1717,6 +1717,11 @@ def load_arguments(self, _):
                    options_list=['--maint-config-id', '-m'],
                    help='Assign maintenance configuration to this managed instance.')
 
+        c.argument('instance_pool_name',
+                   required=False,
+                   options_list=['--instance-pool-name'],
+                   help='Name of the Instance Pool where managed instance will be placed.')
+
         # Create args that will be used to build up the Instance Pool's Sku object
         create_args_for_complex_type(
             c, 'sku', Sku, [
@@ -1761,6 +1766,11 @@ def load_arguments(self, _):
         c.argument('maintenance_configuration_id',
                    options_list=['--maint-config-id', '-m'],
                    help='Assign maintenance configuration to this managed instance.')
+
+        c.argument('instance_pool_name',
+                   required=False,
+                   options_list=['--instance-pool-name'],
+                   help='Name of the Instance Pool where managed instance will be placed.')
 
         create_args_for_complex_type(
             c, 'sku', Sku, [
