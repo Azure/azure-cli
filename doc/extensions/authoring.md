@@ -120,9 +120,9 @@ See [Extension Metadata](metadata.md) for more information.
 
 ### Limit dependencies in setup.py
 
-- Before adding a dependency to your setup.py, check that it's not already available in [azure-cli-core setup.py](https://github.com/Azure/azure-cli/blob/main/src/azure-cli-core/setup.py) or [azure-cli setup.py](https://github.com/Azure/azure-cli/blob/main/src/azure-cli/setup.py). You cannot override a dependency that's already installed in main CLI.
+- Before adding a dependency to your setup.py, check if it's already available in [azure-cli-core setup.py](https://github.com/Azure/azure-cli/blob/main/src/azure-cli-core/setup.py) or [azure-cli setup.py](https://github.com/Azure/azure-cli/blob/main/src/azure-cli/setup.py). You cannot override a dependency that's already installed in main CLI.
 - To use Azure SDK or Azure Management SDK in an extension, include them as `vendored_sdks` in the packages.
-- If there are dependency conflicts among multiple extensions, we will ask all developers to upgrade their dependencies to the latest version.
+- If there are dependencies conflicting among multiple extensions, we will ask all developers to upgrade their dependencies to the latest version.
 
 ### How do I know I'm using my dev extension(s)?
 
