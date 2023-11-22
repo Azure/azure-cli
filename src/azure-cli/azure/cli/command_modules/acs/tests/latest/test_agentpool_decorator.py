@@ -2184,6 +2184,7 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
             mode=CONST_NODEPOOL_MODE_USER,
             scale_down_mode=CONST_SCALE_DOWN_MODE_DELETE,
             host_group_id=None,
+            network_profile=self.models.AgentPoolNetworkProfile(),
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
@@ -2327,6 +2328,7 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
             enable_fips=False,
             mode=CONST_NODEPOOL_MODE_SYSTEM,
             host_group_id=None,
+            network_profile=self.models.AgentPoolNetworkProfile(),
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
