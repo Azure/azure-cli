@@ -14,9 +14,11 @@ from knack.log import get_logger
 
 logger = get_logger(__name__)
 
-_DEEPPROMPT_ENDPOINT = "https://data-ai-dev.microsoft.com/deepprompt/api/v1"
-_DEEPPROMPT_APP = "7d78b7a3-e228-4b85-8fcf-5633fb326beb"
-_AAD_TENANT = "72f988bf-86f1-41af-91ab-2d7cd011db47"
+# TODO: These values are placeholders now.
+# Will need to replace them with the actual values when it's ready in production.
+_DEEPPROMPT_ENDPOINT = "<url>"
+_DEEPPROMPT_APP = "<appid>"
+_AAD_TENANT = "<tenant>"
 _SCOPES = [f"{_DEEPPROMPT_APP}/.default"]
 _TIMEOUT = 180
 
