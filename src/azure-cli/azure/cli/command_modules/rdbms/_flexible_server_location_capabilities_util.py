@@ -31,6 +31,7 @@ def get_performance_tiers_for_storage(storage_edition, storage_size):
                 performance_tiers.append(performance_tier.name)
     return performance_tiers
 
+
 def get_performance_tiers(storage_edition):
     performance_tiers = list()
     for storage_info in storage_edition.supported_storage_mb:
@@ -71,7 +72,7 @@ def _postgres_parse_list_capability(result):
 
         storage_sizes = set()
         for storage_edition in tier_info.supported_storage_editions:
-            if storage_edition.name == "ManagedDisk": 
+            if storage_edition.name == "ManagedDisk":
                 for storage_info in storage_edition.supported_storage_mb:
                     storage_sizes.add(int(storage_info.storage_size_mb // 1024))
                 tier_dict["storage_edition"] = storage_edition
@@ -92,12 +93,12 @@ def _postgres_parse_list_capability(result):
         versions.add(version.name)
 
     return {
-            'sku_info': tiers_dict,
-            'single_az': single_az,
-            'geo_backup_supported': geo_backup_supported,
-            'zones': zones,
-            'server_versions': versions
-            }   
+        'sku_info': tiers_dict,
+        'single_az': single_az,
+        'geo_backup_supported': geo_backup_supported,
+        'zones': zones,
+        'server_versions': versions
+        }
 
 
 def _get_list_from_paged_response(obj_list):

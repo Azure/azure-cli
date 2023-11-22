@@ -317,9 +317,9 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
         tier = instance.sku.tier
-    _pg_storage_performance_tier_validator(performance_tier, 
-                                           sku_info, 
-                                           tier, 
+    _pg_storage_performance_tier_validator(performance_tier,
+                                           sku_info,
+                                           tier,
                                            instance.storage.storage_size_gb if storage_gb is None else storage_gb)
     if geo_redundant_backup is None and instance is not None:
         geo_redundant_backup = instance.backup.geo_redundant_backup
@@ -595,7 +595,7 @@ def validate_mysql_replica(server):
                               "Scale up the source server to General Purpose or Memory Optimized. ")
 
 
-def validate_postgres_replica(cmd, tier, location, instance, sku_name, 
+def validate_postgres_replica(cmd, tier, location, instance, sku_name,
                               storage_gb, performance_tier=None, list_location_capability_info=None):
     # Tier validation
     if tier == 'Burstable':
@@ -607,13 +607,13 @@ def validate_postgres_replica(cmd, tier, location, instance, sku_name,
 
     if not list_location_capability_info:
         list_location_capability_info = get_postgres_location_capability_info(cmd, location)
-    
+
     sku_info = list_location_capability_info['sku_info']
     _pg_tier_validator(tier, sku_info)  # need to be validated first
     _pg_sku_name_validator(sku_name, sku_info, tier, instance)
-    _pg_storage_performance_tier_validator(performance_tier, 
-                                           sku_info, 
-                                           tier, 
+    _pg_storage_performance_tier_validator(performance_tier,
+                                           sku_info,
+                                           tier,
                                            storage_gb)
 
 

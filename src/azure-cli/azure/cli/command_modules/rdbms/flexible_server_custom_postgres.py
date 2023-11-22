@@ -327,7 +327,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
         instance.storage.tier = performance_tier
 
     if instance.storage.type is not None:
-        if instance.storage.type == "": 
+        if instance.storage.type == "":
             instance.storage.type = None
             instance.storage.iops = None
             if performance_tier is None:
@@ -466,7 +466,7 @@ def flexible_list_skus(cmd, client, location):
 def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, zone=None,
                             location=None, vnet=None, vnet_address_prefix=None, subnet=None,
                             subnet_address_prefix=None, private_dns_zone_arguments=None, no_wait=False,
-                            byok_identity=None, byok_key=None, 
+                            byok_identity=None, byok_key=None,
                             sku_name=None, tier=None,
                             storage_gb=None, performance_tier=None, yes=False):
     replica_name = replica_name.lower()
@@ -501,7 +501,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
         sku_name = source_server_object.sku.name
     if storage_gb is None and source_server_object is not None:
         storage_gb = source_server_object.storage.storage_size_gb
-    validate_postgres_replica(cmd, tier, location, source_server_object, 
+    validate_postgres_replica(cmd, tier, location, source_server_object,
                               sku_name, storage_gb, performance_tier, list_location_capability_info)
 
     if not zone:
@@ -544,11 +544,11 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
     parameters.identity, parameters.data_encryption = build_identity_and_data_encryption(db_engine='postgres',
                                                                                          byok_identity=byok_identity,
                                                                                          byok_key=byok_key)
-    
+
     parameters.sku = postgresql_flexibleservers.models.Sku(name=sku_name, tier=tier)
 
     parameters.storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb, auto_grow="Disabled", tier=performance_tier)
-    
+
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, replica_name, parameters)
 
 
