@@ -4317,38 +4317,43 @@ def _get_latest_deployment_id(cmd, rg_name, name, deployment_status_url, slot):
 def _track_deployment_runtime_status(params, deploymentstatusapi_url, timeout=None):
     total_trials = (int(timeout) // 5) if timeout else 200
     num_trials = 0
-    runtime_successful = False
     start_time = time.time()
-    logger.warning("Current deployment status:")
     while num_trials < total_trials:
-        time.sleep(5)
         response_body = send_raw_request(params.cmd.cli_ctx, "GET", deploymentstatusapi_url,
                                          disable_request_response_logging=True).json()
-        deployment_status = response_body.get('properties').get('status')
-        time_elapseed = int(time.time() - start_time)
-        logger.warning("%s %ssec(s)", deployment_status, time_elapseed)
+        deployment_properties = response_body.get('properties')
+        deployment_status = deployment_properties.get('status')
+        time_elapsed = int(time.time() - start_time)
+        logger.warning("Status: %s. Time: %ssec(s)", deployment_status, time_elapsed)
+        if deployment_status == "RuntimeStarting":
+            logger.info("InprogressInstances: %s, SuccessfulInstances: %s",
+                        deployment_properties.get('numberOfInstancesInProgress'),
+                        deployment_properties.get('numberOfInstancesSuccessful'))
         if deployment_status == "RuntimeSuccessful":
-            runtime_successful = True
             break
         if deployment_status == "RuntimeFailed":
-            deployment_properties = response_body.get('properties')
             logger.error("Deployment failed because the runtime failed to start, InprogressInstances: %s, \
                             SuccessfulInstances: %s, FailedInstances: %s",
                          deployment_properties.get('numberOfInstancesInProgress'),
                          deployment_properties.get('numberOfInstancesSuccessful'),
                          deployment_properties.get('numberOfInstancesFailed'))
-            logger.error("Errors: %s", deployment_properties.get('errors'))
+            errors = deployment_properties.get('errors')
+            if errors is not None:
+                logger.error("Errors: %s", errors)
             logger.error("Please check the deployment logs for more info: %s",
                          deployment_properties.get('failedInstancesLogs'))
-            break
+            raise CLIError
         if deployment_status == "BuildFailed":
-            deployment_properties = response_body.get('properties')
             logger.error("Deployment failed because the build process failed")
-            logger.error("Errors: %s", deployment_properties.get('errors'))
+            errors = deployment_properties.get('errors')
+            if errors is not None:
+                logger.error("Errors: %s", errors)
             logger.error("Please check the build logs for more info: %s",
                          deployment_properties.get('failedInstancesLogs'))
-            break
-    if not runtime_successful:
+            raise CLIError
+        num_trials = num_trials + 1
+        time.sleep(5)
+    if num_trials >= total_trials:
         scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
         raise CLIError("Timeout reached while tracking deployment status, however,"
                        "the deployment operation is still on-going. "
@@ -5441,11 +5446,13 @@ def _make_onedeploy_request(params):
         response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_url, body=body)
         poll_async_deployment_for_debugging = False
 
-    # check the status of async deployment
+    # check the status of deployment
     if response.status_code == 202 or response.status_code == 200:
         response_body = None
         if poll_async_deployment_for_debugging:
-            logger.warning('Polling the status of async deployment')
+            logger.warning('Polling the status of %s deployment. Start Time: %s UTC',
+                           "async" if params.is_async_deployment else "sync",
+                           datetime.datetime.now(datetime.timezone.utc))
             if params.track_runtime_status is not None and params.track_runtime_status:
                 # once deploymentstatus/latest is available, we can use it to track the deployment
                 deployment_id = _get_latest_deployment_id(params.cmd, params.resource_group_name,
