@@ -1589,8 +1589,8 @@ class AKSAgentPoolAddDecorator:
 
         asg_ids = self.context.get_asg_ids()
         allowed_host_ports = self.context.get_allowed_host_ports()
-        agentpool.network_profile = self.models.AgentPoolNetworkProfile()
         if allowed_host_ports is not None:
+            agentpool.network_profile = self.models.AgentPoolNetworkProfile()
             agentpool.network_profile.allowed_host_ports = allowed_host_ports
             agentpool.network_profile.application_security_groups = asg_ids
         return agentpool

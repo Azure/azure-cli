@@ -5505,7 +5505,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             enable_ultra_ssd=True,
             enable_fips=True,
             mode=CONST_NODEPOOL_MODE_SYSTEM,
-            network_profile=self.models.AgentPoolNetworkProfile(),
         )
         ground_truth_mc_1 = self.models.ManagedCluster(location="test_location")
         ground_truth_mc_1.agent_pool_profiles = [ground_truth_agentpool_profile_1]
@@ -7282,7 +7281,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             enable_ultra_ssd=False,
             enable_fips=False,
             mode=CONST_NODEPOOL_MODE_SYSTEM,
-            network_profile=self.models.AgentPoolNetworkProfile(),
         )
         ssh_config_1 = self.models.ContainerServiceSshConfiguration(
             public_keys=[self.models.ContainerServiceSshPublicKey(key_data=public_key)]
