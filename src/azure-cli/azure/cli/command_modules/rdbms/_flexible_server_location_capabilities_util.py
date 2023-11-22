@@ -98,7 +98,7 @@ def _postgres_parse_list_capability(result):
         'geo_backup_supported': geo_backup_supported,
         'zones': zones,
         'server_versions': versions
-        }
+    }
 
 
 def _get_list_from_paged_response(obj_list):
