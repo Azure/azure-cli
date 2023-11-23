@@ -53,7 +53,6 @@ from .custom_waf import delete_waf_rate_limit_rule                    # pylint: 
 from .custom_waf import show_waf_rate_limit_rule                      # pylint: disable=unused-import
 from .custom_waf import list_waf_rate_limit_rules                     # pylint: disable=unused-import
 
-from .custom_afdx import create_afd_rule                              # pylint: disable=unused-import
 from .custom_afdx import add_afd_rule_condition                       # pylint: disable=unused-import
 from .custom_afdx import remove_afd_rule_condition                    # pylint: disable=unused-import
 from .custom_afdx import add_afd_rule_action                          # pylint: disable=unused-import
