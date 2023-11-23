@@ -102,6 +102,10 @@ def cf_mysql_flexible_adadmin(cli_ctx, _):
     return get_mysql_flexible_management_client(cli_ctx).azure_ad_administrators
 
 
+def cf_mysql_advanced_threat_protection(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).advanced_threat_protection_settings
+
+
 def cf_mysql_check_resource_availability(cli_ctx, _):
     return get_mysql_flexible_management_client(cli_ctx).check_name_availability
 

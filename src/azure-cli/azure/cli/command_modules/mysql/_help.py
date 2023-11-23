@@ -12,6 +12,33 @@ type: group
 short-summary: Manage Azure Database for MySQL Flexible Servers.
 """
 
+helps['mysql flexible-server advanced-threat-protection'] = """
+type: group
+short-summary: Manage the server's advanced threat protection setting.
+"""
+
+helps['mysql flexible-server advanced-threat-protection show'] = """
+type: command
+short-summary: Gets the server's advanced threat protection setting.
+examples:
+  - name: Get the advanced threat protection setting.
+    text: az mysql flexible-server advanced-threat-protection show -g mygroup -n myserver
+"""
+
+helps['mysql flexible-server advanced-threat-protection update'] = """
+type: command
+short-summary: Updates the server's advanced threat protection setting.
+parameters:
+  - name: --state
+    type: string
+    short-summary: 'State of the advanced threat protection setting'
+examples:
+  - name: Enable the advanced threat protection setting.
+    text: az mysql flexible-server advanced-threat-protection-setting update -g mygroup -s myserver --state Enabled
+  - name: Disable the advanced threat protection setting.
+    text: az mysql flexible-server advanced-threat-protection-setting update -g mygroup -s myserver --state Disabled
+"""
+
 helps['mysql flexible-server create'] = """
 type: command
 short-summary: Create a MySQL flexible server.
