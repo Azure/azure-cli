@@ -2398,7 +2398,7 @@ def load_arguments(self, _):
                 'requested_backup_storage_redundancy',
                 'tags',
                 'yes',
-                'instance_pool_id'
+                'instance_pool_name'
             ])
 
         c.argument('administrator_login_password',
