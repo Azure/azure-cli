@@ -5009,6 +5009,7 @@ def managed_instance_get(
 def managed_instance_update(
         cmd,
         instance,
+        resource_group_name,
         administrator_login_password=None,
         license_type=None,
         vcores=None,
@@ -5101,7 +5102,7 @@ def managed_instance_update(
         instance.zone_redundant = zone_redundant
 
     if instance_pool_name is not None:
-        instance.instance_pool_id = _get_managed_instance_pool_resource_id(cmd.cli_ctx, instance.resource_group_name, instance_pool_name)
+        instance.instance_pool_id = _get_managed_instance_pool_resource_id(cmd.cli_ctx, resource_group_name, instance_pool_name)
 
     return instance
 
