@@ -807,6 +807,7 @@ def _get_managed_instance_resource_id(
         namespace='Microsoft.Sql', type='managedInstances',
         name=managed_instance_name))
 
+
 def _get_managed_instance_pool_resource_id(
         cli_ctx,
         resource_group_name,
@@ -827,6 +828,7 @@ def _get_managed_instance_pool_resource_id(
             name=instance_pool_name))
 
     return instance_pool_name
+
 
 def db_show_conn_str(
         cmd,

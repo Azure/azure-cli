@@ -1027,6 +1027,8 @@ examples:
     text: az sql mi update -g mygroup -n myinstance --bsr Local
   - name: Enable zone redundancy on a managed instance
     text: az sql mi update -g mygroup -n myinstance -z
+  - name: Move managed instance to instance pool
+    text: az sql mi update -g mygroup -n myinstance --instance-pool-name myinstancepool
 """
 
 helps['sql midb'] = """
