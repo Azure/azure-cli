@@ -41,40 +41,26 @@ DEFAULT_DB_NAME = 'flexibleserverdb'
 MINIMUM_IOPS = 300
 
 
-def flexible_server_advanced_threat_protection_update(cmd,
-                                        client,
-                                        resource_group_name,
-                                        server_name,
-                                        state):
+def flexible_server_advanced_threat_protection_update(cmd, client, resource_group_name, server_name, state):
     '''
     Updates an advanced threat protection setting. Custom update function to apply parameters to instance.
     '''
-    
-    allowed_states = [mysql_flexibleservers.models.AdvancedThreatProtectionState.ENABLED.value,
-                                     mysql_flexibleservers.models.AdvancedThreatProtectionState.DISABLED.value]
-    
+    allowed_states = [mysql_flexibleservers.models.AdvancedThreatProtectionState.ENABLED.value, mysql_flexibleservers.models.AdvancedThreatProtectionState.DISABLED.value]
+
     if state not in allowed_states:
         raise ValueError("Invalid defender state provided, allowed values - {}".format(allowed_states))
 
     parameters = {
         'state': state
     }
-    return client.begin_update(resource_group_name,
-                               server_name,
-                               mysql_flexibleservers.models.AdvancedThreatProtectionName.DEFAULT.value,
-                               parameters)
+    return client.begin_update(resource_group_name, server_name, mysql_flexibleservers.models.AdvancedThreatProtectionName.DEFAULT.value, parameters)
 
 
-def flexible_server_advanced_threat_protection_show(cmd,
-                                                    client,
-                                                    resource_group_name,
-                                                    server_name):
+def flexible_server_advanced_threat_protection_show(cmd, client, resource_group_name, server_name):
     '''
     Gets an advanced threat protection setting.
     '''
-    return client.get(resource_group_name,
-                    server_name,
-                    mysql_flexibleservers.models.AdvancedThreatProtectionName.DEFAULT.value)
+    return client.get(resource_group_name, server_name, mysql_flexibleservers.models.AdvancedThreatProtectionName.DEFAULT.value)
 
 
 def flexible_server_update_get(client, resource_group_name, server_name):

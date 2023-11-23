@@ -297,7 +297,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('state',
                    options_list=['--state'],
                    help="State of server's advanced threat protection setting. ")
-        
+
     with self.argument_context('mysql flexible-server create') as c:
         c.argument('tier', default='Burstable', arg_type=tier_arg_type)
         c.argument('sku_name', default='Standard_B1ms', arg_type=sku_name_arg_type)
