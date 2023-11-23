@@ -5006,7 +5006,7 @@ def managed_instance_get(
     return client.get(resource_group_name, managed_instance_name, expand)
 
 
-def managed_instance_update( # pylint: disable=too-many-locals
+def managed_instance_update(  # pylint: disable=too-many-locals
         cmd,
         instance,
         resource_group_name,
