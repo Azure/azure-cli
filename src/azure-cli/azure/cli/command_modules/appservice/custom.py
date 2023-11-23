@@ -4332,14 +4332,18 @@ def _track_deployment_runtime_status(params, deploymentstatusapi_url, timeout=No
         if deployment_status == "RuntimeSuccessful":
             break
         if deployment_status == "RuntimeFailed":
-            logger.error("Deployment failed because the runtime failed to start, InprogressInstances: %s, \
-                            SuccessfulInstances: %s, FailedInstances: %s",
+            logger.error("Deployment failed because the runtime failed to start")
+            logger.error("InprogressInstances: %s, SuccessfulInstances: %s, FailedInstances: %s",
                          deployment_properties.get('numberOfInstancesInProgress'),
                          deployment_properties.get('numberOfInstancesSuccessful'),
                          deployment_properties.get('numberOfInstancesFailed'))
             errors = deployment_properties.get('errors')
             if errors is not None:
-                logger.error("Errors: %s", errors)
+                error_extended_code = errors[0]['extendedCode']
+                error_code = errors[0]['code']
+                error_message = errors[0]['message']
+                logger.error("Error - [Code : %s, Message: %s, ExtendedCode: %s]",
+                             error_code, error_message, error_extended_code)
             logger.error("Please check the deployment logs for more info: %s",
                          deployment_properties.get('failedInstancesLogs'))
             raise CLIError
@@ -4347,7 +4351,11 @@ def _track_deployment_runtime_status(params, deploymentstatusapi_url, timeout=No
             logger.error("Deployment failed because the build process failed")
             errors = deployment_properties.get('errors')
             if errors is not None:
-                logger.error("Errors: %s", errors)
+                error_extended_code = errors[0]['extendedCode']
+                error_code = errors[0]['code']
+                error_message = errors[0]['message']
+                logger.error("Error - [Code : %s, Message: %s, ExtendedCode: %s]",
+                             error_code, error_message, error_extended_code)
             logger.error("Please check the build logs for more info: %s",
                          deployment_properties.get('failedInstancesLogs'))
             raise CLIError
