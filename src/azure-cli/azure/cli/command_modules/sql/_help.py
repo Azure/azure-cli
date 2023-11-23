@@ -1029,6 +1029,8 @@ examples:
     text: az sql mi update -g mygroup -n myinstance -z
   - name: Move managed instance to instance pool
     text: az sql mi update -g mygroup -n myinstance --instance-pool-name myinstancepool
+  - name: Move managed instance out of instance pool
+    text: az sql mi update -g mygroup -n myinstance --remove instancePoolId --capacity vcorecapacity
 """
 
 helps['sql midb'] = """
