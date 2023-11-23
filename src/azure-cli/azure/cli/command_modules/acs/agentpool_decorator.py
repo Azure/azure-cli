@@ -1284,6 +1284,8 @@ class AKSAgentPoolContext(BaseAKSContext):
         ports = ports.split(',')
         port_ranges = []
         import re
+        # Parse the port range. The format is either `<int>/<protocol>` or `<int>-<int>/<protocol>`.
+        # e.g. `80/tcp` | `22/udp` | `4000-5000/tcp`
         regex = re.compile(r'^((\d+)|((\d+)-(\d+)))/(tcp|udp)$')
         for port in ports:
             r = regex.findall(port)
