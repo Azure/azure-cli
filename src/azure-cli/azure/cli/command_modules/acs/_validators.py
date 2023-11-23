@@ -748,12 +748,12 @@ def validate_allowed_host_ports(namespace):
     # Parse the port range. The format is either `<int>/<protocol>` or `<int>-<int>/<protocol>`.
     # e.g. `80/tcp` | `22/udp` | `4000-5000/tcp`
     regex = re.compile(r'^((\d+)|(\d+-\d+))/(tcp|udp)$')
-    for port_range in host_ports.split(","):
-        found = regex.findall(port_range)
+    for port_range in host_ports:
+        found = regex.findall(port_range.lower())
         if found:
             continue
         raise InvalidArgumentValueError(
-            "--allowed-host-ports must be a comma-separated list of port ranges in the format of <port-range>/<protocol>"
+            "--allowed-host-ports must be a space-separated list of port ranges in the format of <port-range>/<protocol>: '{}'".format(port_range)
         )
 
 
@@ -766,6 +766,6 @@ def validate_application_security_groups(namespace):
         return
 
     from msrestazure.tools import is_valid_resource_id
-    for asg in asg_ids.split(","):
+    for asg in asg_ids:
         if not is_valid_resource_id(asg):
             raise InvalidArgumentValueError(asg + " is not a valid Azure resource ID.")

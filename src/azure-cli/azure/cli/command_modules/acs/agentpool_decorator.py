@@ -1263,12 +1263,7 @@ class AKSAgentPoolContext(BaseAKSContext):
         else:
             asg_ids = self.raw_param.get('asg_ids')
 
-        if asg_ids is None:
-            return None
-        if asg_ids == '':
-            return []
-
-        return asg_ids.split(',')
+        return asg_ids
 
     def get_allowed_host_ports(self) -> Union[List[PortRange], None]:
         if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
@@ -1278,17 +1273,14 @@ class AKSAgentPoolContext(BaseAKSContext):
 
         if ports is None:
             return None
-        if ports == '':
-            return []
 
-        ports = ports.split(',')
         port_ranges = []
         import re
         # Parse the port range. The format is either `<int>/<protocol>` or `<int>-<int>/<protocol>`.
         # e.g. `80/tcp` | `22/udp` | `4000-5000/tcp`
         regex = re.compile(r'^((\d+)|((\d+)-(\d+)))/(tcp|udp)$')
         for port in ports:
-            r = regex.findall(port)
+            r = regex.findall(port.lower())
             if r[0][1] != '':
                 # single port
                 port_start, port_end = int(r[0][1]), int(r[0][1])

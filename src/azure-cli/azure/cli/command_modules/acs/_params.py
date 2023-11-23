@@ -321,6 +321,8 @@ def load_arguments(self, _):
         c.argument('linux_os_config')
         c.argument('host_group_id', validator=validate_host_group_id)
         c.argument('gpu_instance_profile', arg_type=get_enum_type(gpu_instance_profiles))
+        c.argument('nodepool_allowed_host_ports', nargs='+', validator=validate_allowed_host_ports, help="allowed host ports for agentpool")
+        c.argument('nodepool_asg_ids', nargs='+', validator=validate_application_security_groups, help="application security groups for agentpool")
         # azure monitor profile
         c.argument('enable_azure_monitor_metrics', action='store_true')
         c.argument('azure_monitor_workspace_resource_id', validator=validate_azuremonitorworkspaceresourceid)
@@ -330,8 +332,6 @@ def load_arguments(self, _):
         c.argument('enable_windows_recording_rules', action='store_true')
         # misc
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
-        c.argument('nodepool_allowed_host_ports', validator=validate_allowed_host_ports, help="allowed host ports for agentpool")
-        c.argument('nodepool_asg_ids', validator=validate_application_security_groups, help="application security groups for agentpool")
 
     with self.argument_context('aks update') as c:
         # managed cluster paramerters
@@ -570,8 +570,8 @@ def load_arguments(self, _):
         c.argument('linux_os_config')
         c.argument('host_group_id', validator=validate_host_group_id)
         c.argument('gpu_instance_profile', arg_type=get_enum_type(gpu_instance_profiles))
-        c.argument('allowed_host_ports', validator=validate_allowed_host_ports)
-        c.argument('asg_ids', validator=validate_application_security_groups)
+        c.argument('allowed_host_ports', nargs='+', validator=validate_allowed_host_ports)
+        c.argument('asg_ids', nargs='+', validator=validate_application_security_groups)
 
     with self.argument_context('aks nodepool update', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='agent_pools') as c:
         c.argument('enable_cluster_autoscaler', options_list=[
@@ -589,8 +589,8 @@ def load_arguments(self, _):
         c.argument('drain_timeout', type=int)
         c.argument('mode', get_enum_type(node_mode_types))
         c.argument('scale_down_mode', arg_type=get_enum_type(scale_down_modes))
-        c.argument('allowed_host_ports', validator=validate_allowed_host_ports)
-        c.argument('asg_ids', validator=validate_application_security_groups)
+        c.argument('allowed_host_ports', nargs='+', validator=validate_allowed_host_ports)
+        c.argument('asg_ids', nargs='+', validator=validate_application_security_groups)
 
     with self.argument_context('aks nodepool upgrade') as c:
         c.argument('max_surge', validator=validate_max_surge)

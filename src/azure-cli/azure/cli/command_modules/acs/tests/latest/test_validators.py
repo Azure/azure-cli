@@ -683,7 +683,7 @@ class TestValidateAllowedHostPorts(unittest.TestCase):
     def test_invalid_allowed_host_ports(self):
         namespace = SimpleNamespace(
             **{
-                "allowed_host_ports": "80,443,8080",
+                "allowed_host_ports": ["80"],
             }
         )
         with self.assertRaises(InvalidArgumentValueError):
@@ -694,7 +694,7 @@ class TestValidateAllowedHostPorts(unittest.TestCase):
     def test_valid_allowed_host_ports(self):
         namespace = SimpleNamespace(
             **{
-                "allowed_host_ports": "80/tcp,443/tcp,8080-8090/tcp,53/udp",
+                "allowed_host_ports": ["80/tcp", "443/tcp", "8080-8090/tcp", "53/udp"],
             }
         )
         validators.validate_allowed_host_ports(
@@ -725,10 +725,10 @@ class TestValidateApplicationSecurityGroups(unittest.TestCase):
         )
 
     def test_multiple_application_security_groups(self):
-        asg_ids = ','.join([
+        asg_ids = [
             "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.Network/applicationSecurityGroups/asg1",
             "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg2/providers/Microsoft.Network/applicationSecurityGroups/asg2",
-        ])
+        ]
         namespace = SimpleNamespace(
             **{
                 "asg_ids": asg_ids,

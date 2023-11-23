@@ -9258,7 +9258,43 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     def test_aks_create_with_nsg_control(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
-        nodepool_name = self.create_random_name('n', 6)
+
+        port_ranges = [
+            {
+                'portEnd': 53,
+                'portStart': 53,
+                'protocol': 'UDP',
+            },
+            {
+                'portEnd': 80,
+                'portStart': 80,
+                'protocol': 'TCP',
+            },
+            {
+                'portEnd': 443,
+                'portStart': 443,
+                'protocol': 'TCP',
+            },
+            {
+                'portEnd': 5000,
+                'portStart': 4000,
+                'protocol': 'TCP',
+            },
+            {
+                'portEnd': 6000,
+                'portStart': 4000,
+                'protocol': "UDP",
+            }
+        ]
+
+        allowed_host_ports_arguments = []
+        for i, port_range in enumerate(port_ranges):
+            start, end, protocol = port_range['portStart'], port_range['portEnd'], port_range['protocol']
+            if start == end:
+                v = '{}/{}'.format(start, protocol)
+            else:
+                v = '{}-{}/{}'.format(start, end, protocol)
+            allowed_host_ports_arguments.append(v)
 
         self.kwargs.update({
             'resource_group': resource_group,
@@ -9268,16 +9304,18 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'node_vm_size': 'standard_d2s_v3',
             'asg1': 'asg1',
             'asg2': 'asg2',
+            'allowed_host_ports_argument': '--nodepool-allowed-host-ports {}'.format(' '.join(allowed_host_ports_arguments)),
         })
 
         create_asg1 = 'network asg create --name {asg1} --resource-group {resource_group} -o json'
         create_asg2 = 'network asg create --name {asg2} --resource-group {resource_group} -o json'
         asg1 = self.cmd(create_asg1, checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
         asg2 = self.cmd(create_asg2, checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
+        asg_ids = [asg1['id'], asg2['id']]
 
         self.kwargs.update({
-            'asg_ids': ','.join([asg1['id'], asg2['id']]),
-            'allowed_host_ports': ','.join(['53/udp', '80/tcp', '443/tcp', '4000-5000/tcp', '4000-6000/udp']),
+            'asg1_id': asg1['id'],
+            'asg2_id': asg2['id'],
         })
         self.cmd(
             'aks create '
@@ -9287,13 +9325,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             '--ssh-key-value={ssh_key_value} '
             '--node-count=1 '
             '--node-vm-size={node_vm_size} ' 
-            '--nodepool-asg-ids={asg_ids} ' 
-            '--nodepool-allowed-host-ports={allowed_host_ports} ' 
-            '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/NodePublicIPNSGControlPreview',
+            '--nodepool-asg-ids={asg1_id} '
+            '--nodepool-asg-ids={asg2_id} '
+            '{allowed_host_ports_argument}',
             checks=[
                 self.check('provisioningState', 'Succeeded'),
-                self.check('agentPoolProfiles[0].networkProfile.applicationSecurityGroups', self.kwargs['asg_ids'].split(',')),
-                self.check('agentPoolProfiles[0].networkProfile.allowedHostPorts[] | length(@)', len(self.kwargs['allowed_host_ports'].split(','))),
+                self.check('agentPoolProfiles[0].networkProfile.applicationSecurityGroups', asg_ids),
+                self.check('agentPoolProfiles[0].networkProfile.allowedHostPorts', port_ranges),
             ],
         )
 
@@ -9309,6 +9347,44 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         aks_name = self.create_random_name('cliakstest', 16)
         nodepool_name = self.create_random_name('n', 6)
 
+        port_ranges = [
+            {
+                'portEnd': 53,
+                'portStart': 53,
+                'protocol': 'UDP',
+            },
+            {
+                'portEnd': 80,
+                'portStart': 80,
+                'protocol': 'TCP',
+            },
+            {
+                'portEnd': 443,
+                'portStart': 443,
+                'protocol': 'TCP',
+            },
+            {
+                'portEnd': 5000,
+                'portStart': 4000,
+                'protocol': 'TCP',
+            },
+            {
+                'portEnd': 6000,
+                'portStart': 4000,
+                'protocol': "UDP",
+            }
+        ]
+
+        allowed_host_ports_arguments = []
+        for i, port_range in enumerate(port_ranges):
+            start, end, protocol = port_range['portStart'], port_range['portEnd'], port_range['protocol']
+            if start == end:
+                v = '{}/{}'.format(start, protocol)
+            else:
+                v = '{}-{}/{}'.format(start, end, protocol)
+            allowed_host_ports_arguments.append(v)
+
+
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
@@ -9318,15 +9394,17 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'node_vm_size': 'standard_d2s_v3',
             'asg1': 'asg1',
             'asg2': 'asg2',
+            'allowed_host_ports_argument': '--allowed-host-ports {}'.format(' '.join(allowed_host_ports_arguments)),
         })
         create_asg1 = 'network asg create --name {asg1} --resource-group {resource_group} -o json'
         create_asg2 = 'network asg create --name {asg2} --resource-group {resource_group} -o json'
         asg1 = self.cmd(create_asg1, checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
         asg2 = self.cmd(create_asg2, checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
+        asg_ids = [asg1['id'], asg2['id']]
 
         self.kwargs.update({
-            'asg_ids': ','.join([asg1['id'], asg2['id']]),
-            'allowed_host_ports': ','.join(['53/udp', '80/tcp', '443/tcp', '4000-5000/tcp', '4000-6000/udp']),
+            'asg1_id': asg1['id'],
+            'asg2_id': asg2['id'],
         })
 
         self.cmd(
@@ -9349,13 +9427,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             '--name={node_pool_name} '
             '--node-vm-size={node_vm_size} '
             '--node-count=1 '
-            '--asg-ids={asg_ids} '
-            '--allowed-host-ports={allowed_host_ports} '
-            '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/NodePublicIPNSGControlPreview',
+            '--asg-ids={asg1_id} '
+            '--asg-ids={asg2_id} '
+            '{allowed_host_ports_argument}',
             checks=[
                 self.check('provisioningState', 'Succeeded'),
-                self.check('networkProfile.applicationSecurityGroups', self.kwargs['asg_ids'].split(',')),
-                self.check('networkProfile.allowedHostPorts[] | length(@)', len(self.kwargs['allowed_host_ports'].split(','))),
+                self.check('networkProfile.applicationSecurityGroups', asg_ids),
+                self.check('networkProfile.allowedHostPorts', port_ranges),
             ],
         )
 
@@ -9371,6 +9449,44 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         aks_name = self.create_random_name('cliakstest', 16)
         nodepool_name = self.create_random_name('n', 6)
 
+        port_ranges = [
+            {
+                'portEnd': 53,
+                'portStart': 53,
+                'protocol': 'UDP',
+            },
+            {
+                'portEnd': 80,
+                'portStart': 80,
+                'protocol': 'TCP',
+            },
+            {
+                'portEnd': 443,
+                'portStart': 443,
+                'protocol': 'TCP',
+            },
+            {
+                'portEnd': 5000,
+                'portStart': 4000,
+                'protocol': 'TCP',
+            },
+            {
+                'portEnd': 6000,
+                'portStart': 4000,
+                'protocol': "UDP",
+            }
+        ]
+
+        allowed_host_ports_arguments = []
+        for i, port_range in enumerate(port_ranges):
+            start, end, protocol = port_range['portStart'], port_range['portEnd'], port_range['protocol']
+            if start == end:
+                v = '{}/{}'.format(start, protocol)
+            else:
+                v = '{}-{}/{}'.format(start, end, protocol)
+            allowed_host_ports_arguments.append(v)
+
+
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
@@ -9380,15 +9496,17 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'node_vm_size': 'standard_d2s_v3',
             'asg1': 'asg1',
             'asg2': 'asg2',
+            'allowed_host_ports_argument': '--allowed-host-ports {}'.format(' '.join(allowed_host_ports_arguments)),
         })
         create_asg1 = 'network asg create --name {asg1} --resource-group {resource_group} -o json'
         create_asg2 = 'network asg create --name {asg2} --resource-group {resource_group} -o json'
         asg1 = self.cmd(create_asg1, checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
         asg2 = self.cmd(create_asg2, checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
+        asg_ids = [asg1['id'], asg2['id']]
 
         self.kwargs.update({
-            'asg_ids': ','.join([asg1['id'], asg2['id']]),
-            'allowed_host_ports': ','.join(['53/udp', '80/tcp', '443/tcp', '4000-5000/tcp', '4000-6000/udp']),
+            'asg1_id': asg1['id'],
+            'asg2_id': asg2['id'],
         })
 
         self.cmd(
@@ -9410,13 +9528,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             '--resource-group={resource_group} '
             '--cluster-name={name} '
             '--name={node_pool_name} '
-            '--asg-ids={asg_ids} '
-            '--allowed-host-ports={allowed_host_ports} '
-            '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/NodePublicIPNSGControlPreview',
+            '--asg-ids={asg1_id} '
+            '--asg-ids={asg2_id} '
+            '{allowed_host_ports_argument}',
             checks=[
                 self.check('provisioningState', 'Succeeded'),
-                self.check('networkProfile.applicationSecurityGroups', self.kwargs['asg_ids'].split(',')),
-                self.check('networkProfile.allowedHostPorts[] | length(@)', len(self.kwargs['allowed_host_ports'].split(','))),
+                self.check('networkProfile.applicationSecurityGroups', asg_ids),
+                self.check('networkProfile.allowedHostPorts', port_ranges),
             ],
         )
 
