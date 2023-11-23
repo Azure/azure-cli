@@ -942,8 +942,8 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
         database_name_one = "cliautomationdb01"
         database_name_two = "cliautomationdb02"
         database_name_three = "cliautomationdb03"
-        preferred_enclave_type_default = AlwaysEncryptedEnclaveType.default
-        preferred_enclave_type_vbs = AlwaysEncryptedEnclaveType.vbs
+        preferred_enclave_type_default = AlwaysEncryptedEnclaveType.default.value
+        preferred_enclave_type_vbs = AlwaysEncryptedEnclaveType.vbs.value
 
 
         # test sql db is created with default enclave type
@@ -1020,8 +1020,8 @@ class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_sql_db_serverless_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"
-        compute_model_serverless = ComputeModelType.serverless
-        compute_model_provisioned = ComputeModelType.provisioned
+        compute_model_serverless = ComputeModelType.serverless.value
+        compute_model_provisioned = ComputeModelType.provisioned.value
 
         # Create database with vcore edition
         vcore_edition = 'GeneralPurpose'
@@ -1100,6 +1100,42 @@ class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
                 JMESPathCheck('sku.name', 'GP_S_Gen5'),
                 JMESPathCheck('autoPauseDelay', auto_pause_delay),
                 JMESPathCheck('minCapacity', min_capacity)])
+
+class SqlServerFreeDbMgmtScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='eastus2euap')
+    @SqlServerPreparer(location='eastus2euap')
+    @AllowLargeResponse()
+    def test_sql_db_free_params(self, resource_group, resource_group_location, server):
+        database_name = "freeDb1"
+        compute_model_serverless = "Serverless"
+
+        # Create database with vcore edition
+        vcore_edition = 'GeneralPurpose'
+        family = 'Gen5'
+        capacity = 2
+        free_limit_exhaustion_behavior = 'AutoPause'
+        self.cmd('sql db create -g {} --server {} --name {} --edition {} --family {} --capacity {} --compute-model {} --use-free-limit --free-limit-exhaustion-behavior {}'
+                 .format(resource_group, server, database_name, vcore_edition, family, capacity, compute_model_serverless, free_limit_exhaustion_behavior),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('useFreeLimit', True),
+                     JMESPathCheck('freeLimitExhaustionBehavior', free_limit_exhaustion_behavior)])
+
+        new_free_limit_exhaustion_behavior = 'BillOverUsage'
+        # Update database to serverless offering
+        self.cmd('sql db update -g {} --server {} --name {} --free-limit-exhaustion-behavior {}'
+                 .format(resource_group, server, database_name, new_free_limit_exhaustion_behavior),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('sku.name', 'GP_S_Gen5'),
+                     JMESPathCheck('freeLimitExhaustionBehavior', new_free_limit_exhaustion_behavior),
+                     JMESPathCheck('useFreeLimit', True)])
 
 
 class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
@@ -3543,8 +3579,8 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
         database_name_one = "cliautomationdb01"
         database_name_two = "cliautomationdb02"
         edition = 'GeneralPurpose'
-        preferred_enclave_type_default = AlwaysEncryptedEnclaveType.default
-        preferred_enclave_type_vbs = AlwaysEncryptedEnclaveType.vbs
+        preferred_enclave_type_default = AlwaysEncryptedEnclaveType.default.value
+        preferred_enclave_type_vbs = AlwaysEncryptedEnclaveType.vbs.value
 
         # Create general purpose pool with default enclave type
         self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {} --preferred-enclave-type {}'
@@ -5430,6 +5466,11 @@ class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
 
 class SqlManagedInstancePoolScenarioTest(ScenarioTest):
     # Instance pool test should be deprecated and also it takes more then 5 hours to record.
+
+    def _get_full_maintenance_id(self, name):
+        return "/subscriptions/{}/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/{}".format(
+            self.get_subscription_id(), name)
+
     @live_only()
     @ManagedInstancePreparer()
     def test_sql_instance_pool(self, mi, rg):
@@ -5442,6 +5483,7 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
         edition = ManagedInstancePreparer.edition
         family = ManagedInstancePreparer.family
         resource_group = rg
+        maintenance_configuration_id = self._get_full_maintenance_id("SQL_WestCentralUS_MI_1")
 
         subnet = ManagedInstancePreparer.subnet
         num_pools = len(self.cmd('sql instance-pool list -g {}'.format(resource_group)).get_output_in_json())
@@ -5449,15 +5491,16 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
         # test create sql managed_instance
         self.cmd(
             'sql instance-pool create -g {} -n {} -l {} '
-            '--subnet {} --license-type {} --capacity {} -e {} -f {}'.format(
-                resource_group, instance_pool_name_1, location, subnet, license_type, v_cores, edition, family),
+            '--subnet {} --license-type {} --capacity {} -e {} -f {} --maintenance-configuration-id {}'.format(
+                resource_group, instance_pool_name_1, location, subnet, license_type, v_cores, edition, family, maintenance_configuration_id),
             checks=[
                 JMESPathCheck('name', instance_pool_name_1),
                 JMESPathCheck('resourceGroup', resource_group),
                 JMESPathCheck('vCores', v_cores),
                 JMESPathCheck('licenseType', license_type),
                 JMESPathCheck('sku.tier', edition),
-                JMESPathCheck('sku.family', family)])
+                JMESPathCheck('sku.family', family),
+                JMESPathCheck('sku.maintenanceConfigurationId', maintenance_configuration_id)])
 
         # test show sql instance pool
         self.cmd('sql instance-pool show -g {} -n {}'
@@ -5483,6 +5526,16 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
                      JMESPathCheck('name', instance_pool_name_1),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('tags', {})])
+
+        # test updating vcore/edition/family of an instance pool
+        self.cmd('sql instance-pool update -g {} -n {} --capacity {} -e {} -f {}'
+                 .format(resource_group, instance_pool_name_1, 8, edition, family),
+                 checks=[
+                     JMESPathCheck('name', instance_pool_name_1),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('vCores', 8),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('sku.family', family)])
 
         # Instance Pool 2
         self.cmd(
@@ -5521,6 +5574,14 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
                      JMESPathCheck('name', instance_pool_name_2),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('tags', {})])
+
+        # test updating maintanace conf id of an instance pool
+        self.cmd('sql instance-pool update -g {} -n {} -maintenance-configuration-id {}'
+                 .format(resource_group, instance_pool_name_2, maintenance_configuration_id),
+                 checks=[
+                     JMESPathCheck('name', instance_pool_name_2),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('sku.maintenanceConfigurationId', maintenance_configuration_id)])
 
         self.cmd('sql instance-pool list -g {}'
                  .format(resource_group),

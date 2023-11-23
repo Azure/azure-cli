@@ -411,6 +411,16 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                 namespace.storage_profile = StorageProfile.ManagedPirImage
         else:
             raise CLIError('Unrecognized image type: {}'.format(image_type))
+    elif not namespace.image and not getattr(namespace, 'attach_os_disk', None):
+        namespace.image = 'MicrosoftWindowsServer:WindowsServer:2022-datacenter-azure-edition:latest'
+        _parse_image_argument(cmd, namespace)
+        namespace.storage_profile = StorageProfile.ManagedPirImage
+        if namespace.enable_secure_boot is None:
+            namespace.enable_secure_boot = True
+        if namespace.enable_vtpm is None:
+            namespace.enable_vtpm = True
+        if namespace.security_type is None:
+            namespace.security_type = 'TrustedLaunch'
     else:
         # did not specify image XOR attach-os-disk
         raise CLIError('incorrect usage: --image IMAGE | --attach-os-disk DISK')
@@ -1263,18 +1273,13 @@ def _validate_vm_vmss_msi(cmd, namespace, is_identity_assign=False):
             raise ArgumentUsageError(
                 "usage error: please specify both --role and --scope when assigning a role to the managed identity")
 
-    # For "az vm identity assign", "--scope" must be passed in when assigning a role to the managed identity
+    # For "az vm/vmss identity assign", "--role" and "--scope" should be passed in at the same time
+    # when assigning a role to the managed identity
     if is_identity_assign:
-        role_is_explicitly_specified = getattr(namespace.identity_role, 'is_default', None) is None
-        if not namespace.identity_scope and role_is_explicitly_specified:
+        if (namespace.identity_scope and not namespace.identity_role) or \
+                (not namespace.identity_scope and namespace.identity_role):
             raise ArgumentUsageError(
-                "usage error: please specify --scope when assigning a role to the managed identity")
-        if not role_is_explicitly_specified and namespace.identity_scope:
-            logger.warning(
-                "Please note that the default value of '--role' will be removed in the breaking change release of the "
-                "fall. So specify '--role' and '--scope' at the same time when assigning a role to the managed "
-                "identity to avoid breaking your automation script when the default value of '--role' is removed."
-            )
+                "usage error: please specify both --role and --scope when assigning a role to the managed identity")
 
     # Assign managed identity
     if is_identity_assign or namespace.assign_identity is not None:
@@ -1307,7 +1312,7 @@ def _enable_msi_for_trusted_launch(namespace):
     # Enable system assigned msi by default when Trusted Launch configuration is met
     is_trusted_launch = namespace.security_type and namespace.security_type.lower() == 'trustedlaunch' \
         and namespace.enable_vtpm and namespace.enable_secure_boot
-    if is_trusted_launch and not namespace.disable_integrity_monitoring:
+    if is_trusted_launch and namespace.enable_integrity_monitoring:
         from ._vm_utils import MSI_LOCAL_ID
         logger.info('The MSI is enabled by default when Trusted Launch configuration is met')
         if namespace.assign_identity is None:
@@ -1327,29 +1332,41 @@ def _validate_trusted_launch(namespace):
         namespace.enable_secure_boot = True
 
 
+def trusted_launch_set_default(namespace, generation_version):
+    if not generation_version:
+        return
+
+    from ._constants import UPGRADE_SECURITY_HINT
+    if generation_version == 'V1' or namespace.security_type == 'Standard':
+        logger.warning(UPGRADE_SECURITY_HINT)
+
+    elif generation_version == 'V2':
+        if namespace.security_type is None:
+            namespace.security_type = 'TrustedLaunch'
+
+        if namespace.enable_vtpm is None:
+            namespace.enable_vtpm = True
+
+        if namespace.enable_secure_boot is None:
+            namespace.enable_secure_boot = True
+
+
 def _validate_generation_version_and_trusted_launch(cmd, namespace):
     from azure.cli.core.profiles import ResourceType
     if not cmd.supported_api_version(resource_type=ResourceType.MGMT_COMPUTE, min_api='2020-12-01'):
         return
-    from ._vm_utils import trusted_launch_warning_log
+    from ._vm_utils import validate_image_trusted_launch, validate_vm_disk_trusted_launch
     if namespace.image is not None:
-        from ._vm_utils import parse_shared_gallery_image_id, parse_community_gallery_image_id, \
-            is_valid_image_version_id, parse_gallery_image_id
+        from ._vm_utils import is_valid_image_version_id
         if is_valid_image_version_id(namespace.image):
-            image_info = parse_gallery_image_id(namespace.image)
-            compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=image_info[0])
-            gallery_image_info = compute_client.gallery_images.get(
-                resource_group_name=image_info[1], gallery_name=image_info[2], gallery_image_name=image_info[3])
-            generation_version = gallery_image_info.hyper_v_generation if hasattr(gallery_image_info,
-                                                                                  'hyper_v_generation') else None
-            features = gallery_image_info.features if hasattr(gallery_image_info, 'features') else None
-            trusted_launch_warning_log(namespace, generation_version, features)
-            return
+            if namespace.security_type is None:
+                namespace.security_type = 'Standard'
 
         image_type = _parse_image_argument(cmd, namespace)
 
         if image_type == 'image_id':
             # managed image does not support trusted launch
+            validate_image_trusted_launch(namespace)
             return
 
         if image_type == 'uri':
@@ -1357,25 +1374,11 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
             return
 
         if image_type == 'shared_gallery_image_id':
-            from ._client_factory import cf_shared_gallery_image
-            image_info = parse_shared_gallery_image_id(namespace.image)
-            gallery_image_info = cf_shared_gallery_image(cmd.cli_ctx).get(
-                location=namespace.location, gallery_unique_name=image_info[0], gallery_image_name=image_info[1])
-            generation_version = gallery_image_info.hyper_v_generation if hasattr(gallery_image_info,
-                                                                                  'hyper_v_generation') else None
-            features = gallery_image_info.features if hasattr(gallery_image_info, 'features') else None
-            trusted_launch_warning_log(namespace, generation_version, features)
+            validate_image_trusted_launch(namespace)
             return
 
         if image_type == 'community_gallery_image_id':
-            from ._client_factory import cf_community_gallery_image
-            image_info = parse_community_gallery_image_id(namespace.image)
-            gallery_image_info = cf_community_gallery_image(cmd.cli_ctx).get(
-                location=namespace.location, public_gallery_name=image_info[0], gallery_image_name=image_info[1])
-            generation_version = gallery_image_info.hyper_v_generation if hasattr(gallery_image_info,
-                                                                                  'hyper_v_generation') else None
-            features = gallery_image_info.features if hasattr(gallery_image_info, 'features') else None
-            trusted_launch_warning_log(namespace, generation_version, features)
+            validate_image_trusted_launch(namespace)
             return
 
         if image_type == 'urn':
@@ -1388,8 +1391,7 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
                                        namespace.os_sku, os_version)
             generation_version = vm_image_info.hyper_v_generation if hasattr(vm_image_info,
                                                                              'hyper_v_generation') else None
-            features = vm_image_info.features if hasattr(vm_image_info, 'features') else None
-            trusted_launch_warning_log(namespace, generation_version, features)
+            trusted_launch_set_default(namespace, generation_version)
             return
 
     # create vm with os disk
@@ -1401,10 +1403,9 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
         client = _compute_client_factory(cmd.cli_ctx).disks
         attach_os_disk_name = parse_resource_id(namespace.attach_os_disk)['name']
         attach_os_disk_info = client.get(namespace.resource_group_name, attach_os_disk_name)
-        generation_version = attach_os_disk_info.hyper_v_generation if hasattr(attach_os_disk_info,
-                                                                               'hyper_v_generation') else None
-        features = attach_os_disk_info.features if hasattr(attach_os_disk_info, 'features') else None
-        trusted_launch_warning_log(namespace, generation_version, features)
+        disk_security_profile = attach_os_disk_info.security_profile if hasattr(attach_os_disk_info,
+                                                                                'security_profile') else None
+        validate_vm_disk_trusted_launch(namespace, disk_security_profile)
 
 
 def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
@@ -1658,15 +1659,7 @@ def get_network_lb(cli_ctx, resource_group_name, lb_name):
 
 def process_vmss_create_namespace(cmd, namespace):
     from azure.cli.core.azclierror import InvalidArgumentValueError
-    uniform_str = 'Uniform'
     flexible_str = 'Flexible'
-
-    if namespace.orchestration_mode is None:
-        namespace.orchestration_mode = uniform_str
-        logger.warning(
-            'Starting Ignite (November) 2023, the "az vmss create" command will use the new default '
-            'orchestration mode: Flexible. To learn more about Flexible Orchestration mode, '
-            'please visit https://aka.ms/orchestrationModeVMSS')
 
     if namespace.os_disk_delete_option is not None or namespace.data_disk_delete_option is not None:
         if namespace.orchestration_mode.lower() != flexible_str.lower():

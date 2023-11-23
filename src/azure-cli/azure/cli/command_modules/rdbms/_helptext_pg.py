@@ -201,8 +201,17 @@ examples:
         --key $keyIdentifier --identity testIdentity --backup-key $geoKeyIdentifier --backup-identity geoIdentity
 
 
-      # create flexible server with storage auto-grow as Enabled. Accepted values Enabled / Disabled. Default value for storage auto-grow is "Disabled".
+  - name: >
+      Create flexible server with custom storage performance tier. Accepted values "P4", "P6", "P10", "P15", "P20", "P30", \\
+      "P40", "P50", "P60", "P70", "P80". Actual allowed values depend on the --storage-size selection for flexible server creation. \\
+      Default value for storage performance tier depends on the --storage-size selected for flexible server creation.
+    text: >
+      az postgres flexible-server create -g testGroup -n testServer --location testLocation --performance-tier P15
 
+
+  - name: >
+      create flexible server with storage auto-grow as Enabled. Accepted values Enabled / Disabled. Default value for storage auto-grow is "Disabled".
+    text: >
       az postgres flexible-server create -g testGroup -n testServer --location testLocation --storage-auto-grow Enabled
 """
 
@@ -256,6 +265,8 @@ examples:
     text: az postgres flexible-server update --resource-group testGroup --name testserver --private-dns-zone /subscriptions/{SubId2}/resourceGroups/{testGroup2}/providers/Microsoft.Network/privateDnsZones/testDNS.postgres.database.azure.com
   - name: Update a flexible server's storage to enable / disable storage auto-grow.
     text: az postgres flexible-server update --resource-group testGroup --name testserver --storage-auto-grow Enabled
+  - name: Update a flexible server's storage to set custom storage performance tier.
+    text: az postgres flexible-server update --resource-group testGroup --name testserver --performance-tier P15
 """
 
 helps['postgres flexible-server restore'] = """
@@ -266,6 +277,19 @@ examples:
     text: az postgres flexible-server restore --resource-group testGroup --name testserverNew --source-server testserver --restore-time "2017-06-15T13:10:00Z"
   - name: Restore 'testserver' to current point-in-time as a new server 'testserverNew'.
     text: az postgres flexible-server restore --resource-group testGroup --name testserverNew --source-server testserver
+  - name: >
+      Restore 'testserver' to current point-in-time as a new server 'testserverNew' in a different resource group. \\
+      Here --restore-group is for the target server's resource group, and --source-server must be passed as resource ID.
+    text: >
+      az postgres flexible-server restore --resource-group testGroup --name testserverNew \\
+        --source-server /subscriptions/{testSubscription}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{sourceServerName}
+  - name: >
+      Restore 'testserver' to current point-in-time as a new server 'testserverNew' in a different subscription. \\
+      Here --restore-group is for the target server's resource group, and --source-server must be passed as resource ID. \\
+      This resource ID can be in a subscription different than the subscription used for az account set.
+    text: >
+      az postgres flexible-server restore --resource-group testGroup --name testserverNew \\
+        --source-server /subscriptions/{sourceSubscriptionId}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{sourceServerName}
 """
 
 helps['postgres flexible-server restart'] = """
@@ -586,6 +610,8 @@ examples:
         replica location which is different from source server, if available, else will pick up zone same as source server \\
         in the replica location if available, else will set the zone as None, i.e. No preference
     text: az postgres flexible-server replica create --replica-name testReplicaServer -g testGroup --source-server testserver --location testLocation
+  - name: Create a read replica 'testReplicaServer' for 'testserver' with custom --storage-size and --sku.
+    text: az postgres flexible-server replica create --replica-name testReplicaServer -g testGroup --source-server testserver --sku-name Standard_D4ds_v5 --storage-size 256
 """
 
 helps['postgres flexible-server replica list'] = """
@@ -619,6 +645,13 @@ examples:
         --source-server testserver --vnet newVnet --subnet newSubnet \\
         --address-prefixes 172.0.0.0/16 --subnet-prefixes 172.0.0.0/24 \\
         --private-dns-zone testDNS.postgres.database.azure.com --location newLocation
+  - name: >
+      Geo-restore 'testserver' to current point-in-time as a new server 'testserverNew' in a different subscription / resource group. \\
+      Here --restore-group is for the target server's resource group, and --source-server must be passed as resource ID. \\
+      This resource ID can be in a subscription different than the subscription used for az account set.
+    text: >
+      az postgres flexible-server geo-restore --resource-group testGroup --name testserverNew --location newLocation \\
+        --source-server /subscriptions/{sourceSubscriptionId}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{sourceServerName}
 """
 
 helps['postgres flexible-server revive-dropped'] = """

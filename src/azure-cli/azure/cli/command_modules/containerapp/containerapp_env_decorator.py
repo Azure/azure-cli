@@ -21,8 +21,8 @@ from ._utils import (get_vnet_location,
                      load_cert_file,
                      safe_set,
                      get_default_workload_profiles,
-                     _azure_monitor_quickstart)
-from ._client_factory import handle_raw_exception
+                     _azure_monitor_quickstart, safe_get)
+from ._client_factory import handle_raw_exception, handle_non_404_status_code_exception
 from .base_resource import BaseResource
 from ._models import (
     ManagedEnvironment as ManagedEnvironmentModel,
@@ -189,6 +189,23 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
 
     def set_up_workload_profiles(self):
         if self.get_argument_enable_workload_profiles():
+            # If the environment exists, infer the environment type
+            existing_environment = None
+            try:
+                existing_environment = self.client.show(cmd=self.cmd,
+                                                        resource_group_name=self.get_argument_resource_group_name(),
+                                                        name=self.get_argument_name())
+            except Exception as e:
+                handle_non_404_status_code_exception(e)
+
+            if existing_environment and safe_get(existing_environment, "properties", "workloadProfiles") is None:
+                # check if input params include -w/--enable-workload-profiles
+                if self.cmd.cli_ctx.data.get('safe_params') and ('-w' in self.cmd.cli_ctx.data.get(
+                        'safe_params') or '--enable-workload-profiles' in self.cmd.cli_ctx.data.get('safe_params')):
+                    raise ValidationError(
+                        f"Existing environment {self.get_argument_name()} cannot enable workload profiles. If you want to use Consumption and Dedicated environment, please create a new one.")
+                return
+
             self.managed_env_def["properties"]["workloadProfiles"] = get_default_workload_profiles(self.cmd, self.get_argument_location())
 
     def set_up_app_log_configuration(self):
@@ -215,10 +232,10 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
         if self.get_argument_infrastructure_subnet_resource_id() or self.get_argument_docker_bridge_cidr() or self.get_argument_platform_reserved_cidr() or self.get_argument_platform_reserved_dns_ip():
             vnet_config_def = VnetConfigurationModel
 
-            if self.get_argument_infrastructure_subnet_resource_id is not None:
+            if self.get_argument_infrastructure_subnet_resource_id() is not None:
                 vnet_config_def["infrastructureSubnetId"] = self.get_argument_infrastructure_subnet_resource_id()
 
-            if self.get_argument_docker_bridge_cidr is not None:
+            if self.get_argument_docker_bridge_cidr() is not None:
                 vnet_config_def["dockerBridgeCidr"] = self.get_argument_docker_bridge_cidr()
 
             if self.get_argument_platform_reserved_cidr() is not None:

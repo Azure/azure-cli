@@ -7,7 +7,8 @@ import os
 import sys
 import subprocess
 
-root_dir = '/opt/az/lib/python3.10/site-packages/azure/cli/command_modules'
+python_minor_version = sys.version_info[1]
+root_dir = f'/opt/az/lib/python3.{python_minor_version}/site-packages/azure/cli/command_modules'
 mod_list = [mod for mod in sorted(os.listdir(root_dir)) if os.path.isdir(os.path.join(root_dir, mod)) and mod != '__pycache__']
 
 pytest_base_cmd = '/opt/az/bin/python3 -m pytest -v --forked -p no:warnings --log-level=WARN'

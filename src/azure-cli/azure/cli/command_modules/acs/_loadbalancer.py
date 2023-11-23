@@ -5,9 +5,6 @@
 
 from distutils.version import StrictVersion  # pylint: disable=deprecated-module
 from types import SimpleNamespace
-from azure.cli.core.azclierror import (
-    InvalidArgumentValueError,
-)
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -30,6 +27,12 @@ def update_load_balancer_profile(managed_outbound_ip_count, managed_outbound_ipv
     if not is_load_balancer_profile_provided(managed_outbound_ip_count, managed_outbound_ipv6_count, outbound_ips,
                                              outbound_ip_prefixes, outbound_ports, idle_timeout):
         return profile
+    if not profile:
+        if isinstance(models, SimpleNamespace):
+            ManagedClusterLoadBalancerProfile = models.ManagedClusterLoadBalancerProfile
+        else:
+            ManagedClusterLoadBalancerProfile = models.get("ManagedClusterLoadBalancerProfile")
+        profile = ManagedClusterLoadBalancerProfile()
     return configure_load_balancer_profile(managed_outbound_ip_count, managed_outbound_ipv6_count, outbound_ips,
                                            outbound_ip_prefixes, outbound_ports, idle_timeout, profile, models)
 
@@ -40,25 +43,23 @@ def create_load_balancer_profile(managed_outbound_ip_count, managed_outbound_ipv
     if not is_load_balancer_profile_provided(managed_outbound_ip_count, managed_outbound_ipv6_count, outbound_ips,
                                              outbound_ip_prefixes, outbound_ports, idle_timeout):
         return None
+
+    if isinstance(models, SimpleNamespace):
+        ManagedClusterLoadBalancerProfile = models.ManagedClusterLoadBalancerProfile
+    else:
+        ManagedClusterLoadBalancerProfile = models.get("ManagedClusterLoadBalancerProfile")
+    profile = ManagedClusterLoadBalancerProfile()
     return configure_load_balancer_profile(managed_outbound_ip_count, managed_outbound_ipv6_count, outbound_ips,
-                                           outbound_ip_prefixes, outbound_ports, idle_timeout, None, models)
+                                           outbound_ip_prefixes, outbound_ports, idle_timeout, profile, models)
 
 
 def configure_load_balancer_profile(managed_outbound_ip_count, managed_outbound_ipv6_count, outbound_ips,
                                     outbound_ip_prefixes, outbound_ports, idle_timeout, profile, models):
     """configure a load balancer with customer supplied values"""
-    if not profile:
-        if isinstance(models, SimpleNamespace):
-            ManagedClusterLoadBalancerProfile = models.ManagedClusterLoadBalancerProfile
-        else:
-            ManagedClusterLoadBalancerProfile = models.get("ManagedClusterLoadBalancerProfile")
-        profile = ManagedClusterLoadBalancerProfile()
     if any([managed_outbound_ip_count,
             managed_outbound_ipv6_count,
             outbound_ips,
             outbound_ip_prefixes]):
-        ip_provider = 0
-
         outbound_ip_resources = _get_load_balancer_outbound_ips(outbound_ips, models)
         if outbound_ip_resources:
             if isinstance(models, SimpleNamespace):
@@ -71,9 +72,8 @@ def configure_load_balancer_profile(managed_outbound_ip_count, managed_outbound_
             profile.outbound_i_ps = ManagedClusterLoadBalancerProfileOutboundIPs(
                 public_i_ps=outbound_ip_resources
             )
-            profile.managed_outbound_i_ps = None
-            profile.outbound_ip_prefixes = None
-            ip_provider += 1
+        elif profile.outbound_i_ps is not None:
+            profile.outbound_i_ps = None
         outbound_ip_prefix_resources = _get_load_balancer_outbound_ip_prefixes(outbound_ip_prefixes, models)
         if outbound_ip_prefix_resources:
             if isinstance(models, SimpleNamespace):
@@ -87,10 +87,8 @@ def configure_load_balancer_profile(managed_outbound_ip_count, managed_outbound_
             profile.outbound_ip_prefixes = ManagedClusterLoadBalancerProfileOutboundIPPrefixes(
                 public_ip_prefixes=outbound_ip_prefix_resources
             )
-            profile.outbound_i_ps = None
-            profile.managed_outbound_i_ps = None
-            ip_provider += 1
-
+        elif profile.outbound_ip_prefixes is not None:
+            profile.outbound_ip_prefixes = None
         if managed_outbound_ip_count or managed_outbound_ipv6_count:
             if profile.managed_outbound_i_ps is None:
                 if isinstance(models, SimpleNamespace):
@@ -106,11 +104,8 @@ def configure_load_balancer_profile(managed_outbound_ip_count, managed_outbound_
                 profile.managed_outbound_i_ps.count = managed_outbound_ip_count
             if managed_outbound_ipv6_count:
                 profile.managed_outbound_i_ps.count_ipv6 = managed_outbound_ipv6_count
-            profile.outbound_ip_prefixes = None
-            profile.outbound_i_ps = None
-            ip_provider += 1
-        if ip_provider <= 0 or ip_provider > 1:
-            raise InvalidArgumentValueError("outbound ip/ipprefix and managed ip should be mutual exclusive.")
+        elif profile.managed_outbound_i_ps is not None:
+            profile.managed_outbound_i_ps = None
     if outbound_ports:
         profile.allocated_outbound_ports = outbound_ports
     if idle_timeout:

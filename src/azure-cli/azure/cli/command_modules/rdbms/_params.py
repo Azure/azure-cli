@@ -323,6 +323,11 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help='Enable or disable the auto scale iops. Default value is Disabled.'
         )
 
+        performance_tier_arg_type = CLIArgumentType(
+            options_list=['--performance-tier'],
+            help='Performance tier of the server.'
+        )
+
         yes_arg_type = CLIArgumentType(
             options_list=['--yes', '-y'],
             action='store_true',
@@ -395,7 +400,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         )
 
         pg_version_upgrade_arg_type = CLIArgumentType(
-            arg_type=get_enum_type(['12', '13', '14']),
+            arg_type=get_enum_type(['12', '13', '14', '15']),
             options_list=['--version', '-v'],
             help='Server major version.'
         )
@@ -501,6 +506,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('active_directory_auth', default='Disabled', arg_type=active_directory_auth_arg_type)
                 c.argument('password_auth', default='Enabled', arg_type=password_auth_arg_type)
                 c.argument('auto_grow', default='Disabled', arg_type=auto_grow_arg_type)
+                c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
             elif command_group == 'mysql':
                 c.argument('tier', default='Burstable', arg_type=tier_arg_type)
                 c.argument('sku_name', default='Standard_B1ms', arg_type=sku_name_arg_type)
@@ -630,6 +636,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('public_access', arg_type=public_access_update_arg_type)
             elif command_group == 'postgres':
                 c.argument('auto_grow', arg_type=auto_grow_arg_type)
+                c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
                 c.argument('backup_retention', arg_type=pg_backup_retention_arg_type)
                 c.argument('active_directory_auth', arg_type=active_directory_auth_arg_type)
                 c.argument('password_auth', arg_type=password_auth_arg_type)
@@ -736,6 +743,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
                 c.argument('byok_key', arg_type=key_arg_type)
                 c.argument('byok_identity', arg_type=identity_arg_type)
+                c.argument('tier', arg_type=tier_arg_type)
+                c.argument('sku_name', arg_type=sku_name_arg_type)
+                c.argument('storage_gb', arg_type=storage_gb_arg_type)
+                c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
                 c.argument('yes', arg_type=yes_arg_type)
             if command_group == 'mysql':
                 c.argument('public_access', options_list=['--public-access'], arg_type=get_enum_type(['Enabled', 'Disabled']),
