@@ -301,6 +301,21 @@ jobs:
     inputs:
       filePath: build_scripts\windows\scripts\test_msi_installation.ps1
 
+- job: TestZipInstallation
+  displayName: Test ZIP Installation
+  dependsOn: BuildWindowsZIP
+  strategy:
+    matrix:
+      x86:
+        Platform: x86
+      x64:
+        Platform: x64
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
+  pool:
+    name: ${{ variables.windows_pool }}
+  steps:
+    - task:
+
 - job: BuildDockerImageAlpine
   displayName: Build Docker Image Alpine
   strategy:
