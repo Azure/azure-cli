@@ -26,6 +26,10 @@ from azure.cli.core.azclierror import (
     MutuallyExclusiveArgumentError,
     RequiredArgumentMissingError,
 )
+from azure.cli.command_modules.acs._consts import (
+    CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP,
+    CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP_CONFIGURATION,
+)
 
 from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.util import CLIError
@@ -250,6 +254,17 @@ def validate_load_balancer_idle_timeout(namespace):
             raise CLIError("--load-balancer-idle-timeout must be in the range [4,100]")
 
 
+def validate_load_balancer_backend_pool_type(namespace):
+    """validate load balancer backend pool type"""
+    if namespace.load_balancer_backend_pool_type is not None:
+        if namespace.load_balancer_backend_pool_type not in [
+                CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP,
+                CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP_CONFIGURATION]:
+            raise InvalidArgumentValueError(
+                f"Invalid Load Balancer Backend Pool Type {namespace.load_balancer_backend_pool_type}, "
+                f"supported values are nodeIP and nodeIPConfiguration")
+
+
 def validate_network_policy(namespace):
     """validate network policy to be in lowercase"""
     if namespace.network_policy is not None and namespace.network_policy.islower() is False:
@@ -377,6 +392,14 @@ def validate_ppg(namespace):
         from msrestazure.tools import is_valid_resource_id
         if not is_valid_resource_id(namespace.ppg):
             raise CLIError("--ppg is not a valid Azure resource ID.")
+
+
+def validate_node_public_ip_tags(ns):
+    if isinstance(ns.node_public_ip_tags, list):
+        tags_dict = {}
+        for item in ns.node_public_ip_tags:
+            tags_dict.update(validate_tag(item))
+        ns.node_public_ip_tags = tags_dict
 
 
 def validate_nodepool_labels(namespace):
