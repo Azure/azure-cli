@@ -683,7 +683,8 @@ class AzCliCommandInvoker(CommandInvoker):
         return CommandResultItem(
             event_data['result'],
             table_transformer=self.commands_loader.command_table[parsed_args.command].table_transformer,
-            is_query_active=self.data['query_active'])
+            is_query_active=self.data['query_active'],
+            raw_result=results)
 
     @staticmethod
     def _extract_parameter_names(args):

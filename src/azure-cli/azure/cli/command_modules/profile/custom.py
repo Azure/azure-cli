@@ -112,6 +112,9 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
     if service_principal and not username:
         raise CLIError('usage error: --service-principal --username NAME --password SECRET --tenant TENANT')
 
+    from knack.events import EVENT_CLI_SUCCESSFUL_EXECUTE
+    cmd.cli_ctx.register_event(EVENT_CLI_SUCCESSFUL_EXECUTE, _login_hinter)
+
     interactive = False
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
@@ -207,3 +210,19 @@ def _remove_adal_token_cache():
         return True  # Deleted
     except FileNotFoundError:
         return False  # Not exist
+
+
+def _login_hinter(cli_ctx, **kwargs):  # pylint: disable=unused-argument
+    from azure.cli.core.style import print_styled_text, Style
+
+    print_styled_text('[HINT]')
+    accounts = kwargs['result'].raw_result
+
+    account = next(s for s in accounts if s['isDefault'] is True)
+    account_text = '{} ({})'.format(account['id'], account['name'])
+
+    print_styled_text([
+        (Style.PRIMARY, 'The default subscription is '),
+        (Style.IMPORTANT, account_text),
+    ])
+    print_styled_text('To change the default subscription, run `az account set --subscription {id or name}`')
