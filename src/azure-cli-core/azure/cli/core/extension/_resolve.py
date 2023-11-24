@@ -5,10 +5,8 @@
 from packaging.version import parse
 from typing import Callable, List, NamedTuple, Union
 
-from azure.cli.core.extension import ext_compat_with_cli, WHEEL_INFO_RE, EXT_METADATA_ISPREVIEW, \
-    EXT_METADATA_ISEXPERIMENTAL
+from azure.cli.core.extension import ext_compat_with_cli, WHEEL_INFO_RE, is_stable_from_metadata
 from azure.cli.core.extension._index import get_index_extensions
-from azure.cli.core.extension.operations import is_preview_from_semantic_version
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -48,12 +46,6 @@ def _is_compatible_with_cli_version(item):
                  "min_core_required=%s max_core_required=%s min_ext_required=%s", item['filename'], is_compatible,
                  cli_core_version, item['metadata'].get('version'), min_required, max_required, min_ext_required)
     return False
-
-
-def _is_stable_from_metadata(item):
-    return not (item["metadata"].get(EXT_METADATA_ISPREVIEW, False) or
-                item["metadata"].get(EXT_METADATA_ISEXPERIMENTAL, False) or
-                is_preview_from_semantic_version(item["metadata"]['version']))
 
 
 def _is_greater_than_cur_version(cur_version):
@@ -152,7 +144,7 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None, target_
     if not allow_preview:
         candidate_filters += [
             _ExtensionFilter(
-                filter=list_filter(_is_stable_from_metadata),
+                filter=list_filter(is_stable_from_metadata),
                 on_empty_results_message=f"No suitable stable version of '{extension_name}' to install. "
                                          f"Add `--allow-preview` to try preview versions"
             )]

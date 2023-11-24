@@ -354,20 +354,6 @@ def add_extension(cmd=None, source=None, extension_name=None, index_url=None, ye
         pass
 
 
-def is_preview_from_semantic_version(version):
-    """
-    pre = [a, b] -> preview
-    >>> print(parse("1.2.3").pre)
-    None
-    >>> parse("1.2.3a1").pre
-    ('a', 1)
-    >>> parse("1.2.3b1").pre
-    ('b', 1)
-    """
-    parsed_version = parse(version)
-    return parsed_version.pre and parsed_version.pre[0] in ["a", "b"]
-
-
 def is_cloud_shell_system_extension(ext_path):
     from azure.cli.core.util import in_cloud_console
     if in_cloud_console():

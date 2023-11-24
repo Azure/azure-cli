@@ -13,6 +13,7 @@ from distutils.sysconfig import get_python_lib  # pylint: disable=deprecated-mod
 import pkginfo
 from knack.config import CLIConfig
 from knack.log import get_logger
+from packaging.version import parse
 from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
 
 az_config = CLIConfig(config_dir=GLOBAL_CONFIG_DIR, config_env_var_prefix=ENV_VAR_PREFIX)
@@ -371,6 +372,11 @@ def is_preview_from_semantic_version(version):
     >>> parse("1.2.3b1").pre
     ('b', 1)
     """
-    from packaging.version import parse
     parsed_version = parse(version)
     return bool(parsed_version.pre and parsed_version.pre[0] in ["a", "b"])
+
+
+def is_stable_from_metadata(item):
+    return not (item["metadata"].get(EXT_METADATA_ISPREVIEW, False) or
+                item["metadata"].get(EXT_METADATA_ISEXPERIMENTAL, False) or
+                is_preview_from_semantic_version(item["metadata"]['version']))

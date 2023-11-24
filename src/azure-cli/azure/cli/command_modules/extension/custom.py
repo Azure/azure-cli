@@ -30,7 +30,8 @@ def show_extension_cmd(extension_name):
     return show_extension(extension_name)
 
 
-def update_extension_cmd(cmd, extension_name, index_url=None, pip_extra_index_urls=None, pip_proxy=None, allow_preview=None):
+def update_extension_cmd(cmd, extension_name, index_url=None, pip_extra_index_urls=None, pip_proxy=None,
+                         allow_preview=None):
     return update_extension(cli_ctx=cmd.cli_ctx, extension_name=extension_name, index_url=index_url,
                             pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy, allow_preview=allow_preview)
 
