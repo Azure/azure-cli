@@ -5080,6 +5080,10 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
     def _get_full_maintenance_id(self, name):
         return "/subscriptions/{}/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/{}".format(
             self.get_subscription_id(), name)
+    
+    def _get_full_instance_pool_id(self, rg_name, pool_name):
+        return "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/instancePools/{}".format(
+            self.get_subscription_id(), rg_name, pool_name)
 
     def test_sql_managed_instance_cmw(self):
         # Values of existing resources in order to test this feature
@@ -5104,14 +5108,15 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
             'family': 'Gen5',
             'collation': ManagedInstancePreparer.collation,
             'proxy_override': "Proxy",
-            'maintenance_id': self._get_full_maintenance_id(self.MMI1)
+            'maintenance_id': self._get_full_maintenance_id(self.MMI1),
+            'intance_pool_name': ''
         })
 
         # test create sql managed_instance with FMW
         managed_instance = self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
                                     '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
                                     '--storage {storage_size_in_gb} --edition {edition} --family {family} --collation {collation} '
-                                    '--proxy-override {proxy_override} --public-data-endpoint-enabled --timezone-id "{timezone_id}" --maint-config-id "{maintenance_id}"',
+                                    '--proxy-override {proxy_override} --public-data-endpoint-enabled --timezone-id "{timezone_id}" --maint-config-id "{maintenance_id}" --instance-pool-name "{intance_pool_name}"',
                                     checks=[
                                         self.check('name', '{managed_instance_name}'),
                                         self.check('resourceGroup', '{rg}'),
@@ -5126,13 +5131,12 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
                                         self.check('collation', '{collation}'),
                                         self.check('proxyOverride', '{proxy_override}'),
                                         self.check('publicDataEndpointEnabled', 'True'),
-                                        self.check('maintenanceConfigurationId',
-                                                   self._get_full_maintenance_id(self.MMI1))]).get_output_in_json()
+                                        self.check('maintenanceConfigurationId', self._get_full_maintenance_id(self.MMI1)),
+                                        self.check('instancePoolId', None)]).get_output_in_json()
 
         # test delete sql managed instance 2
         self.cmd('sql mi delete --ids {} --yes'
                  .format(managed_instance['id']), checks=NoneCheck())
-
 
 class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
     DEFAULT_MC = "SQL_Default"
