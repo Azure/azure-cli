@@ -41,7 +41,7 @@ class TestCommandLogFile(ScenarioTest):
     def setUp(self):
         def _add_alias(self, command_log_dir, logger):
             self.cli_ctx.logging.command_log_dir = command_log_dir
-            self.cmd("az extension add -n alias")
+            self.cmd("az extension add -n alias --allow-preview")
             logger.warning("Adding whl ext alias")
 
         super(TestCommandLogFile, self).setUp()
