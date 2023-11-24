@@ -818,10 +818,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         with self.argument_context('{} flexible-server advanced-threat-protection-setting update'.format(command_group)) as c:
             c.argument('state',
-                        options_list=['--state'],
-                        required=True,
-                        help='State of advanced threat protection setting.',
-                        arg_type=get_enum_type(['Enabled', 'Disabled']))
+                       options_list=['--state'],
+                       required=True,
+                       help='State of advanced threat protection setting.',
+                       arg_type=get_enum_type(['Enabled', 'Disabled']))
 
         # GTID
         if command_group == 'mysql':

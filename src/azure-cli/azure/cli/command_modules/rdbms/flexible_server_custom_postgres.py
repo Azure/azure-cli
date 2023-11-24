@@ -966,10 +966,11 @@ def flexible_server_threat_protection_set(
 
     return resolve_poller(
         client.begin_create_or_update(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        threat_protection_name="Default",
-        parameters=parameters), cmd.cli_ctx,
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            threat_protection_name="Default",
+            parameters=parameters),
+        cmd.cli_ctx,
         'PostgreSQL Flexible Server Advanced Threat Protection Setting Update')
 
 
