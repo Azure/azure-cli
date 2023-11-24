@@ -17,6 +17,9 @@ if "%CLI_VERSION%"=="" (
 if "%ARCH%"=="" (
     set ARCH=x86
 )
+if "%TARGET%"=="" (
+    set TARGET=msi
+)
 if "%ARCH%"=="x86" (
     set PYTHON_ARCH=win32
 ) else if "%ARCH%"=="x64" (
@@ -43,6 +46,7 @@ set ARTIFACTS_DIR=%~dp0..\artifacts
 mkdir %ARTIFACTS_DIR%
 set TEMP_SCRATCH_FOLDER=%ARTIFACTS_DIR%\cli_scratch
 set BUILDING_DIR=%ARTIFACTS_DIR%\cli
+set ZIP_DIR=%ARTIFACTS_DIR%\Azure CLI
 set WIX_DIR=%ARTIFACTS_DIR%\wix
 set PYTHON_DIR=%ARTIFACTS_DIR%\Python
 
@@ -71,20 +75,22 @@ if exist %REPO_ROOT%\privates (
     copy %REPO_ROOT%\privates\*.whl %TEMP_SCRATCH_FOLDER%
 )
 
-REM ensure wix is available
-if exist %WIX_DIR% (
-    echo Using existing Wix at %WIX_DIR%
-)
-if not exist %WIX_DIR% (
-    mkdir %WIX_DIR%
-    pushd %WIX_DIR%
-    echo Downloading Wix.
-    curl --output wix-archive.zip %WIX_DOWNLOAD_URL%
-    unzip wix-archive.zip
-    if %errorlevel% neq 0 goto ERROR
-    del wix-archive.zip
-    echo Wix downloaded and extracted successfully.
-    popd
+if "%TARGET%" == 'msi' (
+    REM ensure wix is available
+    if exist %WIX_DIR% (
+        echo Using existing Wix at %WIX_DIR%
+    )
+    if not exist %WIX_DIR% (
+        mkdir %WIX_DIR%
+        pushd %WIX_DIR%
+        echo Downloading Wix.
+        curl --output wix-archive.zip %WIX_DOWNLOAD_URL%
+        unzip wix-archive.zip
+        if %errorlevel% neq 0 goto ERROR
+        del wix-archive.zip
+        echo Wix downloaded and extracted successfully.
+        popd
+    )
 )
 
 REM ensure Python is available
@@ -122,7 +128,6 @@ set PYTHON_EXE=%PYTHON_DIR%\python.exe
 robocopy %PYTHON_DIR% %BUILDING_DIR% /s /NFL /NDL
 
 set CLI_SRC=%REPO_ROOT%\src
-%BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --force-reinstall pycparser==2.18
 for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-telemetry) do (
    pushd %%a
    %BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --no-cache-dir --no-deps .
@@ -146,9 +151,13 @@ del %BUILDING_DIR%\Lib\site-packages\PyWin32.chm
 
 echo Creating the wbin (Windows binaries) folder that will be added to the path...
 mkdir %BUILDING_DIR%\wbin
-copy %REPO_ROOT%\build_scripts\windows\scripts\az.cmd %BUILDING_DIR%\wbin\
-copy %REPO_ROOT%\build_scripts\windows\scripts\azps.ps1 %BUILDING_DIR%\wbin\
-copy %REPO_ROOT%\build_scripts\windows\scripts\az %BUILDING_DIR%\wbin\
+if "%TARGET%"=="msi" (
+    copy %REPO_ROOT%\build_scripts\windows\scripts\az.cmd %BUILDING_DIR%\wbin\
+    copy %REPO_ROOT%\build_scripts\windows\scripts\azps.ps1 %BUILDING_DIR%\wbin\
+    copy %REPO_ROOT%\build_scripts\windows\scripts\az %BUILDING_DIR%\wbin\
+) else (
+    copy %REPO_ROOT%\build_scripts\windows\scripts\az_zip.cmd %BUILDING_DIR%\wbin\az.cmd
+)
 if %errorlevel% neq 0 goto ERROR
 copy %REPO_ROOT%\build_scripts\windows\resources\CLI_LICENSE.rtf %BUILDING_DIR%
 copy %REPO_ROOT%\build_scripts\windows\resources\ThirdPartyNotices.txt %BUILDING_DIR%
@@ -195,10 +204,17 @@ popd
 
 if %errorlevel% neq 0 goto ERROR
 
-echo Building MSI...
-msbuild /t:rebuild /p:Configuration=Release /p:Platform=%ARCH% %REPO_ROOT%\build_scripts\windows\azure-cli.wixproj
+if "%TARGET%"=="msi" (
+    echo Building MSI...
+    msbuild /t:rebuild /p:Configuration=Release /p:Platform=%ARCH% %REPO_ROOT%\build_scripts\windows\azure-cli.wixproj
+    if %errorlevel% neq 0 goto ERROR
+) else (
+    echo Building ZIP...
+    ren %BUILDING_DIR% "Azure CLI"
+    powershell Compress-Archive -Path '%ZIP_DIR%' -DestinationPath %OUTPUT_DIR%\azure-cli-%CLI_VERSION%.zip
+    if %errorlevel% neq 0 goto ERROR
+)
 
-if %errorlevel% neq 0 goto ERROR
 
 echo %OUTPUT_DIR%
 
