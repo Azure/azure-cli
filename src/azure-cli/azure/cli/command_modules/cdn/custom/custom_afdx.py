@@ -20,7 +20,6 @@ from azure.mgmt.cdn.operations import (AFDOriginGroupsOperations, AFDOriginsOper
                                        RulesOperations, SecurityPoliciesOperations, AFDCustomDomainsOperations,
                                        ProfilesOperations)
 
-from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import (sdk_no_wait)
 from azure.cli.core.azclierror import (InvalidArgumentValueError)
 from azure.core.exceptions import (ResourceNotFoundError)
@@ -30,7 +29,6 @@ from msrest.polling import LROPoller, NoPolling
 
 from .custom import _update_mapper
 from azure.cli.core.aaz._base import has_value
-from msrestazure.tools import is_valid_resource_id
 
 from .custom_rule_util import (create_condition, create_action)
 
@@ -215,21 +213,29 @@ class AFDRuleCreate(_AFDRuleCreate):
         args = self.ctx.args
         # args.parameters.customer_certificate.secret_source = args.action_name
         # conditions
+        conditions = []
         condition = create_condition(args.match_variable, args.operator, args.match_values, args.selector, args.negate_condition, args.transforms)
-        args.conditions.append(condition)
+        if condition is not None:
+            conditions.append(condition)
+        args.conditions = conditions
 
         # actions
+        actions = []
         action = create_action(args.action_name, args.cache_behavior, args.cache_duration, args.header_action,
-                                args.header_name, args.header_value, None, None if args.query_parameters is None else ",".join(args.query_parameters), args.redirect_type, args.redirect_protocol, args.custom_hostname,
+                                args.header_name, args.header_value, None, args.query_parameters, args.redirect_type, args.redirect_protocol, args.custom_hostname,
                                 args.custom_path, args.custom_query_string, args.custom_fragment, args.source_pattern,
-                                args.destination, args.preserve_unmatched_path, args.origin_group, 
+                                args.destination, args.preserve_unmatched_path, 
+                                origin_group=args.origin_group, 
+                                sub_id=self.ctx.subscription_id,
                                 enable_caching=args.enable_caching,
                                 resource_group_name=args.resource_group,
                                 profile_name=args.profile_name,
-                                is_compression_enabled=args.is_compression_enabled,
+                                is_compression_enabled=None,
                                 query_string_caching_behavior=args.query_string_caching_behavior,
                                 forwarding_protocol=args.forwarding_protocol)
-        args.actions.append(action)
+        if action is not None:
+            actions.append(action)
+        args.actions = actions
 
 from azure.cli.command_modules.cdn.aaz.latest.afd.rule import Show as RuleShow
 def add_condition(cmd, resource_group_name, profile_name, rule_set_name,

@@ -12,7 +12,6 @@ from azure.mgmt.cdn.models import SkuName
 
 from collections import namedtuple
 
-
 class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     def test_rule_set_crud(self, resource_group):
