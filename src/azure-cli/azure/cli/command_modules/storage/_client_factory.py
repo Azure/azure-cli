@@ -391,15 +391,6 @@ def cf_share_service(cli_ctx, kwargs):
     account_name = kwargs.pop('account_name', None)
     account_url = kwargs.pop('account_url', None)
     enable_file_backup_request_intent = kwargs.pop('enable_file_backup_request_intent', None)
-    if token_credential is not None and not enable_file_backup_request_intent:
-        raise RequiredArgumentMissingError("--enable-file-backup-request-intent is required for file share OAuth")
-    if enable_file_backup_request_intent:
-        client_kwargs['token_intent'] = 'backup'
-    if connection_string:
-        return t_share_service.from_connection_string(conn_str=connection_string, **client_kwargs)
-    if not account_url:
-        account_url = get_account_url(cli_ctx, account_name=account_name, service='file')
-    credential = account_key or sas_token or token_credential
 
     disallow_trailing_dot = kwargs.pop('disallow_trailing_dot', None)
     disallow_source_trailing_dot = kwargs.pop('disallow_source_trailing_dot', None)
@@ -411,6 +402,16 @@ def cf_share_service(cli_ctx, kwargs):
         import re
         if kwargs.get("source_share") or (copy_url and re.match(r"https?:\/\/.*?\.file\..*", copy_url)):
             client_kwargs["allow_source_trailing_dot"] = not disallow_source_trailing_dot
+
+    if token_credential is not None and not enable_file_backup_request_intent:
+        raise RequiredArgumentMissingError("--enable-file-backup-request-intent is required for file share OAuth")
+    if enable_file_backup_request_intent:
+        client_kwargs['token_intent'] = 'backup'
+    if connection_string:
+        return t_share_service.from_connection_string(conn_str=connection_string, **client_kwargs)
+    if not account_url:
+        account_url = get_account_url(cli_ctx, account_name=account_name, service='file')
+    credential = account_key or sas_token or token_credential
 
     return t_share_service(account_url=account_url, credential=credential, **client_kwargs)
 
