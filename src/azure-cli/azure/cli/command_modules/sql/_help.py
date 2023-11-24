@@ -896,6 +896,8 @@ examples:
     text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} -z
   - name: Create managed instance with zone redundancy explicitly disabled
     text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} -z false
+  - name: Create managed instance with instance pool name
+    text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --instance-pool-name myinstancepool
 """
 
 helps['sql mi delete'] = """
@@ -1025,6 +1027,10 @@ examples:
     text: az sql mi update -g mygroup -n myinstance --bsr Local
   - name: Enable zone redundancy on a managed instance
     text: az sql mi update -g mygroup -n myinstance -z
+  - name: Move managed instance to instance pool
+    text: az sql mi update -g mygroup -n myinstance --instance-pool-name myinstancepool
+  - name: Move managed instance out of instance pool
+    text: az sql mi update -g mygroup -n myinstance --remove instancePoolId --capacity vcorecapacity
 """
 
 helps['sql midb'] = """
