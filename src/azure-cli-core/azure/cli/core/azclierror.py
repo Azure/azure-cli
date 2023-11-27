@@ -45,8 +45,6 @@ class AzCLIError(CLIError):
 
     def request_error_assistance(self, cli_ctx=None) -> None:
         # Get error reason from LLM
-        # We may need to make this call async since it'll take a long time and we don't need the resule until
-        # print_error
         self.error_suggestion = request_error_assistance(command=self.command, error=self.error_msg, cli_ctx=cli_ctx)
 
     def set_recommendation(self, recommendation):

@@ -82,20 +82,17 @@ def print_error_assistance(response) -> None:
         explanation = response["Explanation"]
 
         if explanation:
-            print_styled_text([(Style.ERROR, "Issue: ")])
-            print(explanation)
+            print_styled_text([(Style.ERROR, "Issue: "), (Style.PRIMARY, explanation)])
 
         suggested_command = _validate_command(response["Suggestion"])
 
         if suggested_command:
-            print_styled_text([(Style.ACTION, "Suggestion: ")])
-            print(suggested_command)
+            print_styled_text([(Style.ACTION, "Suggestion: "), (Style.PRIMARY, suggested_command)])
 
         note = response["Note"]
 
         if note:
-            print_styled_text([(Style.PRIMARY, "Note: ")])
-            print(note)
+            print_styled_text([(Style.PRIMARY, "Note: "), (Style.PRIMARY, note)])
 
         _print_line()
 
