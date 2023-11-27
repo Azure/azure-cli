@@ -113,20 +113,15 @@ def _get_docker_status_and_version(ignore_errors, yes):
         output, warning, stderr, succeeded = _subprocess_communicate([docker_command, "pull", IMAGE])
 
         if not succeeded:
-            if DOCKER_PULL_WRONG_PLATFORM in stderr:
+            if stderr and DOCKER_PULL_WRONG_PLATFORM in stderr:
                 print_pass("Docker pull of '{}'".format(IMAGE))
                 logger.warning("Image '%s' can be pulled but cannot be used on this platform", IMAGE)
-            else:
-                _handle_error(DOCKER_PULL_ERROR.append_error_message(stderr), ignore_errors)
+                return
+            _handle_error(DOCKER_PULL_ERROR.append_error_message(stderr), ignore_errors)
         else:
             if warning:
                 logger.warning(warning)
-            if output.find(DOCKER_PULL_SUCCEEDED.format(IMAGE)) != -1 or \
-               output.find(DOCKER_IMAGE_UP_TO_DATE.format(IMAGE)) != -1:
-                print_pass("Docker pull of '{}'".format(IMAGE))
-            else:
-                _handle_error(DOCKER_PULL_ERROR, ignore_errors)
-
+            print_pass("Docker pull of '{}'".format(IMAGE))
 
 # Get current CLI version
 def _get_cli_version():
