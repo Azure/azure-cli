@@ -199,7 +199,7 @@ class RedisCacheTests(ScenarioTest):
         result = self.cmd('az redis access-policy list -n {name} -g {rg}').get_output_in_json()
         self.assertTrue(len(result) == 3)
 
-        # Commenting out due to issues with testing down test for update (need to provide exact sleep time)
+        # Commenting out due to issues with tearing down test for update (need to provide exact sleep time for lro to complete)
         """
         # Disable aad on cache
         self.cmd('az redis update -n {name} -g {rg} --set redisConfiguration.aadEnabled=false --no-wait False')
