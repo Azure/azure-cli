@@ -13,13 +13,15 @@ if "%CLI_VERSION%"=="" (
     echo Please set the CLI_VERSION environment variable, e.g. 2.0.13
     goto ERROR
 )
-
+@REM ARCH can be x86 or x64
 if "%ARCH%"=="" (
     set ARCH=x86
 )
+@REM TARGET can be msi or zip
 if "%TARGET%"=="" (
     set TARGET=msi
 )
+
 if "%ARCH%"=="x86" (
     set PYTHON_ARCH=win32
 ) else if "%ARCH%"=="x64" (
@@ -142,8 +144,11 @@ if %errorlevel% neq 0 goto ERROR
 
 pushd %BUILDING_DIR%
 %BUILDING_DIR%\python.exe %REPO_ROOT%\scripts\compact_aaz.py
+if %errorlevel% neq 0 goto ERROR
 %BUILDING_DIR%\python.exe %~dp0\patch_models_v2.py
+if %errorlevel% neq 0 goto ERROR
 %BUILDING_DIR%\python.exe %REPO_ROOT%\scripts\trim_sdk.py
+if %errorlevel% neq 0 goto ERROR
 popd
 
 REM Remove pywin32 help file to reduce size.
@@ -202,21 +207,19 @@ for /d %%d in ("azure*.dist-info") do (
 )
 popd
 
-if %errorlevel% neq 0 goto ERROR
 
 if "%TARGET%"=="msi" (
     echo Building MSI...
     msbuild /t:rebuild /p:Configuration=Release /p:Platform=%ARCH% %REPO_ROOT%\build_scripts\windows\azure-cli.wixproj
-    if %errorlevel% neq 0 goto ERROR
-) else (
+) else(
     echo Building ZIP...
     ren %BUILDING_DIR% "Azure CLI"
     powershell Compress-Archive -Path '%ZIP_DIR%' -DestinationPath %OUTPUT_DIR%\azure-cli-%CLI_VERSION%.zip
-    if %errorlevel% neq 0 goto ERROR
 )
 
+if %errorlevel% neq 0 goto ERROR
 
-echo %OUTPUT_DIR%
+echo Output Dir: %OUTPUT_DIR%
 
 goto END
 
