@@ -99,7 +99,6 @@ class Extension:
         Lazy load preview status.
         Returns the preview status of the extension.
         """
-        from .operations import is_preview_from_semantic_version
         try:
             if not isinstance(self._preview, bool):
                 self._preview = (bool(self.metadata.get(EXT_METADATA_ISPREVIEW)) or
@@ -356,3 +355,18 @@ def get_extension_names(ext_type=None):
     Returns the extension names of extensions installed in the extensions directory.
     """
     return [ext.name for ext in get_extensions(ext_type=ext_type)]
+
+
+def is_preview_from_semantic_version(version):
+    """
+    pre = [a, b] -> preview
+    >>> print(parse("1.2.3").pre)
+    None
+    >>> parse("1.2.3a1").pre
+    ('a', 1)
+    >>> parse("1.2.3b1").pre
+    ('b', 1)
+    """
+    from packaging.version import parse
+    parsed_version = parse(version)
+    return parsed_version.pre and parsed_version.pre[0] in ["a", "b"]

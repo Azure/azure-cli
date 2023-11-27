@@ -20,7 +20,7 @@ from packaging.version import parse
 from azure.cli.core import CommandIndex
 from azure.cli.core.util import CLIError, reload_module, rmtree_with_retry
 from azure.cli.core.extension import (extension_exists, build_extension_path, get_extensions, get_extension_modname,
-                                      get_extension, ext_compat_with_cli,
+                                      get_extension, ext_compat_with_cli, is_preview_from_semantic_version,
                                       EXT_METADATA_ISPREVIEW, EXT_METADATA_ISEXPERIMENTAL,
                                       WheelExtension, DevExtension, ExtensionNotInstalledException, WHEEL_INFO_RE)
 from azure.cli.core.telemetry import set_extension_management_detail
@@ -361,20 +361,6 @@ def is_cloud_shell_system_extension(ext_path):
         if ext_path.startswith('/usr/lib/python3'):
             return True
     return False
-
-
-def is_preview_from_semantic_version(version):
-    """
-    pre = [a, b] -> preview
-    >>> print(parse("1.2.3").pre)
-    None
-    >>> parse("1.2.3a1").pre
-    ('a', 1)
-    >>> parse("1.2.3b1").pre
-    ('b', 1)
-    """
-    parsed_version = parse(version)
-    return parsed_version.pre and parsed_version.pre[0] in ["a", "b"]
 
 
 def remove_extension(extension_name):
