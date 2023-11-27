@@ -51,7 +51,7 @@ def flexible_server_create(cmd, client,
                            private_dns_zone_arguments=None, public_access=None,
                            high_availability=None, zone=None, standby_availability_zone=None,
                            geo_redundant_backup=None, byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
-                           active_directory_auth=None, password_auth=None, auto_grow=None, yes=False):
+                           active_directory_auth=None, password_auth=None, auto_grow=None, performance_tier=None, yes=False):
 
     # Generate missing parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
@@ -83,7 +83,8 @@ def flexible_server_create(cmd, client,
                            byok_identity=byok_identity,
                            byok_key=byok_key,
                            backup_byok_identity=backup_byok_identity,
-                           backup_byok_key=backup_byok_key)
+                           backup_byok_key=backup_byok_key,
+                           performance_tier=performance_tier)
 
     server_result = firewall_id = None
 
@@ -100,7 +101,7 @@ def flexible_server_create(cmd, client,
                                                                            subnet_address_prefix=subnet_address_prefix,
                                                                            yes=yes)
 
-    storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb, auto_grow=auto_grow)
+    storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb, auto_grow=auto_grow, tier=performance_tier)
 
     backup = postgresql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
                                                       geo_redundant_backup=geo_redundant_backup)
@@ -264,7 +265,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        active_directory_auth=None, password_auth=None,
                                        private_dns_zone_arguments=None,
                                        tags=None,
-                                       auto_grow=None,
+                                       auto_grow=None, performance_tier=None,
                                        yes=False):
 
     # validator
@@ -289,6 +290,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                            byok_key=byok_key,
                            backup_byok_identity=backup_byok_identity,
                            backup_byok_key=backup_byok_key,
+                           performance_tier=performance_tier,
                            instance=instance)
 
     server_module_path = instance.__module__
@@ -320,6 +322,16 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     if auto_grow:
         instance.storage.auto_grow = auto_grow
+
+    if performance_tier:
+        instance.storage.tier = performance_tier
+
+    if instance.storage.type is not None:
+        if instance.storage.type == "":
+            instance.storage.type = None
+            instance.storage.iops = None
+            if performance_tier is None:
+                instance.storage.tier = None
 
     if backup_retention:
         instance.backup.backup_retention_days = backup_retention
@@ -372,6 +384,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
         params.high_availability = high_availability_param
 
+    print(params)
     return params
 
 
@@ -453,7 +466,9 @@ def flexible_list_skus(cmd, client, location):
 def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, zone=None,
                             location=None, vnet=None, vnet_address_prefix=None, subnet=None,
                             subnet_address_prefix=None, private_dns_zone_arguments=None, no_wait=False,
-                            byok_identity=None, byok_key=None, yes=False):
+                            byok_identity=None, byok_key=None,
+                            sku_name=None, tier=None,
+                            storage_gb=None, performance_tier=None, yes=False):
     replica_name = replica_name.lower()
 
     if not is_valid_resource_id(source_server):
@@ -480,7 +495,14 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
 
     list_location_capability_info = get_postgres_location_capability_info(cmd, location)
 
-    validate_postgres_replica(cmd, source_server_object.sku.tier, location, source_server_object, list_location_capability_info)
+    if tier is None and source_server_object is not None:
+        tier = source_server_object.sku.tier
+    if sku_name is None and source_server_object is not None:
+        sku_name = source_server_object.sku.name
+    if storage_gb is None and source_server_object is not None:
+        storage_gb = source_server_object.storage.storage_size_gb
+    validate_postgres_replica(cmd, tier, location, source_server_object,
+                              sku_name, storage_gb, performance_tier, list_location_capability_info)
 
     if not zone:
         zone = _get_pg_replica_zone(list_location_capability_info['zones'],
@@ -522,6 +544,10 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
     parameters.identity, parameters.data_encryption = build_identity_and_data_encryption(db_engine='postgres',
                                                                                          byok_identity=byok_identity,
                                                                                          byok_key=byok_key)
+
+    parameters.sku = postgresql_flexibleservers.models.Sku(name=sku_name, tier=tier)
+
+    parameters.storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb, auto_grow="Disabled", tier=performance_tier)
 
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, replica_name, parameters)
 
