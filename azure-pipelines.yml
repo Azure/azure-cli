@@ -314,7 +314,22 @@ jobs:
   pool:
     name: ${{ variables.windows_pool }}
   steps:
-    - task:
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Build Artifacts'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+      artifactName: metadata
+
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Build Artifacts'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/zip'
+      artifactName: zip-$(Platform)
+
+  - task: PowerShell@2
+    displayName: Install and Load CLI
+    inputs:
+      filePath: build_scripts\windows\scripts\test_zip_installation.ps1
 
 - job: BuildDockerImageAlpine
   displayName: Build Docker Image Alpine
@@ -359,7 +374,7 @@ jobs:
       ${{ each arch in parameters.architectures }}:
         ${{ arch.name }}:
           pool: ${{ arch.pool }}
-          artifactName: docker-${{ arch.name }}
+          artifactName: docker-${{ arch.value }}
   pool:
     name: $(pool)
   steps:
