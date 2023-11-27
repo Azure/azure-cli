@@ -512,6 +512,12 @@ parameters:
   - name: --enable-vpa
     type: bool
     short-summary: Enable vertical pod autoscaler for cluster.
+  - name: --nodepool-allowed-host-ports
+    type: string
+    short-summary: Expose host ports on the node pool. When specified, format should be a space-separated list of ranges with protocol, eg. 80/TCP,443/TCP,4000-5000/TCP.
+  - name: --nodepool-asg-ids
+    type: string
+    short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -1516,6 +1522,12 @@ parameters:
   - name: --gpu-instance-profile
     type: string
     short-summary: GPU instance profile to partition multi-gpu Nvidia GPUs.
+  - name: --allowed-host-ports
+    type: string
+    short-summary: Expose host ports on the node pool. When specified, format should be a space-separated list of ranges with protocol, eg. 80/TCP,443/TCP,4000-5000/TCP.
+  - name: --asg-ids
+    type: string
+    short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
@@ -1607,6 +1619,12 @@ parameters:
   - name: --aks-custom-headers
     type: string
     short-summary: Comma-separated key-value pairs to specify custom headers.
+  - name: --allowed-host-ports
+    type: string
+    short-summary: Expose host ports on the node pool. When specified, format should be a space-separated list of ranges with protocol, eg. 80/TCP,443/TCP,4000-5000/TCP.
+  - name: --asg-ids
+    type: string
+    short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
 examples:
   - name: Reconcile the nodepool back to its current state.
     text: az aks nodepool update -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
