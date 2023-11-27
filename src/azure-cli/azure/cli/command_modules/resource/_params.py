@@ -846,9 +846,7 @@ def load_arguments(self, _):
                                                       help="The target location where the Bicep module will be published."))
         c.argument('documentationUri', arg_type=CLIArgumentType(options_list=['--documentationUri', '-d'],
                                                                 help="The documentation uri of the Bicep module."))
-        c.argument('with_source', arg_type=CLIArgumentType(options_list=['--with-source', '--src'],
-                                                           action='store_true',
-                                                           help="[Experimental] Publish source code with the module."))
+        c.argument('with_source', options_list=['--with-source', '--src'], action='store_true', help="Publish source code with the module.", is_preview=True)
         c.argument('force', arg_type=bicep_force_type, help="Allow overwriting an existing Bicep module version.")
 
     with self.argument_context('bicep install') as c:
