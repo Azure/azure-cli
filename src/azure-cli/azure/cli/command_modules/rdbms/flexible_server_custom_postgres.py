@@ -947,8 +947,8 @@ def flexible_server_threat_protection_update(
                 server_name=server_name,
                 threat_protection_name="Default",
                 parameters=parameters),
-                cmd.cli_ctx,
-                'PostgreSQL Flexible Server Advanced Threat Protection Setting Update')
+            cmd.cli_ctx,
+            'PostgreSQL Flexible Server Advanced Threat Protection Setting Update')
     except HttpResponseError as ex:
         if "Operation returned an invalid status 'Accepted'" in ex.message:
             # TODO: Once the swagger is updated, this won't be needed.
