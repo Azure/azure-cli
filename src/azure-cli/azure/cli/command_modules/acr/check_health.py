@@ -123,6 +123,7 @@ def _get_docker_status_and_version(ignore_errors, yes):
                 logger.warning(warning)
             print_pass("Docker pull of '{}'".format(IMAGE))
 
+
 # Get current CLI version
 def _get_cli_version():
     from azure.cli.core import __version__ as core_version
