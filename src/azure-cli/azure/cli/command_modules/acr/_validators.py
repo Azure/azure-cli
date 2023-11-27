@@ -106,6 +106,8 @@ def validate_retention_days(namespace):
 def validate_registry_name(cmd, namespace):
     """Omit login server endpoint suffix."""
     registry = namespace.registry_name
+    if registry is None:
+        return
     suffixes = cmd.cli_ctx.cloud.suffixes
     # Some clouds do not define 'acr_login_server_endpoint' (e.g. AzureGermanCloud)
     if registry and hasattr(suffixes, 'acr_login_server_endpoint'):
