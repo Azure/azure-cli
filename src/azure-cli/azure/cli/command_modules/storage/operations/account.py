@@ -82,7 +82,8 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     # check name availability and throw a warning if an account with the same name is found
     # TODO throw error instead of just a warning during the next breaking change window
     StorageAccountCheckNameAvailabilityParameters = cmd.get_models('StorageAccountCheckNameAvailabilityParameters')
-    account_name_param = StorageAccountCheckNameAvailabilityParameters(name=account_name, type="Microsoft.Storage/storageAccounts")
+    account_name_param = StorageAccountCheckNameAvailabilityParameters(name=account_name,
+                                                                       type="Microsoft.Storage/storageAccounts")
     name_is_available = scf.storage_accounts.check_name_availability(account_name_param)
     if name_is_available and not name_is_available.name_available and name_is_available.reason == "AlreadyExists":
         logger.warning("A storage account with the provided name %s is found. Will continue to run the update command "
