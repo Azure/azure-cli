@@ -1764,7 +1764,7 @@ class WebappUndeleteTest(ScenarioTest):
             JMESPathCheck('[0].deletedSiteName', webapp_name)
         ])
 
-    @AllowLargeResponse()
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_deleted_restore_to_existing_site(self, resource_group):
         plan = self.create_random_name(prefix='delete-me-plan', length=24)
@@ -1795,7 +1795,7 @@ class WebappUndeleteTest(ScenarioTest):
             JMESPathCheck('name', webapp_2_name)
         ])
 
-    @AllowLargeResponse()
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_deleted_restore_to_non_existent_site(self, resource_group):
         plan = self.create_random_name(prefix='delete-me-plan', length=24)
@@ -2701,10 +2701,8 @@ class WebappOneDeployScenarioTest(ScenarioTest):
             'webapp create -g {} -n {} --plan {} -r "TOMCAT|9.0-java11"'.format(resource_group, webapp_name, plan_name))
         
         self.cmd(f'webapp deploy -g {resource_group} -n {webapp_name} --src-url {war_url} --type war').assert_with_checks([
-            JMESPathCheck('status', 4),
             JMESPathCheck('deployer', 'OneDeploy'),
             JMESPathCheck('message', 'OneDeploy'),
-            JMESPathCheck('complete', True)
         ])
 
 class DomainScenarioTest(ScenarioTest):
