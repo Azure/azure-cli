@@ -76,25 +76,19 @@ def load_command_table(self, _):
     # Management Plane Commands
     with self.command_group('keyvault', mgmt_vaults_entity.command_type,
                             client_factory=mgmt_vaults_entity.client_factory) as g:
-        g.custom_command('create', 'create_vault_or_hsm', supports_no_wait=True,
-                         doc_string_source=mgmt_vaults_entity.models_docs_tmpl.format('VaultProperties'))
+        g.custom_command('create', 'create_vault_or_hsm', supports_no_wait=True)
         g.custom_command('recover', 'recover_vault_or_hsm', supports_no_wait=True)
         g.custom_command('list', 'list_vault_or_hsm')
-        g.custom_show_command('show', 'get_vault_or_hsm',
-                              doc_string_source=mgmt_vaults_entity.operations_docs_tmpl.format('get'))
-        g.custom_command('delete', 'delete_vault_or_hsm', supports_no_wait=True,
-                         doc_string_source=mgmt_vaults_entity.operations_docs_tmpl.format('delete'))
-        g.custom_command('purge', 'purge_vault_or_hsm', supports_no_wait=True,
-                         doc_string_source=mgmt_vaults_entity.operations_docs_tmpl.format('begin_purge_deleted'))
+        g.custom_show_command('show', 'get_vault_or_hsm')
+        g.custom_command('delete', 'delete_vault_or_hsm', supports_no_wait=True)
+        g.custom_command('purge', 'purge_vault_or_hsm', supports_no_wait=True)
         g.custom_command('set-policy', 'set_policy', supports_no_wait=True)
         g.custom_command('delete-policy', 'delete_policy', supports_no_wait=True)
-        g.custom_command('list-deleted', 'list_deleted_vault_or_hsm',
-                         doc_string_source=mgmt_vaults_entity.operations_docs_tmpl.format('list_deleted'))
+        g.custom_command('list-deleted', 'list_deleted_vault_or_hsm')
         g.custom_command('show-deleted', 'get_deleted_vault_or_hsm')
         g.generic_update_command(
             'update', setter_name='update_vault_setter', setter_type=kv_vaults_custom,
             custom_func_name='update_vault',
-            doc_string_source=mgmt_vaults_entity.models_docs_tmpl.format('VaultProperties'),
             supports_no_wait=True)
         g.wait_command('wait')
 
@@ -103,12 +97,9 @@ def load_command_table(self, _):
                                 client_factory=mgmt_hsms_entity.client_factory) as g:
             g.generic_update_command(
                 'update-hsm', setter_name='update_hsm_setter', setter_type=kv_hsms_custom,
-                custom_func_name='update_hsm', supports_no_wait=True,
-                doc_string_source=mgmt_hsms_entity.models_docs_tmpl.format('ManagedHsmProperties'))
+                custom_func_name='update_hsm', supports_no_wait=True)
             g.custom_wait_command('wait-hsm', 'wait_hsm')
-            g.custom_command('check-name', 'check_name_availability',
-                             doc_string_source=mgmt_hsms_entity.operations_docs_tmpl.
-                             format('check_mhsm_name_availability'))
+            g.custom_command('check-name', 'check_name_availability')
 
     with self.command_group('keyvault network-rule',
                             mgmt_vaults_entity.command_type,
@@ -145,12 +136,10 @@ def load_command_table(self, _):
     # Data Plane Commands
     if not is_azure_stack_profile(self):
         with self.command_group('keyvault backup', data_backup_entity.command_type) as g:
-            g.keyvault_custom('start', 'full_backup',
-                              doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_backup'))
+            g.keyvault_custom('start', 'full_backup')
 
         with self.command_group('keyvault restore', data_backup_entity.command_type) as g:
-            g.keyvault_custom('start', 'full_restore',
-                              doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_restore'))
+            g.keyvault_custom('start', 'full_restore')
 
         with self.command_group('keyvault security-domain', private_data_entity.command_type) as g:
             g.keyvault_custom('init-recovery', 'security_domain_init_recovery')
@@ -160,8 +149,7 @@ def load_command_table(self, _):
             g.keyvault_custom('wait', '_wait_security_domain_operation')
 
     with self.command_group('keyvault key', data_key_entity.command_type) as g:
-        g.keyvault_custom('create', 'create_key', transform=transform_key_output,
-                          doc_string_source=data_key_entity.operations_docs_tmpl.format('create_key'))
+        g.keyvault_custom('create', 'create_key', transform=transform_key_output)
         g.keyvault_command('set-attributes', 'update_key_properties', transform=transform_key_output)
         g.keyvault_command('show', 'get_key', transform=transform_key_output)
         g.keyvault_custom('import', 'import_key', transform=transform_key_output)
@@ -179,10 +167,8 @@ def load_command_table(self, _):
         g.keyvault_custom('recover', 'recover_key', transform=transform_key_output)
         g.keyvault_command('purge', 'purge_deleted_key')
         g.keyvault_custom('download', 'download_key')
-        g.keyvault_custom('backup', 'backup_key',
-                          doc_string_source=data_key_entity.operations_docs_tmpl.format('backup_key'))
-        g.keyvault_custom('restore', 'restore_key', supports_no_wait=True, transform=transform_key_output,
-                          doc_string_source=data_key_entity.operations_docs_tmpl.format('restore_key_backup'))
+        g.keyvault_custom('backup', 'backup_key')
+        g.keyvault_custom('restore', 'restore_key', supports_no_wait=True, transform=transform_key_output)
 
     if not is_azure_stack_profile(self):
         with self.command_group('keyvault key', data_key_entity.command_type) as g:
