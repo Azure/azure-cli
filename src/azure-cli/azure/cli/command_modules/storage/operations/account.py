@@ -85,8 +85,8 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     account_name_param = StorageAccountCheckNameAvailabilityParameters(name=account_name)
     name_is_available = scf.storage_accounts.check_name_availability(account_name_param)
     if name_is_available and not name_is_available.name_available and name_is_available.reason == "AlreadyExists":
-        logger.warning("A storage account with the provided name {} is found. Will continue to run the update command "
-                       "instead.".format(account_name))
+        logger.warning("A storage account with the provided name %s is found. Will continue to run the update command "
+                       "instead.", account_name)
 
     if kind is None:
         logger.warning("The default kind for created storage account will change to 'StorageV2' from 'Storage' "
