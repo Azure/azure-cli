@@ -814,7 +814,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             argument_context_string = '{} flexible-server advanced-threat-protection-setting {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('resource_group_name', arg_type=resource_group_name_type)
-                c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+                c.argument('server_name', id_part='name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
 
         with self.argument_context('{} flexible-server advanced-threat-protection-setting update'.format(command_group)) as c:
             c.argument('state',

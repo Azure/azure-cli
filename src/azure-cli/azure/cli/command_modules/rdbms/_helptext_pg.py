@@ -772,4 +772,8 @@ short-summary: Get advanced threat protection settings for a PostgreSL flexible 
 examples:
   - name: Get the details of advanced threat protection setting for a flexible server.
     text: az postgres flexible-server advanced-threat-protection-setting show --resource-group testGroup --server-name testserver
+  - name: Get the details of advanced threat protection setting for a flexible server in a different subscription.
+    text: az postgres flexible-server advanced-threat-protection-setting show --subscription testSubscription --resource-group testGroup --server-name testserver
+  - name: Get the details of advanced threat protection setting for a flexible server using --ids parameter.
+    text: az postgres flexible-server advanced-threat-protection-setting show --ids /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/testGroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/testServer
 """
