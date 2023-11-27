@@ -308,8 +308,8 @@ def add_extension(cmd=None, source=None, extension_name=None, index_url=None, ye
                   version=None, cli_ctx=None, upgrade=None, allow_preview=None):
     if allow_preview is None:
         logger.warning("Default enabled including preview versions for extension installation now. "
-                       "Disabled in March 2024."
-                       "Use '--allow-preview true' to enable it specifically if needed.")
+                       "Disabled in May 2024. "
+                       "Use '--allow-preview true' to enable it specifically if needed. ")
         allow_preview = True
     ext_sha256 = None
     update_to_latest = version == 'latest' and not source
@@ -406,8 +406,8 @@ def show_extension(extension_name):
 def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_index_urls=None, pip_proxy=None, allow_preview=None, cli_ctx=None, version=None, download_url=None, ext_sha256=None):
     if allow_preview is None:
         logger.warning("Default enabled including preview versions for extension installation now. "
-                       "Disabled in March 2024."
-                       "Use '--allow-preview true' to enable it specifically if needed.")
+                       "Disabled in May 2024. "
+                       "Use '--allow-preview true' to enable it specifically if needed. ")
         allow_preview = True
     try:
         cmd_cli_ctx = cli_ctx or cmd.cli_ctx
