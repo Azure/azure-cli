@@ -66,7 +66,7 @@ class ExtensionCommandsLoader(AzCommandsLoader):
                        help='Space-separated list of extra URLs of package indexes to use. This should point to a repository compliant with PEP 503 (the simple repository API) or a local directory laid out in the same format.', arg_group='Experimental Pip')
             c.ignore('_subscription')  # hide global subscription param
             c.argument('system', action='store_true')
-            c.argument('allow_preview', options_list=['--allow-preview', '--preview'], action="store_true", help="Install packages that may be in preview, if exists")
+            c.argument('allow_preview', options_list=['--allow-preview'], help="Include preview packages for extension installation, if exists")
 
         with self.argument_context('extension add') as c:
             c.argument('extension_name', completer=extension_name_from_index_completion_list)

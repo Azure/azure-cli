@@ -6376,7 +6376,7 @@ class NetworkSecurityPartnerProviderScenarioTest(ScenarioTest):
     def __init__(self, method_name, config_file=None, recording_dir=None, recording_name=None, recording_processors=None,
                  replay_processors=None, recording_patches=None, replay_patches=None):
         super(NetworkSecurityPartnerProviderScenarioTest, self).__init__(method_name)
-        self.cmd('extension add -n virtual-wan --allow-preview')
+        self.cmd('extension add -n virtual-wan')
 
     @unittest.skip('Decouple with virtual-wan bump API version')
     @ResourceGroupPreparer(name_prefix='cli_test_security_partner_provider_', location='westus')
@@ -6416,7 +6416,7 @@ class NetworkSecurityPartnerProviderScenarioTest(ScenarioTest):
 class NetworkVirtualApplianceScenarioTest(ScenarioTest):
     def setUp(self):
         super(NetworkVirtualApplianceScenarioTest, self).setUp()
-        self.cmd('extension add -n virtual-wan --allow-preview')
+        self.cmd('extension add -n virtual-wan')
 
     def tearDown(self):
         # avoid influence other test when parallel run
@@ -6520,7 +6520,7 @@ class NetworkVirtualApplianceIdentityScenarioTest(ScenarioTest):
             'ua_Identity1': 'cli-ua-identity1',
             'ua_Identity2': 'cli-ua-identity2'
         })
-        self.cmd('extension add -n virtual-wan --allow-preview')
+        self.cmd('extension add -n virtual-wan')
         self.cmd('network vwan create -n {vwan} -g {rg} --type Standard')
         self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan} --address-prefix 10.5.0.0/16 --sku Standard')
         routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
