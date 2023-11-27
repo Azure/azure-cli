@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 import time
 import datetime
@@ -107,6 +108,114 @@ class RedisCacheTests(ScenarioTest):
             self.check('sku.capacity', basic_size[1:])
         ]).get_output_in_json()
         self.check(result['redisVersion'].split('.')[0], '{redis_version}')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_redis')
+    def test_redis_cache_with_aad(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        
+        self.kwargs = {
+            'rg': resource_group,
+            'name': self.create_random_name(prefix=name_prefix, length=24),
+            'location': location,
+            'sku': premium_sku,
+            'size': premium_size,
+            'redis-configuration-enable-aad': os.path.join(curr_dir, 'config_enable-aad.json').replace('\\', '\\\\'),
+            'access-policy-name': "accessPolicy1",
+            'permissions1': "\"+get +hget\"",
+            'permissions2': "+get",
+            'access-policy-assignment-name': "accessPolicyAssignmentName1",
+            'object-id': "69d700c5-ca77-4335-947e-4f823dd00e1a",
+            'object-id-alias1': "kj-aad-testing",
+            'object-id-alias2': "aad-testing-app"
+        }
+
+        # Create aad enabled cache        
+        self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size} --redis-configuration @"{redis-configuration-enable-aad}"')
+        result = self.cmd('az redis show -n {name} -g {rg}').get_output_in_json()
+        
+        # Verify cache is aad enabled
+        self.assertTrue(result['provisioningState'] == 'Succeeded')
+        self.assertTrue(result['redisConfiguration']['aadEnabled'] == "true")
+
+        # List access polices
+        result = self.cmd('az redis access-policy list -n {name} -g {rg}').get_output_in_json()
+        self.assertTrue(len(result) == 3)
+
+        # Create access policy
+        result = self.cmd('az redis access-policy create -n {name} -g {rg} --access-policy-name {access-policy-name} --permissions {permissions1}').get_output_in_json()
+        self.assertTrue(result['name'] == self.kwargs['access-policy-name'])
+        self.assertTrue(result['permissions'] == "+get +hget allkeys")
+
+        # List access polices
+        result = self.cmd('az redis access-policy list -n {name} -g {rg}').get_output_in_json()
+        self.assertTrue(len(result) == 4)
+
+        # Update access policy
+        result = self.cmd('az redis access-policy update -n {name} -g {rg} --access-policy-name {access-policy-name} --permissions {permissions2}').get_output_in_json()
+        self.assertTrue(result['name'] == self.kwargs['access-policy-name'])
+        self.assertTrue(result['permissions'] == "+get allkeys")
+
+        # Get access policy
+        result = self.cmd('az redis access-policy show -n {name} -g {rg} --access-policy-name {access-policy-name}').get_output_in_json()
+        self.assertTrue(result['name'] == self.kwargs['access-policy-name'])
+        self.assertTrue(result['permissions'] == "+get allkeys")
+
+        # Create access policy assignment
+        result = self.cmd('az redis access-policy-assignment create -n {name} -g {rg} --access-policy-assignment-name {access-policy-assignment-name} --access-policy-name {access-policy-name} --object-id {object-id} --object-id-alias {object-id-alias1}').get_output_in_json()
+        self.assertTrue(result['name'] == self.kwargs['access-policy-assignment-name'])
+        self.assertTrue(result['accessPolicyName'] == self.kwargs['access-policy-name'])
+        self.assertTrue(result['objectId'] == self.kwargs['object-id'])
+        self.assertTrue(result['objectIdAlias'] == self.kwargs['object-id-alias1'])
+
+        # List access policy assignments
+        result = self.cmd('az redis access-policy-assignment list -n {name} -g {rg}').get_output_in_json()
+        self.assertTrue(len(result) == 1)
+
+        # Update access policy assignment
+        result = self.cmd('az redis access-policy-assignment update -n {name} -g {rg} --access-policy-assignment-name {access-policy-assignment-name} --access-policy-name {access-policy-name} --object-id {object-id} --object-id-alias {object-id-alias2}').get_output_in_json()
+        self.assertTrue(result['name'] == self.kwargs['access-policy-assignment-name'])
+        self.assertTrue(result['accessPolicyName'] == self.kwargs['access-policy-name'])
+        self.assertTrue(result['objectId'] == self.kwargs['object-id'])
+        self.assertTrue(result['objectIdAlias'] == self.kwargs['object-id-alias2'])
+
+        # Get access policy assignment
+        result = self.cmd('az redis access-policy-assignment show -n {name} -g {rg} --access-policy-assignment-name {access-policy-assignment-name}').get_output_in_json()
+        self.assertTrue(result['name'] == self.kwargs['access-policy-assignment-name'])
+        self.assertTrue(result['accessPolicyName'] == self.kwargs['access-policy-name'])
+        self.assertTrue(result['objectId'] == self.kwargs['object-id'])
+        self.assertTrue(result['objectIdAlias'] == self.kwargs['object-id-alias2'])
+
+        # Delete access policy assignment
+        self.cmd('az redis access-policy-assignment delete -n {name} -g {rg} --access-policy-assignment-name {access-policy-assignment-name}')
+
+        # List access policy assignments
+        result = self.cmd('az redis access-policy-assignment list -n {name} -g {rg}').get_output_in_json()
+        self.assertTrue(len(result) == 0)
+
+        # Delete access policy
+        self.cmd('az redis access-policy delete -n {name} -g {rg} --access-policy-name {access-policy-name}')
+
+        # List access polices
+        result = self.cmd('az redis access-policy list -n {name} -g {rg}').get_output_in_json()
+        self.assertTrue(len(result) == 3)
+
+        # Commenting out due to issues with tearing down test for update (need to provide exact sleep time for lro to complete)
+        """
+        # Disable aad on cache
+        self.cmd('az redis update -n {name} -g {rg} --set redisConfiguration.aadEnabled=false --no-wait False')
+        result = self.cmd('az redis show -n {name} -g {rg}').get_output_in_json()
+
+        # Verify cache is aad disabled
+        print(result)
+        if self.is_live:
+            while result['provisioningState'] == 'ConfiguringAAD':
+                result = self.cmd('az redis show -n {name} -g {rg}').get_output_in_json()
+                time.sleep(1)
+        print(result)
+        self.assertTrue(result['provisioningState'] == 'Succeeded')
+        self.assertTrue(result['redisConfiguration']['aadEnabled'] == "False")
+        """
+
 
     @ResourceGroupPreparer(name_prefix='cli_test_redis')
     def test_redis_cache_list_works(self, resource_group):

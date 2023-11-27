@@ -59,6 +59,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('rule_name', help='The name of the firewall rule.')
         c.argument('start_ip', help='Lowest IP address included in the range.')
 
+    with self.argument_context('redis access-policy') as c:
+        c.argument('access_policy_name', help='The name of the access policy that is being assigned')
+        c.argument('permissions', help='Permissions for the access policy. Learn how to configure permissions at '
+                                       'https://aka.ms/redis/AADPreRequisites')
+
+    with self.argument_context('redis access-policy-assignment') as c:
+        c.argument('access_policy_assignment_name', help='The name of the access policy assignment')
+        c.argument('object_id', help='Object Id to assign access policy to')
+        c.argument('object_id_alias', help='User friendly name for object id. Also represents username for token based authentication')
+        c.argument('access_policy_name', help='The name of the access policy that is being assigned')
+
     with self.argument_context('redis force-reboot') as c:
         c.argument('shard_id', help='If clustering is enabled, the ID of the shard to be rebooted.')
 
