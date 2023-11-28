@@ -9634,3 +9634,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(cmd, checks=[
             self.is_empty(),
         ])
+
+    @live_only() # live only is required for test environment setup like `az login`
+    @AllowLargeResponse()
+    def test_list_trustedaccess_roles(self):
+        cmd = 'aks trustedaccess role list -l eastus2euap'
+        self.cmd(cmd, checks=[
+            self.check(
+                'type', 'Microsoft.ContainerService/locations/trustedaccessroles')
+        ])
