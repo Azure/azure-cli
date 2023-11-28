@@ -14,7 +14,8 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_postgres_flexible_backups,
     cf_postgres_flexible_replica,
     cf_postgres_flexible_adadmin,
-    cf_postgres_flexible_migrations)
+    cf_postgres_flexible_migrations,
+    cf_postgres_flexible_server_threat_protection_settings)
 
 from ._transformers import (
     table_transform_output,
@@ -74,6 +75,11 @@ def load_flexibleserver_command_table(self, _):
     postgres_flexible_migrations_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#MigrationsOperations.{}',
         client_factory=cf_postgres_flexible_migrations
+    )
+
+    postgres_flexible_server_threat_protection_settings_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#ServerThreatProtectionSettingsOperations.{}',
+        client_factory=cf_postgres_flexible_server_threat_protection_settings
     )
 
     # MERU COMMANDS
@@ -184,3 +190,9 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('list', 'flexible_server_ad_admin_list')
         g.custom_show_command('show', 'flexible_server_ad_admin_show')
         g.custom_wait_command('wait', 'flexible_server_ad_admin_show')
+
+    with self.command_group('postgres flexible-server advanced-threat-protection-setting', postgres_flexible_server_threat_protection_settings_sdk,
+                            custom_command_type=flexible_servers_custom_postgres,
+                            client_factory=cf_postgres_flexible_server_threat_protection_settings) as g:
+        g.custom_show_command('show', 'flexible_server_threat_protection_get', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('update', 'flexible_server_threat_protection_update', custom_command_type=flexible_servers_custom_postgres)
