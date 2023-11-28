@@ -41,7 +41,9 @@ from azure.cli.command_modules.acs._consts import (
     CONST_ABSOLUTEMONTHLY_MAINTENANCE_SCHEDULE, CONST_RELATIVEMONTHLY_MAINTENANCE_SCHEDULE,
     CONST_WEEKINDEX_FIRST, CONST_WEEKINDEX_SECOND,
     CONST_WEEKINDEX_THIRD, CONST_WEEKINDEX_FOURTH,
-    CONST_WEEKINDEX_LAST)
+    CONST_WEEKINDEX_LAST,
+    CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP,
+    CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP_CONFIGURATION)
 from azure.cli.command_modules.acs._validators import (
     validate_acr, validate_agent_pool_name, validate_assign_identity,
     validate_assign_kubelet_identity, validate_azure_keyvault_kms_key_id,
@@ -173,6 +175,11 @@ week_indexes = [
     CONST_WEEKINDEX_LAST,
 ]
 
+backend_pool_types = [
+    CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP,
+    CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP_CONFIGURATION,
+]
+
 
 def load_arguments(self, _):
 
@@ -219,7 +226,8 @@ def load_arguments(self, _):
         c.argument('load_balancer_outbound_ip_prefixes', validator=validate_load_balancer_outbound_ip_prefixes)
         c.argument('load_balancer_outbound_ports', type=int, validator=validate_load_balancer_outbound_ports)
         c.argument('load_balancer_idle_timeout', type=int, validator=validate_load_balancer_idle_timeout)
-        c.argument('load_balancer_backend_pool_type', validator=validate_load_balancer_backend_pool_type)
+        c.argument('load_balancer_backend_pool_type', arg_type=get_enum_type(backend_pool_types),
+                   validator=validate_load_balancer_backend_pool_type)
         c.argument('nat_gateway_managed_outbound_ip_count', type=int, validator=validate_nat_gateway_managed_outbound_ip_count)
         c.argument('nat_gateway_idle_timeout', type=int, validator=validate_nat_gateway_idle_timeout)
         c.argument('outbound_type', arg_type=get_enum_type(outbound_types))
@@ -348,7 +356,8 @@ def load_arguments(self, _):
         c.argument('load_balancer_outbound_ip_prefixes', validator=validate_load_balancer_outbound_ip_prefixes)
         c.argument('load_balancer_outbound_ports', type=int, validator=validate_load_balancer_outbound_ports)
         c.argument('load_balancer_idle_timeout', type=int, validator=validate_load_balancer_idle_timeout)
-        c.argument('load_balancer_backend_pool_type', validator=validate_load_balancer_backend_pool_type)
+        c.argument('load_balancer_backend_pool_type', arg_type=get_enum_type(backend_pool_types),
+                   validator=validate_load_balancer_backend_pool_type)
         c.argument('nat_gateway_managed_outbound_ip_count', type=int, validator=validate_nat_gateway_managed_outbound_ip_count)
         c.argument('nat_gateway_idle_timeout', type=int, validator=validate_nat_gateway_idle_timeout)
         c.argument('network_dataplane', arg_type=get_enum_type(network_dataplanes))
