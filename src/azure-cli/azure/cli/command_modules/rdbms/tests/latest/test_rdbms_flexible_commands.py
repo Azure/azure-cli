@@ -1170,15 +1170,16 @@ class FlexibleServerVirtualEndpointSwitchoverMgmtScenarioTest(ScenarioTest):  # 
                  .format(database_engine, resource_group, master_server, location, 256, master_vnet_args))
         primary_result = self.cmd('{} flexible-server show -g {} --name {} '
                           .format(database_engine, resource_group, master_server),
-                          checks=[JMESPathCheck('replicationRole', primary_role)]).get_output_in_json()
+                          checks=[JMESPathCheck('name', master_server)]).get_output_in_json()
+        self.assertEqual(primary_result['replica']['role'], primary_role)
 
         # create replica
-        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
+        replica_result = self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
                  .format(database_engine, resource_group, replica, master_server),
                  checks=[
                      JMESPathCheck('name', replica),
-                     JMESPathCheck('replicationRole', replica_role),
-                     JMESPathCheck('sourceServerResourceId', primary_result['id'])])
+                     JMESPathCheck('sourceServerResourceId', primary_result['id'])]).get_output_in_json()
+        self.assertEqual(replica_result['replica']['role'], replica_role)
 
         # test virtual-endpoint create
         self.cmd('{} flexible-server virtual-endpoint create -g {} --server-name {} --name {} --endpoint-type {} --members {}'
