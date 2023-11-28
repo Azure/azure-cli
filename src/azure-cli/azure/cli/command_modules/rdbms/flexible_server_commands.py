@@ -194,5 +194,5 @@ def load_flexibleserver_command_table(self, _):
     with self.command_group('postgres flexible-server advanced-threat-protection-setting', postgres_flexible_server_threat_protection_settings_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
                             client_factory=cf_postgres_flexible_server_threat_protection_settings) as g:
-        g.custom_command('show', 'flexible_server_threat_protection_get', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_show_command('show', 'flexible_server_threat_protection_get', custom_command_type=flexible_servers_custom_postgres)
         g.custom_command('update', 'flexible_server_threat_protection_update', custom_command_type=flexible_servers_custom_postgres)
