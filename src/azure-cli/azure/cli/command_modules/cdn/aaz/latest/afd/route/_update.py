@@ -104,11 +104,21 @@ class Update(AAZCommand):
             nullable=True,
         )
 
+        # define Arg Group "OriginGroup"
+
+        _args_schema = cls._args_schema
+        _args_schema.origin_group = AAZStrArg(
+            options=["--origin-group"],
+            arg_group="OriginGroup",
+            help="Name or ID of the origin group to be associated with.",
+            nullable=True,
+        )
+
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.custom_domains = AAZListArg(
-            options=["--custom-domains"],
+        _args_schema.formatted_custom_domains = AAZListArg(
+            options=["--formatted-custom-domains"],
             arg_group="Properties",
             help="Domains referenced by this endpoint.",
             nullable=True,
@@ -141,12 +151,6 @@ class Update(AAZCommand):
             nullable=True,
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
-        _args_schema.origin_group = AAZObjectArg(
-            options=["--origin-group"],
-            arg_group="Properties",
-            help="A reference to the origin group.",
-        )
-        cls._build_args_resource_reference_update(_args_schema.origin_group)
         _args_schema.origin_path = AAZStrArg(
             options=["--origin-path"],
             arg_group="Properties",
@@ -159,8 +163,8 @@ class Update(AAZCommand):
             help="The route patterns of the rule.",
             nullable=True,
         )
-        _args_schema.rule_sets = AAZListArg(
-            options=["--rule-sets"],
+        _args_schema.formatted_rule_sets = AAZListArg(
+            options=["--formatted-rule-sets"],
             arg_group="Properties",
             help="rule sets referenced by this endpoint.",
             nullable=True,
@@ -172,12 +176,12 @@ class Update(AAZCommand):
             nullable=True,
         )
 
-        custom_domains = cls._args_schema.custom_domains
-        custom_domains.Element = AAZObjectArg(
+        formatted_custom_domains = cls._args_schema.formatted_custom_domains
+        formatted_custom_domains.Element = AAZObjectArg(
             nullable=True,
         )
 
-        _element = cls._args_schema.custom_domains.Element
+        _element = cls._args_schema.formatted_custom_domains.Element
         _element.id = AAZStrArg(
             options=["id"],
             help="Resource ID.",
@@ -189,9 +193,11 @@ class Update(AAZCommand):
             nullable=True,
         )
 
-        rule_sets = cls._args_schema.rule_sets
-        rule_sets.Element = AAZObjectArg()
-        cls._build_args_resource_reference_update(rule_sets.Element)
+        formatted_rule_sets = cls._args_schema.formatted_rule_sets
+        formatted_rule_sets.Element = AAZObjectArg(
+            nullable=True,
+        )
+        cls._build_args_resource_reference_update(formatted_rule_sets.Element)
 
         supported_protocols = cls._args_schema.supported_protocols
         supported_protocols.Element = AAZStrArg(
@@ -208,7 +214,9 @@ class Update(AAZCommand):
             _schema.id = cls._args_resource_reference_update.id
             return
 
-        cls._args_resource_reference_update = AAZObjectArg()
+        cls._args_resource_reference_update = AAZObjectArg(
+            nullable=True,
+        )
 
         resource_reference_update = cls._args_resource_reference_update
         resource_reference_update.id = AAZStrArg(
@@ -475,15 +483,15 @@ class Update(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("cacheConfiguration", AAZObjectType)
-                properties.set_prop("customDomains", AAZListType, ".custom_domains")
+                properties.set_prop("customDomains", AAZListType, ".formatted_custom_domains")
                 properties.set_prop("enabledState", AAZStrType, ".enabled_state")
                 properties.set_prop("forwardingProtocol", AAZStrType, ".forwarding_protocol")
                 properties.set_prop("httpsRedirect", AAZStrType, ".https_redirect")
                 properties.set_prop("linkToDefaultDomain", AAZStrType, ".link_to_default_domain")
-                _UpdateHelper._build_schema_resource_reference_update(properties.set_prop("originGroup", AAZObjectType, ".origin_group", typ_kwargs={"flags": {"required": True}}))
+                properties.set_prop("originGroup", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("originPath", AAZStrType, ".origin_path")
                 properties.set_prop("patternsToMatch", AAZListType, ".patterns_to_match")
-                properties.set_prop("ruleSets", AAZListType, ".rule_sets")
+                properties.set_prop("ruleSets", AAZListType, ".formatted_rule_sets")
                 properties.set_prop("supportedProtocols", AAZListType, ".supported_protocols")
 
             cache_configuration = _builder.get(".properties.cacheConfiguration")
@@ -508,6 +516,10 @@ class Update(AAZCommand):
             _elements = _builder.get(".properties.customDomains[]")
             if _elements is not None:
                 _elements.set_prop("id", AAZStrType, ".id")
+
+            origin_group = _builder.get(".properties.originGroup")
+            if origin_group is not None:
+                origin_group.set_prop("id", AAZStrType, ".origin_group")
 
             patterns_to_match = _builder.get(".properties.patternsToMatch")
             if patterns_to_match is not None:

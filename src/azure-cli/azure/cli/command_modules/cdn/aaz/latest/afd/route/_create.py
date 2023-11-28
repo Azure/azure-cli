@@ -93,11 +93,20 @@ class Create(AAZCommand):
         content_types_to_compress = cls._args_schema.content_types_to_compress
         content_types_to_compress.Element = AAZStrArg()
 
+        # define Arg Group "OriginGroup"
+
+        _args_schema = cls._args_schema
+        _args_schema.origin_group = AAZStrArg(
+            options=["--origin-group"],
+            arg_group="OriginGroup",
+            help="Name or ID of the origin group to be associated with.",
+        )
+
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.custom_domains = AAZListArg(
-            options=["--custom-domains"],
+        _args_schema.formatted_custom_domains = AAZListArg(
+            options=["--formatted-custom-domains"],
             arg_group="Properties",
             help="Domains referenced by this endpoint.",
         )
@@ -128,12 +137,6 @@ class Create(AAZCommand):
             default="Disabled",
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
-        _args_schema.origin_group = AAZObjectArg(
-            options=["--origin-group"],
-            arg_group="Properties",
-            help="A reference to the origin group.",
-        )
-        cls._build_args_resource_reference_create(_args_schema.origin_group)
         _args_schema.origin_path = AAZStrArg(
             options=["--origin-path"],
             arg_group="Properties",
@@ -144,8 +147,8 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="The route patterns of the rule.",
         )
-        _args_schema.rule_sets = AAZListArg(
-            options=["--rule-sets"],
+        _args_schema.formatted_rule_sets = AAZListArg(
+            options=["--formatted-rule-sets"],
             arg_group="Properties",
             help="rule sets referenced by this endpoint.",
         )
@@ -156,10 +159,10 @@ class Create(AAZCommand):
             default=["Http", "Https"],
         )
 
-        custom_domains = cls._args_schema.custom_domains
-        custom_domains.Element = AAZObjectArg()
+        formatted_custom_domains = cls._args_schema.formatted_custom_domains
+        formatted_custom_domains.Element = AAZObjectArg()
 
-        _element = cls._args_schema.custom_domains.Element
+        _element = cls._args_schema.formatted_custom_domains.Element
         _element.id = AAZStrArg(
             options=["id"],
             help="Resource ID.",
@@ -168,9 +171,9 @@ class Create(AAZCommand):
         patterns_to_match = cls._args_schema.patterns_to_match
         patterns_to_match.Element = AAZStrArg()
 
-        rule_sets = cls._args_schema.rule_sets
-        rule_sets.Element = AAZObjectArg()
-        cls._build_args_resource_reference_create(rule_sets.Element)
+        formatted_rule_sets = cls._args_schema.formatted_rule_sets
+        formatted_rule_sets.Element = AAZObjectArg()
+        cls._build_args_resource_reference_create(formatted_rule_sets.Element)
 
         supported_protocols = cls._args_schema.supported_protocols
         supported_protocols.Element = AAZStrArg(
@@ -315,15 +318,15 @@ class Create(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("cacheConfiguration", AAZObjectType)
-                properties.set_prop("customDomains", AAZListType, ".custom_domains")
+                properties.set_prop("customDomains", AAZListType, ".formatted_custom_domains")
                 properties.set_prop("enabledState", AAZStrType, ".enabled_state")
                 properties.set_prop("forwardingProtocol", AAZStrType, ".forwarding_protocol")
                 properties.set_prop("httpsRedirect", AAZStrType, ".https_redirect")
                 properties.set_prop("linkToDefaultDomain", AAZStrType, ".link_to_default_domain")
-                _CreateHelper._build_schema_resource_reference_create(properties.set_prop("originGroup", AAZObjectType, ".origin_group", typ_kwargs={"flags": {"required": True}}))
+                properties.set_prop("originGroup", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("originPath", AAZStrType, ".origin_path")
                 properties.set_prop("patternsToMatch", AAZListType, ".patterns_to_match")
-                properties.set_prop("ruleSets", AAZListType, ".rule_sets")
+                properties.set_prop("ruleSets", AAZListType, ".formatted_rule_sets")
                 properties.set_prop("supportedProtocols", AAZListType, ".supported_protocols")
 
             cache_configuration = _builder.get(".properties.cacheConfiguration")
@@ -348,6 +351,10 @@ class Create(AAZCommand):
             _elements = _builder.get(".properties.customDomains[]")
             if _elements is not None:
                 _elements.set_prop("id", AAZStrType, ".id")
+
+            origin_group = _builder.get(".properties.originGroup")
+            if origin_group is not None:
+                origin_group.set_prop("id", AAZStrType, ".origin_group")
 
             patterns_to_match = _builder.get(".properties.patternsToMatch")
             if patterns_to_match is not None:

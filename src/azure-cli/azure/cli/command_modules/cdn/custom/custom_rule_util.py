@@ -238,10 +238,10 @@ def create_condition(match_variable, operator, match_values=None, selector=None,
 def create_action(action_name, cache_behavior=None, cache_duration=None, header_action=None,
                   header_name=None, header_value=None, query_string_behavior=None, query_parameters=None,
                   redirect_type=None, redirect_protocol=None, custom_hostname=None, custom_path=None,
-                  custom_query_string=None, custom_fragment=None, source_pattern=None, destination=None,
+                  custom_querystring=None, custom_fragment=None, source_pattern=None, destination=None,
                   preserve_unmatched_path=None, sub_id=None, resource_group_name=None, profile_name=None,
                   endpoint_name=None, origin_group=None, query_string_caching_behavior=None,
-                  is_compression_enabled=None, enable_caching=None, forwarding_protocol=None):
+                  enable_compression=None, enable_caching=None, forwarding_protocol=None):
     if action_name == "CacheExpiration":
         action = {
             "cache_expiration" : {
@@ -294,9 +294,9 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
                 "parameters": {
                     "type_name": "DeliveryRuleUrlRedirectActionParameters",
                     "custom_fragment": custom_fragment,
-                    "custom_host": custom_hostname,
+                    "custom_hostname": custom_hostname,
                     "custom_path": custom_path,
-                    "custom_query_string": custom_query_string,
+                    "custom_querystring": custom_querystring,
                     "destination_protocol": redirect_protocol,
                     "redirect_type": redirect_type
                 }
@@ -337,7 +337,7 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
     if action_name == "RouteConfigurationOverride":
         origin_group_override = None
         if has_value(origin_group):
-            if is_valid_resource_id(origin_group):
+            if is_valid_resource_id(origin_group.to_serialized_data()):
                 origin_group_override = {
                     "origin_group": {
                         "id": origin_group
@@ -365,7 +365,7 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
                         "query_parameters": query_parameters,
                         "cache_behavior": cache_behavior,
                         "cache_duration": cache_duration,
-                        "is_compression_enabled": RuleIsCompressionEnabled.ENABLED.value if is_compression_enabled else RuleIsCompressionEnabled.DISABLED.value
+                        "is_compression_enabled": RuleIsCompressionEnabled.ENABLED.value if enable_compression else RuleIsCompressionEnabled.DISABLED.value
                         } if enable_caching else None
                     },
                 }

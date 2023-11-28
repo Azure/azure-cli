@@ -11,6 +11,7 @@ from azure.cli.core.azclierror import (InvalidArgumentValueError)
 from azure.mgmt.cdn.models import SkuName
 
 from collections import namedtuple
+from azure.core.exceptions import HttpResponseError
 
 class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
@@ -395,7 +396,7 @@ class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
             if condition.Selector is not None:
                 options += f" --selector {condition.Selector}"
 
-            with self.assertRaises(InvalidArgumentValueError):
+            with self.assertRaises(HttpResponseError):
                 self.afd_rule_add_cmd(resource_group,
                                     rule_set_name,
                                     rule_name,
@@ -437,7 +438,7 @@ class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
             if condition.Selector is not None:
                 options += f" --selector {condition.Selector}"
 
-            with self.assertRaises(InvalidArgumentValueError):
+            with self.assertRaises(HttpResponseError):
                 self.afd_rule_add_cmd(resource_group,
                                     rule_set_name,
                                     rule_name,
@@ -533,7 +534,7 @@ class CdnAfdRuleScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                               profile_name,
                               options='--match-variable UrlFileExtension --operator Contains --match-values exe apk '
                                       '--action-name UrlRedirect --redirect-protocol Https --redirect-type Moved --order 2 '
-                                      '--custom-host "www.contoso.com" --custom-path "/path1" --custom-querystring "a=b" --custom-fragment fg1')
+                                      '--custom-hostname "www.contoso.com" --custom-path "/path1" --custom-querystring "a=b" --custom-fragment fg1')
         self.afd_rule_show_cmd(resource_group,
                                 rule_set_name,
                                 rule_name,
