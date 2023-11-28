@@ -208,6 +208,9 @@ def load_arguments(self, _):
         c.argument('support_hibernation', arg_type=get_three_state_flag(), help='Indicate the OS on a disk supports hibernation.', min_api='2020-12-01')
         c.argument('architecture', arg_type=get_enum_type(self.get_models('Architecture', operation_group='disks')), min_api='2021-12-01', help='CPU architecture.')
         c.argument('data_access_auth_mode', arg_type=get_enum_type(['AzureActiveDirectory', 'None']), min_api='2021-12-01', help='Specify the auth mode when exporting or uploading to a disk or snapshot.')
+        c.argument('optimized_for_frequent_attach', arg_type=get_three_state_flag(), min_api='2023-04-02',
+                   help='Setting this property to true improves reliability and performance of data disks that are frequently (more than 5 times a day) by detached from one virtual machine and attached to another. '
+                        'This property should not be set for disks that are not detached and attached frequently as it causes the disks to not align with the fault domain of the virtual machine.')
     # endregion
 
     # region Disks
@@ -234,6 +237,9 @@ def load_arguments(self, _):
         c.argument('architecture', arg_type=get_enum_type(self.get_models('Architecture', operation_group='snapshots')), min_api='2021-12-01', help='CPU architecture.')
         c.argument('for_upload', arg_type=get_three_state_flag(), min_api='2018-09-30',
                    help='Create the snapshot for uploading blobs later on through storage commands. Run "az snapshot grant-access --access-level Write" to retrieve the snapshot\'s SAS token.')
+        c.argument('elastic_san_resource_id', min_api='2023-04-02',
+                   options_list=['--elastic-san-resource-id', '--elastic-san-id'],
+                   help='This is the ARM id of the source elastic san volume snapshot.')
     # endregion
 
     # region Images
