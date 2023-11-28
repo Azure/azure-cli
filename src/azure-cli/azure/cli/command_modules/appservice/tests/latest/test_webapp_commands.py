@@ -1764,7 +1764,7 @@ class WebappUndeleteTest(ScenarioTest):
             JMESPathCheck('[0].deletedSiteName', webapp_name)
         ])
 
-    @AllowLargeResponse(8192)
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_deleted_restore_to_existing_site(self, resource_group):
         plan = self.create_random_name(prefix='delete-me-plan', length=24)
@@ -1795,7 +1795,7 @@ class WebappUndeleteTest(ScenarioTest):
             JMESPathCheck('name', webapp_2_name)
         ])
 
-    @AllowLargeResponse(8192)
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_deleted_restore_to_non_existent_site(self, resource_group):
         plan = self.create_random_name(prefix='delete-me-plan', length=24)
