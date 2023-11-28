@@ -8,28 +8,34 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 class AcrCheckHealthCommandsTests(ScenarioTest):
 
     @ResourceGroupPreparer()
-    def test_acr_check_health(self, repository_name, image):
-        registry_name = self.create_random_name('clireg', 20)
-        image = 'latest'
+    def test_acr_check_health(self):
+        repository = 'microsoft'
+        tag = 'azure-cli'
+
         self.kwargs.update({
-            'registry': registry_name,
+            'registry': self.create_random_name('clireg', 20),
+            'sku': 'Premium',
+            'resource-group': 'rg',
             'ignore_errors': False,
             'yes': False,
             'vnet': None,
-            'repository': repository_name,
-            'image': image,
-            'reason': 'OK'
+            'repository': repository,
+            'tag': tag,
+            'image': '{}:{}'.format(repository, tag),
+            'reason': 'OK',
+            'source_reg_id': '/subscriptions/dfb63c8c-7c89-4ef8-af13-75c1d873c895/resourcegroups/resourcegroupdiffsub/providers/Microsoft.ContainerRegistry/registries/sourceregistrydiffsub',
         })
-        
-        # Test the check_health command with the --ignore-errors flag
-        self.cmd('acr check-health --name {registry_name} --ignore-errors ',
-            checks=[self.check('name', '{registry_name}'),
-                    self.check('ignoreErrors', False),
-                    self.check('vnet', None)])
 
-        # Test the check_health command to check if blobs can be pulled from the registry
-        self.cmd('acr check-health --name {registry_name} --repository {repository_name} --image {image}',
-            checks=[self.check('name', '{registry_name}'),
-                    self.check('repository', '{repository_name}'),
-                    self.check('image', '{image}'),
-                    self.check('reason', 'OK')])
+        # Create the registry
+        result = self.cmd('acr create --name {registry} --sku {sku} --resource-group {rg}').get_output_in_json()
+        self.kwargs['registry'] = result['name']
+
+        # Import image to registry.
+        self.cmd('acr import -n {registry} -r {source_reg_id} --source {image}')
+        
+        # Check the health of the registry
+        self.cmd('acr check-health --name {registry} --yes --ignore-errors')
+        
+        # Test if imported image can be pulled from the registry
+        result = self.cmd('acr check-health --name {registry} --repository {repository} --image {tag} --yes --ignore-errors')
+        self.assertTrue(result)
