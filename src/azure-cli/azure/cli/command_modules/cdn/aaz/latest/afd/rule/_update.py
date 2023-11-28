@@ -294,8 +294,8 @@ class Update(AAZCommand):
             help="The full path to redirect. Path cannot be empty and must start with /. Leave empty to use the incoming path as destination path.",
             nullable=True,
         )
-        parameters.custom_query_string = AAZStrArg(
-            options=["custom-query-string"],
+        parameters.custom_querystring = AAZStrArg(
+            options=["custom-querystring"],
             help="The set of query strings to be placed in the redirect URL. Setting this value would replace any existing query string; leave empty to preserve the incoming query string. Query string must be in <key>=<value> format. ? and & will be added automatically so do not include them.",
             nullable=True,
         )
@@ -1692,7 +1692,7 @@ class Update(AAZCommand):
                 parameters.set_prop("customFragment", AAZStrType, ".custom_fragment")
                 parameters.set_prop("customHostname", AAZStrType, ".custom_hostname")
                 parameters.set_prop("customPath", AAZStrType, ".custom_path")
-                parameters.set_prop("customQueryString", AAZStrType, ".custom_query_string")
+                parameters.set_prop("customQueryString", AAZStrType, ".custom_querystring")
                 parameters.set_prop("destinationProtocol", AAZStrType, ".destination_protocol")
                 parameters.set_prop("redirectType", AAZStrType, ".redirect_type", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})

@@ -182,10 +182,12 @@ class AFDRouteUpdate(_AFDRouteUpdate):
         args_schema.enable_caching = AAZBoolArg(options=['--enable-caching'],
                                                   help="Indicates whether caching is enanbled on that route.")
         args_schema.custom_domains = AAZListArg(options=['--custom-domains'],
-                                                    help="Custom domains referenced by this endpoint.")
+                                                    help="Custom domains referenced by this endpoint.",
+                                                    nullable=True)
         args_schema.custom_domains.Element = AAZStrArg()
         args_schema.rule_sets = AAZListArg(options=['--rule-sets'],
-                                                    help="Collection of ID or name of rule set referenced by the route.")
+                                                    help="Collection of ID or name of rule set referenced by the route.",
+                                                    nullable=True)
         args_schema.rule_sets.Element = AAZStrArg()
         return args_schema
 
@@ -215,17 +217,38 @@ class AFDRouteUpdate(_AFDRouteUpdate):
             "route_name": args.route_name
         })
 
-        if (has_value(args.enable_caching) is False or args.enable_caching is False) and (has_value(existing["query_string_caching_behavior"]) is False or existing["query_string_caching_behavior"] is None) :
+        if has_value(args.enable_caching) is False:
+            if  ('cacheConfiguration' in existing) is False or existing["cacheConfiguration"] is None:
+                args.query_string_caching_behavior = None
+                args.query_parameters = None
+                args.content_types_to_compress = None
+                args.enable_compression = None
+            else:
+                if has_value(args.query_string_caching_behavior) is False:
+                    if 'cacheConfiguration' in existing and 'queryStringCachingBehavior' in existing['cacheConfiguration']:
+                        args.query_string_caching_behavior = existing['cacheConfiguration']['queryStringCachingBehavior']
+                if has_value(args.query_parameters) is False:
+                    if 'cacheConfiguration' in existing and 'queryParameters' in existing['cacheConfiguration']:
+                        args.query_parameters = existing['cacheConfiguration']['queryParameters']
+                if has_value(args.content_types_to_compress) is False:
+                    if 'cacheConfiguration' in existing and 'compressionSettings' in existing['cacheConfiguration'] and 'contentTypesToCompress' in existing['cacheConfiguration']['compressionSettings']:
+                        args.content_types_to_compress = existing['cacheConfiguration']['compressionSettings']['contentTypesToCompress']
+                if has_value(args.enable_compression) is False:
+                    if 'cacheConfiguration' in existing and 'compressionSettings' in existing['cacheConfiguration'] and 'enableCompression' in existing['cacheConfiguration']['compressionSettings']:
+                        args.enable_compression = existing['cacheConfiguration']['compressionSettings']['enableCompression']
+        elif args.enable_caching is False:
             args.query_string_caching_behavior = None
             args.query_parameters = None
             args.content_types_to_compress = None
             args.enable_compression = None
         else:   
-            if has_value(args.enable_compression) is False or args.enable_compression is False:
-                if has_value(args.content_types_to_compress) is False:
+            if has_value(args.enable_compression) is False and 'cacheConfiguration' in existing and 'compressionSettings' in existing['cacheConfiguration'] and 'contentTypesToCompress' in existing['cacheConfiguration']['compressionSettings']:
+                args.content_types_to_compress = existing['cacheConfiguration']['compressionSettings']['contentTypesToCompress']
+            elif args.enable_compression is False:
+                args.content_types_to_compress = []
+            else:
+                if has_value(args.content_types_to_compress) is False or args.content_types_to_compress is None:
                     args.content_types_to_compress = default_content_types()
-                else :
-                    args.content_types_to_compress = []
 
         rule_sets = []
         if has_value(args.rule_sets):
