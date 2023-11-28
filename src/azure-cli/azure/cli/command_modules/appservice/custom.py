@@ -4315,7 +4315,7 @@ def _get_latest_deployment_id(cmd, rg_name, name, deployment_status_url, slot):
 
 
 def _track_deployment_runtime_status(params, deploymentstatusapi_url, deployment_id, timeout=None):
-    total_trials = (int(timeout) // 5) if timeout else 200
+    total_trials = 200
     num_trials = 0
     start_time = time.time()
     deployment_status = None
@@ -4348,7 +4348,7 @@ def _track_deployment_runtime_status(params, deploymentstatusapi_url, deployment
             failure_logs = deployment_properties.get('failedInstancesLogs')
             if failure_logs is not None and len(failure_logs) > 0:
                 failure_logs = failure_logs[0]
-            logger.error("Please check the deployment logs for more info: %s",
+            logger.error("Please check the runtime logs for more info: %s",
                          failure_logs)
             raise CLIError
         if deployment_status == "BuildFailed":
@@ -4369,9 +4369,11 @@ def _track_deployment_runtime_status(params, deploymentstatusapi_url, deployment
             logger.error("Please check the build logs for more info: %s",
                          deployment_logs)
             raise CLIError
+        if timeout and time_elapsed > int(timeout):
+            break
         num_trials = num_trials + 1
         time.sleep(5)
-    if num_trials >= total_trials:
+    if num_trials >= total_trials or deployment_status != "RuntimeSuccessful":
         scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
         if deployment_status == "BuildInProgress":
             deployments_log_url = scm_url + f"/api/deployments/{deployment_id}/log"
