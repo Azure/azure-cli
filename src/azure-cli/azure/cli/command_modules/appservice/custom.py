@@ -4346,7 +4346,7 @@ def _track_deployment_runtime_status(params, deploymentstatusapi_url, deployment
                 logger.error("Error - [Code : %s, Message: %s, ExtendedCode: %s]",
                              error_code, error_message, error_extended_code)
             failure_logs = deployment_properties.get('failedInstancesLogs')
-            if failure_logs is not None or len(failure_logs) > 0:
+            if failure_logs is not None and len(failure_logs) > 0:
                 failure_logs = failure_logs[0]
             logger.error("Please check the deployment logs for more info: %s",
                          failure_logs)
