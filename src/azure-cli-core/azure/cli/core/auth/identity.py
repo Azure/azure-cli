@@ -307,7 +307,14 @@ class ServicePrincipalStore:
         self._entries = []
 
     def load_entry(self, sp_id, tenant):
+        from azure.cli.core._profile import env_var_auth_configured, load_env_var_credential
         self._load_persistence()
+
+        # If no login data, look for service principal credential in environment variables
+        if not self._entries and env_var_auth_configured():
+            logger.warning("Using service principal credential configured in environment variables.")
+            self._entries = [load_env_var_credential()]
+
         matched = [x for x in self._entries if sp_id == x[_CLIENT_ID]]
         if not matched:
             raise CLIError("Could not retrieve credential from local cache for service principal {}. "

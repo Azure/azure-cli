@@ -1353,3 +1353,17 @@ def should_encrypt_token_cache(cli_ctx):
     encrypt = cli_ctx.config.getboolean('core', 'encrypt_token_cache', fallback=fallback)
 
     return encrypt
+
+def is_guid(guid):
+    import uuid
+    try:
+        uuid.UUID(guid)
+        return True
+    except (ValueError, TypeError):
+        return False
+
+def assert_guid(guid, name=None):
+    if not is_guid(guid):
+        if name:
+            raise CLIError("{} must be a GUID.".format(name))
+        raise CLIError("{} is not a GUID.".format(guid))

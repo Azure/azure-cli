@@ -9,11 +9,13 @@ from copy import deepcopy
 from enum import Enum
 
 from azure.cli.core._session import ACCOUNT
+from azure.cli.core.auth.msal_authentication import _TENANT, _CLIENT_ID, _CLIENT_SECRET
 from azure.cli.core.azclierror import AuthenticationError
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
-from azure.cli.core.util import in_cloud_console, can_launch_browser
+from azure.cli.core.util import in_cloud_console, can_launch_browser, is_guid, assert_guid
 from knack.log import get_logger
 from knack.util import CLIError
+
 
 logger = get_logger(__name__)
 
@@ -32,7 +34,6 @@ _HOME_TENANT_ID = 'homeTenantId'
 _MANAGED_BY_TENANTS = 'managedByTenants'
 _USER_ENTITY = 'user'
 _USER_NAME = 'name'
-_CLIENT_ID = 'clientId'
 _CLOUD_SHELL_ID = 'cloudShellID'
 _SUBSCRIPTIONS = 'subscriptions'
 _INSTALLATION_ID = 'installationId'
@@ -46,12 +47,18 @@ _TOKEN_ENTRY_USER_ID = 'userId'
 _TOKEN_ENTRY_TOKEN_TYPE = 'tokenType'
 
 _TENANT_LEVEL_ACCOUNT_NAME = 'N/A(tenant level account)'
+_ENVIRONMENT_VARIABLE_ACCOUNT_NAME = 'Environment Variable Subscription'
 
 _SYSTEM_ASSIGNED_IDENTITY = 'systemAssignedIdentity'
 _USER_ASSIGNED_IDENTITY = 'userAssignedIdentity'
 _ASSIGNED_IDENTITY_INFO = 'assignedIdentityInfo'
 
 _AZ_LOGIN_MESSAGE = "Please run 'az login' to setup account."
+
+_AZURE_CLIENT_ID = 'AZURE_CLIENT_ID'
+_AZURE_CLIENT_SECRET = 'AZURE_CLIENT_SECRET'
+_AZURE_TENANT_ID = 'AZURE_TENANT_ID'
+_AZURE_SUBSCRIPTION_ID = 'AZURE_SUBSCRIPTION_ID'
 
 
 def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
@@ -60,6 +67,51 @@ def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
         profile.refresh_accounts()
     subscriptions = profile.load_cached_subscriptions(all_clouds)
     return subscriptions
+
+def env_var_auth_configured():
+    keys = [_AZURE_CLIENT_ID, _AZURE_CLIENT_SECRET, _AZURE_TENANT_ID]
+    all_provided = all(key in os.environ for key in keys)
+
+    if all_provided:
+        return True
+
+    any_provided = any(key in os.environ for key in keys)
+    if any_provided:
+        raise CLIError("To authenticate using environment variables, "
+                       "all of {}, {}, {} must be specified."
+                       .format(*keys)
+        )
+
+    return False
+
+def load_env_var_credential():
+    if env_var_auth_configured():
+        credential = {
+            _CLIENT_ID: os.environ[_AZURE_CLIENT_ID],
+            _TENANT: os.environ[_AZURE_TENANT_ID],
+            _CLIENT_SECRET: os.environ[_AZURE_CLIENT_SECRET]
+        }
+        return credential
+    return None
+
+def load_env_var_subscription():
+    if env_var_auth_configured():
+        env_var_subscription = {
+            _SUBSCRIPTION_ID: None,
+            _SUBSCRIPTION_NAME: _ENVIRONMENT_VARIABLE_ACCOUNT_NAME,
+            _TENANT_ID: os.environ[_AZURE_TENANT_ID],
+            _USER: {
+                _USER_NAME: os.environ[_AZURE_CLIENT_ID],
+                _USER_TYPE: _SERVICE_PRINCIPAL
+            }
+        }
+
+        if _AZURE_SUBSCRIPTION_ID in os.environ:
+            subscription_id = os.environ[_AZURE_SUBSCRIPTION_ID]
+            assert_guid(subscription_id, _AZURE_SUBSCRIPTION_ID)
+            env_var_subscription[_SUBSCRIPTION_ID] = subscription_id
+        return env_var_subscription
+    return None
 
 
 def _detect_adfs_authority(authority_url, tenant):
@@ -359,7 +411,7 @@ class Profile:
         if subscription and tenant:
             raise CLIError("Please specify only one of subscription and tenant, not both")
 
-        account = self.get_subscription(subscription)
+        account = self.get_subscription(subscription, allow_null_subscription=True)
 
         identity_type, identity_id = Profile._try_parse_msi_account_name(account)
         if identity_type:
@@ -540,24 +592,40 @@ class Profile:
 
         return active_account[_USER_ENTITY][_USER_NAME]
 
-    def get_subscription(self, subscription=None):  # take id or name
+    def get_subscription(self, subscription=None, allow_null_subscription=False):  # take id or name
         subscriptions = self.load_cached_subscriptions()
-        if not subscriptions:
-            raise CLIError(_AZ_LOGIN_MESSAGE)
 
-        result = [x for x in subscriptions if (
-            not subscription and x.get(_IS_DEFAULT_SUBSCRIPTION) or
-            subscription and subscription.lower() in [x[_SUBSCRIPTION_ID].lower(), x[
-                _SUBSCRIPTION_NAME].lower()])]
-        if not result and subscription:
-            raise CLIError("Subscription '{}' not found. "
-                           "Check the spelling and casing and try again.".format(subscription))
-        if not result and not subscription:
-            raise CLIError("No subscription found. Run 'az account set' to select a subscription.")
-        if len(result) > 1:
-            raise CLIError("Multiple subscriptions with the name '{}' found. "
-                           "Specify the subscription ID.".format(subscription))
-        return result[0]
+        if subscriptions:
+            result = [x for x in subscriptions if (
+                not subscription and x.get(_IS_DEFAULT_SUBSCRIPTION) or
+                subscription and subscription.lower() in [x[_SUBSCRIPTION_ID].lower(), x[
+                    _SUBSCRIPTION_NAME].lower()])]
+            if not result and subscription:
+                raise CLIError("Subscription '{}' not found. "
+                            "Check the spelling and casing and try again.".format(subscription))
+            if not result and not subscription:
+                raise CLIError("No subscription found. Run 'az account set' to select a subscription.")
+            if len(result) > 1:
+                raise CLIError("Multiple subscriptions with the name '{}' found. "
+                            "Specify the subscription ID.".format(subscription))
+            return result[0]
+
+        # Attempt to use env vars
+        if env_var_auth_configured():
+            logger.warning("Using subscription configured in environment variables.")
+            env_var_sub = load_env_var_subscription()
+            if subscription:
+                # Subscription ID must be a GUID
+                assert_guid(subscription, _AZURE_SUBSCRIPTION_ID)
+                # Overwrite env var subscription if given as argument to get_subscription()
+                env_var_sub[_SUBSCRIPTION_ID] = subscription
+
+            if not env_var_sub[_SUBSCRIPTION_ID] and not allow_null_subscription:
+                error = """Subscription is undefined.
+                        Please specific the subscription ID with either {} or --subscription."""
+                raise CLIError(error.format(_AZURE_SUBSCRIPTION_ID))
+            return env_var_sub
+        raise CLIError(_AZ_LOGIN_MESSAGE)
 
     def get_subscription_id(self, subscription=None):  # take id or name
         return self.get_subscription(subscription)[_SUBSCRIPTION_ID]
