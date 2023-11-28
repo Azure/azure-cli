@@ -369,4 +369,4 @@ def is_preview_from_semantic_version(version):
     """
     from packaging.version import parse
     parsed_version = parse(version)
-    return parsed_version.pre and parsed_version.pre[0] in ["a", "b"]
+    return bool(parsed_version.pre and parsed_version.pre[0] in ["a", "b"])
