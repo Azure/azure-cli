@@ -26,10 +26,6 @@ from azure.cli.core.azclierror import (
     MutuallyExclusiveArgumentError,
     RequiredArgumentMissingError,
 )
-from azure.cli.command_modules.acs._consts import (
-    CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP,
-    CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP_CONFIGURATION,
-)
 
 from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.util import CLIError
@@ -252,17 +248,6 @@ def validate_load_balancer_idle_timeout(namespace):
     if namespace.load_balancer_idle_timeout is not None:
         if namespace.load_balancer_idle_timeout < 4 or namespace.load_balancer_idle_timeout > 100:
             raise CLIError("--load-balancer-idle-timeout must be in the range [4,100]")
-
-
-def validate_load_balancer_backend_pool_type(namespace):
-    """validate load balancer backend pool type"""
-    if namespace.load_balancer_backend_pool_type is not None:
-        if namespace.load_balancer_backend_pool_type not in [
-                CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP,
-                CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP_CONFIGURATION]:
-            raise InvalidArgumentValueError(
-                f"Invalid Load Balancer Backend Pool Type {namespace.load_balancer_backend_pool_type}, "
-                f"supported values are nodeIP and nodeIPConfiguration")
 
 
 def validate_network_policy(namespace):

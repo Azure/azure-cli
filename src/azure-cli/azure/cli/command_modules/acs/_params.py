@@ -59,7 +59,6 @@ from azure.cli.command_modules.acs._validators import (
     validate_linux_host_name, validate_load_balancer_idle_timeout,
     validate_load_balancer_outbound_ip_prefixes,
     validate_load_balancer_outbound_ips, validate_load_balancer_outbound_ports,
-    validate_load_balancer_backend_pool_type,
     validate_load_balancer_sku, validate_max_surge,
     validate_nat_gateway_idle_timeout,
     validate_nat_gateway_managed_outbound_ip_count, validate_network_policy,
@@ -226,8 +225,7 @@ def load_arguments(self, _):
         c.argument('load_balancer_outbound_ip_prefixes', validator=validate_load_balancer_outbound_ip_prefixes)
         c.argument('load_balancer_outbound_ports', type=int, validator=validate_load_balancer_outbound_ports)
         c.argument('load_balancer_idle_timeout', type=int, validator=validate_load_balancer_idle_timeout)
-        c.argument('load_balancer_backend_pool_type', arg_type=get_enum_type(backend_pool_types),
-                   validator=validate_load_balancer_backend_pool_type)
+        c.argument('load_balancer_backend_pool_type', arg_type=get_enum_type(backend_pool_types))
         c.argument('nat_gateway_managed_outbound_ip_count', type=int, validator=validate_nat_gateway_managed_outbound_ip_count)
         c.argument('nat_gateway_idle_timeout', type=int, validator=validate_nat_gateway_idle_timeout)
         c.argument('outbound_type', arg_type=get_enum_type(outbound_types))
@@ -356,8 +354,7 @@ def load_arguments(self, _):
         c.argument('load_balancer_outbound_ip_prefixes', validator=validate_load_balancer_outbound_ip_prefixes)
         c.argument('load_balancer_outbound_ports', type=int, validator=validate_load_balancer_outbound_ports)
         c.argument('load_balancer_idle_timeout', type=int, validator=validate_load_balancer_idle_timeout)
-        c.argument('load_balancer_backend_pool_type', arg_type=get_enum_type(backend_pool_types),
-                   validator=validate_load_balancer_backend_pool_type)
+        c.argument('load_balancer_backend_pool_type', arg_type=get_enum_type(backend_pool_types))
         c.argument('nat_gateway_managed_outbound_ip_count', type=int, validator=validate_nat_gateway_managed_outbound_ip_count)
         c.argument('nat_gateway_idle_timeout', type=int, validator=validate_nat_gateway_idle_timeout)
         c.argument('network_dataplane', arg_type=get_enum_type(network_dataplanes))
