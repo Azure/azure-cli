@@ -2630,7 +2630,7 @@ def aks_trustedaccess_role_binding_create(cmd, client, resource_group_name, clus
         pass
 
     if existedBinding:
-        raise Exception("TrustedAccess RoleBinding " + role_binding_name + " already existed, please use 'az aks trustedaccess rolebinding update' command to update!")
+        raise InvalidArgumentValueError("TrustedAccess RoleBinding " + role_binding_name + " already existed, please use 'az aks trustedaccess rolebinding update' command to update!")
 
     roleList = roles.split(',')
     roleBinding = TrustedAccessRoleBinding(source_resource_id=source_resource_id, roles=roleList)

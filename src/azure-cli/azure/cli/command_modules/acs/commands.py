@@ -63,14 +63,18 @@ def load_command_table(self, _):
     )
 
     trustedaccess_role_sdk = CliCommandType(
-        operations_tmpl='azext_aks_preview.vendored_sdks.azure_mgmt_preview_aks.'
-                        'operations._trusted_access_roles_operations#TrustedAccessRolesOperations.{}',
+        operations_tmpl='azure.mgmt.containerservice.operations.'
+                        '_trusted_access_roles_operations#TrustedAccessRolesOperations.{}',
+        operation_group='trustedaccess_role',
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_trustedaccess_role
     )
 
     trustedaccess_role_binding_sdk = CliCommandType(
-        operations_tmpl='azext_aks_preview.vendored_sdks.azure_mgmt_preview_aks.'
-                        'operations._trusted_access_role_bindings_operations#TrustedAccessRoleBindingsOperations.{}',
+        operations_tmpl='azure.mgmt.containerservice.operations.'
+                        '_trusted_access_role_bindings_operations#TrustedAccessRoleBindingsOperations.{}',
+        operation_group='trustedaccess_role_binding',
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_trustedaccess_role_binding
     )
 
