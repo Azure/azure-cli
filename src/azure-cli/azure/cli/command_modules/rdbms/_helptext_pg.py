@@ -806,3 +806,34 @@ examples:
   - name: Wait for an Active Directory administrator to be deleted.
     text: az postgres flexible-server ad-admin wait -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000 --deleted
 """
+
+helps['postgres flexible-server advanced-threat-protection-setting'] = """
+type: group
+short-summary: Manage advanced threat protection setting for a PostgreSQL flexible server.
+"""
+
+helps['postgres flexible-server advanced-threat-protection-setting update'] = """
+type: command
+short-summary: Updates advanced threat protection setting state for a flexible server.
+examples:
+  - name: >
+      Enable advanced threat protection setting for a PostgreSQL flexible server.
+    text: >
+      az postgres flexible-server advanced-threat-protection-setting update --resource-group testGroup --server-name testserver --state Enabled
+  - name: >
+      Disable advanced threat protection setting for a PostgreSQL flexible server.
+    text: >
+      az postgres flexible-server advanced-threat-protection-setting update --resource-group testGroup --server-name testserver --state Disabled
+"""
+
+helps['postgres flexible-server advanced-threat-protection-setting show'] = """
+type: command
+short-summary: Get advanced threat protection settings for a PostgreSL flexible server.
+examples:
+  - name: Get the details of advanced threat protection setting for a flexible server.
+    text: az postgres flexible-server advanced-threat-protection-setting show --resource-group testGroup --server-name testserver
+  - name: Get the details of advanced threat protection setting for a flexible server in a different subscription.
+    text: az postgres flexible-server advanced-threat-protection-setting show --subscription testSubscription --resource-group testGroup --server-name testserver
+  - name: Get the details of advanced threat protection setting for a flexible server using --ids parameter.
+    text: az postgres flexible-server advanced-threat-protection-setting show --ids /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/testGroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/testServer
+"""
