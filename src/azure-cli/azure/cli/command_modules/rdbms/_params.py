@@ -820,6 +820,20 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('principal_type', options_list=['--type', '-t'], default='User', arg_type=get_enum_type(['User', 'Group', 'ServicePrincipal', 'Unknown']), help='Type of the Azure AD administrator.')
             c.argument('identity', help='Name or ID of identity used for AAD Authentication.', validator=validate_identity)
 
+        # server advanced threat protection settings
+        for scope in ['update', 'show']:
+            argument_context_string = '{} flexible-server advanced-threat-protection-setting {}'.format(command_group, scope)
+            with self.argument_context(argument_context_string) as c:
+                c.argument('resource_group_name', arg_type=resource_group_name_type)
+                c.argument('server_name', id_part='name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+
+        with self.argument_context('{} flexible-server advanced-threat-protection-setting update'.format(command_group)) as c:
+            c.argument('state',
+                       options_list=['--state'],
+                       required=True,
+                       help='State of advanced threat protection setting.',
+                       arg_type=get_enum_type(['Enabled', 'Disabled']))
+
         # GTID
         if command_group == 'mysql':
             with self.argument_context('{} flexible-server gtid reset'.format(command_group)) as c:
