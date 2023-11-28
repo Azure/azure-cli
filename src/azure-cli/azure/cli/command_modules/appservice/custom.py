@@ -4314,7 +4314,7 @@ def _get_latest_deployment_id(cmd, rg_name, name, deployment_status_url, slot):
     return None
 
 
-def _track_deployment_runtime_status(params, deploymentstatusapi_url, timeout=None):
+def _track_deployment_runtime_status(params, deploymentstatusapi_url, deployment_id, timeout=None):
     total_trials = (int(timeout) // 5) if timeout else 200
     num_trials = 0
     start_time = time.time()
@@ -4324,7 +4324,7 @@ def _track_deployment_runtime_status(params, deploymentstatusapi_url, timeout=No
         deployment_properties = response_body.get('properties')
         deployment_status = deployment_properties.get('status')
         time_elapsed = int(time.time() - start_time)
-        logger.warning("Status: %s. Time: %ssec(s)", deployment_status, time_elapsed)
+        logger.warning("Status: %s. Time: %s(s)", deployment_status, time_elapsed)
         if deployment_status == "RuntimeStarting":
             logger.info("InprogressInstances: %s, SuccessfulInstances: %s",
                         deployment_properties.get('numberOfInstancesInProgress'),
@@ -4344,8 +4344,9 @@ def _track_deployment_runtime_status(params, deploymentstatusapi_url, timeout=No
                 error_message = errors[0]['message']
                 logger.error("Error - [Code : %s, Message: %s, ExtendedCode: %s]",
                              error_code, error_message, error_extended_code)
+            failure_logs = deployment_properties.get('failedInstancesLogs')[0]
             logger.error("Please check the deployment logs for more info: %s",
-                         deployment_properties.get('failedInstancesLogs'))
+                         failure_logs)
             raise CLIError
         if deployment_status == "BuildFailed":
             logger.error("Deployment failed because the build process failed")
@@ -4356,18 +4357,23 @@ def _track_deployment_runtime_status(params, deploymentstatusapi_url, timeout=No
                 error_message = errors[0]['message']
                 logger.error("Error - [Code : %s, Message: %s, ExtendedCode: %s]",
                              error_code, error_message, error_extended_code)
+            failure_logs = deployment_properties.get('failedInstancesLogs')[0]
+            if failure_logs is None:
+                scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+                deployments_log_url = scm_url + f"/api/deployments/{deployment_id}/log"
             logger.error("Please check the build logs for more info: %s",
-                         deployment_properties.get('failedInstancesLogs'))
+                         deployments_log_url)
             raise CLIError
         num_trials = num_trials + 1
         time.sleep(5)
     if num_trials >= total_trials:
         scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+        latest_deployment_url = scm_url + "/api/deployments/latest"
         raise CLIError("Timeout reached while tracking deployment status, however,"
                        "the deployment operation is still on-going. "
-                       "Navigate to your scm site at {} to check the deployment status. "
+                       "Navigate to {} to check the deployment status of your app. "
                        "InprogressInstances: {}, SuccessfulInstances: {}, FailedInstances: {}".format(
-                           scm_url,
+                           latest_deployment_url,
                            deployment_properties.get('numberOfInstancesInProgress'),
                            deployment_properties.get('numberOfInstancesSuccessful'),
                            deployment_properties.get('numberOfInstancesFailed')))
@@ -5470,7 +5476,7 @@ def _make_onedeploy_request(params):
                                    "Try deploying the app without --track-runtime-status param.")
                 deploymentstatusapi_url = _build_deploymentstatus_url(params, deployment_id)
                 response_body = _track_deployment_runtime_status(params,
-                                                                 deploymentstatusapi_url, params.timeout)
+                                                                 deploymentstatusapi_url, deployment_id, params.timeout)
             else:
                 response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
                                                              deployment_status_url, params.slot, params.timeout)
