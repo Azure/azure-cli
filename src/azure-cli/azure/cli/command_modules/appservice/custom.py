@@ -4318,6 +4318,7 @@ def _track_deployment_runtime_status(params, deploymentstatusapi_url, deployment
     total_trials = (int(timeout) // 5) if timeout else 200
     num_trials = 0
     start_time = time.time()
+    deployment_status = None
     while num_trials < total_trials:
         response_body = send_raw_request(params.cmd.cli_ctx, "GET", deploymentstatusapi_url,
                                          disable_request_response_logging=True).json()
@@ -4338,45 +4339,55 @@ def _track_deployment_runtime_status(params, deploymentstatusapi_url, deployment
                          deployment_properties.get('numberOfInstancesSuccessful'),
                          deployment_properties.get('numberOfInstancesFailed'))
             errors = deployment_properties.get('errors')
-            if errors is not None:
+            if errors is not None and len(errors) > 0:
                 error_extended_code = errors[0]['extendedCode']
                 error_code = errors[0]['code']
                 error_message = errors[0]['message']
                 logger.error("Error - [Code : %s, Message: %s, ExtendedCode: %s]",
                              error_code, error_message, error_extended_code)
-            failure_logs = deployment_properties.get('failedInstancesLogs')[0]
+            failure_logs = deployment_properties.get('failedInstancesLogs')
+            if failure_logs is not None or len(failure_logs) > 0:
+                failure_logs = failure_logs[0]
             logger.error("Please check the deployment logs for more info: %s",
                          failure_logs)
             raise CLIError
         if deployment_status == "BuildFailed":
             logger.error("Deployment failed because the build process failed")
             errors = deployment_properties.get('errors')
-            if errors is not None:
+            if errors is not None and len(errors) > 0:
                 error_extended_code = errors[0]['extendedCode']
                 error_code = errors[0]['code']
                 error_message = errors[0]['message']
                 logger.error("Error - [Code : %s, Message: %s, ExtendedCode: %s]",
                              error_code, error_message, error_extended_code)
-            failure_logs = deployment_properties.get('failedInstancesLogs')[0]
-            if failure_logs is None:
+            deployment_logs = deployment_properties.get('failedInstancesLogs')
+            if deployment_logs is None or len(deployment_logs) == 0:
                 scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
-                deployments_log_url = scm_url + f"/api/deployments/{deployment_id}/log"
+                deployment_logs = scm_url + f"/api/deployments/{deployment_id}/log"
+            else:
+                deployment_logs = deployment_logs[0]
             logger.error("Please check the build logs for more info: %s",
-                         deployments_log_url)
+                         deployment_logs)
             raise CLIError
         num_trials = num_trials + 1
         time.sleep(5)
     if num_trials >= total_trials:
         scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
-        latest_deployment_url = scm_url + "/api/deployments/latest"
-        raise CLIError("Timeout reached while tracking deployment status, however,"
-                       "the deployment operation is still on-going. "
-                       "Navigate to {} to check the deployment status of your app. "
-                       "InprogressInstances: {}, SuccessfulInstances: {}, FailedInstances: {}".format(
-                           latest_deployment_url,
-                           deployment_properties.get('numberOfInstancesInProgress'),
-                           deployment_properties.get('numberOfInstancesSuccessful'),
-                           deployment_properties.get('numberOfInstancesFailed')))
+        if deployment_status == "BuildInProgress":
+            deployments_log_url = scm_url + f"/api/deployments/{deployment_id}/log"
+            raise CLIError("Timeout reached while build was still in progress. "
+                            "Navigate to {} to check the build logs for your app.".format(
+                                deployments_log_url))
+        else:
+            latest_deployment_url = scm_url + "/api/deployments/latest"
+            raise CLIError("Timeout reached while tracking deployment status, however,"
+                        "the deployment operation is still on-going. "
+                        "Navigate to {} to check the deployment status of your app. "
+                        "InprogressInstances: {}, SuccessfulInstances: {}, FailedInstances: {}".format(
+                            latest_deployment_url,
+                            deployment_properties.get('numberOfInstancesInProgress'),
+                            deployment_properties.get('numberOfInstancesSuccessful'),
+                            deployment_properties.get('numberOfInstancesFailed')))
     return response_body
 
 
