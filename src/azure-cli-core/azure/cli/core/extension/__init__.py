@@ -101,9 +101,7 @@ class Extension:
         """
         try:
             if not isinstance(self._preview, bool):
-                self._preview = (bool(self.metadata.get(EXT_METADATA_ISPREVIEW)) or
-                                 bool(self.metadata.get(EXT_METADATA_ISEXPERIMENTAL)) or
-                                 is_preview_from_semantic_version(self._version))
+                self._preview = is_preview_from_extension_meta(self.metadata)
         except Exception:  # pylint: disable=broad-except
             logger.debug("Unable to get extension preview status: %s", traceback.format_exc())
         return self._preview
@@ -355,6 +353,12 @@ def get_extension_names(ext_type=None):
     Returns the extension names of extensions installed in the extensions directory.
     """
     return [ext.name for ext in get_extensions(ext_type=ext_type)]
+
+
+def is_preview_from_extension_meta(extension_meta):
+    return (bool(extension_meta.get(EXT_METADATA_ISPREVIEW, False)) or
+            bool(extension_meta.get(EXT_METADATA_ISEXPERIMENTAL, False)) or
+            is_preview_from_semantic_version(extension_meta.get('version')))
 
 
 def is_preview_from_semantic_version(version):
