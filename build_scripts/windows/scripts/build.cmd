@@ -77,7 +77,7 @@ if exist %REPO_ROOT%\privates (
     copy %REPO_ROOT%\privates\*.whl %TEMP_SCRATCH_FOLDER%
 )
 
-if "%TARGET%" == 'msi' (
+if "%TARGET%" == "msi" (
     REM ensure wix is available
     if exist %WIX_DIR% (
         echo Using existing Wix at %WIX_DIR%
@@ -211,10 +211,10 @@ popd
 if "%TARGET%"=="msi" (
     echo Building MSI...
     msbuild /t:rebuild /p:Configuration=Release /p:Platform=%ARCH% %REPO_ROOT%\build_scripts\windows\azure-cli.wixproj
-) else(
+) else (
     echo Building ZIP...
     ren %BUILDING_DIR% "Azure CLI"
-    powershell Compress-Archive -Path '%ZIP_DIR%' -DestinationPath %OUTPUT_DIR%\azure-cli-%CLI_VERSION%.zip
+    powershell Compress-Archive -Path '%ZIP_DIR%' -DestinationPath '%OUTPUT_DIR%\Microsoft Azure CLI.zip'
 )
 
 if %errorlevel% neq 0 goto ERROR
