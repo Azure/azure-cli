@@ -9666,7 +9666,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             '--node-vm-size {vm_size}',
             '--node-count {node_count}',
             '--enable-image-cleaner',
-            '--ssh-key-value={ssh_key_value}',
+            '--ssh-key-value={ssh_key_value}'
         ])
 
         self.cmd(create_cmd, checks=[
@@ -9688,16 +9688,23 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         })
         print("The vmss_id is %s " % vmss_id)
 
+        list_binding_cmd = 'aks trustedaccess rolebinding list ' \
+            '--cluster-name={name} ' \
+            '--resource-group={resource_group}'
+        self.cmd(list_binding_cmd, checks=[
+            self.is_empty(),
+        ])
+
         create_binding_cmd = 'aks trustedaccess rolebinding create ' \
             '--resource-group={resource_group} ' \
             '--cluster-name={name} ' \
             '-n testbinding ' \
             '-r {vmss_id} ' \
-            '--roles Microsoft.Compute/virtualMachineScaleSets/test-node-reader'
-        self.cmd(create_binding_cmd, checks=[
-            self.check('type', 'Microsoft.ContainerService/managedClusters/trustedAccessRoleBindings'),
-            self.check('name', 'testbinding'),
-            self.check('properties.provisioningState', 'Success'),
+            '--roles Microsoft.Compute/virtualMachineScaleSets/test-node-reader '
+        self.cmd(create_binding_cmd)
+        self.cmd(list_binding_cmd, checks=[
+            self.check('[0].type', 'Microsoft.ContainerService/managedClusters/trustedAccessRoleBindings'),
+            self.check('[0].name', 'testbinding'),
         ])
 
         get_binding_cmd = 'aks trustedaccess rolebinding show ' \
@@ -9707,30 +9714,22 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(get_binding_cmd, checks=[
             self.check('type', 'Microsoft.ContainerService/managedClusters/trustedAccessRoleBindings'),
             self.check('name', 'testbinding'),
-            self.check('properties.provisioningState', 'Success'),
-        ])
-
-        list_binding_cmd = 'aks trustedaccess rolebinding list ' \
-            '--cluster-name={name} ' \
-            '--resource-group={resource_group}'
-        self.cmd(list_binding_cmd, checks=[
-            self.check('[0].type', 'Microsoft.ContainerService/managedClusters/trustedAccessRoleBindings'),
-            self.check('[0]name', 'testbinding'),
+            self.check('provisioningState', 'Succeeded'),
         ])
 
         update_binding_cmd = 'aks trustedaccess rolebinding update ' \
             '--cluster-name={name} ' \
             '-n testbinding ' \
             '--resource-group={resource_group} ' \
-            '--roles Microsoft.Compute/virtualMachineScaleSets/test-pod-reader'
+            '--roles Microsoft.Compute/virtualMachineScaleSets/test-pod-reader '
         self.cmd(update_binding_cmd, checks=[
-            self.check('.properties.roles[0]', 'Microsoft.Compute/virtualMachineScaleSets/test-pod-reader'),
+            self.check('roles[0]', 'Microsoft.Compute/virtualMachineScaleSets/test-pod-reader'),
         ])
 
         delete_binding_cmd = 'aks trustedaccess rolebinding delete ' \
             '--cluster-name={name} ' \
             '-n testbinding ' \
-            '--resource-group={resource_group} '
+            '--resource-group={resource_group} -y'
         self.cmd(delete_binding_cmd)
         self.cmd(list_binding_cmd, checks=[
             self.is_empty(),

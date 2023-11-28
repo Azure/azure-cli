@@ -88,6 +88,7 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import in_cloud_console, sdk_no_wait
+from azure.core.exceptions import ResourceNotFoundError as ResourceNotFoundErrorAzCore
 from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt_y_n
 from knack.util import CLIError
@@ -2626,7 +2627,7 @@ def aks_trustedaccess_role_binding_create(cmd, client, resource_group_name, clus
     existedBinding = None
     try:
         existedBinding = client.get(resource_group_name, cluster_name, role_binding_name)
-    except ResourceNotFoundError:
+    except ResourceNotFoundErrorAzCore:
         pass
 
     if existedBinding:
