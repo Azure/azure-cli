@@ -1051,7 +1051,11 @@ def virtual_endpoint_list_func(client, resource_group_name, server_name):
         server_name)
 
 
-def virtual_endpoint_delete_func(client, resource_group_name, server_name, virtual_endpoint_name):
+def virtual_endpoint_delete_func(client, resource_group_name, server_name, virtual_endpoint_name, yes=False):
+    if not yes:
+        user_confirmation(
+            "Are you sure you want to delete the virtual endpoint '{0}' in resource group '{1}'".format(virtual_endpoint_name,
+                                                                                              resource_group_name), yes=yes)
 
     return client.begin_delete(
         resource_group_name,

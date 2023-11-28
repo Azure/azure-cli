@@ -504,7 +504,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         endpoint_type_arg_type = CLIArgumentType(
             options_list=['--endpoint-type', '-t'],
-            arg_type=get_enum_type(['ReadWrite', 'ReadOnly']),
+            arg_type=get_enum_type(['ReadWrite']),
             help='Type of connection point for virtual endpoint.'
         )
 

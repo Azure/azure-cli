@@ -1199,7 +1199,7 @@ class FlexibleServerVirtualEndpointSwitchoverMgmtScenarioTest(ScenarioTest):  # 
                  checks=[JMESPathCheck('members', update_check['members'])])
 
         # test virtual-endpoint delete
-        self.cmd('{} flexible-server virtual-endpoint delete -g {} --server-name {} --name {}'
+        self.cmd('{} flexible-server virtual-endpoint delete -g {} --server-name {} --name {} --yes'
                  .format(database_engine, resource_group, master_server, virtual_endpoint_name))
 
         # test virtual-endpoint list
