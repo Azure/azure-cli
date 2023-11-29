@@ -645,7 +645,7 @@ def __export_keyvalues(fetched_items, format_, separator, prefix=None):
                 try:
                     # Convert JSON string value to python object
                     kv.value = json.loads(kv.value)
-                except ValueError or TypeError:
+                except (ValueError, TypeError):
                     logger.debug('Error while converting value "%s" for key "%s" to JSON. Value will be treated as string.', kv.value, kv.key)
 
             if prefix is not None:
