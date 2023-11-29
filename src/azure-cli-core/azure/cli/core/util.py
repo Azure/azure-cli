@@ -1238,6 +1238,7 @@ def is_guid(guid):
     except (ValueError, TypeError):
         return False
 
+
 def assert_guid(guid, name=None):
     if not is_guid(guid):
         if name:

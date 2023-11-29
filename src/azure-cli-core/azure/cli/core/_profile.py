@@ -12,7 +12,7 @@ from azure.cli.core._session import ACCOUNT
 from azure.cli.core.auth.msal_authentication import _TENANT, _CLIENT_ID, _CLIENT_SECRET
 from azure.cli.core.azclierror import AuthenticationError
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
-from azure.cli.core.util import in_cloud_console, can_launch_browser, is_guid, assert_guid
+from azure.cli.core.util import in_cloud_console, can_launch_browser, assert_guid
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -68,6 +68,7 @@ def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
     subscriptions = profile.load_cached_subscriptions(all_clouds)
     return subscriptions
 
+
 def env_var_auth_configured():
     keys = [_AZURE_CLIENT_ID, _AZURE_CLIENT_SECRET, _AZURE_TENANT_ID]
     all_provided = all(key in os.environ for key in keys)
@@ -78,11 +79,10 @@ def env_var_auth_configured():
     any_provided = any(key in os.environ for key in keys)
     if any_provided:
         raise CLIError("To authenticate using environment variables, "
-                       "all of {}, {}, {} must be specified."
-                       .format(*keys)
-        )
+                       "all of {}, {}, {} must be specified.".format(*keys))
 
     return False
+
 
 def load_env_var_credential():
     if env_var_auth_configured():
@@ -93,6 +93,7 @@ def load_env_var_credential():
         }
         return credential
     return None
+
 
 def load_env_var_subscription():
     if env_var_auth_configured():
@@ -602,12 +603,12 @@ class Profile:
                     _SUBSCRIPTION_NAME].lower()])]
             if not result and subscription:
                 raise CLIError("Subscription '{}' not found. "
-                            "Check the spelling and casing and try again.".format(subscription))
+                               "Check the spelling and casing and try again.".format(subscription))
             if not result and not subscription:
                 raise CLIError("No subscription found. Run 'az account set' to select a subscription.")
             if len(result) > 1:
                 raise CLIError("Multiple subscriptions with the name '{}' found. "
-                            "Specify the subscription ID.".format(subscription))
+                               "Specify the subscription ID.".format(subscription))
             return result[0]
 
         # Attempt to use env vars
