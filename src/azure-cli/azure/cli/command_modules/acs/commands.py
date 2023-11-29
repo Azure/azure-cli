@@ -19,6 +19,8 @@ from azure.cli.command_modules.acs._format import (
     aks_show_table_format,
     aks_upgrades_table_format,
     aks_versions_table_format,
+    aks_mesh_revisions_table_format,
+    aks_mesh_upgrades_table_format,
 )
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import ResourceType
@@ -157,3 +159,47 @@ def load_command_table(self, _):
                          confirmation='Be careful that rotate oidc issuer signing keys twice within short period' +
                          ' will invalidate service accounts token immediately. Please refer to doc for details.\n' +
                          'Are you sure you want to perform this operation?')
+        
+     # AKS mesh commands
+    with self.command_group('aks mesh', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
+        g.custom_command(
+            'enable',
+            'aks_mesh_enable',
+            supports_no_wait=True)
+        g.custom_command(
+            'disable',
+            'aks_mesh_disable',
+            supports_no_wait=True,
+            confirmation=True)
+        g.custom_command(
+            'enable-ingress-gateway',
+            'aks_mesh_enable_ingress_gateway',
+            supports_no_wait=True)
+        g.custom_command(
+            'disable-ingress-gateway',
+            'aks_mesh_disable_ingress_gateway',
+            supports_no_wait=True,
+            confirmation=True)
+        g.custom_command(
+            'get-revisions',
+            'aks_mesh_get_revisions',
+            table_transformer=aks_mesh_revisions_table_format)
+        g.custom_command(
+            'get-upgrades',
+            'aks_mesh_get_upgrades',
+            table_transformer=aks_mesh_upgrades_table_format)
+
+    # AKS mesh upgrade commands
+    with self.command_group('aks mesh upgrade', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
+        g.custom_command(
+            'start',
+            'aks_mesh_upgrade_start',
+            supports_no_wait=True)
+        g.custom_command(
+            'complete',
+            'aks_mesh_upgrade_complete',
+            supports_no_wait=True)
+        g.custom_command(
+            'rollback',
+            'aks_mesh_upgrade_rollback',
+            supports_no_wait=True)

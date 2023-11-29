@@ -41,7 +41,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_ABSOLUTEMONTHLY_MAINTENANCE_SCHEDULE, CONST_RELATIVEMONTHLY_MAINTENANCE_SCHEDULE,
     CONST_WEEKINDEX_FIRST, CONST_WEEKINDEX_SECOND,
     CONST_WEEKINDEX_THIRD, CONST_WEEKINDEX_FOURTH,
-    CONST_WEEKINDEX_LAST)
+    CONST_WEEKINDEX_LAST,)
 from azure.cli.command_modules.acs._validators import (
     validate_acr, validate_agent_pool_name, validate_assign_identity,
     validate_assign_kubelet_identity, validate_azure_keyvault_kms_key_id,
@@ -68,7 +68,8 @@ from azure.cli.command_modules.acs._validators import (
     validate_nodepool_taints, validate_vm_set_type, validate_vnet_subnet_id, validate_k8s_support_plan,
     validate_utc_offset, validate_start_date, validate_start_time,
     validate_force_upgrade_disable_and_enable_parameters,
-    validate_allowed_host_ports, validate_application_security_groups)
+    validate_allowed_host_ports, validate_application_security_groups,
+    validate_azure_service_mesh_revision)
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
     get_resource_name_completion_list, get_three_state_flag, name_type,
@@ -169,6 +170,12 @@ week_indexes = [
     CONST_WEEKINDEX_THIRD,
     CONST_WEEKINDEX_FOURTH,
     CONST_WEEKINDEX_LAST,
+]
+
+# azure service mesh
+ingress_gateway_types = [
+    CONST_AZURE_SERVICE_MESH_INGRESS_MODE_EXTERNAL,
+    CONST_AZURE_SERVICE_MESH_INGRESS_MODE_INTERNAL,
 ]
 
 
@@ -274,6 +281,10 @@ def load_arguments(self, _):
         c.argument('http_proxy_config')
         c.argument('enable_keda', action='store_true')
         c.argument('enable_vpa', action='store_true', help='enable vertical pod autoscaler for cluster')
+        c.argument('enable_azure_service_mesh',
+                   options_list=["--enable-azure-service-mesh", "--enable-asm"],
+                   action='store_true',
+                   is_preview=True)
         # addons
         c.argument('enable_addons', options_list=['--enable-addons', '-a'])
         c.argument('workspace_resource_id')
@@ -634,6 +645,28 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('snapshot_name', options_list=['--name', '-n'], required=True, validator=validate_snapshot_name, help='The nodepool snapshot name.')
             c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
+
+    with self.argument_context('aks mesh enable-ingress-gateway') as c:
+        c.argument('ingress_gateway_type',
+                   arg_type=get_enum_type(ingress_gateway_types))
+
+    with self.argument_context('aks mesh disable-ingress-gateway') as c:
+        c.argument('ingress_gateway_type',
+                   arg_type=get_enum_type(ingress_gateway_types))
+
+    with self.argument_context('aks mesh enable') as c:
+        c.argument('revision', validator=validate_azure_service_mesh_revision)
+        c.argument('key_vault_id')
+        c.argument('ca_cert_object_name')
+        c.argument('ca_key_object_name')
+        c.argument('root_cert_object_name')
+        c.argument('cert_chain_object_name')
+
+    with self.argument_context('aks mesh get-revisions') as c:
+        c.argument('location', required=True, help='Location in which to discover available Azure Service Mesh revisions.')
+
+    with self.argument_context('aks mesh upgrade start') as c:
+        c.argument('revision', validator=validate_azure_service_mesh_revision, required=True)
 
 
 def _get_default_install_location(exe_name):

@@ -188,3 +188,59 @@ def _custom_functions(preview_versions):
                 return version
 
     return CustomFunctions()
+
+
+def aks_mesh_revisions_table_format(result):
+    """Format a list of mesh revisions as summary results for display with "-o table". """
+    revision_table = flatten_mesh_revision_table(result[0]['properties']['meshRevisions'])
+    parsed = compile_jmes("""[].{
+        revision: revision,
+        upgrades: upgrades || [`None available`] | sort_versions(@) | join(`, `, @),
+        compatibleWith: compatibleWith_name,
+        compatibleVersions: compatibleVersions || [`None available`] | sort_versions(@) | join(`, `, @)
+    }""")
+    # Use ordered dicts so headers are predictable
+    results = parsed.search(revision_table, Options(
+        dict_cls=OrderedDict, custom_functions=_custom_functions({})))
+
+    return results
+
+
+# Helper function used by aks_mesh_revisions_table_format
+def flatten_mesh_revision_table(revision_info):
+    """Flattens revision information"""
+    flattened = []
+    for revision_data in revision_info:
+        flattened.extend(_format_mesh_revision_entry(revision_data))
+    return flattened
+
+
+def aks_mesh_upgrades_table_format(result):
+    """Format a list of mesh upgrades as summary results for display with "-o table". """
+    upgrades_table = _format_mesh_revision_entry(result[0]['properties'])
+    parsed = compile_jmes("""[].{
+        revision: revision,
+        upgrades: upgrades || [`None available`] | sort_versions(@) | join(`, `, @),
+        compatibleWith: compatibleWith_name,
+        compatibleVersions: compatibleVersions || [`None available`] | sort_versions(@) | join(`, `, @)
+    }""")
+    # Use ordered dicts so headers are predictable
+    results = parsed.search(upgrades_table, Options(
+        dict_cls=OrderedDict, custom_functions=_custom_functions({})))
+    return results
+
+
+def _format_mesh_revision_entry(revision):
+    flattened = []
+    revision_entry = revision['revision']
+    upgrades = revision['upgrades']
+    compatible_with_list = revision['compatibleWith']
+    for compatible_with in compatible_with_list:
+        item = {
+            'revision': revision_entry,
+            'upgrades': upgrades,
+            'compatibleWith_name': compatible_with['name'],
+            'compatibleVersions': compatible_with['versions']
+        }
+        flattened.append(item)
+    return flattened

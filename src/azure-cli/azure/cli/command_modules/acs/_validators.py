@@ -18,6 +18,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_OS_SKU_AZURELINUX,
     CONST_OS_SKU_CBLMARINER,
     CONST_OS_SKU_MARINER,
+    CONST_AZURE_SERVICE_MESH_INGRESS_MODE_EXTERNAL,
+    CONST_AZURE_SERVICE_MESH_INGRESS_MODE_INTERNAL,
 )
 from azure.cli.core import keys
 from azure.cli.core.azclierror import (
@@ -769,3 +771,14 @@ def validate_application_security_groups(namespace):
     for asg in asg_ids:
         if not is_valid_resource_id(asg):
             raise InvalidArgumentValueError(asg + " is not a valid Azure resource ID.")
+
+
+def validate_azure_service_mesh_revision(namespace):
+    """Validates the user provided revision parameter for azure service mesh commands."""
+    if namespace.revision is None:
+        return
+    revision = namespace.revision
+    asm_revision_regex = re.compile(r'^asm-\d+-\d+$')
+    found = asm_revision_regex.findall(revision)
+    if not found:
+        raise InvalidArgumentValueError(f"Revision {revision} is not supported by the service mesh add-on.")

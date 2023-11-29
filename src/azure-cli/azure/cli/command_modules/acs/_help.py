@@ -518,6 +518,9 @@ parameters:
   - name: --nodepool-asg-ids
     type: string
     short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
+  - name: --enable-asm --enable-azure-service-mesh
+    type: bool
+    short-summary: Enable Azure Service Mesh.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -592,6 +595,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-monitor-metrics
   - name: Create a kubernetes cluster with vertical pod autoscaler enaled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-vpa
+  - name: Create a kubernetes cluster with Azure Service Mesh enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-service-mesh
 """
 
 helps['aks update'] = """
@@ -1987,4 +1992,130 @@ helps['aks oidc-issuer'] = """
 helps['aks oidc-issuer rotate-signing-keys'] = """
     type: command
     short-summary: Rotate oidc issuer service account signing keys
+"""
+
+helps['aks mesh'] = """
+    type: group
+    short-summary: Commands to manage Azure Service Mesh.
+    long-summary: A group of commands to manage Azure Service Mesh in given cluster.
+"""
+
+helps['aks mesh enable'] = """
+    type: command
+    short-summary: Enable Azure Service Mesh.
+    long-summary: This command enables Azure Service Mesh in given cluster.
+    parameters:
+      - name: --revision
+        type: string
+        short-summary: Azure Service Mesh revision to install.
+      - name: --key-vault-id
+        type: string
+        short-summary: The Azure Keyvault id with plugin CA info.
+      - name: --ca-cert-object-name
+        type: string
+        short-summary: Intermediate cert object name in the Azure Keyvault.
+      - name: --ca-key-object-name
+        type: string
+        short-summary: Intermediate key object name in the Azure Keyvault.
+      - name: --cert-chain-object-name
+        type: string
+        short-summary: Cert chain object name in the Azure Keyvault.
+      - name: --root-cert-object-name
+        type: string
+        short-summary: Root cert object name in the Azure Keyvault.
+    examples:
+      - name: Enable Azure Service Mesh with selfsigned CA.
+        text: az aks mesh enable --resource-group MyResourceGroup --name MyManagedCluster
+      - name: Enable Azure Service Mesh with plugin CA.
+        text: az aks mesh enable --resource-group MyResourceGroup --name MyManagedCluster --key-vault-id /subscriptions/8ecadfc9-d1a3-4ea4-b844-0d9f87e4d7c8/resourceGroups/foo/providers/Microsoft.KeyVault/vaults/foo --ca-cert-object-name my-ca-cert --ca-key-object-name my-ca-key --cert-chain-object-name my-cert-chain --root-cert-object-name my-root-cert
+"""
+
+helps['aks mesh disable'] = """
+    type: command
+    short-summary: Disable Azure Service Mesh.
+    long-summary: This command disables Azure Service Mesh in given cluster.
+"""
+
+helps['aks mesh enable-ingress-gateway'] = """
+    type: command
+    short-summary: Enable an Azure Service Mesh ingress gateway.
+    long-summary: This command enables an Azure Service Mesh ingress gateway in given cluster.
+    parameters:
+      - name: --ingress-gateway-type
+        type: string
+        short-summary: Specify the type of ingress gateway.
+        long-summary: Allowed values are "External" which is backed by a load balancer with an external IP address; "Internal" which is backed by a load balancer with an internal IP address.
+    examples:
+      - name: Enable an internal ingress gateway.
+        text: az aks mesh enable-ingress-gateway --resource-group MyResourceGroup --name MyManagedCluster --ingress-gateway-type Internal
+"""
+
+helps['aks mesh disable-ingress-gateway'] = """
+    type: command
+    short-summary: Disable an Azure Service Mesh ingress gateway.
+    long-summary: This command disables an Azure Service Mesh ingress gateway in given cluster.
+    parameters:
+      - name: --ingress-gateway-type
+        type: string
+        short-summary: Specify the type of ingress gateway.
+        long-summary: Allowed values are "External" which is backed by a load balancer with an external IP address, "Internal" which is backed by a load balancer with an internal IP address.
+    examples:
+      - name: Disable an internal ingress gateway.
+        text: az aks mesh disable-ingress-gateway --resource-group MyResourceGroup --name MyManagedCluster --ingress-gateway-type Internal
+"""
+
+helps['aks mesh get-revisions'] = """
+    type: command
+    short-summary: Discover available Azure Service Mesh revisions and their compatibility.
+    long-summary: This command discovers available Azure Service Mesh revisions and their compatibility information for the given location.
+    examples:
+      - name: Discover Azure Service Mesh revisions.
+        text: az aks mesh get-revisions --location westus2
+        crafted: true
+"""
+
+helps['aks mesh get-upgrades'] = """
+    type: command
+    short-summary: Discover available Azure Service Mesh upgrades.
+    long-summary: This command discovers available Azure Service Mesh upgrades for the mesh revision installed on the cluster.
+    examples:
+      - name: Discover Azure Service Mesh upgrades.
+        text: az aks mesh get-upgrades --resource-group MyResourceGroup --name MyManagedCluster
+"""
+
+helps['aks mesh upgrade start'] = """
+    type: command
+    short-summary: Initiate Azure Service Mesh upgrade.
+    long-summary: This command initiates upgrade of Azure Service Mesh to the specified revision.
+    parameters:
+      - name: --revision
+        type: string
+        short-summary: Azure Service Mesh revision to upgrade to.
+    examples:
+      - name: Initiate Azure Service Mesh upgrade.
+        text: az aks mesh upgrade start --resource-group MyResourceGroup --name MyManagedCluster --revision asm-1-18
+"""
+
+helps['aks mesh upgrade'] = """
+    type: group
+    short-summary: Commands to manage the upgrades for Azure Service Mesh.
+    long-summary: A group of commands to manage the upgrades for Azure Service Mesh in given cluster.
+"""
+
+helps['aks mesh upgrade complete'] = """
+    type: command
+    short-summary: Complete Azure Service Mesh upgrade.
+    long-summary: This command completes Azure Service Mesh canary upgrade by removing the previous revision.
+    examples:
+      - name: Complete Azure Service Mesh upgrade.
+        text: az aks mesh upgrade complete --resource-group MyResourceGroup --name MyManagedCluster
+"""
+
+helps['aks mesh upgrade rollback'] = """
+    type: command
+    short-summary: Rollback Azure Service Mesh upgrade.
+    long-summary: This command rolls back Azure Service Mesh upgrade to the previous stable revision.
+    examples:
+      - name: Rollback Azure Service Mesh upgrade.
+        text: az aks mesh upgrade rollback --resource-group MyResourceGroup --name MyManagedCluster
 """
