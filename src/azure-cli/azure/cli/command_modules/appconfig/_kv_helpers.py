@@ -719,6 +719,8 @@ def __convert_feature_dict_to_keyvalue_list(features_dict, feature_management_ke
                             feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS] = condition_value
                             enabled_for_found = True
                         elif condition == feature_management_keywords.requirement_type:
+                            if condition_value not in ("All", "Any"):
+                                raise ValidationError("Feature '{0}' must have an Any/All requirement type. \n".format (str(k)))
                             feature_flag_value.conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = condition_value
                         else:
                             feature_flag_value.conditions[condition] = condition_value

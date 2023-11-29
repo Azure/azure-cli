@@ -784,6 +784,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         import_separator_features_file_path = os.path.join(TEST_DIR, 'import_separator_features.json')
         import_features_alt_syntax_file_path = os.path.join(TEST_DIR, 'import_features_alt_syntax.json')
         import_features_random_conditions_file_path = os.path.join(TEST_DIR, 'import_features_random_conditions.json')
+        import_features_invalid_requirement_type_file_path = os.path.join(TEST_DIR, 'import_features_invalid_requirement_type.json')
 
         self.kwargs.update({
             'label': 'KeyValuesWithFeatures',
@@ -902,6 +903,15 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             exported_kvs = json.load(json_file)
         assert imported_kvs == exported_kvs
         os.remove(exported_file_path)
+
+        self.kwargs.update({
+            'imported_file_path': import_features_invalid_requirement_type_file_path
+        })
+
+        # Invalid requirement type should fail import
+        with self.assertRaisesRegex(CLIError, "Feature 'Timestamp' must have an Any/All requirement type"):
+            self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
