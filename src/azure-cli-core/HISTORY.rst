@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.55.0
+++++++
+* Minor fixes
+
 2.54.0
 ++++++
 * `aaz`: Support data-plane clients (#27617)
