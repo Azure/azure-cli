@@ -8,6 +8,7 @@ import json
 from knack.log import get_logger
 from azure.cli.core.util import shell_safe_json_parse
 from azure.cli.core.azclierror import InvalidArgumentValueError
+from collections import namedtuple
 from ._models import KeyValue
 from ._constants import FeatureFlagConstants
 
@@ -346,3 +347,22 @@ def is_feature_flag(kv):
     if kv and kv.key and isinstance(kv.key, str) and kv.content_type and isinstance(kv.content_type, str):
         return kv.key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX) and kv.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE
     return False
+
+
+class FeatureManagementReservedKeywords:
+    '''
+    Feature management keywords used in files in different naming conventions.
+    '''
+    FeatureFlagKeywords = namedtuple("FeatureFlagKeywords", ["feature_management", "enabled_for", "requirement_type"])
+
+    PASCAL = FeatureFlagKeywords(feature_management="FeatureManagement",enabled_for="EnabledFor", requirement_type="RequirementType")
+    CAMEL = FeatureFlagKeywords(feature_management="featureManagement",enabled_for="enabledFor", requirement_type="requirementType")
+    UNDERSCORE = FeatureFlagKeywords(feature_management="feature_management",enabled_for="enabled_for", requirement_type="requirement_type")
+    HYPHEN = FeatureFlagKeywords(feature_management="feature-management",enabled_for="enabled-for", requirement_type="requirement-type")
+
+    ALL = (PASCAL, CAMEL, UNDERSCORE, HYPHEN)
+
+    @classmethod
+    def get_keywords(cls, naming_convention = 'pascal'):
+        return getattr(cls, naming_convention.upper(), cls.PASCAL)
+

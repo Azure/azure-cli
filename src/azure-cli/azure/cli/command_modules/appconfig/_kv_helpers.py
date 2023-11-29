@@ -35,52 +35,15 @@ from ._diff_utils import get_serializer, KVComparer, print_preview, __print_diff
 from ._utils import prep_label_filter_for_url_encoding, is_json_content_type, validate_feature_flag_name, validate_feature_flag_key
 from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting, QueryFields)
-from ._featuremodels import (map_featureflag_to_keyvalue, is_feature_flag, FeatureFlagValue)
+from ._featuremodels import (map_featureflag_to_keyvalue, is_feature_flag, FeatureFlagValue, FeatureManagementReservedKeywords)
 
 logger = get_logger(__name__)
-FEATURE_MANAGEMENT_KEYWORDS = ["FeatureManagement", "featureManagement", "feature_management", "feature-management"]
-ENABLED_FOR_KEYWORDS = ["EnabledFor", "enabledFor", "enabled_for", "enabled-for"]
+
 FEATURE_FLAG_PROPERTIES = {
     FeatureFlagConstants.ID,
     FeatureFlagConstants.DESCRIPTION,
     FeatureFlagConstants.ENABLED,
     FeatureFlagConstants.CONDITIONS}
-
-
-class FeatureManagementReservedKeywords:
-    '''
-    Feature management keywords used in files in different naming conventions.
-
-    :ivar str featuremanagement:
-        "FeatureManagement" keyword denoting feature management section in config file.
-    :ivar str enabledfor:
-        "EnabledFor" keyword denoting feature filters associated with a feature flag.
-    '''
-
-    def pascal(self):
-        self.featuremanagement = FEATURE_MANAGEMENT_KEYWORDS[0]
-        self.enabledfor = ENABLED_FOR_KEYWORDS[0]
-
-    def camel(self):
-        self.featuremanagement = FEATURE_MANAGEMENT_KEYWORDS[1]
-        self.enabledfor = ENABLED_FOR_KEYWORDS[1]
-
-    def underscore(self):
-        self.featuremanagement = FEATURE_MANAGEMENT_KEYWORDS[2]
-        self.enabledfor = ENABLED_FOR_KEYWORDS[2]
-
-    def hyphen(self):
-        self.featuremanagement = FEATURE_MANAGEMENT_KEYWORDS[3]
-        self.enabledfor = ENABLED_FOR_KEYWORDS[3]
-
-    def __init__(self,
-                 naming_convention):
-        self.featuremanagement = FEATURE_MANAGEMENT_KEYWORDS[0]
-        self.enabledfor = ENABLED_FOR_KEYWORDS[0]
-
-        if naming_convention != 'pascal':
-            select_keywords = getattr(self, naming_convention, self.pascal)
-            select_keywords()
 
 
 def validate_import_key(key):
@@ -172,7 +135,8 @@ def __read_kv_from_file(file_path,
     try:
         config_data = __read_with_appropriate_encoding(file_path, format_)
         if format_ in ('json', 'yaml'):
-            for feature_management_keyword in FEATURE_MANAGEMENT_KEYWORDS:
+            for feature_management_keyword in (
+                keywords.feature_management for keywords in FeatureManagementReservedKeywords.ALL):
                 # delete all feature management sections in any name format.
                 # If users have not skipped features, and there are multiple
                 # feature sections, we will error out while reading features.
@@ -223,7 +187,7 @@ def __read_features_from_file(file_path, format_):
     config_data = {}
     features_dict = {}
     # Default is PascalCase, but it will always be overwritten as long as there is a feature section in file
-    enabled_for_keyword = ENABLED_FOR_KEYWORDS[0]
+    feature_management_keywords = FeatureManagementReservedKeywords.get_keywords()
 
     if format_ == 'properties':
         logger.warning("Importing feature flags from a properties file is not supported. If properties file contains feature flags, they will be imported as regular key-values.")
@@ -232,14 +196,14 @@ def __read_features_from_file(file_path, format_):
     try:
         config_data = __read_with_appropriate_encoding(file_path, format_)
         found_feature_section = False
-        for index, feature_management_keyword in enumerate(FEATURE_MANAGEMENT_KEYWORDS):
+        for keywords in FeatureManagementReservedKeywords.ALL:
             # find the first occurrence of feature management section in file.
             # Enforce the same naming convention for 'EnabledFor' keyword
             # If there are multiple feature sections, we will error out here.
-            if feature_management_keyword in config_data:
+            if keywords.feature_management in config_data:
                 if not found_feature_section:
-                    features_dict = config_data[feature_management_keyword]
-                    enabled_for_keyword = ENABLED_FOR_KEYWORDS[index]
+                    features_dict = config_data[keywords.feature_management]
+                    feature_management_keywords = keywords
                     found_feature_section = True
                 else:
                     raise FileOperationError('Unable to proceed because file contains multiple sections corresponding to "Feature Management".')
@@ -253,7 +217,7 @@ def __read_features_from_file(file_path, format_):
         raise FileOperationError('File is not available.')
 
     # features_dict contains all features that need to be converted to KeyValue format now
-    return __convert_feature_dict_to_keyvalue_list(features_dict, enabled_for_keyword)
+    return __convert_feature_dict_to_keyvalue_list(features_dict, feature_management_keywords)
 
 
 def __write_kv_and_features_to_file(file_path, key_values=None, features=None, format_=None, separator=None, skip_features=False, naming_convention='pascal'):
@@ -697,8 +661,8 @@ def __try_convert_to_arrays(constructed_data):
 
 
 def __export_features(retrieved_features, naming_convention):
-    feature_reserved_keywords = FeatureManagementReservedKeywords(naming_convention)
-    exported_dict = {feature_reserved_keywords.featuremanagement: {}}
+    feature_reserved_keywords = FeatureManagementReservedKeywords.get_keywords(naming_convention)
+    exported_dict = {feature_reserved_keywords.feature_management: {}}
 
     try:
         # retrieved_features is a list of FeatureFlag objects
@@ -712,17 +676,19 @@ def __export_features(retrieved_features, naming_convention):
                 feature_state = False
 
             elif feature.state == "conditional":
-                feature_state = {feature_reserved_keywords.enabledfor: []}
+                feature_state = {feature_reserved_keywords.enabled_for: []}
 
                 for condition_key, condition in feature.conditions.items():
                     if condition_key == FeatureFlagConstants.CLIENT_FILTERS:
-                        feature_state[feature_reserved_keywords.enabledfor] = [filter_.to_dict() for filter_ in condition]
+                        feature_state[feature_reserved_keywords.enabled_for] = [filter_.to_dict() for filter_ in condition]
+                    elif condition_key == FeatureFlagConstants.REQUIREMENT_TYPE:
+                        feature_state[feature_reserved_keywords.requirement_type] = condition
                     else:
                         feature_state[condition_key] = condition
 
             feature_entry = {feature.name: feature_state}
 
-            exported_dict[feature_reserved_keywords.featuremanagement].update(feature_entry)
+            exported_dict[feature_reserved_keywords.feature_management].update(feature_entry)
 
         return __compact_key_values(exported_dict)
 
@@ -730,7 +696,7 @@ def __export_features(retrieved_features, naming_convention):
         raise CLIError("Failed to export feature flags. " + str(exception))
 
 
-def __convert_feature_dict_to_keyvalue_list(features_dict, enabled_for_keyword):
+def __convert_feature_dict_to_keyvalue_list(features_dict, feature_management_keywords):
     # pylint: disable=too-many-nested-blocks
     key_values = []
     default_conditions = {FeatureFlagConstants.CLIENT_FILTERS: []}
@@ -749,14 +715,15 @@ def __convert_feature_dict_to_keyvalue_list(features_dict, enabled_for_keyword):
                     enabled_for_found = False
 
                     for condition, condition_value in v.items():
-                        if condition == enabled_for_keyword:
+                        if condition == feature_management_keywords.enabled_for:
                             feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS] = condition_value
                             enabled_for_found = True
-                            continue
-
-                        feature_flag_value.conditions[condition] = condition_value
+                        elif condition == feature_management_keywords.requirement_type:
+                            feature_flag_value.conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = condition_value
+                        else:
+                            feature_flag_value.conditions[condition] = condition_value
                     if not enabled_for_found:
-                        raise ValidationError("Feature '{0}' must contain '{1}' definition or have a true/false value. \n".format(str(k), enabled_for_keyword))
+                        raise ValidationError("Feature '{0}' must contain '{1}' definition or have a true/false value. \n".format(str(k), feature_management_keywords.enabled_for))
 
                     if feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS]:
                         feature_flag_value.enabled = True
