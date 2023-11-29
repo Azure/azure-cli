@@ -717,9 +717,8 @@ def __export_features(retrieved_features, naming_convention):
                 for condition_key, condition in feature.conditions.items():
                     if condition_key == FeatureFlagConstants.CLIENT_FILTERS:
                         feature_state[feature_reserved_keywords.enabledfor] = [filter_.to_dict() for filter_ in condition]
-                        continue
-
-                    feature_state[condition_key] = condition
+                    else:
+                        feature_state[condition_key] = condition
 
             feature_entry = {feature.name: feature_state}
 
@@ -765,18 +764,18 @@ def __convert_feature_dict_to_keyvalue_list(features_dict, enabled_for_keyword):
                         for idx, val in enumerate(feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS]):
                             # each val should be a dict with at most 2 keys (Name, Parameters) or at least 1 key (Name)
                             val = {filter_key.lower(): filter_val for filter_key, filter_val in val.items()}
-                            if not val.get("name", None):
+                            if not val.get(FeatureFlagConstants.FILTER_NAME, None):
                                 logger.warning("Ignoring a filter for feature '%s' because it doesn't have a 'Name' attribute.", str(k))
                                 continue
 
-                            if val["name"].lower() == "alwayson":
+                            if val[FeatureFlagConstants.FILTER_NAME].lower() == "alwayson":
                                 # We support alternate format for specifying always ON features
                                 # "FeatureT": {"EnabledFor": [{ "Name": "AlwaysOn"}]}
                                 feature_flag_value.conditions = default_conditions
                                 break
 
-                            filter_param = val.get("parameters", {})
-                            new_val = {FeatureFlagConstants.FILTER_NAME: val["name"]}
+                            filter_param = val.get(FeatureFlagConstants.FILTER_PARAMETERS, {})
+                            new_val = {FeatureFlagConstants.FILTER_NAME: val[FeatureFlagConstants.FILTER_NAME]}
                             if filter_param:
                                 new_val[FeatureFlagConstants.FILTER_PARAMETERS] = filter_param
                             feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS][idx] = new_val
