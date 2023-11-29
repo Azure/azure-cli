@@ -355,14 +355,17 @@ class FeatureManagementReservedKeywords:
     '''
     FeatureFlagKeywords = namedtuple("FeatureFlagKeywords", ["feature_management", "enabled_for", "requirement_type"])
 
-    PASCAL = FeatureFlagKeywords(feature_management="FeatureManagement",enabled_for="EnabledFor", requirement_type="RequirementType")
-    CAMEL = FeatureFlagKeywords(feature_management="featureManagement",enabled_for="enabledFor", requirement_type="requirementType")
-    UNDERSCORE = FeatureFlagKeywords(feature_management="feature_management",enabled_for="enabled_for", requirement_type="requirement_type")
-    HYPHEN = FeatureFlagKeywords(feature_management="feature-management",enabled_for="enabled-for", requirement_type="requirement-type")
+    PASCAL = FeatureFlagKeywords(feature_management="FeatureManagement", enabled_for="EnabledFor",
+                                 requirement_type="RequirementType")
+    CAMEL = FeatureFlagKeywords(feature_management="featureManagement", enabled_for="enabledFor",
+                                requirement_type="requirementType")
+    UNDERSCORE = FeatureFlagKeywords(feature_management="feature_management", enabled_for="enabled_for",
+                                     requirement_type="requirement_type")
+    HYPHEN = FeatureFlagKeywords(feature_management="feature-management", enabled_for="enabled-for",
+                                 requirement_type="requirement-type")
 
     ALL = (PASCAL, CAMEL, UNDERSCORE, HYPHEN)
 
     @classmethod
-    def get_keywords(cls, naming_convention = 'pascal'):
+    def get_keywords(cls, naming_convention='pascal'):
         return getattr(cls, naming_convention.upper(), cls.PASCAL)
-

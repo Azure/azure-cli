@@ -136,7 +136,7 @@ def __read_kv_from_file(file_path,
         config_data = __read_with_appropriate_encoding(file_path, format_)
         if format_ in ('json', 'yaml'):
             for feature_management_keyword in (
-                keywords.feature_management for keywords in FeatureManagementReservedKeywords.ALL):
+                    keywords.feature_management for keywords in FeatureManagementReservedKeywords.ALL):
                 # delete all feature management sections in any name format.
                 # If users have not skipped features, and there are multiple
                 # feature sections, we will error out while reading features.
@@ -720,7 +720,7 @@ def __convert_feature_dict_to_keyvalue_list(features_dict, feature_management_ke
                             enabled_for_found = True
                         elif condition == feature_management_keywords.requirement_type:
                             if condition_value not in ("All", "Any"):
-                                raise ValidationError("Feature '{0}' must have an Any/All requirement type. \n".format (str(k)))
+                                raise ValidationError("Feature '{0}' must have an Any/All requirement type. \n".format(str(k)))
                             feature_flag_value.conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = condition_value
                         else:
                             feature_flag_value.conditions[condition] = condition_value
