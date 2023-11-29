@@ -612,7 +612,7 @@ class Profile:
 
         # Attempt to use env vars
         if env_var_auth_configured():
-            logger.warning("Using subscription configured in environment variables.")
+            logger.debug("Using subscription configured in environment variables.")
             env_var_sub = load_env_var_subscription()
             if subscription:
                 # Subscription ID must be a GUID

@@ -312,7 +312,7 @@ class ServicePrincipalStore:
 
         # If no login data, look for service principal credential in environment variables
         if not self._entries and env_var_auth_configured():
-            logger.warning("Using service principal credential configured in environment variables.")
+            logger.debug("Using service principal credential configured in environment variables.")
             self._entries = [load_env_var_credential()]
 
         matched = [x for x in self._entries if sp_id == x[_CLIENT_ID]]
