@@ -69,7 +69,7 @@ Release History
 
 **Storage**
 
-* `az storage blob upload`: Increase `max_block_size` for append/block blobs of size >= 8mb to 8mb instead of 4mb
+* `az storage blob upload`: Increase `max_block_size` for append/block blobs of size >= 8mb to 8mb instead of 4mb (#27880)
 * `az storage blob upload`: Change default `max_connections` for append blob to 1 (#27880)
 * `az storage file upload/upload-batch`: Fix `--allow-trailing-dot` breaking `--connection-string` usage (#27901)
 * Fix #27899: `az storage account create`: Run `check_name_availability()` first and throw a warning when an existing account with the name is found (#27914)
