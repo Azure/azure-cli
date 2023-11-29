@@ -55,7 +55,6 @@ Release History
 
 * `az postgres flexible-server replica create`: Add support for parameters like `--tier`, `--sku-name`, `--storage-size` during replica creation (#27894)
 * `az postgres flexible-server update`: Add support for custom IOPS update for flexible server using `--performance-tier` (#27894)
-* `az postgres flexible-server replica create`: Add support for parameters like `--tier`, `--sku-name`, `--storage-size` during replica creation (#27894)
 * `az postgres flexible-server advanced-threat-protection-setting show`: Show advanced threat protection setting (#27918)
 * `az postgres flexible-server advanced-threat-protection-setting update`: Update advanced threat protection setting using `--state` as Enabled/Disabled (#27918)
 
