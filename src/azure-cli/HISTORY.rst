@@ -3,6 +3,76 @@
 Release History
 ===============
 
+2.55.0
+++++++
+
+**ACR**
+
+* `az acr login`: Allow registry names with hyphen (#27835)
+* Fix #27487: `az acr check-health`: Fix DOCKER_PULL_ERROR when acr check-health for Mac OS (#27891)
+
+**AKS**
+
+* `az aks update`: Update outbound ip description and remove limitation (#27890)
+* Add arguments `--asg-ids` and `--allowed-host-ports` for `az aks create` | `az aks nodepool add` | `az aks nodepool update` (#27900)
+
+**App Service**
+
+* `az webapp log tail`: Fix #27189 catch exception when scm connection is lost (#27810)
+
+**Billing**
+
+* `az billing period list`: Fix `--top` does not work as expected (#27804)
+* `az billing invoice download`: Fix command does not work (#27804)
+* `az billing invoice list`: Fix `--period-end-date` and `--period-start-date` help message error (#27804)
+
+**Compute**
+
+* `az disk create`: Add new parameter `--optimized-for-frequent-attach` to improve reliability and performance of data disks that are frequently attached (#27815)
+* `az disk/snapshot create`: Add new parameter `--elastic-san-resource-id` to support creating through the ARM id of elastic san volume snapshot (#27815)
+
+**Containerapp**
+
+* `az containerapp ingress cors enable`: Only update arguments `--allow-headers`, `--allow-credentials`, `--allow-methods`, `--expose-methods`, `--max-age` when the value is not `None` (#27837)
+* `az containerapp`: Change the container-app name and container-app job name in the example to legal names (#27933)
+
+**Key Vault**
+
+* `az keyvault backup start`: Add `status` in output (#27902)
+
+**Monitor**
+
+* `az monitor activity-log alert`: Upgrade api-version to `2020-10-01` to include `any-of` query condition (#27623)
+* `az monitor activity-log alert`: Expose parameter `all-of` to enable user modifying query condition specifically (#27623)
+
+**Network**
+
+* `az network private-endpoint-connection`: Add provider `Microsoft.DBforPostgreSQL/flexibleServers` (#27840)
+* `az network public-ip prefix`: Add parameter `--tier` (#27825)
+
+**RDBMS**
+
+* `az postgres flexible-server replica create`: Add support for parameters like `--tier`, `--sku-name`, `--storage-size` during replica creation (#27894)
+* `az postgres flexible-server update`: Add support for custom IOPS update for flexible server using `--performance-tier` (#27894)
+* `az postgres flexible-server replica create`: Add support for parameters like `--tier`, `--sku-name`, `--storage-size` during replica creation (#27894)
+* `az postgres flexible-server advanced-threat-protection-setting show`: Show advanced threat protection setting (#27918)
+* `az postgres flexible-server advanced-threat-protection-setting update`: Update advanced threat protection setting using `--state` as Enabled/Disabled (#27918)
+
+**Service Connector**
+
+* `az containerapp connection create`: Enable Key Vault Reference in Container Apps (#27270)
+
+**SQL**
+
+* `az instance-pool create/update`: Add optional parameter `--maintenance-configuration-id` for  SQL Instance Pool resource (#27859)
+* `az mi create/update`: Add optional parameter `--instance-pool-name` for SQL Managed Server resource (#27906)
+
+**Storage**
+
+* `az storage blob upload`: Change default `max_connections` for append blob to 1 (#27880)
+* `az storage file upload/upload-batch`: Fix `--allow-trailing-dot` breaking `--connection-string` usage (#27901)
+* Fix #27899: `az storage account create`: Run `check_name_availability()` first and throw a warning when an existing account with the name is found (#27914)
+
 2.54.0
 ++++++
 
