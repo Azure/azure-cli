@@ -14,11 +14,12 @@ Release History
 **AKS**
 
 * `az aks update`: Update outbound ip description and remove limitation (#27890)
-* Add arguments `--asg-ids` and `--allowed-host-ports` for `az aks create` | `az aks nodepool add` | `az aks nodepool update` (#27900)
+* `az aks create`: Add arguments `--asg-ids` and `--allowed-host-ports` (#27900)
+* `az aks nodepool add/update`: Add arguments `--asg-ids` and `--allowed-host-ports` (#27900)
 
 **App Service**
 
-* `az webapp log tail`: Fix #27189 catch exception when scm connection is lost (#27810)
+* Fix #27189: `az webapp log tail`: Catch exception when scm connection is lost (#27810)
 
 **Billing**
 
