@@ -64,7 +64,7 @@ Release History
 
 **SQL**
 
-* `az instance-pool create/update`: Add optional parameter `--maintenance-configuration-id` for  SQL Instance Pool resource (#27859)
+* `az instance-pool create/update`: Add optional parameter `--maintenance-configuration-id` for SQL Instance Pool resource (#27859)
 * `az mi create/update`: Add optional parameter `--instance-pool-name` for SQL Managed Server resource (#27906)
 
 **Storage**
