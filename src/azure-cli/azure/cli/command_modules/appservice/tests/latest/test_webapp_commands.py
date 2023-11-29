@@ -539,25 +539,25 @@ class AppServicePlanScenarioTest(ScenarioTest):
         self.cmd('appservice plan list -g {}'.format(resource_group),
                  checks=[JMESPathCheck('length(@)', 0)])
 
-    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
+    @ResourceGroupPreparer(location="eastus")
     def test_zone_redundant_plan(self, resource_group):
         plan = self.create_random_name('plan', 24)
         self.cmd(
-            'appservice plan create -g {} -n {} -l {} -z --sku P1V3'.format(resource_group, plan, LINUX_ASP_LOCATION_WEBAPP))
+            'appservice plan create -g {} -n {} -l {} -z --sku P1V3'.format(resource_group, plan, "eastus"))
 
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
             JMESPathCheck('properties.zoneRedundant', True), JMESPathCheck('properties.numberOfWorkers', 3)])
 
         # test with unsupported SKU
         plan2 = self.create_random_name('plan', 24)
-        self.cmd('appservice plan create -g {} -n {} -l {} -z --sku FREE'.format(resource_group, plan2, LINUX_ASP_LOCATION_WEBAPP), expect_failure=True)
+        self.cmd('appservice plan create -g {} -n {} -l {} -z --sku FREE'.format(resource_group, plan2, "eastus"), expect_failure=True)
 
         # test with unsupported location
         self.cmd('appservice plan create -g {} -n {} -l {} -z --sku P1V3'.format(resource_group, plan2, WINDOWS_ASP_LOCATION_WEBAPP), expect_failure=True)
 
         # ensure non zone redundant
         plan = self.create_random_name('plan', 24)
-        self.cmd('functionapp plan create -g {} -n {} -l {} --sku FREE'.format(resource_group, plan, LINUX_ASP_LOCATION_WEBAPP))
+        self.cmd('functionapp plan create -g {} -n {} -l {} --sku FREE'.format(resource_group, plan, "eastus"))
 
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[JMESPathCheck('properties.zoneRedundant', False)])
 
