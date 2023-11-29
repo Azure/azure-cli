@@ -36,47 +36,47 @@ logger = get_logger(__name__)
 
 
 def default_content_types():
-    return ["application/eot",
-            "application/font",
-            "application/font-sfnt",
-            "application/javascript",
-            "application/json",
-            "application/opentype",
-            "application/otf",
-            "application/pkcs7-mime",
-            "application/truetype",
-            "application/ttf",
-            "application/vnd.ms-fontobject",
-            "application/xhtml+xml",
-            "application/xml",
-            "application/xml+rss",
-            "application/x-font-opentype",
-            "application/x-font-truetype",
-            "application/x-font-ttf",
-            "application/x-httpd-cgi",
-            "application/x-javascript",
-            "application/x-mpegurl",
-            "application/x-opentype",
-            "application/x-otf",
-            "application/x-perl",
-            "application/x-ttf",
-            "font/eot",
-            "font/ttf",
-            "font/otf",
-            "font/opentype",
-            "image/svg+xml",
-            "text/css",
-            "text/csv",
-            "text/html",
-            "text/javascript",
-            "text/js",
-            "text/plain",
-            "text/richtext",
-            "text/tab-separated-values",
-            "text/xml",
-            "text/x-script",
-            "text/x-component",
-            "text/x-java-source"]
+    return ['application/eot',
+            'application/font',
+            'application/font-sfnt',
+            'application/javascript',
+            'application/json',
+            'application/opentype',
+            'application/otf',
+            'application/pkcs7-mime',
+            'application/truetype',
+            'application/ttf',
+            'application/vnd.ms-fontobject',
+            'application/xhtml+xml',
+            'application/xml',
+            'application/xml+rss',
+            'application/x-font-opentype',
+            'application/x-font-truetype',
+            'application/x-font-ttf',
+            'application/x-httpd-cgi',
+            'application/x-javascript',
+            'application/x-mpegurl',
+            'application/x-opentype',
+            'application/x-otf',
+            'application/x-perl',
+            'application/x-ttf',
+            'font/eot',
+            'font/ttf',
+            'font/otf',
+            'font/opentype',
+            'image/svg+xml',
+            'text/css',
+            'text/csv',
+            'text/html',
+            'text/javascript',
+            'text/js',
+            'text/plain',
+            'text/richtext',
+            'text/tab-separated-values',
+            'text/xml',
+            'text/x-script',
+            'text/x-component',
+            'text/x-java-source']
 
 from azure.cli.command_modules.cdn.aaz.latest.afd.origin import Create as _AFDOriginCreate
 class AFDOriginCreate(_AFDOriginCreate):
@@ -85,7 +85,7 @@ class AFDOriginCreate(_AFDOriginCreate):
         from azure.cli.core.aaz import AAZBoolArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.enable_private_link = AAZBoolArg(options=['--enable-private-link'],
-                                                  help="Indicates whether private link is enanbled on that origin.")
+                                                  help='Indicates whether private link is enanbled on that origin.')
         return args_schema
 
     def pre_operations(self):
@@ -103,7 +103,7 @@ class AFDOriginUpdate(_AFDOriginUpdate):
         from azure.cli.core.aaz import AAZBoolArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.enable_private_link = AAZBoolArg(options=['--enable-private-link'],
-                                                  help="Indicates whether private link is enanbled on that origin.")
+                                                  help='Indicates whether private link is enanbled on that origin.')
         return args_schema
 
     def pre_operations(self):
@@ -121,12 +121,12 @@ class AFDRouteCreate(_AFDRouteCreate):
         from azure.cli.core.aaz import AAZBoolArg, AAZListArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.enable_caching = AAZBoolArg(options=['--enable-caching'],
-                                                  help="Indicates whether caching is enanbled on that route.")
+                                                  help='Indicates whether caching is enanbled on that route.')
         args_schema.custom_domains = AAZListArg(options=['--custom-domains'],
-                                                    help="Custom domains referenced by this endpoint.")
+                                                    help='Custom domains referenced by this endpoint.')
         args_schema.custom_domains.Element = AAZStrArg()
         args_schema.rule_sets = AAZListArg(options=['--rule-sets'],
-                                                    help="Collection of ID or name of rule set referenced by the route.")
+                                                    help='Collection of ID or name of rule set referenced by the route.')
         args_schema.rule_sets.Element = AAZStrArg()
         return args_schema
 
@@ -140,7 +140,7 @@ class AFDRouteCreate(_AFDRouteCreate):
                     custom_domain = f'/subscriptions/{self.ctx.subscription_id}/resourceGroups/{args.resource_group}' \
                                 f'/providers/Microsoft.Cdn/profiles/{args.profile_name}/customDomains/{custom_domain}'
                     item = {
-                        "id": custom_domain,
+                        'id': custom_domain,
                     }
                     custom_domains.append(item)
             args.formatted_custom_domains = custom_domains
@@ -168,7 +168,7 @@ class AFDRouteCreate(_AFDRouteCreate):
                     rule_set = f'/subscriptions/{self.ctx.subscription_id}/resourceGroups/{args.resource_group}' \
                                 f'/providers/Microsoft.Cdn/profiles/{args.profile_name}/ruleSets/{rule_set}'
                     item = {
-                        "id": rule_set,
+                        'id': rule_set,
                     }
                     rule_sets.append(item)
             args.formatted_rule_sets = rule_sets
@@ -180,13 +180,13 @@ class AFDRouteUpdate(_AFDRouteUpdate):
         from azure.cli.core.aaz import AAZBoolArg, AAZListArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.enable_caching = AAZBoolArg(options=['--enable-caching'],
-                                                  help="Indicates whether caching is enanbled on that route.")
+                                                  help='Indicates whether caching is enanbled on that route.')
         args_schema.custom_domains = AAZListArg(options=['--custom-domains'],
-                                                    help="Custom domains referenced by this endpoint.",
+                                                    help='Custom domains referenced by this endpoint.',
                                                     nullable=True)
         args_schema.custom_domains.Element = AAZStrArg()
         args_schema.rule_sets = AAZListArg(options=['--rule-sets'],
-                                                    help="Collection of ID or name of rule set referenced by the route.",
+                                                    help='Collection of ID or name of rule set referenced by the route.',
                                                     nullable=True)
         args_schema.rule_sets.Element = AAZStrArg()
         return args_schema
@@ -201,7 +201,7 @@ class AFDRouteUpdate(_AFDRouteUpdate):
                     custom_domain = f'/subscriptions/{self.ctx.subscription_id}/resourceGroups/{args.resource_group}' \
                                 f'/providers/Microsoft.Cdn/profiles/{args.profile_name}/customDomains/{custom_domain}'
                     item = {
-                        "id": custom_domain,
+                        'id': custom_domain,
                     }
                     custom_domains.append(item)
             args.formatted_custom_domains = custom_domains
@@ -211,14 +211,14 @@ class AFDRouteUpdate(_AFDRouteUpdate):
                        f'/providers/Microsoft.Cdn/profiles/{args.profile_name}/originGroups/{args.origin_group}'
 
         existing = _AFDRouteShow(cli_ctx=self.cli_ctx)(command_args={
-            "resource_group": args.resource_group,
-            "profile_name": args.profile_name,
-            "endpoint_name": args.endpoint_name,
-            "route_name": args.route_name
+            'resource_group': args.resource_group,
+            'profile_name': args.profile_name,
+            'endpoint_name': args.endpoint_name,
+            'route_name': args.route_name
         })
 
         if has_value(args.enable_caching) is False:
-            if  ('cacheConfiguration' in existing) is False or existing["cacheConfiguration"] is None:
+            if  ('cacheConfiguration' in existing) is False or existing['cacheConfiguration'] is None:
                 args.query_string_caching_behavior = None
                 args.query_parameters = None
                 args.content_types_to_compress = None
@@ -257,7 +257,7 @@ class AFDRouteUpdate(_AFDRouteUpdate):
                     rule_set = f'/subscriptions/{self.ctx.subscription_id}/resourceGroups/{args.resource_group}' \
                                 f'/providers/Microsoft.Cdn/profiles/{args.profile_name}/ruleSets/{rule_set}'
                     item = {
-                        "id": rule_set,
+                        'id': rule_set,
                     }
                     rule_sets.append(item)
             args.formatted_rule_sets = rule_sets
@@ -269,60 +269,60 @@ class AFDRuleCreate(_AFDRuleCreate):
         from azure.cli.core.aaz import AAZStrArg, AAZDateArg, AAZBoolArg, AAZListArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.action_name = AAZStrArg(options=['--action-name'],
-                                                  help="The name of the action for the delivery rule: https://docs.microsoft.com/en-us/azure/frontdoor/front-door-rules-engine-actions.")
+                                                  help='The name of the action for the delivery rule: https://docs.microsoft.com/en-us/azure/frontdoor/front-door-rules-engine-actions.')
         args_schema.cache_behavior = AAZStrArg(options=['--cache-behavior'],
-                                                  help="Caching behavior for the requests.")
+                                                  help='Caching behavior for the requests.')
         args_schema.cache_duration = AAZDateArg(options=['--cache-duration'],
-                                                    help="The duration for which the content needs to be cached. Allowed format is [d.]hh:mm:ss.")
+                                                    help='The duration for which the content needs to be cached. Allowed format is [d.]hh:mm:ss.')
         args_schema.custom_fragment = AAZStrArg(options=['--custom-fragment'],
-                                                  help="Fragment to add to the redirect URL.")
+                                                  help='Fragment to add to the redirect URL.')
         args_schema.custom_hostname = AAZStrArg(options=['--custom-hostname'],
-                                                    help="Host to redirect. Leave empty to use the incoming host as the destination host.")
+                                                    help='Host to redirect. Leave empty to use the incoming host as the destination host.')
         args_schema.custom_path = AAZStrArg(options=['--custom-path'],
-                                                    help="The full path to redirect. Path cannot be empty and must start with /. Leave empty to use the incoming path as destination pat")
+                                                    help='The full path to redirect. Path cannot be empty and must start with /. Leave empty to use the incoming path as destination pat')
         args_schema.custom_querystring = AAZStrArg(options=['--custom-querystring'],
-                                                    help="The set of query strings to be placed in the redirect URL. leave empty to preserve the incoming query string.")
+                                                    help='The set of query strings to be placed in the redirect URL. leave empty to preserve the incoming query string.')
         args_schema.destination = AAZStrArg(options=['--destination'],
-                                                    help="The destination path to be used in the rewrite.")
+                                                    help='The destination path to be used in the rewrite.')
         args_schema.enable_caching = AAZBoolArg(options=['--enable-caching'],
-                                                    help="Indicates whether to enable caching on the route.")
+                                                    help='Indicates whether to enable caching on the route.')
         args_schema.enable_compression = AAZBoolArg(options=['--enable-compression'],
-                                                    help="Indicates whether content compression is enabled on AzureFrontDoor. Default value is false. If compression is enabled, content will be served as compressed if user requests for a compressed version. Content won't be compressed on AzureFrontDoor when requested content is smaller than 1 byte or larger than 1 MB.")
+                                                    help='Indicates whether content compression is enabled on AzureFrontDoor. Default value is false. If compression is enabled, content will be served as compressed if user requests for a compressed version. Content won\'t be compressed on AzureFrontDoor when requested content is smaller than 1 byte or larger than 1 MB.')
         args_schema.forwarding_protocol = AAZStrArg(options=['--forwarding-protocol'],
-                                                    help="Protocol this rule will use when forwarding traffic to backends.")
+                                                    help='Protocol this rule will use when forwarding traffic to backends.')
         args_schema.header_action = AAZStrArg(options=['--header-action'],
-                                                    help="Header action for the requests.")
+                                                    help='Header action for the requests.')
         args_schema.header_name = AAZStrArg(options=['--header-name'],
-                                                    help="Name of the header to modify.")
+                                                    help='Name of the header to modify.')
         args_schema.header_value = AAZStrArg(options=['--header-value'],
-                                                    help="Value of the header.")
+                                                    help='Value of the header.')
         args_schema.match_values = AAZListArg(options=['--match-values'],
-                                                    help="Match values of the match condition. e.g, space separated values \"GET\" \"HTTP\".")
+                                                    help='Match values of the match condition. e.g, space separated values \'GET\' \'HTTP\'.')
         args_schema.match_values.Element = AAZStrArg()
         args_schema.match_variable = AAZStrArg(options=['--match-variable'],
-                                                    help="Name of the match condition: https://docs.microsoft.com/en-us/azure/frontdoor/rules-match-conditions.")
+                                                    help='Name of the match condition: https://docs.microsoft.com/en-us/azure/frontdoor/rules-match-conditions.')
         args_schema.negate_condition = AAZBoolArg(options=['--negate-condition'],
-                                                    help="If true, negates the condition.")
+                                                    help='If true, negates the condition.')
         args_schema.operator = AAZStrArg(options=['--operator'],
-                                                    help="Operator of the match condition.")
+                                                    help='Operator of the match condition.')
         args_schema.origin_group = AAZStrArg(options=['--origin-group'],
-                                                    help="Name or ID of the OriginGroup that would override the default OriginGroup.")
+                                                    help='Name or ID of the OriginGroup that would override the default OriginGroup.')
         args_schema.preserve_unmatched_path = AAZBoolArg(options=['--preserve-unmatched-path'],
-                                                    help="If True, the remaining path after the source pattern will be appended to the new destination path.")
+                                                    help='If True, the remaining path after the source pattern will be appended to the new destination path.')
         args_schema.query_parameters = AAZStrArg(options=['--query-parameters'],
-                                                    help="Query parameters to include or exclude.")
+                                                    help='Query parameters to include or exclude.')
         args_schema.query_string_caching_behavior = AAZStrArg(options=['--query-string-caching-behavior'],
-                                                    help="Defines how CDN caches requests that include query strings. You can ignore any query strings when caching, bypass caching to prevent requests that contain query strings from being cached, or cache every request with a unique URL.")
+                                                    help='Defines how CDN caches requests that include query strings. You can ignore any query strings when caching, bypass caching to prevent requests that contain query strings from being cached, or cache every request with a unique URL.')
         args_schema.redirect_protocol = AAZStrArg(options=['--redirect-protocol'],
-                                                    help="Protocol to use for the redirect.")
+                                                    help='Protocol to use for the redirect.')
         args_schema.redirect_type = AAZStrArg(options=['--redirect-type'],
-                                                    help="The redirect type the rule will use when redirecting traffic.")
+                                                    help='The redirect type the rule will use when redirecting traffic.')
         args_schema.selector = AAZStrArg(options=['--selector'],
-                                                    help="Selector of the match condition.")
+                                                    help='Selector of the match condition.')
         args_schema.source_pattern = AAZStrArg(options=['--source-pattern'],
-                                                    help="A request URI pattern that identifies the type of requests that may be rewritten.")
+                                                    help='A request URI pattern that identifies the type of requests that may be rewritten.')
         args_schema.transforms = AAZListArg(options=['--transforms'],
-                                                    help="Transform to apply before matching.")
+                                                    help='Transform to apply before matching.')
         args_schema.transforms.Element = AAZStrArg()
         return args_schema
     def pre_operations(self):
@@ -354,43 +354,27 @@ class AFDRuleCreate(_AFDRuleCreate):
         args.actions = actions
 
 from azure.cli.command_modules.cdn.aaz.latest.afd.rule import Show as RuleShow
-def add_condition(cmd, resource_group_name, profile_name, rule_set_name,
-                           rule_name, match_variable, operator, match_values=None, selector=None,
-                           negate_condition=None, transforms=None):
-    existing_conditions = RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
-        "resource_group": resource_group_name,
-        "profile_name": profile_name,
-        "rule_set_name": rule_set_name,
-        "rule_name": rule_name
-    })["conditions"]
-    condition = create_condition(match_variable, operator, match_values, selector, negate_condition, transforms)
-
-    return _AFDRuleCreate(cli_ctx=cmd.cli_ctx)(command_args={
-        "resource_group": resource_group_name,
-        "profile_name": profile_name,
-        "rule_set_name": rule_set_name,
-        "rule_name": rule_name,
-        "conditions": existing_conditions.append(condition)
-    })
-
 def add_afd_rule_condition(cmd, resource_group_name, profile_name, rule_set_name,
                            rule_name, match_variable, operator, match_values=None, selector=None,
                            negate_condition=None, transforms=None):
 
-    existing_conditions = RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
-        "resource_group": resource_group_name,
-        "profile_name": profile_name,
-        "rule_set_name": rule_set_name,
-        "rule_name": rule_name
-    })["actions"]
+    existing = RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'profile_name': profile_name,
+        'rule_set_name': rule_set_name,
+        'rule_name': rule_name
+    })
     condition = create_condition(match_variable, operator, match_values, selector, negate_condition, transforms)
 
     return _AFDRuleCreate(cli_ctx=cmd.cli_ctx)(command_args={
-        "resource_group": resource_group_name,
-        "profile_name": profile_name,
-        "rule_set_name": rule_set_name,
-        "rule_name": rule_name,
-        "conditions": existing_conditions.append(condition)
+        'resource_group': resource_group_name,
+        'profile_name': profile_name,
+        'rule_set_name': rule_set_name,
+        'rule_name': rule_name,
+        'conditions': None if 'conditions' not in existing else existing['conditions'].append(condition),
+        'actions': existing['actions'],
+        'match_processing_behavior': None if 'matchProcessingBehavior' not in existing else existing['matchProcessingBehavior'],
+        'order': None if 'order' not in existing else existing['order']
     })
 
 def add_afd_rule_action(cmd, resource_group_name, profile_name, rule_set_name,
@@ -403,14 +387,14 @@ def add_afd_rule_action(cmd, resource_group_name, profile_name, rule_set_name,
                         query_string_caching_behavior: AfdQueryStringCachingBehavior = None,
                         enable_compression=None,
                         enable_caching=None):
-    existing_actions = RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
-        "resource_group": resource_group_name,
-        "profile_name": profile_name,
-        "rule_set_name": rule_set_name,
-        "rule_name": rule_name
-    })["actions"]
+    existing = RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'profile_name': profile_name,
+        'rule_set_name': rule_set_name,
+        'rule_name': rule_name
+    })
     action = create_action(action_name, cache_behavior, cache_duration, header_action, header_name,
-                           header_value, None, None if query_parameters is None else ",".join(query_parameters),
+                           header_value, None, None if query_parameters is None else ','.join(query_parameters),
                            redirect_type, redirect_protocol, custom_hostname, custom_path, custom_querystring,
                            custom_fragment, source_pattern, destination, preserve_unmatched_path,
                            cmd=cmd, resource_group_name=resource_group_name,
@@ -421,80 +405,83 @@ def add_afd_rule_action(cmd, resource_group_name, profile_name, rule_set_name,
                            enable_caching=enable_caching)
 
     return _AFDRuleCreate(cli_ctx=cmd.cli_ctx)(command_args={
-        "resource_group": resource_group_name,
-        "profile_name": profile_name,
-        "rule_set_name": rule_set_name,
-        "rule_name": rule_name,
-        "actions": existing_actions.append(action)
+        'resource_group': resource_group_name,
+        'profile_name': profile_name,
+        'rule_set_name': rule_set_name,
+        'rule_name': rule_name,
+        'conditions': None if 'conditions' not in existing else existing['conditions'],
+        'actions': existing['actions'].append(action),
+        'match_processing_behavior': None if 'matchProcessingBehavior' not in existing else existing['matchProcessingBehavior'],
+        'order': None if 'order' not in existing else existing['order']
     })
 
 def remove_afd_rule_condition(cmd, resource_group_name, profile_name,
                               rule_set_name, rule_name, index):
 
     existing_conditions = RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
-        "resource_group": resource_group_name,
-        "profile_name": profile_name,
-        "rule_set_name": rule_set_name,
-        "rule_name": rule_name
+        'resource_group': resource_group_name,
+        'profile_name': profile_name,
+        'rule_set_name': rule_set_name,
+        'rule_name': rule_name
     })
     if len(existing_conditions) > 1 and index < len(existing_conditions):
         existing_conditions.pop(index)
     else:
-        logger.warning("Invalid condition index found. This command will be skipped. Please check the rule.")
+        logger.warning('Invalid condition index found. This command will be skipped. Please check the rule.')
 
     return _AFDRuleCreate(cli_ctx=cmd.cli_ctx)(command_args={
-        "resource_group": resource_group_name,
-        "profile_name": profile_name,
-        "rule_set_name": rule_set_name,
-        "rule_name": rule_name,
-        "conditions": existing_conditions,
+        'resource_group': resource_group_name,
+        'profile_name': profile_name,
+        'rule_set_name': rule_set_name,
+        'rule_name': rule_name,
+        'conditions': existing_conditions,
     })
 
 def remove_afd_rule_action(cmd, resource_group_name, profile_name, rule_set_name, rule_name, index):
 
     existing_actions = RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
-        "resource_group": resource_group_name,
-        "profile_name": profile_name,
-        "rule_set_name": rule_set_name,
-        "rule_name": rule_name
-    })["actions"]
+        'resource_group': resource_group_name,
+        'profile_name': profile_name,
+        'rule_set_name': rule_set_name,
+        'rule_name': rule_name
+    })['actions']
     if len(existing_actions) > 1 and index < len(existing_actions):
         existing_actions.pop(index)
     else:
-        logger.warning("Invalid condition index found. This command will be skipped. Please check the rule.")
+        logger.warning('Invalid condition index found. This command will be skipped. Please check the rule.')
 
     return _AFDRuleCreate(cli_ctx=cmd.cli_ctx)(command_args={
-        "resource_group": resource_group_name,
-        "profile_name": profile_name,
-        "rule_set_name": rule_set_name,
-        "rule_name": rule_name,
-        "actions": existing_actions,
+        'resource_group': resource_group_name,
+        'profile_name': profile_name,
+        'rule_set_name': rule_set_name,
+        'rule_name': rule_name,
+        'actions': existing_actions,
     })
 
 def list_afd_rule_condition(cmd, resource_group_name,
                             profile_name, rule_set_name,
                             rule_name):
     rule = RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
-        "resource_group": resource_group_name,
-        "profile_name": profile_name,
-        "rule_set_name": rule_set_name,
-        "rule_name": rule_name
+        'resource_group': resource_group_name,
+        'profile_name': profile_name,
+        'rule_set_name': rule_set_name,
+        'rule_name': rule_name
     })
 
-    return rule["conditions"]
+    return rule['conditions']
 
 
 def list_afd_rule_action(cmd, resource_group_name,
                          profile_name, rule_set_name,
                          rule_name):
     rule = RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
-        "resource_group": resource_group_name,
-        "profile_name": profile_name,
-        "rule_set_name": rule_set_name,
-        "rule_name": rule_name
+        'resource_group': resource_group_name,
+        'profile_name': profile_name,
+        'rule_set_name': rule_set_name,
+        'rule_name': rule_name
     })
     
-    return rule["actions"]
+    return rule['actions']
 
 from azure.cli.command_modules.cdn.aaz.latest.afd.secret import Create as _AFDSecretCreate
 class AFDSecretCreate(_AFDSecretCreate):
@@ -503,13 +490,13 @@ class AFDSecretCreate(_AFDSecretCreate):
         from azure.cli.core.aaz import AAZStrArg, AAZBoolArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.secret_source = AAZStrArg(options=['--secret-source'],
-                                                  help="Resource ID of the Azure Key Vault certificate, expected format is like /subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/vault1/secrets/cert1.",
+                                                  help='Resource ID of the Azure Key Vault certificate, expected format is like /subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/vault1/secrets/cert1.',
                                                   required=True)
         args_schema.secret_version = AAZStrArg(options=['--secret-version'],
-                                                  help="Version of the certificate to be used.",
+                                                  help='Version of the certificate to be used.',
                                                   required=False)
         args_schema.use_latest_version = AAZBoolArg(options=['--use-latest-version'],
-                                                  help="Whether to use the latest version for the certificate.",
+                                                  help='Whether to use the latest version for the certificate.',
                                                   required=False)
         return args_schema
     def pre_operations(self):
@@ -527,13 +514,13 @@ class AFDSecretCreate(_AFDSecretCreate):
         from azure.cli.core.aaz import AAZStrArg, AAZBoolArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.secret_source = AAZStrArg(options=['--secret-source'],
-                                                  help="Resource ID of the Azure Key Vault certificate, expected format is like /subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/vault1/secrets/cert1.",
+                                                  help='Resource ID of the Azure Key Vault certificate, expected format is like /subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/vault1/secrets/cert1.',
                                                   required=True)
         args_schema.secret_version = AAZStrArg(options=['--secret-version'],
-                                                  help="Version of the certificate to be used.",
+                                                  help='Version of the certificate to be used.',
                                                   required=False)
         args_schema.use_latest_version = AAZBoolArg(options=['--use-latest-version'],
-                                                  help="Whether to use the latest version for the certificate.",
+                                                  help='Whether to use the latest version for the certificate.',
                                                   required=False)
         return args_schema
     def pre_operations(self):
@@ -551,13 +538,13 @@ class AFDSecretUpdate(_AFDSecretUpdate):
         from azure.cli.core.aaz import AAZStrArg, AAZBoolArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.secret_source = AAZStrArg(options=['--secret-source'],
-                                                  help="Resource ID of the Azure Key Vault certificate, expected format is like /subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/vault1/secrets/cert1.",
+                                                  help='Resource ID of the Azure Key Vault certificate, expected format is like /subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/vault1/secrets/cert1.',
                                                   required=True)
         args_schema.secret_version = AAZStrArg(options=['--secret-version'],
-                                                  help="Version of the certificate to be used.",
+                                                  help='Version of the certificate to be used.',
                                                   required=False)
         args_schema.use_latest_version = AAZBoolArg(options=['--use-latest-version'],
-                                                  help="Whether to use the latest version for the certificate.",
+                                                  help='Whether to use the latest version for the certificate.',
                                                   required=False)
         return args_schema
     def pre_operations(self):
@@ -575,11 +562,11 @@ class AFDSecurityPolicyCreate(_AFDSecurityPolicyCreate):
         from azure.cli.core.aaz import AAZListArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.domains = AAZListArg(options=['--domains'],
-                                                  help="The domains to associate with the WAF policy. Could either be the ID of an endpoint (default domain will be used in that case) or ID of a custom domain.",
+                                                  help='The domains to associate with the WAF policy. Could either be the ID of an endpoint (default domain will be used in that case) or ID of a custom domain.',
                                                   required=True)
         args_schema.domains.Element = AAZStrArg()
         args_schema.waf_policy = AAZStrArg(options=['--waf-policy'],
-                                                  help="The ID of Front Door WAF policy.",
+                                                  help='The ID of Front Door WAF policy.',
                                                   required=True)
         return args_schema
     def pre_operations(self):
@@ -587,9 +574,9 @@ class AFDSecurityPolicyCreate(_AFDSecurityPolicyCreate):
         from azure.cli.command_modules.cdn.aaz.latest.afd.security_policy import Show
 
         existing_security_policy = Show(cli_ctx=self.cli_ctx)(command_args={
-            "resource_group": args.resource_group,
-            "profile_name": args.profile_name,
-            "security_policy_name": args.security_policy_name
+            'resource_group': args.resource_group,
+            'profile_name': args.profile_name,
+            'security_policy_name': args.security_policy_name
         })
 
         associations = existing_security_policy.parameters.associations
@@ -598,14 +585,14 @@ class AFDSecurityPolicyCreate(_AFDSecurityPolicyCreate):
             for domain in args.domains:
                 associations = [
                     {
-                        "domains": [{"id": domain}],
-                        "patterns_to_match":["/*"]
+                        'domains': [{'id': domain}],
+                        'patterns_to_match':['/*']
                     }
                 ]
 
         args.web_application_firewall = {
-            "waf_policy": args.waf_policy,
-            "associations": associations
+            'waf_policy': args.waf_policy,
+            'associations': associations
         }
 
     
@@ -616,12 +603,12 @@ class AFDSecurityPolicyUpdate(_AFDSecurityPolicyUpdate):
         from azure.cli.core.aaz import AAZListArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.domains = AAZListArg(options=['--domains'],
-                                                  help="The domains to associate with the WAF policy. Could either be the ID of an endpoint (default domain will be used in that case) or ID of a custom domain.",
+                                                  help='The domains to associate with the WAF policy. Could either be the ID of an endpoint (default domain will be used in that case) or ID of a custom domain.',
                                                   required=True)
         args_schema.domains.Element = AAZStrArg()
         
         args_schema.waf_policy = AAZStrArg(options=['--waf-policy'],
-                                                  help="The ID of Front Door WAF policy.",
+                                                  help='The ID of Front Door WAF policy.',
                                                   required=True)
         return args_schema
     def pre_operations(self):
@@ -629,9 +616,9 @@ class AFDSecurityPolicyUpdate(_AFDSecurityPolicyUpdate):
         from azure.cli.command_modules.cdn.aaz.latest.afd.security_policy import Show
 
         existing_security_policy = Show(cli_ctx=self.cli_ctx)(command_args={
-            "resource_group": args.resource_group,
-            "profile_name": args.profile_name,
-            "security_policy_name": args.security_policy_name
+            'resource_group': args.resource_group,
+            'profile_name': args.profile_name,
+            'security_policy_name': args.security_policy_name
         })
 
         associations = existing_security_policy.parameters.associations
@@ -640,12 +627,12 @@ class AFDSecurityPolicyUpdate(_AFDSecurityPolicyUpdate):
             for domain in args.domains:
                 associations = [
                     {
-                        "domains": [{"id": domain}],
-                        "patterns_to_match":["/*"]
+                        'domains': [{'id': domain}],
+                        'patterns_to_match':['/*']
                     }
                 ]
 
         args.web_application_firewall = {
-            "waf_policy": args.waf_policy,
-            "associations": associations
+            'waf_policy': args.waf_policy,
+            'associations': associations
         }

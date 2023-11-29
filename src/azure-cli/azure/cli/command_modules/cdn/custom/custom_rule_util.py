@@ -24,7 +24,7 @@ def create_condition(match_variable, operator, match_values=None, selector=None,
                     "type_name": "DeliveryRuleRequestMethodConditionParameters",
                     "match_values": match_values,
                     "negate_condition": negate_condition,
-                    "operator": RequestMethodOperator.EQUAL
+                    "operator": operator if has_value(operator) else RequestMethodOperator.EQUAL, 
                     }
                 }
             }
@@ -97,7 +97,7 @@ def create_condition(match_variable, operator, match_values=None, selector=None,
                     "type_name": "DeliveryRuleRequestSchemeConditionParameters",
                     "match_values": match_values,
                     "negate_condition": negate_condition,
-                    "operator": RequestMethodOperator.EQUAL
+                    "operator": operator if has_value(operator) else RequestMethodOperator.EQUAL
                     }
                 }
             }
@@ -248,7 +248,8 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
                 "parameters": {
                     "type_name": "DeliveryRuleCacheExpirationActionParameters",
                     "cache_behavior": cache_behavior,
-                    "cache_duration": cache_duration
+                    "cache_duration": cache_duration,
+                    "cache_type": "All"
                 }
             }
         }
