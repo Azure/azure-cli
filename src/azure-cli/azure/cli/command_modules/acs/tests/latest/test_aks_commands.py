@@ -9680,13 +9680,11 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.kwargs.update({
             'nodeRG': nodeRG
         })
-        print("The nodeRG is %s " % nodeRG)
 
         vmss_id = self.cmd('az vmss list -g {nodeRG}').get_output_in_json()[0]['id']
         self.kwargs.update({
             'vmss_id': vmss_id
         })
-        print("The vmss_id is %s " % vmss_id)
 
         list_binding_cmd = 'aks trustedaccess rolebinding list ' \
             '--cluster-name={name} ' \
