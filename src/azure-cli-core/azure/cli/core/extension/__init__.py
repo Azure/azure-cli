@@ -111,7 +111,7 @@ class Extension:
         """
         In extension semantic versioning, experimental = preview, experimental deprecated
         """
-        return self._experimental
+        return False
 
     def get_version(self):
         raise NotImplementedError()
