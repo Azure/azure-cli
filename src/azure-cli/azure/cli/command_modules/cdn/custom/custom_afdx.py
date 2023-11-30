@@ -122,13 +122,30 @@ class AFDRouteCreate(_AFDRouteCreate):
         from azure.cli.core.aaz import AAZBoolArg, AAZListArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.enable_caching = AAZBoolArg(options=['--enable-caching'],
-                                                  help='Indicates whether caching is enanbled on that route.')
+                                                  help='Indicates whether caching is enanbled on that route.',
+                                                  )
         args_schema.custom_domains = AAZListArg(options=['--custom-domains'],
-                                                    help='Custom domains referenced by this endpoint.')
+                                                    help='Custom domains referenced by this endpoint.', 
+                                                    nullable=True)
         args_schema.custom_domains.Element = AAZStrArg()
         args_schema.rule_sets = AAZListArg(options=['--rule-sets'],
-                                                    help='Collection of ID or name of rule set referenced by the route.')
+                                                    help='Collection of ID or name of rule set referenced by the route.',
+                                                    nullable=True)
         args_schema.rule_sets.Element = AAZStrArg()
+        args_schema.query_string_caching_behavior = AAZStrArg(options=['--query-string-caching-behaviorn'],
+                                                    help='Defines how Frontdoor caches requests that include query strings. You can ignore any query strings when caching, ignore specific query strings, cache every request with a unique URL, or cache specific query strings',
+                                                    )
+        args_schema.query_parameters = AAZListArg(options=['--query-parameters'],
+                                                    help='Query parameters to include or exclude.',
+                                                    )
+        args_schema.query_parameters.Element = AAZStrArg()
+        args_schema.content_types_to_compress = AAZListArg(options=['--content-types-to-compress'],
+                                                    help='List of content types on which compression applies.',
+                                                    )
+        args_schema.content_types_to_compress.Element = AAZStrArg()
+        args_schema.enable_compression = AAZBoolArg(options=['--enable-compression'],
+                                                    help='Indicates whether content compression is enabled on AzureFrontDoor. Default value is false. If compression is enabled, content will be served as compressed if user requests for a compressed version. Content won\'t be compressed on AzureFrontDoor when requested content is smaller than 1 byte or larger than 1 MB.',
+                                                    )
         return args_schema
 
     def pre_operations(self):
@@ -150,17 +167,23 @@ class AFDRouteCreate(_AFDRouteCreate):
             args.origin_group = f'/subscriptions/{self.ctx.subscription_id}/resourceGroups/{args.resource_group}' \
                        f'/providers/Microsoft.Cdn/profiles/{args.profile_name}/originGroups/{args.origin_group}'
 
+        cache_configuration = {
+            'query_string_caching_behavior': args.query_string_caching_behavior,
+            'query_parameters': None if not has_value(args.query_parameters) or args.query_parameters is None else ",".join(args.query_parameters.to_serialized_data()),
+            'compression_settings': {
+                'is_compression_enabled': args.enable_compression,
+                'content_types_to_compress': args.content_types_to_compress
+                }
+            }
         if not has_value(args.enable_caching) or args.enable_caching.to_serialized_data() is False:
-            args.query_string_caching_behavior = None
-            args.query_parameters = None
-            args.content_types_to_compress = None
-            args.enable_compression = None
-        else:   
-            if not has_value(args.enable_compression) or args.enable_compression.to_serialized_data() is False:
-                if not has_value(args.content_types_to_compress):
-                    args.content_types_to_compress = default_content_types()
-                else :
-                    args.content_types_to_compress = []
+            cache_configuration = None
+        else:
+            if args.cache_configuration is None:
+                cache_configuration['compression_settings']['content_types_to_compress'] = default_content_types()
+            else:
+                cache_configuration['compression_settings']['content_types_to_compress'] = []
+        
+        args.cache_configuration = cache_configuration
 
         rule_sets = []
         if has_value(args.rule_sets):
@@ -190,6 +213,16 @@ class AFDRouteUpdate(_AFDRouteUpdate):
                                                     help='Collection of ID or name of rule set referenced by the route.',
                                                     nullable=True)
         args_schema.rule_sets.Element = AAZStrArg()
+        args_schema.query_string_caching_behavior = AAZStrArg(options=['--query-string-caching-behaviorn'],
+                                                    help='Defines how Frontdoor caches requests that include query strings. You can ignore any query strings when caching, ignore specific query strings, cache every request with a unique URL, or cache specific query strings')
+        args_schema.query_parameters = AAZListArg(options=['--query-parameters'],
+                                                    help='Query parameters to include or exclude.')
+        args_schema.query_parameters.Element = AAZStrArg()
+        args_schema.content_types_to_compress = AAZListArg(options=['--content-types-to-compress'],
+                                                    help='List of content types on which compression applies.')
+        args_schema.content_types_to_compress.Element = AAZStrArg()
+        args_schema.enable_compression = AAZBoolArg(options=['--enable-compression'],
+                                                    help='Indicates whether content compression is enabled on AzureFrontDoor. Default value is false. If compression is enabled, content will be served as compressed if user requests for a compressed version. Content won\'t be compressed on AzureFrontDoor when requested content is smaller than 1 byte or larger than 1 MB.')
         return args_schema
 
     def pre_operations(self):
@@ -218,38 +251,42 @@ class AFDRouteUpdate(_AFDRouteUpdate):
             'route_name': args.route_name
         })
 
+        cache_configuration = {
+            'query_string_caching_behavior': args.query_string_caching_behavior,
+            'query_parameters': None if not has_value(args.query_parameters) or args.query_parameters is None else ",".join(args.query_parameters.to_serialized_data()),
+            'compression_settings': {
+                'is_compression_enabled': args.enable_compression,
+                'content_types_to_compress': args.content_types_to_compress
+                }
+            }
+
         if not has_value(args.enable_caching):
             if  'cacheConfiguration' not in existing or existing['cacheConfiguration'] is None:
-                args.query_string_caching_behavior = None
-                args.query_parameters = None
-                args.content_types_to_compress = None
-                args.enable_compression = None
+                cache_configuration = None
             else:
                 if not has_value(args.query_string_caching_behavior):
                     if 'cacheConfiguration' in existing and 'queryStringCachingBehavior' in existing['cacheConfiguration']:
-                        args.query_string_caching_behavior = existing['cacheConfiguration']['queryStringCachingBehavior']
+                        cache_configuration['query_string_caching_behavior'] = existing['cacheConfiguration']['queryStringCachingBehavior']
                 if not has_value(args.query_parameters):
                     if 'cacheConfiguration' in existing and 'queryParameters' in existing['cacheConfiguration']:
-                        args.query_parameters = existing['cacheConfiguration']['queryParameters']
+                        cache_configuration['query_parameters'] = existing['cacheConfiguration']['queryParameters']
                 if not has_value(args.content_types_to_compress):
                     if 'cacheConfiguration' in existing and 'compressionSettings' in existing['cacheConfiguration'] and 'contentTypesToCompress' in existing['cacheConfiguration']['compressionSettings']:
-                        args.content_types_to_compress = existing['cacheConfiguration']['compressionSettings']['contentTypesToCompress']
+                        cache_configuration['compression_settings']['content_types_to_compress'] = existing['cacheConfiguration']['compressionSettings']['contentTypesToCompress']
                 if not has_value(args.enable_compression):
-                    if 'cacheConfiguration' in existing and 'compressionSettings' in existing['cacheConfiguration'] and 'enableCompression' in existing['cacheConfiguration']['compressionSettings']:
-                        args.enable_compression = existing['cacheConfiguration']['compressionSettings']['enableCompression']
+                    if 'cacheConfiguration' in existing and 'compressionSettings' in existing['cacheConfiguration'] and 'isCompressionEnabled' in existing['cacheConfiguration']['compressionSettings']:
+                        cache_configuration['compression_settings']['is_compression_enabled'] = existing['cacheConfiguration']['compressionSettings']['isCompressionEnabled']
         elif args.enable_caching.to_serialized_data() is False:
-            args.query_string_caching_behavior = None
-            args.query_parameters = None
-            args.content_types_to_compress = None
-            args.enable_compression = None
+            cache_configuration = None
         else:   
             if not has_value(args.enable_compression) and 'cacheConfiguration' in existing and 'compressionSettings' in existing['cacheConfiguration'] and 'contentTypesToCompress' in existing['cacheConfiguration']['compressionSettings']:
-                args.content_types_to_compress = existing['cacheConfiguration']['compressionSettings']['contentTypesToCompress']
+                cache_configuration['compression_settings']['content_types_to_compress'] = existing['cacheConfiguration']['compressionSettings']['contentTypesToCompress']
             elif args.enable_compression.to_serialized_data() is False:
-                args.content_types_to_compress = []
+                cache_configuration['compression_settings']['content_types_to_compress'] = []
             else:
                 if not has_value(args.content_types_to_compress) or args.content_types_to_compress.to_serialized_data() is None:
-                    args.content_types_to_compress = default_content_types()
+                    cache_configuration['compression_settings']['content_types_to_compress'] = default_content_types()
+        args.cache_configuration = cache_configuration
 
         rule_sets = []
         if has_value(args.rule_sets):
