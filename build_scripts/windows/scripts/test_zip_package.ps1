@@ -5,7 +5,7 @@
 Set-PSDebug -Trace 1
 
 Write-Output "Extracting zip to $env:SYSTEM_ARTIFACTSDIRECTORY\zip\"
-Expand-Archive -Path "$env:SYSTEM_ARTIFACTSDIRECTORY\zip\Microsoft Azure CLI.zip" -DestinationPath "$env:SYSTEM_ARTIFACTSDIRECTORY\zip\"
+& "C:\Program Files\7-Zip\7z.exe" x -o"$env:SYSTEM_ARTIFACTSDIRECTORY\zip\" "$env:SYSTEM_ARTIFACTSDIRECTORY\zip\Microsoft Azure CLI.zip"
 
 $az_full_path = "$env:SYSTEM_ARTIFACTSDIRECTORY\zip\Azure CLI\wbin\az.cmd"
 

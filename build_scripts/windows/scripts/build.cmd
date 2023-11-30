@@ -214,7 +214,7 @@ if "%TARGET%"=="msi" (
 ) else (
     echo Building ZIP...
     ren %BUILDING_DIR% "Azure CLI"
-    powershell Compress-Archive -Path '%ZIP_DIR%' -DestinationPath '%OUTPUT_DIR%\Microsoft Azure CLI.zip'
+    "%ProgramFiles%\7-Zip\7z.exe" a -tzip "%OUTPUT_DIR%\Microsoft Azure CLI.zip" "%ZIP_DIR%"
 )
 
 if %errorlevel% neq 0 goto ERROR

@@ -301,8 +301,8 @@ jobs:
     inputs:
       filePath: build_scripts\windows\scripts\test_msi_installation.ps1
 
-- job: TestZipInstallation
-  displayName: Test ZIP Installation
+- job: TestZipPackage
+  displayName: Test ZIP Package
   dependsOn: BuildWindowsZIP
   strategy:
     matrix:
@@ -327,9 +327,9 @@ jobs:
       artifactName: zip-$(Platform)
 
   - task: PowerShell@2
-    displayName: Install and Load CLI
+    displayName: Expand and Load CLI
     inputs:
-      filePath: build_scripts\windows\scripts\test_zip_installation.ps1
+      filePath: build_scripts\windows\scripts\test_zip_package.ps1
 
 - job: BuildDockerImageAlpine
   displayName: Build Docker Image Alpine
