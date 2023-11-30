@@ -29,8 +29,9 @@ from msrest.polling import LROPoller, NoPolling
 
 from .custom import _update_mapper
 from azure.cli.core.aaz._base import has_value
+from azure.cli.core.commands.client_factory import get_subscription_id
 
-from .custom_rule_util import (create_condition, create_action)
+from .custom_rule_util import (create_condition, create_action, create_conditions_from_existing, create_actions_from_existing)
 
 logger = get_logger(__name__)
 
@@ -90,7 +91,7 @@ class AFDOriginCreate(_AFDOriginCreate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.enable_private_link) is False or args.enable_private_link is False:
+        if not has_value(args.enable_private_link) or args.enable_private_link.to_serialized_data() is False:
             args.private_link_location = None
             args.private_link_resource = None
             args.private_link_request_message = None
@@ -108,7 +109,7 @@ class AFDOriginUpdate(_AFDOriginUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.enable_private_link) is False or args.enable_private_link is False:
+        if not has_value(args.enable_private_link) or args.enable_private_link.to_serialized_data() is False:
             args.private_link_location = None
             args.private_link_resource = None
             args.private_link_request_message = None
@@ -149,14 +150,14 @@ class AFDRouteCreate(_AFDRouteCreate):
             args.origin_group = f'/subscriptions/{self.ctx.subscription_id}/resourceGroups/{args.resource_group}' \
                        f'/providers/Microsoft.Cdn/profiles/{args.profile_name}/originGroups/{args.origin_group}'
 
-        if has_value(args.enable_caching) is False or args.enable_caching is False:
+        if not has_value(args.enable_caching) or args.enable_caching.to_serialized_data() is False:
             args.query_string_caching_behavior = None
             args.query_parameters = None
             args.content_types_to_compress = None
             args.enable_compression = None
         else:   
-            if has_value(args.enable_compression) is False or args.enable_compression is False:
-                if has_value(args.content_types_to_compress) is False:
+            if not has_value(args.enable_compression) or args.enable_compression.to_serialized_data() is False:
+                if not has_value(args.content_types_to_compress):
                     args.content_types_to_compress = default_content_types()
                 else :
                     args.content_types_to_compress = []
@@ -217,37 +218,37 @@ class AFDRouteUpdate(_AFDRouteUpdate):
             'route_name': args.route_name
         })
 
-        if has_value(args.enable_caching) is False:
-            if  ('cacheConfiguration' in existing) is False or existing['cacheConfiguration'] is None:
+        if not has_value(args.enable_caching):
+            if  'cacheConfiguration' not in existing or existing['cacheConfiguration'] is None:
                 args.query_string_caching_behavior = None
                 args.query_parameters = None
                 args.content_types_to_compress = None
                 args.enable_compression = None
             else:
-                if has_value(args.query_string_caching_behavior) is False:
+                if not has_value(args.query_string_caching_behavior):
                     if 'cacheConfiguration' in existing and 'queryStringCachingBehavior' in existing['cacheConfiguration']:
                         args.query_string_caching_behavior = existing['cacheConfiguration']['queryStringCachingBehavior']
-                if has_value(args.query_parameters) is False:
+                if not has_value(args.query_parameters):
                     if 'cacheConfiguration' in existing and 'queryParameters' in existing['cacheConfiguration']:
                         args.query_parameters = existing['cacheConfiguration']['queryParameters']
-                if has_value(args.content_types_to_compress) is False:
+                if not has_value(args.content_types_to_compress):
                     if 'cacheConfiguration' in existing and 'compressionSettings' in existing['cacheConfiguration'] and 'contentTypesToCompress' in existing['cacheConfiguration']['compressionSettings']:
                         args.content_types_to_compress = existing['cacheConfiguration']['compressionSettings']['contentTypesToCompress']
-                if has_value(args.enable_compression) is False:
+                if not has_value(args.enable_compression):
                     if 'cacheConfiguration' in existing and 'compressionSettings' in existing['cacheConfiguration'] and 'enableCompression' in existing['cacheConfiguration']['compressionSettings']:
                         args.enable_compression = existing['cacheConfiguration']['compressionSettings']['enableCompression']
-        elif args.enable_caching is False:
+        elif args.enable_caching.to_serialized_data() is False:
             args.query_string_caching_behavior = None
             args.query_parameters = None
             args.content_types_to_compress = None
             args.enable_compression = None
         else:   
-            if has_value(args.enable_compression) is False and 'cacheConfiguration' in existing and 'compressionSettings' in existing['cacheConfiguration'] and 'contentTypesToCompress' in existing['cacheConfiguration']['compressionSettings']:
+            if not has_value(args.enable_compression) and 'cacheConfiguration' in existing and 'compressionSettings' in existing['cacheConfiguration'] and 'contentTypesToCompress' in existing['cacheConfiguration']['compressionSettings']:
                 args.content_types_to_compress = existing['cacheConfiguration']['compressionSettings']['contentTypesToCompress']
-            elif args.enable_compression is False:
+            elif args.enable_compression.to_serialized_data() is False:
                 args.content_types_to_compress = []
             else:
-                if has_value(args.content_types_to_compress) is False or args.content_types_to_compress is None:
+                if not has_value(args.content_types_to_compress) or args.content_types_to_compress.to_serialized_data() is None:
                     args.content_types_to_compress = default_content_types()
 
         rule_sets = []
@@ -309,8 +310,9 @@ class AFDRuleCreate(_AFDRuleCreate):
                                                     help='Name or ID of the OriginGroup that would override the default OriginGroup.')
         args_schema.preserve_unmatched_path = AAZBoolArg(options=['--preserve-unmatched-path'],
                                                     help='If True, the remaining path after the source pattern will be appended to the new destination path.')
-        args_schema.query_parameters = AAZStrArg(options=['--query-parameters'],
+        args_schema.query_parameters = AAZListArg(options=['--query-parameters'],
                                                     help='Query parameters to include or exclude.')
+        args_schema.query_parameters.Element = AAZStrArg()
         args_schema.query_string_caching_behavior = AAZStrArg(options=['--query-string-caching-behavior'],
                                                     help='Defines how CDN caches requests that include query strings. You can ignore any query strings when caching, bypass caching to prevent requests that contain query strings from being cached, or cache every request with a unique URL.')
         args_schema.redirect_protocol = AAZStrArg(options=['--redirect-protocol'],
@@ -338,7 +340,7 @@ class AFDRuleCreate(_AFDRuleCreate):
         # actions
         actions = []
         action = create_action(args.action_name, args.cache_behavior, args.cache_duration, args.header_action,
-                                args.header_name, args.header_value, None, args.query_parameters, args.redirect_type, args.redirect_protocol, args.custom_hostname,
+                                args.header_name, args.header_value, None, None if args.query_parameters is None else ','.join(args.query_parameters), args.redirect_type, args.redirect_protocol, args.custom_hostname,
                                 args.custom_path, args.custom_querystring, args.custom_fragment, args.source_pattern,
                                 args.destination, args.preserve_unmatched_path, 
                                 origin_group=args.origin_group, 
@@ -365,14 +367,18 @@ def add_afd_rule_condition(cmd, resource_group_name, profile_name, rule_set_name
         'rule_name': rule_name
     })
     condition = create_condition(match_variable, operator, match_values, selector, negate_condition, transforms)
+    conditions = create_conditions_from_existing(existing['conditions'])
+    conditions.append(condition)
+    existing_actions = create_actions_from_existing(existing['actions'])
 
-    return _AFDRuleCreate(cli_ctx=cmd.cli_ctx)(command_args={
+    from azure.cli.command_modules.cdn.aaz.latest.afd.rule import Update
+    return Update(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': resource_group_name,
         'profile_name': profile_name,
         'rule_set_name': rule_set_name,
         'rule_name': rule_name,
-        'conditions': None if 'conditions' not in existing else existing['conditions'].append(condition),
-        'actions': existing['actions'],
+        'conditions': conditions,
+        'actions': existing_actions,
         'match_processing_behavior': None if 'matchProcessingBehavior' not in existing else existing['matchProcessingBehavior'],
         'order': None if 'order' not in existing else existing['order']
     })
@@ -393,24 +399,31 @@ def add_afd_rule_action(cmd, resource_group_name, profile_name, rule_set_name,
         'rule_set_name': rule_set_name,
         'rule_name': rule_name
     })
+    actions = create_actions_from_existing(existing['actions'])
+    existing_conditions = create_conditions_from_existing(existing['conditions'])
+
     action = create_action(action_name, cache_behavior, cache_duration, header_action, header_name,
                            header_value, None, None if query_parameters is None else ','.join(query_parameters),
                            redirect_type, redirect_protocol, custom_hostname, custom_path, custom_querystring,
                            custom_fragment, source_pattern, destination, preserve_unmatched_path,
-                           cmd=cmd, resource_group_name=resource_group_name,
+                           resource_group_name=resource_group_name,
                            forwarding_protocol=forwarding_protocol,
                            origin_group=origin_group, profile_name=profile_name,
                            query_string_caching_behavior=query_string_caching_behavior,
                            enable_compression=enable_compression,
-                           enable_caching=enable_caching)
+                           enable_caching=enable_caching,
+                           sub_id=get_subscription_id(cmd.cli_ctx))
+    actions.append(action)
 
-    return _AFDRuleCreate(cli_ctx=cmd.cli_ctx)(command_args={
+    from azure.cli.command_modules.cdn.aaz.latest.afd.rule import Update
+
+    return Update(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': resource_group_name,
         'profile_name': profile_name,
         'rule_set_name': rule_set_name,
         'rule_name': rule_name,
-        'conditions': None if 'conditions' not in existing else existing['conditions'],
-        'actions': existing['actions'].append(action),
+        'conditions': existing_conditions,
+        'actions': actions,
         'match_processing_behavior': None if 'matchProcessingBehavior' not in existing else existing['matchProcessingBehavior'],
         'order': None if 'order' not in existing else existing['order']
     })
@@ -418,70 +431,84 @@ def add_afd_rule_action(cmd, resource_group_name, profile_name, rule_set_name,
 def remove_afd_rule_condition(cmd, resource_group_name, profile_name,
                               rule_set_name, rule_name, index):
 
-    existing_conditions = RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
+    existing = RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': resource_group_name,
         'profile_name': profile_name,
         'rule_set_name': rule_set_name,
         'rule_name': rule_name
     })
-    if len(existing_conditions) > 1 and index < len(existing_conditions):
-        existing_conditions.pop(index)
+    conditions = create_conditions_from_existing(existing['conditions'])
+    existing_actions = create_actions_from_existing(existing['actions'])
+
+    if len(conditions) > 1 and index < len(conditions):
+        conditions.pop(index)
     else:
         logger.warning('Invalid condition index found. This command will be skipped. Please check the rule.')
 
-    return _AFDRuleCreate(cli_ctx=cmd.cli_ctx)(command_args={
+    from azure.cli.command_modules.cdn.aaz.latest.afd.rule import Update
+    return Update(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': resource_group_name,
         'profile_name': profile_name,
         'rule_set_name': rule_set_name,
         'rule_name': rule_name,
-        'conditions': existing_conditions,
+        'conditions': conditions,
+        'actions': existing_actions,
+        'match_processing_behavior': None if 'matchProcessingBehavior' not in existing else existing['matchProcessingBehavior'],
+        'order': None if 'order' not in existing else existing['order']
     })
 
 def remove_afd_rule_action(cmd, resource_group_name, profile_name, rule_set_name, rule_name, index):
 
-    existing_actions = RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
+    existing = RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': resource_group_name,
         'profile_name': profile_name,
         'rule_set_name': rule_set_name,
         'rule_name': rule_name
-    })['actions']
-    if len(existing_actions) > 1 and index < len(existing_actions):
-        existing_actions.pop(index)
+    })
+
+    existing_conditions = create_conditions_from_existing(existing['conditions'])
+    actions = create_actions_from_existing(existing['actions'])   
+    if len(actions) > 1 and index < len(actions):
+        actions.pop(index)
     else:
         logger.warning('Invalid condition index found. This command will be skipped. Please check the rule.')
-
-    return _AFDRuleCreate(cli_ctx=cmd.cli_ctx)(command_args={
+        
+    from azure.cli.command_modules.cdn.aaz.latest.afd.rule import Update
+    return Update(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': resource_group_name,
         'profile_name': profile_name,
         'rule_set_name': rule_set_name,
         'rule_name': rule_name,
-        'actions': existing_actions,
+        'actions' : actions,
+        'conditions': existing_conditions,
+        'match_processing_behavior': None if 'matchProcessingBehavior' not in existing else existing['matchProcessingBehavior'],
+        'order': None if 'order' not in existing else existing['order']
     })
 
 def list_afd_rule_condition(cmd, resource_group_name,
                             profile_name, rule_set_name,
                             rule_name):
-    rule = RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
+    existing = RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': resource_group_name,
         'profile_name': profile_name,
         'rule_set_name': rule_set_name,
         'rule_name': rule_name
     })
 
-    return rule['conditions']
+    return existing['conditions']
 
 
 def list_afd_rule_action(cmd, resource_group_name,
                          profile_name, rule_set_name,
                          rule_name):
-    rule = RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
+    existing = RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': resource_group_name,
         'profile_name': profile_name,
         'rule_set_name': rule_set_name,
         'rule_name': rule_name
     })
     
-    return rule['actions']
+    return existing['actions']
 
 from azure.cli.command_modules.cdn.aaz.latest.afd.secret import Create as _AFDSecretCreate
 class AFDSecretCreate(_AFDSecretCreate):
