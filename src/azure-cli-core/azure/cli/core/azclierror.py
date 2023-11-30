@@ -26,7 +26,7 @@ class AzCLIError(CLIError):
     """ Base class for all the AzureCLI defined error classes.
     DO NOT raise this error class in your codes. """
 
-    def __init__(self, error_msg, command=None, recommendation=None):
+    def __init__(self, error_msg, recommendation=None, command=None):
         # error message
         self.error_msg = error_msg
         self.command = command

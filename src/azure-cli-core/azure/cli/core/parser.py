@@ -149,7 +149,7 @@ class AzCliCommandParser(CLICommandParser):
     def validation_error(self, message):
         cli_ctx = self._get_underlying_cli_ctx()
 
-        az_error = ValidationError(message, self.full_command)
+        az_error = ValidationError(message, command=self.full_command)
         az_error.request_error_assistance(cli_ctx)
         az_error.print_error()
         az_error.send_telemetry()
@@ -163,13 +163,13 @@ class AzCliCommandParser(CLICommandParser):
         recommender.set_help_examples(self.get_examples(self.prog))
         recommendations = recommender.provide_recommendations()
 
-        az_error = ArgumentUsageError(message, self.full_command)
+        az_error = ArgumentUsageError(message, command=self.full_command)
         if 'unrecognized arguments' in message:
-            az_error = UnrecognizedArgumentError(message, self.full_command)
+            az_error = UnrecognizedArgumentError(message, command=self.full_command)
         elif 'arguments are required' in message:
-            az_error = RequiredArgumentMissingError(message, self.full_command)
+            az_error = RequiredArgumentMissingError(message, command=self.full_command)
         elif 'invalid' in message:
-            az_error = InvalidArgumentValueError(message, self.full_command)
+            az_error = InvalidArgumentValueError(message, command=self.full_command)
 
         if '--query' in message:
             from azure.cli.core.util import QUERY_REFERENCE
@@ -311,7 +311,7 @@ class AzCliCommandParser(CLICommandParser):
                 use_dynamic_install = try_install_extension(self, args)
                 # parser has no `command_source`, value is part of command itself
                 error_msg = "'{value}' is misspelled or not recognized by the system.".format(value=value)
-                az_error = CommandNotFoundError(error_msg, self.full_command)
+                az_error = CommandNotFoundError(error_msg, command=self.full_command)
                 candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
                 if candidates:
                     # use the most likely candidate to replace the misspelled command
@@ -322,7 +322,7 @@ class AzCliCommandParser(CLICommandParser):
                 parameter = action.option_strings[0] if action.option_strings else action.dest
                 error_msg = "{prog}: '{value}' is not a valid value for '{param}'. Allowed values: {choices}.".format(
                     prog=self.prog, value=value, param=parameter, choices=', '.join([str(x) for x in action.choices]))
-                az_error = InvalidArgumentValueError(error_msg, self.full_command)
+                az_error = InvalidArgumentValueError(error_msg, command=self.full_command)
                 candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
 
             command_arguments = self._get_failure_recovery_arguments(action)

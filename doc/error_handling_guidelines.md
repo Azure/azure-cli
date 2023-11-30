@@ -74,7 +74,7 @@ When an error is raised, you are highly recommended
    suggestions from the LLM service.
 2. to set `recomendation` to provide some recommendations for users to take action if the error message is not clear enough for users to know what to do next.
 ```Python
-__init__(self, error_msg, command=None, recommendation=None):
+__init__(self, error_msg, recommendation=None, command=None):
 ```
 - `error_msg`: _string_, _required_. A clear message shown to users what the error is.
 - `recommendation`: _string_ or _list_, _optional_. Recommendations telling users what action to take.
