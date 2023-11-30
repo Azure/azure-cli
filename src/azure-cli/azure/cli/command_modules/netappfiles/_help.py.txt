@@ -22,59 +22,59 @@ type: group
 short-summary: Manage Azure NetApp Files (ANF) Account active directories.
 """
 
-helps['netappfiles account ad add'] = """
-type: command
-short-summary: Add an active directory to the account.
-parameters:
-  - name: --account-name --name -a -n
-    short-summary: The name of the ANF account
-  - name: --username
-    short-summary: Username of Active Directory domain administrator
-  - name: --password
-    short-summary: Plain text password of Active Directory domain administrator
-  - name: --domain
-    short-summary: Name of the Active Directory domain
-  - name: --dns
-    short-summary: Comma separated list of DNS server IP addresses for the Active Directory domain
-  - name: --smb-server-name
-    short-summary: NetBIOS name of the SMB server. This name will be registered as a computer account in the AD and used to mount volumes. Must be 10 characters or less
-  - name: --organizational-unit
-    short-summary: The Organizational Unit (OU) within the Windows Active Directory
-  - name: --site
-    short-summary: The Active Directory site the service will limit Domain Controller discovery to
-  - name: --kdc-ip
-    short-summary: kdc server IP addresses for the active directory machine. This optional parameter is used only while creating kerberos volume
-  - name: --ad-name
-    short-summary: Name of the active directory machine. This optional parameter is used only while creating kerberos volume
-  - name: --server-root-ca-cert
-    short-summary: When LDAP over SSL/TLS is enabled, the LDAP client is required to have base64 encoded Active Directory Certificate Service's self-signed root CA certificate, this optional parameter is used only for dual protocol with LDAP user-mapping volumes.
-  - name: --backup-operators
-    short-summary: Users to be added to the Built-in Backup Operator active directory group. A space separated string of unique usernames without domain specifier
-  - name: --aes-encryption
-    short-summary: If enabled, AES encryption will be enabled for SMB communication
-  - name: --ldap-signing
-    short-summary: Specifies whether or not the LDAP traffic needs to be signed
-  - name: --security-operators
-    short-summary: Domain Users in the Active directory to be given SeSecurityPrivilege privilege (Needed for SMB Continuously available shares for SQL). A space separated list of unique usernames without domain specifier
-  - name: --ldap-over-tls
-    short-summary: Specifies whether or not the LDAP traffic needs to be secured via TLS
-  - name: --allow-local-ldap-users
-    short-summary: If enabled, NFS client local users can also (in addition to LDAP users) access the NFS volumes
-  - name: --administrators
-    short-summary: Users to be added to the Built-in Administrators active directory group. A space separated string of unique usernames without domain specifier.
-  - name: --encrypt-dc-conn
-    short-summary: If enabled, Traffic between the SMB server to Domain Controller (DC) will be encrypted
-  - name: --user-dn
-    short-summary: This specifies the user DN, which overrides the base DN for user lookups
-  - name: --group-dn
-    short-summary: This specifies the group DN, which overrides the base DN for group lookups
-  - name: --group-filter
-    short-summary: This specifies the custom LDAP search filter to be used when looking up group membership from LDAP server
-examples:
-  - name: Add an active directory to the account
-    text: >
-        az netappfiles account ad add -g mygroup --name myname --username aduser --password aduser --smb-server-name SMBSERVER --dns 1.2.3.4 --domain westcentralus
-"""
+# helps['netappfiles account ad add'] = """
+# type: command
+# short-summary: Add an active directory to the account.
+# parameters:
+#   - name: --account-name --name -a -n
+#     short-summary: The name of the ANF account
+#   - name: --username
+#     short-summary: Username of Active Directory domain administrator
+#   - name: --password
+#     short-summary: Plain text password of Active Directory domain administrator
+#   - name: --domain
+#     short-summary: Name of the Active Directory domain
+#   - name: --dns
+#     short-summary: Comma separated list of DNS server IP addresses for the Active Directory domain
+#   - name: --smb-server-name
+#     short-summary: NetBIOS name of the SMB server. This name will be registered as a computer account in the AD and used to mount volumes. Must be 10 characters or less
+#   - name: --organizational-unit
+#     short-summary: The Organizational Unit (OU) within the Windows Active Directory
+#   - name: --site
+#     short-summary: The Active Directory site the service will limit Domain Controller discovery to
+#   - name: --kdc-ip
+#     short-summary: kdc server IP addresses for the active directory machine. This optional parameter is used only while creating kerberos volume
+#   - name: --ad-name
+#     short-summary: Name of the active directory machine. This optional parameter is used only while creating kerberos volume
+#   - name: --server-root-ca-certificate
+#     short-summary: When LDAP over SSL/TLS is enabled, the LDAP client is required to have base64 encoded Active Directory Certificate Service's self-signed root CA certificate, this optional parameter is used only for dual protocol with LDAP user-mapping volumes.
+#   - name: --backup-operators
+#     short-summary: Users to be added to the Built-in Backup Operator active directory group. A space separated string of unique usernames without domain specifier
+#   - name: --aes-encryption
+#     short-summary: If enabled, AES encryption will be enabled for SMB communication
+#   - name: --ldap-signing
+#     short-summary: Specifies whether or not the LDAP traffic needs to be signed
+#   - name: --security-operators
+#     short-summary: Domain Users in the Active directory to be given SeSecurityPrivilege privilege (Needed for SMB Continuously available shares for SQL). A space separated list of unique usernames without domain specifier
+#   - name: --ldap-over-tls
+#     short-summary: Specifies whether or not the LDAP traffic needs to be secured via TLS
+#   - name: --allow-local-nfs-users-with-ldap
+#     short-summary: If enabled, NFS client local users can also (in addition to LDAP users) access the NFS volumes
+#   - name: --administrators
+#     short-summary: Users to be added to the Built-in Administrators active directory group. A space separated string of unique usernames without domain specifier.
+#   - name: --encrypt-dc-connections
+#     short-summary: If enabled, Traffic between the SMB server to Domain Controller (DC) will be encrypted
+#   - name: --user-dn
+#     short-summary: This specifies the user DN, which overrides the base DN for user lookups
+#   - name: --group-dn
+#     short-summary: This specifies the group DN, which overrides the base DN for group lookups
+#   - name: --group-filter
+#     short-summary: This specifies the custom LDAP search filter to be used when looking up group membership from LDAP server
+# examples:
+#   - name: Add an active directory to the account
+#     text: >
+#         az netappfiles account ad add -g mygroup -a myname --username aduser --password aduser --smb-server-name SMBSERVER --dns 1.2.3.4 --domain westcentralus
+# """
 
 helps['netappfiles account ad update'] = """
 type: command
@@ -141,7 +141,7 @@ parameters:
 examples:
   - name: Add an active directory to the account
     text: >
-        az netappfiles account ad list -g mygroup --name myname
+        az netappfiles account ad list -g mygroup -a myname
 """
 
 helps['netappfiles account ad remove'] = """
@@ -150,12 +150,12 @@ short-summary: Remove an active directory from the account.
 parameters:
   - name: --account-name --name -a -n
     short-summary: The name of the ANF account
-  - name: --active-directory
+  - name: --active-directory-id
     short-summary: The id of the active directory
 examples:
   - name: Remove an active directory from the account
     text: >
-        az netappfiles account ad remove -g mygroup --name myname --active-directory 13641da9-c0e9-4b97-84fc-4f8014a93848
+        az netappfiles account ad remove -g mygroup --name myname --active-directory-id 13641da9-c0e9-4b97-84fc-4f8014a93848
 """
 
 helps['netappfiles account ad wait'] = """
@@ -178,7 +178,7 @@ examples:
 
   - name: Create an ANF account enabling CMK encryption
     text: >
-        az netappfiles account create -g mygroup --name myname -l location --key-source Microsoft.KeyVault --key-name cmkKey --key-vault-uri https://mykvuri.vault.azure.net/ --keyvault-resource-id myKeyVaultResourceId --identity-type UserAssigned --user-assigned-identity myIdenityResourceId
+        az netappfiles account create -g mygroup --name myname -l location --key-source Microsoft.KeyVault --key-name cmkKey --key-vault-uri https://mykvuri.vault.azure.net/ --keyvault-resource-id myKeyVaultResourceId --identity-type UserAssigned --user-assigned-identity '/subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourcegroups/myrg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/anf-mi'
 """
 
 helps['netappfiles account delete'] = """
@@ -233,56 +233,6 @@ examples:
 helps['netappfiles account wait'] = """
 type: command
 short-summary: Wait for a account operation.
-"""
-
-helps['netappfiles account backup'] = """
-type: group
-short-summary: Manage Azure NetApp Files (ANF) Account Backup Resources.
-"""
-
-helps['netappfiles account backup list'] = """
-type: command
-short-summary: Get list of all Azure NetApp Files (ANF) Account Backups.
-parameters:
-  - name: --account-name -a
-    short-summary: The name of the ANF account
-examples:
-  - name: Get a list of all ANF account backup
-    text: >
-        az netappfiles account backup list -g mygroup --account-name myaccountname
-"""
-
-helps['netappfiles account backup show'] = """
-type: command
-short-summary: Get Backup for a Netapp Files (ANF) Account.
-parameters:
-  - name: --account-name -a
-    short-summary: The name of the ANF account
-  - name: --backup-name
-    short-summary: The name of the backup
-examples:
-  - name: Get a list of all ANF account backup
-    text: >
-        az netappfiles account backup show -g mygroup --account-name myaccountname --backup-name mybackupname
-"""
-
-helps['netappfiles account backup delete'] = """
-type: command
-short-summary: Delete Backup for a Netapp Files (ANF) Account.
-parameters:
-  - name: --account-name -a
-    short-summary: The name of the ANF account
-  - name: --backup-name
-    short-summary: The name of the backup
-examples:
-  - name: Get a list of all ANF account backup
-    text: >
-        az netappfiles account backup delete -g mygroup --account-name myaccountname --backup-name mybackupname
-"""
-
-helps['netappfiles account backup wait'] = """
-type: command
-short-summary: Wait for a account backup operation.
 """
 
 
@@ -376,7 +326,7 @@ parameters:
 examples:
   - name: Update specific values for an ANF backup policy
     text: >
-        az netappfiles account backup-policy update -g mygroup --account-name myaccountname --backup-policy-name mybackuppolicyname -l westus2 --daily-backups 1 --enabled false
+        az netappfiles account backup-policy update -g mygroup --account-name myaccountname --backup-policy-name mybackuppolicyname --daily-backups 1 --enabled false
 """
 
 helps['netappfiles account backup-policy wait'] = """
@@ -722,7 +672,7 @@ examples:
 
   - name: Create an ANF volume with CMK Encryption
     text: >
-        az netappfiles volume create -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname -l westus2 --service-level premium --usage-threshold 100 --file-path "unique-file-path" --vnet myvnet --subnet mysubnet --protocol-types NFSv3 --network-features Standard --protocol-types NFSv4.1 --rule-index 1 --allowed-clients '10.7.0.0/24' --kerberos-enabled false --policy-enforced true --encryption-key-source  Microsoft.KeyVault --kv-private-endpoint-id myPrivateEndpointId
+        az netappfiles volume create -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname -l westus2 --service-level premium --usage-threshold 100 --file-path "unique-file-path" --vnet myvnet --subnet mysubnet --protocol-types NFSv3 --network-features Standard --protocol-types NFSv4.1 --rule-index 1 --allowed-clients '10.7.0.0/24' --kerberos-enabled false --encryption-key-source  Microsoft.KeyVault --kv-private-endpoint-id myPrivateEndpointId
 """
 
 helps['netappfiles volume delete'] = """
@@ -880,11 +830,6 @@ examples:
   - name: List all replications for a specified volume
     text: >
         az netappfiles volume replication list -g mygroup --account-name myaccname --pool-name mypoolname --name mydestinationvolname
-"""
-
-helps['netappfiles volume replication wait'] = """
-type: command
-short-summary: Wait for a volume replication operation.
 """
 
 
@@ -1119,147 +1064,6 @@ examples:
         az netappfiles volume break-file-locks -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
 """
 
-helps['netappfiles volume backup'] = """
-type: group
-short-summary: Manage Azure NetApp Files (ANF) Volume Backup Resources.
-"""
-
-helps['netappfiles volume backup create'] = """
-type: command
-short-summary: Create specified ANF volume backup.
-parameters:
-  - name: --account-name -a
-    short-summary: The name of the ANF account
-  - name: --pool-name -p
-    short-summary: The name of the ANF pool
-  - name: --name --volume-name -n -v
-    short-summary: The name of the ANF volume
-  - name: --backup-name -b
-    short-summary: The name of the ANF backup
-  - name: --use-existing-snapshot
-    short-summary: Manual backup an already existing snapshot. This will always be false for scheduled backups and true/false for manual backups
-examples:
-  - name: Returns the created ANF backup
-    text: >
-        az netappfiles volume backup create -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname -l westus2 --backup-name mybackupname
-"""
-
-helps['netappfiles volume backup list'] = """
-type: command
-short-summary: List the ANF Backups for the specified volume.
-parameters:
-  - name: --account-name -a
-    short-summary: The name of the ANF account
-  - name: --pool-name -p
-    short-summary: The name of the ANF pool
-  - name: --name --volume-name -n -v
-    short-summary: The name of the ANF volume
-examples:
-  - name: List the ANF backups of the volume
-    text: >
-        az netappfiles volume backup list -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
-"""
-
-helps['netappfiles volume backup show'] = """
-type: command
-short-summary: Get the specified ANF Backup.
-parameters:
-  - name: --account-name -a
-    short-summary: The name of the ANF account
-  - name: --pool-name -p
-    short-summary: The name of the ANF pool
-  - name: --name --volume-name -n -v
-    short-summary: The name of the ANF pool
-  - name: --backup-name -b
-    short-summary: The name of the ANF backup
-examples:
-  - name: Returns the properties of the given ANF backup
-    text: >
-        az netappfiles volume backup show -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --backup-name mybackupname
-"""
-
-helps['netappfiles volume backup status'] = """
-type: command
-short-summary: Get backup status of the specified ANF Volume.
-parameters:
-  - name: --account-name -a
-    short-summary: The name of the ANF account
-  - name: --pool-name -p
-    short-summary: The name of the ANF pool
-  - name: --name --volume-name -n -v
-    short-summary: The name of the ANF volume
-examples:
-  - name: Returns the backup status of the given ANF Volume
-    text: >
-        az netappfiles volume backup status -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
-"""
-
-helps['netappfiles volume backup restore-status'] = """
-type: command
-short-summary: Get backup restore status of the specified ANF Volume.
-parameters:
-  - name: --account-name -a
-    short-summary: The name of the ANF account
-  - name: --pool-name -p
-    short-summary: The name of the ANF pool
-  - name: --name --volume-name -n -v
-    short-summary: The name of the ANF pool
-examples:
-  - name: Returns the backup restore status of the given ANF Volume
-    text: >
-        az netappfiles volume backup restore-status -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
-"""
-
-helps['netappfiles volume backup restore-files'] = """
-type: command
-short-summary: Restore the specified files from the specified backup to the active filesystem.
-parameters:
-  - name: --account-name -a
-    short-summary: The name of the ANF account
-  - name: --pool-name -p
-    short-summary: The name of the ANF pool
-  - name: --name --volume-name -n -v
-    short-summary: The name of the ANF volume
-  - name: --backup-name -b
-    short-summary: The name of the ANF backup
-  - name: --file-paths
-    short-summary: Required. A space separated string of filed to be restored
-  - name: --destination-path
-    short-summary: Destination folder where the files will be restored
-  - name: --destination-volume-id
-    short-summary: Resource Id of the destination volume on which the files need to be restored
-examples:
-  - name: Restore files from backup
-    text: >
-        az netappfiles volume backup restore-files -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname --backup-name mybackupname --file-paths myfilepaths --destination-path mydestinationpath --destination-volume-id volumeresourceid
-"""
-
-helps['netappfiles volume backup update'] = """
-type: command
-short-summary: Update the specified ANF backup with the values provided.
-parameters:
-  - name: --account-name -a
-    short-summary: The name of the ANF account
-  - name: --pool-name -p
-    short-summary: The name of the ANF pool
-  - name: --name --volume-name -n -v
-    short-summary: The name of the ANF volume
-  - name: --backup-name -b
-    short-summary: The name of the ANF backup
-  - name: --label
-    short-summary: Label for backup.
-  - name: --use-existing-snapshot
-    short-summary: Manual backup an already existing snapshot. This will always be false for scheduled backups and true or false for manual backups.
-examples:
-  - name: Update an ANF backup
-    text: >
-        az netappfiles volume backup update -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --backup-name mybackupname
-"""
-
-helps['netappfiles volume backup wait'] = """
-type: command
-short-summary: Wait for a volume backup operation.
-"""
 
 helps['netappfiles volume quota-rule'] = """
 type: group
@@ -1716,21 +1520,4 @@ examples:
 helps['netappfiles volume-group wait'] = """
 type: command
 short-summary: Wait for a volume group to be created.
-"""
-
-helps['netappfiles resource'] = """
-type: group
-short-summary: Provides operations for Azure NetApp Files (ANF) Account Resources.
-"""
-
-helps['netappfiles resource query-region-info'] = """
-type: command
-short-summary: Provides storage to network proximity and logical zone mapping information.
-parameters:
-  - name: --location -l
-    short-summary: The location
-examples:
-  - name: Describes region specific information.
-    text: >
-        az netappfiles resource query-region-info -l location
 """
