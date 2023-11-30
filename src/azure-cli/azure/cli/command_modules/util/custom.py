@@ -140,6 +140,13 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
                            "or run 'pip install --upgrade azure-cli' in this container")
         elif installer == 'MSI':
             _upgrade_on_windows()
+        elif installer == 'ZIP':
+            if platform.architecture()[0] == '32bit':
+                zip_url = 'https://aka.ms/installazurecliwindowszip'
+            else:
+                zip_url = 'https://aka.ms/installazurecliwindowszipx64'
+            logger.warning(f"Please download the latest ZIP from {zip_url}, uncompress it and replace the existing"
+                           "folder")
         else:
             logger.warning(UPGRADE_MSG)
     if exit_code:
