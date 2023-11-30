@@ -145,8 +145,8 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
                 zip_url = 'https://aka.ms/installazurecliwindowszip'
             else:
                 zip_url = 'https://aka.ms/installazurecliwindowszipx64'
-            logger.warning(f"Please download the latest ZIP from {zip_url}, uncompress it and replace the existing"
-                           "folder")
+            logger.warning("Please download the latest ZIP from %s, uncompress it and replace the existing"
+                           "folder", zip_url)
         else:
             logger.warning(UPGRADE_MSG)
     if exit_code:

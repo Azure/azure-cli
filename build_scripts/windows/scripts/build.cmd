@@ -188,6 +188,7 @@ for /f %%f in ('dir /b /s *.pyc') do (
         REM Delete __init__.pyc
         del %%~f
     ) ELSE (
+        REM pip source code is required when install packages from source code
         echo --SKIP !PARENT_DIR! under pip
     )
 )
@@ -213,7 +214,8 @@ if "%TARGET%"=="msi" (
     msbuild /t:rebuild /p:Configuration=Release /p:Platform=%ARCH% %REPO_ROOT%\build_scripts\windows\azure-cli.wixproj
 ) else (
     echo Building ZIP...
-    ren %BUILDING_DIR% "Azure CLI"
+    REM Rename zip root folder to "Azure CLI"
+    ren %BUILDING_DIR% "%ZIP_DIR%"
     "%ProgramFiles%\7-Zip\7z.exe" a -tzip "%OUTPUT_DIR%\Microsoft Azure CLI.zip" "%ZIP_DIR%"
 )
 
