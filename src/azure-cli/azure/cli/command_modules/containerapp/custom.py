@@ -392,7 +392,7 @@ def update_containerapp_logic(cmd,
                         e["value"] = ""
 
     update_map = {}
-    update_map['scale'] = min_replicas or max_replicas or scale_rule_name
+    update_map['scale'] = min_replicas is not None or max_replicas is not None or scale_rule_name is not None
     update_map['container'] = image or container_name or set_env_vars is not None or remove_env_vars is not None or replace_env_vars is not None or remove_all_env_vars or cpu or memory or startup_command is not None or args is not None or secret_volume_mount is not None
     update_map['ingress'] = ingress or target_port
     update_map['registry'] = registry_server or registry_user or registry_pass
