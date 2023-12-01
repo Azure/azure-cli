@@ -5,6 +5,7 @@
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 import time
+import unittest
 LOCATION = "eastus"
 VNET_LOCATION = "eastus"
 
@@ -58,7 +59,7 @@ class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
                         (account_name, pool_name, volume_name, LOCATION, backup_name)).get_output_in_json()
 
     def delete_backup(self, account_name, pool_name, volume_name):
-        
+
         # Delete
         self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --backup-enabled %s " %
                  (account_name, pool_name, volume_name, False))
