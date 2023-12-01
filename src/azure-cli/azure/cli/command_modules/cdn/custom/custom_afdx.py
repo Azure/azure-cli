@@ -83,37 +83,86 @@ from azure.cli.command_modules.cdn.aaz.latest.afd.origin import Create as _AFDOr
 class AFDOriginCreate(_AFDOriginCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZBoolArg
+        from azure.cli.core.aaz import AAZBoolArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.enable_private_link = AAZBoolArg(options=['--enable-private-link'],
                                                   help='Indicates whether private link is enanbled on that origin.')
+        args_schema.private_link_location = AAZStrArg(options=['--private-link-location'],
+                                                  help='The location of origin that will be connected to using the private link.')
+        args_schema.private_link_resource = AAZStrArg(options=['--private-link-resource'],
+                                                  help='The resource ID of the origin that will be connected to using the private link.')
+        args_schema.private_link_request_message = AAZStrArg(options=['--private-link-request-message'],
+                                                  help='The message that is shown to the approver of the private link request.')
+        args_schema.private_link_sub_resource_type = AAZStrArg(options=['--private-link-sub-resource-type'],
+                                                    help='The sub-resource type of the origin that will be connected to using the private link.You can use "az network private-link-resource list" to obtain the supported sub-resource types.')
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        if not has_value(args.enable_private_link) or args.enable_private_link.to_serialized_data() is False:
-            args.private_link_location = None
-            args.private_link_resource = None
-            args.private_link_request_message = None
-            args.private_link_sub_resource_type = None
+        shared_private_link_resource = None
+        if has_value(args.enable_private_link) and args.enable_private_link.to_serialized_data() is True:
+            shared_private_link_resource = {
+                'private_link_location':args.private_link_location,
+                'private_link': {'id': args.private_link_resource},
+                'request_message':args.private_link_request_message,
+                'group_id':args.private_link_sub_resource_type
+            }
+        args.shared_private_link_resource = shared_private_link_resource
 
 from azure.cli.command_modules.cdn.aaz.latest.afd.origin import Update as _AFDOriginUpdate
 class AFDOriginUpdate(_AFDOriginUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZBoolArg
+        from azure.cli.core.aaz import AAZBoolArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.enable_private_link = AAZBoolArg(options=['--enable-private-link'],
                                                   help='Indicates whether private link is enanbled on that origin.')
+        args_schema.private_link_location = AAZStrArg(options=['--private-link-location'],
+                                                  help='The location of origin that will be connected to using the private link.')
+        args_schema.private_link_resource = AAZStrArg(options=['--private-link-resource'],
+                                                  help='The resource ID of the origin that will be connected to using the private link.')
+        args_schema.private_link_request_message = AAZStrArg(options=['--private-link-request-message'],
+                                                  help='The message that is shown to the approver of the private link request.')
+        args_schema.private_link_sub_resource_type = AAZStrArg(options=['--private-link-sub-resource-type'],
+                                                    help='The sub-resource type of the origin that will be connected to using the private link.You can use "az network private-link-resource list" to obtain the supported sub-resource types.')
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        if not has_value(args.enable_private_link) or args.enable_private_link.to_serialized_data() is False:
-            args.private_link_location = None
-            args.private_link_resource = None
-            args.private_link_request_message = None
-            args.private_link_sub_resource_type = None
+        from azure.cli.command_modules.cdn.aaz.latest.afd.origin import Show
+        existing = Show(cli_ctx=self.cli_ctx)(command_args={
+            'resource_group': args.resource_group,
+            'profile_name': args.profile_name,
+            'origin_group_name': args.origin_group_name,
+            'origin_name': args.origin_name
+        })
+
+        shared_private_link_resource = None
+        if (not has_value(args.enable_private_link) and 'sharedPrivateLinkResource' not in existing) or (has_value(args.enable_private_link) and args.enable_private_link.to_serialized_data() is False):
+            shared_private_link_resource = None
+        elif (has_value(args.private_link_location) or 
+              has_value(args.private_link_resource) or 
+              has_value(args.private_link_request_message) or 
+              has_value(args.private_link_sub_resource_type)) or args.enable_private_link.to_serialized_data() is True or 'sharedPrivateLinkResource' in existing:
+            existing_private_link_location = None if 'sharedPrivateLinkResource' not in existing or 'privateLinkLocation' not in existing['sharedPrivateLinkResource'] else existing['sharedPrivateLinkResource']['privateLinkLocation']
+            existing_private_link_resource = None if 'sharedPrivateLinkResource' not in existing or 'privateLink' not in existing['sharedPrivateLinkResource'] else existing['sharedPrivateLinkResource']['privateLink']['id']
+            existing_private_link_request_message = None if 'sharedPrivateLinkResource' not in existing or 'requestMessage' not in existing['sharedPrivateLinkResource'] else existing['sharedPrivateLinkResource']['requestMessage']
+            existing_private_link_sub_resource_type = None if 'sharedPrivateLinkResource' not in existing or 'groupId' not in existing['sharedPrivateLinkResource'] else existing['sharedPrivateLinkResource']['groupId']
+            shared_private_link_resource = {
+                'private_link_location':args.private_link_location if has_value(args.private_link_location) else existing_private_link_location,
+                'private_link': {'id': args.private_link_resource if has_value(args.private_link_resource) else existing_private_link_resource},
+                'request_message':args.private_link_request_message if has_value(args.private_link_request_message) else existing_private_link_request_message,
+                'group_id':args.private_link_sub_resource_type if has_value(args.private_link_sub_resource_type) else existing_private_link_sub_resource_type
+            }
+        args.shared_private_link_resource = shared_private_link_resource
+        args.host_name = args.host_name if args.host_name is not None else existing['hostName']
+        args.http_port = args.http_port if args.http_port is not None else existing['httpPort']
+        args.https_port = args.https_port if args.https_port is not None else existing['httpsPort']
+        args.origin_host_header = args.origin_host_header if args.origin_host_header is not None else existing['originHostHeader']
+        args.priority = args.priority if args.priority is not None else existing['priority']
+        args.weight = args.weight if args.weight is not None else existing['weight']
+        args.enabled_state = args.enabled_state if args.enabled_state is not None else existing['enabledState']
+        args.enforce_certificate_name_check = args.enforce_certificate_name_check if args.enforce_certificate_name_check is not None else existing['enforceCertificateNameCheck']
 
 from azure.cli.command_modules.cdn.aaz.latest.afd.route import Create as _AFDRouteCreate
 class AFDRouteCreate(_AFDRouteCreate):

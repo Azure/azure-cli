@@ -61,15 +61,6 @@ class Create(AAZCommand):
             required=True,
         )
 
-        # define Arg Group "PrivateLinkResource"
-
-        _args_schema = cls._args_schema
-        _args_schema.private_link_resource = AAZStrArg(
-            options=["--private-link-resource"],
-            arg_group="PrivateLinkResource",
-            help="The resource ID of the origin that will be connected to using the private link.",
-        )
-
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
@@ -130,6 +121,11 @@ class Create(AAZCommand):
                 minimum=1,
             ),
         )
+        _args_schema.shared_private_link_resource = AAZObjectArg(
+            options=["--shared-private-link-resource"],
+            arg_group="Properties",
+            help="The properties of the private link resource for private origin.",
+        )
         _args_schema.weight = AAZIntArg(
             options=["--weight"],
             arg_group="Properties",
@@ -140,23 +136,28 @@ class Create(AAZCommand):
             ),
         )
 
-        # define Arg Group "SharedPrivateLinkResource"
-
-        _args_schema = cls._args_schema
-        _args_schema.private_link_sub_resource_type = AAZStrArg(
-            options=["--private-link-sub-resource-type"],
-            arg_group="SharedPrivateLinkResource",
+        shared_private_link_resource = cls._args_schema.shared_private_link_resource
+        shared_private_link_resource.group_id = AAZStrArg(
+            options=["group-id"],
             help="The group id from the provider of resource the shared private link resource is for.",
         )
-        _args_schema.private_link_location = AAZStrArg(
-            options=["--private-link-location"],
-            arg_group="SharedPrivateLinkResource",
+        shared_private_link_resource.private_link = AAZObjectArg(
+            options=["private-link"],
+            help="The resource id of the resource the shared private link resource is for.",
+        )
+        cls._build_args_resource_reference_create(shared_private_link_resource.private_link)
+        shared_private_link_resource.private_link_location = AAZStrArg(
+            options=["private-link-location"],
             help="The location of the shared private link resource",
         )
-        _args_schema.private_link_request_message = AAZStrArg(
-            options=["--private-link-request-message"],
-            arg_group="SharedPrivateLinkResource",
+        shared_private_link_resource.request_message = AAZStrArg(
+            options=["request-message"],
             help="The request message for requesting approval of the shared private link resource.",
+        )
+        shared_private_link_resource.status = AAZStrArg(
+            options=["status"],
+            help="Status of the shared private link resource. Can be Pending, Approved, Rejected, Disconnected, or Timeout.",
+            enum={"Approved": "Approved", "Disconnected": "Disconnected", "Pending": "Pending", "Rejected": "Rejected", "Timeout": "Timeout"},
         )
         return cls._args_schema
 
@@ -304,19 +305,16 @@ class Create(AAZCommand):
                 properties.set_prop("httpsPort", AAZIntType, ".https_port")
                 properties.set_prop("originHostHeader", AAZStrType, ".origin_host_header")
                 properties.set_prop("priority", AAZIntType, ".priority")
-                properties.set_prop("sharedPrivateLinkResource", AAZObjectType)
+                properties.set_prop("sharedPrivateLinkResource", AAZObjectType, ".shared_private_link_resource")
                 properties.set_prop("weight", AAZIntType, ".weight")
 
             shared_private_link_resource = _builder.get(".properties.sharedPrivateLinkResource")
             if shared_private_link_resource is not None:
-                shared_private_link_resource.set_prop("groupId", AAZStrType, ".private_link_sub_resource_type")
-                shared_private_link_resource.set_prop("privateLink", AAZObjectType)
+                shared_private_link_resource.set_prop("groupId", AAZStrType, ".group_id")
+                _CreateHelper._build_schema_resource_reference_create(shared_private_link_resource.set_prop("privateLink", AAZObjectType, ".private_link"))
                 shared_private_link_resource.set_prop("privateLinkLocation", AAZStrType, ".private_link_location")
-                shared_private_link_resource.set_prop("requestMessage", AAZStrType, ".private_link_request_message")
-
-            private_link = _builder.get(".properties.sharedPrivateLinkResource.privateLink")
-            if private_link is not None:
-                private_link.set_prop("id", AAZStrType, ".private_link_resource")
+                shared_private_link_resource.set_prop("requestMessage", AAZStrType, ".request_message")
+                shared_private_link_resource.set_prop("status", AAZStrType, ".status")
 
             return self.serialize_content(_content_value)
 
