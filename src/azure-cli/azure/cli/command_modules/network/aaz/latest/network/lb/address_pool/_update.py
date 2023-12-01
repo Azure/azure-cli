@@ -100,6 +100,7 @@ class Update(AAZCommand):
             options=["--sync-mode"],
             arg_group="Properties",
             help="Backend address synchronous mode for the backend pool",
+            is_preview=True,
             nullable=True,
             enum={"Automatic": "Automatic", "Manual": "Manual"},
         )

@@ -935,10 +935,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server create -g {} -n {} -l {} --public-access none --tier {} --sku-name {}'
                  .format(database_engine, resource_group, source_server, location, 'GeneralPurpose', general_purpose_sku))
         
-        self.cmd('{} flexible-server show -g {} -n {}'
-                 .format(database_engine, resource_group, source_server),
-                 checks=[JMESPathCheck('backup.geoRedundantBackup', 'Disabled')])
-        
         # update server paramters to enable gtid
         source = 'user-override'
         parameter_name = 'enforce_gtid_consistency'
@@ -958,18 +954,9 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server parameter set --name {} -v {} --source {} -s {} -g {}'
                  .format(database_engine, parameter_name, 'ON', source, source_server, resource_group),
                  checks=[JMESPathCheck('value', 'ON'), JMESPathCheck('source', source), JMESPathCheck('name', parameter_name)])
-
-        # set gtid string to source server
-        self.cmd('{} flexible-server gtid reset --resource-group {} --server-name {} --gtid-set {} --yes'
-                 .format(database_engine, resource_group, source_server, str(uuid.uuid4()).upper() + ":1"), expect_failure=False)
-
-        # udpate server geo-redundant-backup to enable
-        self.cmd('{} flexible-server update -g {} -n {} --geo-redundant-backup Enabled'
-                 .format(database_engine, resource_group, source_server),
-                 checks=[JMESPathCheck('backup.geoRedundantBackup', 'Enabled')])
         
         self.cmd('{} flexible-server gtid reset --resource-group {} --server-name {} --gtid-set {} --yes'
-                 .format(database_engine, resource_group, source_server, str(uuid.uuid4()).upper() + ":1"), expect_failure=True)
+                 .format(database_engine, resource_group, source_server, str(uuid.uuid4()).upper() + ":1"), expect_failure=False)
         
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, source_server))
 

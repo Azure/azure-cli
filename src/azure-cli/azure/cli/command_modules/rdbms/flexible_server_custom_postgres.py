@@ -14,7 +14,7 @@ from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.local_context import ALL
 from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
-from azure.core.exceptions import ResourceNotFoundError
+from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
 from azure.cli.core.azclierror import BadRequestError, FileOperationError, MutuallyExclusiveArgumentError, RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError
 from azure.mgmt.rdbms import postgresql_flexibleservers
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, \
@@ -51,7 +51,7 @@ def flexible_server_create(cmd, client,
                            private_dns_zone_arguments=None, public_access=None,
                            high_availability=None, zone=None, standby_availability_zone=None,
                            geo_redundant_backup=None, byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
-                           active_directory_auth=None, password_auth=None, auto_grow=None, yes=False):
+                           active_directory_auth=None, password_auth=None, auto_grow=None, performance_tier=None, yes=False):
 
     # Generate missing parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
@@ -83,7 +83,8 @@ def flexible_server_create(cmd, client,
                            byok_identity=byok_identity,
                            byok_key=byok_key,
                            backup_byok_identity=backup_byok_identity,
-                           backup_byok_key=backup_byok_key)
+                           backup_byok_key=backup_byok_key,
+                           performance_tier=performance_tier)
 
     server_result = firewall_id = None
 
@@ -100,7 +101,7 @@ def flexible_server_create(cmd, client,
                                                                            subnet_address_prefix=subnet_address_prefix,
                                                                            yes=yes)
 
-    storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb, auto_grow=auto_grow)
+    storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb, auto_grow=auto_grow, tier=performance_tier)
 
     backup = postgresql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
                                                       geo_redundant_backup=geo_redundant_backup)
@@ -196,7 +197,9 @@ def flexible_server_restore(cmd, client,
 
     try:
         id_parts = parse_resource_id(source_server_id)
-        source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
+        source_subscription_id = id_parts['subscription']
+        postgres_source_client = get_postgresql_flexible_management_client(cmd.cli_ctx, source_subscription_id)
+        source_server_object = postgres_source_client.servers.get(id_parts['resource_group'], id_parts['name'])
 
         location = ''.join(source_server_object.location.lower().split())
 
@@ -262,7 +265,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        active_directory_auth=None, password_auth=None,
                                        private_dns_zone_arguments=None,
                                        tags=None,
-                                       auto_grow=None,
+                                       auto_grow=None, performance_tier=None,
                                        yes=False):
 
     # validator
@@ -287,6 +290,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                            byok_key=byok_key,
                            backup_byok_identity=backup_byok_identity,
                            backup_byok_key=backup_byok_key,
+                           performance_tier=performance_tier,
                            instance=instance)
 
     server_module_path = instance.__module__
@@ -318,6 +322,16 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     if auto_grow:
         instance.storage.auto_grow = auto_grow
+
+    if performance_tier:
+        instance.storage.tier = performance_tier
+
+    if instance.storage.type is not None:
+        if instance.storage.type == "":
+            instance.storage.type = None
+            instance.storage.iops = None
+            if performance_tier is None:
+                instance.storage.tier = None
 
     if backup_retention:
         instance.backup.backup_retention_days = backup_retention
@@ -370,6 +384,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
         params.high_availability = high_availability_param
 
+    print(params)
     return params
 
 
@@ -451,7 +466,9 @@ def flexible_list_skus(cmd, client, location):
 def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, zone=None,
                             location=None, vnet=None, vnet_address_prefix=None, subnet=None,
                             subnet_address_prefix=None, private_dns_zone_arguments=None, no_wait=False,
-                            byok_identity=None, byok_key=None, yes=False):
+                            byok_identity=None, byok_key=None,
+                            sku_name=None, tier=None,
+                            storage_gb=None, performance_tier=None, yes=False):
     replica_name = replica_name.lower()
 
     if not is_valid_resource_id(source_server):
@@ -478,7 +495,14 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
 
     list_location_capability_info = get_postgres_location_capability_info(cmd, location)
 
-    validate_postgres_replica(cmd, source_server_object.sku.tier, location, source_server_object, list_location_capability_info)
+    if tier is None and source_server_object is not None:
+        tier = source_server_object.sku.tier
+    if sku_name is None and source_server_object is not None:
+        sku_name = source_server_object.sku.name
+    if storage_gb is None and source_server_object is not None:
+        storage_gb = source_server_object.storage.storage_size_gb
+    validate_postgres_replica(cmd, tier, location, source_server_object,
+                              sku_name, storage_gb, performance_tier, list_location_capability_info)
 
     if not zone:
         zone = _get_pg_replica_zone(list_location_capability_info['zones'],
@@ -521,6 +545,10 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
                                                                                          byok_identity=byok_identity,
                                                                                          byok_key=byok_key)
 
+    parameters.sku = postgresql_flexibleservers.models.Sku(name=sku_name, tier=tier)
+
+    parameters.storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb, auto_grow="Disabled", tier=performance_tier)
+
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, replica_name, parameters)
 
 
@@ -542,9 +570,11 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
     else:
         source_server_id = source_server
 
-    source_server_id_parts = parse_resource_id(source_server_id)
     try:
-        source_server_object = client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
+        id_parts = parse_resource_id(source_server_id)
+        source_subscription_id = id_parts['subscription']
+        postgres_source_client = get_postgresql_flexible_management_client(cmd.cli_ctx, source_subscription_id)
+        source_server_object = postgres_source_client.servers.get(id_parts['resource_group'], id_parts['name'])
     except Exception as e:
         raise ResourceNotFoundError(e)
 
@@ -906,6 +936,68 @@ def flexible_server_provision_network_resource(cmd, resource_group_name, server_
         start_ip, end_ip = prepare_public_network(public_access, yes=yes)
 
     return network, start_ip, end_ip
+
+
+def flexible_server_threat_protection_get(
+        client,
+        resource_group_name,
+        server_name):
+    '''
+    Gets an advanced threat protection setting.
+    '''
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        threat_protection_name="Default")
+
+
+def flexible_server_threat_protection_update(
+        cmd,
+        client, resource_group_name, server_name,
+        state=None):
+    # pylint: disable=unused-argument
+    '''
+    Updates an advanced threat protection setting. Custom update function to apply parameters to instance.
+    '''
+
+    try:
+        parameters = {
+            'properties': {
+                'state': state
+            }
+        }
+        return resolve_poller(
+            client.begin_create_or_update(
+                resource_group_name=resource_group_name,
+                server_name=server_name,
+                threat_protection_name="Default",
+                parameters=parameters),
+            cmd.cli_ctx,
+            'PostgreSQL Flexible Server Advanced Threat Protection Setting Update')
+    except HttpResponseError as ex:
+        if "Operation returned an invalid status 'Accepted'" in ex.message:
+            # TODO: Once the swagger is updated, this won't be needed.
+            pass
+        else:
+            raise ex
+
+
+def flexible_server_threat_protection_set(
+        cmd,
+        client,
+        resource_group_name,
+        server_name,
+        parameters):
+
+    return resolve_poller(
+        client.begin_create_or_update(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            threat_protection_name="Default",
+            parameters=parameters),
+        cmd.cli_ctx,
+        'PostgreSQL Flexible Server Advanced Threat Protection Setting Update')
 
 
 def migration_create_func(cmd, client, resource_group_name, server_name, properties, migration_mode="offline",
