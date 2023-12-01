@@ -247,7 +247,6 @@ class TestExtensionCommands(unittest.TestCase):
                 self.assertEqual(MY_EXT_NAME, call_args[0][1])
                 self.assertEqual(mock_logger.warning.call_count, 1)
 
-
     def test_update_extension(self):
         add_extension(cmd=self.cmd, source=MY_EXT_SOURCE)
         ext = show_extension(MY_EXT_NAME)
