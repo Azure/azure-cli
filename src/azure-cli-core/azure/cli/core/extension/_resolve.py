@@ -115,6 +115,14 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None, target_
         )
     ]
 
+    if not allow_preview:
+        candidate_filters += [
+            _ExtensionFilter(
+                filter=list_filter(is_stable_from_metadata),
+                on_empty_results_message=f"No suitable stable version of '{extension_name}' to install. "
+                                         f"Add `--allow-preview` to try preview versions"
+            )]
+
     if target_version:
         candidate_filters += [
             _ExtensionFilter(
@@ -140,14 +148,6 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None, target_
             on_empty_results_message=f"No suitable extensions found for '{extension_name}'."
         )
     ]
-
-    if not allow_preview:
-        candidate_filters += [
-            _ExtensionFilter(
-                filter=list_filter(is_stable_from_metadata),
-                on_empty_results_message=f"No suitable stable version of '{extension_name}' to install. "
-                                         f"Add `--allow-preview` to try preview versions"
-            )]
 
     for candidate_filter, on_empty_results_message in candidate_filters:
         logger.debug("Candidates %s", [c['filename'] for c in candidates])
