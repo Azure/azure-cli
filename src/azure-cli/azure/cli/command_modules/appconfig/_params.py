@@ -115,6 +115,11 @@ def load_arguments(self, _):
         configured_default=None
     )
 
+    parse_json_arg_type = CLIArgumentType(
+        arg_type=get_three_state_flag(),
+        help="Parse value of key-value with valid JSON content-type. If parsing fails, the value is returned as-is."
+    )
+
     with self.argument_context('appconfig') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('name', options_list=['--name', '-n'], id_part='None', help='Name of the App Configuration. You can configure the default name using `az configure --defaults app_configuration_store=<name>`', configured_default='app_configuration_store')
@@ -268,10 +273,12 @@ def load_arguments(self, _):
     with self.argument_context('appconfig kv show') as c:
         c.argument('key', help='Key to be showed.')
         c.argument('label', help="If no label specified, show entry with null label. Filtering is not supported.")
+        c.argument('parse_json', arg_type=parse_json_arg_type)
 
     with self.argument_context('appconfig kv list') as c:
         c.argument('key', help='If no key specified, return all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix.')
         c.argument('label', help="If no label specified, list all labels. Support star sign as filters, for instance abc* means labels with abc as prefix. Use '\\0' for null label.")
+        c.argument('parse_json', arg_type=parse_json_arg_type)
         c.argument('snapshot', help="List all keys in a given snapshot of the App Configuration store. If no snapshot is specified, the keys currently in the store are listed.")
         c.argument('resolve_keyvault', arg_type=get_three_state_flag(), help="Resolve the content of key vault reference. This argument should NOT be specified along with --fields. Instead use --query for customized query.")
 
@@ -291,6 +298,7 @@ def load_arguments(self, _):
         c.argument('name', arg_type=data_plane_name_arg_type)
         c.argument('key', help='If no key specified, return all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix.')
         c.argument('label', help="If no label specified, list all labels. Support star sign as filters, for instance abc* means labels with abc as prefix. Use '\\0' for null label.")
+        c.argument('parse_json', arg_type=parse_json_arg_type)
 
     with self.argument_context('appconfig feature') as c:
         c.argument('name', arg_type=data_plane_name_arg_type)

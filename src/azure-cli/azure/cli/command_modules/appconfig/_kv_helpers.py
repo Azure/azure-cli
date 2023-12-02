@@ -295,6 +295,7 @@ def __map_to_appservice_config_reference(key_value, endpoint, prefix):
 def __read_kv_from_config_store(azconfig_client,
                                 key=None,
                                 label=None,
+                                parse_json=False,
                                 snapshot=None,
                                 datetime=None,
                                 fields=None,
@@ -353,7 +354,7 @@ def __read_kv_from_config_store(azconfig_client,
         keyvault_client = None
 
     for setting in configsetting_iterable:
-        kv = convert_configurationsetting_to_keyvalue(setting)
+        kv = convert_configurationsetting_to_keyvalue(setting, parse_json)
 
         if kv.key:
             # remove prefix if specified
@@ -831,7 +832,12 @@ def __compact_key_values(key_values):
 def __resolve_secret(keyvault_client, keyvault_reference):
     from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1.key_vault_id import SecretId
     try:
-        secret_id = json.loads(keyvault_reference.value)["uri"]
+        value = keyvault_reference.value
+
+        if isinstance(value, str):
+            value = json.loads(keyvault_reference.value)
+
+        secret_id = json.loads(value)["uri"]
         kv_identifier = SecretId(uri=secret_id)
 
         secret = keyvault_client.get_secret(vault_base_url=kv_identifier.vault,
@@ -840,7 +846,7 @@ def __resolve_secret(keyvault_client, keyvault_reference):
         keyvault_reference.value = secret.value
         return keyvault_reference
     except (TypeError, ValueError):
-        raise ValidationError("Invalid key vault reference for key {} value:{}.".format(keyvault_reference.key, keyvault_reference.value))
+        raise ValidationError("Invalid key vault reference for key {} value:{}.".format(keyvault_reference.key, str(value)))
     except Exception as exception:
         raise CLIError(str(exception))
 

@@ -5,8 +5,12 @@
 
 from datetime import datetime
 from enum import Enum
+from ._utils import is_json_content_type
+import json
+from knack.log import get_logger
 from azure.appconfiguration import ConfigurationSetting
 
+logger = get_logger()
 
 # pylint: disable=too-few-public-methods
 # pylint: disable=too-many-instance-attributes
@@ -76,18 +80,25 @@ class KeyValue:
                "\nTags: " + (str(self.tags) if self.tags else '')
 
 
-def convert_configurationsetting_to_keyvalue(configuration_setting=None):
-
+def convert_configurationsetting_to_keyvalue(configuration_setting=None, parse_json=False):
     if configuration_setting is None:
         return None
-    return KeyValue(key=configuration_setting.key,
-                    label=configuration_setting.label,
-                    content_type=configuration_setting.content_type,
-                    value=configuration_setting.value,
-                    last_modified=configuration_setting.last_modified,
-                    tags=configuration_setting.tags,
-                    locked=configuration_setting.read_only,
-                    etag=configuration_setting.etag)
+
+    key_value = KeyValue(key=configuration_setting.key,
+                         label=configuration_setting.label,
+                         content_type=configuration_setting.content_type,
+                         value=configuration_setting.value,
+                         last_modified=configuration_setting.last_modified,
+                         tags=configuration_setting.tags,
+                         locked=configuration_setting.read_only,
+                         etag=configuration_setting.etag)
+
+    if parse_json and is_json_content_type(key_value.content_type):
+        try:
+            key_value.value = json.loads(key_value.value)
+        except (ValueError, TypeError):
+            logger.warning("Failed to parse value of key '%s' with label '%s'", key_value.key, key_value.label)
+    return key_value
 
 
 def convert_keyvalue_to_configurationsetting(keyvalue=None):
@@ -96,7 +107,7 @@ def convert_keyvalue_to_configurationsetting(keyvalue=None):
     return ConfigurationSetting(key=keyvalue.key,
                                 label=keyvalue.label,
                                 content_type=keyvalue.content_type,
-                                value=keyvalue.value,
+                                value=keyvalue.value if isinstance(keyvalue.value, str) else str(keyvalue.value),
                                 last_modified=keyvalue.last_modified,
                                 tags=keyvalue.tags,
                                 read_only=keyvalue.locked,
