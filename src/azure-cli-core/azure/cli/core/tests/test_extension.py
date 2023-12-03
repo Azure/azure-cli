@@ -303,16 +303,16 @@ class TestExtensions(TestExtensionsBase):
         remove_extension("ml")
 
     def test_add_extension_without_preview(self):
-        extension_name = "ml"
-        extension1 = 'ml-2.0.0a1-py3-none-any.whl'
-        extension2 = 'ml-2.2.3-py3-none-any.whl'
-        extension3 = 'ml-2.4.0b1-py3-none-any.whl'
+        extension_name = "extension-test-pkg"
+        extension1 = 'extension_test_pkg-1.0.0b1-py3-none-any.whl'
+        extension2 = 'extension_test_pkg-1.2.3-py3-none-any.whl'
+        extension3 = 'extension_test_pkg-1.4.1a1-py3-none-any.whl'
 
         mocked_index_data = {
             extension_name: [
-                mock_ext(extension1, version='2.0.0a1', download_url=_get_test_data_file(extension1)),
-                mock_ext(extension2, version='2.2.3', download_url=_get_test_data_file(extension2)),
-                mock_ext(extension3, version='2.4.0b1', download_url=_get_test_data_file(extension3))
+                mock_ext(extension1, version='1.0.0b1', download_url=_get_test_data_file(extension1)),
+                mock_ext(extension2, version='1.2.3', download_url=_get_test_data_file(extension2)),
+                mock_ext(extension3, version='1.4.1a1', download_url=_get_test_data_file(extension3))
             ]
         }
 
@@ -320,20 +320,20 @@ class TestExtensions(TestExtensionsBase):
             add_extension(self.cmd, extension_name=extension_name, allow_preview=False)
             ext = show_extension(extension_name)
             self.assertEqual(ext['name'], extension_name)
-            self.assertEqual(ext['version'], '2.2.3')
+            self.assertEqual(ext['version'], '1.2.3')
             remove_extension(extension_name)
 
     def test_add_extension_with_preview(self):
-        extension_name = "ml"
-        extension1 = 'ml-2.0.0a1-py3-none-any.whl'
-        extension2 = 'ml-2.2.3-py3-none-any.whl'
-        extension3 = 'ml-2.4.0b1-py3-none-any.whl'
+        extension_name = "extension-test-pkg"
+        extension1 = 'extension_test_pkg-1.0.0b1-py3-none-any.whl'
+        extension2 = 'extension_test_pkg-1.2.3-py3-none-any.whl'
+        extension3 = 'extension_test_pkg-1.4.1a1-py3-none-any.whl'
 
         mocked_index_data = {
             extension_name: [
-                mock_ext(extension1, version='2.0.0a1', download_url=_get_test_data_file(extension1)),
-                mock_ext(extension2, version='2.2.3', download_url=_get_test_data_file(extension2)),
-                mock_ext(extension3, version='2.4.0b1', download_url=_get_test_data_file(extension3))
+                mock_ext(extension1, version='1.0.0b1', download_url=_get_test_data_file(extension1)),
+                mock_ext(extension2, version='1.2.3', download_url=_get_test_data_file(extension2)),
+                mock_ext(extension3, version='1.4.1a1', download_url=_get_test_data_file(extension3))
             ]
         }
 
@@ -341,56 +341,50 @@ class TestExtensions(TestExtensionsBase):
             add_extension(self.cmd, extension_name=extension_name, allow_preview=True)
             ext = show_extension(extension_name)
             self.assertEqual(ext['name'], extension_name)
-            self.assertEqual(ext['version'], '2.4.0')
+            self.assertEqual(ext['version'], '1.4.1a1')
             remove_extension(extension_name)
 
-
     def test_add_extension_preview_inavailable(self):
-        extension_name = "ml"
-        extension1 = 'ml-2.0.0a1-py3-none-any.whl'
-        extension2 = 'ml-2.2.3-py3-none-any.whl'
-        extension3 = 'ml-2.4.0b1-py3-none-any.whl'
+        extension_name = "extension-test-pkg"
+        extension1 = 'extension_test_pkg-1.0.0b1-py3-none-any.whl'
+        extension2 = 'extension_test_pkg-1.2.3-py3-none-any.whl'
+        extension3 = 'extension_test_pkg-1.4.1a1-py3-none-any.whl'
 
         mocked_index_data = {
             extension_name: [
-                mock_ext(extension1, version='2.0.0a1', download_url=_get_test_data_file(extension1)),
-                mock_ext(extension3, version='2.4.0b1', download_url=_get_test_data_file(extension3))
+                mock_ext(extension1, version='1.0.0b1', download_url=_get_test_data_file(extension1)),
+                mock_ext(extension3, version='1.4.1a1', download_url=_get_test_data_file(extension3))
             ]
         }
-
+        from knack.util import CLIError
         with IndexPatch(mocked_index_data):
-            with mock.patch('azure.cli.core.extension.operations.logger') as mock_logger:
-                add_extension(cmd=self.cmd, extension_name=extension_name)
-                call_args = mock_logger.error.call_args
-                self.assertEqual("No suitable stable version of '%s' to install. Add `--allow-preview` to try preview versions", call_args[0][0])
-                self.assertEqual(extension_name, call_args[0][1])
-                self.assertEqual(mock_logger.error.call_count, 1)
+            with self.assertRaisesRegex(CLIError, "No suitable stable version of 'extension-test-pkg' to install. Add `--allow-preview` to try preview versions"):
+                add_extension(cmd=self.cmd, extension_name=extension_name, allow_preview=False)
 
     def test_update_extension_with_preview(self):
-        extension_name = "ml"
-        extension1 = 'ml-2.0.0a1-py3-none-any.whl'
-        extension2 = 'ml-2.2.3-py3-none-any.whl'
-        extension3 = 'ml-2.4.0b1-py3-none-any.whl'
+        extension_name = "extension-test-pkg"
+        extension1 = 'extension_test_pkg-1.0.0b1-py3-none-any.whl'
+        extension2 = 'extension_test_pkg-1.2.3-py3-none-any.whl'
+        extension3 = 'extension_test_pkg-1.4.1a1-py3-none-any.whl'
 
         mocked_index_data = {
             extension_name: [
-                mock_ext(extension1, version='2.0.0a1', download_url=_get_test_data_file(extension1)),
-                mock_ext(extension2, version='2.2.3', download_url=_get_test_data_file(extension2)),
-                mock_ext(extension3, version='2.4.0b1', download_url=_get_test_data_file(extension3))
+                mock_ext(extension1, version='1.0.0b1', download_url=_get_test_data_file(extension1)),
+                mock_ext(extension2, version='1.2.3', download_url=_get_test_data_file(extension2)),
+                mock_ext(extension3, version='1.4.1a1', download_url=_get_test_data_file(extension3))
             ]
         }
 
         with IndexPatch(mocked_index_data):
-            add_extension(self.cmd, extension_name=extension_name, version='2.2.3')
-            update_extension(self.cmd, extension_name)
+            add_extension(self.cmd, extension_name=extension_name, allow_preview=False)
             ext = show_extension(extension_name)
             self.assertEqual(ext['name'], extension_name)
-            self.assertEqual(ext['version'], '2.2.3')
+            self.assertEqual(ext['version'], '1.2.3')
 
             update_extension(self.cmd, extension_name, allow_preview=True)
             ext = show_extension(extension_name)
             self.assertEqual(ext['name'], extension_name)
-            self.assertEqual(ext['version'], '2.4.0b1')
+            self.assertEqual(ext['version'], '1.4.1a1')
 
     @mock.patch('sys.stdin.isatty', return_value=True)
     def test_ext_dynamic_install_config_tty(self, _):
