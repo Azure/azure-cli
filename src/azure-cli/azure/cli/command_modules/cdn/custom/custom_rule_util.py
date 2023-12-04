@@ -441,4 +441,3 @@ def create_conditions_from_existing(existing_conditions):
     if len(parsed_conditions) == 0:
         return []
     return parsed_conditions
-        
