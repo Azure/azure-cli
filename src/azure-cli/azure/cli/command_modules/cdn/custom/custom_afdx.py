@@ -181,7 +181,7 @@ class AFDRouteCreate(_AFDRouteCreate):
                                                     help='Collection of ID or name of rule set referenced by the route.',
                                                     nullable=True)
         args_schema.rule_sets.Element = AAZStrArg()
-        args_schema.query_string_caching_behavior = AAZStrArg(options=['--query-string-caching-behaviorn'],
+        args_schema.query_string_caching_behavior = AAZStrArg(options=['--query-string-caching-behavior'],
                                                     help='Defines how Frontdoor caches requests that include query strings. You can ignore any query strings when caching, ignore specific query strings, cache every request with a unique URL, or cache specific query strings',
                                                     )
         args_schema.query_parameters = AAZListArg(options=['--query-parameters'],
@@ -262,7 +262,7 @@ class AFDRouteUpdate(_AFDRouteUpdate):
                                                     help='Collection of ID or name of rule set referenced by the route.',
                                                     nullable=True)
         args_schema.rule_sets.Element = AAZStrArg()
-        args_schema.query_string_caching_behavior = AAZStrArg(options=['--query-string-caching-behaviorn'],
+        args_schema.query_string_caching_behavior = AAZStrArg(options=['--query-string-caching-behavior'],
                                                     help='Defines how Frontdoor caches requests that include query strings. You can ignore any query strings when caching, ignore specific query strings, cache every request with a unique URL, or cache specific query strings')
         args_schema.query_parameters = AAZListArg(options=['--query-parameters'],
                                                     help='Query parameters to include or exclude.')
@@ -630,11 +630,9 @@ class AFDSecretCreate(_AFDSecretCreate):
                                                   help='Resource ID of the Azure Key Vault certificate, expected format is like /subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/vault1/secrets/cert1.',
                                                   required=True)
         args_schema.secret_version = AAZStrArg(options=['--secret-version'],
-                                                  help='Version of the certificate to be used.',
-                                                  required=False)
+                                                  help='Version of the certificate to be used.')
         args_schema.use_latest_version = AAZBoolArg(options=['--use-latest-version'],
-                                                  help='Whether to use the latest version for the certificate.',
-                                                  required=False)
+                                                  help='Whether to use the latest version for the certificate.')
         return args_schema
     def pre_operations(self):
         args = self.ctx.args
@@ -667,11 +665,9 @@ class AFDSecretUpdate(_AFDSecretUpdate):
                                                   help='Resource ID of the Azure Key Vault certificate, expected format is like /subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/vault1/secrets/cert1.',
                                                   required=True)
         args_schema.secret_version = AAZStrArg(options=['--secret-version'],
-                                                  help='Version of the certificate to be used.',
-                                                  required=False)
+                                                  help='Version of the certificate to be used.')
         args_schema.use_latest_version = AAZBoolArg(options=['--use-latest-version'],
-                                                  help='Whether to use the latest version for the certificate.',
-                                                  required=False)
+                                                  help='Whether to use the latest version for the certificate.')
         return args_schema
     def pre_operations(self):
         args = self.ctx.args
