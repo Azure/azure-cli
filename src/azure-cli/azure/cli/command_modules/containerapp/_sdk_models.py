@@ -7356,10 +7356,10 @@ class Scale(_serialization.Model):
 class JobScale(_serialization.Model):
     """Container Apps Job scaling configurations.
 
-    :ivar min_replicas: Optional. Minimum number of container replicas.
-    :vartype min_replicas: int
-    :ivar max_replicas: Optional. Maximum number of container replicas. Defaults to 10 if not set.
-    :vartype max_replicas: int
+    :ivar min_executions: Optional. Minimum number of job executions that are created for a trigger, default 0.
+    :vartype min_executions: int
+    :ivar max_executions: Optional. Maximum number of job executions that are created for a trigger, default 10.
+    :vartype max_executions: int
     :ivar pollingInterval: Optional. Time between poll requests.
     :vartype pollingInterval: int
     :ivar rules: Scaling rules.
@@ -7367,8 +7367,8 @@ class JobScale(_serialization.Model):
     """
 
     _attribute_map = {
-        "min_replicas": {"key": "minReplicas", "type": "int"},
-        "max_replicas": {"key": "maxReplicas", "type": "int"},
+        "min_executions": {"key": "minExecutions", "type": "int"},
+        "max_executions": {"key": "maxExecutions", "type": "int"},
         "polling_Interval": {"key": "pollingInterval", "type": "int"},
         "rules": {"key": "rules", "type": "[JobScaleRule]"},
     }
@@ -7376,24 +7376,23 @@ class JobScale(_serialization.Model):
     def __init__(
         self,
         *,
-        min_replicas: Optional[int] = None,
-        max_replicas: int = 10,
+        min_executions: Optional[int] = None,
+        max_executions: int = 10,
         polling_Interval: Optional[int] = None,
         rules: Optional[List["JobScaleRule"]] = None,
         **kwargs: Any
     ) -> None:
         """
-        :keyword min_replicas: Optional. Minimum number of container replicas.
-        :paramtype min_replicas: int
-        :keyword max_replicas: Optional. Maximum number of container replicas. Defaults to 10 if not
-         set.
-        :paramtype max_replicas: int
+        :keyword min_executions: Optional. Minimum number of job executions that are created for a trigger, default 0.
+        :paramtype min_executions: int
+        :keyword max_executions: Optional. Maximum number of job executions that are created for a trigger, default 10.
+        :paramtype max_executions: int
         :keyword rules: Scaling rules.
         :paramtype rules: list[~azure.mgmt.appcontainers.models.JobScaleRule]
         """
         super().__init__(**kwargs)
-        self.min_replicas = min_replicas
-        self.max_replicas = max_replicas
+        self.min_executions = min_executions
+        self.max_executions = max_executions
         self.polling_Interval = polling_Interval
         self.rules = rules
 

@@ -58,7 +58,7 @@ examples:
         vm_secrets=$(az vm secret format -s "$secrets")
 
         az vm create -g group-name -n vm-name --admin-username deploy  \\
-          --image debian --secrets "$vm_secrets"
+          --image Debian11 --secrets "$vm_secrets"
 """
 
 helps['keyvault certificate list'] = """
@@ -166,7 +166,7 @@ examples:
         vm_secrets=$(az vm secret format -s "$secrets")
 
         az vm create -g group-name -n vm-name --admin-username deploy  \\
-          --image debian --secrets "$vm_secrets"
+          --image Debian11 --secrets "$vm_secrets"
 """
 
 helps['keyvault certificate backup'] = """
@@ -313,7 +313,7 @@ long-summary: The ENCRYPT operation encrypts an arbitrary sequence of bytes usin
     have a key-reference but do not have access to the public key material. This operation
     requires the keys/encrypt permission.
 examples:
-  - name: Encrypt value(Base64 encoded string) with valut's key using RSA-OAEP.
+  - name: Encrypt value(Base64 encoded string) with vault's key using RSA-OAEP.
     text: |
         az keyvault key encrypt --name mykey --vault-name myvault --algorithm RSA-OAEP --value "YWJjZGVm" --data-type base64
   - name: Encrypt value(plaintext) with MHSM's key using AES-GCM.
@@ -331,7 +331,7 @@ long-summary: The DECRYPT operation decrypts a well-formed block of ciphertext u
     stored in Vault or HSM since it uses the private portion of the key. This operation
     requires the keys/decrypt permission.
 examples:
-  - name: Decrypt value(Base64 encoded string returned by encrypt command) with valut's key using RSA-OAEP and get result as base64 encoded.
+  - name: Decrypt value(Base64 encoded string returned by encrypt command) with vault's key using RSA-OAEP and get result as base64 encoded.
     text: |
         az keyvault key decrypt --name mykey --vault-name myvault --algorithm RSA-OAEP --data-type base64 --value "CbFcCxHG7WTU+nbpFRrHoqSduwlPy8xpWxf1JxZ2y12BY/qFJirMSYq1i4SO9rvSmvmEMxFV5kw5s9Tc+YoKmv8X6oe+xXx+JytYV8obA5l3OQD9epuuQHWW0kir/mp88lzhcYWxYuF7mKDpPKDV4if+wnAZqQ4woB6t2JEZU5MVK3s+3E/EU4ehb5XrVxAl6xpYy8VYbyF33uJ5s+aUsYIrsVtXgrW99HQ3ic7tJtIOGuWqKhPCdQRezRkOcyxkJcmnDHOLjWA/9strzzx/dyg/t884gT7qrkmIHh8if9SFal/vi1h4XhoDqUleMTnKev2IFHyDNcYVYG3pftJiuA=="
   - name: Decrypt value(Base64 encoded string returned by encrypt command) with MHSM's key using AES-GCM and get result as plaintext.
@@ -873,6 +873,11 @@ examples:
     text: |
         az keyvault update-hsm --enable-purge-protection true --hsm-name MyHSM --resource-group MyResourceGroup
     crafted: true
+"""
+
+helps['keyvault check-name'] = """
+type: command
+short-summary: Check that the given name is valid and is not already in use.
 """
 
 helps['keyvault wait'] = """

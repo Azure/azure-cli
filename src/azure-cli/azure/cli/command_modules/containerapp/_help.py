@@ -17,26 +17,26 @@ helps['containerapp create'] = """
     examples:
     - name: Create a container app and retrieve its fully qualified domain name.
       text: |
-          az containerapp create -n MyContainerapp -g MyResourceGroup \\
+          az containerapp create -n my-containerapp -g MyResourceGroup \\
               --image myregistry.azurecr.io/my-app:v1.0 --environment MyContainerappEnv \\
               --ingress external --target-port 80 \\
               --registry-server myregistry.azurecr.io --registry-username myregistry --registry-password $REGISTRY_PASSWORD \\
               --query properties.configuration.ingress.fqdn
     - name: Create a container app with resource requirements and replica count limits.
       text: |
-          az containerapp create -n MyContainerapp -g MyResourceGroup \\
+          az containerapp create -n my-containerapp -g MyResourceGroup \\
               --image nginx --environment MyContainerappEnv \\
               --cpu 0.5 --memory 1.0Gi \\
               --min-replicas 4 --max-replicas 8
     - name: Create a container app with secrets and environment variables.
       text: |
-          az containerapp create -n MyContainerapp -g MyResourceGroup \\
+          az containerapp create -n my-containerapp -g MyResourceGroup \\
               --image my-app:v1.0 --environment MyContainerappEnv \\
               --secrets mysecret=secretvalue1 anothersecret="secret value 2" \\
               --env-vars GREETING="Hello, world" SECRETENV=secretref:anothersecret
     - name: Create a container app using a YAML configuration. Example YAML configuration - https://aka.ms/azure-container-apps-yaml
       text: |
-          az containerapp create -n MyContainerapp -g MyResourceGroup \\
+          az containerapp create -n my-containerapp -g MyResourceGroup \\
               --environment MyContainerappEnv \\
               --yaml "path/to/yaml/file.yml"
     - name: Create a container app with an http scale rule
@@ -46,7 +46,7 @@ helps['containerapp create'] = """
               --scale-rule-http-concurrency 50
     - name: Create a container app with a custom scale rule
       text: |
-          az containerapp create -n MyContainerapp -g MyResourceGroup \\
+          az containerapp create -n my-containerapp -g MyResourceGroup \\
               --image my-queue-processor --environment MyContainerappEnv \\
               --min-replicas 4 --max-replicas 8 \\
               --scale-rule-name queue-based-autoscaling \\
@@ -57,7 +57,7 @@ helps['containerapp create'] = """
               --scale-rule-auth "connection=my-connection-string-secret-name"
     - name: Create a container app with secrets and mounts them in a volume.
       text: |
-          az containerapp create -n MyContainerapp -g MyResourceGroup \\
+          az containerapp create -n my-containerapp -g MyResourceGroup \\
               --image my-app:v1.0 --environment MyContainerappEnv \\
               --secrets mysecret=secretvalue1 anothersecret="secret value 2" \\
               --secret-volume-mount "mnt/secrets"
@@ -69,11 +69,11 @@ helps['containerapp update'] = """
     examples:
     - name: Update a container app's container image.
       text: |
-          az containerapp update -n MyContainerapp -g MyResourceGroup \\
+          az containerapp update -n my-containerapp -g MyResourceGroup \\
               --image myregistry.azurecr.io/my-app:v2.0
     - name: Update a container app's resource requirements and scale limits.
       text: |
-          az containerapp update -n MyContainerapp -g MyResourceGroup \\
+          az containerapp update -n my-containerapp -g MyResourceGroup \\
               --cpu 0.5 --memory 1.0Gi \\
               --min-replicas 4 --max-replicas 8
     - name: Update a container app with an http scale rule
@@ -104,7 +104,7 @@ helps['containerapp show'] = """
     examples:
     - name: Show the details of a container app.
       text: |
-          az containerapp show -n MyContainerapp -g MyResourceGroup
+          az containerapp show -n my-containerapp -g MyResourceGroup
 """
 
 helps['containerapp list'] = """
@@ -125,13 +125,13 @@ helps['containerapp exec'] = """
     examples:
     - name: exec into a container app
       text: |
-          az containerapp exec -n MyContainerapp -g MyResourceGroup
+          az containerapp exec -n my-containerapp -g MyResourceGroup
     - name: exec into a particular container app replica and revision
       text: |
-          az containerapp exec -n MyContainerapp -g MyResourceGroup --replica MyReplica --revision MyRevision
+          az containerapp exec -n my-containerapp -g MyResourceGroup --replica MyReplica --revision MyRevision
     - name: open a bash shell in a containerapp
       text: |
-          az containerapp exec -n MyContainerapp -g MyResourceGroup --command bash
+          az containerapp exec -n my-containerapp -g MyResourceGroup --command bash
 """
 
 helps['containerapp browse'] = """
@@ -140,7 +140,7 @@ helps['containerapp browse'] = """
     examples:
     - name: open a containerapp in the browser
       text: |
-          az containerapp browse -n MyContainerapp -g MyResourceGroup
+          az containerapp browse -n my-containerapp -g MyResourceGroup
 """
 
 helps['containerapp up'] = """
@@ -149,16 +149,16 @@ helps['containerapp up'] = """
     examples:
     - name: Create a container app from a dockerfile in a GitHub repo (setting up github actions)
       text: |
-          az containerapp up -n MyContainerapp --repo https://github.com/myAccount/myRepo
+          az containerapp up -n my-containerapp --repo https://github.com/myAccount/myRepo
     - name: Create a container app from a dockerfile in a local directory (or autogenerate a container if no dockerfile is found)
       text: |
-          az containerapp up -n MyContainerapp --source .
+          az containerapp up -n my-containerapp --source .
     - name: Create a container app from an image in a registry
       text: |
-          az containerapp up -n MyContainerapp --image myregistry.azurecr.io/myImage:myTag
+          az containerapp up -n my-containerapp --image myregistry.azurecr.io/myImage:myTag
     - name: Create a container app from an image in a registry with ingress enabled and a specified environment
       text: |
-          az containerapp up -n MyContainerapp --image myregistry.azurecr.io/myImage:myTag --ingress external --target-port 80 --environment MyEnv
+          az containerapp up -n my-containerapp --image myregistry.azurecr.io/myImage:myTag --ingress external --target-port 80 --environment MyEnv
 """
 
 helps['containerapp env logs'] = """
@@ -189,16 +189,16 @@ helps['containerapp logs show'] = """
     examples:
     - name: Fetch the past 20 lines of logs from an app and return
       text: |
-          az containerapp logs show -n MyContainerapp -g MyResourceGroup
+          az containerapp logs show -n my-containerapp -g MyResourceGroup
     - name: Fetch the past 20 lines of system logs from an app and return
       text: |
-          az containerapp logs show -n MyContainerapp -g MyResourceGroup --type system
+          az containerapp logs show -n my-containerapp -g MyResourceGroup --type system
     - name: Fetch 30 lines of past logs logs from an app and print logs as they come in
       text: |
-          az containerapp logs show -n MyContainerapp -g MyResourceGroup --follow --tail 30
+          az containerapp logs show -n my-containerapp -g MyResourceGroup --follow --tail 30
     - name: Fetch logs for a particular revision, replica, and container
       text: |
-          az containerapp logs show -n MyContainerapp -g MyResourceGroup --replica MyReplica --revision MyRevision --container MyContainer
+          az containerapp logs show -n my-containerapp -g MyResourceGroup --replica MyReplica --revision MyRevision --container MyContainer
 """
 
 # Replica Commands
@@ -213,10 +213,10 @@ helps['containerapp replica list'] = """
     examples:
     - name: List a container app's replicas in the latest revision
       text: |
-          az containerapp replica list -n MyContainerapp -g MyResourceGroup
+          az containerapp replica list -n my-containerapp -g MyResourceGroup
     - name: List a container app's replicas in a particular revision
       text: |
-          az containerapp replica list -n MyContainerapp -g MyResourceGroup --revision MyRevision
+          az containerapp replica list -n my-containerapp -g MyResourceGroup --revision MyRevision
 """
 
 helps['containerapp replica show'] = """
@@ -225,10 +225,10 @@ helps['containerapp replica show'] = """
     examples:
     - name: Show a replica from the latest revision
       text: |
-          az containerapp replica show -n MyContainerapp -g MyResourceGroup --replica MyReplica
+          az containerapp replica show -n my-containerapp -g MyResourceGroup --replica MyReplica
     - name: Show a replica from the a particular revision
       text: |
-          az containerapp replica show -n MyContainerapp -g MyResourceGroup --replica MyReplica --revision MyRevision
+          az containerapp replica show -n my-containerapp -g MyResourceGroup --replica MyReplica --revision MyRevision
 """
 
 # Revision Commands
@@ -243,7 +243,7 @@ helps['containerapp revision show'] = """
     examples:
     - name: Show details of a revision.
       text: |
-          az containerapp revision show -n MyContainerapp -g MyResourceGroup \\
+          az containerapp revision show -n my-containerapp -g MyResourceGroup \\
               --revision MyContainerappRevision
 """
 
@@ -253,7 +253,7 @@ helps['containerapp revision list'] = """
     examples:
     - name: List a container app's revisions.
       text: |
-          az containerapp revision list -n MyContainerapp -g MyResourceGroup
+          az containerapp revision list -n my-containerapp -g MyResourceGroup
 """
 
 helps['containerapp revision restart'] = """
@@ -262,7 +262,7 @@ helps['containerapp revision restart'] = """
     examples:
     - name: Restart a revision.
       text: |
-          az containerapp revision restart -n MyContainerapp -g MyResourceGroup --revision MyContainerappRevision
+          az containerapp revision restart -n my-containerapp -g MyResourceGroup --revision MyContainerappRevision
 """
 
 helps['containerapp revision activate'] = """
@@ -289,7 +289,7 @@ helps['containerapp revision set-mode'] = """
     examples:
     - name: Set a container app to single revision mode.
       text: |
-          az containerapp revision set-mode -n MyContainerapp -g MyResourceGroup --mode Single
+          az containerapp revision set-mode -n my-containerapp -g MyResourceGroup --mode Single
 """
 
 helps['containerapp revision copy'] = """
@@ -298,7 +298,7 @@ helps['containerapp revision copy'] = """
     examples:
     - name: Create a revision based on the latest revision.
       text: |
-          az containerapp revision copy -n MyContainerapp -g MyResourceGroup \\
+          az containerapp revision copy -n my-containerapp -g MyResourceGroup \\
               --cpu 0.75 --memory 1.5Gi
     - name: Create a revision based on a previous revision.
       text: |
@@ -313,7 +313,7 @@ helps['containerapp revision copy'] = """
     examples:
     - name: Create a revision based on a previous revision.
       text: |
-          az containerapp revision copy -n MyContainerapp -g MyResourceGroup --cpu 0.75 --memory 1.5Gi
+          az containerapp revision copy -n my-containerapp -g MyResourceGroup --cpu 0.75 --memory 1.5Gi
 """
 
 helps['containerapp revision label'] = """
@@ -327,7 +327,7 @@ helps['containerapp revision label add'] = """
     examples:
     - name: Add a label to the latest revision.
       text: |
-          az containerapp revision label add -n MyContainerapp -g MyResourceGroup --label myLabel --revision latest
+          az containerapp revision label add -n my-containerapp -g MyResourceGroup --label myLabel --revision latest
     - name: Add a label to a previous revision.
       text: |
           az containerapp revision label add -g MyResourceGroup --label myLabel --revision revisionName
@@ -339,7 +339,7 @@ helps['containerapp revision label remove'] = """
     examples:
     - name: Remove a label.
       text: |
-          az containerapp revision label remove -n MyContainerapp -g MyResourceGroup --label myLabel
+          az containerapp revision label remove -n my-containerapp -g MyResourceGroup --label myLabel
 """
 
 helps['containerapp revision label swap'] = """
@@ -348,7 +348,7 @@ helps['containerapp revision label swap'] = """
     examples:
     - name: Swap a revision label between two revisions.
       text: |
-          az containerapp revision label swap -n MyContainerapp -g MyResourceGroup --source myLabel1 --target myLabel2
+          az containerapp revision label swap -n my-containerapp -g MyResourceGroup --source myLabel1 --target myLabel2
 """
 
 # Environment Commands
@@ -565,7 +565,7 @@ helps['containerapp env workload-profile update'] = """
     examples:
     - name: Update an existing workload profile in a Container Apps environment
       text: |
-          az containerapp env workload-profile update -g MyResourceGroup -n MyEnvironment --workload-profile-name my-wlp --workload-profile-type D4 --min-nodes 1 --max-nodes 3
+          az containerapp env workload-profile update -g MyResourceGroup -n MyEnvironment --workload-profile-name my-wlp --min-nodes 1 --max-nodes 3
 """
 
 # Container Apps Job Commands
@@ -624,7 +624,7 @@ helps['containerapp job update'] = """
     examples:
     - name: Update a job's replica timeout.
       text: |
-          az containerapp job update -n MyContainerAppJob -g MyResourceGroup \\
+          az containerapp job update -n my-containerapp-job -g MyResourceGroup \\
               --replica-timeout 10
 """
 
@@ -633,7 +633,7 @@ helps['containerapp job delete'] = """
     short-summary: Delete a Container Apps Job.
     examples:
     - name: Delete a job.
-      text: az containerapp job delete -n MyContainerAppJob -g MyResourceGroup
+      text: az containerapp job delete -n my-containerapp-job -g MyResourceGroup
 """
 
 helps['containerapp job show'] = """
@@ -642,7 +642,7 @@ helps['containerapp job show'] = """
     examples:
     - name: Show the details of a job.
       text: |
-          az containerapp job show -n MyContainerAppJob -g MyResourceGroup
+          az containerapp job show -n my-containerapp-job -g MyResourceGroup
 """
 
 helps['containerapp job list'] = """
@@ -662,9 +662,9 @@ helps['containerapp job start'] = """
     short-summary: Start a Container Apps Job execution.
     examples:
     - name: Start a job execution.
-      text: az containerapp job start -n MyContainerAppJob -g MyResourceGroup
+      text: az containerapp job start -n my-containerapp-job -g MyResourceGroup
     - name: Start a job with different image and configurations.
-      text: az containerapp job start -n MyContainerAppJob -g MyResourceGroup --image MyImageName --cpu 0.5 --memory 1.0Gi
+      text: az containerapp job start -n my-containerapp-job -g MyResourceGroup --image MyImageName --cpu 0.5 --memory 1.0Gi
 """
 
 helps['containerapp job stop'] = """
@@ -672,11 +672,11 @@ helps['containerapp job stop'] = """
     short-summary: Stops a Container Apps Job execution.
     examples:
     - name: Stop a job execution.
-      text: az containerapp job stop -n MyContainerAppJob -g MyResourceGroup
+      text: az containerapp job stop -n my-containerapp-job -g MyResourceGroup
     - name: Stop a job execution giving a specific job execution name.
-      text: az containerapp job stop -n MyContainerAppJob -g MyResourceGroup --job-execution-name MyContainerAppJob-66v9xh0
+      text: az containerapp job stop -n my-containerapp-job -g MyResourceGroup --job-execution-name MyContainerAppJob-66v9xh0
     - name: Stop multiple job executions giving a list of execution names.
-      text: az containerapp job stop -n MyContainerAppJob -g MyResourceGroup --execution-name-list MyContainerAppJob-66v9xh0,MyContainerAppJob-66v9xh1
+      text: az containerapp job stop -n my-containerapp-job -g MyResourceGroup --execution-name-list MyContainerAppJob-66v9xh0,MyContainerAppJob-66v9xh1
 """
 
 # Container App Job Secret Commands
@@ -691,7 +691,7 @@ helps['containerapp job secret show'] = """
     examples:
     - name: Show the details of a secret.
       text: |
-          az containerapp job secret show -n MyContainerappjob -g MyResourceGroup --secret-name MySecret
+          az containerapp job secret show -n my-containerapp-job -g MyResourceGroup --secret-name MySecret
 """
 
 helps['containerapp job secret list'] = """
@@ -700,7 +700,7 @@ helps['containerapp job secret list'] = """
     examples:
     - name: List the secrets of a container app job.
       text: |
-          az containerapp job secret list -n MyContainerappjob -g MyResourceGroup
+          az containerapp job secret list -n my-containerapp-job -g MyResourceGroup
 """
 
 helps['containerapp job secret remove'] = """
@@ -709,7 +709,7 @@ helps['containerapp job secret remove'] = """
     examples:
     - name: Remove secrets from a container app job.
       text: |
-          az containerapp job secret remove -n MyContainerappjob -g MyResourceGroup --secret-names MySecret MySecret2
+          az containerapp job secret remove -n my-containerapp-job -g MyResourceGroup --secret-names MySecret MySecret2
 """
 
 helps['containerapp job secret set'] = """
@@ -718,10 +718,10 @@ helps['containerapp job secret set'] = """
     examples:
     - name: Add secrets to a container app job.
       text: |
-          az containerapp job secret set -n MyContainerappjob -g MyResourceGroup --secrets MySecretName1=MySecretValue1 MySecretName2=keyvaultref:https://example.vault.azure.net/secrets/mysecret,identityref:/subscriptions/sub/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myidentity
+          az containerapp job secret set -n my-containerapp-job -g MyResourceGroup --secrets MySecretName1=MySecretValue1 MySecretName2=keyvaultref:https://example.vault.azure.net/secrets/mysecret,identityref:/subscriptions/sub/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myidentity
     - name: Update a secret.
       text: |
-          az containerapp job secret set -n MyContainerappjob -g MyResourceGroup --secrets MyExistingSecretName=MyNewSecretValue MyExistingSecretName2=keyvaultref:https://example.vault.azure.net/secrets/mysecret,identityref:/subscriptions/sub/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myidentity
+          az containerapp job secret set -n my-containerapp-job -g MyResourceGroup --secrets MyExistingSecretName=MyNewSecretValue MyExistingSecretName2=keyvaultref:https://example.vault.azure.net/secrets/mysecret,identityref:/subscriptions/sub/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myidentity
 """
 
 # Container App Job execution commands
@@ -735,7 +735,7 @@ helps['containerapp job execution list'] = """
     short-summary: Get list of all executions of a Container App Job.
     examples:
     - name: List of all executions of a Container App Job.
-      text: az containerapp job execution list -n MyContainerAppJob -g MyResourceGroup
+      text: az containerapp job execution list -n my-containerapp-job -g MyResourceGroup
 """
 
 helps['containerapp job execution show'] = """
@@ -743,7 +743,7 @@ helps['containerapp job execution show'] = """
     short-summary: Get execution of a Container App Job.
     examples:
     - name: Get execution of a Container App Job.
-      text: az containerapp job execution show -n MyContainerAppJob -g MyResourceGroup --job-execution-name MyContainerAppJob-66v9xh0
+      text: az containerapp job execution show -n my-containerapp-job -g MyResourceGroup --job-execution-name MyContainerAppJob-66v9xh0
 """
 
 # Certificates Commands
@@ -810,16 +810,16 @@ helps['containerapp identity assign'] = """
     examples:
     - name: Assign system identity.
       text: |
-          az containerapp identity assign -n myContainerapp -g MyResourceGroup --system-assigned
+          az containerapp identity assign -n my-containerapp -g MyResourceGroup --system-assigned
     - name: Assign user identity.
       text: |
-          az containerapp identity assign -n myContainerapp -g MyResourceGroup --user-assigned myUserIdentityName
+          az containerapp identity assign -n my-containerapp -g MyResourceGroup --user-assigned myUserIdentityName
     - name: Assign user identity (from a different resource group than the containerapp).
       text: |
-          az containerapp identity assign -n myContainerapp -g MyResourceGroup --user-assigned myUserIdentityResourceId
+          az containerapp identity assign -n my-containerapp -g MyResourceGroup --user-assigned myUserIdentityResourceId
     - name: Assign system and user identity.
       text: |
-          az containerapp identity assign -n myContainerapp -g MyResourceGroup --system-assigned --user-assigned myUserIdentityResourceId
+          az containerapp identity assign -n my-containerapp -g MyResourceGroup --system-assigned --user-assigned myUserIdentityResourceId
 """
 
 helps['containerapp identity remove'] = """
@@ -828,19 +828,19 @@ helps['containerapp identity remove'] = """
     examples:
     - name: Remove system identity.
       text: |
-          az containerapp identity remove -n myContainerapp -g MyResourceGroup --system-assigned
+          az containerapp identity remove -n my-containerapp -g MyResourceGroup --system-assigned
     - name: Remove user identity.
       text: |
-          az containerapp identity remove -n myContainerapp -g MyResourceGroup --user-assigned myUserIdentityName
+          az containerapp identity remove -n my-containerapp -g MyResourceGroup --user-assigned myUserIdentityName
     - name: Remove system and user identity (from a different resource group than the containerapp).
       text: |
-          az containerapp identity remove -n myContainerapp -g MyResourceGroup --system-assigned --user-assigned myUserIdentityResourceId
+          az containerapp identity remove -n my-containerapp -g MyResourceGroup --system-assigned --user-assigned myUserIdentityResourceId
     - name: Remove all user identities.
       text: |
-          az containerapp identity remove -n myContainerapp -g MyResourceGroup --user-assigned
+          az containerapp identity remove -n my-containerapp -g MyResourceGroup --user-assigned
     - name: Remove system identity and all user identities.
       text: |
-          az containerapp identity remove -n myContainerapp -g MyResourceGroup --system-assigned --user-assigned
+          az containerapp identity remove -n my-containerapp -g MyResourceGroup --system-assigned --user-assigned
 """
 
 helps['containerapp identity show'] = """
@@ -849,7 +849,7 @@ helps['containerapp identity show'] = """
     examples:
     - name: Show managed identities.
       text: |
-          az containerapp identity show -n myContainerapp -g MyResourceGroup
+          az containerapp identity show -n my-containerapp -g MyResourceGroup
 """
 
 helps['containerapp job identity'] = """
@@ -864,16 +864,16 @@ helps['containerapp job identity assign'] = """
     examples:
     - name: Assign system identity.
       text: |
-          az containerapp job identity assign -n myContainerappjob -g MyResourceGroup --system-assigned
+          az containerapp job identity assign -n my-containerapp-job -g MyResourceGroup --system-assigned
     - name: Assign user identity.
       text: |
-          az containerapp job identity assign -n myContainerappjob -g MyResourceGroup --user-assigned myUserIdentityName
+          az containerapp job identity assign -n my-containerapp-job -g MyResourceGroup --user-assigned myUserIdentityName
     - name: Assign user identity (from a different resource group than the containerapp job).
       text: |
-          az containerapp job identity assign -n myContainerappjob -g MyResourceGroup --user-assigned myUserIdentityResourceId
+          az containerapp job identity assign -n my-containerapp-job -g MyResourceGroup --user-assigned myUserIdentityResourceId
     - name: Assign system and user identity.
       text: |
-          az containerapp job identity assign -n myContainerappjob -g MyResourceGroup --system-assigned --user-assigned myUserIdentityResourceId
+          az containerapp job identity assign -n my-containerapp-job -g MyResourceGroup --system-assigned --user-assigned myUserIdentityResourceId
 """
 
 helps['containerapp job identity remove'] = """
@@ -882,19 +882,19 @@ helps['containerapp job identity remove'] = """
     examples:
     - name: Remove system identity.
       text: |
-          az containerapp job identity remove -n myContainerappjob -g MyResourceGroup --system-assigned
+          az containerapp job identity remove -n my-containerapp-job -g MyResourceGroup --system-assigned
     - name: Remove user identity.
       text: |
-          az containerapp job identity remove -n myContainerappjob -g MyResourceGroup --user-assigned myUserIdentityName
+          az containerapp job identity remove -n my-containerapp-job -g MyResourceGroup --user-assigned myUserIdentityName
     - name: Remove system and user identity (from a different resource group than the containerapp job).
       text: |
-          az containerapp job identity remove -n myContainerappjob -g MyResourceGroup --system-assigned --user-assigned myUserIdentityResourceId
+          az containerapp job identity remove -n my-containerapp-job -g MyResourceGroup --system-assigned --user-assigned myUserIdentityResourceId
     - name: Remove all user identities.
       text: |
-          az containerapp job identity remove -n myContainerappjob -g MyResourceGroup --user-assigned
+          az containerapp job identity remove -n my-containerapp-job -g MyResourceGroup --user-assigned
     - name: Remove system identity and all user identities.
       text: |
-          az containerapp job identity remove -n myContainerappjob -g MyResourceGroup --system-assigned --user-assigned
+          az containerapp job identity remove -n my-containerapp-job -g MyResourceGroup --system-assigned --user-assigned
 """
 
 helps['containerapp job identity show'] = """
@@ -903,7 +903,7 @@ helps['containerapp job identity show'] = """
     examples:
     - name: Show managed identities.
       text: |
-          az containerapp job identity show -n myContainerappjob -g MyResourceGroup
+          az containerapp job identity show -n my-containerapp-job -g MyResourceGroup
 """
 
 # Ingress Commands
@@ -923,7 +923,7 @@ helps['containerapp ingress show'] = """
     examples:
     - name: Show the details of a container app's ingress.
       text: |
-          az containerapp ingress show -n MyContainerapp -g MyResourceGroup
+          az containerapp ingress show -n my-containerapp -g MyResourceGroup
 """
 
 helps['containerapp ingress enable'] = """
@@ -932,7 +932,7 @@ helps['containerapp ingress enable'] = """
     examples:
     - name: Enable or update ingress for a container app.
       text: |
-          az containerapp ingress enable -n MyContainerapp -g MyResourceGroup \\
+          az containerapp ingress enable -n my-containerapp -g MyResourceGroup \\
               --type external --allow-insecure --target-port 80 --transport auto
 """
 
@@ -942,7 +942,7 @@ helps['containerapp ingress disable'] = """
     examples:
     - name: Disable ingress for a container app.
       text: |
-          az containerapp ingress disable -n MyContainerapp -g MyResourceGroup
+          az containerapp ingress disable -n my-containerapp -g MyResourceGroup
 """
 
 helps['containerapp ingress update'] = """
@@ -951,7 +951,7 @@ helps['containerapp ingress update'] = """
     examples:
     - name: Update ingress for a container app.
       text: |
-          az containerapp ingress update -n MyContainerapp -g MyResourceGroup \\
+          az containerapp ingress update -n my-containerapp -g MyResourceGroup \\
               --target-port 8080
 """
 
@@ -966,16 +966,16 @@ helps['containerapp ingress traffic set'] = """
     examples:
     - name: Route 100% of a container app's traffic to its latest revision.
       text: |
-          az containerapp ingress traffic set -n MyContainerapp -g MyResourceGroup --revision-weight latest=100
+          az containerapp ingress traffic set -n my-containerapp -g MyResourceGroup --revision-weight latest=100
     - name: Split a container app's traffic between two revisions.
       text: |
-          az containerapp ingress traffic set -n MyContainerapp -g MyResourceGroup --revision-weight latest=80 MyRevisionName=20
+          az containerapp ingress traffic set -n my-containerapp -g MyResourceGroup --revision-weight latest=80 MyRevisionName=20
     - name: Split a container app's traffic between two labels.
       text: |
-          az containerapp ingress traffic set -n MyContainerapp -g MyResourceGroup --label-weight myLabel=80 myLabel2=20
+          az containerapp ingress traffic set -n my-containerapp -g MyResourceGroup --label-weight myLabel=80 myLabel2=20
     - name: Split a container app's traffic between a label and a revision.
       text: |
-          az containerapp ingress traffic set -n MyContainerapp -g MyResourceGroup --revision-weight latest=80 --label-weight myLabel=20
+          az containerapp ingress traffic set -n my-containerapp -g MyResourceGroup --revision-weight latest=80 --label-weight myLabel=20
 """
 
 helps['containerapp ingress traffic show'] = """
@@ -984,7 +984,7 @@ helps['containerapp ingress traffic show'] = """
     examples:
     - name: Show a container app's ingress traffic configuration.
       text: |
-          az containerapp ingress traffic show -n MyContainerapp -g MyResourceGroup
+          az containerapp ingress traffic show -n my-containerapp -g MyResourceGroup
 """
 
 helps['containerapp ingress access-restriction'] = """
@@ -998,7 +998,7 @@ helps['containerapp ingress access-restriction set'] = """
     examples:
     - name: Add an allow IP access restriction.
       text: |
-          az containerapp ingress access-restriction set -n MyContainerapp -g MyResourceGroup --rule-name restrictionName --ip-address 192.168.1.1/32 --description "Restriction description." --action Allow
+          az containerapp ingress access-restriction set -n my-containerapp -g MyResourceGroup --rule-name restrictionName --ip-address 192.168.1.1/32 --description "Restriction description." --action Allow
 """
 
 helps['containerapp ingress access-restriction remove'] = """
@@ -1007,7 +1007,7 @@ helps['containerapp ingress access-restriction remove'] = """
     examples:
     - name: Remove an IP access restriction.
       text: |
-          az containerapp ingress access-restriction remove -n MyContainerapp -g MyResourceGroup --rule-name restrictionName
+          az containerapp ingress access-restriction remove -n my-containerapp -g MyResourceGroup --rule-name restrictionName
 """
 
 helps['containerapp ingress access-restriction list'] = """
@@ -1016,7 +1016,7 @@ helps['containerapp ingress access-restriction list'] = """
     examples:
     - name: List IP access restrictions.
       text: |
-          az containerapp ingress access-restriction list -n MyContainerapp -g MyResourceGroup
+          az containerapp ingress access-restriction list -n my-containerapp -g MyResourceGroup
 """
 
 helps['containerapp ingress sticky-sessions'] = """
@@ -1030,10 +1030,10 @@ helps['containerapp ingress sticky-sessions set'] = """
     examples:
     - name: Set affinity to sticky for a container app.
       text: |
-          az containerapp ingress sticky-sessions set -n MyContainerapp -g MyResourceGroup --affinity sticky
+          az containerapp ingress sticky-sessions set -n my-containerapp -g MyResourceGroup --affinity sticky
     - name: Set affinity to none for a container app.
       text: |
-          az containerapp ingress sticky-sessions set -n MyContainerapp -g MyResourceGroup --affinity none
+          az containerapp ingress sticky-sessions set -n my-containerapp -g MyResourceGroup --affinity none
 """
 
 helps['containerapp ingress sticky-sessions show'] = """
@@ -1042,7 +1042,7 @@ helps['containerapp ingress sticky-sessions show'] = """
     examples:
     - name: Show a container app's Sticky affinity configuration.
       text: |
-          az containerapp ingress sticky-sessions show -n MyContainerapp -g MyResourceGroup
+          az containerapp ingress sticky-sessions show -n my-containerapp -g MyResourceGroup
 """
 
 helps['containerapp ingress cors'] = """
@@ -1056,10 +1056,10 @@ helps['containerapp ingress cors enable'] = """
     examples:
     - name: Set allowed origins and allowed methods for a container app.
       text: |
-          az containerapp ingress cors enable -n MyContainerapp -g MyResourceGroup --allowed-origins http://www.contoso.com https://www.contoso.com --allowed-methods GET POST
+          az containerapp ingress cors enable -n my-containerapp -g MyResourceGroup --allowed-origins http://www.contoso.com https://www.contoso.com --allowed-methods GET POST
     - name: Set allowed origins, allowed methods and allowed headers for a container app.
       text: |
-          az containerapp ingress cors enable -n MyContainerapp -g MyResourceGroup --allowed-origins * --allowed-methods * --allowed-headers header1 header2
+          az containerapp ingress cors enable -n my-containerapp -g MyResourceGroup --allowed-origins * --allowed-methods * --allowed-headers header1 header2
 """
 
 helps['containerapp ingress cors disable'] = """
@@ -1068,7 +1068,7 @@ helps['containerapp ingress cors disable'] = """
     examples:
     - name: Disable CORS policy for a container app.
       text: |
-          az containerapp ingress cors disable -n MyContainerapp -g MyResourceGroup
+          az containerapp ingress cors disable -n my-containerapp -g MyResourceGroup
 """
 
 helps['containerapp ingress cors update'] = """
@@ -1077,7 +1077,7 @@ helps['containerapp ingress cors update'] = """
     examples:
     - name: Update allowed origins and allowed methods for a container app while keeping other cors settings.
       text: |
-          az containerapp ingress cors update -n MyContainerapp -g MyResourceGroup --allowed-origins http://www.contoso.com https://www.contoso.com --allowed-methods GET POST
+          az containerapp ingress cors update -n my-containerapp -g MyResourceGroup --allowed-origins http://www.contoso.com https://www.contoso.com --allowed-methods GET POST
 """
 
 helps['containerapp ingress cors show'] = """
@@ -1086,7 +1086,7 @@ helps['containerapp ingress cors show'] = """
     examples:
     - name: Show CORS policy for a container app.
       text: |
-          az containerapp ingress cors show -n MyContainerapp -g MyResourceGroup
+          az containerapp ingress cors show -n my-containerapp -g MyResourceGroup
 """
 
 # Registry Commands
@@ -1101,7 +1101,7 @@ helps['containerapp registry show'] = """
     examples:
     - name: Show the details of a container registry.
       text: |
-          az containerapp registry show -n MyContainerapp -g MyResourceGroup --server MyContainerappRegistry.azurecr.io
+          az containerapp registry show -n my-containerapp -g MyResourceGroup --server MyContainerappRegistry.azurecr.io
 """
 
 helps['containerapp registry list'] = """
@@ -1110,7 +1110,7 @@ helps['containerapp registry list'] = """
     examples:
     - name: List container registries configured in a container app.
       text: |
-          az containerapp registry list -n MyContainerapp -g MyResourceGroup
+          az containerapp registry list -n my-containerapp -g MyResourceGroup
 """
 
 helps['containerapp registry set'] = """
@@ -1119,7 +1119,7 @@ helps['containerapp registry set'] = """
     examples:
     - name: Configure a container app to use a registry.
       text: |
-          az containerapp registry set -n MyContainerapp -g MyResourceGroup \\
+          az containerapp registry set -n my-containerapp -g MyResourceGroup \\
               --server MyExistingContainerappRegistry.azurecr.io --username MyRegistryUsername --password MyRegistryPassword
 """
 
@@ -1129,7 +1129,7 @@ helps['containerapp registry remove'] = """
     examples:
     - name: Remove a registry from a Containerapp.
       text: |
-          az containerapp registry remove -n MyContainerapp -g MyResourceGroup --server MyContainerappRegistry.azurecr.io
+          az containerapp registry remove -n my-containerapp -g MyResourceGroup --server MyContainerappRegistry.azurecr.io
 """
 
 # Secret Commands
@@ -1144,7 +1144,7 @@ helps['containerapp secret show'] = """
     examples:
     - name: Show the details of a secret.
       text: |
-          az containerapp secret show -n MyContainerapp -g MyResourceGroup --secret-name MySecret
+          az containerapp secret show -n my-containerapp -g MyResourceGroup --secret-name MySecret
 """
 
 helps['containerapp secret list'] = """
@@ -1153,7 +1153,7 @@ helps['containerapp secret list'] = """
     examples:
     - name: List the secrets of a container app.
       text: |
-          az containerapp secret list -n MyContainerapp -g MyResourceGroup
+          az containerapp secret list -n my-containerapp -g MyResourceGroup
 """
 
 helps['containerapp secret remove'] = """
@@ -1162,7 +1162,7 @@ helps['containerapp secret remove'] = """
     examples:
     - name: Remove secrets from a container app.
       text: |
-          az containerapp secret remove -n MyContainerapp -g MyResourceGroup --secret-names MySecret MySecret2
+          az containerapp secret remove -n my-containerapp -g MyResourceGroup --secret-names MySecret MySecret2
 """
 
 helps['containerapp secret set'] = """
@@ -1171,10 +1171,10 @@ helps['containerapp secret set'] = """
     examples:
     - name: Add secrets to a container app.
       text: |
-          az containerapp secret set -n MyContainerapp -g MyResourceGroup --secrets MySecretName1=MySecretValue1 MySecretName2=keyvaultref:https://example.vault.azure.net/secrets/mysecret,identityref:/subscriptions/sub/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myidentity
+          az containerapp secret set -n my-containerapp -g MyResourceGroup --secrets MySecretName1=MySecretValue1 MySecretName2=keyvaultref:https://example.vault.azure.net/secrets/mysecret,identityref:/subscriptions/sub/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myidentity
     - name: Update a secret.
       text: |
-          az containerapp secret set -n MyContainerapp -g MyResourceGroup --secrets MyExistingSecretName=MyNewSecretValue MyExistingSecretName2=keyvaultref:https://example.vault.azure.net/secrets/mysecret,identityref:/subscriptions/sub/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myidentity
+          az containerapp secret set -n my-containerapp -g MyResourceGroup --secrets MyExistingSecretName=MyNewSecretValue MyExistingSecretName2=keyvaultref:https://example.vault.azure.net/secrets/mysecret,identityref:/subscriptions/sub/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myidentity
 """
 
 helps['containerapp github-action'] = """
@@ -1187,21 +1187,21 @@ helps['containerapp github-action add'] = """
     short-summary: Add a GitHub Actions workflow to a repository to deploy a container app.
     examples:
     - name: Add GitHub Actions, using Azure Container Registry and personal access token.
-      text: az containerapp github-action add -g MyResourceGroup -n MyContainerapp --repo-url https://github.com/userid/repo --branch main
+      text: az containerapp github-action add -g MyResourceGroup -n my-containerapp --repo-url https://github.com/userid/repo --branch main
           --registry-url myregistryurl.azurecr.io
           --service-principal-client-id 00000000-0000-0000-0000-00000000
           --service-principal-tenant-id 00000000-0000-0000-0000-00000000
           --service-principal-client-secret ClientSecret
           --token MyAccessToken
     - name: Add GitHub Actions, using Azure Container Registry and log in to GitHub flow to retrieve personal access token.
-      text: az containerapp github-action add -g MyResourceGroup -n MyContainerapp --repo-url https://github.com/userid/repo --branch main
+      text: az containerapp github-action add -g MyResourceGroup -n my-containerapp --repo-url https://github.com/userid/repo --branch main
           --registry-url myregistryurl.azurecr.io
           --service-principal-client-id 00000000-0000-0000-0000-00000000
           --service-principal-tenant-id 00000000-0000-0000-0000-00000000
           --service-principal-client-secret ClientSecret
           --login-with-github
     - name: Add GitHub Actions, using Docker Hub and log in to GitHub flow to retrieve personal access token.
-      text: az containerapp github-action add -g MyResourceGroup -n MyContainerapp --repo-url https://github.com/userid/repo --branch main
+      text: az containerapp github-action add -g MyResourceGroup -n my-containerapp --repo-url https://github.com/userid/repo --branch main
           --registry-username MyUsername
           --registry-password MyPassword
           --service-principal-client-id 00000000-0000-0000-0000-00000000
@@ -1242,7 +1242,7 @@ helps['containerapp dapr enable'] = """
     examples:
     - name: Enable Dapr for a container app.
       text: |
-          az containerapp dapr enable -n MyContainerapp -g MyResourceGroup --dapr-app-id my-app-id --dapr-app-port 8080
+          az containerapp dapr enable -n my-containerapp -g MyResourceGroup --dapr-app-id my-app-id --dapr-app-port 8080
 """
 
 helps['containerapp dapr disable'] = """
@@ -1251,7 +1251,7 @@ helps['containerapp dapr disable'] = """
     examples:
     - name: Disable Dapr for a container app.
       text: |
-          az containerapp dapr disable -n MyContainerapp -g MyResourceGroup
+          az containerapp dapr disable -n my-containerapp -g MyResourceGroup
 """
 
 # custom domain Commands
@@ -1276,7 +1276,7 @@ helps['containerapp hostname add'] = """
     examples:
     - name: Add hostname without binding.
       text: |
-          az containerapp hostname add -n MyContainerapp -g MyResourceGroup --hostname MyHostname
+          az containerapp hostname add -n my-containerapp -g MyResourceGroup --hostname MyHostname
 """
 
 helps['containerapp hostname bind'] = """
@@ -1285,10 +1285,10 @@ helps['containerapp hostname bind'] = """
     examples:
     - name: Add or update hostname and binding with a provided certificate.
       text: |
-          az containerapp hostname bind -n MyContainerapp -g MyResourceGroup --hostname MyHostname --certificate MyCertificateId
+          az containerapp hostname bind -n my-containerapp -g MyResourceGroup --hostname MyHostname --certificate MyCertificateId
     - name: Look for or create a managed certificate and bind with the hostname if no certificate or thumbprint is provided.
       text: |
-          az containerapp hostname bind -n MyContainerapp -g MyResourceGroup --hostname MyHostname
+          az containerapp hostname bind -n my-containerapp -g MyResourceGroup --hostname MyHostname
 """
 
 helps['containerapp hostname delete'] = """
@@ -1297,7 +1297,7 @@ helps['containerapp hostname delete'] = """
     examples:
     - name: Delete secrets from a container app.
       text: |
-          az containerapp hostname delete -n MyContainerapp -g MyResourceGroup --hostname MyHostname
+          az containerapp hostname delete -n my-containerapp -g MyResourceGroup --hostname MyHostname
 """
 
 helps['containerapp hostname list'] = """
@@ -1306,7 +1306,7 @@ helps['containerapp hostname list'] = """
     examples:
     - name: List the hostnames of a container app.
       text: |
-          az containerapp hostname list -n MyContainerapp -g MyResourceGroup
+          az containerapp hostname list -n my-containerapp -g MyResourceGroup
 """
 
 # Auth commands
@@ -1320,7 +1320,7 @@ type: command
 short-summary: Show the authentication settings for the containerapp.
 examples:
   - name: Show the authentication settings for the containerapp.
-    text: az containerapp auth show --name MyContainerapp --resource-group MyResourceGroup
+    text: az containerapp auth show --name my-containerapp --resource-group MyResourceGroup
 """
 
 helps['containerapp auth update'] = """
@@ -1329,19 +1329,19 @@ short-summary: Update the authentication settings for the containerapp.
 examples:
   - name: Update the client ID of the AAD provider already configured.
     text: |
-        az containerapp auth update -g myResourceGroup --name MyContainerapp --set identityProviders.azureActiveDirectory.registration.clientId=my-client-id
+        az containerapp auth update -g myResourceGroup --name my-containerapp --set identityProviders.azureActiveDirectory.registration.clientId=my-client-id
   - name: Configure the app with file based authentication by setting the config file path.
     text: |
-        az containerapp auth update -g myResourceGroup --name MyContainerapp --config-file-path D:\\home\\site\\wwwroot\\auth.json
+        az containerapp auth update -g myResourceGroup --name my-containerapp --config-file-path D:\\home\\site\\wwwroot\\auth.json
   - name: Configure the app to allow unauthenticated requests to hit the app.
     text: |
-        az containerapp auth update -g myResourceGroup --name MyContainerapp --unauthenticated-client-action AllowAnonymous
+        az containerapp auth update -g myResourceGroup --name my-containerapp --unauthenticated-client-action AllowAnonymous
   - name: Configure the app to redirect unauthenticated requests to the Facebook provider.
     text: |
-        az containerapp auth update -g myResourceGroup --name MyContainerapp --redirect-provider Facebook
+        az containerapp auth update -g myResourceGroup --name my-containerapp --redirect-provider Facebook
   - name: Configure the app to listen to the forward headers X-FORWARDED-HOST and X-FORWARDED-PROTO.
     text: |
-        az containerapp auth update -g myResourceGroup --name MyContainerapp --proxy-convention Standard
+        az containerapp auth update -g myResourceGroup --name my-containerapp --proxy-convention Standard
 """
 
 helps['containerapp auth apple'] = """
@@ -1354,7 +1354,7 @@ type: command
 short-summary: Show the authentication settings for the Apple identity provider.
 examples:
   - name: Show the authentication settings for the Apple identity provider.
-    text: az containerapp auth apple show --name MyContainerapp --resource-group MyResourceGroup
+    text: az containerapp auth apple show --name my-containerapp --resource-group MyResourceGroup
 """
 
 helps['containerapp auth apple update'] = """
@@ -1363,7 +1363,7 @@ short-summary: Update the client id and client secret for the Apple identity pro
 examples:
   - name: Update the client id and client secret for the Apple identity provider.
     text: |
-        az containerapp auth apple update  -g myResourceGroup --name MyContainerapp \\
+        az containerapp auth apple update  -g myResourceGroup --name my-containerapp \\
           --client-id my-client-id --client-secret very_secret_password
 """
 
@@ -1377,7 +1377,7 @@ type: command
 short-summary: Show the authentication settings for the Facebook identity provider.
 examples:
   - name: Show the authentication settings for the Facebook identity provider.
-    text: az containerapp auth facebook show --name MyContainerapp --resource-group MyResourceGroup
+    text: az containerapp auth facebook show --name my-containerapp --resource-group MyResourceGroup
 """
 
 helps['containerapp auth facebook update'] = """
@@ -1386,7 +1386,7 @@ short-summary: Update the app id and app secret for the Facebook identity provid
 examples:
   - name: Update the app id and app secret for the Facebook identity provider.
     text: |
-        az containerapp auth facebook update  -g myResourceGroup --name MyContainerapp \\
+        az containerapp auth facebook update  -g myResourceGroup --name my-containerapp \\
           --app-id my-client-id --app-secret very_secret_password
 """
 
@@ -1400,7 +1400,7 @@ type: command
 short-summary: Show the authentication settings for the GitHub identity provider.
 examples:
   - name: Show the authentication settings for the GitHub identity provider.
-    text: az containerapp auth github show --name MyContainerapp --resource-group MyResourceGroup
+    text: az containerapp auth github show --name my-containerapp --resource-group MyResourceGroup
 """
 
 helps['containerapp auth github update'] = """
@@ -1409,7 +1409,7 @@ short-summary: Update the client id and client secret for the GitHub identity pr
 examples:
   - name: Update the client id and client secret for the GitHub identity provider.
     text: |
-        az containerapp auth github update  -g myResourceGroup --name MyContainerapp \\
+        az containerapp auth github update  -g myResourceGroup --name my-containerapp \\
           --client-id my-client-id --client-secret very_secret_password
 """
 
@@ -1423,7 +1423,7 @@ type: command
 short-summary: Show the authentication settings for the Google identity provider.
 examples:
   - name: Show the authentication settings for the Google identity provider.
-    text: az containerapp auth google show --name MyContainerapp --resource-group MyResourceGroup
+    text: az containerapp auth google show --name my-containerapp --resource-group MyResourceGroup
 """
 
 helps['containerapp auth google update'] = """
@@ -1432,7 +1432,7 @@ short-summary: Update the client id and client secret for the Google identity pr
 examples:
   - name: Update the client id and client secret for the Google identity provider.
     text: |
-        az containerapp auth google update  -g myResourceGroup --name MyContainerapp \\
+        az containerapp auth google update  -g myResourceGroup --name my-containerapp \\
           --client-id my-client-id --client-secret very_secret_password
 """
 
@@ -1446,7 +1446,7 @@ type: command
 short-summary: Show the authentication settings for the Azure Active Directory identity provider.
 examples:
   - name: Show the authentication settings for the Azure Active Directory identity provider.
-    text: az containerapp auth microsoft show --name MyContainerapp --resource-group MyResourceGroup
+    text: az containerapp auth microsoft show --name my-containerapp --resource-group MyResourceGroup
 """
 
 helps['containerapp auth microsoft update'] = """
@@ -1455,7 +1455,7 @@ short-summary: Update the client id and client secret for the Azure Active Direc
 examples:
   - name: Update the open id issuer, client id and client secret for the Azure Active Directory identity provider.
     text: |
-        az containerapp auth microsoft update  -g myResourceGroup --name MyContainerapp \\
+        az containerapp auth microsoft update  -g myResourceGroup --name my-containerapp \\
           --client-id my-client-id --client-secret very_secret_password \\
           --issuer https://sts.windows.net/54826b22-38d6-4fb2-bad9-b7983a3e9c5a/
 """
@@ -1470,7 +1470,7 @@ type: command
 short-summary: Show the authentication settings for the custom OpenID Connect identity provider.
 examples:
   - name: Show the authentication settings for the custom OpenID Connect identity provider.
-    text: az containerapp auth openid-connect show --name MyContainerapp --resource-group MyResourceGroup \\
+    text: az containerapp auth openid-connect show --name my-containerapp --resource-group MyResourceGroup \\
             --provider-name myOpenIdConnectProvider
 """
 
@@ -1480,7 +1480,7 @@ short-summary: Configure a new custom OpenID Connect identity provider.
 examples:
   - name: Configure a new custom OpenID Connect identity provider.
     text: |
-        az containerapp auth openid-connect add -g myResourceGroup --name MyContainerapp \\
+        az containerapp auth openid-connect add -g myResourceGroup --name my-containerapp \\
           --provider-name myOpenIdConnectProvider --client-id my-client-id \\
           --client-secret-name MY_SECRET_APP_SETTING \\
           --openid-configuration https://myopenidprovider.net/.well-known/openid-configuration
@@ -1492,7 +1492,7 @@ short-summary: Update the client id and client secret setting name for an existi
 examples:
   - name: Update the client id and client secret setting name for an existing custom OpenID Connect identity provider.
     text: |
-        az containerapp auth openid-connect update -g myResourceGroup --name MyContainerapp \\
+        az containerapp auth openid-connect update -g myResourceGroup --name my-containerapp \\
           --provider-name myOpenIdConnectProvider --client-id my-client-id \\
           --client-secret-name MY_SECRET_APP_SETTING
 """
@@ -1503,7 +1503,7 @@ short-summary: Removes an existing custom OpenID Connect identity provider.
 examples:
   - name: Removes an existing custom OpenID Connect identity provider.
     text: |
-        az containerapp auth openid-connect remove --name MyContainerapp --resource-group MyResourceGroup \\
+        az containerapp auth openid-connect remove --name my-containerapp --resource-group MyResourceGroup \\
           --provider-name myOpenIdConnectProvider
 """
 
@@ -1517,7 +1517,7 @@ type: command
 short-summary: Show the authentication settings for the Twitter identity provider.
 examples:
   - name: Show the authentication settings for the Twitter identity provider.
-    text: az containerapp auth twitter show --name MyContainerapp --resource-group MyResourceGroup
+    text: az containerapp auth twitter show --name my-containerapp --resource-group MyResourceGroup
 """
 
 helps['containerapp auth twitter update'] = """
@@ -1526,7 +1526,7 @@ short-summary: Update the consumer key and consumer secret for the Twitter ident
 examples:
   - name: Update the consumer key and consumer secret for the Twitter identity provider.
     text: |
-        az containerapp auth twitter update  -g myResourceGroup --name MyContainerapp \\
+        az containerapp auth twitter update  -g myResourceGroup --name my-containerapp \\
           --consumer-key my-client-id --consumer-secret very_secret_password
 """
 

@@ -103,6 +103,12 @@ CONST_NETWORK_PLUGIN_MODE_OVERLAY = "overlay"
 CONST_NETWORK_DATAPLANE_AZURE = "azure"
 CONST_NETWORK_DATAPLANE_CILIUM = "cilium"
 
+# network policy
+CONST_NETWORK_POLICY_AZURE = "azure"
+CONST_NETWORK_POLICY_CILIUM = "cilium"
+CONST_NETWORK_POLICY_CALICO = "calico"
+CONST_NETWORK_POLICY_NONE = "none"
+
 # consts for addons
 # http application routing
 CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME = "httpApplicationRouting"

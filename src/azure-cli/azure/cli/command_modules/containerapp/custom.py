@@ -496,11 +496,11 @@ def update_containerapp_logic(cmd,
                         volume_mount_def["volumeName"] = volume_def["name"]
                         volume_mount_def["mountPath"] = secret_volume_mount
 
-                        if "volumes" not in new_containerapp["properties"]["template"]:
+                        if "volumes" not in new_containerapp["properties"]["template"] or new_containerapp["properties"]["template"]["volumes"] is None:
                             new_containerapp["properties"]["template"]["volumes"] = [volume_def]
                         else:
                             new_containerapp["properties"]["template"]["volumes"].append(volume_def)
-                        c["volumeMounts"] = volume_mount_def
+                        c["volumeMounts"] = [volume_mount_def]
                     else:
                         if len(c["volumeMounts"]) > 1:
                             raise ValidationError("Usage error: --secret-volume-mount can only be used with a container that has a single volume mount, to define multiple volumes and mounts please use --yaml")
@@ -819,7 +819,7 @@ def create_managed_environment(cmd,
                                hostname=None,
                                certificate_file=None,
                                certificate_password=None,
-                               enable_workload_profiles=False,
+                               enable_workload_profiles=True,
                                mtls_enabled=None,
                                no_wait=False):
     raw_parameters = locals()
@@ -2702,13 +2702,27 @@ def enable_cors_policy(cmd, name, resource_group_name, allowed_origins, allowed_
     if not containerapp_def:
         raise ResourceNotFoundError(f"The containerapp '{name}' does not exist in group '{resource_group_name}'")
 
+    reset_max_age = False
+    if max_age == "":
+        reset_max_age = True
+
     containerapp_patch = {}
-    safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowedOrigins", value=allowed_origins)
-    safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowedMethods", value=allowed_methods)
-    safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowedHeaders", value=allowed_headers)
-    safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "exposeHeaders", value=expose_headers)
-    safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowCredentials", value=allow_credentials)
-    safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "maxAge", value=max_age)
+    if allowed_origins is not None:
+        safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowedOrigins", value=allowed_origins)
+    if allowed_methods is not None:
+        safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowedMethods", value=allowed_methods)
+    if allowed_headers is not None:
+        safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowedHeaders", value=allowed_headers)
+    if expose_headers is not None:
+        safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "exposeHeaders", value=expose_headers)
+    if allow_credentials is not None:
+        safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowCredentials", value=allow_credentials)
+    if max_age is not None:
+        if reset_max_age:
+            safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "maxAge", value=None)
+        else:
+            safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "maxAge", value=max_age)
+
     try:
         r = ContainerAppClient.update(
             cmd=cmd, resource_group_name=resource_group_name, name=name, container_app_envelope=containerapp_patch, no_wait=no_wait)
@@ -4898,7 +4912,7 @@ def add_workload_profile(cmd, resource_group_name, env_name, workload_profile_na
     return update_managed_environment(cmd, env_name, resource_group_name, workload_profile_type=workload_profile_type, workload_profile_name=workload_profile_name, min_nodes=min_nodes, max_nodes=max_nodes)
 
 
-def update_workload_profile(cmd, resource_group_name, env_name, workload_profile_name, workload_profile_type=None, min_nodes=None, max_nodes=None):
+def update_workload_profile(cmd, resource_group_name, env_name, workload_profile_name, min_nodes=None, max_nodes=None):
     try:
         r = ManagedEnvironmentClient.show(cmd=cmd, resource_group_name=resource_group_name, name=env_name)
     except CLIError as e:
@@ -4911,7 +4925,7 @@ def update_workload_profile(cmd, resource_group_name, env_name, workload_profile
     if workload_profile_name.lower() not in workload_profiles_lower:
         raise ValidationError(f"Workload profile with name {workload_profile_name} does not exist in this environment. The workload profiles available in this environment are {','.join([p['name'] for p in workload_profiles])}")
 
-    return update_managed_environment(cmd, env_name, resource_group_name, workload_profile_type=workload_profile_type, workload_profile_name=workload_profile_name, min_nodes=min_nodes, max_nodes=max_nodes)
+    return update_managed_environment(cmd, env_name, resource_group_name, workload_profile_name=workload_profile_name, min_nodes=min_nodes, max_nodes=max_nodes)
 
 
 def delete_workload_profile(cmd, resource_group_name, env_name, workload_profile_name):
@@ -4928,11 +4942,11 @@ def delete_workload_profile(cmd, resource_group_name, env_name, workload_profile
 
     workload_profiles = [p for p in r["properties"]["workloadProfiles"] if p["name"].lower() != workload_profile_name.lower()]
 
-    r["properties"]["workloadProfiles"] = workload_profiles
-
+    managed_env_def = {}
+    safe_set(managed_env_def, "properties", "workloadProfiles", value=workload_profiles)
     try:
-        r = ManagedEnvironmentClient.create(
-            cmd=cmd, resource_group_name=resource_group_name, name=env_name, managed_environment_envelope=r)
+        r = ManagedEnvironmentClient.update(
+            cmd=cmd, resource_group_name=resource_group_name, name=env_name, managed_environment_envelope=managed_env_def)
 
         return r
     except Exception as e:

@@ -391,6 +391,18 @@ def cf_share_service(cli_ctx, kwargs):
     account_name = kwargs.pop('account_name', None)
     account_url = kwargs.pop('account_url', None)
     enable_file_backup_request_intent = kwargs.pop('enable_file_backup_request_intent', None)
+
+    disallow_trailing_dot = kwargs.pop('disallow_trailing_dot', None)
+    disallow_source_trailing_dot = kwargs.pop('disallow_source_trailing_dot', None)
+
+    if disallow_trailing_dot is not None:
+        client_kwargs["allow_trailing_dot"] = not disallow_trailing_dot
+    if disallow_source_trailing_dot is not None:
+        copy_url = kwargs.get("copy_source")
+        import re
+        if kwargs.get("source_share") or (copy_url and re.match(r"https?:\/\/.*?\.file\..*", copy_url)):
+            client_kwargs["allow_source_trailing_dot"] = not disallow_source_trailing_dot
+
     if token_credential is not None and not enable_file_backup_request_intent:
         raise RequiredArgumentMissingError("--enable-file-backup-request-intent is required for file share OAuth")
     if enable_file_backup_request_intent:
@@ -430,8 +442,21 @@ def cf_share_file_client(cli_ctx, kwargs):
         kwargs.pop('share_name')
         kwargs.pop('directory_name')
         kwargs.pop('file_name')
+
+        disallow_trailing_dot = kwargs.pop('disallow_trailing_dot', None)
+        disallow_source_trailing_dot = kwargs.pop('disallow_source_trailing_dot', None)
+
+        client_kwargs = {}
+        if disallow_trailing_dot is not None:
+            client_kwargs["allow_trailing_dot"] = not disallow_trailing_dot
+        if disallow_source_trailing_dot is not None:
+            copy_url = kwargs.get("copy_source")
+            import re
+            if kwargs.get("source_share") or (copy_url and re.match(r"https?:\/\/.*?\.file\..*", copy_url)):
+                client_kwargs["allow_source_trailing_dot"] = not disallow_source_trailing_dot
+
         return t_file_client.from_file_url(file_url=kwargs.pop('file_url'),
-                                           credential=credential, token_intent=token_intent)
+                                           credential=credential, token_intent=token_intent, **client_kwargs)
     if 'file_url' in kwargs:
         kwargs.pop('file_url')
 
