@@ -354,7 +354,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         tier=None, enable_bursting=None, edge_zone=None, security_type=None, support_hibernation=None,
                         public_network_access=None, accelerated_network=None, architecture=None,
                         data_access_auth_mode=None, gallery_image_reference_type=None, security_data_uri=None,
-                        upload_type=None, secure_vm_disk_encryption_set=None, performance_plus=None):
+                        upload_type=None, secure_vm_disk_encryption_set=None, performance_plus=None,
+                        optimized_for_frequent_attach=None):
 
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -525,6 +526,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
             disk.supported_capabilities.architecture = architecture
     if data_access_auth_mode is not None:
         disk.data_access_auth_mode = data_access_auth_mode
+    if optimized_for_frequent_attach is not None:
+        disk.optimized_for_frequent_attach = optimized_for_frequent_attach
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.disks.begin_create_or_update, resource_group_name, disk_name, disk)
@@ -669,7 +672,8 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
                     source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
                     hyper_v_generation=None, tags=None, no_wait=False, disk_encryption_set=None,
                     encryption_type=None, network_access_policy=None, disk_access=None, edge_zone=None,
-                    public_network_access=None, accelerated_network=None, architecture=None):
+                    public_network_access=None, accelerated_network=None, architecture=None,
+                    elastic_san_resource_id=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -685,13 +689,16 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
             option = getattr(DiskCreateOption, 'copy_start') if copy_start else getattr(DiskCreateOption, 'copy')
     elif for_upload:
         option = getattr(DiskCreateOption, 'upload')
+    elif elastic_san_resource_id:
+        option = getattr(DiskCreateOption, 'copy_from_san_snapshot')
     else:
         option = getattr(DiskCreateOption, 'empty')
 
     creation_data = CreationData(create_option=option, source_uri=source_blob_uri,
                                  image_reference=None,
                                  source_resource_id=source_disk or source_snapshot,
-                                 storage_account_id=source_storage_account_id)
+                                 storage_account_id=source_storage_account_id,
+                                 elastic_san_resource_id=elastic_san_resource_id)
 
     if size_gb is None and option == DiskCreateOption.empty:
         raise CLIError('Please supply size for the snapshots')

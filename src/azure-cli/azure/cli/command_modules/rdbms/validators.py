@@ -23,7 +23,9 @@ from ._flexible_server_util import (get_mysql_versions, get_mysql_skus, get_mysq
                                     get_postgres_skus, get_postgres_storage_sizes, get_postgres_tiers,
                                     _is_resource_name)
 from ._flexible_server_location_capabilities_util import (get_postgres_location_capability_info,
-                                                          get_postgres_server_capability_info)
+                                                          get_postgres_server_capability_info,
+                                                          get_performance_tiers,
+                                                          get_performance_tiers_for_storage)
 
 logger = get_logger(__name__)
 
@@ -297,7 +299,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                            standby_availability_zone=None, high_availability=None, subnet=None, public_access=None,
                            version=None, instance=None, geo_redundant_backup=None,
                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
-                           auto_grow=None, replication_role=None):
+                           auto_grow=None, replication_role=None, performance_tier=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
     if not instance:
         list_location_capability_info = get_postgres_location_capability_info(
@@ -315,6 +317,10 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
         tier = instance.sku.tier
+    _pg_storage_performance_tier_validator(performance_tier,
+                                           sku_info,
+                                           tier,
+                                           instance.storage.storage_size_gb if storage_gb is None else storage_gb)
     if geo_redundant_backup is None and instance is not None:
         geo_redundant_backup = instance.backup.geo_redundant_backup
     _pg_georedundant_backup_validator(geo_redundant_backup, geo_backup_supported)
@@ -356,6 +362,20 @@ def _pg_sku_name_validator(sku_name, sku_info, tier, instance):
             raise CLIError('Incorrect value for --sku-name. The SKU name does not match {} tier. '
                            'Specify --tier if you did not. Or CLI will set GeneralPurpose as the default tier. '
                            'Allowed values : {}'.format(tier, skus))
+
+
+def _pg_storage_performance_tier_validator(performance_tier, sku_info, tier=None, storage_size=None):
+    if performance_tier:
+        tiers = get_postgres_tiers(sku_info)
+        if tier in tiers:
+            if storage_size is None:
+                performance_tiers = get_performance_tiers(sku_info[tier]["storage_edition"])
+            else:
+                performance_tiers = get_performance_tiers_for_storage(sku_info[tier]["storage_edition"],
+                                                                      storage_size=storage_size)
+            if performance_tier not in performance_tiers:
+                raise CLIError('Incorrect value for --performance-tier for storage-size: {}.'
+                               ' Allowed values : {}'.format(storage_size, performance_tiers))
 
 
 def _pg_version_validator(version, versions):
@@ -577,7 +597,8 @@ def validate_mysql_replica(server):
                               "Scale up the source server to General Purpose or Memory Optimized. ")
 
 
-def validate_postgres_replica(cmd, tier, location, instance, list_location_capability_info=None):
+def validate_postgres_replica(cmd, tier, location, instance, sku_name,
+                              storage_gb, performance_tier=None, list_location_capability_info=None):
     # Tier validation
     if tier == 'Burstable':
         raise ValidationError("Read replica is not supported for the Burstable pricing tier. "
@@ -588,6 +609,14 @@ def validate_postgres_replica(cmd, tier, location, instance, list_location_capab
 
     if not list_location_capability_info:
         list_location_capability_info = get_postgres_location_capability_info(cmd, location)
+
+    sku_info = list_location_capability_info['sku_info']
+    _pg_tier_validator(tier, sku_info)  # need to be validated first
+    _pg_sku_name_validator(sku_name, sku_info, tier, instance)
+    _pg_storage_performance_tier_validator(performance_tier,
+                                           sku_info,
+                                           tier,
+                                           storage_gb)
 
 
 def validate_mysql_tier_update(instance, tier):

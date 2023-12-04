@@ -584,6 +584,8 @@ def aks_create(
     nodepool_tags=None,
     nodepool_labels=None,
     nodepool_taints=None,
+    nodepool_allowed_host_ports=None,
+    nodepool_asg_ids=None,
     node_osdisk_type=None,
     node_osdisk_size=None,
     vm_set_type=None,
@@ -2193,6 +2195,8 @@ def aks_agentpool_add(
     aks_custom_headers=None,
     host_group_id=None,
     gpu_instance_profile=None,
+    allowed_host_ports=None,
+    asg_ids=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -2237,6 +2241,8 @@ def aks_agentpool_update(
     scale_down_mode=None,
     no_wait=False,
     aks_custom_headers=None,
+    allowed_host_ports=None,
+    asg_ids=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()

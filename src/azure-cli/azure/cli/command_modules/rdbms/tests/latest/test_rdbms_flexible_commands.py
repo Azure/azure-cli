@@ -2070,3 +2070,49 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
             self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
 
 
+class FlexibleServerAdvancedThreatProtectionSettingMgmtScenarioTest(ScenarioTest):
+    postgres_location = 'eastus'
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    @ServerPreparer(engine_type='postgres', location=postgres_location)
+    def test_postgres_flexible_server_advanced_threat_protection_setting_mgmt(self, resource_group, server):
+        self._test_advanced_threat_protection_setting_mgmt('postgres', resource_group, server)
+
+
+    def _test_advanced_threat_protection_setting_mgmt(self, database_engine, resource_group, server):
+        location = self.postgres_location
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, 32)
+
+        # create a server
+        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --public-access none '
+                 '--tier GeneralPurpose --sku-name Standard_D2s_v3 --yes'
+                 .format(database_engine, resource_group, server_name, location, 128))
+        
+        # show advanced threat protection setting for server
+        self.cmd('{} flexible-server advanced-threat-protection-setting show -g {} --server-name {} '
+                    .format(database_engine, resource_group, server_name),
+                    checks=[JMESPathCheck('state', "Disabled")]).get_output_in_json()
+        
+        # Enable advanced threat protection setting for server
+        self.cmd('{} flexible-server advanced-threat-protection-setting update -g {} --server-name {} --state Enabled'
+                    .format(database_engine, resource_group, server_name))
+        
+        # show advanced threat protection setting for server
+        self.cmd('{} flexible-server advanced-threat-protection-setting show -g {} --server-name {} '
+                    .format(database_engine, resource_group, server_name),
+                    checks=[JMESPathCheck('state', "Enabled")]).get_output_in_json()
+        
+        # Disable advanced threat protection setting for server
+        self.cmd('{} flexible-server advanced-threat-protection-setting update -g {} --server-name {} --state Disabled'
+                    .format(database_engine, resource_group, server_name))
+        
+        # show advanced threat protection setting for server
+        self.cmd('{} flexible-server advanced-threat-protection-setting show -g {} --server-name {} '
+                    .format(database_engine, resource_group, server_name),
+                    checks=[JMESPathCheck('state', "Disabled")]).get_output_in_json()
+
+        # delete everything
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
+
+
