@@ -161,7 +161,8 @@ if "%TARGET%"=="msi" (
     copy %REPO_ROOT%\build_scripts\windows\scripts\azps.ps1 %BUILDING_DIR%\wbin\
     copy %REPO_ROOT%\build_scripts\windows\scripts\az %BUILDING_DIR%\wbin\
 ) else (
-    copy %REPO_ROOT%\build_scripts\windows\scripts\az_zip.cmd %BUILDING_DIR%\wbin\az.cmd
+    copy %REPO_ROOT%\build_scripts\windows\scripts\az.cmd %BUILDING_DIR%\wbin\
+    powershell -Command "(Get-Content '%BUILDING_DIR%\wbin\az.cmd') -replace 'SET AZ_INSTALLER=MSI','SET AZ_INSTALLER=ZIP' | Set-Content '%BUILDING_DIR%\wbin\az.cmd'"
 )
 if %errorlevel% neq 0 goto ERROR
 copy %REPO_ROOT%\build_scripts\windows\resources\CLI_LICENSE.rtf %BUILDING_DIR%
@@ -215,7 +216,7 @@ if "%TARGET%"=="msi" (
 ) else (
     echo Building ZIP...
     REM Rename zip root folder to "Azure CLI"
-    ren %BUILDING_DIR% "%ZIP_DIR%"
+    ren %BUILDING_DIR% "Azure CLI"
     "%ProgramFiles%\7-Zip\7z.exe" a -tzip "%OUTPUT_DIR%\Microsoft Azure CLI.zip" "%ZIP_DIR%"
 )
 
