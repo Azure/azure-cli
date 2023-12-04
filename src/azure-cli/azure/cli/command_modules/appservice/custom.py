@@ -3045,14 +3045,19 @@ def _get_log(url, headers, log_file=None):
                 f.write(data)
     else:  # streaming
         std_encoding = sys.stdout.encoding
-        for chunk in r.stream():
-            if chunk:
-                # Extra encode() and decode for stdout which does not surpport 'utf-8'
-                logger.warning(chunk.decode(encoding='utf-8', errors='replace')
-                               .encode(std_encoding, errors='replace')
-                               .decode(std_encoding, errors='replace')
-                               .rstrip('\n\r'))  # each line of log has CRLF.
-    r.release_conn()
+        try:
+            for chunk in r.stream():
+                if chunk:
+                    # Extra encode() and decode for stdout which does not support 'utf-8'
+                    logger.warning(chunk.decode(encoding='utf-8', errors='replace')
+                                   .encode(std_encoding, errors='replace')
+                                   .decode(std_encoding, errors='replace')
+                                   .rstrip('\n\r'))  # each line of log has CRLF.
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.error("Log stream interrupted. Exiting live log stream.")
+            logger.debug(ex)
+        finally:
+            r.release_conn()
 
 
 def upload_ssl_cert(cmd, resource_group_name,
