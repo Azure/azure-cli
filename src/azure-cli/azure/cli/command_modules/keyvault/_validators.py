@@ -662,7 +662,7 @@ def validate_key_id(entity_type):
 
 def validate_keyvault_resource_id(entity_type):
     def _validate(ns):
-        from .vendored_sdks.azure_keyvault_t1.key_vault_id import KeyVaultIdentifier
+        from azure.keyvault.keys._shared import parse_key_vault_id
 
         pure_entity_type = entity_type.replace('deleted', '')
         name = getattr(ns, pure_entity_type + '_name', None) or getattr(ns, 'name', None)
@@ -679,58 +679,20 @@ def validate_keyvault_resource_id(entity_type):
             if hsm_name:
                 raise CLIError('--hsm-name and --id are mutually exclusive.')
 
-            ident = KeyVaultIdentifier(uri=identifier, collection=entity_type + 's')
+            kv_resource_id = parse_key_vault_id(identifier)
             if getattr(ns, 'command', None) and 'key rotation-policy' in ns.command:
-                setattr(ns, 'key_name', ident.name)
+                setattr(ns, 'key_name', kv_resource_id.name)
             elif getattr(ns, 'command', None) and 'certificate' in ns.command:
-                setattr(ns, 'certificate_name', ident.name)
+                setattr(ns, 'certificate_name', kv_resource_id.name)
             else:
-                setattr(ns, 'name', ident.name)
-            setattr(ns, 'vault_base_url', ident.vault)
-            if ident.version and (hasattr(ns, pure_entity_type + '_version') or hasattr(ns, 'version')):
-                setattr(ns, 'version', ident.version)
+                setattr(ns, 'name', kv_resource_id.name)
+            setattr(ns, 'vault_base_url', kv_resource_id.vault_url)
+            if kv_resource_id.version and (hasattr(ns, pure_entity_type + '_version') or hasattr(ns, 'version')):
+                setattr(ns, 'version', kv_resource_id.version)
         elif not (name and vault):
             raise CLIError('incorrect usage: --id ID | --vault-name/--hsm-name VAULT/HSM '
                            '--name/-n NAME [--version VERSION]')
 
-    return _validate
-
-
-def validate_sas_definition_id(ns):
-    from .vendored_sdks.azure_keyvault_t1 import StorageSasDefinitionId
-    acct_name = getattr(ns, 'storage_account_name', None)
-    sas_name = getattr(ns, 'sas_definition_name', None)
-    vault = getattr(ns, 'vault_base_url', None)
-    identifier = getattr(ns, 'identifier', None)
-
-    if identifier:
-        ident = StorageSasDefinitionId(uri=identifier)
-        setattr(ns, 'sas_definition_name', getattr(ident, 'sas_definition'))
-        setattr(ns, 'storage_account_name', getattr(ident, 'account_name'))
-        setattr(ns, 'vault_base_url', ident.vault)
-    elif not (acct_name and sas_name and vault):
-        raise CLIError('incorrect usage: --id ID | --vault-name VAULT --account-name --name NAME')
-
-
-def validate_storage_account_id(ns):
-    from .vendored_sdks.azure_keyvault_t1 import StorageAccountId
-    acct_name = getattr(ns, 'storage_account_name', None)
-    vault = getattr(ns, 'vault_base_url', None)
-    identifier = getattr(ns, 'identifier', None)
-
-    if identifier:
-        ident = StorageAccountId(uri=identifier)
-        setattr(ns, 'storage_account_name', ident.name)
-        setattr(ns, 'vault_base_url', ident.vault)
-    elif not (acct_name and vault):
-        raise CLIError('incorrect usage: --id ID | --vault-name VAULT --name NAME')
-
-
-def validate_storage_disabled_attribute(attr_arg_name, attr_type):
-    def _validate(ns):
-        disabled = getattr(ns, 'disabled', None)
-        attr_arg = attr_type(enabled=(not disabled))
-        setattr(ns, attr_arg_name, attr_arg)
     return _validate
 
 
