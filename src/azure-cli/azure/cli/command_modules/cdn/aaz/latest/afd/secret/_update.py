@@ -79,11 +79,11 @@ class Update(AAZCommand):
         )
 
         customer_certificate = cls._args_schema.parameters.customer_certificate
-        customer_certificate.secret_source = AAZStrArg(
+        customer_certificate.secret_source = AAZObjectArg(
             options=["secret-source"],
-            help="Resource reference to the Azure Key Vault certificate. Expected to be in format of /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.KeyVault/vaults/{vaultName}/secrets/{certificateName}",
-            nullable=True,
+            help="Resource reference to the Azure Key Vault certificate. Expected to be in format of /subscriptions/{â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹subscriptionId}â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹/resourceGroups/{â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹resourceGroupName}â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹/providers/Microsoft.KeyVault/vaults/{vaultName}â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹/secrets/{certificateName}â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹",
         )
+        cls._build_args_resource_reference_update(customer_certificate.secret_source)
         customer_certificate.secret_version = AAZStrArg(
             options=["secret-version"],
             help="Version of the secret to be used",
@@ -102,7 +102,7 @@ class Update(AAZCommand):
         )
         url_signing_key.secret_source = AAZObjectArg(
             options=["secret-source"],
-            help="Resource reference to the Azure Key Vault secret. Expected to be in format of /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.KeyVault/vaults/{vaultName}/secrets/{secretName}",
+            help="Resource reference to the Azure Key Vault secret. Expected to be in format of /subscriptions/{â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹subscriptionId}â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹/resourceGroups/{â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹resourceGroupName}â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹/providers/Microsoft.KeyVault/vaults/{vaultName}â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹/secrets/{secretName}â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹â€‹",
         )
         cls._build_args_resource_reference_update(url_signing_key.secret_source)
         url_signing_key.secret_version = AAZStrArg(
@@ -389,13 +389,9 @@ class Update(AAZCommand):
 
             disc_customer_certificate = _builder.get(".properties.parameters{type:CustomerCertificate}")
             if disc_customer_certificate is not None:
-                disc_customer_certificate.set_prop("secretSource", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
+                _UpdateHelper._build_schema_resource_reference_update(disc_customer_certificate.set_prop("secretSource", AAZObjectType, ".customer_certificate.secret_source", typ_kwargs={"flags": {"required": True}}))
                 disc_customer_certificate.set_prop("secretVersion", AAZStrType, ".customer_certificate.secret_version")
                 disc_customer_certificate.set_prop("useLatestVersion", AAZBoolType, ".customer_certificate.use_latest_version")
-
-            secret_source = _builder.get(".properties.parameters{type:CustomerCertificate}.secretSource")
-            if secret_source is not None:
-                secret_source.set_prop("id", AAZStrType, ".customer_certificate.secret_source")
 
             disc_url_signing_key = _builder.get(".properties.parameters{type:UrlSigningKey}")
             if disc_url_signing_key is not None:

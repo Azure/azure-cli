@@ -638,11 +638,24 @@ class AFDSecretCreate(_AFDSecretCreate):
         return args_schema
     def pre_operations(self):
         args = self.ctx.args
-        args.parameters.customer_certificate.secret_source = args.secret_source
-        if has_value(args.secret_version):
-            args.parameters.customer_certificate.secret_version = args.secret_version
-        if has_value(args.use_latest_version):
-            args.parameters.customer_certificate.use_latest_version = args.use_latest_version
+        parameters = None
+        if has_value(args.use_latest_version) and args.use_latest_version.to_serialized_data() is True:
+            parameters = {
+                'customer-certificate': {
+                    'secret-source': {'id': args.secret_source},
+                    'secret-version': None,
+                    'use-latest-version': True
+                }
+            }
+        else:
+            parameters = {
+                'customer-certificate': {
+                    'secret-source': {'id': args.secret_source},
+                    'secret-version': args.secret_version,
+                    'use-latest-version': False
+                }
+            }
+        args.parameters = parameters
 
 from azure.cli.command_modules.cdn.aaz.latest.afd.secret import Update as _AFDSecretUpdate
 class AFDSecretUpdate(_AFDSecretUpdate):
@@ -662,11 +675,30 @@ class AFDSecretUpdate(_AFDSecretUpdate):
         return args_schema
     def pre_operations(self):
         args = self.ctx.args
-        args.parameters.customer_certificate.secret_source = args.secret_source
-        if has_value(args.secret_version):
-            args.parameters.customer_certificate.secret_version = args.secret_version
-        if has_value(args.use_latest_version):
-            args.parameters.customer_certificate.use_latest_version = args.use_latest_version
+        from azure.cli.command_modules.cdn.aaz.latest.afd.secret import Show
+        existing = Show(cli_ctx=self.cli_ctx)(command_args={
+            'resource_group': args.resource_group,
+            'profile_name': args.profile_name,
+            'secret_name': args.secret_name
+        })
+        
+        secret_source = args.secret_source if has_value(args.secret_source) else existing['parameters']['secretSource']['id']
+        if 'secretVersion' in existing['parameters'] and existing['parameters']['secretVersion'] in args.secret_source.to_serialized_data():
+            existing_secret_version = existing['parameters']['secretVersion']
+            version_start = args.secret_source.to_serialized_data().lower().rindex(f'/{existing_secret_version}')
+            secret_source = args.secret_source.to_serialized_data()[0:version_start]
+
+        secret_version = args.secret_version if has_value(args.secret_version) and args.secret_version is not None else existing['parameters']['secretVersion']
+        use_latest_version = args.use_latest_version if has_value(args.use_latest_version) and args.use_latest_version is not None else existing['parameters']['useLatestVersion']
+
+        parameters = {
+            'customer-certificate': {
+                'secret-source': {'id': secret_source},
+                'secret-version': secret_version,
+                'use-latest-version': use_latest_version
+            }
+        }
+        args.parameters = parameters
 
 from azure.cli.command_modules.cdn.aaz.latest.afd.security_policy import Create as _AFDSecurityPolicyCreate
 class AFDSecurityPolicyCreate(_AFDSecurityPolicyCreate):
@@ -684,24 +716,18 @@ class AFDSecurityPolicyCreate(_AFDSecurityPolicyCreate):
         return args_schema
     def pre_operations(self):
         args = self.ctx.args
-        from azure.cli.command_modules.cdn.aaz.latest.afd.security_policy import Show
 
-        existing_security_policy = Show(cli_ctx=self.cli_ctx)(command_args={
-            'resource_group': args.resource_group,
-            'profile_name': args.profile_name,
-            'security_policy_name': args.security_policy_name
-        })
-
-        associations = existing_security_policy.parameters.associations
-
+        domains = []
         if has_value(args.domains):
             for domain in args.domains:
-                associations = [
-                    {
-                        'domains': [{'id': domain}],
-                        'patterns_to_match':['/*']
-                    }
-                ]
+                domains.append({
+                    'id': domain
+                })
+
+        associations = [{
+            'domains': domains,
+            'patterns_to_match':['/*']
+        }]
 
         args.web_application_firewall = {
             'waf_policy': args.waf_policy,
@@ -734,18 +760,20 @@ class AFDSecurityPolicyUpdate(_AFDSecurityPolicyUpdate):
             'security_policy_name': args.security_policy_name
         })
 
-        associations = existing_security_policy.parameters.associations
+        associations = existing_security_policy['parameters']['associations']
 
+        domains = []
         if has_value(args.domains):
             for domain in args.domains:
-                associations = [
-                    {
-                        'domains': [{'id': domain}],
-                        'patterns_to_match':['/*']
-                    }
-                ]
+                domains.append({
+                    'id': domain
+                })
+            associations = [{
+                'domains': domains,
+                'patterns_to_match':['/*']
+             }]
 
         args.web_application_firewall = {
-            'waf_policy': args.waf_policy,
+            'waf_policy': args.waf_policy if has_value(args.waf_policy) else existing_security_policy['parameters']['wafPolicy'],
             'associations': associations
         }
