@@ -718,13 +718,9 @@ class AzCliCommandInvoker(CommandInvoker):
             for key in redact_keys:
                 result[key] = '_REDACTED_'
             from ..credential_helper import is_containing_credential, distinguish_credential, redact_credential
-            from knack.prompting import prompt_y_n
-            from knack.output import format_json
             if not sensitive_info and is_containing_credential(result, max_level=99):
                 logger.warning(f'!!! The output may contain sensitive data: {distinguish_credential(result)}, please be careful !!!')
-                # print(json.dumps(redact_credential(result), ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')))
-                # if not prompt_y_n('Do you want to continue to output sensitive data?'):
-                #     result = redact_credential(result)
+            if (not sensitive_info) or redact:
                 result = redact_credential(result)
             event_data = {'result': result}
             cmd_copy.cli_ctx.raise_event(EVENT_INVOKER_TRANSFORM_RESULT, event_data=event_data)
