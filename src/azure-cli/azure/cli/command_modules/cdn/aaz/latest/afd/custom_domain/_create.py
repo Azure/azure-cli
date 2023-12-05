@@ -56,15 +56,18 @@ class Create(AAZCommand):
             required=True,
         )
 
+        # define Arg Group "AzureDnsZone"
+
+        _args_schema = cls._args_schema
+        _args_schema.azure_dns_zone = AAZStrArg(
+            options=["--azure-dns-zone"],
+            arg_group="AzureDnsZone",
+            help="ID of the Azure DNS zone.",
+        )
+
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.azure_dns_zone = AAZObjectArg(
-            options=["--azure-dns-zone"],
-            arg_group="Properties",
-            help="Resource reference to the Azure DNS zone",
-        )
-        cls._build_args_resource_reference_create(_args_schema.azure_dns_zone)
         _args_schema.extended_properties = AAZDictArg(
             options=["--extended-properties"],
             arg_group="Properties",
@@ -75,12 +78,6 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="The host name of the domain. Must be a domain name.",
         )
-        _args_schema.pre_validated_custom_domain_resource_id = AAZObjectArg(
-            options=["--pre-validated-custom-domain-resource-id"],
-            arg_group="Properties",
-            help="Resource reference to the Azure resource where custom domain ownership was prevalidated",
-        )
-        cls._build_args_resource_reference_create(_args_schema.pre_validated_custom_domain_resource_id)
 
         extended_properties = cls._args_schema.extended_properties
         extended_properties.Element = AAZStrArg()
@@ -243,11 +240,14 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                _CreateHelper._build_schema_resource_reference_create(properties.set_prop("azureDnsZone", AAZObjectType, ".azure_dns_zone"))
+                properties.set_prop("azureDnsZone", AAZObjectType)
                 properties.set_prop("extendedProperties", AAZDictType, ".extended_properties")
                 properties.set_prop("hostName", AAZStrType, ".host_name", typ_kwargs={"flags": {"required": True}})
-                _CreateHelper._build_schema_resource_reference_create(properties.set_prop("preValidatedCustomDomainResourceId", AAZObjectType, ".pre_validated_custom_domain_resource_id"))
                 properties.set_prop("tlsSettings", AAZObjectType)
+
+            azure_dns_zone = _builder.get(".properties.azureDnsZone")
+            if azure_dns_zone is not None:
+                azure_dns_zone.set_prop("id", AAZStrType, ".azure_dns_zone")
 
             extended_properties = _builder.get(".properties.extendedProperties")
             if extended_properties is not None:
