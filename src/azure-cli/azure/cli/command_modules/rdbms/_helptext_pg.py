@@ -439,6 +439,53 @@ examples:
     text: az postgres flexible-server firewall-rule delete --rule-name testRule --resource-group testGroup --name testserver
 """
 
+helps['postgres flexible-server virtual-endpoint'] = """
+type: group
+short-summary: Manage virtual endpoints for a PostgreSQL flexible server.
+"""
+
+helps['postgres flexible-server virtual-endpoint create'] = """
+type: command
+short-summary: Create a new virtual endpoint for a flexible server.
+examples:
+  - name: >
+      Create a virtual endpoint with writer endpoint.
+    text: >
+      az postgres flexible-server virtual-endpoint create --resource-group testGroup --server-name testserver --name test_virtual_endpoint --endpoint-type ReadWrite --members testReplica1
+"""
+
+helps['postgres flexible-server virtual-endpoint list'] = """
+type: command
+short-summary: List all virtual endpoints for a flexible server.
+example:
+  - name: List all virtual endpoints for a flexible server.
+    text: az postgres flexible-server virtual-endpoint list --resource-group testGroup --server-name testserver
+"""
+
+helps['postgres flexible-server virtual-endpoint show'] = """
+type: command
+short-summary: Get the details of a virtual endpoint.
+examples:
+  - name: Get the details of a virtual endpoint.
+    text: az postgres flexible-server virtual-endpoint show --resource-group testGroup --server-name testserver --name test_virtual_endpoint
+"""
+
+helps['postgres flexible-server virtual-endpoint update'] = """
+type: command
+short-summary: Update a virtual endpoint.
+examples:
+  - name: Update a virtual endpoint.
+    text: az postgres flexible-server virtual-endpoint update --resource-group testGroup --server-name testserver --name test_virtual_endpoint --endpoint-type ReadWrite --members testReplica1
+"""
+
+helps['postgres flexible-server virtual-endpoint delete'] = """
+type: command
+short-summary: Delete a virtual endpoint.
+examples:
+  - name: Delete a virtual endpoint.
+    text: az postgres flexible-server virtual-endpoint delete --resource-group testGroup --server-name testserver --name test_virtual_endpoint
+"""
+
 helps['postgres flexible-server migration'] = """
 type: group
 short-summary: Manage migration workflows for PostgreSQL Flexible Servers.
