@@ -23,7 +23,7 @@ def cli_redis_export(cmd, client, resource_group_name, name, prefix, container,
                      preferred_data_archive_auth_method=None, file_format=None, storage_subscription_id=None):
     from azure.mgmt.redis.models import ExportRDBParameters
     parameters = ExportRDBParameters(prefix=prefix, container=container, format=file_format,
-                                     preferred_data_archive_auth_method=preferred_data_archive_auth_method, 
+                                     preferred_data_archive_auth_method=preferred_data_archive_auth_method,
                                      storage_subscription_id=storage_subscription_id)
     return client.begin_export_data(resource_group_name, name, parameters)
 
@@ -191,7 +191,7 @@ def cli_redis_import(client, resource_group_name, name, files,
                      preferred_data_archive_auth_method=None, file_format=None, storage_subscription_id=None):
     from azure.mgmt.redis.models import ImportRDBParameters
     return client.begin_import_data(resource_group_name, name, ImportRDBParameters(files=files, format=file_format,
-                                    preferred_data_archive_auth_method=preferred_data_archive_auth_method, 
+                                    preferred_data_archive_auth_method=preferred_data_archive_auth_method,
                                     storage_subscription_id=storage_subscription_id))
 
 
