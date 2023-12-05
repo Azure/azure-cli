@@ -338,12 +338,18 @@ subscription than the app service environment, please use the resource ID for --
             c.argument('net_framework_version', help="The version used to run your web app if using .NET Framework, e.g., 'v4.0' for .NET 4.6 and 'v3.0' for .NET 3.5")
             c.argument('linux_fx_version', help="The runtime stack used for your linux-based webapp, e.g., \"RUBY|2.5.5\", \"NODE|12LTS\", \"PHP|7.2\", \"DOTNETCORE|2.1\". See https://aka.ms/linux-stacks for more info.")
             c.argument('windows_fx_version', help="A docker image name used for your windows container web app, e.g., microsoft/nanoserver:ltsc2016")
+            c.argument('always_ready_instances', type=int, options_list=['--always-ready-instances'], help="The number of pre-allocated instances.", is_preview=True)
+            c.argument('maximum_instances', type=int, options_list=['--maximum-instances'], help="The maximum number of instances.", is_preview=True)
+            c.argument('instance_size', type=int, options_list=['--instance-size'], help="The size of instances.", is_preview=True)
             if scope == 'functionapp':
                 c.ignore('windows_fx_version')
             c.argument('pre_warmed_instance_count', options_list=['--prewarmed-instance-count'],
                        help="Number of pre-warmed instances a function app has")
             if scope == 'webapp':
                 c.ignore('reserved_instance_count')
+                c.ignore('always_ready_instances')
+                c.ignore('maximum_instances')
+                c.ignore('instance_size')
             c.argument('java_version',
                        help="The version used to run your web app if using Java, e.g., '1.7' for Java 7, '1.8' for Java 8")
             c.argument('java_container', help="The java container, e.g., Tomcat, Jetty")
@@ -428,7 +434,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('xml', options_list=['--xml'], required=False, help='retrieves the publishing profile details in XML format')
     with self.argument_context('webapp deployment slot') as c:
         c.argument('slot', help='the name of the slot')
-        c.argument('webapp', arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'),
+        c.argument('name', arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'),
                    help='Name of the webapp', id_part='name',
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET]))
         c.argument('auto_swap_slot', help='target slot to auto swap', default='production')
@@ -766,6 +772,11 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('dapr_http_read_buffer_size', type=int, options_list=['--dapr-http-read-buffer-size', '--dhrbs'], help="Max size of http header read buffer in KB to handle when sending multi-KB headers.")
         c.argument('dapr_log_level', help="The log level for the Dapr sidecar", arg_type=get_enum_type(DAPR_LOG_LEVELS))
         c.argument('dapr_enable_api_logging', options_list=['--dapr-enable-api-logging', '--dal'], help="Enable/Disable API logging for the Dapr sidecar.", arg_type=get_three_state_flag(return_label=True))
+        c.argument('always_ready_instances', type=int, options_list=['--always-ready-instances'], help="The number of pre-allocated instances.", is_preview=True)
+        c.argument('maximum_instances', type=int, options_list=['--maximum-instances'], help="The maximum number of instances.", is_preview=True)
+        c.argument('instance_size', type=int, options_list=['--instance-size'], help="The size of instances.", is_preview=True)
+        c.argument('flexconsumption_location', options_list=['--flexconsumption-location', '-f'],
+                   help="Geographic location where function app will be hosted. Use `az functionapp list-flexconsumption-locations` to view available locations.", is_preview=True)
         c.argument('workspace', help="Name of an existing log analytics workspace to be used for the application insights component")
         c.argument('workload_profile_name', help="The workload profile name to run the container app on.", is_preview=True)
         c.argument('cpu', type=float, help="The CPU in cores of the container app. e.g 0.75", is_preview=True)
@@ -916,9 +927,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('xml', options_list=['--xml'], required=False, help='retrieves the publishing profile details in XML format')
     with self.argument_context('functionapp deployment slot') as c:
         c.argument('slot', help='the name of the slot')
-        # This is set to webapp to simply reuse webapp functions, without rewriting same functions for function apps.
-        # The help will still show "-n or --name", so it should not be a problem to do it this way
-        c.argument('webapp', arg_type=functionapp_name_arg_type,
+        c.argument('name', arg_type=functionapp_name_arg_type,
                    completer=get_resource_name_completion_list('Microsoft.Web/sites'),
                    help='Name of the function app', id_part='name')
         c.argument('auto_swap_slot', help='target slot to auto swap', default='production')

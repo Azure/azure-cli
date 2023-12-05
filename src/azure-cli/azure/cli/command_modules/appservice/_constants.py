@@ -136,3 +136,30 @@ LANGUAGE_EOL_DEPRECATION_NOTICES = {
                "14-lts-is-ending-on-30-april-2023/",
     "node|16": "https://azure.microsoft.com/en-us/updates/node16support/"
 }
+
+FLEX_RUNTIMES = [
+    {
+        'runtime': 'dotnet-isolated',
+        'version': '6'
+    },
+    {
+        'runtime': 'java',
+        'version': '17.0'
+    },
+    {
+        'runtime': 'node',
+        'version': '18'
+    },
+    {
+        'runtime': 'python',
+        'version': '3.10'
+    },
+    {
+        'runtime': 'powershell',
+        'version': '7.2'
+    }
+]
+
+FLEX_SUBNET_DELEGATION = "Microsoft.App/environments"
+
+DEFAULT_INSTANCE_SIZE = 2048

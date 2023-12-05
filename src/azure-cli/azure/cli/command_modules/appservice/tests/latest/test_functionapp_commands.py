@@ -15,7 +15,7 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, JMESPathCheck, live_only)
 from azure.cli.testsdk.checkers import JMESPathCheckNotExists, JMESPathPatternCheck
-from azure.cli.core.azclierror import ResourceNotFoundError, ValidationError, ArgumentUsageError, RequiredArgumentMissingError
+from azure.cli.core.azclierror import ValidationError, ArgumentUsageError, RequiredArgumentMissingError, MutuallyExclusiveArgumentError
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -27,6 +27,7 @@ WINDOWS_ASP_LOCATION_WEBAPP = 'japanwest'
 WINDOWS_ASP_LOCATION_FUNCTIONAPP = 'francecentral'
 LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
 LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
+FLEX_ASP_LOCATION_FUNCTIONAPP = 'eastus'
 WINDOWS_ASP_LOCATION_CHINACLOUD_WEBAPP = 'chinaeast'
 
 
@@ -627,6 +628,98 @@ class FunctionappDapr(LiveScenarioTest):
             JMESPathCheck('daprConfig.logLevel', 'warn'),
             JMESPathCheck('daprConfig.enableApiLogging', True)
         ])
+
+
+class FunctionAppFlex(LiveScenarioTest):
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_create(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionapp', 40)
+        plan = '{}LinuxFlexPlan'.format(FLEX_ASP_LOCATION_FUNCTIONAPP)
+
+        self.cmd('functionapp create -g {} -n {} -f {} -s {} --os-type Linux --functions-version 4 --runtime dotnet --always-ready-instances {} --instance-size {} --maximum-instances {}'
+                 .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account, 5, 512, 100)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('reserved', True),
+                     JMESPathCheck('kind', 'functionapp,linux'),
+                     JMESPathCheck('containerSize', 512),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('siteConfig.minimumElasticInstanceCount', 5),
+            JMESPathCheck('siteConfig.functionAppScaleLimit', 100)
+        ])
+
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck('sku.tier', 'FlexConsumption'),
+            JMESPathCheck('sku.name', 'FL1')
+        ])
+
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_update(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionapp', 40)
+
+        self.cmd('functionapp create -g {} -n {} -f {} -s {} --os-type Linux --functions-version 4 --runtime dotnet --always-ready-instances 5 --instance-size 512 --maximum-instances 100'
+                 .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('reserved', True),
+                     JMESPathCheck('kind', 'functionapp,linux'),
+                     JMESPathCheck('containerSize', 512),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('siteConfig.minimumElasticInstanceCount', 5),
+            JMESPathCheck('siteConfig.functionAppScaleLimit', 100)
+        ])
+
+        self.cmd('functionapp config set -g {} -n {} --instance-size 1280'
+                 .format(resource_group, functionapp_name))
+
+        self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('containerSize', 1280)
+        ])
+
+        self.cmd('functionapp config set -g {} -n {} --always-ready-instances 7 --maximum-instances 200'
+                 .format(resource_group, functionapp_name)).assert_with_checks([
+                    JMESPathCheck('minimumElasticInstanceCount', 7),
+                    JMESPathCheck('functionAppScaleLimit', 200)
+                 ])
+
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_validation(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionapp', 40)
+        with self.assertRaises(ArgumentUsageError):
+            self.cmd('functionapp create -g {} -n {} --flexconsumption-location {} -s {} --image nginx --functions-version 4'
+                    .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
+        with self.assertRaises(ArgumentUsageError):
+            self.cmd('functionapp create -g {} -n {} --flexconsumption-location {} -s {} --deployment-local-git --functions-version 4'
+                    .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
+        with self.assertRaises(ArgumentUsageError):
+            self.cmd('functionapp create -g {} -n {} --flexconsumption-location {} -s {} --deployment-source-url https://github.com/Azure/azure-cli --functions-version 4'
+                    .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
+        with self.assertRaises(ArgumentUsageError):
+            self.cmd('functionapp create -g {} -n {} --flexconsumption-location {} -s {} --deployment-source-branch dev --functions-version 4'
+                    .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
+        with self.assertRaises(ArgumentUsageError):
+            self.cmd('functionapp create -g {} -n {} --flexconsumption-location {} -s {} --os-type windows --functions-version 4'
+                    .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
+        with self.assertRaises(RequiredArgumentMissingError):
+            self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4 --always-ready-instances 5'
+                     .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            self.cmd('functionapp create -g {} -n {} -f {} -c {} -s {} --functions-version 4'
+                     .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
+        with self.assertRaises(ValidationError):
+            self.cmd('functionapp create -g {} -n {} -f {} -s {} --functions-version 4 --runtime notdotnet'
+                    .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
 
 
 class FunctionAppManagedEnvironment(ScenarioTest):
