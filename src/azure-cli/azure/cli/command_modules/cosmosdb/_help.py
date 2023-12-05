@@ -1339,3 +1339,73 @@ examples:
     text: |
       az managed-cassandra datacenter list --resource-group MyResourceGroup --cluster-name MyCluster
 """
+
+# in-account restore of a deleted sql database
+helps['cosmosdb sql database restore'] = """
+    type: command
+    short-summary: "Restore a deleted sql database within the same account."
+    examples:
+      - name: Restore a deleted sql database within the same account.
+        text: |-
+               az cosmosdb sql database restore --resource-group resource_group --account-name database_account_name --name name_of_database_needs_to_be_restored --restore-timestamp 2020-07-13T16:03:41+0000
+"""
+
+# in-account restore of a deleted sql container
+helps['cosmosdb sql container restore'] = """
+    type: command
+    short-summary: "Restore a deleted sql container within the same account."
+    examples:
+      - name: Restore a deleted sql container within the same account.
+        text: |-
+               az cosmosdb sql container restore --resource-group resource_group --account-name database_account_name --database-name parent_database_name --name name_of_container_needs_to_be_restored --restore-timestamp 2020-07-13T16:03:41+0000
+"""
+
+# in-account restore of a deleted mongodb database
+helps['cosmosdb mongodb database restore'] = """
+    type: command
+    short-summary: "Restore a deleted mongodb database within the same account."
+    examples:
+      - name: Restore a deleted mongodb database within the same account.
+        text: |-
+               az cosmosdb mongodb database restore --resource-group resource_group --account-name database_account_name --name name_of_database_needs_to_be_restored --restore-timestamp 2020-07-13T16:03:41+0000
+"""
+
+# in-account restore of a deleted mongodb collection
+helps['cosmosdb mongodb collection restore'] = """
+    type: command
+    short-summary: "Restore a deleted mongodb collection within the same account."
+    examples:
+      - name: Restore a deleted mongodb collection within the same account.
+        text: |-
+               az cosmosdb mongodb collection restore --resource-group resource_group --account-name database_account_name --database-name parent_database_name --name name_of_collection_needs_to_be_restored --restore-timestamp 2020-07-13T16:03:41+0000
+"""
+
+# in-account restore of a deleted gremlin database
+helps['cosmosdb gremlin database restore'] = """
+    type: command
+    short-summary: "Restore a deleted gremlin database within the same account."
+    examples:
+      - name: Restore a deleted gremlin database within the same account.
+        text: |-
+               az cosmosdb gremlin database restore --resource-group resource_group --account-name database_account_name --name name_of_database_needs_to_be_restored --restore-timestamp 2020-07-13T16:03:41+0000
+"""
+
+# in-account restore of a deleted gremlin graph
+helps['cosmosdb gremlin graph restore'] = """
+    type: command
+    short-summary: "Restore a deleted gremlin graph within the same account."
+    examples:
+      - name: Restore a deleted gremlin graph within the same account.
+        text: |-
+               az cosmosdb gremlin graph restore --resource-group resource_group --account-name database_account_name --database-name parent_database_name --name name_of_graph_needs_to_be_restored --restore-timestamp 2020-07-13T16:03:41+0000
+"""
+
+# in-account restore of a deleted table
+helps['cosmosdb table restore'] = """
+    type: command
+    short-summary: "Restore a deleted table within the same account."
+    examples:
+      - name: Restore a deleted table within the same account.
+        text: |-
+               az cosmosdb table restore --resource-group resource_group --account-name database_account_name --table-name name_of_table_needs_to_be_restored --restore-timestamp 2020-07-13T16:03:41+0000
+"""
