@@ -1036,7 +1036,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         result = self.cmd('{} flexible-server show -g {} --name {} '
                           .format(database_engine, resource_group, master_server),
                           checks=[
-                              JMESPathCheck('replicationRole', primary_role),
+                              JMESPathCheck('replica.role', primary_role),
                               JMESPathCheck('storage.autoGrow', source_server_auto_grow)]).get_output_in_json()
         
         # test replica create
@@ -1072,7 +1072,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                  .format(database_engine, resource_group, master_server, location, 256, master_vnet_args))
         result = self.cmd('{} flexible-server show -g {} --name {} '
                           .format(database_engine, resource_group, master_server),
-                          checks=[JMESPathCheck('replicationRole', primary_role)] + master_vnet_check).get_output_in_json()
+                          checks=[JMESPathCheck('replica.role', primary_role)] + master_vnet_check).get_output_in_json()
         
         # test replica create
         self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} --zone 2 {} {}'
@@ -1083,9 +1083,9 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('sku.tier', result['sku']['tier']),
                      JMESPathCheck('sku.name', result['sku']['name']),
-                     JMESPathCheck('replicationRole', replica_role),
+                     JMESPathCheck('replica.role', replica_role),
                      JMESPathCheck('sourceServerResourceId', result['id']),
-                     JMESPathCheck('replicaCapacity', '0')] + replica_vnet_check[0] + public_access_check)
+                     JMESPathCheck('replica.capacity', '0')] + replica_vnet_check[0] + public_access_check)
         
         # test storage auto-grow not allowed for replica server update
         self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Enabled'
@@ -1103,17 +1103,17 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                  checks=[
                      JMESPathCheck('name', replicas[0]),
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('replicationRole', primary_role),
+                     JMESPathCheck('replica.role', primary_role),
                      JMESPathCheck('sourceServerResourceId', 'None'),
-                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
+                     JMESPathCheck('replica.capacity', result['replica.capacity'])])
 
         # test show server with replication info, master becomes normal server
         self.cmd('{} flexible-server show -g {} --name {}'
                  .format(database_engine, resource_group, master_server),
                  checks=[
-                     JMESPathCheck('replicationRole', primary_role),
+                     JMESPathCheck('replica.role', primary_role),
                      JMESPathCheck('sourceServerResourceId', 'None'),
-                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
+                     JMESPathCheck('replica.capacity', result['replica.capacity'])])
 
         # test delete master server
         self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} {}'
@@ -1122,9 +1122,9 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                     JMESPathCheck('name', replicas[1]),
                     JMESPathCheck('resourceGroup', resource_group),
                     JMESPathCheck('sku.name', result['sku']['name']),
-                    JMESPathCheck('replicationRole', replica_role),
+                    JMESPathCheck('replica.role', replica_role),
                     JMESPathCheck('sourceServerResourceId', result['id']),
-                    JMESPathCheck('replicaCapacity', '0')] + replica_vnet_check[1])
+                    JMESPathCheck('replica.capacity', '0')] + replica_vnet_check[1])
 
         # in postgres we can't delete master server if it has replicas
         self.cmd('{} flexible-server delete -g {} --name {} --yes'
