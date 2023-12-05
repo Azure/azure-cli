@@ -94,6 +94,16 @@ class Update(AAZCommand):
             nullable=True,
         )
 
+        # define Arg Group "Secret"
+
+        _args_schema = cls._args_schema
+        _args_schema.secret = AAZStrArg(
+            options=["--secret"],
+            arg_group="Secret",
+            help="Resource reference to the secret. ie. subs/rg/profile/secret",
+            nullable=True,
+        )
+
         # define Arg Group "TlsSettings"
 
         _args_schema = cls._args_schema
@@ -110,13 +120,6 @@ class Update(AAZCommand):
             nullable=True,
             enum={"TLS10": "TLS10", "TLS12": "TLS12"},
         )
-        _args_schema.secret = AAZObjectArg(
-            options=["--secret"],
-            arg_group="TlsSettings",
-            help="Resource reference to the secret. ie. subs/rg/profile/secret",
-            nullable=True,
-        )
-        cls._build_args_resource_reference_update(_args_schema.secret)
         return cls._args_schema
 
     _args_resource_reference_update = None
@@ -401,7 +404,11 @@ class Update(AAZCommand):
             if tls_settings is not None:
                 tls_settings.set_prop("certificateType", AAZStrType, ".certificate_type", typ_kwargs={"flags": {"required": True}})
                 tls_settings.set_prop("minimumTlsVersion", AAZStrType, ".minimum_tls_version")
-                _UpdateHelper._build_schema_resource_reference_update(tls_settings.set_prop("secret", AAZObjectType, ".secret"))
+                tls_settings.set_prop("secret", AAZObjectType)
+
+            secret = _builder.get(".properties.tlsSettings.secret")
+            if secret is not None:
+                secret.set_prop("id", AAZStrType, ".secret")
 
             return _instance_value
 
