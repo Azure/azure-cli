@@ -84,7 +84,7 @@ class Create(AAZCommand):
         _args_schema.order = AAZIntArg(
             options=["--order"],
             arg_group="Properties",
-            help="The order in which the rules are applied for the endpoint. Possible values {0,1,2,3,â€¦â€¦â€¦}. A rule with a lesser order will be applied before a rule with a greater order. Rule with order 0 is a special rule. It does not require any condition and actions listed in it will always be applied.",
+            help="The order in which the rules are applied for the endpoint. Possible values {0,1,2,3,Ã¢â‚¬Â¦Ã¢â‚¬Â¦Ã¢â‚¬Â¦}. A rule with a lesser order will be applied before a rule with a greater order. Rule with order 0 is a special rule. It does not require any condition and actions listed in it will always be applied.",
         )
 
         actions = cls._args_schema.actions

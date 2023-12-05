@@ -51,17 +51,21 @@ class List(AAZCommand):
         )
         _args_schema.custom_domains = AAZListArg(
             options=["--custom-domains"],
+            help="The domains to be included.",
         )
         _args_schema.date_time_begin = AAZDateTimeArg(
             options=["--date-time-begin"],
+            help="The start datetime.",
             required=True,
         )
         _args_schema.date_time_end = AAZDateTimeArg(
             options=["--date-time-end"],
+            help="The end datetime.",
             required=True,
         )
         _args_schema.max_ranking = AAZIntArg(
             options=["--max-ranking"],
+            help="The maximum number of rows to return based on the ranking.",
             required=True,
         )
         _args_schema.metrics = AAZListArg(

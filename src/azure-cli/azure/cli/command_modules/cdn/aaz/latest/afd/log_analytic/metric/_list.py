@@ -57,18 +57,22 @@ class List(AAZCommand):
         )
         _args_schema.custom_domains = AAZListArg(
             options=["--custom-domains"],
+            help="The domains to be included.",
             required=True,
         )
         _args_schema.date_time_begin = AAZDateTimeArg(
             options=["--date-time-begin"],
+            help="The start datetime.",
             required=True,
         )
         _args_schema.date_time_end = AAZDateTimeArg(
             options=["--date-time-end"],
+            help="The end datetime.",
             required=True,
         )
         _args_schema.granularity = AAZStrArg(
             options=["--granularity"],
+            help="The interval granularity.",
             required=True,
             enum={"P1D": "P1D", "PT1H": "PT1H", "PT5M": "PT5M"},
         )
@@ -77,10 +81,12 @@ class List(AAZCommand):
         )
         _args_schema.metrics = AAZListArg(
             options=["--metrics"],
+            help="Metric types to include.",
             required=True,
         )
         _args_schema.protocols = AAZListArg(
             options=["--protocols"],
+            help="The protocols to be included.",
             required=True,
         )
 

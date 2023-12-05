@@ -782,7 +782,6 @@ class AFDSecretUpdate(_AFDSecretUpdate):
             options=['--secret-source'],
             help='Resource ID of the Azure Key Vault certificate, expected format is like'
             '/subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/vault1/secrets/cert1.',
-            required=True,
         )
         args_schema.secret_version = AAZStrArg(
             options=['--secret-version'],
@@ -868,14 +867,12 @@ class AFDSecurityPolicyUpdate(_AFDSecurityPolicyUpdate):
             options=['--domains'],
             help='The domains to associate with the WAF policy. Could either be the ID of an endpoint'
             '(default domain will be used in that case) or ID of a custom domain.',
-            required=True,
         )
         args_schema.domains.Element = AAZStrArg()
 
         args_schema.waf_policy = AAZStrArg(
             options=['--waf-policy'],
             help='The ID of Front Door WAF policy.',
-            required=True,
         )
         return args_schema
 
