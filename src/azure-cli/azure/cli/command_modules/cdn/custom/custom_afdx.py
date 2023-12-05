@@ -584,7 +584,7 @@ def add_afd_rule_action(cmd, resource_group_name, profile_name, rule_set_name,
                         destination=None, preserve_unmatched_path=None, origin_group=None,
                         forwarding_protocol: ForwardingProtocol = None,
                         query_string_caching_behavior: AfdQueryStringCachingBehavior = None,
-                        enable_compression=None,
+                        is_compression_enabled=None,
                         enable_caching=None):
     existing = _RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': resource_group_name,
@@ -603,7 +603,7 @@ def add_afd_rule_action(cmd, resource_group_name, profile_name, rule_set_name,
                            forwarding_protocol=forwarding_protocol,
                            origin_group=origin_group, profile_name=profile_name,
                            query_string_caching_behavior=query_string_caching_behavior,
-                           enable_compression=enable_compression,
+                           enable_compression=is_compression_enabled,
                            enable_caching=enable_caching,
                            sub_id=get_subscription_id(cmd.cli_ctx))
     actions.append(action)
