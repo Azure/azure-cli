@@ -22,7 +22,6 @@ from azure.cli.core.commands.constants import (
     CLI_POSITIONAL_PARAM_KWARGS, CONFIRM_PARAM_NAME)
 from azure.cli.core.commands.parameters import (
     AzArgumentContext, patch_arg_make_required, patch_arg_make_optional)
-from azure.cli.core.commands.sensitive import ImplicitSensitiveItem, resolve_sensitive_info
 from azure.cli.core.extension import get_extension
 from azure.cli.core.util import (
     get_command_type_kwarg, read_file_content, get_arg_list, poller_classes)
@@ -712,7 +711,7 @@ class AzCliCommandInvoker(CommandInvoker):
                 result = list(result)
 
             result = todict(result, AzCliCommandInvoker.remove_additional_prop_layer)
-            sensitive_info = cmd_copy.sensitive_info
+            sensitive_info = cmd_copy.sensitive_info if hasattr(cmd_copy, 'sensitive_info') else None
             redact = sensitive_info and sensitive_info.redact
             redact_keys = sensitive_info.redact_keys if sensitive_info and redact else []
             for key in redact_keys:
@@ -759,7 +758,7 @@ class AzCliCommandInvoker(CommandInvoker):
 
     def _resolve_preview_and_deprecation_warnings(self, cmd, parsed_args):
         sensitives = []
-        if cmd.sensitive_info:
+        if hasattr(cmd, 'sensitive_info') and cmd.sensitive_info:
             sensitives.append(cmd.sensitive_info)
 
         deprecations = [] + getattr(parsed_args, '_argument_deprecations', [])
