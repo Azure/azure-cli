@@ -98,3 +98,30 @@ WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
 
 DEFAULT_CENTAURI_IMAGE = 'mcr.microsoft.com/azure-functions/dotnet7-quickstart-demo:1.0'
 ACR_IMAGE_SUFFIX = ".azurecr.io"
+
+FLEX_RUNTIMES = [
+    {
+        'runtime': 'dotnet-isolated',
+        'version': '6'
+    },
+    {
+        'runtime': 'java',
+        'version': '17.0'
+    },
+    {
+        'runtime': 'node',
+        'version': '18'
+    },
+    {
+        'runtime': 'python',
+        'version': '3.10'
+    },
+    {
+        'runtime': 'powershell',
+        'version': '7.2'
+    }
+]
+
+FLEX_SUBNET_DELEGATION = "Microsoft.App/environments"
+
+DEFAULT_INSTANCE_SIZE = 2048
