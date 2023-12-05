@@ -22,6 +22,7 @@ from azure.cli.core.commands.constants import (
     CLI_POSITIONAL_PARAM_KWARGS, CONFIRM_PARAM_NAME)
 from azure.cli.core.commands.parameters import (
     AzArgumentContext, patch_arg_make_required, patch_arg_make_optional)
+from azure.cli.core.commands.sensitive import ImplicitSensitiveItem, resolve_sensitive_info
 from azure.cli.core.extension import get_extension
 from azure.cli.core.util import (
     get_command_type_kwarg, read_file_content, get_arg_list, poller_classes)
@@ -266,13 +267,14 @@ class AzCliCommand(CLICommand):
 
     def __init__(self, loader, name, handler, description=None, table_transformer=None,
                  arguments_loader=None, description_loader=None,
-                 formatter_class=None, deprecate_info=None, validator=None, **kwargs):
+                 formatter_class=None, sensitive_info=None, deprecate_info=None, validator=None, **kwargs):
         super(AzCliCommand, self).__init__(loader.cli_ctx, name, handler, description=description,
                                            table_transformer=table_transformer, arguments_loader=arguments_loader,
                                            description_loader=description_loader, formatter_class=formatter_class,
                                            deprecate_info=deprecate_info, validator=validator, **kwargs)
         self.loader = loader
         self.command_source = None
+        self.sensitive_info = sensitive_info
         self.no_wait_param = kwargs.get('no_wait_param', None)
         self.supports_no_wait = kwargs.get('supports_no_wait', False)
         self.exception_handler = kwargs.get('exception_handler', None)
@@ -710,6 +712,20 @@ class AzCliCommandInvoker(CommandInvoker):
                 result = list(result)
 
             result = todict(result, AzCliCommandInvoker.remove_additional_prop_layer)
+            sensitive_info = cmd_copy.sensitive_info
+            redact = sensitive_info and sensitive_info.redact
+            redact_keys = sensitive_info.redact_keys if sensitive_info and redact else []
+            for key in redact_keys:
+                result[key] = '_REDACTED_'
+            from ..credential_helper import is_containing_credential, distinguish_credential, redact_credential
+            from knack.prompting import prompt_y_n
+            from knack.output import format_json
+            if not sensitive_info and is_containing_credential(result, max_level=99):
+                logger.warning(f'!!! The output may contain sensitive data: {distinguish_credential(result)}, please be careful !!!')
+                # print(json.dumps(redact_credential(result), ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')))
+                # if not prompt_y_n('Do you want to continue to output sensitive data?'):
+                #     result = redact_credential(result)
+                result = redact_credential(result)
             event_data = {'result': result}
             cmd_copy.cli_ctx.raise_event(EVENT_INVOKER_TRANSFORM_RESULT, event_data=event_data)
             return event_data['result']
@@ -746,6 +762,10 @@ class AzCliCommandInvoker(CommandInvoker):
         self._resolve_extension_override_warning(cmd)
 
     def _resolve_preview_and_deprecation_warnings(self, cmd, parsed_args):
+        sensitives = []
+        if cmd.sensitive_info:
+            sensitives.append(cmd.sensitive_info)
+
         deprecations = [] + getattr(parsed_args, '_argument_deprecations', [])
         if cmd.deprecate_info:
             deprecations.append(cmd.deprecate_info)
@@ -801,6 +821,8 @@ class AzCliCommandInvoker(CommandInvoker):
                 experimentals.append(ImplicitExperimentalItem(cli_ctx=self.cli_ctx, **experimental_kwargs))
 
         if not self.cli_ctx.only_show_errors:
+            for s in sensitives:
+                print(s.message, file=sys.stderr)
             for d in deprecations:
                 print(d.message, file=sys.stderr)
             for p in previews:
@@ -1423,6 +1445,11 @@ class AzCommandGroup(CommandGroup):
             merged_kwargs['preview_info'] = PreviewItem(self.command_loader.cli_ctx, object_type='command')
         if is_experimental:
             merged_kwargs['experimental_info'] = ExperimentalItem(self.command_loader.cli_ctx, object_type='command')
+
+    def sensitive(self, **kwargs):
+        from .sensitive import SensitiveItem
+        kwargs['object_type'] = 'command'
+        return SensitiveItem(self.command_loader.cli_ctx, **kwargs)
 
 
 def register_cache_arguments(cli_ctx):

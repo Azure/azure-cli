@@ -9,22 +9,22 @@ from enum import Enum
 
 
 class CredentialType(Enum):
-    STORAGE_SAS_TOKEN = ('([?&;])sig=[\w%-]+', r'\1sig=_REDACTED_SAS_TOKEN_SIG_', 'Storage SAS token')
-    CODE = ('([?&;])code=[\w%+/=-]+', r'\1code=_REDACTED_CODE_', 'Several types of keys/secrets are passed with a query parameter "code"')
-    AZCOPY_TOKEN = ('([?&/]|%2F)(SourceKey|DestKey)(=|%3A|%3D|:)(?:[\w/-]|%2F)+(?:==|%3D%3D)', r'\1\2\3_REDACTED_AZCOPY_TOKEN_', 'AzCopy token')
-    JWT_TOKEN = ('(?:eyJ0eXAi|eyJhbGci)[\w\-.~+/%]*', '_REDACTED_JWT_TOKEN_', 'JWT token')
-    BEARER_TOKEN = ('("|\'|%22)(bearer |bearer%20)[\w\-.~+/]{100,}("|\'|%22)', r'\1\2_REDACTED_BEARER_TOKEN_\3', 'Bearer token')
-    SSH_KEY = ('("|\')(ssh-rsa )AAAA[\w\-.~+/]{100,}("|\')', r'\1\2_REDACTED_SSH_KEY_\3', 'SSH key')
-    EMAIL_ADDRESS = ('\b[\w.%#+-]+(%40|@)([a-z0-9.-]*\.[a-z]{2,})\b', r'_REDACTED_EMAIL_\1\2', 'Email address')
-    GUID = ('([0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12})\b', '_REDACTED_GUID_', 'GUID')
+    STORAGE_SAS_TOKEN = ('([?&;])sig=[\w%-/]+', r'\1sig=_REDACTED_SAS_TOKEN_SIG_', 1, 'Storage SAS token')
+    KEY = ('(.*)key=[\w%+/=-]+', r'\1key=_REDACTED_KEY_', 1, 'Several types of keys/secrets are passed with a query parameter "key"')
+    JWT_TOKEN = ('(?:eyJ0eXAi|eyJhbGci)[\w\-.~+/%]*', '_REDACTED_JWT_TOKEN_', 0, 'JWT token')
+    BEARER_TOKEN = ('(bearer |bearer%20)[\w\-.~+/]{100,}', r'\1_REDACTED_BEARER_TOKEN_', 0, 'Bearer token')
+    SSH_KEY = ('(ssh-rsa )AAAA[\w\-.~+/]{100,}', r'\1_REDACTED_SSH_KEY_', 1, 'SSH key')
+    EMAIL_ADDRESS = ('[\w.%#+-]+(%40|@)([a-z0-9.-]*\.[a-z]{2,})', r'_REDACTED_EMAIL_\1\2', 99, 'Email address')
+    GUID = ('([0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12})', '_REDACTED_GUID_', 999, 'GUID')
 
-    def __init__(self, regex, replacement, description=''):
+    def __init__(self, regex, replacement, level=0, description=''):
         self.regex = regex
         self.replacement = replacement
+        self.level = level
         self.description = description
 
 
-def is_containing_credential(content, is_file=False):
+def is_containing_credential(content, is_file=False, max_level=999):
     """Check if the given content contains credential or not.
 
     :param content: The content or the file path.
@@ -36,9 +36,12 @@ def is_containing_credential(content, is_file=False):
     if is_file:
         with open(content, 'r') as f:
             content = f.read()
-    elif isinstance(content, json) or isinstance(content, dict):
-        content = json.dumps(content)
-    return any(re.search(cred_type.regex, content, flags=re.IGNORECASE | re.MULTILINE) for cred_type in CredentialType)
+    elif not isinstance(content, str):
+        try:
+            content = json.dumps(content)
+        except ValueError:
+            raise ValueError('The content is not string or json object.')
+    return any(re.search(cred_type.regex, content, flags=re.IGNORECASE | re.MULTILINE) and cred_type.level<=max_level for cred_type in CredentialType)
 
 
 def distinguish_credential(content, is_file=False):
@@ -53,9 +56,12 @@ def distinguish_credential(content, is_file=False):
     if is_file:
         with open(content, 'r') as f:
             content = f.read()
-    elif isinstance(content, json) or isinstance(content, dict):
-        content = json.dumps(content)
-    types = [cred_type for cred_type in CredentialType if re.search(cred_type.regex, content, flags=re.IGNORECASE | re.MULTILINE)]
+    elif not isinstance(content, str):
+        try:
+            content = json.dumps(content)
+        except ValueError:
+            raise ValueError('The content is not string or json object.')
+    types = [cred_type.name for cred_type in CredentialType if re.search(cred_type.regex, content, flags=re.IGNORECASE | re.MULTILINE)]
     return types
 
 
@@ -77,14 +83,15 @@ def redact_credential(content, is_file=False):
             f.write(content)
         return fp
 
-    if isinstance(content, json) or isinstance(content, dict):
+    if isinstance(content, str):
+        return redact_credential_for_string(content)
+
+    try:
         content = json.dumps(content)
         content = redact_credential_for_string(content)
         return json.loads(content)
-    elif isinstance(content, str):
-        return redact_credential_for_string(content)
-
-    return content
+    except ValueError:
+        raise ValueError('The content is not string or json object.')
 
 
 def redact_credential_for_string(string):

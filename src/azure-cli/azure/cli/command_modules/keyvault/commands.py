@@ -197,7 +197,7 @@ def load_command_table(self, _):
                            transform=multi_transformers(
                                keep_max_results,
                                transform_deleted_secret_list))
-        g.keyvault_command('set', 'set_secret', validator=process_secret_set_namespace, transform=transform_secret_set)
+        g.keyvault_command('set', 'set_secret', validator=process_secret_set_namespace, transform=transform_secret_set, sensitive_info=g.sensitive(redact=True, redact_keys=['value']))
         g.keyvault_command('set-attributes', 'update_secret_properties', transform=transform_secret_set_attributes)
         g.keyvault_command('show', 'get_secret', transform=transform_secret_set)
         g.keyvault_command('show-deleted', 'get_deleted_secret', transform=transform_secret_show_deleted)
