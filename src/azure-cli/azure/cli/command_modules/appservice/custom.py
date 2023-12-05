@@ -2791,7 +2791,22 @@ def add_cors(cmd, resource_group_name, name, allowed_origins, slot=None):
     if not configs.cors:
         configs.cors = CorsSettings()
     configs.cors.allowed_origins = (configs.cors.allowed_origins or []) + allowed_origins
-    result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+    try:
+        result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+    except Exception as ex:  # pylint: disable=broad-except
+        poll_url = ex.response.headers['Location'] if 'Location' in ex.response.headers else None
+        if ex.response.status_code == 202 and poll_url:
+            r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+            poll_timeout = time.time() + 60 * 2  # 2 minute timeout
+
+            while r.status_code != 200 and time.time() < poll_timeout:
+                time.sleep(5)
+                r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+            return r.cors    
+        else:
+            raise CLIError(ex)
+        
+    # result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
     return result.cors
 
 
@@ -2802,7 +2817,20 @@ def remove_cors(cmd, resource_group_name, name, allowed_origins, slot=None):
             configs.cors.allowed_origins = [x for x in (configs.cors.allowed_origins or []) if x not in allowed_origins]
         else:
             configs.cors.allowed_origins = []
-        configs = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+        try:
+            configs = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+        except Exception as ex:  # pylint: disable=broad-except
+           poll_url = ex.response.headers['Location'] if 'Location' in ex.response.headers else None
+           if ex.response.status_code == 202 and poll_url:
+               r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+               poll_timeout = time.time() + 60 * 2  # 2 minute timeout
+
+               while r.status_code != 200 and time.time() < poll_timeout:
+                   time.sleep(5)
+                   r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+               return r.cors    
+        else:
+            raise CLIError(ex)
     return configs.cors
 
 
