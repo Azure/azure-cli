@@ -91,7 +91,7 @@ class Create(AAZCommand):
             help="Daily backups count to keep",
         )
         _args_schema.enabled = AAZBoolArg(
-            options=["--enabled"],
+            options=["-e", "--enabled"],
             arg_group="Properties",
             help="The property to decide policy is enabled or not",
         )

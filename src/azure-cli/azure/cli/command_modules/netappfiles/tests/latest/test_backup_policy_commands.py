@@ -79,7 +79,7 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
         assert len(backup_policy_list) == 1
 
         # delete backup policy
-        self.cmd("az netappfiles account backup-policy delete -g {rg} -a %s --backup-policy-name %s" %
+        self.cmd("az netappfiles account backup-policy delete -g {rg} -a %s --backup-policy-name %s --yes" %
                  (account_name, backup_policy_name))
 
         # create backup policy using short parameter names and validate result
@@ -96,7 +96,7 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
         assert backup_policy['tags']['Tag2'] == 'Value2'
 
         # delete backup policy
-        self.cmd("az netappfiles account backup-policy delete -g {rg} -a %s --backup-policy-name %s" %
+        self.cmd("az netappfiles account backup-policy delete -g {rg} -a %s --backup-policy-name %s --yes" %
                  (account_name, backup_policy_name))
 
         # validate backup policy doesn't exist
@@ -125,7 +125,7 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
 
         # delete all backup policies
         for backup_policy_name in backup_policies:
-            self.cmd("az netappfiles account backup-policy delete -g {rg} -a %s --backup-policy-name %s" %
+            self.cmd("az netappfiles account backup-policy delete -g {rg} -a %s --backup-policy-name %s --yes" %
                      (account_name, backup_policy_name))
 
         # validate that no backup policies exist
@@ -180,8 +180,8 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
         monthly_backups_to_keep = 6
         enabled = False
         tags = "Tag1=Value2"
-        self.cmd("az netappfiles account backup-policy update -g {rg} -a %s --backup-policy-name %s -l %s -d %s -w %s "
-                 "-m %s -e %s --tags %s" % (account_name, backup_policy_name, LOCATION, daily_backups_to_keep,
+        self.cmd("az netappfiles account backup-policy update -g {rg} -a %s --backup-policy-name %s -d %s -w %s "
+                 "-m %s -e %s --tags %s" % (account_name, backup_policy_name, daily_backups_to_keep,
                                             weekly_backups_to_keep, monthly_backups_to_keep, enabled, tags)).get_output_in_json()
 
         # get updated backup policy and validate update
