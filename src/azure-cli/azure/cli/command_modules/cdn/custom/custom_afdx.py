@@ -8,17 +8,12 @@ from knack.log import get_logger
 from azure.cli.core.aaz._base import has_value
 from azure.cli.core.commands.client_factory import get_subscription_id
 from .custom_rule_util import (create_condition, create_action, create_conditions_from_existing, create_actions_from_existing)
-from azure.cli.command_modules.cdn.aaz.latest.afd.security_policy import Update as _AFDSecurityPolicyUpdate
-from azure.cli.command_modules.cdn.aaz.latest.afd.security_policy import Create as _AFDSecurityPolicyCreate
-from azure.cli.command_modules.cdn.aaz.latest.afd.secret import Update as _AFDSecretUpdate
-from azure.cli.command_modules.cdn.aaz.latest.afd.secret import Create as _AFDSecretCreate
-from azure.cli.command_modules.cdn.aaz.latest.afd.origin import Create as _AFDOriginCreate
-from azure.cli.command_modules.cdn.aaz.latest.afd.origin import Update as _AFDOriginUpdate
-from azure.cli.command_modules.cdn.aaz.latest.afd.route import Create as _AFDRouteCreate
-from azure.cli.command_modules.cdn.aaz.latest.afd.route import Update as _AFDRouteUpdate, Show as _AFDRouteShow
-from azure.cli.command_modules.cdn.aaz.latest.afd.rule import Create as _AFDRuleCreate
-from azure.cli.command_modules.cdn.aaz.latest.afd.rule import Show as RuleShow
-from azure.cli.command_modules.cdn.aaz.latest.afd.rule import Update as _AFDRuleUpdate
+from azure.cli.command_modules.cdn.aaz.latest.afd.origin import Create as _AFDOriginCreate, Update as _AFDOriginUpdate
+from azure.cli.command_modules.cdn.aaz.latest.afd.route import Show as _AFDRouteShow, Create as _AFDRouteCreate, Update as _AFDRouteUpdate
+from azure.cli.command_modules.cdn.aaz.latest.afd.rule import Show as _RuleShow, Create as _AFDRuleCreate, Update as _AFDRuleUpdate
+from azure.cli.command_modules.cdn.aaz.latest.afd.secret import Show as _AFDSecretShow, Create as _AFDSecretCreate, Update as _AFDSecretUpdate
+from azure.cli.command_modules.cdn.aaz.latest.afd.security_policy import Show as _AFDSecurityPolicyShow, Create as _AFDSecurityPolicyCreate, Update as _AFDSecurityPolicyUpdate
+from azure.cli.core.aaz import AAZStrArg, AAZBoolArg, AAZListArg, AAZDateArg
 
 logger = get_logger(__name__)
 
@@ -70,7 +65,6 @@ def default_content_types():
 class AFDOriginCreate(_AFDOriginCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZBoolArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.enable_private_link = AAZBoolArg(
             options=['--enable-private-link'],
@@ -111,7 +105,6 @@ class AFDOriginCreate(_AFDOriginCreate):
 class AFDOriginUpdate(_AFDOriginUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZBoolArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.enable_private_link = AAZBoolArg(
             options=['--enable-private-link'],
@@ -195,7 +188,6 @@ class AFDOriginUpdate(_AFDOriginUpdate):
 class AFDRouteCreate(_AFDRouteCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZBoolArg, AAZListArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.enable_caching = AAZBoolArg(
             options=['--enable-caching'],
@@ -289,7 +281,6 @@ class AFDRouteCreate(_AFDRouteCreate):
 class AFDRouteUpdate(_AFDRouteUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZBoolArg, AAZListArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.enable_caching = AAZBoolArg(
             options=['--enable-caching'],
@@ -409,7 +400,6 @@ class AFDRouteUpdate(_AFDRouteUpdate):
 class AFDRuleCreate(_AFDRuleCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZDateArg, AAZBoolArg, AAZListArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.action_name = AAZStrArg(
             options=['--action-name'],
@@ -530,7 +520,6 @@ class AFDRuleCreate(_AFDRuleCreate):
 
     def pre_operations(self):
         args = self.ctx.args
-        # args.parameters.customer_certificate.secret_source = args.action_name
         # conditions
         conditions = []
         condition = create_condition(args.match_variable, args.operator, args.match_values, args.selector, args.negate_condition, args.transforms)
@@ -564,7 +553,7 @@ def add_afd_rule_condition(cmd, resource_group_name, profile_name, rule_set_name
                            rule_name, match_variable, operator, match_values=None, selector=None,
                            negate_condition=None, transforms=None):
 
-    existing = RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
+    existing = _RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': resource_group_name,
         'profile_name': profile_name,
         'rule_set_name': rule_set_name,
@@ -597,7 +586,7 @@ def add_afd_rule_action(cmd, resource_group_name, profile_name, rule_set_name,
                         query_string_caching_behavior: AfdQueryStringCachingBehavior = None,
                         enable_compression=None,
                         enable_caching=None):
-    existing = RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
+    existing = _RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': resource_group_name,
         'profile_name': profile_name,
         'rule_set_name': rule_set_name,
@@ -634,7 +623,7 @@ def add_afd_rule_action(cmd, resource_group_name, profile_name, rule_set_name,
 def remove_afd_rule_condition(cmd, resource_group_name, profile_name,
                               rule_set_name, rule_name, index):
 
-    existing = RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
+    existing = _RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': resource_group_name,
         'profile_name': profile_name,
         'rule_set_name': rule_set_name,
@@ -662,7 +651,7 @@ def remove_afd_rule_condition(cmd, resource_group_name, profile_name,
 
 def remove_afd_rule_action(cmd, resource_group_name, profile_name, rule_set_name, rule_name, index):
 
-    existing = RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
+    existing = _RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': resource_group_name,
         'profile_name': profile_name,
         'rule_set_name': rule_set_name,
@@ -691,7 +680,7 @@ def remove_afd_rule_action(cmd, resource_group_name, profile_name, rule_set_name
 def list_afd_rule_condition(cmd, resource_group_name,
                             profile_name, rule_set_name,
                             rule_name):
-    existing = RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
+    existing = _RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': resource_group_name,
         'profile_name': profile_name,
         'rule_set_name': rule_set_name,
@@ -704,7 +693,7 @@ def list_afd_rule_condition(cmd, resource_group_name,
 def list_afd_rule_action(cmd, resource_group_name,
                          profile_name, rule_set_name,
                          rule_name):
-    existing = RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
+    existing = _RuleShow(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': resource_group_name,
         'profile_name': profile_name,
         'rule_set_name': rule_set_name,
@@ -717,7 +706,6 @@ def list_afd_rule_action(cmd, resource_group_name,
 class AFDSecretCreate(_AFDSecretCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZBoolArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.secret_source = AAZStrArg(
             options=['--secret-source'],
@@ -747,7 +735,6 @@ class AFDSecretCreate(_AFDSecretCreate):
 class AFDSecretCreate(_AFDSecretCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZBoolArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.secret_source = AAZStrArg(
             options=['--secret-source'],
@@ -790,7 +777,6 @@ class AFDSecretCreate(_AFDSecretCreate):
 class AFDSecretUpdate(_AFDSecretUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZBoolArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.secret_source = AAZStrArg(
             options=['--secret-source'],
@@ -803,15 +789,14 @@ class AFDSecretUpdate(_AFDSecretUpdate):
             help='Version of the certificate to be used.',
         )
         args_schema.use_latest_version = AAZBoolArg(
-            ptions=['--use-latest-version'],
+            options=['--use-latest-version'],
             help='Whether to use the latest version for the certificate.',
         )
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        from azure.cli.command_modules.cdn.aaz.latest.afd.secret import Show
-        existing = Show(cli_ctx=self.cli_ctx)(command_args={
+        existing = _AFDSecretShow(cli_ctx=self.cli_ctx)(command_args={
             'resource_group': args.resource_group,
             'profile_name': args.profile_name,
             'secret_name': args.secret_name
@@ -839,7 +824,6 @@ class AFDSecretUpdate(_AFDSecretUpdate):
 class AFDSecurityPolicyCreate(_AFDSecurityPolicyCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.domains = AAZListArg(
             options=['--domains'],
@@ -879,7 +863,6 @@ class AFDSecurityPolicyCreate(_AFDSecurityPolicyCreate):
 class AFDSecurityPolicyUpdate(_AFDSecurityPolicyUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.domains = AAZListArg(
             options=['--domains'],
@@ -898,9 +881,7 @@ class AFDSecurityPolicyUpdate(_AFDSecurityPolicyUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        from azure.cli.command_modules.cdn.aaz.latest.afd.security_policy import Show
-
-        existing_security_policy = Show(cli_ctx=self.cli_ctx)(command_args={
+        existing_security_policy = _AFDSecurityPolicyShow(cli_ctx=self.cli_ctx)(command_args={
             'resource_group': args.resource_group,
             'profile_name': args.profile_name,
             'security_policy_name': args.security_policy_name
