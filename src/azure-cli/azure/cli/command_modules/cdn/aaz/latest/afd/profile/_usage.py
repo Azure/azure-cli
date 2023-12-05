@@ -21,7 +21,7 @@ class Usage(AAZCommand):
     _aaz_info = {
         "version": "2023-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/origingroups/{}/usages", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/usages", "2023-05-01"],
         ]
     }
 
@@ -42,11 +42,6 @@ class Usage(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.ids = AAZStrArg(
-            options=["--ids"],
-            help="Name of the origin group which is unique within the endpoint.",
-            required=True,
-        )
         _args_schema.profile_name = AAZStrArg(
             options=["--profile-name"],
             help="Name of the Azure Front Door Standard or Azure Front Door Premium profile which is unique within the resource group.",
@@ -59,7 +54,7 @@ class Usage(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        self.AFDOriginGroupsListResourceUsage(ctx=self.ctx)()
+        self.AFDProfilesListResourceUsage(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -75,7 +70,7 @@ class Usage(AAZCommand):
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
 
-    class AFDOriginGroupsListResourceUsage(AAZHttpOperation):
+    class AFDProfilesListResourceUsage(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -89,7 +84,7 @@ class Usage(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/originGroups/{originGroupName}/usages",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/usages",
                 **self.url_parameters
             )
 
@@ -104,10 +99,6 @@ class Usage(AAZCommand):
         @property
         def url_parameters(self):
             parameters = {
-                **self.serialize_url_param(
-                    "originGroupName", self.ctx.args.ids,
-                    required=True,
-                ),
                 **self.serialize_url_param(
                     "profileName", self.ctx.args.profile_name,
                     required=True,
