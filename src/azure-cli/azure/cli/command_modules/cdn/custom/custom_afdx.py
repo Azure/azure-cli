@@ -725,35 +725,6 @@ class AFDSecretCreate(_AFDSecretCreate):
 
     def pre_operations(self):
         args = self.ctx.args
-        args.parameters.customer_certificate.secret_source = args.secret_source
-        if has_value(args.secret_version):
-            args.parameters.customer_certificate.secret_version = args.secret_version
-        if has_value(args.use_latest_version):
-            args.parameters.customer_certificate.use_latest_version = args.use_latest_version
-
-
-class AFDSecretCreate(_AFDSecretCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.secret_source = AAZStrArg(
-            options=['--secret-source'],
-            help='Resource ID of the Azure Key Vault certificate, expected format is like'
-            '/subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/vault1/secrets/cert1.',
-            required=True,
-        )
-        args_schema.secret_version = AAZStrArg(
-            options=['--secret-version'],
-            help='Version of the certificate to be used.',
-        )
-        args_schema.use_latest_version = AAZBoolArg(
-            options=['--use-latest-version'],
-            help='Whether to use the latest version for the certificate.',
-        )
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
         parameters = None
         if has_value(args.use_latest_version) and args.use_latest_version.to_serialized_data() is True:
             parameters = {
