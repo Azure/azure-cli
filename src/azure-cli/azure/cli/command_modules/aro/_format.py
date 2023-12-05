@@ -25,3 +25,13 @@ def aro_show_table_format(result):
         WorkerCount=sum(wp['count'] or 0 for wp in worker_profiles),
         URL=result['consoleProfile']['url'],
     )
+
+
+def aro_version_table_format(result):
+    return [aro_build_version_table(r) for r in result]
+
+
+def aro_build_version_table(result):
+    return collections.OrderedDict(
+        Version=result
+    )

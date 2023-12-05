@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
-__version__ = "2.38.0"
+__version__ = "2.55.0"
 
 import os
 import sys
@@ -117,18 +117,10 @@ class AzCli(CLI):
 
     def show_version(self):
         from azure.cli.core.util import get_az_version_string, show_updates
-        from azure.cli.core.commands.constants import SURVEY_PROMPT_STYLED, UX_SURVEY_PROMPT_STYLED
-        from azure.cli.core.style import print_styled_text
 
         ver_string, updates_available_components = get_az_version_string()
         print(ver_string)
         show_updates(updates_available_components)
-
-        show_link = self.config.getboolean('output', 'show_survey_link', True)
-        if show_link:
-            print_styled_text()
-            print_styled_text(SURVEY_PROMPT_STYLED)
-            print_styled_text(UX_SURVEY_PROMPT_STYLED)
 
     def exception_handler(self, ex):  # pylint: disable=no-self-use
         from azure.cli.core.util import handle_exception
@@ -457,6 +449,20 @@ class MainCommandsLoader(CLICommandsLoader):
                 if raw_cmd in self.command_group_table:
                     logger.debug("Found a match in the command group table for '%s'.", raw_cmd)
                     return self.command_table
+                if self.cli_ctx.data['completer_active']:
+                    # If the command is not complete in autocomplete mode, we should match shorter command.
+                    # For example, `account sho` should match `account`.
+                    logger.debug("Could not find a match in the command or command group table for '%s'", raw_cmd)
+                    trimmed_raw_cmd = ' '.join(raw_cmd.split()[:-1])
+                    logger.debug("In autocomplete mode, try to match trimmed raw cmd: '%s'", trimmed_raw_cmd)
+                    if not trimmed_raw_cmd:
+                        # If full command is 'az acc', raw_cmd is 'acc', trimmed_raw_cmd is ''.
+                        logger.debug("Trimmed raw cmd is empty, return command table.")
+                        return self.command_table
+                    if trimmed_raw_cmd in self.command_group_table:
+                        logger.debug("Found a match in the command group table for trimmed raw cmd: '%s'.",
+                                     trimmed_raw_cmd)
+                        return self.command_table
 
                 logger.debug("Could not find a match in the command or command group table for '%s'. "
                              "The index may be outdated.", raw_cmd)
@@ -535,6 +541,7 @@ class CommandIndex:
         if cli_ctx:
             self.version = __version__
             self.cloud_profile = cli_ctx.cloud.profile
+        self.cli_ctx = cli_ctx
 
     def get(self, args):
         """Get the corresponding module and extension list of a command.
@@ -563,6 +570,13 @@ class CommandIndex:
         # Check the command index for (command: [module]) mapping, like
         # "network": ["azure.cli.command_modules.natgateway", "azure.cli.command_modules.network", "azext_firewall"]
         index_modules_extensions = index.get(top_command)
+        if not index_modules_extensions and self.cli_ctx.data['completer_active']:
+            # If user type `az acco`, command begin with `acco` will be matched.
+            logger.debug("In autocomplete mode, load commands starting with: '%s'", top_command)
+            index_modules_extensions = []
+            for command in index:
+                if command.startswith(top_command):
+                    index_modules_extensions += index[command]
 
         if index_modules_extensions:
             # This list contains both built-in modules and extensions

@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.command_modules.acs._client_factory import cf_graph_client
+from azure.cli.command_modules.acs._client_factory import get_graph_client
 from azure.cli.core.azclierror import AzCLIError, RequiredArgumentMissingError
 from knack.log import get_logger
 
@@ -11,7 +11,7 @@ logger = get_logger(__name__)
 
 
 def resolve_object_id(cli_ctx, assignee):
-    client = cf_graph_client(cli_ctx)
+    client = get_graph_client(cli_ctx)
     result = None
     if assignee is None:
         raise AzCLIError('Inputted parameter "assignee" is None.')

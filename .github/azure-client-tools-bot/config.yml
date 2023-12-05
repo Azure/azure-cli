@@ -1,0 +1,100 @@
+similar_issue: true
+allowed_branches:
+  - "dev"
+auto_choose_milestone:
+  pr_expected_days: 7
+pull_request:
+  comment:
+    - azure_pipeline:
+        allow_list:
+          - "Azure.azure-cli Full Test"
+        result_path: "/test_results/"
+      group_by_keys:
+        - "TestName"
+        - "Module"
+        - "Profile"
+        - "PythonVersion"
+      template_path: "templates/PRComment.handlebars"
+      comment_title: "AzureCLI-FullTest"
+      init_comment: |
+        Validation for Azure CLI Full Test Starting...
+        Thanks for your contribution!
+      disable_check_suit: true
+    - azure_pipeline:
+        allow_list:
+          - "Azure.azure-cli Breaking Change Test"
+        result_path: "/breaking_change_test/"
+      group_by_keys:
+        - "TestName"
+        - "Module"
+      template_path: "templates/BreakingChangeTest.handlebars"
+      comment_title: "AzureCLI-BreakingChangeTest"
+      init_comment: |
+        Validation for Breaking Change Starting...
+        Thanks for your contribution!
+      disable_check_suit: true
+cli_common_issues:
+  issues:
+    - tag: unofficial_cli
+      keywords:
+        - "azure-cli 2\\.0\\.80"
+        - "azure-cli 2\\.0\\.81"
+        - "azure-cli 2\\.18\\.0"
+        - "dist-packages"
+      solution: |
+        Hi @${author},
+
+        This is not the official Azure CLI published by Microsoft.
+
+        How to tell if the installed Azure CLI is unofficial:
+        - https://github.com/Azure/azure-cli/issues/19640#issuecomment-1133875268
+        - https://github.com/Azure/azure-cli/issues/19640#issuecomment-1148202854
+
+        Please follow  https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-linux to install Microsoft official Azure CLI.
+
+        If you feel that further discussion is needed, please add a comment with the text `/clibot unresolve` to reopen the issue.
+    - tag: latest_api_version_not_available
+      keywords:
+        - "No registered resource provider found"
+      solution: |
+        Hi @${author},
+
+        This is a known issue.
+
+        Please follow https://github.com/Azure/azure-cli/issues/23985#issue-1383263012 to get temporary workaround.
+
+        If you feel that further discussion is needed, please add a comment with the text `/clibot unresolve` to reopen the issue.
+    - tag: az_login_fails
+      keywords:
+        - "WinError 0"
+        - "WinError -2146893813"
+        - "WinError -2146892987"
+        - "WinError 87"
+      solution: |
+        Hi @${author},
+
+        This is a known issue.
+
+        Please follow https://github.com/Azure/azure-cli/issues/20231#issuecomment-1007176901 to get workaround.
+
+        If you feel that further discussion is needed, please add a comment with the text `/clibot unresolve` to reopen the issue.
+    - tag: cloud_shell_fails
+      keywords:
+        - "\\[Errno 30\\]"
+      solution: |
+        Hi @${author},
+
+        This is a known issue.
+
+        Please follow https://github.com/Azure/azure-cli/issues/13855#issuecomment-722412068 to get workaround.
+
+        If you feel that further discussion is needed, please add a comment with the text `/clibot unresolve` to reopen the issue.
+    - tag: not_latest_cli
+      keywords:
+        - "azure-cli[^0-9a-z\n]*(2\\.\\d+\\.\\d+)"
+      solution: |
+        Hi @${author},
+
+        ${currentVersion} is not the latest Azure CLI(${latestVersion}).
+
+        If you haven't already attempted to do so, please upgrade to the latest Azure CLI version by following https://learn.microsoft.com/en-us/cli/azure/update-azure-cli.

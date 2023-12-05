@@ -554,13 +554,13 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         attrs = list(self.command_job._get_attrs(models.JobManagerTask, 'job.job_manager_task'))
         self.assertEqual(len(attrs), 7)
         attrs = list(self.command_job._get_attrs(models.JobAddParameter, 'job'))
-        self.assertEqual(len(attrs), 9)
+        self.assertEqual(len(attrs), 10)
 
     def test_batch_load_arguments(self):
         # pylint: disable=too-many-statements
         handler = operations._pool_operations.PoolOperations.add
         args = list(self.command_pool._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 30)
+        self.assertEqual(len(args), 32)
         self.assertFalse('yes' in [a for a, _ in args])
         self.assertTrue('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])

@@ -21,7 +21,7 @@ class CognitiveServicesPrivateEndpointTests(ScenarioTest):
             'vnetname': sname,
             'pename': 'pe' + sname,
             'customdomain': customdomain,
-            'location': 'westus'
+            'location': 'SOUTHCENTRALUS'
         })
 
         # test to create cognitive services account
@@ -82,7 +82,7 @@ class CognitiveServicesPrivateEndpointTests(ScenarioTest):
             'vnetname': sname,
             'pename': 'pe' + sname,
             'customdomain': customdomain,
-            'location': 'centraluseuap'
+            'location': 'SOUTHCENTRALUS'
         })
 
         # test to create cognitive services account

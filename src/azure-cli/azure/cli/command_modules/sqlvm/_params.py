@@ -18,7 +18,9 @@ from azure.mgmt.sqlvirtualmachine.models import (
     SqlVmGroupImageSku,
     SqlImageSku,
     SqlManagementMode,
-    AssessmentDayOfWeek
+    AssessmentDayOfWeek,
+    LeastPrivilegeMode,
+    ClusterSubnetType
 )
 
 from azure.cli.core.commands.parameters import (
@@ -37,7 +39,8 @@ from ._validators import (
     validate_sqlmanagement,
     validate_expand,
     validate_assessment,
-    validate_assessment_start_time_local
+    validate_assessment_start_time_local,
+    validate_least_privilege_mode
 )
 
 
@@ -94,6 +97,9 @@ def load_arguments(self, _):
                    help='Optional path for fileshare witness.')
         c.argument('ou_path',
                    help='Organizational Unit path in which the nodes and cluster will be present. Example: OU=WSCluster,DC=testdomain,DC=com')
+        c.argument('cluster_subnet_type',
+                   help='Cluster subnet type.',
+                   arg_type=get_enum_type(ClusterSubnetType))
 
     ###############################################
     #    availability group listener params       #
@@ -171,6 +177,11 @@ def load_arguments(self, _):
                    options_list=['--sql-mgmt-type'],
                    validator=validate_sqlmanagement,
                    arg_type=get_enum_type(SqlManagementMode))
+        c.argument('least_privilege_mode',
+                   help='SQL IaaS Agent Least Privilege Mode. Updates from sysadmin to specific permissions used per feature.',
+                   options_list=['--least-privilege-mode'],
+                   validator=validate_least_privilege_mode,
+                   arg_type=get_enum_type(LeastPrivilegeMode))
 
     with self.argument_context('sql vm', arg_group='SQL Server License') as c:
         c.argument('sql_server_license_type',
@@ -204,10 +215,16 @@ def load_arguments(self, _):
         c.argument('sql_management_mode',
                    help='SQL Server management type. Updates from LightWeight to Full.',
                    options_list=['--sql-mgmt-type'],
-                   arg_type=get_enum_type(['Full']))
+                   deprecate_info=c.deprecate())
         c.argument('prompt',
                    options_list=['--yes', '-y'],
-                   help="Do not prompt for confirmation. Requires --sql-mgmt-type.")
+                   help="Do not prompt for confirmation. Requires --sql-mgmt-type.",
+                   deprecate_info=c.deprecate())
+
+    with self.argument_context('sql vm create') as c:
+        c.argument('sql_management_mode',
+                   options_list=['--sql-mgmt-type'],
+                   deprecate_info=c.deprecate())
 
     with self.argument_context('sql vm add-to-group', arg_group='WSFC Domain Credentials') as c:
         c.argument('cluster_bootstrap_account_password',
@@ -351,3 +368,18 @@ def load_arguments(self, _):
                    help='Name of the Log Analytics workspace to associate with VM.')
         c.argument('workspace_rg',
                    help='Resource group containing the Log Analytics workspace.')
+        c.argument('workspace_sub',
+                   help='Subscription containing the Log Analytics workspace.')
+        c.argument('agent_rg',
+                   help='Resource group containing the AMA resources DCE and DCR.')
+
+    with self.argument_context('sql vm enable-azure-ad-auth') as c:
+        c.argument('msi_client_id',
+                   help='Virutal Machine Managed Identity Client ID.')
+        c.argument('skip_client_validation',
+                   help='Skip client side Azure AD authentication validation, the server side validation will still happen.',
+                   action='store_true')
+
+    with self.argument_context('sql vm validate-azure-ad-auth') as c:
+        c.argument('msi_client_id',
+                   help='Virutal Machine Managed Identity Client ID.')

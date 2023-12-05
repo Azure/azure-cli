@@ -20,7 +20,6 @@ def process_autoscale_create_namespace(cmd, namespace):
 
 
 def validate_autoscale_recurrence(namespace):
-    from azure.mgmt.monitor.models import Recurrence, RecurrentSchedule, RecurrenceFrequency
 
     def _validate_weekly_recurrence(namespace):
         # Construct days
@@ -37,15 +36,15 @@ def validate_autoscale_recurrence(namespace):
             valid_days.remove(match)
 
         # validate, but don't process start and end time
-        recurrence_obj = Recurrence(
-            frequency=RecurrenceFrequency.week,
-            schedule=RecurrentSchedule(
-                time_zone=namespace.timezone,
-                days=days,
-                hours=[],  # will be filled in during custom command
-                minutes=[]  # will be filled in during custom command
-            )
-        )
+        recurrence_obj = {
+            "frequency": "Week",
+            "schedule": {
+                "time_zone": namespace.timezone,
+                "days": days,
+                "hours": [],  # will be filled in during custom command
+                "minutes": []  # will be filled in during custom command
+            }
+        }
         return recurrence_obj
 
     valid_recurrence = {
@@ -284,7 +283,7 @@ def process_action_group_detail_for_creation(namespace):
     name = ns['action_group_name']
     receivers = ns.pop('receivers') or []
     action_group_resource_properties = {
-        'location': 'global',  # as of now, 'global' is the only available location for action group
+        'location': ns.pop('location') or 'Global',  # both inputed or 'global' location are available for action group
         'group_short_name': ns.pop('short_name') or name[:12],  # '12' is the short name length limitation
         'email_receivers': [r for r in receivers if isinstance(r, EmailReceiver)],
         'sms_receivers': [r for r in receivers if isinstance(r, SmsReceiver)],
@@ -345,13 +344,13 @@ def get_action_group_validator(dest):
         subscription = get_subscription_id(cmd.cli_ctx)
         resource_group = namespace.resource_group_name
         for group in action_groups:
-            if not is_valid_resource_id(group.action_group_id):
-                group.action_group_id = resource_id(
+            if not is_valid_resource_id(group["action_group_id"]):
+                group["action_group_id"] = resource_id(
                     subscription=subscription,
                     resource_group=resource_group,
                     namespace='microsoft.insights',
                     type='actionGroups',
-                    name=group.action_group_id
+                    name=group["action_group_id"]
                 )
     return validate_action_groups
 
@@ -383,20 +382,6 @@ def get_action_group_id_validator(dest):
     return validate_action_group_ids
 
 
-def validate_private_endpoint_connection_id(namespace):
-    if namespace.connection_id:
-        from azure.cli.core.util import parse_proxy_resource_id
-        result = parse_proxy_resource_id(namespace.connection_id)
-        namespace.resource_group_name = result['resource_group']
-        namespace.scope_name = result['name']
-        namespace.private_endpoint_connection_name = result['child_name_1']
-
-    if not all([namespace.scope_name, namespace.resource_group_name, namespace.private_endpoint_connection_name]):
-        raise CLIError('incorrect usage. Please provide [--id ID] or [--name NAME --scope-name NAME -g NAME]')
-
-    del namespace.connection_id
-
-
 def validate_storage_accounts_name_or_id(cmd, namespace):
     if namespace.storage_account_ids:
         from msrestazure.tools import is_valid_resource_id, resource_id
@@ -412,31 +397,16 @@ def validate_storage_accounts_name_or_id(cmd, namespace):
                 )
 
 
+def validate_loganalytics_workspace_search_table_name(namespace):
+    if namespace.table_name and not namespace.table_name.endswith("_SRCH"):
+        raise CLIError('usage: The table name needs to end with _SRCH')
+
+
+def validate_loganalytics_workspace_restore_table_name(namespace):
+    if namespace.table_name and not namespace.table_name.endswith("_RST"):
+        raise CLIError('usage: The table name needs to end with _RST')
+
+
 def process_subscription_id(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
     namespace.subscription_id = get_subscription_id(cmd.cli_ctx)
-
-
-def process_workspace_data_export_destination(namespace):
-    if namespace.destination:
-        from azure.mgmt.core.tools import is_valid_resource_id, resource_id, parse_resource_id
-        if not is_valid_resource_id(namespace.destination):
-            raise CLIError('usage error: --destination should be a storage account, '
-                           'an evenhug namespace or an event hub resource id.')
-        result = parse_resource_id(namespace.destination)
-        if result['namespace'].lower() == 'microsoft.storage' and result['type'].lower() == 'storageaccounts':
-            namespace.data_export_type = 'StorageAccount'
-        elif result['namespace'].lower() == 'microsoft.eventhub' and result['type'].lower() == 'namespaces':
-            namespace.data_export_type = 'EventHub'
-            namespace.destination = resource_id(
-                subscription=result['subscription'],
-                resource_group=result['resource_group'],
-                namespace=result['namespace'],
-                type=result['type'],
-                name=result['name']
-            )
-            if 'child_type_1' in result and result['child_type_1'].lower() == 'eventhubs':
-                namespace.event_hub_name = result['child_name_1']
-        else:
-            raise CLIError('usage error: --destination should be a storage account, '
-                           'an evenhug namespace or an event hub resource id.')

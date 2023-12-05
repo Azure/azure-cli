@@ -5,8 +5,8 @@
 
 from azure.cli.command_modules.acs._client_factory import (
     cf_agent_pools,
-    cf_container_services,
     cf_managed_clusters,
+    cf_maintenance_configurations,
     cf_snapshots,
 )
 from azure.cli.command_modules.acs._format import (
@@ -21,20 +21,12 @@ from azure.cli.command_modules.acs._format import (
     aks_versions_table_format,
 )
 from azure.cli.core.commands import CliCommandType
-from azure.cli.core.commands.arm import deployment_validate_table_format
 from azure.cli.core.profiles import ResourceType
 
 
 # pylint: disable=too-many-statements
+# pylint: disable=line-too-long
 def load_command_table(self, _):
-
-    container_services_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.containerservice.operations.'
-                        '_container_services_operations#ContainerServicesOperations.{}',
-        operation_group='container_services',
-        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-        client_factory=cf_container_services
-    )
 
     managed_clusters_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.operations.'
@@ -52,6 +44,14 @@ def load_command_table(self, _):
         client_factory=cf_managed_clusters
     )
 
+    maintenance_configuration_sdk = CliCommandType(
+        operations_tmpl='aazure.mgmt.containerservice.operations.'
+                        '_maintenance_configurations_operations#MaintenanceConfigurationsOperations.{}',
+        operation_group='maintenance_configurations',
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        client_factory=cf_maintenance_configurations
+    )
+
     snapshot_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.operations.'
                         '_snapshots_operations#SnapshotsOperations.{}',
@@ -59,35 +59,6 @@ def load_command_table(self, _):
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_snapshots
     )
-
-    # ACS base commands
-    # TODO: When the first azure-cli release after January 31, 2020 is planned, add
-    # `expiration=<CLI core version>` to the `self.deprecate()` args below.
-    deprecate_info = self.deprecate(redirect='aks', hide=True)
-    with self.command_group('acs', container_services_sdk, deprecate_info=deprecate_info,
-                            client_factory=cf_container_services) as g:
-        g.custom_command('browse', 'acs_browse')
-        g.custom_command('create', 'acs_create', supports_no_wait=True,
-                         table_transformer=deployment_validate_table_format)
-        g.command('delete', 'begin_delete', confirmation=True)
-        g.custom_command('list', 'list_container_services')
-        g.custom_command('list-locations', 'list_acs_locations')
-        g.custom_command('scale', 'update_acs')
-        g.show_command('show', 'get')
-        g.wait_command('wait')
-
-    # ACS Mesos DC/OS commands
-    with self.command_group('acs dcos', container_services_sdk, client_factory=cf_container_services) as g:
-        g.custom_command('browse', 'dcos_browse')
-        g.custom_command('install-cli', 'dcos_install_cli',
-                         client_factory=None)
-
-    # ACS Kubernetes commands
-    with self.command_group('acs kubernetes', container_services_sdk,
-                            client_factory=cf_container_services) as g:
-        g.custom_command('browse', 'k8s_browse')
-        g.custom_command('get-credentials', 'k8s_get_credentials')
-        g.custom_command('install-cli', 'k8s_install_cli', client_factory=None)
 
     # AKS commands
     with self.command_group('aks', managed_clusters_sdk,
@@ -115,10 +86,17 @@ def load_command_table(self, _):
         g.wait_command('wait')
         g.custom_command('use-dev-spaces', 'aks_use_dev_spaces', deprecate_info=g.deprecate())
         g.custom_command('remove-dev-spaces', 'aks_remove_dev_spaces', deprecate_info=g.deprecate())
-
-    with self.command_group('aks', container_services_sdk, client_factory=cf_container_services) as g:
+        g.custom_command('operation-abort', 'aks_operation_abort', supports_no_wait=True)
         g.custom_command('get-versions', 'aks_get_versions',
                          table_transformer=aks_versions_table_format)
+
+    # AKS maintenance configuration commands
+    with self.command_group('aks maintenanceconfiguration', maintenance_configuration_sdk, client_factory=cf_maintenance_configurations) as g:
+        g.custom_command('list', 'aks_maintenanceconfiguration_list')
+        g.custom_show_command('show', 'aks_maintenanceconfiguration_show')
+        g.custom_command('add', 'aks_maintenanceconfiguration_add')
+        g.custom_command('update', 'aks_maintenanceconfiguration_update')
+        g.custom_command('delete', 'aks_maintenanceconfiguration_delete')
 
     # AKS agent pool commands
     with self.command_group('aks nodepool',
@@ -135,6 +113,7 @@ def load_command_table(self, _):
         g.custom_command('stop', 'aks_agentpool_stop', supports_no_wait=True)
         g.custom_command('start', 'aks_agentpool_start', supports_no_wait=True)
         g.wait_command('wait')
+        g.custom_command('operation-abort', 'aks_agentpool_operation_abort', supports_no_wait=True)
 
     with self.command_group('aks command', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
         g.custom_command('invoke', 'aks_runcommand', supports_no_wait=True,
@@ -170,4 +149,11 @@ def load_command_table(self, _):
                               table_transformer=aks_show_nodepool_snapshot_table_format)
         g.custom_command('create', 'aks_nodepool_snapshot_create', supports_no_wait=True)
         g.custom_command('delete', 'aks_nodepool_snapshot_delete', supports_no_wait=True)
+        g.custom_command('update', 'aks_nodepool_snapshot_update')
         g.wait_command('wait')
+
+    with self.command_group('aks oidc-issuer', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
+        g.custom_command('rotate-signing-keys', 'aks_rotate_service_account_signing_keys', supports_no_wait=True,
+                         confirmation='Be careful that rotate oidc issuer signing keys twice within short period' +
+                         ' will invalidate service accounts token immediately. Please refer to doc for details.\n' +
+                         'Are you sure you want to perform this operation?')

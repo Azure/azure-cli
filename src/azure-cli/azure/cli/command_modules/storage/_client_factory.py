@@ -225,8 +225,13 @@ def cf_blob_service(cli_ctx, kwargs):
     if not account_url:
         account_url = get_account_url(cli_ctx, account_name=account_name, service='blob')
     credential = account_key or sas_token or token_credential
+    if account_name and account_key:
+        # For non-standard account URL such as Edge Zone, account_name can't be parsed from account_url. Use credential
+        # dict instead.
+        credential = {'account_key': account_key, 'account_name': account_name}
 
-    return t_blob_service(account_url=account_url, credential=credential, **client_kwargs)
+    return t_blob_service(account_url=account_url, credential=credential,
+                          connection_timeout=kwargs.pop('connection_timeout', None), **client_kwargs)
 
 
 def get_credential(kwargs):
@@ -250,7 +255,8 @@ def cf_blob_client(cli_ctx, kwargs):
         kwargs.pop('blob_name')
         return t_blob_client.from_blob_url(blob_url=kwargs.pop('blob_url'),
                                            credential=credential,
-                                           snapshot=kwargs.pop('snapshot', None))
+                                           snapshot=kwargs.pop('snapshot', None),
+                                           connection_timeout=kwargs.pop('connection_timeout', None))
     if 'blob_url' in kwargs:
         kwargs.pop('blob_url')
 
@@ -374,6 +380,7 @@ def cf_table_client(cli_ctx, kwargs):
 
 
 def cf_share_service(cli_ctx, kwargs):
+    from azure.cli.core.azclierror import RequiredArgumentMissingError
     client_kwargs = prepare_client_kwargs_track2(cli_ctx)
     client_kwargs = _config_location_mode(kwargs, client_kwargs)
     t_share_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILESHARE, '_share_service_client#ShareServiceClient')
@@ -383,6 +390,23 @@ def cf_share_service(cli_ctx, kwargs):
     sas_token = kwargs.pop('sas_token', None)
     account_name = kwargs.pop('account_name', None)
     account_url = kwargs.pop('account_url', None)
+    enable_file_backup_request_intent = kwargs.pop('enable_file_backup_request_intent', None)
+
+    disallow_trailing_dot = kwargs.pop('disallow_trailing_dot', None)
+    disallow_source_trailing_dot = kwargs.pop('disallow_source_trailing_dot', None)
+
+    if disallow_trailing_dot is not None:
+        client_kwargs["allow_trailing_dot"] = not disallow_trailing_dot
+    if disallow_source_trailing_dot is not None:
+        copy_url = kwargs.get("copy_source")
+        import re
+        if kwargs.get("source_share") or (copy_url and re.match(r"https?:\/\/.*?\.file\..*", copy_url)):
+            client_kwargs["allow_source_trailing_dot"] = not disallow_source_trailing_dot
+
+    if token_credential is not None and not enable_file_backup_request_intent:
+        raise RequiredArgumentMissingError("--enable-file-backup-request-intent is required for file share OAuth")
+    if enable_file_backup_request_intent:
+        client_kwargs['token_intent'] = 'backup'
     if connection_string:
         return t_share_service.from_connection_string(conn_str=connection_string, **client_kwargs)
     if not account_url:
@@ -402,5 +426,43 @@ def cf_share_directory_client(cli_ctx, kwargs):
 
 
 def cf_share_file_client(cli_ctx, kwargs):
+    if kwargs.get('file_url'):
+        from azure.cli.core.azclierror import RequiredArgumentMissingError
+        t_file_client = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILESHARE, '_file_client#ShareFileClient')
+        token_credential = kwargs.get('token_credential')
+        enable_file_backup_request_intent = kwargs.pop('enable_file_backup_request_intent', None)
+        token_intent = 'backup' if enable_file_backup_request_intent else None
+        if token_credential is not None and not enable_file_backup_request_intent:
+            raise RequiredArgumentMissingError("--enable-file-backup-request-intent is required for file share OAuth")
+        credential = get_credential(kwargs)
+        # del unused kwargs
+        kwargs.pop('connection_string')
+        kwargs.pop('account_name')
+        kwargs.pop('account_url')
+        kwargs.pop('share_name')
+        kwargs.pop('directory_name')
+        kwargs.pop('file_name')
+
+        disallow_trailing_dot = kwargs.pop('disallow_trailing_dot', None)
+        disallow_source_trailing_dot = kwargs.pop('disallow_source_trailing_dot', None)
+
+        client_kwargs = {}
+        if disallow_trailing_dot is not None:
+            client_kwargs["allow_trailing_dot"] = not disallow_trailing_dot
+        if disallow_source_trailing_dot is not None:
+            copy_url = kwargs.get("copy_source")
+            import re
+            if kwargs.get("source_share") or (copy_url and re.match(r"https?:\/\/.*?\.file\..*", copy_url)):
+                client_kwargs["allow_source_trailing_dot"] = not disallow_source_trailing_dot
+
+        return t_file_client.from_file_url(file_url=kwargs.pop('file_url'),
+                                           credential=credential, token_intent=token_intent, **client_kwargs)
+    if 'file_url' in kwargs:
+        kwargs.pop('file_url')
+
     return cf_share_client(cli_ctx, kwargs).get_directory_client(directory_path=kwargs.pop('directory_name')).\
         get_file_client(file_name=kwargs.pop('file_name'))
+
+
+def cf_local_users(cli_ctx, _):
+    return storage_client_factory(cli_ctx).local_users

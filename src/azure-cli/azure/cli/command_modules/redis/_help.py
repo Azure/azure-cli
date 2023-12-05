@@ -74,6 +74,10 @@ examples:
 helps['redis export'] = """
 type: command
 short-summary: Export data stored in a Redis cache.
+examples:
+  - name: Use managed identity to export cache data
+    text: az redis export -n testCacheName -g testResourceGroup --prefix examplePrefix --container containerUrl  --preferred-data-archive-auth-method ManagedIdentity
+    crafted: true
 """
 
 helps['redis firewall-rules'] = """
@@ -95,6 +99,10 @@ short-summary: Update a redis cache firewall rule.
 helps['redis import'] = """
 type: command
 short-summary: Import data into a Redis cache.
+examples:
+  - name: Use managed identity to import cache data
+    text: az redis import -n testCacheName -g testResourceGroup --files blobUrl --preferred-data-archive-auth-method ManagedIdentity
+    crafted: true
 """
 
 helps['redis list'] = """
@@ -143,7 +151,7 @@ examples:
     text: az redis update --name MyRedisCache --resource-group MyResourceGroup --set "redisConfiguration.rdb-backup-enabled"="false"
     crafted: true
   - name: Configure the RDB back up enabled data persistence for already created Premium Azure Cache for Redis
-    text: az redis update --name MyRedisCache --resource-group MyResourceGroup --set "redisConfiguration.rdb-storage-connection-string"="DefaultEndpointsProtocol=https;AccountName=mystorageaccount;AccountKey=myAccountKey;EndpointSuffix=core.windows.net" "redisConfiguration.rdb-backup-enabled"="true" "redisConfiguration.rdb-backup-frequency"="15" "redisConfiguration.rdb-backup-max-snapshot-count"="1"
+    text: az redis update --name MyRedisCache --resource-group MyResourceGroup --set "redisConfiguration.rdb-storage-connection-string"="BlobEndpoint=https//..." "redisConfiguration.rdb-backup-enabled"="true" "redisConfiguration.rdb-backup-frequency"="15" "redisConfiguration.rdb-backup-max-snapshot-count"="1"
     crafted: true
   - name: Scale an Azure Cache for Redis Instance - Update to different size (An example to scale from c0 to c1).
     text: az redis update --name MyRedisCache --resource-group MyResourceGroup --set "sku.capacity"="2"

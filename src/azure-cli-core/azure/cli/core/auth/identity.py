@@ -6,6 +6,7 @@
 import json
 import os
 import re
+import sys
 
 from azure.cli.core._environment import get_config_dir
 from knack.log import get_logger
@@ -52,7 +53,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     # It follows singleton pattern so that _secret_file is read only once.
     _service_principal_store_instance = None
 
-    def __init__(self, authority, tenant_id=None, client_id=None, encrypt=False, use_msal_http_cache=True):
+    def __init__(self, authority, tenant_id=None, client_id=None, encrypt=False, use_msal_http_cache=True,
+                 allow_broker=None, instance_discovery=None):
         """
         :param authority: Authentication authority endpoint. For example,
             - AAD: https://login.microsoftonline.com
@@ -67,6 +69,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         self.client_id = client_id or AZURE_CLI_CLIENT_ID
         self._encrypt = encrypt
         self._use_msal_http_cache = use_msal_http_cache
+        self._allow_broker = allow_broker
+        self._instance_discovery = instance_discovery
 
         # Build the authority in MSAL style
         self._msal_authority, self._is_adfs = _get_authority_url(authority, tenant_id)
@@ -82,7 +86,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
     @property
     def _msal_app_kwargs(self):
-        """kwargs for creating UserCredential or ServicePrincipalCredential.
+        """kwargs for creating ClientApplication (including its subclass ConfidentialClientApplication).
         MSAL token cache and HTTP cache are lazily created.
         """
         if not Identity._msal_token_cache:
@@ -94,8 +98,17 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         return {
             "authority": self._msal_authority,
             "token_cache": Identity._msal_token_cache,
-            "http_cache": Identity._msal_http_cache
+            "http_cache": Identity._msal_http_cache,
+            "instance_discovery": self._instance_discovery,
+            # CP1 means we can handle claims challenges (CAE)
+            "client_capabilities": None if "AZURE_IDENTITY_DISABLE_CP1" in os.environ else ["CP1"]
         }
+
+    @property
+    def _msal_public_app_kwargs(self):
+        """kwargs for creating PublicClientApplication."""
+        # allow_broker can only be used on PublicClientApplication.
+        return {**self._msal_app_kwargs, "allow_broker": self._allow_broker}
 
     @property
     def _msal_app(self):
@@ -103,7 +116,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         The instance is lazily created.
         """
         if not self._msal_app_instance:
-            self._msal_app_instance = PublicClientApplication(self.client_id, **self._msal_app_kwargs)
+            self._msal_app_instance = PublicClientApplication(self.client_id, **self._msal_public_app_kwargs)
         return self._msal_app_instance
 
     def _load_msal_token_cache(self):
@@ -129,9 +142,15 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     def login_with_auth_code(self, scopes, **kwargs):
         # Emit a warning to inform that a browser is opened.
         # Only show the path part of the URL and hide the query string.
-        logger.warning("A web browser has been opened at %s. Please continue the login in the web browser. "
-                       "If no web browser is available or if the web browser fails to open, use device code flow "
-                       "with `az login --use-device-code`.", self._msal_app.authority.authorization_endpoint)
+
+        def _prompt_launching_ui(ui=None, **_):
+            if ui == 'browser':
+                logger.warning("A web browser has been opened at %s. Please continue the login in the web browser. "
+                               "If no web browser is available or if the web browser fails to open, use device code "
+                               "flow with `az login --use-device-code`.",
+                               self._msal_app.authority.authorization_endpoint)
+            elif ui == 'broker':
+                logger.warning("Please select the account you want to log in with.")
 
         from .util import read_response_templates
         success_template, error_template = read_response_templates()
@@ -140,7 +159,10 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         # on port 8400 from the old design. However, ADFS only allows port 8400.
         result = self._msal_app.acquire_token_interactive(
             scopes, prompt='select_account', port=8400 if self._is_adfs else None,
-            success_template=success_template, error_template=error_template, **kwargs)
+            success_template=success_template, error_template=error_template,
+            parent_window_handle=self._msal_app.CONSOLE_WINDOW_HANDLE, on_before_launching_ui=_prompt_launching_ui,
+            enable_msa_passthrough=True,
+            **kwargs)
         return check_result(result)
 
     def login_with_device_code(self, scopes, **kwargs):
@@ -148,7 +170,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         if "user_code" not in flow:
             raise ValueError(
                 "Fail to create device flow. Err: %s" % json.dumps(flow, indent=4))
-        logger.warning(flow["message"])
+        from azure.cli.core.style import print_styled_text, Style
+        print_styled_text((Style.WARNING, flow["message"]), file=sys.stderr)
         result = self._msal_app.acquire_token_by_device_flow(flow, **kwargs)  # By default it will block
         return check_result(result)
 
@@ -183,6 +206,12 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             self._msal_app.remove_account(account)
 
     def logout_all_users(self):
+        # Remove users from MSAL
+        accounts = self._msal_app.get_accounts()
+        for account in accounts:
+            self._msal_app.remove_account(account)
+
+        # Also remove token cache file
         for e in file_extensions.values():
             _try_remove(self._token_cache_file + e)
 
@@ -200,7 +229,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         return accounts
 
     def get_user_credential(self, username):
-        return UserCredential(self.client_id, username, **self._msal_app_kwargs)
+        return UserCredential(self.client_id, username, **self._msal_public_app_kwargs)
 
     def get_service_principal_credential(self, client_id):
         entry = self._service_principal_store.load_entry(client_id, self.tenant_id)

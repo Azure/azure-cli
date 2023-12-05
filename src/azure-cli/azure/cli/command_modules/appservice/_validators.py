@@ -9,7 +9,6 @@ import ipaddress
 from azure.cli.core.azclierror import (InvalidArgumentValueError, ArgumentUsageError, RequiredArgumentMissingError,
                                        ResourceNotFoundError, ValidationError, MutuallyExclusiveArgumentError)
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
-from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import validate_tags
 
 from knack.log import get_logger
@@ -18,7 +17,11 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id
 from ._appservice_utils import _generic_site_operation
 from ._client_factory import web_client_factory
 from .utils import (_normalize_sku, get_sku_tier, _normalize_location, get_resource_name_and_group,
-                    get_resource_if_exists)
+                    get_resource_if_exists, is_functionapp, is_logicapp, is_webapp, is_centauri_functionapp)
+
+from .aaz.latest.network import ListServiceTags
+from .aaz.latest.network.vnet import List as VNetList, Show as VNetShow
+from ._constants import ACR_IMAGE_SUFFIX
 
 logger = get_logger(__name__)
 
@@ -87,10 +90,11 @@ def validate_ase_create(cmd, namespace):
 
 
 def _validate_asp_sku(sku, app_service_environment, zone_redundant):
-    if zone_redundant and get_sku_tier(sku.upper()) not in ['PREMIUMV2', 'PREMIUMV3']:
+    supported_skus = ['PREMIUMV2', 'PREMIUMV3', 'PREMIUMMV3', 'PREMIUM0V3', 'ISOLATEDV2']
+    if zone_redundant and get_sku_tier(sku).upper() not in supported_skus:
         raise ValidationError("Zone redundancy cannot be enabled for sku {}".format(sku))
     # Isolated SKU is supported only for ASE
-    if sku.upper() in ['I1', 'I2', 'I3', 'I1V2', 'I2V2', 'I3V2']:
+    if sku.upper() in ['I1', 'I2', 'I3', 'I1V2', 'I2V2', 'I3V2', 'I4V2', 'I5V2', 'I6V2']:
         if not app_service_environment:
             raise ValidationError("The pricing tier 'Isolated' is not allowed for this app service plan. "
                                   "Use this link to learn more: "
@@ -119,6 +123,42 @@ def validate_functionapp_asp_create(namespace):
             raise ArgumentUsageError("--max-burst is only supported for Elastic Premium (EP) plans")
 
 
+def validate_functionapp_on_containerapp_site_config_set(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    name = namespace.name
+    if is_centauri_functionapp(cmd, resource_group_name, name):
+        raise ValidationError(
+            "Invalid command. This is not supported for Azure Functions on Azure Container app environments.",
+            "Please use the following command instead: az functionapp config container set")
+
+
+def validate_functionapp_on_containerapp_container_settings_delete(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    name = namespace.name
+    if is_centauri_functionapp(cmd, resource_group_name, name):
+        raise ValidationError(
+            "Invalid command. This is currently not supported for Azure Functions on Azure Container app environments.",
+            "Please use the following command instead: az functionapp config appsettings set")
+
+
+def validate_functionapp_on_containerapp_update(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    name = namespace.name
+    if is_centauri_functionapp(cmd, resource_group_name, name):
+        raise ValidationError(
+            "Invalid command. This is currently not supported for Azure Functions on Azure Container app environments.",
+            "Please use either 'az functionapp config appsettings set' or 'az functionapp config container set'")
+
+
+def validate_functionapp_on_containerapp_site_config_show(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    name = namespace.name
+    if is_centauri_functionapp(cmd, resource_group_name, name):
+        raise ValidationError(
+            "Invalid command. This is not supported for Azure Functions on Azure Container app environments.",
+            "Please use the following command instead: az functionapp config container show")
+
+
 def validate_app_exists(cmd, namespace):
     app = namespace.name
     resource_group_name = namespace.resource_group_name
@@ -128,12 +168,24 @@ def validate_app_exists(cmd, namespace):
         raise ResourceNotFoundError("'{}' app not found in ResourceGroup '{}'".format(app, resource_group_name))
 
 
+def validate_functionapp_on_containerapp_vnet_add(cmd, namespace):
+    validate_functionapp_on_containerapp_vnet(cmd, namespace)
+    validate_add_vnet(cmd, namespace)
+
+
+def validate_functionapp_on_containerapp_vnet(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    name = namespace.name
+    if is_centauri_functionapp(cmd, resource_group_name, name):
+        raise ValidationError(
+            'Unsupported operation on function app.',
+            'Please set virtual network configuration for the function app at Container app environment level.')
+
+
 def validate_add_vnet(cmd, namespace):
     from azure.core.exceptions import ResourceNotFoundError as ResNotFoundError
 
     resource_group_name = namespace.resource_group_name
-    from azure.cli.command_modules.network._client_factory import network_client_factory
-
     vnet_identifier = namespace.vnet
     name = namespace.name
     slot = namespace.slot
@@ -147,22 +199,23 @@ def validate_add_vnet(cmd, namespace):
         vnet_name = parsed_vnet['name']
 
         cmd.cli_ctx.data['subscription_id'] = vnet_sub_id
-        vnet_client = network_client_factory(cmd.cli_ctx)
-        vnet_loc = vnet_client.virtual_networks.get(resource_group_name=vnet_group,
-                                                    virtual_network_name=vnet_name).location
+        vnet_loc = VNetShow(cli_ctx=cmd.cli_ctx)(command_args={
+            "name": vnet_name,
+            "resource_group": vnet_group
+        })["location"]
         cmd.cli_ctx.data['subscription_id'] = current_sub_id
     else:
-        vnet_client = network_client_factory(cmd.cli_ctx)
-
         try:
-            vnet_loc = vnet_client.virtual_networks.get(resource_group_name=namespace.resource_group_name,
-                                                        virtual_network_name=vnet_identifier).location
+            vnet_loc = VNetShow(cli_ctx=cmd.cli_ctx)(command_args={
+                "name": vnet_identifier,
+                "resource_group": namespace.resource_group_name
+            })["location"]
         except ResNotFoundError:
-            vnets = vnet_client.virtual_networks.list_all()
+            vnets = VNetList(cli_ctx=cmd.cli_ctx)(command_args={})
             vnet_loc = ''
             for v in vnets:
-                if vnet_identifier == v.name:
-                    vnet_loc = v.location
+                if vnet_identifier == v["name"]:
+                    vnet_loc = v["location"]
                     break
 
     if not vnet_loc:
@@ -220,7 +273,7 @@ def _validate_ip_address_format(namespace):
         validated_ips = ''
         for ip in input_ips:
             # Use ipaddress library to validate ip network format
-            ip_obj = ipaddress.ip_network(ip)
+            ip_obj = ipaddress.ip_network(ip, False)
             validated_ips += str(ip_obj) + ','
         namespace.ip_address = validated_ips[:-1]
 
@@ -232,7 +285,7 @@ def _validate_ip_address_existence(cmd, namespace):
     scm_site = namespace.scm_site
     configs = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
     access_rules = configs.scm_ip_security_restrictions if scm_site else configs.ip_security_restrictions
-    ip_exists = [(lambda x: x.ip_address == namespace.ip_address)(x) for x in access_rules]
+    ip_exists = [x.ip_address == namespace.ip_address for x in access_rules]
     if True in ip_exists:
         raise ArgumentUsageError('IP address: ' + namespace.ip_address + ' already exists. '
                                  'Cannot add duplicate IP address values.')
@@ -254,18 +307,19 @@ def _validate_service_tag_format(cmd, namespace):
         input_tags = input_value.split(',')
         if len(input_tags) > 8:
             raise InvalidArgumentValueError('Maximum 8 service tags are allowed per rule.')
-        network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK)
         resource_group_name = namespace.resource_group_name
         name = namespace.name
         webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
-        service_tag_full_list = network_client.service_tags.list(webapp.location).values
+        service_tag_full_list = ListServiceTags(cli_ctx=cmd.cli_ctx)(command_args={
+            "location": webapp.location
+        })["values"]
         if service_tag_full_list is None:
             logger.warning('Not able to get full Service Tag list. Cannot validate Service Tag.')
             return
         for tag in input_tags:
             valid_tag = False
             for tag_full_list in service_tag_full_list:
-                if tag.lower() == tag_full_list.name.lower():
+                if tag.lower() == tag_full_list["name"].lower():
                     valid_tag = True
                     continue
             if not valid_tag:
@@ -318,9 +372,27 @@ def validate_staticsite_link_function(cmd, namespace):
         raise ValidationError("Cannot have more than one user provided function app associated with a Static Web App")
 
 
+def validate_functionapp(cmd, namespace):
+    validate_vnet_integration(cmd, namespace)
+    validate_registry_server(namespace)
+    validate_registry_user(namespace)
+    validate_registry_pass(namespace)
+
+
 # TODO consider combining with validate_add_vnet
 def validate_vnet_integration(cmd, namespace):
     validate_tags(namespace)
+    if _get_environment(namespace):
+        if namespace.vnet:
+            raise ArgumentUsageError(
+                "Invalid input. '--vnet' is not a supported property for function apps deployed to Azure Container "
+                "Apps.",
+                "Please try again without '--vnet' and configure vnet from Azure Container Apps environment.")
+        if namespace.subnet:
+            raise ArgumentUsageError(
+                "Invalid input. '--subnet' is not a supported property for function apps deployed to Azure Container "
+                "Apps.",
+                "Please try again without '--subnet' and configure subnet from Azure Container Apps environment.")
     if namespace.subnet or namespace.vnet:
         if not namespace.subnet:
             raise ArgumentUsageError("Cannot use --vnet without --subnet")
@@ -331,12 +403,14 @@ def validate_vnet_integration(cmd, namespace):
         if is_valid_resource_id(namespace.plan):
             parse_result = parse_resource_id(namespace.plan)
             plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
+        elif _get_consumption_plan_location(namespace):
+            raise ArgumentUsageError("Virtual network integration is not allowed for consumption plans.")
         else:
             plan_info = client.app_service_plans.get(name=namespace.plan,
                                                      resource_group_name=namespace.resource_group_name)
 
         sku_name = plan_info.sku.name
-        disallowed_skus = {'FREE', 'SHARED', 'BASIC', 'ElasticPremium', 'PremiumContainer', 'Isolated', 'IsolatedV2'}
+        disallowed_skus = {'FREE', 'SHARED', 'PremiumContainer', 'Isolated', 'IsolatedV2'}
         if get_sku_tier(sku_name) in disallowed_skus:
             raise ArgumentUsageError("App Service Plan has invalid sku for vnet integration: {}."
                                      "Plan sku cannot be one of: {}. "
@@ -390,3 +464,76 @@ def validate_webapp_up(cmd, namespace):
         ase = client.app_service_environments.get(resource_group_name=ase_rg, name=ase_name)
         _validate_ase_is_v3(ase)
         _validate_ase_not_ilb(ase)
+
+
+def _get_app_name(namespace):
+    if hasattr(namespace, "name"):
+        return namespace.name
+    if hasattr(namespace, "webapp"):
+        return namespace.webapp
+    return None
+
+
+def _get_environment(namespace):
+    if hasattr(namespace, "environment"):
+        return namespace.environment
+    return None
+
+
+def _get_consumption_plan_location(namespace):
+    if hasattr(namespace, "consumption_plan_location"):
+        return namespace.consumption_plan_location
+    return None
+
+
+def validate_app_is_webapp(cmd, namespace):
+    client = web_client_factory(cmd.cli_ctx)
+    name = _get_app_name(namespace)
+    rg = namespace.resource_group
+    app = get_resource_if_exists(client.web_apps, name=name, resource_group_name=rg)
+    if is_functionapp(app):
+        raise ValidationError(f"App '{name}' in group '{rg}' is a function app.")
+    if is_logicapp(app):
+        raise ValidationError(f"App '{name}' in group '{rg}' is a logic app.")
+
+
+def validate_app_is_functionapp(cmd, namespace):
+    client = web_client_factory(cmd.cli_ctx)
+    name = _get_app_name(namespace)
+    rg = namespace.resource_group
+    app = get_resource_if_exists(client.web_apps, name=name, resource_group_name=rg)
+    if is_logicapp(app):
+        raise ValidationError(f"App '{name}' in group '{rg}' is a logic app.")
+    if is_webapp(app):
+        raise ValidationError(f"App '{name}' in group '{rg}' is a web app.")
+
+
+def validate_centauri_delete_function(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    name = namespace.name
+    if is_centauri_functionapp(cmd, resource_group_name, name):
+        raise ValidationError(
+            "Invalid Operation. This function is currently present in your image",
+            "Please modify your image to remove the function and provide an updated image.")
+
+
+def validate_registry_server(namespace):
+    if namespace.environment and namespace.registry_server:
+        if not namespace.registry_username or not namespace.registry_password:
+            if ACR_IMAGE_SUFFIX not in namespace.registry_server:
+                raise RequiredArgumentMissingError("Usage error: --registry-server, --registry-password and"
+                                                   " --registry-username are required together if not using Azure Container Registry")  # pylint: disable=line-too-long
+
+
+def validate_registry_user(namespace):
+    if namespace.environment and namespace.registry_username:
+        if not namespace.registry_server or (not namespace.registry_password and ACR_IMAGE_SUFFIX not in namespace.registry_server):  # pylint: disable=line-too-long
+            raise RequiredArgumentMissingError("Usage error: --registry-server, --registry-password and"
+                                               " --registry-username are required together if not using Azure Container Registry")  # pylint: disable=line-too-long
+
+
+def validate_registry_pass(namespace):
+    if namespace.environment and namespace.registry_password:
+        if not namespace.registry_server or (not namespace.registry_username and ACR_IMAGE_SUFFIX not in namespace.registry_server):  # pylint: disable=line-too-long
+            raise RequiredArgumentMissingError("Usage error: --registry-server, --registry-password and"
+                                               " --registry-username are required together if not using Azure Container Registry")  # pylint: disable=line-too-long

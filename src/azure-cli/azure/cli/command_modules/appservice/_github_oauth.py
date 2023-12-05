@@ -2,11 +2,18 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=consider-using-f-string
 
-from azure.cli.core.azclierror import (ValidationError, CLIInternalError, UnclassifiedUserFault)
+import os
+import sys
+from datetime import datetime
+
 from knack.log import get_logger
+from azure.cli.core.util import open_page_in_browser
+from azure.cli.core.auth.persistence import SecretStore, build_persistence
+from azure.cli.core.azclierror import (ValidationError, CLIInternalError, UnclassifiedUserFault)
 
-from ._constants import (GITHUB_OAUTH_CLIENT_ID, GITHUB_OAUTH_SCOPES)
+from .utils import repo_url_to_name
 
 logger = get_logger(__name__)
 
@@ -17,7 +24,56 @@ https://docs.github.com/en/developers/apps/authorizing-oauth-apps#device-flow
 '''
 
 
-def get_github_access_token(cmd, scope_list=None):  # pylint: disable=unused-argument
+GITHUB_OAUTH_CLIENT_ID = "8d8e1f6000648c575489"
+GITHUB_OAUTH_SCOPES = [
+    "admin:repo_hook",
+    "repo",
+    "workflow"
+]
+
+
+def _get_github_token_secret_store(cmd):
+    location = os.path.join(cmd.cli_ctx.config.config_dir, "github_token_cache")
+    # TODO use core CLI util to take care of this once it's merged and released
+    encrypt = sys.platform.startswith('win32')  # encryption not supported on non-windows platforms
+    file_persistence = build_persistence(location, encrypt)
+    return SecretStore(file_persistence)
+
+
+def cache_github_token(cmd, token, repo):
+    repo = repo_url_to_name(repo)
+    secret_store = _get_github_token_secret_store(cmd)
+    cache = secret_store.load()
+
+    for entry in cache:
+        if isinstance(entry, dict) and entry.get("value") == token:
+            if repo not in entry.get("repos", []):
+                entry["repos"] = [*entry.get("repos", []), repo]
+                entry["last_modified_timestamp"] = datetime.utcnow().timestamp()
+            break
+    else:
+        cache_entry = {"last_modified_timestamp": datetime.utcnow().timestamp(), "value": token, "repos": [repo]}
+        cache = [cache_entry, *cache]
+
+    secret_store.save(cache)
+
+
+def load_github_token_from_cache(cmd, repo):
+    repo = repo_url_to_name(repo)
+    secret_store = _get_github_token_secret_store(cmd)
+    cache = secret_store.load()
+
+    if isinstance(cache, list):
+        for entry in cache:
+            if isinstance(entry, dict) and repo in entry.get("repos", []):
+                return entry.get("value")
+
+    return None
+
+
+def get_github_access_token(cmd, scope_list=None, token=None):  # pylint: disable=unused-argument
+    if token:
+        return token
     if scope_list:
         for scope in scope_list:
             if scope not in GITHUB_OAUTH_SCOPES:
@@ -45,6 +101,7 @@ def get_github_access_token(cmd, scope_list=None):  # pylint: disable=unused-arg
         expires_in_seconds = int(parsed_response['expires_in'][0])
         logger.warning('Please navigate to %s and enter the user code %s to activate and '
                        'retrieve your github personal access token', verification_uri, user_code)
+        open_page_in_browser("https://github.com/login/device")
 
         timeout = time.time() + expires_in_seconds
         logger.warning("Waiting up to '%s' minutes for activation", str(expires_in_seconds // 60))
@@ -76,6 +133,6 @@ def get_github_access_token(cmd, scope_list=None):  # pylint: disable=unused-arg
                 return parsed_confirmation_response['access_token'][0]
     except Exception as e:
         raise CLIInternalError(
-            'Error: {}. Please try again, or retrieve personal access token from the Github website'.format(e))
+            'Error: {}. Please try again, or retrieve personal access token from the Github website'.format(e)) from e
 
     raise UnclassifiedUserFault('Activation did not happen in time. Please try again')

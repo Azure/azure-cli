@@ -28,6 +28,7 @@ class ImportFormat(Enum):
     OpenApi = "OpenApi"
     OpenApiJson = "OpenApiJson"
     Wsdl = "Wsdl"
+    GraphQL = "GraphQL"
 
 
 def load_arguments(self, _):
@@ -66,7 +67,11 @@ def load_arguments(self, _):
         c.argument('sku_name', arg_type=get_enum_type(SKU_TYPES), help='The sku of the api management instance')
         c.argument('sku_capacity', type=int, help='The number of deployed units of the SKU.')
         c.argument('enable_managed_identity', arg_type=get_three_state_flag(),
-                   help='Create a managed identity for the API Management service to access other Azure resources.')
+                   help='Create a managed identity for the API Management service to access other Azure resources. Only meant to be used for Consumption SKU Service.')
+        c.argument('public_network_access', arg_type=get_three_state_flag(),
+                   help='Whether or not public endpoint access is allowed for this API Management service. If set to true, private endpoints are the exclusive access method.')
+        c.argument('disable_gateway', arg_type=get_three_state_flag(),
+                   help='Disable gateway in the master region. Only valid for an Api Management service deployed in multiple locations.')
 
     with self.argument_context('apim update') as c:
         c.argument(
@@ -81,7 +86,11 @@ def load_arguments(self, _):
         c.argument('sku_name', arg_type=get_enum_type(SKU_TYPES), help='The sku of the api management instance')
         c.argument('sku_capacity', type=int, help='The number of deployed units of the SKU.')
         c.argument('enable_managed_identity', arg_type=get_three_state_flag(),
-                   help='Create a managed identity for the API Management service to access other Azure resources.')
+                   help='Create a managed identity for the API Management service to access other Azure resources. Only meant to be used for Consumption SKU Service.')
+        c.argument('public_network_access', arg_type=get_three_state_flag(),
+                   help='Whether or not public endpoint access is allowed for this API Management service. If set to true, private endpoints are the exclusive access method.')
+        c.argument('disable_gateway', arg_type=get_three_state_flag(),
+                   help='Disable gateway in the master region. Only valid for an Api Management service deployed in multiple locations.')
 
     with self.argument_context('apim backup') as c:
         c.argument('backup_name', help='The name of the backup file to create.')
@@ -318,7 +327,7 @@ def load_arguments(self, _):
         c.argument(
             'subscription_required', options_list=['--subscription-required', '-s'], arg_type=get_three_state_flag(),
             help="Whether a product subscription is required for accessing APIs included in this product.")
-        c.argument('approval_required', arg_type=get_three_state_flag(), help="whether subscription approval is required. If false, new subscriptions will be approved automatically enabling developers to call the product’s APIs immediately after subscribing. If true, administrators must manually approve the subscription before the developer can any of the product’s APIs. Can be present only if subscriptionRequired property is present and has a value of false.")
+        c.argument('approval_required', arg_type=get_three_state_flag(), help="whether subscription approval is required. If false, new subscriptions will be approved automatically enabling developers to call the product’s APIs immediately after subscribing. If true, administrators must manually approve the subscription before the developer can use any of the product’s APIs. Can be present only if subscriptionRequired property is present and has a value of false.")
         c.argument('subscriptions_limit', help="Whether the number of subscriptions a user can have to this product at the same time. Set to null or omit to allow unlimited per user subscriptions. Can be present only if subscriptionRequired property is present and has a value of false.")
         c.argument(
             'state', arg_type=get_enum_type(ProductState),
@@ -411,3 +420,60 @@ def load_arguments(self, _):
         c.argument(
             'service_name', options_list=['--service-name', '-n'],
             help="The name of the soft deleted API Management service instance.")
+
+    with self.argument_context('apim graphql resolver create') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument('api_id', arg_type=api_id)
+        c.argument('resolver_id',
+                   help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.')
+        c.argument('display_name',
+                   help='Resolver Name.')
+        c.argument('path', help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.', required=True)
+        c.argument('description',
+                   help='Description of the resolver. May include HTML formatting tags.')
+
+    with self.argument_context('apim graphql resolver delete') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument('api_id', arg_type=api_id)
+        c.argument('resolver_id', help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.')
+        c.argument('if_match', help='ETag of the Entity.')
+
+    with self.argument_context('apim graphql resolver show') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument('api_id', arg_type=api_id)
+        c.argument('resolver_id', help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.')
+
+    with self.argument_context('apim graphql resolver list') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument('api_id', arg_type=api_id)
+
+    with self.argument_context('apim graphql resolver policy create') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument('api_id', arg_type=api_id)
+        c.argument('resolver_id', help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.')
+        c.argument('policy_format', help='Format of the policyContent.')
+        c.argument('value_path', help='Contents of the Policy as defined by the format.')
+
+    with self.argument_context('apim graphql resolver policy show') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument('api_id', arg_type=api_id)
+        c.argument('resolver_id', help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.')
+
+    with self.argument_context('apim graphql resolver policy list') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument('api_id', arg_type=api_id)
+        c.argument('resolver_id', help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.')
+
+    with self.argument_context('apim graphql resolver policy delete') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument('api_id', arg_type=api_id)
+        c.argument('resolver_id', help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.')
+        c.argument('if_match', help='ETag of the Entity.')

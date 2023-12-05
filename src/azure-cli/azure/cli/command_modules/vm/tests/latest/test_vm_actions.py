@@ -373,7 +373,8 @@ class TestActions(unittest.TestCase):
         from azure.cli.core.azclierror import ArgumentUsageError
         with self.assertRaises(ArgumentUsageError) as err:
             _validate_vm_vmss_msi(cmd, np_mock, is_identity_assign=True)
-        self.assertTrue("usage error: please specify --scope when assigning a role to the managed identity"
+        self.assertTrue("usage error: please specify both --role and --scope "
+                        "when assigning a role to the managed identity"
                         in str(err.exception))
 
         # check we set right role id
@@ -691,8 +692,11 @@ class TestActions(unittest.TestCase):
         OSDiskImageEncryption = self._get_compute_model('OSDiskImageEncryption', api_version)
         DataDiskImageEncryption = self._get_compute_model('DataDiskImageEncryption', api_version)
         ConfidentialVMEncryptionType = self._get_compute_model('ConfidentialVMEncryptionType', api_version)
+        GalleryTargetExtendedLocation = self._get_compute_model('GalleryTargetExtendedLocation', api_version)
+        GalleryExtendedLocation = self._get_compute_model('GalleryExtendedLocation', api_version)
         cmd = mock.MagicMock()
-        cmd.get_models.return_value = [TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption, ConfidentialVMEncryptionType]
+        cmd.get_models.return_value = [TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption,
+                                       ConfidentialVMEncryptionType, GalleryTargetExtendedLocation, GalleryExtendedLocation]
 
         target_regions_list = ["southcentralus", "westus=1", "westus2=standard_zrs", "eastus=2=standard_lrs", 'CentralUSEUAP=1']
         np.target_regions = target_regions_list

@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from enum import Enum
 from argcomplete.completers import FilesCompleter
 
 from knack.arguments import CLIArgumentType
@@ -11,16 +12,20 @@ from azure.mgmt.batch.models import (
     AccountKeyType,
     KeySource,
     PublicNetworkAccessType,
-    ResourceIdentityType)
-from azure.batch.models import ComputeNodeDeallocationOption
+    ResourceIdentityType,
+    EndpointAccessDefaultAction)
+from azure.batch.models import (
+    ComputeNodeDeallocationOption,
+    NodeCommunicationMode)
 
 from azure.cli.core.commands.parameters import (
-    tags_type,
-    get_location_type,
-    resource_group_name_type,
-    get_resource_name_completion_list,
     file_type,
-    get_enum_type)
+    get_enum_type,
+    get_location_type,
+    get_resource_name_completion_list,
+    get_three_state_flag,
+    resource_group_name_type,
+    tags_type)
 
 from azure.cli.command_modules.batch._completers import load_supported_images
 from azure.cli.command_modules.batch._validators import (
@@ -39,6 +44,16 @@ from azure.cli.command_modules.batch._validators import (
     validate_client_parameters,
     validate_json_file,
     validate_pool_resize_parameters)
+
+
+class NetworkProfile(Enum):
+    BatchAccount = "BatchAccount"
+    NodeManagement = "NodeManagement"
+
+
+profile_param_type = CLIArgumentType(
+    help="Network profile to set.",
+    arg_type=get_enum_type(NetworkProfile))
 
 
 # pylint: disable=line-too-long, too-many-statements
@@ -71,15 +86,68 @@ def load_arguments(self, _):
         c.argument('encryption_key_source', help='Part of the encryption configuration for the Batch account. Type of the key source. Can be either Microsoft.Batch or Microsoft.KeyVault', arg_type=get_enum_type(KeySource))
         c.argument('encryption_key_identifier', help='Part of the encryption configuration for the Batch account. '
                                                      'Full path to the versioned secret. Example https://mykeyvault.vault.azure.net/keys/testkey/6e34a81fef704045975661e297a4c053.')
-        c.argument('identity_type', help="The type of identity used for the Batch account. Possible values include: 'SystemAssigned', 'None'.", arg_type=get_enum_type(ResourceIdentityType))
+        c.argument('identity_type', help="The type of identity used for the Batch account. Possible values include: 'SystemAssigned', 'None'.", arg_type=get_enum_type(ResourceIdentityType), deprecate_info=c.deprecate(hide=True))
+        c.argument('mi_user_assigned', help='Resource ID of the user assigned identity for the batch services account.', arg_group='Identity')
+        c.argument('mi_system_assigned', help='Set the system managed identity on the batch services account.', arg_group='Identity')
         c.ignore('keyvault_url')
 
     with self.argument_context('batch account set') as c:
         c.argument('tags', tags_type)
         c.argument('storage_account', help='The storage account name or resource ID to be used for auto storage.', validator=storage_account_id)
         c.argument('encryption_key_source', help='Part of the encryption configuration for the Batch account. Type of the key source. Can be either Microsoft.Batch or Microsoft.KeyVault')
+        c.argument('public_network_access', help="The network access type for accessing Azure Batch account. Values can either be enabled or disabled.", arg_type=get_enum_type(PublicNetworkAccessType))
         c.argument('encryption_key_identifier', help='Part of the encryption configuration for the Batch account. Full path to the versioned secret. Example https://mykeyvault.vault.azure.net/keys/testkey/6e34a81fef704045975661e297a4c053.')
-        c.argument('identity_type', help="The type of identity used for the Batch account. Possible values include: 'SystemAssigned', 'None'.", arg_type=get_enum_type(ResourceIdentityType))
+        c.argument('identity_type', help="The type of identity used for the Batch account. Possible values include: 'SystemAssigned', 'None'.", arg_type=get_enum_type(ResourceIdentityType), deprecate_info=c.deprecate(hide=True))
+
+    with self.argument_context('batch account identity assign') as c:
+        c.argument('resource_group_name', resource_group_name_type, help='Name of the resource group. If not specified will display currently set account.')
+        c.argument('account_name', batch_name_type, options_list=('--name', '-n'), help='Name of the batch account to show. If not specified will display currently set account.')
+        c.argument('mi_system_assigned', options_list=['--system-assigned'], action='store_true',
+                   arg_group='Managed Identity', help='Provide this flag to use system assigned identity for batch accounts. '
+                   'Check out help for more examples')
+        c.argument('mi_user_assigned', options_list=['--user-assigned'],
+                   arg_group='Managed Identity', help='User Assigned Identity ids to be used for batch account. '
+                   'Check out help for more examples')
+
+    with self.argument_context('batch account identity remove') as c:
+        c.argument('resource_group_name', resource_group_name_type, help='Name of the resource group. If not specified will display currently set account.')
+        c.argument('account_name', batch_name_type, options_list=('--name', '-n'), help='Name of the batch account to show. If not specified will display currently set account.')
+        c.argument('mi_system_assigned', options_list=['--system-assigned'], action='store_true',
+                   arg_group='Managed Identity', help='Provide this flag to use system assigned identity for batch accounts. '
+                   'Check out help for more examples')
+        c.argument('mi_user_assigned', options_list=['--user-assigned'], nargs='*',
+                   arg_group='Managed Identity', help='User Assigned Identity ids to be used for batch account. '
+                   'Check out help for more examples')
+
+    with self.argument_context('batch account identity show') as c:
+        c.argument('resource_group_name', resource_group_name_type, help='Name of the resource group. If not specified will display currently set account.')
+        c.argument('account_name', batch_name_type, options_list=('--name', '-n'), help='Name of the batch account to show. If not specified will display currently set account.')
+
+    with self.argument_context('batch account network-profile show') as c:
+        c.argument('resource_group_name', resource_group_name_type, help='Name of the resource group. If not specified will display currently set account.')
+        c.argument('account_name', batch_name_type, options_list=('--name', '-n'), help='Name of the batch account to show. If not specified will display currently set account.')
+
+    with self.argument_context('batch account network-profile set') as c:
+        c.argument('resource_group_name', resource_group_name_type, help='Name of the resource group. If not specified will display currently set account.')
+        c.argument('account_name', batch_name_type, options_list=('--name', '-n'), help='Name of the batch account to show. If not specified will display currently set account.')
+        c.argument('profile', arg_type=profile_param_type)
+        c.argument('default_action', help="Default action for endpoint access. It is only applicable when publicNetworkAccess is enabled. Possible values include: 'Allow', 'Deny'", arg_type=get_enum_type(EndpointAccessDefaultAction))
+
+    with self.argument_context('batch account network-profile network-rule list') as c:
+        c.argument('resource_group_name', resource_group_name_type, help='Name of the resource group. If not specified will display currently set account.')
+        c.argument('account_name', batch_name_type, options_list=('--name', '-n'), help='Name of the batch account to show. If not specified will display currently set account.')
+
+    with self.argument_context('batch account network-profile network-rule add') as c:
+        c.argument('resource_group_name', resource_group_name_type, help='Name of the resource group. If not specified will display currently set account.')
+        c.argument('account_name', batch_name_type, options_list=('--name', '-n'), help='Name of the batch account to show. If not specified will display currently set account.')
+        c.argument('profile', arg_type=profile_param_type)
+        c.argument('ip_address', help='IPv4 address or CIDR range.')
+
+    with self.argument_context('batch account network-profile network-rule delete') as c:
+        c.argument('resource_group_name', resource_group_name_type, help='Name of the resource group. If not specified will display currently set account.')
+        c.argument('account_name', batch_name_type, options_list=('--name', '-n'), help='Name of the batch account to show. If not specified will display currently set account.')
+        c.argument('profile', arg_type=profile_param_type)
+        c.argument('ip_address', help='IPv4 address or CIDR range.')
 
     with self.argument_context('batch account keys renew') as c:
         c.argument('resource_group_name', resource_group_name_type,
@@ -165,6 +233,7 @@ def load_arguments(self, _):
             c.argument('pool_id', options_list=('--pool-id',), help='The id of an existing pool. All the tasks of the job will run on the specified pool.')
 
     with self.argument_context('batch pool create') as c:
+        c.argument('json_file', help='The file containing pool create properties parameter specification in JSON(formatted to match REST API request body). If this parameter is specified, all \'Pool Create Properties Parameter Arguments\' are ignored.  See https://docs.microsoft.com/en-us/rest/api/batchservice/pool/add?tabs=HTTP#request-body')
         c.argument('os_family', arg_type=get_enum_type(['2', '3', '4', '5', '6']))
         c.argument('auto_scale_formula', help='A formula for the desired number of compute nodes in the pool. The formula is checked for validity before the pool is created. If the formula is not valid, the Batch service rejects the request with detailed error information. For more information about specifying this formula, see https://azure.microsoft.com/documentation/articles/batch-automatic-scaling/.')
         c.extra('disk_encryption_targets',
@@ -172,6 +241,16 @@ def load_arguments(self, _):
                 help='A space separated list of DiskEncryptionTargets. current possible values include OsDisk and TemporaryDisk.', type=disk_encryption_configuration_format)
         c.extra('image', completer=load_supported_images, arg_group="Pool: Virtual Machine Configuration",
                 help="OS image reference. This can be either 'publisher:offer:sku[:version]' format, or a fully qualified ARM image id of the form '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/images/{imageName}'. If 'publisher:offer:sku[:version]' format, version is optional and if omitted latest will be used. Valid values can be retrieved via 'az batch pool supported-images list'. For example: 'MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest'")
+        c.argument('target_node_communication_mode', options_list=['--target-communication'],
+                   help="The desired node communication mode for the pool. If this element is present, it replaces the existing targetNodeCommunicationMode configured on the Pool. If omitted, any existing metadata is left unchanged.",
+                   arg_type=get_enum_type(NodeCommunicationMode))
+        c.extra('enable_accelerated_networking', arg_type=get_three_state_flag(), options_list=['--accelerated-networking'], arg_group="Pool: Network Configuration",
+                help='Whether this pool should enable accelerated networking. Accelerated networking enables single root I/O virtualization (SR-IOV) to a VM, which may lead to improved networking performance. For more details, see: https://learn.microsoft.com/azure/virtual- network/accelerated-networking-overview. Set true to enable.')
+
+    with self.argument_context('batch pool set') as c:
+        c.argument('target_node_communication_mode', options_list=['--target-communication'],
+                   help="The desired node communication mode for the pool. If this element is present, it replaces the existing targetNodeCommunicationMode configured on the Pool. If omitted, any existing metadata is left unchanged.",
+                   arg_type=get_enum_type(NodeCommunicationMode))
 
     with self.argument_context('batch certificate') as c:
         c.argument('thumbprint', help='The certificate thumbprint.')

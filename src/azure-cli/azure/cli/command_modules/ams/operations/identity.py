@@ -16,10 +16,12 @@ def assign_identity(client, resource_group_name, account_name, system_assigned=F
 
     account_info = client.get(resource_group_name,
                               account_name) if resource_group_name else client.get_by_subscription(account_name)
-
-    current_identity_types = account_info.identity.type.split(',')
-    if 'None' in current_identity_types:
+    if account_info.identity is None:
         current_identity_types = []
+    else:
+        current_identity_types = account_info.identity.type.split(',')
+        if 'None' in current_identity_types:
+            current_identity_types = []
 
     media_service = MediaServiceUpdate(identity=MediaServiceIdentity(type=''))
 

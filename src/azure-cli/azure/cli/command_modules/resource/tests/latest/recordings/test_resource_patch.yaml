@@ -1,0 +1,2218 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --size --v-cpus-available --v-cpus-per-core --admin-username
+        --generate-ssh-keys --nsg-rule
+      User-Agent:
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.9.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_patch_000001?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001","name":"cli_test_resource_patch_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-03-23T03:59:06Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '338'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Mar 2023 03:59:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.26.0
+    method: GET
+    uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/arm-compute/quickstart-templates/aliases.json
+  response:
+    body:
+      string: "{\n  \"$schema\": \"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json\",\n
+        \ \"contentVersion\": \"1.0.0.0\",\n  \"parameters\": {},\n  \"variables\":
+        {},\n  \"resources\": [],\n  \"outputs\": {\n    \"aliases\": {\n      \"type\":
+        \"object\",\n      \"value\": {\n        \"Linux\": {\n          \"CentOS\":
+        {\n            \"publisher\": \"OpenLogic\",\n            \"offer\": \"CentOS\",\n
+        \           \"sku\": \"7.5\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"Debian\": {\n            \"publisher\":
+        \"Debian\",\n            \"offer\": \"debian-10\",\n            \"sku\": \"10\",\n
+        \           \"version\": \"latest\",\n            \"architecture\": \"x64\"\n
+        \         },\n          \"Flatcar\": {\n            \"publisher\": \"kinvolk\",\n
+        \           \"offer\": \"flatcar-container-linux-free\",\n            \"sku\":
+        \"stable\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"openSUSE-Leap\": {\n            \"publisher\":
+        \"SUSE\",\n            \"offer\": \"opensuse-leap-15-3\",\n            \"sku\":
+        \"gen2\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"RHEL\": {\n            \"publisher\": \"RedHat\",\n
+        \           \"offer\": \"RHEL\",\n            \"sku\": \"7-LVM\",\n            \"version\":
+        \"latest\",\n            \"architecture\": \"x64\"\n          },\n          \"SLES\":
+        {\n            \"publisher\": \"SUSE\",\n            \"offer\": \"sles-15-sp3\",\n
+        \           \"sku\": \"gen2\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"UbuntuLTS\": {\n            \"publisher\":
+        \"Canonical\",\n            \"offer\": \"UbuntuServer\",\n            \"sku\":
+        \"18.04-LTS\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          }\n        },\n        \"Windows\": {\n          \"Win2022Datacenter\":
+        {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
+        \"WindowsServer\",\n            \"sku\": \"2022-Datacenter\",\n            \"version\":
+        \"latest\",\n            \"architecture\": \"x64\"\n          },\n          \"Win2022AzureEditionCore\":
+        {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
+        \"WindowsServer\",\n            \"sku\": \"2022-datacenter-azure-edition-core\",\n
+        \           \"version\": \"latest\",\n            \"architecture\": \"x64\"\n
+        \         },\n          \"Win2019Datacenter\": {\n            \"publisher\":
+        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
+        \"2019-Datacenter\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"Win2016Datacenter\": {\n            \"publisher\":
+        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
+        \"2016-Datacenter\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"Win2012R2Datacenter\": {\n            \"publisher\":
+        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
+        \"2012-R2-Datacenter\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"Win2012Datacenter\": {\n            \"publisher\":
+        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
+        \"2012-Datacenter\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"Win2008R2SP1\": {\n            \"publisher\":
+        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
+        \"2008-R2-SP1\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          }\n        }\n      }\n    }\n  }\n}"
+    headers:
+      accept-ranges:
+      - bytes
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - max-age=300
+      connection:
+      - keep-alive
+      content-length:
+      - '3463'
+      content-security-policy:
+      - default-src 'none'; style-src 'unsafe-inline'; sandbox
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Thu, 23 Mar 2023 03:59:11 GMT
+      etag:
+      - W/"41b202f4dc5098d126019dc00721a4c5e30df0c5196794514fadc3710ee2a5cb"
+      expires:
+      - Thu, 23 Mar 2023 04:04:11 GMT
+      source-age:
+      - '244'
+      strict-transport-security:
+      - max-age=31536000
+      vary:
+      - Authorization,Accept-Encoding,Origin
+      via:
+      - 1.1 varnish
+      x-cache:
+      - HIT
+      x-cache-hits:
+      - '1'
+      x-content-type-options:
+      - nosniff
+      x-fastly-request-id:
+      - 847597dbb3e5190c637d5583dce40876750c57dc
+      x-frame-options:
+      - deny
+      x-github-request-id:
+      - E246:0811:1E93B0:24B881:641650FB
+      x-served-by:
+      - cache-qpg1250-QPG
+      x-timer:
+      - S1679543952.908675,VS0,VE10
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --size --v-cpus-available --v-cpus-per-core --admin-username
+        --generate-ssh-keys --nsg-rule
+      User-Agent:
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-compute/29.1.0 Python/3.9.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Canonical/artifacttypes/vmimage/offers/UbuntuServer/skus/18.04-LTS/versions?$top=1&$orderby=name%20desc&api-version=2022-11-01
+  response:
+    body:
+      string: "[\r\n  {\r\n    \"location\": \"westus\",\r\n    \"name\": \"18.04.202303220\",\r\n
+        \   \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18.04-LTS/Versions/18.04.202303220\"\r\n
+        \ }\r\n]"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '286'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Mar 2023 03:59:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15995,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43982
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --size --v-cpus-available --v-cpus-per-core --admin-username
+        --generate-ssh-keys --nsg-rule
+      User-Agent:
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-compute/29.1.0 Python/3.9.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Canonical/artifacttypes/vmimage/offers/UbuntuServer/skus/18.04-LTS/versions/18.04.202303220?api-version=2022-11-01
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
+        \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n    \"disallowed\": {\r\n
+        \     \"vmDiskType\": \"None\"\r\n    },\r\n    \"automaticOSUpgradeProperties\":
+        {\r\n      \"automaticOSUpgradeSupported\": true\r\n    },\r\n    \"imageDeprecationStatus\":
+        {\r\n      \"imageState\": \"Active\"\r\n    },\r\n    \"features\": [\r\n
+        \     {\r\n        \"name\": \"IsAcceleratedNetworkSupported\",\r\n        \"value\":
+        \"True\"\r\n      },\r\n      {\r\n        \"name\": \"DiskControllerTypes\",\r\n
+        \       \"value\": \"SCSI, NVMe\"\r\n      },\r\n      {\r\n        \"name\":
+        \"IsHibernateSupported\",\r\n        \"value\": \"True\"\r\n      }\r\n    ],\r\n
+        \   \"osDiskImage\": {\r\n      \"operatingSystem\": \"Linux\",\r\n      \"sizeInGb\":
+        31,\r\n      \"sizeInBytes\": 32213303808\r\n    },\r\n    \"dataDiskImages\":
+        []\r\n  },\r\n  \"location\": \"westus\",\r\n  \"name\": \"18.04.202303220\",\r\n
+        \ \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18.04-LTS/Versions/18.04.202303220\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1048'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Mar 2023 03:59:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12995,Microsoft.Compute/GetVMImageFromLocation30Min;73982
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --size --v-cpus-available --v-cpus-per-core --admin-username
+        --generate-ssh-keys --nsg-rule
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.9.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/virtualNetworks?api-version=2022-01-01
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Mar 2023 03:59:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.26.0
+    method: GET
+    uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/arm-compute/quickstart-templates/aliases.json
+  response:
+    body:
+      string: "{\n  \"$schema\": \"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json\",\n
+        \ \"contentVersion\": \"1.0.0.0\",\n  \"parameters\": {},\n  \"variables\":
+        {},\n  \"resources\": [],\n  \"outputs\": {\n    \"aliases\": {\n      \"type\":
+        \"object\",\n      \"value\": {\n        \"Linux\": {\n          \"CentOS\":
+        {\n            \"publisher\": \"OpenLogic\",\n            \"offer\": \"CentOS\",\n
+        \           \"sku\": \"7.5\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"Debian\": {\n            \"publisher\":
+        \"Debian\",\n            \"offer\": \"debian-10\",\n            \"sku\": \"10\",\n
+        \           \"version\": \"latest\",\n            \"architecture\": \"x64\"\n
+        \         },\n          \"Flatcar\": {\n            \"publisher\": \"kinvolk\",\n
+        \           \"offer\": \"flatcar-container-linux-free\",\n            \"sku\":
+        \"stable\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"openSUSE-Leap\": {\n            \"publisher\":
+        \"SUSE\",\n            \"offer\": \"opensuse-leap-15-3\",\n            \"sku\":
+        \"gen2\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"RHEL\": {\n            \"publisher\": \"RedHat\",\n
+        \           \"offer\": \"RHEL\",\n            \"sku\": \"7-LVM\",\n            \"version\":
+        \"latest\",\n            \"architecture\": \"x64\"\n          },\n          \"SLES\":
+        {\n            \"publisher\": \"SUSE\",\n            \"offer\": \"sles-15-sp3\",\n
+        \           \"sku\": \"gen2\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"UbuntuLTS\": {\n            \"publisher\":
+        \"Canonical\",\n            \"offer\": \"UbuntuServer\",\n            \"sku\":
+        \"18.04-LTS\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          }\n        },\n        \"Windows\": {\n          \"Win2022Datacenter\":
+        {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
+        \"WindowsServer\",\n            \"sku\": \"2022-Datacenter\",\n            \"version\":
+        \"latest\",\n            \"architecture\": \"x64\"\n          },\n          \"Win2022AzureEditionCore\":
+        {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
+        \"WindowsServer\",\n            \"sku\": \"2022-datacenter-azure-edition-core\",\n
+        \           \"version\": \"latest\",\n            \"architecture\": \"x64\"\n
+        \         },\n          \"Win2019Datacenter\": {\n            \"publisher\":
+        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
+        \"2019-Datacenter\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"Win2016Datacenter\": {\n            \"publisher\":
+        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
+        \"2016-Datacenter\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"Win2012R2Datacenter\": {\n            \"publisher\":
+        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
+        \"2012-R2-Datacenter\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"Win2012Datacenter\": {\n            \"publisher\":
+        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
+        \"2012-Datacenter\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"Win2008R2SP1\": {\n            \"publisher\":
+        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
+        \"2008-R2-SP1\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          }\n        }\n      }\n    }\n  }\n}"
+    headers:
+      accept-ranges:
+      - bytes
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - max-age=300
+      connection:
+      - keep-alive
+      content-length:
+      - '3463'
+      content-security-policy:
+      - default-src 'none'; style-src 'unsafe-inline'; sandbox
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Thu, 23 Mar 2023 03:59:15 GMT
+      etag:
+      - W/"41b202f4dc5098d126019dc00721a4c5e30df0c5196794514fadc3710ee2a5cb"
+      expires:
+      - Thu, 23 Mar 2023 04:04:15 GMT
+      source-age:
+      - '248'
+      strict-transport-security:
+      - max-age=31536000
+      vary:
+      - Authorization,Accept-Encoding,Origin
+      via:
+      - 1.1 varnish
+      x-cache:
+      - HIT
+      x-cache-hits:
+      - '1'
+      x-content-type-options:
+      - nosniff
+      x-fastly-request-id:
+      - b6099db905d3d5e411b89a8556e8c7a533e023c6
+      x-frame-options:
+      - deny
+      x-github-request-id:
+      - E246:0811:1E93B0:24B881:641650FB
+      x-served-by:
+      - cache-qpg1265-QPG
+      x-timer:
+      - S1679543956.559264,VS0,VE1
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --size --v-cpus-available --v-cpus-per-core --admin-username
+        --generate-ssh-keys --nsg-rule
+      User-Agent:
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-compute/29.1.0 Python/3.9.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Canonical/artifacttypes/vmimage/offers/UbuntuServer/skus/18.04-LTS/versions?$top=1&$orderby=name%20desc&api-version=2022-11-01
+  response:
+    body:
+      string: "[\r\n  {\r\n    \"location\": \"westus\",\r\n    \"name\": \"18.04.202303220\",\r\n
+        \   \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18.04-LTS/Versions/18.04.202303220\"\r\n
+        \ }\r\n]"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '286'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Mar 2023 03:59:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15994,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43981
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --size --v-cpus-available --v-cpus-per-core --admin-username
+        --generate-ssh-keys --nsg-rule
+      User-Agent:
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-compute/29.1.0 Python/3.9.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Canonical/artifacttypes/vmimage/offers/UbuntuServer/skus/18.04-LTS/versions/18.04.202303220?api-version=2022-11-01
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
+        \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n    \"disallowed\": {\r\n
+        \     \"vmDiskType\": \"None\"\r\n    },\r\n    \"automaticOSUpgradeProperties\":
+        {\r\n      \"automaticOSUpgradeSupported\": true\r\n    },\r\n    \"imageDeprecationStatus\":
+        {\r\n      \"imageState\": \"Active\"\r\n    },\r\n    \"features\": [\r\n
+        \     {\r\n        \"name\": \"IsAcceleratedNetworkSupported\",\r\n        \"value\":
+        \"True\"\r\n      },\r\n      {\r\n        \"name\": \"DiskControllerTypes\",\r\n
+        \       \"value\": \"SCSI, NVMe\"\r\n      },\r\n      {\r\n        \"name\":
+        \"IsHibernateSupported\",\r\n        \"value\": \"True\"\r\n      }\r\n    ],\r\n
+        \   \"osDiskImage\": {\r\n      \"operatingSystem\": \"Linux\",\r\n      \"sizeInGb\":
+        31,\r\n      \"sizeInBytes\": 32213303808\r\n    },\r\n    \"dataDiskImages\":
+        []\r\n  },\r\n  \"location\": \"westus\",\r\n  \"name\": \"18.04.202303220\",\r\n
+        \ \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18.04-LTS/Versions/18.04.202303220\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1048'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Mar 2023 03:59:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12994,Microsoft.Compute/GetVMImageFromLocation30Min;73981
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --size --v-cpus-available --v-cpus-per-core --admin-username
+        --generate-ssh-keys --nsg-rule
+      User-Agent:
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-compute/29.1.0 Python/3.9.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Canonical/artifacttypes/vmimage/offers/UbuntuServer/skus/18.04-LTS/versions?$top=1&$orderby=name%20desc&api-version=2022-11-01
+  response:
+    body:
+      string: "[\r\n  {\r\n    \"location\": \"westus\",\r\n    \"name\": \"18.04.202303220\",\r\n
+        \   \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18.04-LTS/Versions/18.04.202303220\"\r\n
+        \ }\r\n]"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '286'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Mar 2023 03:59:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15993,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43980
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --size --v-cpus-available --v-cpus-per-core --admin-username
+        --generate-ssh-keys --nsg-rule
+      User-Agent:
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-compute/29.1.0 Python/3.9.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Canonical/artifacttypes/vmimage/offers/UbuntuServer/skus/18.04-LTS/versions/18.04.202303220?api-version=2022-11-01
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
+        \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n    \"disallowed\": {\r\n
+        \     \"vmDiskType\": \"None\"\r\n    },\r\n    \"automaticOSUpgradeProperties\":
+        {\r\n      \"automaticOSUpgradeSupported\": true\r\n    },\r\n    \"imageDeprecationStatus\":
+        {\r\n      \"imageState\": \"Active\"\r\n    },\r\n    \"features\": [\r\n
+        \     {\r\n        \"name\": \"IsAcceleratedNetworkSupported\",\r\n        \"value\":
+        \"True\"\r\n      },\r\n      {\r\n        \"name\": \"DiskControllerTypes\",\r\n
+        \       \"value\": \"SCSI, NVMe\"\r\n      },\r\n      {\r\n        \"name\":
+        \"IsHibernateSupported\",\r\n        \"value\": \"True\"\r\n      }\r\n    ],\r\n
+        \   \"osDiskImage\": {\r\n      \"operatingSystem\": \"Linux\",\r\n      \"sizeInGb\":
+        31,\r\n      \"sizeInBytes\": 32213303808\r\n    },\r\n    \"dataDiskImages\":
+        []\r\n  },\r\n  \"location\": \"westus\",\r\n  \"name\": \"18.04.202303220\",\r\n
+        \ \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18.04-LTS/Versions/18.04.202303220\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1048'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Mar 2023 03:59:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12993,Microsoft.Compute/GetVMImageFromLocation30Min;73980
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {}, "variables": {}, "resources":
+      [{"name": "vmVNET", "type": "Microsoft.Network/virtualNetworks", "location":
+      "westus", "apiVersion": "2015-06-15", "dependsOn": [], "tags": {}, "properties":
+      {"addressSpace": {"addressPrefixes": ["10.0.0.0/16"]}, "subnets": [{"name":
+      "vmSubnet", "properties": {"addressPrefix": "10.0.0.0/24"}}]}}, {"type": "Microsoft.Network/networkSecurityGroups",
+      "name": "vmNSG", "apiVersion": "2015-06-15", "location": "westus", "tags": {},
+      "dependsOn": []}, {"apiVersion": "2022-01-01", "type": "Microsoft.Network/publicIPAddresses",
+      "name": "vmPublicIP", "location": "westus", "tags": {}, "dependsOn": [], "properties":
+      {"publicIPAllocationMethod": null}}, {"apiVersion": "2015-06-15", "type": "Microsoft.Network/networkInterfaces",
+      "name": "vmVMNic", "location": "westus", "tags": {}, "dependsOn": ["Microsoft.Network/virtualNetworks/vmVNET",
+      "Microsoft.Network/networkSecurityGroups/vmNSG", "Microsoft.Network/publicIpAddresses/vmPublicIP"],
+      "properties": {"ipConfigurations": [{"name": "ipconfigvm", "properties": {"privateIPAllocationMethod":
+      "Dynamic", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/virtualNetworks/vmVNET/subnets/vmSubnet"},
+      "publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/publicIPAddresses/vmPublicIP"}}}],
+      "networkSecurityGroup": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/networkSecurityGroups/vmNSG"}}},
+      {"apiVersion": "2022-11-01", "type": "Microsoft.Compute/virtualMachines", "name":
+      "vm", "location": "westus", "tags": {}, "dependsOn": ["Microsoft.Network/networkInterfaces/vmVMNic"],
+      "properties": {"hardwareProfile": {"vmSize": "Standard_D2s_v3", "vmSizeProperties":
+      {"vCPUsAvailable": 1, "vCPUsPerCore": 1}}, "networkProfile": {"networkInterfaces":
+      [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/networkInterfaces/vmVMNic",
+      "properties": {"deleteOption": null}}]}, "storageProfile": {"osDisk": {"createOption":
+      "fromImage", "name": null, "caching": "ReadWrite", "managedDisk": {"storageAccountType":
+      null}}, "imageReference": {"publisher": "Canonical", "offer": "UbuntuServer",
+      "sku": "18.04-LTS", "version": "latest"}}, "osProfile": {"computerName": "vm",
+      "adminUsername": "vmtest", "linuxConfiguration": {"disablePasswordAuthentication":
+      true, "ssh": {"publicKeys": [{"keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDmGsW4LjseEjF/ye2EN/w3j6dmswbvXI7N/UlAqV8aCxHeYYIjFDnuhFQSF7i1iYgTt8St/6FGkIaTA4ZefhrVVZtJw8dUEKzDkUIMfdQGu4TdlpDjQIeUSHzz1KNFwhANVNK9pm1cy5Z4P3GJd1PP+lTx/IRP+qZesTC/UCSV7EluCmoj5xg6LeC9MWksu07APIFRJySqxVi8nSbCFFHODW5QTZ/82n6iJzbSRDn7KgEQGzfFEAZgzxJE+ino+r3569kWzO/qkixm92swj97fnuOX7i0Ohe1T4Me5dFvpEifoQ3bii1vG4DQDQ7L2pvEvzQyy11Hr9dDtPHZTCzeIr62vWArq75T149ZLCNjfQh44vmbeSPAc/0KVakQOEiDjLvUkMSgDUx6DD4bQgiaEyWnZ23CZ3U1U9xag4p3Kl48tGLGHTpzplaZJQEAVogeloxE1tPLBGi7et3TskoXejHhl9BrtsnXLeNVj1ep9dqD2kxNogVSc4/Av8Wuv9oU=
+      zhuyan@microsoft.com\n", "path": "/home/vmtest/.ssh/authorized_keys"}]}}}}}],
+      "outputs": {}}, "parameters": {}, "mode": "incremental"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '3474'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --image --size --v-cpus-available --v-cpus-per-core --admin-username
+        --generate-ssh-keys --nsg-rule
+      User-Agent:
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.9.0 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_patch_000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Resources/deployments/vm_deploy_jNm30Vmswikw1FZrPm3bbosDtdUmTTRk","name":"vm_deploy_jNm30Vmswikw1FZrPm3bbosDtdUmTTRk","type":"Microsoft.Resources/deployments","properties":{"templateHash":"309418443756759588","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2023-03-23T03:59:27.0752901Z","duration":"PT0.0005124S","correlationId":"8578a939-7ba4-4cee-bf2b-211f9e916610","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/virtualNetworks/vmVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/networkSecurityGroups/vmNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vmNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/publicIPAddresses/vmPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vmPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/networkInterfaces/vmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vmVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/networkInterfaces/vmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vmVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Compute/virtualMachines/vm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm"}]}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_patch_000001/providers/Microsoft.Resources/deployments/vm_deploy_jNm30Vmswikw1FZrPm3bbosDtdUmTTRk/operationStatuses/08585220629213518176?api-version=2022-09-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '2414'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Mar 2023 03:59:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --size --v-cpus-available --v-cpus-per-core --admin-username
+        --generate-ssh-keys --nsg-rule
+      User-Agent:
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.9.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_patch_000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585220629213518176?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Mar 2023 03:59:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --size --v-cpus-available --v-cpus-per-core --admin-username
+        --generate-ssh-keys --nsg-rule
+      User-Agent:
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.9.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_patch_000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585220629213518176?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Mar 2023 04:00:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --size --v-cpus-available --v-cpus-per-core --admin-username
+        --generate-ssh-keys --nsg-rule
+      User-Agent:
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.9.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_patch_000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585220629213518176?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Mar 2023 04:00:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --size --v-cpus-available --v-cpus-per-core --admin-username
+        --generate-ssh-keys --nsg-rule
+      User-Agent:
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.9.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_patch_000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Resources/deployments/vm_deploy_jNm30Vmswikw1FZrPm3bbosDtdUmTTRk","name":"vm_deploy_jNm30Vmswikw1FZrPm3bbosDtdUmTTRk","type":"Microsoft.Resources/deployments","properties":{"templateHash":"309418443756759588","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2023-03-23T04:00:33.4463372Z","duration":"PT1M6.3715595S","correlationId":"8578a939-7ba4-4cee-bf2b-211f9e916610","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/virtualNetworks/vmVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/networkSecurityGroups/vmNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vmNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/publicIPAddresses/vmPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vmPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/networkInterfaces/vmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vmVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/networkInterfaces/vmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vmVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Compute/virtualMachines/vm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Compute/virtualMachines/vm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/networkInterfaces/vmVMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/networkSecurityGroups/vmNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/publicIPAddresses/vmPublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/virtualNetworks/vmVNET"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3250'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Mar 2023 04:00:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --size --v-cpus-available --v-cpus-per-core --admin-username
+        --generate-ssh-keys --nsg-rule
+      User-Agent:
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-compute/29.1.0 Python/3.9.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Compute/virtualMachines/vm?$expand=instanceView&api-version=2022-11-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vm\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Compute/virtualMachines/vm\",\r\n
+        \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"aa412854-e8f0-4a28-ba08-0362aae42bb3\",\r\n
+        \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_D2s_v3\",\r\n      \"vmSizeProperties\":
+        {\r\n        \"vCPUsAvailable\": 1,\r\n        \"vCPUsPerCore\": 1\r\n      }\r\n
+        \   },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
+        \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
+        \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
+        \"18.04.202303220\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"Linux\",\r\n        \"name\": \"vm_OsDisk_1_974fde6b2e95499ba80e466fc01fbdd2\",\r\n
+        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n
+        \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n
+        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Compute/disks/vm_OsDisk_1_974fde6b2e95499ba80e466fc01fbdd2\"\r\n
+        \       },\r\n        \"deleteOption\": \"Detach\",\r\n        \"diskSizeGB\":
+        30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
+        {\r\n      \"computerName\": \"vm\",\r\n      \"adminUsername\": \"vmtest\",\r\n
+        \     \"linuxConfiguration\": {\r\n        \"disablePasswordAuthentication\":
+        true,\r\n        \"ssh\": {\r\n          \"publicKeys\": [\r\n            {\r\n
+        \             \"path\": \"/home/vmtest/.ssh/authorized_keys\",\r\n              \"keyData\":
+        \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDmGsW4LjseEjF/ye2EN/w3j6dmswbvXI7N/UlAqV8aCxHeYYIjFDnuhFQSF7i1iYgTt8St/6FGkIaTA4ZefhrVVZtJw8dUEKzDkUIMfdQGu4TdlpDjQIeUSHzz1KNFwhANVNK9pm1cy5Z4P3GJd1PP+lTx/IRP+qZesTC/UCSV7EluCmoj5xg6LeC9MWksu07APIFRJySqxVi8nSbCFFHODW5QTZ/82n6iJzbSRDn7KgEQGzfFEAZgzxJE+ino+r3569kWzO/qkixm92swj97fnuOX7i0Ohe1T4Me5dFvpEifoQ3bii1vG4DQDQ7L2pvEvzQyy11Hr9dDtPHZTCzeIr62vWArq75T149ZLCNjfQh44vmbeSPAc/0KVakQOEiDjLvUkMSgDUx6DD4bQgiaEyWnZ23CZ3U1U9xag4p3Kl48tGLGHTpzplaZJQEAVogeloxE1tPLBGi7et3TskoXejHhl9BrtsnXLeNVj1ep9dqD2kxNogVSc4/Av8Wuv9oU=
+        zhuyan@microsoft.com\\n\"\r\n            }\r\n          ]\r\n        },\r\n
+        \       \"provisionVMAgent\": true,\r\n        \"patchSettings\": {\r\n          \"patchMode\":
+        \"ImageDefault\",\r\n          \"assessmentMode\": \"ImageDefault\"\r\n        },\r\n
+        \       \"enableVMAgentPlatformUpdates\": false\r\n      },\r\n      \"secrets\":
+        [],\r\n      \"allowExtensionOperations\": true,\r\n      \"requireGuestProvisionSignal\":
+        true\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/networkInterfaces/vmVMNic\"}]},\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\": {\r\n      \"computerName\":
+        \"vm\",\r\n      \"osName\": \"ubuntu\",\r\n      \"osVersion\": \"18.04\",\r\n
+        \     \"vmAgent\": {\r\n        \"vmAgentVersion\": \"2.9.0.4\",\r\n        \"statuses\":
+        [\r\n          {\r\n            \"code\": \"ProvisioningState/succeeded\",\r\n
+        \           \"level\": \"Info\",\r\n            \"displayStatus\": \"Ready\",\r\n
+        \           \"message\": \"Guest Agent is running\",\r\n            \"time\":
+        \"2023-03-23T04:00:42+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
+        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"vm_OsDisk_1_974fde6b2e95499ba80e466fc01fbdd2\",\r\n
+        \         \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
+        \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
+        succeeded\",\r\n              \"time\": \"2023-03-23T03:59:48.2857449+00:00\"\r\n
+        \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\":
+        \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
+        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
+        succeeded\",\r\n          \"time\": \"2023-03-23T04:00:30.5830259+00:00\"\r\n
+        \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
+        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
+        \       }\r\n      ]\r\n    },\r\n    \"timeCreated\": \"2023-03-23T03:59:47.0201107+00:00\"\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4159'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Mar 2023 04:01:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/LowCostGet3Min;3994,Microsoft.Compute/LowCostGet30Min;31972
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --size --v-cpus-available --v-cpus-per-core --admin-username
+        --generate-ssh-keys --nsg-rule
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.9.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/networkInterfaces/vmVMNic?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vmVMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/networkInterfaces/vmVMNic\",\r\n
+        \ \"etag\": \"W/\\\"be195952-49a7-46f8-b513-91470457c114\\\"\",\r\n  \"tags\":
+        {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"793e7b05-aeb0-4dfa-899d-46a8f2b83fdf\",\r\n    \"ipConfigurations\":
+        [\r\n      {\r\n        \"name\": \"ipconfigvm\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/networkInterfaces/vmVMNic/ipConfigurations/ipconfigvm\",\r\n
+        \       \"etag\": \"W/\\\"be195952-49a7-46f8-b513-91470457c114\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"publicIPAddress\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/publicIPAddresses/vmPublicIP\"\r\n
+        \         },\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/virtualNetworks/vmVNET/subnets/vmSubnet\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"3vpudhmdqatunmsy3qqkwswgyc.dx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
+        \"00-0D-3A-35-AA-54\",\r\n    \"vnetEncryptionSupported\": false,\r\n    \"enableIPForwarding\":
+        false,\r\n    \"networkSecurityGroup\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/networkSecurityGroups/vmNSG\"\r\n
+        \   },\r\n    \"primary\": true,\r\n    \"virtualMachine\": {\r\n      \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Compute/virtualMachines/vm\"\r\n
+        \   },\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\n
+        \   \"nicType\": \"Standard\",\r\n    \"allowPort25Out\": true\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\": \"westus\",\r\n
+        \ \"kind\": \"Regular\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2421'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Mar 2023 04:01:02 GMT
+      etag:
+      - W/"be195952-49a7-46f8-b513-91470457c114"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - b61afc47-04ab-4573-9da4-2ff0982ad112
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --size --v-cpus-available --v-cpus-per-core --admin-username
+        --generate-ssh-keys --nsg-rule
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.9.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/publicIPAddresses/vmPublicIP?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vmPublicIP\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/publicIPAddresses/vmPublicIP\",\r\n
+        \ \"etag\": \"W/\\\"a3a44714-2c92-49fc-909f-62f71bed3dd2\\\"\",\r\n  \"location\":
+        \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"resourceGuid\": \"1c92bd55-ff21-4f78-94b0-31ab18e74a6a\",\r\n
+        \   \"ipAddress\": \"20.245.41.219\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
+        \   \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
+        4,\r\n    \"ipTags\": [],\r\n    \"ipConfiguration\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/networkInterfaces/vmVMNic/ipConfigurations/ipconfigvm\"\r\n
+        \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
+        \ \"sku\": {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '928'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Mar 2023 04:01:03 GMT
+      etag:
+      - W/"a3a44714-2c92-49fc-909f-62f71bed3dd2"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 00d19ab7-0e2c-4e90-95f7-3dde8bd919f0
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-compute/29.1.0 Python/3.9.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Compute/virtualMachines/vm?api-version=2022-11-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vm\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Compute/virtualMachines/vm\",\r\n
+        \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"aa412854-e8f0-4a28-ba08-0362aae42bb3\",\r\n
+        \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_D2s_v3\",\r\n      \"vmSizeProperties\":
+        {\r\n        \"vCPUsAvailable\": 1,\r\n        \"vCPUsPerCore\": 1\r\n      }\r\n
+        \   },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
+        \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
+        \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
+        \"18.04.202303220\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"Linux\",\r\n        \"name\": \"vm_OsDisk_1_974fde6b2e95499ba80e466fc01fbdd2\",\r\n
+        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n
+        \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n
+        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Compute/disks/vm_OsDisk_1_974fde6b2e95499ba80e466fc01fbdd2\"\r\n
+        \       },\r\n        \"deleteOption\": \"Detach\",\r\n        \"diskSizeGB\":
+        30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
+        {\r\n      \"computerName\": \"vm\",\r\n      \"adminUsername\": \"vmtest\",\r\n
+        \     \"linuxConfiguration\": {\r\n        \"disablePasswordAuthentication\":
+        true,\r\n        \"ssh\": {\r\n          \"publicKeys\": [\r\n            {\r\n
+        \             \"path\": \"/home/vmtest/.ssh/authorized_keys\",\r\n              \"keyData\":
+        \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDmGsW4LjseEjF/ye2EN/w3j6dmswbvXI7N/UlAqV8aCxHeYYIjFDnuhFQSF7i1iYgTt8St/6FGkIaTA4ZefhrVVZtJw8dUEKzDkUIMfdQGu4TdlpDjQIeUSHzz1KNFwhANVNK9pm1cy5Z4P3GJd1PP+lTx/IRP+qZesTC/UCSV7EluCmoj5xg6LeC9MWksu07APIFRJySqxVi8nSbCFFHODW5QTZ/82n6iJzbSRDn7KgEQGzfFEAZgzxJE+ino+r3569kWzO/qkixm92swj97fnuOX7i0Ohe1T4Me5dFvpEifoQ3bii1vG4DQDQ7L2pvEvzQyy11Hr9dDtPHZTCzeIr62vWArq75T149ZLCNjfQh44vmbeSPAc/0KVakQOEiDjLvUkMSgDUx6DD4bQgiaEyWnZ23CZ3U1U9xag4p3Kl48tGLGHTpzplaZJQEAVogeloxE1tPLBGi7et3TskoXejHhl9BrtsnXLeNVj1ep9dqD2kxNogVSc4/Av8Wuv9oU=
+        zhuyan@microsoft.com\\n\"\r\n            }\r\n          ]\r\n        },\r\n
+        \       \"provisionVMAgent\": true,\r\n        \"patchSettings\": {\r\n          \"patchMode\":
+        \"ImageDefault\",\r\n          \"assessmentMode\": \"ImageDefault\"\r\n        },\r\n
+        \       \"enableVMAgentPlatformUpdates\": false\r\n      },\r\n      \"secrets\":
+        [],\r\n      \"allowExtensionOperations\": true,\r\n      \"requireGuestProvisionSignal\":
+        true\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/networkInterfaces/vmVMNic\"}]},\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"timeCreated\": \"2023-03-23T03:59:47.0201107+00:00\"\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2868'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Mar 2023 04:01:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/LowCostGet3Min;3993,Microsoft.Compute/LowCostGet30Min;31971
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource patch
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --is-full-object --properties
+      User-Agent:
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.9.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute","namespace":"Microsoft.Compute","authorizations":[{"applicationId":"60e6cd67-9c8c-4951-9b3c-23c25a2169af","roleDefinitionId":"e4770acb-272e-4dc8-87f3-12f44a612224"},{"applicationId":"a303894e-f1d8-4a37-bf10-67aa654a0596","roleDefinitionId":"903ac751-8ad5-4e5a-bfc2-5e49f450a241"},{"applicationId":"a8b6bf88-1d1a-4626-b040-9a729ea93c65","roleDefinitionId":"45c8267c-80ba-4b96-9a43-115b8f49fccd"},{"applicationId":"184909ca-69f1-4368-a6a7-c558ee6eb0bd","roleDefinitionId":"45c8267c-80ba-4b96-9a43-115b8f49fccd"},{"applicationId":"5e5e43d4-54da-4211-86a4-c6e7f3715801","roleDefinitionId":"ffcd6e5b-8772-457d-bb17-89703c03428f"},{"applicationId":"ce6ff14a-7fdc-4685-bbe0-f6afdfcfa8e0","roleDefinitionId":"cb17cddc-dbac-4ae0-ae79-8db34eddfca0"},{"applicationId":"372140e0-b3b7-4226-8ef9-d57986796201","roleDefinitionId":"cb17cddc-dbac-4ae0-ae79-8db34eddfca0"},{"applicationId":"579d9c9d-4c83-4efc-8124-7eba65ed3356","roleDefinitionId":"8c99c4ce-d744-4597-a2f0-0a0044d67560"},{"applicationId":"b9a92e36-2cf8-4f4e-bcb3-9d99e00e14ab","roleDefinitionId":"6efa92ca-56b6-40af-a468-5e3d2b5232f0"}],"resourceTypes":[{"resourceType":"availabilitySets","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01","2018-06-01","2018-04-01","2017-12-01","2017-03-30","2016-08-30","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"],"defaultApiVersion":"2022-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2016-03-30"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-30"},{"profileVersion":"2018-06-01-profile","apiVersion":"2017-12-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-12-01"},{"profileVersion":"2020-09-01-hybrid","apiVersion":"2020-06-01"}],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"virtualMachines","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01","2018-06-01","2018-04-01","2017-12-01","2017-03-30","2016-08-30","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"],"defaultApiVersion":"2022-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2016-03-30"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-30"},{"profileVersion":"2018-06-01-profile","apiVersion":"2017-12-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-12-01"},{"profileVersion":"2020-09-01-hybrid","apiVersion":"2020-06-01"}],"zoneMappings":[{"location":"Australia
+        East","zones":["2","3","1"]},{"location":"Brazil South","zones":["2","3","1"]},{"location":"Canada
+        Central","zones":["2","3","1"]},{"location":"Central India","zones":["2","3","1"]},{"location":"Central
+        US","zones":["2","3","1"]},{"location":"Central US EUAP","zones":["1","2"]},{"location":"East
+        Asia","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"France
+        Central","zones":["2","3","1"]},{"location":"Germany West Central","zones":["2","3","1"]},{"location":"Japan
+        East","zones":["2","3","1"]},{"location":"Korea Central","zones":["2","3","1"]},{"location":"North
+        Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
+        East","zones":["2","3","1"]},{"location":"Qatar Central","zones":["2","3","1"]},{"location":"South
+        Africa North","zones":["2","3","1"]},{"location":"South Central US","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"Sweden Central","zones":["2","3","1"]},{"location":"Switzerland
+        North","zones":["2","3","1"]},{"location":"UAE North","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"locationMappings":[{"location":"East US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","microsoftb25lab2","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1","attnewyork1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]},{"location":"Southeast
+        Asia","type":"EdgeZone","extendedLocations":["sgxsingapore1"]},{"location":"Central
+        US","type":"EdgeZone","extendedLocations":["attdetroit1"]}],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity, SupportsTags,
+        SupportsLocation"},{"resourceType":"virtualMachines/extensions","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01","2018-06-01","2018-04-01","2017-12-01","2017-03-30","2016-08-30","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"],"defaultApiVersion":"2022-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2016-03-30"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-30"},{"profileVersion":"2018-06-01-profile","apiVersion":"2017-12-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-12-01"},{"profileVersion":"2020-09-01-hybrid","apiVersion":"2020-06-01"}],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"virtualMachineScaleSets","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01","2018-06-01","2018-04-01","2017-12-01","2017-10-30-preview","2017-03-30","2016-08-30","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"],"defaultApiVersion":"2022-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2016-03-30"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-30"},{"profileVersion":"2018-06-01-profile","apiVersion":"2017-12-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-12-01"},{"profileVersion":"2020-09-01-hybrid","apiVersion":"2020-06-01"}],"zoneMappings":[{"location":"Australia
+        East","zones":["2","3","1"]},{"location":"Brazil South","zones":["2","3","1"]},{"location":"Canada
+        Central","zones":["2","3","1"]},{"location":"Central India","zones":["2","3","1"]},{"location":"Central
+        US","zones":["2","3","1"]},{"location":"Central US EUAP","zones":["1","2"]},{"location":"East
+        Asia","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"France
+        Central","zones":["2","3","1"]},{"location":"Germany West Central","zones":["2","3","1"]},{"location":"Japan
+        East","zones":["2","3","1"]},{"location":"Korea Central","zones":["2","3","1"]},{"location":"North
+        Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
+        East","zones":["2","3","1"]},{"location":"Qatar Central","zones":["2","3","1"]},{"location":"South
+        Africa North","zones":["2","3","1"]},{"location":"South Central US","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"Sweden Central","zones":["2","3","1"]},{"location":"Switzerland
+        North","zones":["2","3","1"]},{"location":"UAE North","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"locationMappings":[{"location":"East US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","microsoftb25lab2","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1","attnewyork1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]},{"location":"Southeast
+        Asia","type":"EdgeZone","extendedLocations":["sgxsingapore1"]},{"location":"Central
+        US","type":"EdgeZone","extendedLocations":["attdetroit1"]}],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity, SupportsTags,
+        SupportsLocation"},{"resourceType":"virtualMachineScaleSets/extensions","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01","2018-06-01","2018-04-01","2017-12-01","2017-10-30-preview","2017-03-30","2016-08-30","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"],"defaultApiVersion":"2015-06-15","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2016-03-30"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-30"},{"profileVersion":"2018-06-01-profile","apiVersion":"2017-12-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-12-01"},{"profileVersion":"2020-09-01-hybrid","apiVersion":"2020-06-01"}],"capabilities":"None"},{"resourceType":"virtualMachineScaleSets/virtualMachines","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01","2018-06-01","2018-04-01","2017-12-01","2017-10-30-preview","2017-03-30","2016-08-30","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"],"defaultApiVersion":"2022-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2016-03-30"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-30"},{"profileVersion":"2018-06-01-profile","apiVersion":"2017-12-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-12-01"},{"profileVersion":"2020-09-01-hybrid","apiVersion":"2020-06-01"}],"capabilities":"None"},{"resourceType":"virtualMachineScaleSets/virtualMachines/extensions","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01","2018-06-01","2018-04-01","2017-12-01","2017-10-30-preview","2017-03-30","2016-08-30","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"],"apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2016-03-30"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-30"},{"profileVersion":"2018-06-01-profile","apiVersion":"2017-12-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-12-01"},{"profileVersion":"2020-09-01-hybrid","apiVersion":"2020-06-01"}],"capabilities":"None"},{"resourceType":"virtualMachineScaleSets/networkInterfaces","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01","2018-06-01","2018-04-01","2017-12-01","2017-03-30","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"],"apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2016-03-30"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-30"},{"profileVersion":"2018-06-01-profile","apiVersion":"2017-12-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-12-01"},{"profileVersion":"2020-09-01-hybrid","apiVersion":"2020-06-01"}],"capabilities":"None"},{"resourceType":"virtualMachineScaleSets/virtualMachines/networkInterfaces","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01","2018-06-01","2018-04-01","2017-12-01","2017-03-30","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"],"apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2016-03-30"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-30"},{"profileVersion":"2018-06-01-profile","apiVersion":"2017-12-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-12-01"},{"profileVersion":"2020-09-01-hybrid","apiVersion":"2020-06-01"}],"capabilities":"None"},{"resourceType":"virtualMachineScaleSets/publicIPAddresses","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01","2018-06-01","2018-04-01","2017-12-01","2017-03-30"],"apiProfiles":[{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-30"},{"profileVersion":"2018-06-01-profile","apiVersion":"2017-12-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-12-01"},{"profileVersion":"2020-09-01-hybrid","apiVersion":"2020-06-01"}],"capabilities":"None"},{"resourceType":"locations","locations":[],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01","2018-06-01","2018-04-01","2017-12-01","2017-03-30","2016-08-30","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"],"capabilities":"None"},{"resourceType":"locations/operations","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01","2018-06-01","2018-04-01","2017-12-01","2017-10-30-preview","2017-03-30","2016-08-30","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"],"apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2016-03-30"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-30"},{"profileVersion":"2018-06-01-profile","apiVersion":"2017-12-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-12-01"},{"profileVersion":"2020-09-01-hybrid","apiVersion":"2020-06-01"}],"capabilities":"None"},{"resourceType":"locations/vmSizes","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01","2018-06-01","2018-04-01","2017-12-01","2017-03-30","2016-08-30","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"],"apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2016-03-30"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-30"},{"profileVersion":"2018-06-01-profile","apiVersion":"2017-12-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-12-01"},{"profileVersion":"2020-09-01-hybrid","apiVersion":"2020-06-01"}],"capabilities":"None"},{"resourceType":"locations/runCommands","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01","2018-06-01","2018-04-01","2017-12-01","2017-03-30"],"apiProfiles":[{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-30"},{"profileVersion":"2018-06-01-profile","apiVersion":"2017-12-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-12-01"},{"profileVersion":"2020-09-01-hybrid","apiVersion":"2020-06-01"}],"capabilities":"None"},{"resourceType":"locations/usages","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01","2018-06-01","2018-04-01","2017-12-01","2017-03-30","2016-08-30","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"],"apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2016-03-30"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-30"},{"profileVersion":"2018-06-01-profile","apiVersion":"2017-12-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-12-01"},{"profileVersion":"2020-09-01-hybrid","apiVersion":"2020-06-01"}],"capabilities":"None"},{"resourceType":"locations/virtualMachines","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01","2018-06-01","2018-04-01","2017-12-01","2017-03-30","2016-08-30"],"defaultApiVersion":"2022-03-01","apiProfiles":[{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-30"},{"profileVersion":"2018-06-01-profile","apiVersion":"2017-12-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-12-01"},{"profileVersion":"2020-09-01-hybrid","apiVersion":"2020-06-01"}],"capabilities":"None"},{"resourceType":"locations/virtualMachineScaleSets","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01","2018-06-01","2018-04-01","2017-12-01","2017-03-30","2016-08-30"],"defaultApiVersion":"2022-03-01","apiProfiles":[{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-30"},{"profileVersion":"2018-06-01-profile","apiVersion":"2017-12-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-12-01"},{"profileVersion":"2020-09-01-hybrid","apiVersion":"2020-06-01"}],"capabilities":"None"},{"resourceType":"locations/publishers","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-03","2022-03-01","2022-01-03","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-09-30","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01","2018-06-01","2018-04-01","2017-12-01","2017-03-30","2016-08-30","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"],"apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2016-03-30"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-30"},{"profileVersion":"2018-06-01-profile","apiVersion":"2017-12-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-12-01"},{"profileVersion":"2020-09-01-hybrid","apiVersion":"2020-06-01"}],"capabilities":"None"},{"resourceType":"operations","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01","2018-06-01","2018-04-01","2017-12-01","2017-03-30","2016-08-30","2016-03-30","2015-06-15","2015-05-01-preview"],"capabilities":"None"},{"resourceType":"virtualMachines/runCommands","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01","2019-12-01"],"defaultApiVersion":"2022-03-01","capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"virtualMachineScaleSets/applications","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01"],"defaultApiVersion":"2022-03-01","capabilities":"None"},{"resourceType":"virtualMachines/applications","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01"],"defaultApiVersion":"2022-03-01","capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"locations/edgeZones","locations":[],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01"],"capabilities":"None"},{"resourceType":"locations/edgeZones/vmimages","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01"],"capabilities":"None"},{"resourceType":"locations/edgeZones/publishers","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01"],"capabilities":"None"},{"resourceType":"restorePointCollections","locations":["Southeast
+        Asia","East US 2","Central US","West Europe","East US","North Central US","South
+        Central US","West US","North Europe","East Asia","Brazil South","West US 2","West
+        Central US","UK West","UK South","Japan East","Japan West","Canada Central","Canada
+        East","Central India","South India","Australia East","Australia Southeast","Korea
+        Central","Korea South","West India","France Central","South Africa North","UAE
+        North","Australia Central","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01","2018-06-01","2018-04-01","2017-12-01","2017-03-30"],"defaultApiVersion":"2022-03-01","capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"restorePointCollections/restorePoints","locations":["Southeast
+        Asia","East US 2","Central US","West Europe","East US","North Central US","South
+        Central US","West US","North Europe","East Asia","Brazil South","West US 2","West
+        Central US","UK West","UK South","Japan East","Japan West","Canada Central","Canada
+        East","Central India","South India","Australia East","Australia Southeast","Korea
+        Central","Korea South","West India","France Central","South Africa North","UAE
+        North","Australia Central","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01","2018-06-01","2018-04-01","2017-12-01","2017-03-30"],"capabilities":"None"},{"resourceType":"proximityPlacementGroups","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01","2018-06-01","2018-04-01"],"defaultApiVersion":"2022-03-01","zoneMappings":[{"location":"Australia
+        East","zones":["2","3","1"]},{"location":"Brazil South","zones":["2","3","1"]},{"location":"Canada
+        Central","zones":["2","3","1"]},{"location":"Central India","zones":["2","3","1"]},{"location":"Central
+        US","zones":["2","3","1"]},{"location":"Central US EUAP","zones":[]},{"location":"East
+        Asia","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":[]},{"location":"France
+        Central","zones":["2","3","1"]},{"location":"Germany West Central","zones":["2","3","1"]},{"location":"Japan
+        East","zones":["2","3","1"]},{"location":"Korea Central","zones":["2","3","1"]},{"location":"North
+        Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
+        East","zones":["2","3","1"]},{"location":"Qatar Central","zones":["2","3","1"]},{"location":"South
+        Africa North","zones":["2","3","1"]},{"location":"South Central US","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"Sweden Central","zones":["2","3","1"]},{"location":"Switzerland
+        North","zones":["2","3","1"]},{"location":"UAE North","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"sshPublicKeys","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01","2019-12-01"],"defaultApiVersion":"2022-03-01","capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"capacityReservationGroups","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01"],"defaultApiVersion":"2022-03-01","zoneMappings":[{"location":"Australia
+        East","zones":["2","3","1"]},{"location":"Brazil South","zones":["2","3","1"]},{"location":"Canada
+        Central","zones":["2","3","1"]},{"location":"Central India","zones":["2","3","1"]},{"location":"Central
+        US","zones":["2","3","1"]},{"location":"Central US EUAP","zones":["1","2"]},{"location":"East
+        Asia","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"France
+        Central","zones":["2","3","1"]},{"location":"Germany West Central","zones":["2","3","1"]},{"location":"Japan
+        East","zones":["2","3","1"]},{"location":"Korea Central","zones":["2","3","1"]},{"location":"North
+        Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
+        East","zones":["2","3","1"]},{"location":"Qatar Central","zones":["2","3","1"]},{"location":"South
+        Africa North","zones":["2","3","1"]},{"location":"South Central US","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"Sweden Central","zones":["2","3","1"]},{"location":"Switzerland
+        North","zones":["2","3","1"]},{"location":"UAE North","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"capabilities":"SupportsTags, SupportsLocation"},{"resourceType":"capacityReservationGroups/capacityReservations","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01"],"defaultApiVersion":"2022-03-01","zoneMappings":[{"location":"Australia
+        East","zones":["2","3","1"]},{"location":"Brazil South","zones":["2","3","1"]},{"location":"Canada
+        Central","zones":["2","3","1"]},{"location":"Central India","zones":["2","3","1"]},{"location":"Central
+        US","zones":["2","3","1"]},{"location":"Central US EUAP","zones":["1","2"]},{"location":"East
+        Asia","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"France
+        Central","zones":["2","3","1"]},{"location":"Germany West Central","zones":["2","3","1"]},{"location":"Japan
+        East","zones":["2","3","1"]},{"location":"Korea Central","zones":["2","3","1"]},{"location":"North
+        Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
+        East","zones":["2","3","1"]},{"location":"Qatar Central","zones":["2","3","1"]},{"location":"South
+        Africa North","zones":["2","3","1"]},{"location":"South Central US","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"Sweden Central","zones":["2","3","1"]},{"location":"Switzerland
+        North","zones":["2","3","1"]},{"location":"UAE North","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"capabilities":"SupportsTags, SupportsLocation"},{"resourceType":"virtualMachines/metricDefinitions","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","West US 3","Jio India West","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2014-04-01"],"capabilities":"None"},{"resourceType":"locations/spotEvictionRates","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01"],"defaultApiVersion":"2022-03-01","capabilities":"None"},{"resourceType":"locations/spotPriceHistory","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01"],"defaultApiVersion":"2022-03-01","capabilities":"None"},{"resourceType":"locations/recommendations","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01"],"defaultApiVersion":"2022-03-01","capabilities":"None"},{"resourceType":"locations/sharedGalleries","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-03","2022-03-01","2022-01-03","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-09-30","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01","2018-06-01","2018-04-01","2017-12-01","2017-03-30","2016-08-30","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"],"apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2016-03-30"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-30"},{"profileVersion":"2018-06-01-profile","apiVersion":"2017-12-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-12-01"},{"profileVersion":"2020-09-01-hybrid","apiVersion":"2020-06-01"}],"capabilities":"None"},{"resourceType":"locations/communityGalleries","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-03","2022-03-01","2022-01-03","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-09-30","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01","2018-06-01","2018-04-01","2017-12-01","2017-03-30","2016-08-30","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"],"apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2016-03-30"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-30"},{"profileVersion":"2018-06-01-profile","apiVersion":"2017-12-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-12-01"},{"profileVersion":"2020-09-01-hybrid","apiVersion":"2020-06-01"}],"capabilities":"None"},{"resourceType":"sharedVMImages","locations":["West
+        Central US","South Central US","East US 2","Southeast Asia","West Europe","West
+        US","East US","Canada Central","North Europe","North Central US","Brazil South","UK
+        West","West India","East Asia","Australia East","Japan East","Korea South","West
+        US 2","Canada East","UK South","Central India","South India","Australia Southeast","Japan
+        West","Korea Central","France Central","Central US","Australia Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2017-10-15-preview"],"defaultApiVersion":"2017-10-15-preview","capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"sharedVMImages/versions","locations":["West
+        Central US","South Central US","East US 2","Southeast Asia","West Europe","West
+        US","East US","Canada Central","North Europe","North Central US","Brazil South","UK
+        West","West India","East Asia","Australia East","Japan East","Korea South","West
+        US 2","Canada East","UK South","Central India","South India","Australia Southeast","Japan
+        West","Korea Central","France Central","Central US","Australia Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2017-10-15-preview"],"defaultApiVersion":"2017-10-15-preview","capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"locations/artifactPublishers","locations":["West
+        Central US","South Central US","East US 2","Southeast Asia","West Europe","West
+        US","East US","Canada Central","North Europe","North Central US","Brazil South","UK
+        West","West India","East Asia","Australia East","Japan East","Korea South","West
+        US 2","Canada East","UK South","Central India","South India","Australia Southeast","Japan
+        West","Korea Central","France Central","Central US","Australia Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2017-10-15-preview"],"capabilities":"None"},{"resourceType":"locations/capsoperations","locations":["West
+        Central US","South Central US","East US 2","Southeast Asia","West Europe","West
+        US","East US","Canada Central","North Europe","North Central US","Brazil South","UK
+        West","West India","East Asia","Australia East","Japan East","Korea South","West
+        US 2","Canada East","UK South","Central India","South India","Australia Southeast","Japan
+        West","Korea Central","France Central","Central US","Australia Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2022-08-03","2022-03-03","2022-01-03","2021-10-01","2021-07-01","2021-03-01","2020-09-30","2019-12-01","2019-07-01","2019-03-01","2018-06-01","2017-10-15-preview"],"capabilities":"None"},{"resourceType":"galleries","locations":["West
+        Central US","South Central US","East US 2","Southeast Asia","West Europe","West
+        US","East US","Canada Central","North Europe","North Central US","Brazil South","UK
+        West","West India","East Asia","Australia East","Japan East","Korea South","West
+        US 2","Canada East","UK South","Central India","South India","Australia Southeast","Japan
+        West","Korea Central","France Central","Central US","Australia Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2022-08-03","2022-03-03","2022-01-03","2021-10-01","2021-07-01","2021-03-01","2020-09-30","2019-12-01","2019-07-01","2019-03-01","2018-06-01"],"defaultApiVersion":"2018-06-01","capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"galleries/images","locations":["West Central
+        US","South Central US","East US 2","Southeast Asia","West Europe","West US","East
+        US","Canada Central","North Europe","North Central US","Brazil South","UK
+        West","West India","East Asia","Australia East","Japan East","Korea South","West
+        US 2","Canada East","UK South","Central India","South India","Australia Southeast","Japan
+        West","Korea Central","France Central","Central US","Australia Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2022-08-03","2022-03-03","2022-01-03","2021-10-01","2021-07-01","2021-03-01","2020-09-30","2019-12-01","2019-07-01","2019-03-01","2018-06-01"],"defaultApiVersion":"2018-06-01","capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"galleries/images/versions","locations":["West
+        Central US","South Central US","East US 2","Southeast Asia","West Europe","West
+        US","East US","Canada Central","North Europe","North Central US","Brazil South","UK
+        West","West India","East Asia","Australia East","Japan East","Korea South","West
+        US 2","Canada East","UK South","Central India","South India","Australia Southeast","Japan
+        West","Korea Central","France Central","Central US","Australia Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2022-08-03","2022-03-03","2022-01-03","2021-10-01","2021-07-01","2021-03-01","2020-09-30","2019-12-01","2019-07-01","2019-03-01","2018-06-01"],"defaultApiVersion":"2018-06-01","capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"locations/galleries","locations":["West
+        Central US","South Central US","East US 2","Southeast Asia","West Europe","West
+        US","East US","Canada Central","North Europe","North Central US","Brazil South","UK
+        West","West India","East Asia","Australia East","Japan East","Korea South","West
+        US 2","Canada East","UK South","Central India","South India","Australia Southeast","Japan
+        West","Korea Central","France Central","Central US","Australia Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2022-08-03","2022-03-03","2022-01-03","2021-10-01","2021-07-01","2021-03-01","2020-09-30","2019-12-01","2019-07-01","2019-03-01","2018-06-01"],"defaultApiVersion":"2018-06-01","capabilities":"None"},{"resourceType":"galleries/applications","locations":["West
+        Central US","South Central US","East US 2","Southeast Asia","West Europe","West
+        US","East US","Canada Central","North Europe","North Central US","Brazil South","UK
+        West","West India","East Asia","Australia East","Japan East","Korea South","West
+        US 2","Canada East","UK South","Central India","South India","Australia Southeast","Japan
+        West","Korea Central","France Central","Central US","Australia Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2022-08-03","2022-03-03","2022-01-03","2021-10-01","2021-07-01","2021-03-01","2020-09-30","2019-12-01","2019-07-01","2019-03-01"],"defaultApiVersion":"2019-03-01","capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"galleries/applications/versions","locations":["West
+        Central US","South Central US","East US 2","Southeast Asia","West Europe","West
+        US","East US","Canada Central","North Europe","North Central US","Brazil South","UK
+        West","West India","East Asia","Australia East","Japan East","Korea South","West
+        US 2","Canada East","UK South","Central India","South India","Australia Southeast","Japan
+        West","Korea Central","France Central","Central US","Australia Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2022-08-03","2022-03-03","2022-01-03","2021-10-01","2021-07-01","2021-03-01","2020-09-30","2019-12-01","2019-07-01","2019-03-01"],"defaultApiVersion":"2019-03-01","capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"disks","locations":["Southeast Asia","East
+        US 2","Central US","West Europe","East US","North Central US","South Central
+        US","West US","North Europe","East Asia","Brazil South","West US 2","West
+        Central US","UK West","UK South","Japan East","Japan West","Canada Central","Canada
+        East","Central India","South India","Australia East","Australia Southeast","Korea
+        Central","Korea South","West India","France Central","South Africa North","UAE
+        North","Australia Central","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-01-02","2022-07-02","2022-03-02","2021-12-01","2021-08-01","2021-04-01","2020-12-01","2020-09-30","2020-06-30","2020-05-01","2019-11-01","2019-07-01","2019-03-01","2018-09-30","2018-06-01","2018-04-01","2017-03-30","2016-04-30-preview"],"defaultApiVersion":"2022-03-02","apiProfiles":[{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-30"},{"profileVersion":"2018-06-01-profile","apiVersion":"2018-04-01"}],"zoneMappings":[{"location":"Australia
+        East","zones":["2","3","1"]},{"location":"Brazil South","zones":["2","3","1"]},{"location":"Canada
+        Central","zones":["2","3","1"]},{"location":"Central India","zones":["2","3","1"]},{"location":"Central
+        US","zones":["2","3","1"]},{"location":"Central US EUAP","zones":["1","2"]},{"location":"East
+        Asia","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"France
+        Central","zones":["2","3","1"]},{"location":"Germany West Central","zones":["2","3","1"]},{"location":"Japan
+        East","zones":["2","3","1"]},{"location":"Korea Central","zones":["2","3","1"]},{"location":"North
+        Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
+        East","zones":["2","3","1"]},{"location":"Qatar Central","zones":["2","3","1"]},{"location":"South
+        Africa North","zones":["2","3","1"]},{"location":"South Central US","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"Sweden Central","zones":["2","3","1"]},{"location":"Switzerland
+        North","zones":["2","3","1"]},{"location":"UAE North","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"locationMappings":[{"location":"East US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","microsoftb25lab2","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1","attnewyork1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]},{"location":"Southeast
+        Asia","type":"EdgeZone","extendedLocations":["sgxsingapore1"]},{"location":"Central
+        US","type":"EdgeZone","extendedLocations":["attdetroit1"]}],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"snapshots","locations":["Southeast
+        Asia","East US 2","Central US","West Europe","East US","North Central US","South
+        Central US","West US","North Europe","East Asia","Brazil South","West US 2","West
+        Central US","UK West","UK South","Japan East","Japan West","Canada Central","Canada
+        East","Central India","South India","Australia East","Australia Southeast","Korea
+        Central","Korea South","West India","France Central","South Africa North","UAE
+        North","Australia Central","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-01-02","2022-07-02","2022-03-02","2021-12-01","2021-08-01","2021-04-01","2020-12-01","2020-09-30","2020-06-30","2020-05-01","2019-11-01","2019-07-01","2019-03-01","2018-09-30","2018-06-01","2018-04-01","2017-03-30","2016-04-30-preview"],"defaultApiVersion":"2022-03-02","apiProfiles":[{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-30"},{"profileVersion":"2018-06-01-profile","apiVersion":"2018-04-01"}],"locationMappings":[{"location":"East
+        US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","microsoftb25lab2","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1","attnewyork1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]},{"location":"Southeast
+        Asia","type":"EdgeZone","extendedLocations":["sgxsingapore1"]},{"location":"Central
+        US","type":"EdgeZone","extendedLocations":["attdetroit1"]}],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"locations/diskoperations","locations":["Southeast
+        Asia","East US 2","Central US","West Europe","East US","North Central US","South
+        Central US","West US","North Europe","East Asia","Brazil South","West US 2","West
+        Central US","UK West","UK South","Japan East","Japan West","Canada Central","Canada
+        East","Central India","South India","Australia East","Australia Southeast","Korea
+        Central","Korea South","West India","France Central","South Africa North","UAE
+        North","Australia Central","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-01-02","2022-07-02","2022-03-02","2021-12-01","2021-08-01","2021-04-01","2020-12-01","2020-09-30","2020-06-30","2020-05-01","2019-11-01","2019-07-01","2019-03-01","2018-09-30","2018-06-01","2018-04-01","2017-03-30","2016-04-30-preview"],"apiProfiles":[{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-30"},{"profileVersion":"2018-06-01-profile","apiVersion":"2018-04-01"}],"capabilities":"None"},{"resourceType":"diskEncryptionSets","locations":["Southeast
+        Asia","East US 2","Central US","West Europe","East US","North Central US","South
+        Central US","West US","North Europe","East Asia","Brazil South","West US 2","West
+        Central US","UK West","UK South","Japan East","Japan West","Canada Central","Canada
+        East","Central India","South India","Australia East","Australia Southeast","Korea
+        Central","Korea South","West India","France Central","South Africa North","UAE
+        North","Australia Central","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-01-02","2022-07-02","2022-03-02","2021-12-01","2021-08-01","2021-04-01","2020-12-01","2020-09-30","2020-06-30","2020-05-01","2019-11-01","2019-07-01"],"defaultApiVersion":"2022-03-02","capabilities":"SystemAssignedResourceIdentity,
+        SupportsTags, SupportsLocation"},{"resourceType":"diskAccesses","locations":["Southeast
+        Asia","East US 2","Central US","West Europe","East US","North Central US","South
+        Central US","West US","North Europe","East Asia","Brazil South","West US 2","West
+        Central US","UK West","UK South","Japan East","Japan West","Canada Central","Canada
+        East","Central India","South India","Australia East","Australia Southeast","Korea
+        Central","Korea South","West India","France Central","South Africa North","UAE
+        North","Australia Central","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-01-02","2022-07-02","2022-03-02","2021-12-01","2021-08-01","2021-04-01","2020-12-01","2020-09-30","2020-06-30","2020-05-01"],"defaultApiVersion":"2022-03-02","locationMappings":[{"location":"East
+        US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","microsoftb25lab2","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1","attnewyork1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]},{"location":"Southeast
+        Asia","type":"EdgeZone","extendedLocations":["sgxsingapore1"]},{"location":"Central
+        US","type":"EdgeZone","extendedLocations":["attdetroit1"]}],"capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"restorePointCollections/restorePoints/diskRestorePoints","locations":["Southeast
+        Asia","East US 2","Central US","West Europe","East US","North Central US","South
+        Central US","West US","North Europe","East Asia","Brazil South","West US 2","West
+        Central US","UK West","UK South","Japan East","Japan West","Canada Central","Canada
+        East","Central India","South India","Australia East","Australia Southeast","Korea
+        Central","Korea South","West India","France Central","South Africa North","UAE
+        North","Australia Central","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-01-02","2022-07-02","2022-03-02","2021-12-01","2021-08-01","2021-04-01","2020-12-01","2020-09-30"],"defaultApiVersion":"2022-03-02","capabilities":"None"},{"resourceType":"cloudServices","locations":["Southeast
+        Asia","East US 2","Central US","West Europe","East US","North Central US","South
+        Central US","West US","North Europe","East Asia","Brazil South","West US 2","West
+        Central US","UK West","UK South","Japan East","Japan West","Canada Central","Canada
+        East","Central India","South India","Australia East","Australia Southeast","Korea
+        Central","Korea South","West India","France Central","South Africa North","UAE
+        North","Australia Central","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2022-09-04","2022-04-04","2021-03-01","2020-10-01-preview"],"defaultApiVersion":"2021-03-01","zoneMappings":[{"location":"Australia
+        East","zones":["2","3","1"]},{"location":"Brazil South","zones":["2","3","1"]},{"location":"Canada
+        Central","zones":["2","3","1"]},{"location":"Central India","zones":["2","3","1"]},{"location":"Central
+        US","zones":["2","3","1"]},{"location":"Central US EUAP","zones":["1","2"]},{"location":"East
+        Asia","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"France
+        Central","zones":["2","3","1"]},{"location":"Germany West Central","zones":["2","3","1"]},{"location":"Japan
+        East","zones":["2","3","1"]},{"location":"Korea Central","zones":["2","3","1"]},{"location":"North
+        Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
+        East","zones":["2","3","1"]},{"location":"Qatar Central","zones":["2","3","1"]},{"location":"South
+        Africa North","zones":["2","3","1"]},{"location":"South Central US","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"Sweden Central","zones":["2","3","1"]},{"location":"Switzerland
+        North","zones":["2","3","1"]},{"location":"UAE North","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"cloudServices/roles","locations":["Southeast
+        Asia","East US 2","Central US","West Europe","East US","North Central US","South
+        Central US","West US","North Europe","East Asia","Brazil South","West US 2","West
+        Central US","UK West","UK South","Japan East","Japan West","Canada Central","Canada
+        East","Central India","South India","Australia East","Australia Southeast","Korea
+        Central","Korea South","West India","France Central","South Africa North","UAE
+        North","Australia Central","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2022-09-04","2022-04-04","2021-03-01","2020-10-01-preview"],"defaultApiVersion":"2021-03-01","capabilities":"None"},{"resourceType":"cloudServices/roleInstances","locations":["Southeast
+        Asia","East US 2","Central US","West Europe","East US","North Central US","South
+        Central US","West US","North Europe","East Asia","Brazil South","West US 2","West
+        Central US","UK West","UK South","Japan East","Japan West","Canada Central","Canada
+        East","Central India","South India","Australia East","Australia Southeast","Korea
+        Central","Korea South","West India","France Central","South Africa North","UAE
+        North","Australia Central","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2022-09-04","2022-04-04","2021-03-01","2020-10-01-preview"],"defaultApiVersion":"2021-03-01","capabilities":"None"},{"resourceType":"locations/csoperations","locations":["Southeast
+        Asia","East US 2","Central US","West Europe","East US","North Central US","South
+        Central US","West US","North Europe","East Asia","Brazil South","West US 2","West
+        Central US","UK West","UK South","Japan East","Japan West","Canada Central","Canada
+        East","Central India","South India","Australia East","Australia Southeast","Korea
+        Central","Korea South","West India","France Central","South Africa North","UAE
+        North","Australia Central","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2022-09-04","2022-04-04","2021-03-01","2020-10-01-preview"],"capabilities":"None"},{"resourceType":"locations/cloudServiceOsVersions","locations":["Southeast
+        Asia","East US 2","Central US","West Europe","East US","North Central US","South
+        Central US","West US","North Europe","East Asia","Brazil South","West US 2","West
+        Central US","UK West","UK South","Japan East","Japan West","Canada Central","Canada
+        East","Central India","South India","Australia East","Australia Southeast","Korea
+        Central","Korea South","West India","France Central","South Africa North","UAE
+        North","Australia Central","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2022-09-04","2022-04-04","2021-03-01"],"defaultApiVersion":"2021-03-01","capabilities":"None"},{"resourceType":"locations/cloudServiceOsFamilies","locations":["Southeast
+        Asia","East US 2","Central US","West Europe","East US","North Central US","South
+        Central US","West US","North Europe","East Asia","Brazil South","West US 2","West
+        Central US","UK West","UK South","Japan East","Japan West","Canada Central","Canada
+        East","Central India","South India","Australia East","Australia Southeast","Korea
+        Central","Korea South","West India","France Central","South Africa North","UAE
+        North","Australia Central","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2022-09-04","2022-04-04","2021-03-01"],"defaultApiVersion":"2021-03-01","capabilities":"None"},{"resourceType":"cloudServices/networkInterfaces","locations":["Southeast
+        Asia","East US 2","Central US","West Europe","East US","North Central US","South
+        Central US","West US","North Europe","East Asia","Brazil South","West US 2","West
+        Central US","UK West","UK South","Japan East","Japan West","Canada Central","Canada
+        East","Central India","South India","Australia East","Australia Southeast","Korea
+        Central","Korea South","West India","France Central","South Africa North","UAE
+        North","Australia Central","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2021-03-01","2020-10-01-preview"],"capabilities":"None"},{"resourceType":"cloudServices/roleInstances/networkInterfaces","locations":["Southeast
+        Asia","East US 2","Central US","West Europe","East US","North Central US","South
+        Central US","West US","North Europe","East Asia","Brazil South","West US 2","West
+        Central US","UK West","UK South","Japan East","Japan West","Canada Central","Canada
+        East","Central India","South India","Australia East","Australia Southeast","Korea
+        Central","Korea South","West India","France Central","South Africa North","UAE
+        North","Australia Central","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2021-03-01","2020-10-01-preview"],"capabilities":"None"},{"resourceType":"cloudServices/publicIPAddresses","locations":["Southeast
+        Asia","East US 2","Central US","West Europe","East US","North Central US","South
+        Central US","West US","North Europe","East Asia","Brazil South","West US 2","West
+        Central US","UK West","UK South","Japan East","Japan West","Canada Central","Canada
+        East","Central India","South India","Australia East","Australia Southeast","Korea
+        Central","Korea South","West India","France Central","South Africa North","UAE
+        North","Australia Central","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2021-03-01","2020-10-01-preview"],"capabilities":"None"},{"resourceType":"images","locations":["Southeast
+        Asia","East US 2","Central US","West Europe","East US","North Central US","South
+        Central US","West US","North Europe","East Asia","Brazil South","West US 2","West
+        Central US","UK West","UK South","Japan East","Japan West","Canada Central","Canada
+        East","Central India","South India","Australia East","Australia Southeast","Korea
+        Central","Korea South","West India","France Central","South Africa North","UAE
+        North","Australia Central","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01","2018-06-01","2018-04-01","2017-12-01","2017-03-30","2016-08-30","2016-04-30-preview"],"defaultApiVersion":"2022-03-01","apiProfiles":[{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-30"},{"profileVersion":"2018-06-01-profile","apiVersion":"2018-04-01"}],"locationMappings":[{"location":"East
+        US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","microsoftb25lab2","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1","attnewyork1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]},{"location":"Southeast
+        Asia","type":"EdgeZone","extendedLocations":["sgxsingapore1"]},{"location":"Central
+        US","type":"EdgeZone","extendedLocations":["attdetroit1"]}],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"locations/diagnostics","locations":["West
+        Central US","Southeast Asia","East US 2","East US","South Central US","West
+        Europe","North Europe","West US 2","UK South","Australia East","South India","Central
+        India","West India","Korea Central","Korea South","Jio India West","Japan
+        West","Japan East","East Asia","Canada Central","Canada East","South Africa
+        North","Central US","West US 3","West US","UK West","France Central","UAE
+        North","Australia Central","Australia Southeast","Switzerland North","Germany
+        West Central","Norway East","North Central US","Brazil South","Sweden Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2021-06-01-preview"],"defaultApiVersion":"2021-06-01-preview","capabilities":"None"},{"resourceType":"locations/diagnosticOperations","locations":["West
+        Central US","Southeast Asia","East US 2","East US","South Central US","West
+        Europe","North Europe","West US 2","UK South","Australia East","South India","Central
+        India","West India","Korea Central","Korea South","Jio India West","Japan
+        West","Japan East","East Asia","Canada Central","Canada East","South Africa
+        North","Central US","West US 3","West US","UK West","France Central","UAE
+        North","Australia Central","Australia Southeast","Switzerland North","Germany
+        West Central","Norway East","North Central US","Brazil South","Sweden Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2021-06-01-preview"],"defaultApiVersion":"2021-06-01-preview","capabilities":"None"},{"resourceType":"locations/logAnalytics","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Australia Central","Brazil South","South India","Central
+        India","West India","Canada Central","Canada East","West US 2","West Central
+        US","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01","2018-06-01","2018-04-01","2017-12-01"],"capabilities":"None"},{"resourceType":"hostGroups","locations":["Central
+        US","East US 2","West Europe","Southeast Asia","France Central","North Europe","West
+        US 2","East US","UK South","Japan East","Japan West","East Asia","North Central
+        US","South Central US","Canada East","Korea Central","Brazil South","UK West","Canada
+        Central","West US","West Central US","Central India","South India","Australia
+        Southeast","Korea South","West India","South Africa North","UAE North","Australia
+        Central","Switzerland North","Germany West Central","Norway East","Australia
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01"],"defaultApiVersion":"2022-03-01","zoneMappings":[{"location":"Australia
+        East","zones":["2","3","1"]},{"location":"Brazil South","zones":["2","3","1"]},{"location":"Canada
+        Central","zones":["2","3","1"]},{"location":"Central India","zones":["2","3","1"]},{"location":"Central
+        US","zones":["2","3","1"]},{"location":"Central US EUAP","zones":["1","2"]},{"location":"East
+        Asia","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"France
+        Central","zones":["2","3","1"]},{"location":"Germany West Central","zones":["2","3","1"]},{"location":"Japan
+        East","zones":["2","3","1"]},{"location":"Korea Central","zones":["2","3","1"]},{"location":"North
+        Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
+        East","zones":["2","3","1"]},{"location":"Qatar Central","zones":["2","3","1"]},{"location":"South
+        Africa North","zones":["2","3","1"]},{"location":"South Central US","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"Sweden Central","zones":["2","3","1"]},{"location":"Switzerland
+        North","zones":["2","3","1"]},{"location":"UAE North","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"capabilities":"SupportsTags, SupportsLocation"},{"resourceType":"hostGroups/hosts","locations":["Central
+        US","East US 2","West Europe","Southeast Asia","France Central","North Europe","West
+        US 2","East US","UK South","Japan East","Japan West","East Asia","North Central
+        US","South Central US","Canada East","Korea Central","Brazil South","UK West","Canada
+        Central","West US","West Central US","Central India","South India","Australia
+        Southeast","Korea South","West India","South Africa North","UAE North","Australia
+        Central","Switzerland North","Germany West Central","Norway East","Australia
+        East","Jio India West","West US 3","Sweden Central","Qatar Central","East
+        US 2 EUAP","Central US EUAP"],"apiVersions":["2023-03-01","2022-11-01","2022-08-01","2022-03-01","2021-11-01","2021-07-01","2021-04-01","2021-03-01","2020-12-01","2020-06-01","2019-12-01","2019-07-01","2019-03-01","2018-10-01"],"defaultApiVersion":"2022-03-01","zoneMappings":[{"location":"Australia
+        East","zones":["2","3","1"]},{"location":"Brazil South","zones":["2","3","1"]},{"location":"Canada
+        Central","zones":["2","3","1"]},{"location":"Central India","zones":["2","3","1"]},{"location":"Central
+        US","zones":["2","3","1"]},{"location":"Central US EUAP","zones":["1","2"]},{"location":"East
+        Asia","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"France
+        Central","zones":["2","3","1"]},{"location":"Germany West Central","zones":["2","3","1"]},{"location":"Japan
+        East","zones":["2","3","1"]},{"location":"Korea Central","zones":["2","3","1"]},{"location":"North
+        Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
+        East","zones":["2","3","1"]},{"location":"Qatar Central","zones":["2","3","1"]},{"location":"South
+        Africa North","zones":["2","3","1"]},{"location":"South Central US","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"Sweden Central","zones":["2","3","1"]},{"location":"Switzerland
+        North","zones":["2","3","1"]},{"location":"UAE North","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"capabilities":"SupportsTags, SupportsLocation"},{"resourceType":"sharedVMExtensions","locations":["East
+        US 2 EUAP","Central US EUAP","Southeast Asia","East US 2","Central US","West
+        Europe","East US","North Central US","South Central US","West US","North Europe","East
+        Asia","Brazil South","West US 2","West Central US","UK West","UK South","Japan
+        East","Japan West","Canada Central","Canada East","Central India","South India","Australia
+        East","Australia Southeast","Korea Central","Korea South","West India","France
+        Central","South Africa North","UAE North","Australia Central","Switzerland
+        North","Germany West Central","Norway East","Jio India West","West US 3","Sweden
+        Central","Qatar Central"],"apiVersions":["2022-08-03","2022-03-03","2022-01-03","2021-10-01","2021-07-01","2021-03-01","2020-09-30","2019-12-01"],"defaultApiVersion":"2019-12-01","capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"sharedVMExtensions/versions","locations":["East
+        US 2 EUAP","Central US EUAP","Southeast Asia","East US 2","Central US","West
+        Europe","East US","North Central US","South Central US","West US","North Europe","East
+        Asia","Brazil South","West US 2","West Central US","UK West","UK South","Japan
+        East","Japan West","Canada Central","Canada East","Central India","South India","Australia
+        East","Australia Southeast","Korea Central","Korea South","West India","France
+        Central","South Africa North","UAE North","Australia Central","Switzerland
+        North","Germany West Central","Norway East","Jio India West","West US 3","Sweden
+        Central","Qatar Central"],"apiVersions":["2022-08-03","2022-03-03","2022-01-03","2021-10-01","2021-07-01","2021-03-01","2020-09-30","2019-12-01"],"defaultApiVersion":"2019-12-01","capabilities":"SupportsTags,
+        SupportsLocation"}],"registrationState":"Registered","registrationPolicy":"RegistrationRequired"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '90808'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Mar 2023 04:01:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"osProfile": {"allowExtensionOperations": "false"}}, "identity":
+      {"type": "SystemAssigned"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource patch
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '108'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --id --is-full-object --properties
+      User-Agent:
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.9.0 (Windows-10-10.0.19041-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Compute/virtualMachines/vm?api-version=2023-03-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vm\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Compute/virtualMachines/vm\",\r\n
+        \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"identity\": {\r\n    \"type\": \"SystemAssigned\",\r\n
+        \   \"principalId\": \"b76c5ce1-3e0a-412c-9b85-c8d26c7a1f7e\",\r\n    \"tenantId\":
+        \"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a\"\r\n  },\r\n  \"properties\": {\r\n
+        \   \"vmId\": \"aa412854-e8f0-4a28-ba08-0362aae42bb3\",\r\n    \"hardwareProfile\":
+        {\r\n      \"vmSize\": \"Standard_D2s_v3\",\r\n      \"vmSizeProperties\":
+        {\r\n        \"vCPUsAvailable\": 1,\r\n        \"vCPUsPerCore\": 1\r\n      }\r\n
+        \   },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
+        \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
+        \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
+        \"18.04.202303220\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"Linux\",\r\n        \"name\": \"vm_OsDisk_1_974fde6b2e95499ba80e466fc01fbdd2\",\r\n
+        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n
+        \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n
+        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Compute/disks/vm_OsDisk_1_974fde6b2e95499ba80e466fc01fbdd2\"\r\n
+        \       },\r\n        \"deleteOption\": \"Detach\",\r\n        \"diskSizeGB\":
+        30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
+        {\r\n      \"computerName\": \"vm\",\r\n      \"adminUsername\": \"vmtest\",\r\n
+        \     \"linuxConfiguration\": {\r\n        \"disablePasswordAuthentication\":
+        true,\r\n        \"ssh\": {\r\n          \"publicKeys\": [\r\n            {\r\n
+        \             \"path\": \"/home/vmtest/.ssh/authorized_keys\",\r\n              \"keyData\":
+        \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDmGsW4LjseEjF/ye2EN/w3j6dmswbvXI7N/UlAqV8aCxHeYYIjFDnuhFQSF7i1iYgTt8St/6FGkIaTA4ZefhrVVZtJw8dUEKzDkUIMfdQGu4TdlpDjQIeUSHzz1KNFwhANVNK9pm1cy5Z4P3GJd1PP+lTx/IRP+qZesTC/UCSV7EluCmoj5xg6LeC9MWksu07APIFRJySqxVi8nSbCFFHODW5QTZ/82n6iJzbSRDn7KgEQGzfFEAZgzxJE+ino+r3569kWzO/qkixm92swj97fnuOX7i0Ohe1T4Me5dFvpEifoQ3bii1vG4DQDQ7L2pvEvzQyy11Hr9dDtPHZTCzeIr62vWArq75T149ZLCNjfQh44vmbeSPAc/0KVakQOEiDjLvUkMSgDUx6DD4bQgiaEyWnZ23CZ3U1U9xag4p3Kl48tGLGHTpzplaZJQEAVogeloxE1tPLBGi7et3TskoXejHhl9BrtsnXLeNVj1ep9dqD2kxNogVSc4/Av8Wuv9oU=
+        zhuyan@microsoft.com\\n\"\r\n            }\r\n          ]\r\n        },\r\n
+        \       \"provisionVMAgent\": true,\r\n        \"patchSettings\": {\r\n          \"patchMode\":
+        \"ImageDefault\",\r\n          \"assessmentMode\": \"ImageDefault\"\r\n        },\r\n
+        \       \"enableVMAgentPlatformUpdates\": false\r\n      },\r\n      \"secrets\":
+        [],\r\n      \"allowExtensionOperations\": false,\r\n      \"requireGuestProvisionSignal\":
+        true\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/networkInterfaces/vmVMNic\"}]},\r\n
+        \   \"provisioningState\": \"Updating\",\r\n    \"timeCreated\": \"2023-03-23T03:59:47.0201107+00:00\"\r\n
+        \ }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/52e09334-8936-45c6-b9a8-4387d0e521e4?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2023-03-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '3038'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Mar 2023 04:01:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/PutVM3Min;238,Microsoft.Compute/PutVM30Min;1195
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource patch
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --is-full-object --properties
+      User-Agent:
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.9.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/52e09334-8936-45c6-b9a8-4387d0e521e4?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2023-03-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2023-03-23T04:01:09.2708821+00:00\",\r\n  \"endTime\":
+        \"2023-03-23T04:01:17.1615919+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"52e09334-8936-45c6-b9a8-4387d0e521e4\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '184'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Mar 2023 04:01:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperation3Min;14994,Microsoft.Compute/GetOperation30Min;29965
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource patch
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --is-full-object --properties
+      User-Agent:
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.9.0 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Compute/virtualMachines/vm?api-version=2023-03-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vm\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Compute/virtualMachines/vm\",\r\n
+        \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"identity\": {\r\n    \"type\": \"SystemAssigned\",\r\n
+        \   \"principalId\": \"b76c5ce1-3e0a-412c-9b85-c8d26c7a1f7e\",\r\n    \"tenantId\":
+        \"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a\"\r\n  },\r\n  \"properties\": {\r\n
+        \   \"vmId\": \"aa412854-e8f0-4a28-ba08-0362aae42bb3\",\r\n    \"hardwareProfile\":
+        {\r\n      \"vmSize\": \"Standard_D2s_v3\",\r\n      \"vmSizeProperties\":
+        {\r\n        \"vCPUsAvailable\": 1,\r\n        \"vCPUsPerCore\": 1\r\n      }\r\n
+        \   },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
+        \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
+        \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
+        \"18.04.202303220\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"Linux\",\r\n        \"name\": \"vm_OsDisk_1_974fde6b2e95499ba80e466fc01fbdd2\",\r\n
+        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n
+        \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n
+        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Compute/disks/vm_OsDisk_1_974fde6b2e95499ba80e466fc01fbdd2\"\r\n
+        \       },\r\n        \"deleteOption\": \"Detach\",\r\n        \"diskSizeGB\":
+        30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
+        {\r\n      \"computerName\": \"vm\",\r\n      \"adminUsername\": \"vmtest\",\r\n
+        \     \"linuxConfiguration\": {\r\n        \"disablePasswordAuthentication\":
+        true,\r\n        \"ssh\": {\r\n          \"publicKeys\": [\r\n            {\r\n
+        \             \"path\": \"/home/vmtest/.ssh/authorized_keys\",\r\n              \"keyData\":
+        \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDmGsW4LjseEjF/ye2EN/w3j6dmswbvXI7N/UlAqV8aCxHeYYIjFDnuhFQSF7i1iYgTt8St/6FGkIaTA4ZefhrVVZtJw8dUEKzDkUIMfdQGu4TdlpDjQIeUSHzz1KNFwhANVNK9pm1cy5Z4P3GJd1PP+lTx/IRP+qZesTC/UCSV7EluCmoj5xg6LeC9MWksu07APIFRJySqxVi8nSbCFFHODW5QTZ/82n6iJzbSRDn7KgEQGzfFEAZgzxJE+ino+r3569kWzO/qkixm92swj97fnuOX7i0Ohe1T4Me5dFvpEifoQ3bii1vG4DQDQ7L2pvEvzQyy11Hr9dDtPHZTCzeIr62vWArq75T149ZLCNjfQh44vmbeSPAc/0KVakQOEiDjLvUkMSgDUx6DD4bQgiaEyWnZ23CZ3U1U9xag4p3Kl48tGLGHTpzplaZJQEAVogeloxE1tPLBGi7et3TskoXejHhl9BrtsnXLeNVj1ep9dqD2kxNogVSc4/Av8Wuv9oU=
+        zhuyan@microsoft.com\\n\"\r\n            }\r\n          ]\r\n        },\r\n
+        \       \"provisionVMAgent\": true,\r\n        \"patchSettings\": {\r\n          \"patchMode\":
+        \"ImageDefault\",\r\n          \"assessmentMode\": \"ImageDefault\"\r\n        },\r\n
+        \       \"enableVMAgentPlatformUpdates\": false\r\n      },\r\n      \"secrets\":
+        [],\r\n      \"allowExtensionOperations\": false,\r\n      \"requireGuestProvisionSignal\":
+        true\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_patch_000001/providers/Microsoft.Network/networkInterfaces/vmVMNic\"}]},\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"timeCreated\": \"2023-03-23T03:59:47.0201107+00:00\"\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3039'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 23 Mar 2023 04:01:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/LowCostGet3Min;3990,Microsoft.Compute/LowCostGet30Min;31968
+    status:
+      code: 200
+      message: OK
+version: 1

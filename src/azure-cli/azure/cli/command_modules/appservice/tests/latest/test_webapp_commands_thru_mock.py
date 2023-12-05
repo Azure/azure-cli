@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import unittest
 from unittest import mock
+import os
 
 from msrestazure.azure_exceptions import CloudError
 
@@ -57,7 +58,7 @@ class TestWebappMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom.get_site_availability')
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_app_details')
-    def test_webapp_github_actions_add(self, get_app_details_mock, web_client_factory_mock, site_availability_mock,  *args):
+    def test_webapp_github_actions_add(self, get_app_details_mock, web_client_factory_mock, site_availability_mock, *args):
         runtime = "python:3.9"
         rg = "group"
         is_linux = True
@@ -70,7 +71,6 @@ class TestWebappMocked(unittest.TestCase):
         with mock.patch('azure.cli.command_modules.appservice.custom._runtime_supports_github_actions', autospec=True) as m:
             add_github_actions(cmd, rg, "name", "repo", runtime, "token")
             m.assert_called_with(cmd, runtime.replace(":", "|"), is_linux)
-
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_set_deployment_user_creds(self, client_factory_mock):
@@ -101,7 +101,7 @@ class TestWebappMocked(unittest.TestCase):
         result = update_git_token(cmd_mock, 'veryNiceToken')
 
         # assert things gets wired up
-        self.assertEqual(result.token, 'veryNiceToken')
+        self.assertEqual(result.token, None)
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_set_domain_name(self, client_factory_mock):
@@ -128,7 +128,7 @@ class TestWebappMocked(unittest.TestCase):
         # assert
         self.assertEqual(result.domain_id, domain)
 
-         # action- Slot
+        # action- Slot
         result = add_hostname(cmd_mock, 'g1', webapp.name, domain, 'slot1')
 
         # assert
@@ -202,11 +202,15 @@ class TestWebappMocked(unittest.TestCase):
         resolve_hostname_mock.assert_called_with('myweb.com')
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
-    def test_update_site_config(self, site_op_mock):
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp', autospec=True)
+    def test_update_site_config(self, is_centauri_functionapp_mock, site_op_mock):
+
         cmd_mock = _get_test_cmd()
         SiteConfig = cmd_mock.get_models('SiteConfig')
         site_config = SiteConfig(name='antarctica')
         site_op_mock.return_value = site_config
+
+        is_centauri_functionapp_mock.return_value = False
         # action
         update_site_configs(cmd_mock, 'myRG', 'myweb', java_version='1.8')
         # assert
@@ -245,11 +249,13 @@ class TestWebappMocked(unittest.TestCase):
         log_mock.assert_called_with(mock.ANY, 'myRG', 'myweb', None, None)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom._rename_server_farm_props', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom._fill_ftp_publishing_url', autospec=True)
-    def test_show_webapp(self, file_ftp_mock, rename_mock, site_op_mock):
+    def test_show_webapp(self, file_ftp_mock, rename_mock, is_centauri_functionapp_mock, site_op_mock):
         faked_web = mock.MagicMock()
         site_op_mock.return_value = faked_web
+        is_centauri_functionapp_mock.return_value = False
         # action
         result = show_app(mock.MagicMock(), 'myRG', 'myweb', slot=None)
         # assert (we invoke the site op)
@@ -274,10 +280,11 @@ class TestWebappMocked(unittest.TestCase):
         result = _match_host_names_from_cert(['*.mysite.com', 'mysite.com'], ['admin.mysite.com', 'log.mysite.com', 'mysite.com'])
         self.assertEqual(set(['admin.mysite.com', 'log.mysite.com', 'mysite.com']), result)
 
-    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers', return_value={"auth": "1245!"})
     @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.ping_site', autospec=True)
     @mock.patch('threading.Thread', autospec=True)
-    def test_log_stream_supply_cli_ctx(self, threading_mock, get_scm_url_mock, site_op_mock):
+    def test_log_stream_supply_cli_ctx(self, threading_mock, ping_site_mock, get_scm_url_mock, get_scm_site_headers_mock):
 
         # test exception to exit the streaming loop
         class ErrorToExitInfiniteLoop(Exception):
@@ -285,17 +292,38 @@ class TestWebappMocked(unittest.TestCase):
 
         threading_mock.side_effect = ErrorToExitInfiniteLoop('Expected error to exit early')
         get_scm_url_mock.return_value = 'http://great_url'
+        ping_site_mock.return_value = None
         cmd_mock = mock.MagicMock()
         cli_ctx_mock = mock.MagicMock()
         cmd_mock.cli_ctx = cli_ctx_mock
+        rg_name = "rg"
+        app_name = "web1"
 
         try:
             # action
-            get_streaming_log(cmd_mock, 'rg', 'web1')
+            get_streaming_log(cmd_mock, rg_name, app_name)
             self.fail('test exception was not thrown')
         except ErrorToExitInfiniteLoop:
             # assert
-            site_op_mock.assert_called_with(cli_ctx_mock, 'rg', 'web1', 'begin_list_publishing_credentials', None)
+            get_scm_site_headers_mock.assert_called_with(cli_ctx_mock, app_name, rg_name, None)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_url', autospec=True)
+    def test_log_stream_ping_site_failed(self, get_site_url_mock):
+        import urllib3
+        get_site_url_mock.return_value = 'http://unreachable-url'
+        cmd_mock = mock.MagicMock()
+        cli_ctx_mock = mock.MagicMock()
+        cmd_mock.cli_ctx = cli_ctx_mock
+        rg_name = "rg"
+        app_name = "web1"
+
+        try:
+            # action
+            get_streaming_log(cmd_mock, rg_name, app_name)
+            self.fail('Exception not thrown even when site ping should fail')
+        except urllib3.exceptions.MaxRetryError:
+            # assert
+            get_site_url_mock.assert_called_with(cmd_mock, rg_name, app_name, None)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     def test_restore_deleted_webapp(self, site_op_mock):
@@ -348,13 +376,14 @@ class TestWebappMocked(unittest.TestCase):
         restore_snapshot(cmd_mock, 'rg', 'web1', '2018-12-07T02:01:31.4708832Z', restore_content_only=False)
 
         # assert
-        client.web_apps.begin_restore_snapshot_slot.assert_called_with('rg', 'web1', request, 'slot1')
+        client.web_apps.begin_restore_snapshot_slot.assert_called_with('rg', 'web1', 'slot1', request)
         client.web_apps.begin_restore_snapshot.assert_called_with('rg', 'web1', overwrite_request)
 
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers', return_value={"auth": "1245!"})
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom._get_log', autospec=True)
-    def test_download_log_supply_cli_ctx(self, get_log_mock, get_scm_url_mock, site_op_mock):
+    def test_download_log_supply_cli_ctx(self, get_log_mock, get_scm_url_mock, site_op_mock, *args):
         def test_result():
             res = mock.MagicMock()
             res.publishing_user_name, res.publishing_password = 'great_user', 'secret_password'
@@ -372,8 +401,7 @@ class TestWebappMocked(unittest.TestCase):
         download_historical_logs(cmd_mock, 'rg', 'web1')
 
         # assert
-        site_op_mock.assert_called_with(cli_ctx_mock, 'rg', 'web1', 'begin_list_publishing_credentials', None)
-        get_log_mock.assert_called_with(test_scm_url + '/dump', 'great_user', 'secret_password', None)
+        get_log_mock.assert_called_with(test_scm_url + '/dump', {"auth": "1245!"}, None)
 
     def test_valid_linux_create_options(self):
         some_runtime = 'TOMCAT|8.5-jre8'

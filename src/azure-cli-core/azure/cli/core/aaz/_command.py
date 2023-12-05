@@ -6,21 +6,29 @@
 # pylint: disable=too-few-public-methods, too-many-instance-attributes, protected-access, not-callable
 import importlib
 import os
+import copy
 from functools import partial
 
 from knack.commands import CLICommand, PREVIEW_EXPERIMENTAL_CONFLICT_ERROR
 from knack.deprecation import Deprecated
 from knack.experimental import ExperimentalItem
+from knack.log import get_logger
 from knack.preview import PreviewItem
 
 from azure.cli.core.azclierror import CLIInternalError
-from ._arg import AAZArgumentsSchema, AAZBoolArg
+from ._arg import AAZArgumentsSchema, AAZBoolArg, \
+    AAZGenericUpdateAddArg, AAZGenericUpdateSetArg, AAZGenericUpdateRemoveArg, AAZGenericUpdateForceStringArg, \
+    AAZPaginationTokenArg, AAZPaginationLimitArg
 from ._base import AAZUndefined, AAZBaseValue
 from ._field_type import AAZObjectType
 from ._paging import AAZPaged
 from ._poller import AAZLROPoller
 from ._command_ctx import AAZCommandCtx
-from .exceptions import AAZUnknownFieldError
+from .exceptions import AAZUnknownFieldError, AAZUnregisteredArg
+from .utils import get_aaz_profile_module_name
+
+
+logger = get_logger(__name__)
 
 
 class AAZCommandGroup:
@@ -55,6 +63,7 @@ class AAZCommand(CLICommand):
     AZ_HELP = None
     AZ_SUPPORT_NO_WAIT = False
     AZ_SUPPORT_GENERIC_UPDATE = False
+    AZ_SUPPORT_PAGINATION = False
 
     AZ_CONFIRMATION = None
     AZ_PREVIEW_INFO = None
@@ -79,18 +88,36 @@ class AAZCommand(CLICommand):
                 options=['--no-wait'],
                 help='Do not wait for the long-running operation to finish.'
             )
-        # TODO: Implement Generic Update
-        # if cls.AZ_SUPPORT_GENERIC_UPDATE:
-        #     schema.generic_update_add = AAZGenericUpdateAddArg()
-        #     schema.generic_update_set = AAZGenericUpdateSetArg()
-        #     schema.generic_update_remove = AAZGenericUpdateRemoveArg()
-        #     schema.generic_update_force_string = AAZGenericUpdateForceString()
+        if cls.AZ_SUPPORT_GENERIC_UPDATE:
+            schema.generic_update_add = AAZGenericUpdateAddArg()
+            schema.generic_update_set = AAZGenericUpdateSetArg()
+            schema.generic_update_remove = AAZGenericUpdateRemoveArg()
+            schema.generic_update_force_string = AAZGenericUpdateForceStringArg()
+        if cls.AZ_SUPPORT_PAGINATION:
+            schema.pagination_token = AAZPaginationTokenArg()
+            schema.pagination_limit = AAZPaginationLimitArg()
         return schema
 
-    def __init__(self, loader):
+    def __init__(self, loader=None, cli_ctx=None, callbacks=None, **kwargs):
+        """
+
+        :param loader: it is required for command registered in the command table
+        :param cli_ctx: if a command instance is not registered in the command table, only cli_ctx is required.
+        :param callbacks: a dict of customized callback functions registered by @register_callback.
+            common used callbacks:
+                'pre_operations': This callback runs before all the operations
+                    pre_operations(ctx) -> void
+                'post_operations': This callback runs after all the operations
+                    post_operations(ctx) -> void
+                'pre_instance_update': This callback runs before all the instance update operations
+                    pre_instance_update(instance, ctx) -> void
+                'post_instance_update': This callback runs after all the instance update operations and before PUT
+                    post_instance_update(instance, ctx) -> void
+        """
+        assert loader or cli_ctx, "loader or cli_ctx is required"
         self.loader = loader
         super().__init__(
-            cli_ctx=loader.cli_ctx,
+            cli_ctx=cli_ctx or loader.cli_ctx,
             name=self.AZ_NAME,
             confirmation=self.AZ_CONFIRMATION,
             arguments_loader=self._cli_arguments_loader,
@@ -98,6 +125,7 @@ class AAZCommand(CLICommand):
             # knack use cmd.handler to check whether it is group or command,
             # however this property will not be used in AAZCommand. So use True value for it.
             # https://github.com/microsoft/knack/blob/e496c9590792572e680cb3ec959db175d9ba85dd/knack/parser.py#L227-L233
+            **kwargs
         )
         self.command_kwargs = {}
 
@@ -111,6 +139,7 @@ class AAZCommand(CLICommand):
         self.help = self.AZ_HELP
 
         self.ctx = None
+        self.callbacks = callbacks or {}
 
         # help property will be assigned as help_file for command parser:
         # https://github.com/Azure/azure-cli/blob/d69eedd89bd097306b8579476ef8026b9f2ad63d/src/azure-cli-core/azure/cli/core/parser.py#L104
@@ -127,7 +156,12 @@ class AAZCommand(CLICommand):
 
     def _handler(self, command_args):
         # command_args will be parsed by AAZCommandCtx
-        self.ctx = AAZCommandCtx(cli_ctx=self.cli_ctx, schema=self.get_arguments_schema(), command_args=command_args)
+        self.ctx = AAZCommandCtx(
+            cli_ctx=self.cli_ctx,
+            schema=self.get_arguments_schema(),
+            command_args=command_args,
+            no_wait_arg='no_wait' if self.supports_no_wait else None,
+        )
         self.ctx.format_args()
 
     def _cli_arguments_loader(self):
@@ -136,19 +170,23 @@ class AAZCommand(CLICommand):
         args = {}
         for name, field in schema._fields.items():
             # generate command arguments from argument schema.
-            args[name] = field.to_cmd_arg(name)
+            try:
+                args[name] = field.to_cmd_arg(name, cli_ctx=self.cli_ctx)
+            except AAZUnregisteredArg:
+                continue
         return list(args.items())
 
     def update_argument(self, param_name, argtype):
         """ This function is called by core to add global arguments
         """
         schema = self.get_arguments_schema()
-        # not support to overwrite arguments defined in schema
-        if not hasattr(schema, param_name):
-            super().update_argument(param_name, argtype)
+        if hasattr(schema, param_name):
+            # not support to overwrite arguments defined in schema, use arg.type as overrides
+            argtype = copy.deepcopy(self.arguments[param_name].type)
+        super().update_argument(param_name, argtype)
 
     @staticmethod
-    def deserialize_output(value, client_flatten=True):
+    def deserialize_output(value, client_flatten=True, secret_hidden=True):
         """ Deserialize output of a command.
         """
         if not isinstance(value, AAZBaseValue):
@@ -159,7 +197,7 @@ class AAZCommand(CLICommand):
             if result == AAZUndefined:
                 return result
 
-            if client_flatten and isinstance(schema, AAZObjectType):
+            if isinstance(schema, AAZObjectType):
                 # handle client flatten in result
                 disc_schema = schema.get_discriminator(result)
                 new_result = {}
@@ -173,8 +211,12 @@ class AAZCommand(CLICommand):
                         # get k_schema from discriminator definition
                         k_schema = disc_schema[k]
 
-                    if k_schema._flags.get('client_flatten', False):
-                        # flatten k when there are client_flatten flag in it's schema
+                    if secret_hidden and k_schema._flags.get('secret', False):
+                        # hidden secret properties in output
+                        continue
+
+                    if client_flatten and k_schema._flags.get('client_flatten', False):
+                        # flatten k when there are client_flatten flag in its schema
                         assert isinstance(k_schema, AAZObjectType) and isinstance(v, dict)
                         for sub_k, sub_v in v.items():
                             if sub_k in new_result:
@@ -190,11 +232,15 @@ class AAZCommand(CLICommand):
 
         return value.to_serialized_data(processor=processor)
 
-    @staticmethod
-    def build_lro_poller(executor, extract_result):
+    def build_lro_poller(self, executor, extract_result):
         """ Build AAZLROPoller instance to support long running operation
         """
-        return AAZLROPoller(polling_generator=executor, result_callback=extract_result)
+        polling_generator = executor()
+        if self.ctx.lro_no_wait:
+            # run until yield the first polling
+            _ = next(polling_generator)
+            return None
+        return AAZLROPoller(polling_generator=polling_generator, result_callback=extract_result)
 
     def build_paging(self, executor, extract_result):
         """ Build AAZPaged instance to support paging
@@ -203,7 +249,48 @@ class AAZCommand(CLICommand):
             self.ctx.next_link = next_link
             executor()
 
-        return AAZPaged(executor=executor_wrapper, extract_result=extract_result)
+        if self.AZ_SUPPORT_PAGINATION:
+            args = self.ctx.args
+            token = args.pagination_token.to_serialized_data()
+            limit = args.pagination_limit.to_serialized_data()
+
+            return AAZPaged(
+                executor=executor_wrapper, extract_result=extract_result, cli_ctx=self.cli_ctx,
+                token=token, limit=limit
+            )
+
+        return AAZPaged(executor=executor_wrapper, extract_result=extract_result, cli_ctx=self.cli_ctx)
+
+
+class AAZWaitCommand(AAZCommand):
+    """Support wait command"""
+
+    def __init__(self, loader):
+        from azure.cli.core.commands.command_operation import WaitCommandOperation
+        super().__init__(loader)
+
+        # add wait args in commands
+        for param_name, argtype in WaitCommandOperation.wait_args().items():
+            self.arguments[param_name] = argtype
+
+    def __call__(self, *args, **kwargs):
+        from azure.cli.core.commands.command_operation import WaitCommandOperation
+        return WaitCommandOperation.wait(
+            *args, **kwargs,
+            cli_ctx=self.cli_ctx,
+            getter=lambda **command_args: self._handler(command_args)
+        )
+
+
+def register_callback(func):
+    def wrapper(self, *args, **kwargs):
+        callback = self.callbacks.get(func.__name__, None)
+        if callback is None:
+            return func(self, *args, **kwargs)
+
+        kwargs.setdefault("ctx", self.ctx)
+        return callback(*args, **kwargs)
+    return wrapper
 
 
 def register_command_group(
@@ -307,7 +394,7 @@ def load_aaz_command_table(loader, aaz_pkg_name, args):
         arg_str = ''
         fully_load = True
     else:
-        arg_str = ' '.join(args)
+        arg_str = ' '.join(args).lower()  # Sometimes args may contain capital letters.
         fully_load = os.environ.get(AAZ_PACKAGE_FULL_LOAD_ENV_NAME, 'False').lower() == 'true'  # disable cut logic
     if profile_pkg is not None:
         _load_aaz_pkg(loader, profile_pkg, command_table, command_group_table, arg_str, fully_load)
@@ -322,11 +409,29 @@ def load_aaz_command_table(loader, aaz_pkg_name, args):
 def _get_profile_pkg(aaz_module_name, cloud):
     """ load the profile package of aaz module according to the cloud profile.
     """
-    profile_module_name = cloud.profile.lower().replace('-', '_')
+    profile_module_name = get_aaz_profile_module_name(cloud.profile)
     try:
         return importlib.import_module(f'{aaz_module_name}.{profile_module_name}')
     except ModuleNotFoundError:
         return None
+
+
+def _link_helper(pkg, name, mod, helper_cls_name="_Helper"):
+    helper_mod = importlib.import_module(mod, pkg)
+    helper = getattr(helper_mod, helper_cls_name)
+    return getattr(helper, name)
+
+
+def link_helper(pkg, *links):
+    def _wrapper(cls):
+        for link in links:
+            if isinstance(link[1], str):
+                func = _link_helper(pkg, *link)
+            else:
+                func = getattr(link[1], link[0])
+            setattr(cls, link[0], partial(func, cls))
+        return cls
+    return _wrapper
 
 
 def _load_aaz_pkg(loader, pkg, parent_command_table, command_group_table, arg_str, fully_load):
@@ -344,7 +449,7 @@ def _load_aaz_pkg(loader, pkg, parent_command_table, command_group_table, arg_st
             if issubclass(value, AAZCommandGroup):
                 if value.AZ_NAME:
                     # AAZCommandGroup already be registered by register_command_command
-                    if not arg_str.startswith(f'{value.AZ_NAME} '):
+                    if not arg_str.startswith(f'{value.AZ_NAME.lower()} '):
                         # when args not contain command group prefix, then cut more loading.
                         cut = True
                     # add command group into command group table
@@ -366,7 +471,13 @@ def _load_aaz_pkg(loader, pkg, parent_command_table, command_group_table, arg_st
         try:
             sub_pkg = importlib.import_module(f'.{sub_path}', pkg.__name__)
         except ModuleNotFoundError:
+            logger.debug('Failed to load package folder in aaz: %s.', os.path.join(pkg_path, sub_path))
             continue
+
+        if not sub_pkg.__file__:
+            logger.debug('Ignore invalid package folder in aaz: %s.', os.path.join(pkg_path, sub_path))
+            continue
+
         # recursively load sub package
         _load_aaz_pkg(loader, sub_pkg, command_table, command_group_table, arg_str, fully_load)
 

@@ -16,7 +16,7 @@ from azure.cli.core.aaz import *
     confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
-    """Deletes a cluster instance.
+    """Delete a cluster instance.
 
     :example: Delete a cluster instance.
         az monitor log-analytics cluster delete -g MyResourceGroup -n MyCluster
@@ -48,7 +48,7 @@ class Delete(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.cluster_name = AAZStrArg(
             options=["-n", "--name", "--cluster-name"],
-            help="The name of the Log Analytics cluster.",
+            help="Name of the Log Analytics Cluster.",
             required=True,
             id_part="name",
         )
@@ -58,7 +58,17 @@ class Delete(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         yield self.ClustersDelete(ctx=self.ctx)()
+        self.post_operations()
+
+    # @register_callback
+    def pre_operations(self):
+        pass
+
+    # @register_callback
+    def post_operations(self):
+        pass
 
     class ClustersDelete(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"

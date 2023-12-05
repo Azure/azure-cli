@@ -18,13 +18,15 @@ from msrestazure.tools import parse_resource_id
 from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.util import CLIError
 from azure.cli.core.azclierror import AuthenticationError
+from azure.core.exceptions import HttpResponseError
 from azure.core.paging import ItemPaged
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
 from azure.cli.command_modules.role.custom import create_service_principal_for_rbac
+from azure.mgmt.rdbms import mysql_flexibleservers, postgresql_flexibleservers
 from azure.mgmt.resource.resources.models import ResourceGroup
-from ._client_factory import resource_client_factory, cf_mysql_flexible_location_capabilities, cf_postgres_flexible_location_capabilities
+from ._client_factory import resource_client_factory, cf_mysql_flexible_location_capabilities
 
 logger = get_logger(__name__)
 
@@ -167,50 +169,11 @@ def get_postgres_tiers(sku_info):
     return list(sku_info.keys())
 
 
-def get_postgres_list_skus_info(cmd, location):
-    list_skus_client = cf_postgres_flexible_location_capabilities(cmd.cli_ctx, '_')
-    list_skus_result = list_skus_client.execute(location)
-    return _postgres_parse_list_skus(list_skus_result)
-
-
-def get_mysql_list_skus_info(cmd, location):
+def get_mysql_list_skus_info(cmd, location, server_name=None):
     list_skus_client = cf_mysql_flexible_location_capabilities(cmd.cli_ctx, '_')
-    list_skus_result = list_skus_client.list(location)
+    params = {'serverName': server_name} if server_name else None
+    list_skus_result = list_skus_client.list(location, params=params)
     return _mysql_parse_list_skus(list_skus_result)
-
-
-def _postgres_parse_list_skus(result):
-    result = _get_list_from_paged_response(result)
-
-    if not result:
-        raise InvalidArgumentValueError("No available SKUs in this location")
-    single_az = not result[0].zone_redundant_ha_supported
-
-    tiers = result[0].supported_flexible_server_editions
-    tiers_dict = {}
-    for tier_info in tiers:
-        tier_name = tier_info.name
-        tier_dict = {}
-
-        skus = set()
-        versions = set()
-        for version in tier_info.supported_server_versions:
-            versions.add(version.name)
-            for vcores in version.supported_vcores:
-                skus.add(vcores.name)
-        tier_dict["skus"] = skus
-        tier_dict["versions"] = versions
-
-        storage_info = tier_info.supported_storage_editions[0]
-        storage_sizes = set()
-        for size in storage_info.supported_storage_mb:
-            storage_sizes.add(int(size.storage_size_mb // 1024))
-        tier_dict["storage_sizes"] = storage_sizes
-
-        tiers_dict[tier_name] = tier_dict
-
-    return {'sku_info': tiers_dict,
-            'single_az': single_az}
 
 
 def _mysql_parse_list_skus(result):
@@ -270,9 +233,20 @@ def _create_resource_group(cmd, location, resource_group_name):
     return resource_group_name
 
 
-def _check_resource_group_existence(cmd, resource_group_name):
-    resource_client = resource_client_factory(cmd.cli_ctx)
-    return resource_client.resource_groups.check_existence(resource_group_name)
+# pylint: disable=protected-access
+def _check_resource_group_existence(cmd, resource_group_name, resource_client=None):
+    if resource_client is None:
+        resource_client = resource_client_factory(cmd.cli_ctx)
+
+    exists = False
+
+    try:
+        exists = resource_client.resource_groups.check_existence(resource_group_name)
+    except HttpResponseError as e:
+        if e.status_code == 403:
+            raise CLIError("You don't have authorization to perform action 'Microsoft.Resources/subscriptions/resourceGroups/read' over scope '/subscriptions/{}/resourceGroups/{}'.".format(resource_client._config.subscription_id, resource_group_name))
+
+    return exists
 
 
 # Map day_of_week string to integer to day of week
@@ -305,18 +279,21 @@ def get_id_components(rid):
 
 def check_existence(resource_client, value, resource_group, provider_namespace, resource_type,
                     parent_name=None, parent_type=None):
-    from azure.core.exceptions import HttpResponseError
     parent_path = ''
     if parent_name and parent_type:
         parent_path = '{}/{}'.format(parent_type, parent_name)
 
     api_version = _resolve_api_version(resource_client, provider_namespace, resource_type, parent_path)
 
+    resource = None
+
     try:
-        resource_client.resources.get(resource_group, provider_namespace, parent_path, resource_type, value, api_version)
-    except HttpResponseError:
-        return False
-    return True
+        resource = resource_client.resources.get(resource_group, provider_namespace, parent_path, resource_type, value, api_version)
+    except HttpResponseError as e:
+        if e.status_code == 403 and e.error and e.error.code == 'AuthorizationFailed':
+            raise CLIError(e)
+
+    return resource is not None
 
 
 def _resolve_api_version(client, provider_namespace, resource_type, parent_path):
@@ -457,10 +434,10 @@ def get_user_confirmation(message, yes=False):
 
 def replace_memory_optimized_tier(result):
     result = _get_list_from_paged_response(result)
-    for capability_idx, capability in enumerate(result):
+    for capability in result:
         for edition_idx, edition in enumerate(capability.supported_flexible_server_editions):
             if edition.name == 'MemoryOptimized':
-                result[capability_idx].supported_flexible_server_editions[edition_idx].name = 'BusinessCritical'
+                capability.supported_flexible_server_editions[edition_idx].name = 'BusinessCritical'
 
     return result
 
@@ -469,3 +446,73 @@ def _is_resource_name(resource):
     if len(resource.split('/')) == 1:
         return True
     return False
+
+
+def build_identity_and_data_encryption(db_engine, byok_identity=None, backup_byok_identity=None,
+                                       byok_key=None, backup_byok_key=None):
+    identity, data_encryption = None, None
+
+    if byok_identity and byok_key:
+        identities = {byok_identity: {}}
+
+        if backup_byok_identity:
+            identities[backup_byok_identity] = {}
+
+        if db_engine == 'mysql':
+            identity = mysql_flexibleservers.models.Identity(user_assigned_identities=identities,
+                                                             type="UserAssigned")
+
+            data_encryption = mysql_flexibleservers.models.DataEncryption(
+                primary_user_assigned_identity_id=byok_identity,
+                primary_key_uri=byok_key,
+                geo_backup_user_assigned_identity_id=backup_byok_identity,
+                geo_backup_key_uri=backup_byok_key,
+                type="AzureKeyVault")
+        else:
+            identity = postgresql_flexibleservers.models.UserAssignedIdentity(user_assigned_identities=identities,
+                                                                              type="UserAssigned")
+
+            data_encryption = postgresql_flexibleservers.models.DataEncryption(
+                primary_user_assigned_identity_id=byok_identity,
+                primary_key_uri=byok_key,
+                geo_backup_user_assigned_identity_id=backup_byok_identity,
+                geo_backup_key_uri=backup_byok_key,
+                type="AzureKeyVault")
+
+    return identity, data_encryption
+
+
+def get_identity_and_data_encryption(server):
+    identity, data_encryption = server.identity, server.data_encryption
+
+    if identity and identity.type == 'UserAssigned':
+        for current_id in identity.user_assigned_identities:
+            identity.user_assigned_identities[current_id] = {}
+    else:
+        identity = None
+
+    if not (data_encryption and data_encryption.type == 'AzureKeyVault'):
+        data_encryption = None
+
+    return identity, data_encryption
+
+
+def get_tenant_id():
+    from azure.cli.core._profile import Profile
+    profile = Profile()
+    sub = profile.get_subscription()
+    return sub['tenantId']
+
+
+def get_case_insensitive_key_value(case_insensitive_key, list_of_keys, dictionary):
+    for key in list_of_keys:
+        if key.lower() == case_insensitive_key.lower():
+            return dictionary[key]
+    return None
+
+
+def get_enum_value_true_false(value, key):
+    if value is not None and value.lower() != 'true' and value.lower() != 'false':
+        raise CLIError("Value of Key {} must be either 'True' or 'False'".format(key))
+
+    return "False" if value is None or value.lower() == 'false' else "True"

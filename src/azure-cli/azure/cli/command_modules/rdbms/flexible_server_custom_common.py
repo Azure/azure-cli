@@ -5,20 +5,18 @@
 
 # pylint: disable=unused-argument, line-too-long
 
-import os
-import json
-import uuid
-from datetime import datetime
+import re
+from datetime import datetime, timedelta
+from dateutil.tz import tzutc
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
-from azure.cli.core.commands.client_factory import get_subscription_id
-from azure.cli.core.util import send_raw_request
+from urllib.request import urlretrieve
+from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.util import user_confirmation
-from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError, FileOperationError, BadRequestError
-from azure.mgmt.rdbms.mysql_flexibleservers.operations._servers_operations import ServersOperations as MySqlServersOperations
-from ._flexible_server_util import run_subprocess, run_subprocess_get_output, fill_action_template, get_git_root_dir, \
-    GITHUB_ACTION_PATH
+from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError
+from ._client_factory import cf_postgres_flexible_replica
+from ._flexible_server_util import run_subprocess, run_subprocess_get_output, \
+    fill_action_template, get_git_root_dir, resolve_poller, GITHUB_ACTION_PATH
 from .validators import validate_public_access_server
 
 logger = get_logger(__name__)
@@ -30,10 +28,11 @@ def flexible_server_update_get(client, resource_group_name, server_name):
     return client.get(resource_group_name, server_name)
 
 
-def flexible_server_stop(client, resource_group_name=None, server_name=None):
-    logger.warning("Server will be automatically started after 7 days "
-                   "if you do not perform a manual start operation")
-    return client.begin_stop(resource_group_name, server_name)
+def flexible_server_stop(client, resource_group_name=None, server_name=None, no_wait=False):
+    days = 7
+    logger.warning("Server will be automatically started after %d days "
+                   "if you do not perform a manual start operation", days)
+    return sdk_no_wait(no_wait, client.begin_stop, resource_group_name, server_name)
 
 
 def flexible_server_update_set(client, resource_group_name, server_name, parameters):
@@ -44,106 +43,6 @@ def server_list_custom_func(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
     return client.list()
-
-
-def migration_create_func(cmd, client, resource_group_name, server_name, properties, migration_name=None):
-
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    properties_filepath = os.path.join(os.path.abspath(os.getcwd()), properties)
-    if not os.path.exists(properties_filepath):
-        raise FileOperationError("Properties file does not exist in the given location")
-    with open(properties_filepath, "r") as f:
-        try:
-            request_payload = json.load(f)
-            request_payload.get("properties")['TriggerCutover'] = 'true'
-            json_data = json.dumps(request_payload)
-        except ValueError as err:
-            logger.error(err)
-            raise BadRequestError("Invalid json file. Make sure that the json file content is properly formatted.")
-    if migration_name is None:
-        # Convert a UUID to a string of hex digits in standard form
-        migration_name = str(uuid.uuid4())
-    r = send_raw_request(cmd.cli_ctx, "put", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name), None, None, json_data)
-
-    return r.json()
-
-
-def migration_show_func(cmd, client, resource_group_name, server_name, migration_name, level="Default"):
-
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-
-    r = send_raw_request(cmd.cli_ctx, "get", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?level={}&api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name, level))
-
-    return r.json()
-
-
-def migration_list_func(cmd, client, resource_group_name, server_name, migration_filter="Active"):
-
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-
-    r = send_raw_request(cmd.cli_ctx, "get", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations?migrationListFilter={}&api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_filter))
-
-    return r.json()
-
-
-def migration_update_func(cmd, client, resource_group_name, server_name, migration_name, setup_logical_replication=None, db_names=None, overwrite_dbs=None, start_data_migration=None):
-
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-
-    operationSpecified = False
-    if setup_logical_replication is True:
-        operationSpecified = True
-        properties = "{\"properties\": {\"setupLogicalReplicationOnSourceDBIfNeeded\": \"true\"} }"
-
-    if db_names is not None:
-        if operationSpecified is True:
-            raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
-        operationSpecified = True
-        prefix = "{ \"properties\": { \"dBsToMigrate\": ["
-        db_names_str = "\"" + "\", \"".join(db_names) + "\""
-        suffix = "] } }"
-        properties = prefix + db_names_str + suffix
-
-    if overwrite_dbs is True:
-        if operationSpecified is True:
-            raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
-        operationSpecified = True
-        properties = "{\"properties\": {\"overwriteDBsInTarget\": \"true\"} }"
-
-    if start_data_migration is True:
-        if operationSpecified is True:
-            raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
-        operationSpecified = True
-        properties = "{\"properties\": {\"startDataMigration\": \"true\"} }"
-
-    if operationSpecified is False:
-        raise RequiredArgumentMissingError("Incorrect Usage: Atleast one update operation needs to be specified.")
-
-    r = send_raw_request(cmd.cli_ctx, "patch", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name), None, None, properties)
-
-    return r.json()
-
-
-def migration_delete_func(cmd, client, resource_group_name, server_name, migration_name, yes=None):
-
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-
-    if not yes:
-        user_confirmation(
-            "Are you sure you want to delete the migration '{0}' on target server '{1}', resource group '{2}'".format(
-                migration_name, server_name, resource_group_name))
-
-    r = send_raw_request(cmd.cli_ctx, "delete", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name))
-
-    return r.json()
-
-
-def migration_check_name_availability(cmd, client, resource_group_name, server_name, migration_name):
-
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    properties = json.dumps({"name": "%s" % migration_name, "type": "Microsoft.DBforPostgreSQL/flexibleServers/migrations"})
-    r = send_raw_request(cmd.cli_ctx, "post", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/checkMigrationNameAvailability?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name), None, None, properties)
-    return r.json()
 
 
 def firewall_rule_delete_func(cmd, client, resource_group_name, server_name, firewall_rule_name, yes=None):
@@ -275,10 +174,7 @@ def github_actions_setup(cmd, client, resource_group_name, server_name, database
         action_name = server.name + '_' + database_name + "_deploy"
     gitcli_check_and_login()
 
-    if isinstance(client, MySqlServersOperations):
-        database_engine = 'mysql'
-    else:
-        database_engine = 'postgresql'
+    database_engine = 'postgresql'
 
     fill_action_template(cmd,
                          database_engine=database_engine,
@@ -317,3 +213,73 @@ def gitcli_check_and_login():
     output = run_subprocess_get_output("gh auth status")
     if output.returncode:
         run_subprocess("gh auth login", stdout_show=True)
+
+
+# Custom functions for server logs
+def flexible_server_log_download(client, resource_group_name, server_name, file_name):
+
+    files = client.list_by_server(resource_group_name, server_name)
+
+    for f in files:
+        if f.name in file_name:
+            urlretrieve(f.url, f.name)
+
+
+def flexible_server_log_list(client, resource_group_name, server_name, filename_contains=None,
+                             file_last_written=None, max_file_size=None):
+
+    all_files = client.list_by_server(resource_group_name, server_name)
+    files = []
+
+    if file_last_written is None:
+        file_last_written = 72
+    time_line = datetime.utcnow().replace(tzinfo=tzutc()) - timedelta(hours=file_last_written)
+
+    for f in all_files:
+        if f.last_modified_time < time_line:
+            continue
+        if filename_contains is not None and re.search(filename_contains, f.name) is None:
+            continue
+        if max_file_size is not None and f.size_in_kb > max_file_size:
+            continue
+
+        del f.created_time
+        files.append(f)
+
+    return files
+
+
+def flexible_server_version_upgrade(cmd, client, resource_group_name, server_name, version, yes=None):
+    if not yes:
+        user_confirmation(
+            "Updating major version in server {} is irreversible. The action you're about to take can't be undone. "
+            "Going further will initiate major version upgrade to the selected version on this server."
+            .format(server_name), yes=yes)
+
+    instance = client.get(resource_group_name, server_name)
+    if instance.sku.tier == 'Burstable':
+        raise CLIError("Major version update is not supported for the Burstable pricing tier.")
+
+    current_version = int(instance.version.split('.')[0])
+    if current_version >= int(version):
+        raise CLIError("The version to upgrade to must be greater than the current version.")
+
+    replica_operations_client = cf_postgres_flexible_replica(cmd.cli_ctx, '_')
+    version_mapped = version
+
+    replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
+
+    if 'replica' in instance.replication_role.lower() or len(list(replicas)) > 0:
+        raise CLIError("Major version upgrade is not yet supported for servers in a read replica setup.")
+
+    parameters = {
+        'version': version_mapped
+    }
+
+    return resolve_poller(
+        client.begin_update(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            parameters=parameters),
+        cmd.cli_ctx, 'Updating server {} to major version {}'.format(server_name, version)
+    )

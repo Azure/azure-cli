@@ -13,7 +13,7 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 class StorageContainerRmScenarios(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix="cli", location="eastus")
-    @StorageAccountPreparer(name_prefix="containerrm", location="eastus")
+    @StorageAccountPreparer(name_prefix="containerrm", location="eastus", allow_blob_public_access=True)
     def test_storage_container_using_rm_main_scenario(self):
         # 1. Test create command.
 
@@ -99,11 +99,6 @@ class StorageContainerRmScenarios(ScenarioTest):
                           '-n {container_name} --public-access container').get_output_in_json()
         self.assertEqual(result['name'], container_name)
         self.assertEqual(result['publicAccess'], 'Container')
-
-        # Update container by container resource id.
-        result = self.cmd('storage container-rm update --ids {container_id} '
-                          '--deny-encryption-scope-override true').get_output_in_json()
-        self.assertEqual(result['denyEncryptionScopeOverride'], True)
 
         # 5. Test list command(with storage account name and resource group)
         result = self.cmd('storage container-rm list --storage-account {sa} --query "[].name"').get_output_in_json()

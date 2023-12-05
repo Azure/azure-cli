@@ -1,0 +1,2091 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.49.0 azsdk-python-azure-mgmt-resource/23.0.1 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_app_gateway_waf_custom_rule_v2_000001?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001","name":"cli_test_app_gateway_waf_custom_rule_v2_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_network_app_gateway_waf_custom_rule_v2","date":"2023-06-08T03:18:39Z","module":"network"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '442'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:18:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"managedRules": {"managedRuleSets":
+      [{"ruleSetType": "OWASP", "ruleSetVersion": "3.0"}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '128'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"b193e345-160a-4bbd-bdbd-53c22b9b0758\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Updating","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.0","ruleGroupOverrides":[]}],"exclusions":[]}}}'
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/941175d3-2c0e-425b-91da-7bc6ef9e5cd4?api-version=2022-11-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '782'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:18:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 0205b3bd-a25a-42c5-afd9-f2efb7df2d17
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy managed-rule rule-set update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --policy-name --type --version --group-name --rule --rule
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"8bcc7836-c605-4714-b235-221bf829034b\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Succeeded","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.0","ruleGroupOverrides":[]}],"exclusions":[]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '783'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:00 GMT
+      etag:
+      - W/"8bcc7836-c605-4714-b235-221bf829034b"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - f7e3228a-a0f6-46d6-aae1-7144e88518a5
+    status:
+      code: 200
+      message: ''
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1",
+      "location": "westus", "properties": {"customRules": [], "managedRules": {"exclusions":
+      [], "managedRuleSets": [{"ruleGroupOverrides": [{"ruleGroupName": "REQUEST-931-APPLICATION-ATTACK-RFI",
+      "rules": [{"action": "Log", "ruleId": "931120", "state": "Enabled"}, {"action":
+      "AnomalyScoring", "ruleId": "931130", "state": "Disabled"}]}], "ruleSetType":
+      "OWASP", "ruleSetVersion": "3.2"}]}, "policySettings": {"fileUploadEnforcement":
+      true, "fileUploadLimitInMb": 100, "maxRequestBodySizeInKb": 128, "mode": "Detection",
+      "requestBodyCheck": true, "requestBodyEnforcement": true, "requestBodyInspectLimitInKB":
+      128, "state": "Disabled"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy managed-rule rule-set update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '838'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --policy-name --type --version --group-name --rule --rule
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"2d4b9fe9-cd10-4ec3-ba6a-e665d970d91d\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Updating","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[]}}}'
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/93ebea3b-4082-459b-847e-3895ae332032?api-version=2022-11-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '964'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 9044cd19-2152-4a95-ac2c-922f32055919
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy managed-rule exclusion rule-set add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --policy-name --match-variable --selector-match-operator --selector --type
+        --version --group-name --rule-ids
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"2409bcb2-59f1-4f38-b14b-3ccbde0da605\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Succeeded","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '965'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:03 GMT
+      etag:
+      - W/"2409bcb2-59f1-4f38-b14b-3ccbde0da605"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 6847d344-40ab-4e01-9a50-86135ef95b15
+    status:
+      code: 200
+      message: ''
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1",
+      "location": "westus", "properties": {"customRules": [], "managedRules": {"exclusions":
+      [{"exclusionManagedRuleSets": [{"ruleGroups": [{"ruleGroupName": "REQUEST-930-APPLICATION-ATTACK-LFI",
+      "rules": [{"ruleId": "930120"}]}], "ruleSetType": "OWASP", "ruleSetVersion":
+      "3.2"}], "matchVariable": "RequestArgNames", "selector": "hello", "selectorMatchOperator":
+      "StartsWith"}], "managedRuleSets": [{"ruleGroupOverrides": [{"ruleGroupName":
+      "REQUEST-931-APPLICATION-ATTACK-RFI", "rules": [{"action": "Log", "ruleId":
+      "931120", "state": "Enabled"}, {"action": "AnomalyScoring", "ruleId": "931130",
+      "state": "Disabled"}]}], "ruleSetType": "OWASP", "ruleSetVersion": "3.2"}]},
+      "policySettings": {"fileUploadEnforcement": true, "fileUploadLimitInMb": 100,
+      "maxRequestBodySizeInKb": 128, "mode": "Detection", "requestBodyCheck": true,
+      "requestBodyEnforcement": true, "requestBodyInspectLimitInKB": 128, "state":
+      "Disabled"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy managed-rule exclusion rule-set add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1121'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --policy-name --match-variable --selector-match-operator --selector --type
+        --version --group-name --rule-ids
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"27ee190f-a67b-425c-8564-93bc8b157bf7\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Updating","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[{"ruleGroupName":"REQUEST-930-APPLICATION-ATTACK-LFI","rules":[{"ruleId":"930120"}]}]}]}]}}}'
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/94b9c651-0435-457a-9741-105b1050cd07?api-version=2022-11-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1231'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - e2482887-bac7-49d5-975c-faee70ce9d60
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy managed-rule exclusion rule-set add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --policy-name --match-variable --selector-match-operator --selector --type
+        --version --group-name
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"cddfaa1e-77b8-4a41-954c-257ea8874448\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Succeeded","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[{"ruleGroupName":"REQUEST-930-APPLICATION-ATTACK-LFI","rules":[{"ruleId":"930120"}]}]}]}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1232'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:06 GMT
+      etag:
+      - W/"cddfaa1e-77b8-4a41-954c-257ea8874448"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 7c04c2ee-d4a9-48f9-9404-14c67b7139f0
+    status:
+      code: 200
+      message: ''
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1",
+      "location": "westus", "properties": {"customRules": [], "managedRules": {"exclusions":
+      [{"exclusionManagedRuleSets": [{"ruleGroups": [{"ruleGroupName": "REQUEST-930-APPLICATION-ATTACK-LFI",
+      "rules": [{"ruleId": "930120"}]}, {"ruleGroupName": "REQUEST-932-APPLICATION-ATTACK-RCE",
+      "rules": []}], "ruleSetType": "OWASP", "ruleSetVersion": "3.2"}], "matchVariable":
+      "RequestArgNames", "selector": "hello", "selectorMatchOperator": "StartsWith"}],
+      "managedRuleSets": [{"ruleGroupOverrides": [{"ruleGroupName": "REQUEST-931-APPLICATION-ATTACK-RFI",
+      "rules": [{"action": "Log", "ruleId": "931120", "state": "Enabled"}, {"action":
+      "AnomalyScoring", "ruleId": "931130", "state": "Disabled"}]}], "ruleSetType":
+      "OWASP", "ruleSetVersion": "3.2"}]}, "policySettings": {"fileUploadEnforcement":
+      true, "fileUploadLimitInMb": 100, "maxRequestBodySizeInKb": 128, "mode": "Detection",
+      "requestBodyCheck": true, "requestBodyEnforcement": true, "requestBodyInspectLimitInKB":
+      128, "state": "Disabled"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy managed-rule exclusion rule-set add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1191'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --policy-name --match-variable --selector-match-operator --selector --type
+        --version --group-name
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"00eb5ec4-0ab8-4a15-9579-7121b0f27ce8\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Updating","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[{"ruleGroupName":"REQUEST-930-APPLICATION-ATTACK-LFI","rules":[{"ruleId":"930120"}]},{"ruleGroupName":"REQUEST-932-APPLICATION-ATTACK-RCE","rules":[]}]}]}]}}}'
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/3d878235-efa9-42aa-8f7c-9cd0342d3a6d?api-version=2022-11-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1297'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 6d74b1c0-b0f1-42b6-958c-13db1a538c33
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy managed-rule exclusion rule-set add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --policy-name --match-variable --selector-match-operator --selector --type
+        --version
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"58f93229-8769-4317-b504-b8ccebf0aeec\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Succeeded","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[{"ruleGroupName":"REQUEST-930-APPLICATION-ATTACK-LFI","rules":[{"ruleId":"930120"}]},{"ruleGroupName":"REQUEST-932-APPLICATION-ATTACK-RCE","rules":[]}]}]}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1298'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:07 GMT
+      etag:
+      - W/"58f93229-8769-4317-b504-b8ccebf0aeec"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - e95d7d47-7bbb-454f-b940-d7edb2c98217
+    status:
+      code: 200
+      message: ''
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1",
+      "location": "westus", "properties": {"customRules": [], "managedRules": {"exclusions":
+      [{"exclusionManagedRuleSets": [{"ruleGroups": [{"ruleGroupName": "REQUEST-930-APPLICATION-ATTACK-LFI",
+      "rules": [{"ruleId": "930120"}]}, {"ruleGroupName": "REQUEST-932-APPLICATION-ATTACK-RCE",
+      "rules": []}], "ruleSetType": "OWASP", "ruleSetVersion": "3.2"}], "matchVariable":
+      "RequestArgNames", "selector": "hello", "selectorMatchOperator": "StartsWith"},
+      {"exclusionManagedRuleSets": [{"ruleGroups": [], "ruleSetType": "OWASP", "ruleSetVersion":
+      "3.2"}], "matchVariable": "RequestArgNames", "selector": "hello", "selectorMatchOperator":
+      "EndsWith"}], "managedRuleSets": [{"ruleGroupOverrides": [{"ruleGroupName":
+      "REQUEST-931-APPLICATION-ATTACK-RFI", "rules": [{"action": "Log", "ruleId":
+      "931120", "state": "Enabled"}, {"action": "AnomalyScoring", "ruleId": "931130",
+      "state": "Disabled"}]}], "ruleSetType": "OWASP", "ruleSetVersion": "3.2"}]},
+      "policySettings": {"fileUploadEnforcement": true, "fileUploadLimitInMb": 100,
+      "maxRequestBodySizeInKb": 128, "mode": "Detection", "requestBodyCheck": true,
+      "requestBodyEnforcement": true, "requestBodyInspectLimitInKB": 128, "state":
+      "Disabled"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy managed-rule exclusion rule-set add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1386'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --policy-name --match-variable --selector-match-operator --selector --type
+        --version
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"b29efa10-ef2f-4d12-8f92-46927d89b00c\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Updating","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[{"ruleGroupName":"REQUEST-930-APPLICATION-ATTACK-LFI","rules":[{"ruleId":"930120"}]},{"ruleGroupName":"REQUEST-932-APPLICATION-ATTACK-RCE","rules":[]}]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"EndsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[]}]}]}}}'
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/85c7fd21-53ee-4b8f-a248-4686e9f9e905?api-version=2022-11-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1479'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - e0b24424-b057-4274-b3f9-e978a5d8139e
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy managed-rule exclusion add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --policy-name --match-variable --selector-match-operator --selector
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"90cf3ee9-b070-4578-9202-9266a0dd8170\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Succeeded","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[{"ruleGroupName":"REQUEST-930-APPLICATION-ATTACK-LFI","rules":[{"ruleId":"930120"}]},{"ruleGroupName":"REQUEST-932-APPLICATION-ATTACK-RCE","rules":[]}]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"EndsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[]}]}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1480'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:10 GMT
+      etag:
+      - W/"90cf3ee9-b070-4578-9202-9266a0dd8170"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 7d7b7871-d19f-43e1-9710-c2f23232bcd1
+    status:
+      code: 200
+      message: ''
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1",
+      "location": "westus", "properties": {"customRules": [], "managedRules": {"exclusions":
+      [{"exclusionManagedRuleSets": [{"ruleGroups": [{"ruleGroupName": "REQUEST-930-APPLICATION-ATTACK-LFI",
+      "rules": [{"ruleId": "930120"}]}, {"ruleGroupName": "REQUEST-932-APPLICATION-ATTACK-RCE",
+      "rules": []}], "ruleSetType": "OWASP", "ruleSetVersion": "3.2"}], "matchVariable":
+      "RequestArgNames", "selector": "hello", "selectorMatchOperator": "StartsWith"},
+      {"exclusionManagedRuleSets": [{"ruleGroups": [], "ruleSetType": "OWASP", "ruleSetVersion":
+      "3.2"}], "matchVariable": "RequestArgNames", "selector": "hello", "selectorMatchOperator":
+      "EndsWith"}, {"matchVariable": "RequestArgNames", "selector": "test", "selectorMatchOperator":
+      "StartsWith"}], "managedRuleSets": [{"ruleGroupOverrides": [{"ruleGroupName":
+      "REQUEST-931-APPLICATION-ATTACK-RFI", "rules": [{"action": "Log", "ruleId":
+      "931120", "state": "Enabled"}, {"action": "AnomalyScoring", "ruleId": "931130",
+      "state": "Disabled"}]}], "ruleSetType": "OWASP", "ruleSetVersion": "3.2"}]},
+      "policySettings": {"fileUploadEnforcement": true, "fileUploadLimitInMb": 100,
+      "maxRequestBodySizeInKb": 128, "mode": "Detection", "requestBodyCheck": true,
+      "requestBodyEnforcement": true, "requestBodyInspectLimitInKB": 128, "state":
+      "Disabled"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy managed-rule exclusion add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1483'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --policy-name --match-variable --selector-match-operator --selector
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"dbaeef13-5db2-4e6e-977c-4325532aba95\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Updating","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[{"ruleGroupName":"REQUEST-930-APPLICATION-ATTACK-LFI","rules":[{"ruleId":"930120"}]},{"ruleGroupName":"REQUEST-932-APPLICATION-ATTACK-RCE","rules":[]}]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"EndsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]}]}}}'
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/73eac0c8-ba64-42e5-bd99-b18a47fcfbf1?api-version=2022-11-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1600'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 46bc2917-edd3-48ee-afd9-8d041ad8c482
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy managed-rule exclusion add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --policy-name --match-variable --selector-match-operator --selector
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"5f28895c-16b9-456c-9752-1066c17d61b3\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Succeeded","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[{"ruleGroupName":"REQUEST-930-APPLICATION-ATTACK-LFI","rules":[{"ruleId":"930120"}]},{"ruleGroupName":"REQUEST-932-APPLICATION-ATTACK-RCE","rules":[]}]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"EndsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1601'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:13 GMT
+      etag:
+      - W/"5f28895c-16b9-456c-9752-1066c17d61b3"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 75a545df-8380-444a-9ff5-b59560868737
+    status:
+      code: 200
+      message: ''
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1",
+      "location": "westus", "properties": {"customRules": [], "managedRules": {"exclusions":
+      [{"exclusionManagedRuleSets": [{"ruleGroups": [{"ruleGroupName": "REQUEST-930-APPLICATION-ATTACK-LFI",
+      "rules": [{"ruleId": "930120"}]}, {"ruleGroupName": "REQUEST-932-APPLICATION-ATTACK-RCE",
+      "rules": []}], "ruleSetType": "OWASP", "ruleSetVersion": "3.2"}], "matchVariable":
+      "RequestArgNames", "selector": "hello", "selectorMatchOperator": "StartsWith"},
+      {"exclusionManagedRuleSets": [{"ruleGroups": [], "ruleSetType": "OWASP", "ruleSetVersion":
+      "3.2"}], "matchVariable": "RequestArgNames", "selector": "hello", "selectorMatchOperator":
+      "EndsWith"}, {"exclusionManagedRuleSets": [], "matchVariable": "RequestArgNames",
+      "selector": "test", "selectorMatchOperator": "StartsWith"}, {"matchVariable":
+      "RequestArgValues", "selector": "test", "selectorMatchOperator": "StartsWith"}],
+      "managedRuleSets": [{"ruleGroupOverrides": [{"ruleGroupName": "REQUEST-931-APPLICATION-ATTACK-RFI",
+      "rules": [{"action": "Log", "ruleId": "931120", "state": "Enabled"}, {"action":
+      "AnomalyScoring", "ruleId": "931130", "state": "Disabled"}]}], "ruleSetType":
+      "OWASP", "ruleSetVersion": "3.2"}]}, "policySettings": {"fileUploadEnforcement":
+      true, "fileUploadLimitInMb": 100, "maxRequestBodySizeInKb": 128, "mode": "Detection",
+      "requestBodyCheck": true, "requestBodyEnforcement": true, "requestBodyInspectLimitInKB":
+      128, "state": "Disabled"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy managed-rule exclusion add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1613'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --policy-name --match-variable --selector-match-operator --selector
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"a3998486-526b-43f1-b167-66022a524ad1\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Updating","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[{"ruleGroupName":"REQUEST-930-APPLICATION-ATTACK-LFI","rules":[{"ruleId":"930120"}]},{"ruleGroupName":"REQUEST-932-APPLICATION-ATTACK-RCE","rules":[]}]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"EndsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]},{"matchVariable":"RequestArgValues","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]}]}}}'
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/c5092c21-da70-4b51-8653-93fe7d21d473?api-version=2022-11-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1722'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - a0a1ad28-92a5-4ccd-ae24-ff95ea0098ff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy policy-setting update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --policy-name --log-scrubbing-state --scrubbing-rules
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"e3c45beb-394a-4e2f-8735-b5000d1194a6\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Succeeded","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[{"ruleGroupName":"REQUEST-930-APPLICATION-ATTACK-LFI","rules":[{"ruleId":"930120"}]},{"ruleGroupName":"REQUEST-932-APPLICATION-ATTACK-RCE","rules":[]}]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"EndsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]},{"matchVariable":"RequestArgValues","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1723'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:15 GMT
+      etag:
+      - W/"e3c45beb-394a-4e2f-8735-b5000d1194a6"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 8216e0aa-7a00-4746-91ac-2f350a45b7c2
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1",
+      "location": "westus", "properties": {"customRules": [], "managedRules": {"exclusions":
+      [{"exclusionManagedRuleSets": [{"ruleGroups": [{"ruleGroupName": "REQUEST-930-APPLICATION-ATTACK-LFI",
+      "rules": [{"ruleId": "930120"}]}, {"ruleGroupName": "REQUEST-932-APPLICATION-ATTACK-RCE",
+      "rules": []}], "ruleSetType": "OWASP", "ruleSetVersion": "3.2"}], "matchVariable":
+      "RequestArgNames", "selector": "hello", "selectorMatchOperator": "StartsWith"},
+      {"exclusionManagedRuleSets": [{"ruleGroups": [], "ruleSetType": "OWASP", "ruleSetVersion":
+      "3.2"}], "matchVariable": "RequestArgNames", "selector": "hello", "selectorMatchOperator":
+      "EndsWith"}, {"exclusionManagedRuleSets": [], "matchVariable": "RequestArgNames",
+      "selector": "test", "selectorMatchOperator": "StartsWith"}, {"exclusionManagedRuleSets":
+      [], "matchVariable": "RequestArgValues", "selector": "test", "selectorMatchOperator":
+      "StartsWith"}], "managedRuleSets": [{"ruleGroupOverrides": [{"ruleGroupName":
+      "REQUEST-931-APPLICATION-ATTACK-RFI", "rules": [{"action": "Log", "ruleId":
+      "931120", "state": "Enabled"}, {"action": "AnomalyScoring", "ruleId": "931130",
+      "state": "Disabled"}]}], "ruleSetType": "OWASP", "ruleSetVersion": "3.2"}]},
+      "policySettings": {"fileUploadEnforcement": true, "fileUploadLimitInMb": 100,
+      "logScrubbing": {"scrubbingRules": [{"matchVariable": "RequestArgNames", "selector":
+      "test", "selectorMatchOperator": "Equals", "state": "Enabled"}, {"matchVariable":
+      "RequestIPAddress", "selectorMatchOperator": "EqualsAny", "state": "Enabled"}],
+      "state": "Enabled"}, "maxRequestBodySizeInKb": 128, "mode": "Detection", "requestBodyCheck":
+      false, "requestBodyEnforcement": true, "requestBodyInspectLimitInKB": 128, "state":
+      "Disabled"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy policy-setting update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1914'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --policy-name --log-scrubbing-state --scrubbing-rules
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"8dd63130-d67b-4e9e-b4fe-1ef434a1d940\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Updating","customRules":[],"policySettings":{"requestBodyCheck":false,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","logScrubbing":{"state":"Enabled","scrubbingRules":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"Equals","selector":"test","state":"Enabled"},{"matchVariable":"RequestIPAddress","selectorMatchOperator":"EqualsAny","state":"Enabled"}]},"requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[{"ruleGroupName":"REQUEST-930-APPLICATION-ATTACK-LFI","rules":[{"ruleId":"930120"}]},{"ruleGroupName":"REQUEST-932-APPLICATION-ATTACK-RCE","rules":[]}]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"EndsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]},{"matchVariable":"RequestArgValues","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]}]}}}'
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d60c5b3c-05d3-4544-aa20-c02a224a750c?api-version=2022-11-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1973'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 9496d0be-5660-40a6-9412-0f9998f9c3d0
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy custom-rule create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --policy-name -n --priority --action --rule-type
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"edbf8be0-1de6-41ce-9b06-0356df66155b\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Succeeded","customRules":[],"policySettings":{"requestBodyCheck":false,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","logScrubbing":{"state":"Enabled","scrubbingRules":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"Equals","selector":"test","state":"Enabled"},{"matchVariable":"RequestIPAddress","selectorMatchOperator":"EqualsAny","state":"Enabled"}]},"requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[{"ruleGroupName":"REQUEST-930-APPLICATION-ATTACK-LFI","rules":[{"ruleId":"930120"}]},{"ruleGroupName":"REQUEST-932-APPLICATION-ATTACK-RCE","rules":[]}]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"EndsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]},{"matchVariable":"RequestArgValues","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1974'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:18 GMT
+      etag:
+      - W/"edbf8be0-1de6-41ce-9b06-0356df66155b"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - cbc76ca0-d3ed-4143-8e8a-3c8d3011dbff
+    status:
+      code: 200
+      message: ''
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1",
+      "location": "westus", "properties": {"customRules": [{"action": "Block", "matchConditions":
+      [], "name": "rule1", "priority": 1, "ruleType": "MatchRule", "state": "Enabled"}],
+      "managedRules": {"exclusions": [{"exclusionManagedRuleSets": [{"ruleGroups":
+      [{"ruleGroupName": "REQUEST-930-APPLICATION-ATTACK-LFI", "rules": [{"ruleId":
+      "930120"}]}, {"ruleGroupName": "REQUEST-932-APPLICATION-ATTACK-RCE", "rules":
+      []}], "ruleSetType": "OWASP", "ruleSetVersion": "3.2"}], "matchVariable": "RequestArgNames",
+      "selector": "hello", "selectorMatchOperator": "StartsWith"}, {"exclusionManagedRuleSets":
+      [{"ruleGroups": [], "ruleSetType": "OWASP", "ruleSetVersion": "3.2"}], "matchVariable":
+      "RequestArgNames", "selector": "hello", "selectorMatchOperator": "EndsWith"},
+      {"exclusionManagedRuleSets": [], "matchVariable": "RequestArgNames", "selector":
+      "test", "selectorMatchOperator": "StartsWith"}, {"exclusionManagedRuleSets":
+      [], "matchVariable": "RequestArgValues", "selector": "test", "selectorMatchOperator":
+      "StartsWith"}], "managedRuleSets": [{"ruleGroupOverrides": [{"ruleGroupName":
+      "REQUEST-931-APPLICATION-ATTACK-RFI", "rules": [{"action": "Log", "ruleId":
+      "931120", "state": "Enabled"}, {"action": "AnomalyScoring", "ruleId": "931130",
+      "state": "Disabled"}]}], "ruleSetType": "OWASP", "ruleSetVersion": "3.2"}]},
+      "policySettings": {"fileUploadEnforcement": true, "fileUploadLimitInMb": 100,
+      "logScrubbing": {"scrubbingRules": [{"matchVariable": "RequestArgNames", "selector":
+      "test", "selectorMatchOperator": "Equals", "state": "Enabled"}, {"matchVariable":
+      "RequestIPAddress", "selectorMatchOperator": "EqualsAny", "state": "Enabled"}],
+      "state": "Enabled"}, "maxRequestBodySizeInKb": 128, "mode": "Detection", "requestBodyCheck":
+      false, "requestBodyEnforcement": true, "requestBodyInspectLimitInKB": 128, "state":
+      "Disabled"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy custom-rule create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2033'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --policy-name -n --priority --action --rule-type
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"f0bb030d-e93a-4b12-8a43-f51abb675500\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Updating","customRules":[{"name":"rule1","priority":1,"ruleType":"MatchRule","action":"Block","matchConditions":[],"skippedManagedRuleSets":[],"state":"Enabled"}],"policySettings":{"requestBodyCheck":false,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","logScrubbing":{"state":"Enabled","scrubbingRules":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"Equals","selector":"test","state":"Enabled"},{"matchVariable":"RequestIPAddress","selectorMatchOperator":"EqualsAny","state":"Enabled"}]},"requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[{"ruleGroupName":"REQUEST-930-APPLICATION-ATTACK-LFI","rules":[{"ruleId":"930120"}]},{"ruleGroupName":"REQUEST-932-APPLICATION-ATTACK-RCE","rules":[]}]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"EndsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]},{"matchVariable":"RequestArgValues","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]}]}}}'
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/e674bfcb-3516-447f-ad5e-b0b650cedcc8?api-version=2022-11-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '2109'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 222db94b-7504-4dbb-8b5d-f6c5b795b5fc
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy custom-rule create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --policy-name -n --priority --action --rule-type
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"0010bfb1-3e2b-42b1-90cf-980311e0cd2e\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Succeeded","customRules":[{"name":"rule1","priority":1,"ruleType":"MatchRule","action":"Block","matchConditions":[],"skippedManagedRuleSets":[],"state":"Enabled"}],"policySettings":{"requestBodyCheck":false,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","logScrubbing":{"state":"Enabled","scrubbingRules":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"Equals","selector":"test","state":"Enabled"},{"matchVariable":"RequestIPAddress","selectorMatchOperator":"EqualsAny","state":"Enabled"}]},"requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[{"ruleGroupName":"REQUEST-930-APPLICATION-ATTACK-LFI","rules":[{"ruleId":"930120"}]},{"ruleGroupName":"REQUEST-932-APPLICATION-ATTACK-RCE","rules":[]}]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"EndsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]},{"matchVariable":"RequestArgValues","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2110'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:20 GMT
+      etag:
+      - W/"0010bfb1-3e2b-42b1-90cf-980311e0cd2e"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 19c43af0-a30f-410c-bf07-e4e25b40b4ca
+    status:
+      code: 200
+      message: ''
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1",
+      "location": "westus", "properties": {"customRules": [{"action": "Block", "matchConditions":
+      [], "name": "rule1", "priority": 1, "ruleType": "MatchRule", "state": "Enabled"},
+      {"action": "Block", "matchConditions": [], "name": "rule2", "priority": 2, "ruleType":
+      "MatchRule", "state": "Enabled"}], "managedRules": {"exclusions": [{"exclusionManagedRuleSets":
+      [{"ruleGroups": [{"ruleGroupName": "REQUEST-930-APPLICATION-ATTACK-LFI", "rules":
+      [{"ruleId": "930120"}]}, {"ruleGroupName": "REQUEST-932-APPLICATION-ATTACK-RCE",
+      "rules": []}], "ruleSetType": "OWASP", "ruleSetVersion": "3.2"}], "matchVariable":
+      "RequestArgNames", "selector": "hello", "selectorMatchOperator": "StartsWith"},
+      {"exclusionManagedRuleSets": [{"ruleGroups": [], "ruleSetType": "OWASP", "ruleSetVersion":
+      "3.2"}], "matchVariable": "RequestArgNames", "selector": "hello", "selectorMatchOperator":
+      "EndsWith"}, {"exclusionManagedRuleSets": [], "matchVariable": "RequestArgNames",
+      "selector": "test", "selectorMatchOperator": "StartsWith"}, {"exclusionManagedRuleSets":
+      [], "matchVariable": "RequestArgValues", "selector": "test", "selectorMatchOperator":
+      "StartsWith"}], "managedRuleSets": [{"ruleGroupOverrides": [{"ruleGroupName":
+      "REQUEST-931-APPLICATION-ATTACK-RFI", "rules": [{"action": "Log", "ruleId":
+      "931120", "state": "Enabled"}, {"action": "AnomalyScoring", "ruleId": "931130",
+      "state": "Disabled"}]}], "ruleSetType": "OWASP", "ruleSetVersion": "3.2"}]},
+      "policySettings": {"fileUploadEnforcement": true, "fileUploadLimitInMb": 100,
+      "logScrubbing": {"scrubbingRules": [{"matchVariable": "RequestArgNames", "selector":
+      "test", "selectorMatchOperator": "Equals", "state": "Enabled"}, {"matchVariable":
+      "RequestIPAddress", "selectorMatchOperator": "EqualsAny", "state": "Enabled"}],
+      "state": "Enabled"}, "maxRequestBodySizeInKb": 128, "mode": "Detection", "requestBodyCheck":
+      false, "requestBodyEnforcement": true, "requestBodyInspectLimitInKB": 128, "state":
+      "Disabled"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy custom-rule create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2154'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --policy-name -n --priority --action --rule-type
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"9fe260fc-6abc-4020-aa6e-fd5ded8db866\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Updating","customRules":[{"name":"rule1","priority":1,"ruleType":"MatchRule","action":"Block","matchConditions":[],"skippedManagedRuleSets":[],"state":"Enabled"},{"name":"rule2","priority":2,"ruleType":"MatchRule","action":"Block","matchConditions":[],"skippedManagedRuleSets":[],"state":"Enabled"}],"policySettings":{"requestBodyCheck":false,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","logScrubbing":{"state":"Enabled","scrubbingRules":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"Equals","selector":"test","state":"Enabled"},{"matchVariable":"RequestIPAddress","selectorMatchOperator":"EqualsAny","state":"Enabled"}]},"requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[{"ruleGroupName":"REQUEST-930-APPLICATION-ATTACK-LFI","rules":[{"ruleId":"930120"}]},{"ruleGroupName":"REQUEST-932-APPLICATION-ATTACK-RCE","rules":[]}]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"EndsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]},{"matchVariable":"RequestArgValues","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]}]}}}'
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/5033f085-5fb3-4a1f-961f-0e4849dc06c0?api-version=2022-11-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '2246'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - d33573f2-dde1-4116-8195-e831b8e587cf
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy custom-rule match-condition add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --policy-name -n --match-variables --operator --values --negate
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"50e2cc19-bee6-4ac9-97a3-4dbfde35ef08\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Succeeded","customRules":[{"name":"rule1","priority":1,"ruleType":"MatchRule","action":"Block","matchConditions":[],"skippedManagedRuleSets":[],"state":"Enabled"},{"name":"rule2","priority":2,"ruleType":"MatchRule","action":"Block","matchConditions":[],"skippedManagedRuleSets":[],"state":"Enabled"}],"policySettings":{"requestBodyCheck":false,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","logScrubbing":{"state":"Enabled","scrubbingRules":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"Equals","selector":"test","state":"Enabled"},{"matchVariable":"RequestIPAddress","selectorMatchOperator":"EqualsAny","state":"Enabled"}]},"requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[{"ruleGroupName":"REQUEST-930-APPLICATION-ATTACK-LFI","rules":[{"ruleId":"930120"}]},{"ruleGroupName":"REQUEST-932-APPLICATION-ATTACK-RCE","rules":[]}]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"EndsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]},{"matchVariable":"RequestArgValues","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2247'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:22 GMT
+      etag:
+      - W/"50e2cc19-bee6-4ac9-97a3-4dbfde35ef08"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 3cfaa08c-53c7-4742-b954-7642015be763
+    status:
+      code: 200
+      message: ''
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1",
+      "location": "westus", "properties": {"customRules": [{"action": "Block", "matchConditions":
+      [{"matchValues": ["192.168.1.0/24", "10.0.0.0/24"], "matchVariables": [{"variableName":
+      "RemoteAddr"}], "negationConditon": false, "operator": "IPMatch"}], "name":
+      "rule1", "priority": 1, "ruleType": "MatchRule", "state": "Enabled"}, {"action":
+      "Block", "matchConditions": [], "name": "rule2", "priority": 2, "ruleType":
+      "MatchRule", "state": "Enabled"}], "managedRules": {"exclusions": [{"exclusionManagedRuleSets":
+      [{"ruleGroups": [{"ruleGroupName": "REQUEST-930-APPLICATION-ATTACK-LFI", "rules":
+      [{"ruleId": "930120"}]}, {"ruleGroupName": "REQUEST-932-APPLICATION-ATTACK-RCE",
+      "rules": []}], "ruleSetType": "OWASP", "ruleSetVersion": "3.2"}], "matchVariable":
+      "RequestArgNames", "selector": "hello", "selectorMatchOperator": "StartsWith"},
+      {"exclusionManagedRuleSets": [{"ruleGroups": [], "ruleSetType": "OWASP", "ruleSetVersion":
+      "3.2"}], "matchVariable": "RequestArgNames", "selector": "hello", "selectorMatchOperator":
+      "EndsWith"}, {"exclusionManagedRuleSets": [], "matchVariable": "RequestArgNames",
+      "selector": "test", "selectorMatchOperator": "StartsWith"}, {"exclusionManagedRuleSets":
+      [], "matchVariable": "RequestArgValues", "selector": "test", "selectorMatchOperator":
+      "StartsWith"}], "managedRuleSets": [{"ruleGroupOverrides": [{"ruleGroupName":
+      "REQUEST-931-APPLICATION-ATTACK-RFI", "rules": [{"action": "Log", "ruleId":
+      "931120", "state": "Enabled"}, {"action": "AnomalyScoring", "ruleId": "931130",
+      "state": "Disabled"}]}], "ruleSetType": "OWASP", "ruleSetVersion": "3.2"}]},
+      "policySettings": {"fileUploadEnforcement": true, "fileUploadLimitInMb": 100,
+      "logScrubbing": {"scrubbingRules": [{"matchVariable": "RequestArgNames", "selector":
+      "test", "selectorMatchOperator": "Equals", "state": "Enabled"}, {"matchVariable":
+      "RequestIPAddress", "selectorMatchOperator": "EqualsAny", "state": "Enabled"}],
+      "state": "Enabled"}, "maxRequestBodySizeInKb": 128, "mode": "Detection", "requestBodyCheck":
+      false, "requestBodyEnforcement": true, "requestBodyInspectLimitInKB": 128, "state":
+      "Disabled"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy custom-rule match-condition add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2306'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --policy-name -n --match-variables --operator --values --negate
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"e73682c2-7015-45fc-a1ed-38eb2711ed48\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Updating","customRules":[{"name":"rule1","priority":1,"ruleType":"MatchRule","action":"Block","matchConditions":[{"matchVariables":[{"variableName":"RemoteAddr"}],"operator":"IPMatch","negationConditon":false,"matchValues":["192.168.1.0/24","10.0.0.0/24"],"transforms":[]}],"skippedManagedRuleSets":[],"state":"Enabled"},{"name":"rule2","priority":2,"ruleType":"MatchRule","action":"Block","matchConditions":[],"skippedManagedRuleSets":[],"state":"Enabled"}],"policySettings":{"requestBodyCheck":false,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","logScrubbing":{"state":"Enabled","scrubbingRules":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"Equals","selector":"test","state":"Enabled"},{"matchVariable":"RequestIPAddress","selectorMatchOperator":"EqualsAny","state":"Enabled"}]},"requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[{"ruleGroupName":"REQUEST-930-APPLICATION-ATTACK-LFI","rules":[{"ruleId":"930120"}]},{"ruleGroupName":"REQUEST-932-APPLICATION-ATTACK-RCE","rules":[]}]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"EndsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]},{"matchVariable":"RequestArgValues","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]}]}}}'
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/77672937-76ab-4d17-b8b8-4ade57462935?api-version=2022-11-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '2405'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - b7e1d287-d5a7-47e9-93d6-38bb1db147af
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy custom-rule match-condition add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --policy-name -n --negate --match-variables --operator --values
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"2d4caf2a-c66e-49f5-a6f9-b9b608309a5b\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Succeeded","customRules":[{"name":"rule1","priority":1,"ruleType":"MatchRule","action":"Block","matchConditions":[{"matchVariables":[{"variableName":"RemoteAddr"}],"operator":"IPMatch","negationConditon":false,"matchValues":["192.168.1.0/24","10.0.0.0/24"],"transforms":[]}],"skippedManagedRuleSets":[],"state":"Enabled"},{"name":"rule2","priority":2,"ruleType":"MatchRule","action":"Block","matchConditions":[],"skippedManagedRuleSets":[],"state":"Enabled"}],"policySettings":{"requestBodyCheck":false,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","logScrubbing":{"state":"Enabled","scrubbingRules":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"Equals","selector":"test","state":"Enabled"},{"matchVariable":"RequestIPAddress","selectorMatchOperator":"EqualsAny","state":"Enabled"}]},"requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[{"ruleGroupName":"REQUEST-930-APPLICATION-ATTACK-LFI","rules":[{"ruleId":"930120"}]},{"ruleGroupName":"REQUEST-932-APPLICATION-ATTACK-RCE","rules":[]}]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"EndsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]},{"matchVariable":"RequestArgValues","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2406'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:23 GMT
+      etag:
+      - W/"2d4caf2a-c66e-49f5-a6f9-b9b608309a5b"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 544c7805-cce8-4738-909b-e7c1c3b44324
+    status:
+      code: 200
+      message: ''
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1",
+      "location": "westus", "properties": {"customRules": [{"action": "Block", "matchConditions":
+      [{"matchValues": ["192.168.1.0/24", "10.0.0.0/24"], "matchVariables": [{"variableName":
+      "RemoteAddr"}], "negationConditon": false, "operator": "IPMatch", "transforms":
+      []}], "name": "rule1", "priority": 1, "ruleType": "MatchRule", "state": "Enabled"},
+      {"action": "Block", "matchConditions": [{"matchValues": ["192.168.1.0/24"],
+      "matchVariables": [{"variableName": "RemoteAddr"}], "negationConditon": false,
+      "operator": "IPMatch"}], "name": "rule2", "priority": 2, "ruleType": "MatchRule",
+      "state": "Enabled"}], "managedRules": {"exclusions": [{"exclusionManagedRuleSets":
+      [{"ruleGroups": [{"ruleGroupName": "REQUEST-930-APPLICATION-ATTACK-LFI", "rules":
+      [{"ruleId": "930120"}]}, {"ruleGroupName": "REQUEST-932-APPLICATION-ATTACK-RCE",
+      "rules": []}], "ruleSetType": "OWASP", "ruleSetVersion": "3.2"}], "matchVariable":
+      "RequestArgNames", "selector": "hello", "selectorMatchOperator": "StartsWith"},
+      {"exclusionManagedRuleSets": [{"ruleGroups": [], "ruleSetType": "OWASP", "ruleSetVersion":
+      "3.2"}], "matchVariable": "RequestArgNames", "selector": "hello", "selectorMatchOperator":
+      "EndsWith"}, {"exclusionManagedRuleSets": [], "matchVariable": "RequestArgNames",
+      "selector": "test", "selectorMatchOperator": "StartsWith"}, {"exclusionManagedRuleSets":
+      [], "matchVariable": "RequestArgValues", "selector": "test", "selectorMatchOperator":
+      "StartsWith"}], "managedRuleSets": [{"ruleGroupOverrides": [{"ruleGroupName":
+      "REQUEST-931-APPLICATION-ATTACK-RFI", "rules": [{"action": "Log", "ruleId":
+      "931120", "state": "Enabled"}, {"action": "AnomalyScoring", "ruleId": "931130",
+      "state": "Disabled"}]}], "ruleSetType": "OWASP", "ruleSetVersion": "3.2"}]},
+      "policySettings": {"fileUploadEnforcement": true, "fileUploadLimitInMb": 100,
+      "logScrubbing": {"scrubbingRules": [{"matchVariable": "RequestArgNames", "selector":
+      "test", "selectorMatchOperator": "Equals", "state": "Enabled"}, {"matchVariable":
+      "RequestIPAddress", "selectorMatchOperator": "EqualsAny", "state": "Enabled"}],
+      "state": "Enabled"}, "maxRequestBodySizeInKb": 128, "mode": "Detection", "requestBodyCheck":
+      false, "requestBodyEnforcement": true, "requestBodyInspectLimitInKB": 128, "state":
+      "Disabled"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy custom-rule match-condition add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2461'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --policy-name -n --negate --match-variables --operator --values
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"50dc6d1f-fb28-4036-8c65-925db7f026b6\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Updating","customRules":[{"name":"rule1","priority":1,"ruleType":"MatchRule","action":"Block","matchConditions":[{"matchVariables":[{"variableName":"RemoteAddr"}],"operator":"IPMatch","negationConditon":false,"matchValues":["192.168.1.0/24","10.0.0.0/24"],"transforms":[]}],"skippedManagedRuleSets":[],"state":"Enabled"},{"name":"rule2","priority":2,"ruleType":"MatchRule","action":"Block","matchConditions":[{"matchVariables":[{"variableName":"RemoteAddr"}],"operator":"IPMatch","negationConditon":false,"matchValues":["192.168.1.0/24"],"transforms":[]}],"skippedManagedRuleSets":[],"state":"Enabled"}],"policySettings":{"requestBodyCheck":false,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","logScrubbing":{"state":"Enabled","scrubbingRules":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"Equals","selector":"test","state":"Enabled"},{"matchVariable":"RequestIPAddress","selectorMatchOperator":"EqualsAny","state":"Enabled"}]},"requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[{"ruleGroupName":"REQUEST-930-APPLICATION-ATTACK-LFI","rules":[{"ruleId":"930120"}]},{"ruleGroupName":"REQUEST-932-APPLICATION-ATTACK-RCE","rules":[]}]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"EndsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]},{"matchVariable":"RequestArgValues","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]}]}}}'
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/be714156-cf90-430b-8100-2d26f1d2835c?api-version=2022-11-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '2550'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 996246e5-d21d-429b-91e9-1791676e1b1b
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy custom-rule match-condition add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --policy-name -n --match-variables --operator --values
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"4bde8fec-fd56-4952-a21e-c9242b3bb490\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Succeeded","customRules":[{"name":"rule1","priority":1,"ruleType":"MatchRule","action":"Block","matchConditions":[{"matchVariables":[{"variableName":"RemoteAddr"}],"operator":"IPMatch","negationConditon":false,"matchValues":["192.168.1.0/24","10.0.0.0/24"],"transforms":[]}],"skippedManagedRuleSets":[],"state":"Enabled"},{"name":"rule2","priority":2,"ruleType":"MatchRule","action":"Block","matchConditions":[{"matchVariables":[{"variableName":"RemoteAddr"}],"operator":"IPMatch","negationConditon":false,"matchValues":["192.168.1.0/24"],"transforms":[]}],"skippedManagedRuleSets":[],"state":"Enabled"}],"policySettings":{"requestBodyCheck":false,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","logScrubbing":{"state":"Enabled","scrubbingRules":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"Equals","selector":"test","state":"Enabled"},{"matchVariable":"RequestIPAddress","selectorMatchOperator":"EqualsAny","state":"Enabled"}]},"requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[{"ruleGroupName":"REQUEST-930-APPLICATION-ATTACK-LFI","rules":[{"ruleId":"930120"}]},{"ruleGroupName":"REQUEST-932-APPLICATION-ATTACK-RCE","rules":[]}]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"EndsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]},{"matchVariable":"RequestArgValues","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2551'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:25 GMT
+      etag:
+      - W/"4bde8fec-fd56-4952-a21e-c9242b3bb490"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 89f2880e-7c5c-493b-86be-2f258f38b675
+    status:
+      code: 200
+      message: ''
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1",
+      "location": "westus", "properties": {"customRules": [{"action": "Block", "matchConditions":
+      [{"matchValues": ["192.168.1.0/24", "10.0.0.0/24"], "matchVariables": [{"variableName":
+      "RemoteAddr"}], "negationConditon": false, "operator": "IPMatch", "transforms":
+      []}], "name": "rule1", "priority": 1, "ruleType": "MatchRule", "state": "Enabled"},
+      {"action": "Block", "matchConditions": [{"matchValues": ["192.168.1.0/24"],
+      "matchVariables": [{"variableName": "RemoteAddr"}], "negationConditon": false,
+      "operator": "IPMatch", "transforms": []}, {"matchValues": ["Windows"], "matchVariables":
+      [{"selector": "UserAgent", "variableName": "RequestHeaders"}], "operator": "Contains"}],
+      "name": "rule2", "priority": 2, "ruleType": "MatchRule", "state": "Enabled"}],
+      "managedRules": {"exclusions": [{"exclusionManagedRuleSets": [{"ruleGroups":
+      [{"ruleGroupName": "REQUEST-930-APPLICATION-ATTACK-LFI", "rules": [{"ruleId":
+      "930120"}]}, {"ruleGroupName": "REQUEST-932-APPLICATION-ATTACK-RCE", "rules":
+      []}], "ruleSetType": "OWASP", "ruleSetVersion": "3.2"}], "matchVariable": "RequestArgNames",
+      "selector": "hello", "selectorMatchOperator": "StartsWith"}, {"exclusionManagedRuleSets":
+      [{"ruleGroups": [], "ruleSetType": "OWASP", "ruleSetVersion": "3.2"}], "matchVariable":
+      "RequestArgNames", "selector": "hello", "selectorMatchOperator": "EndsWith"},
+      {"exclusionManagedRuleSets": [], "matchVariable": "RequestArgNames", "selector":
+      "test", "selectorMatchOperator": "StartsWith"}, {"exclusionManagedRuleSets":
+      [], "matchVariable": "RequestArgValues", "selector": "test", "selectorMatchOperator":
+      "StartsWith"}], "managedRuleSets": [{"ruleGroupOverrides": [{"ruleGroupName":
+      "REQUEST-931-APPLICATION-ATTACK-RFI", "rules": [{"action": "Log", "ruleId":
+      "931120", "state": "Enabled"}, {"action": "AnomalyScoring", "ruleId": "931130",
+      "state": "Disabled"}]}], "ruleSetType": "OWASP", "ruleSetVersion": "3.2"}]},
+      "policySettings": {"fileUploadEnforcement": true, "fileUploadLimitInMb": 100,
+      "logScrubbing": {"scrubbingRules": [{"matchVariable": "RequestArgNames", "selector":
+      "test", "selectorMatchOperator": "Equals", "state": "Enabled"}, {"matchVariable":
+      "RequestIPAddress", "selectorMatchOperator": "EqualsAny", "state": "Enabled"}],
+      "state": "Enabled"}, "maxRequestBodySizeInKb": 128, "mode": "Detection", "requestBodyCheck":
+      false, "requestBodyEnforcement": true, "requestBodyInspectLimitInKB": 128, "state":
+      "Disabled"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy custom-rule match-condition add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2614'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --policy-name -n --match-variables --operator --values
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"2e9f11b0-0f89-498c-ae12-572aac0c780f\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Updating","customRules":[{"name":"rule1","priority":1,"ruleType":"MatchRule","action":"Block","matchConditions":[{"matchVariables":[{"variableName":"RemoteAddr"}],"operator":"IPMatch","negationConditon":false,"matchValues":["192.168.1.0/24","10.0.0.0/24"],"transforms":[]}],"skippedManagedRuleSets":[],"state":"Enabled"},{"name":"rule2","priority":2,"ruleType":"MatchRule","action":"Block","matchConditions":[{"matchVariables":[{"variableName":"RemoteAddr"}],"operator":"IPMatch","negationConditon":false,"matchValues":["192.168.1.0/24"],"transforms":[]},{"matchVariables":[{"variableName":"RequestHeaders","selector":"UserAgent"}],"operator":"Contains","negationConditon":false,"matchValues":["Windows"],"transforms":[]}],"skippedManagedRuleSets":[],"state":"Enabled"}],"policySettings":{"requestBodyCheck":false,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","logScrubbing":{"state":"Enabled","scrubbingRules":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"Equals","selector":"test","state":"Enabled"},{"matchVariable":"RequestIPAddress","selectorMatchOperator":"EqualsAny","state":"Enabled"}]},"requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[{"ruleGroupName":"REQUEST-930-APPLICATION-ATTACK-LFI","rules":[{"ruleId":"930120"}]},{"ruleGroupName":"REQUEST-932-APPLICATION-ATTACK-RCE","rules":[]}]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"EndsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]},{"matchVariable":"RequestArgValues","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]}]}}}'
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/3268586c-26e2-44f1-b2f2-0a606a717ec7?api-version=2022-11-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '2717'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 980c5e46-187f-4403-b790-7c16b2527a2d
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy custom-rule create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --policy-name -n --priority --action --rule-type --rate-limit-duration
+        --rate-limit-threshold --group-by-user-session
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"301bb8a5-d868-4653-a20c-0746690e7ad2\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Succeeded","customRules":[{"name":"rule1","priority":1,"ruleType":"MatchRule","action":"Block","matchConditions":[{"matchVariables":[{"variableName":"RemoteAddr"}],"operator":"IPMatch","negationConditon":false,"matchValues":["192.168.1.0/24","10.0.0.0/24"],"transforms":[]}],"skippedManagedRuleSets":[],"state":"Enabled"},{"name":"rule2","priority":2,"ruleType":"MatchRule","action":"Block","matchConditions":[{"matchVariables":[{"variableName":"RemoteAddr"}],"operator":"IPMatch","negationConditon":false,"matchValues":["192.168.1.0/24"],"transforms":[]},{"matchVariables":[{"variableName":"RequestHeaders","selector":"UserAgent"}],"operator":"Contains","negationConditon":false,"matchValues":["Windows"],"transforms":[]}],"skippedManagedRuleSets":[],"state":"Enabled"}],"policySettings":{"requestBodyCheck":false,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","logScrubbing":{"state":"Enabled","scrubbingRules":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"Equals","selector":"test","state":"Enabled"},{"matchVariable":"RequestIPAddress","selectorMatchOperator":"EqualsAny","state":"Enabled"}]},"requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[{"ruleGroupName":"REQUEST-930-APPLICATION-ATTACK-LFI","rules":[{"ruleId":"930120"}]},{"ruleGroupName":"REQUEST-932-APPLICATION-ATTACK-RCE","rules":[]}]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"EndsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]},{"matchVariable":"RequestArgValues","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2718'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:28 GMT
+      etag:
+      - W/"301bb8a5-d868-4653-a20c-0746690e7ad2"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - a56cfb63-2f22-4782-ba19-b3510f75a587
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1",
+      "location": "westus", "properties": {"customRules": [{"action": "Block", "matchConditions":
+      [{"matchValues": ["192.168.1.0/24", "10.0.0.0/24"], "matchVariables": [{"variableName":
+      "RemoteAddr"}], "negationConditon": false, "operator": "IPMatch", "transforms":
+      []}], "name": "rule1", "priority": 1, "ruleType": "MatchRule", "state": "Enabled"},
+      {"action": "Block", "matchConditions": [{"matchValues": ["192.168.1.0/24"],
+      "matchVariables": [{"variableName": "RemoteAddr"}], "negationConditon": false,
+      "operator": "IPMatch", "transforms": []}, {"matchValues": ["Windows"], "matchVariables":
+      [{"selector": "UserAgent", "variableName": "RequestHeaders"}], "negationConditon":
+      false, "operator": "Contains", "transforms": []}], "name": "rule2", "priority":
+      2, "ruleType": "MatchRule", "state": "Enabled"}, {"action": "Block", "groupByUserSession":
+      [{"groupByVariables": [{"variableName": "GeoLocation"}]}], "matchConditions":
+      [], "name": "rule3", "priority": 3, "rateLimitDuration": "FiveMins", "rateLimitThreshold":
+      15, "ruleType": "RateLimitRule", "state": "Enabled"}], "managedRules": {"exclusions":
+      [{"exclusionManagedRuleSets": [{"ruleGroups": [{"ruleGroupName": "REQUEST-930-APPLICATION-ATTACK-LFI",
+      "rules": [{"ruleId": "930120"}]}, {"ruleGroupName": "REQUEST-932-APPLICATION-ATTACK-RCE",
+      "rules": []}], "ruleSetType": "OWASP", "ruleSetVersion": "3.2"}], "matchVariable":
+      "RequestArgNames", "selector": "hello", "selectorMatchOperator": "StartsWith"},
+      {"exclusionManagedRuleSets": [{"ruleGroups": [], "ruleSetType": "OWASP", "ruleSetVersion":
+      "3.2"}], "matchVariable": "RequestArgNames", "selector": "hello", "selectorMatchOperator":
+      "EndsWith"}, {"exclusionManagedRuleSets": [], "matchVariable": "RequestArgNames",
+      "selector": "test", "selectorMatchOperator": "StartsWith"}, {"exclusionManagedRuleSets":
+      [], "matchVariable": "RequestArgValues", "selector": "test", "selectorMatchOperator":
+      "StartsWith"}], "managedRuleSets": [{"ruleGroupOverrides": [{"ruleGroupName":
+      "REQUEST-931-APPLICATION-ATTACK-RFI", "rules": [{"action": "Log", "ruleId":
+      "931120", "state": "Enabled"}, {"action": "AnomalyScoring", "ruleId": "931130",
+      "state": "Disabled"}]}], "ruleSetType": "OWASP", "ruleSetVersion": "3.2"}]},
+      "policySettings": {"fileUploadEnforcement": true, "fileUploadLimitInMb": 100,
+      "logScrubbing": {"scrubbingRules": [{"matchVariable": "RequestArgNames", "selector":
+      "test", "selectorMatchOperator": "Equals", "state": "Enabled"}, {"matchVariable":
+      "RequestIPAddress", "selectorMatchOperator": "EqualsAny", "state": "Enabled"}],
+      "state": "Enabled"}, "maxRequestBodySizeInKb": 128, "mode": "Detection", "requestBodyCheck":
+      false, "requestBodyEnforcement": true, "requestBodyInspectLimitInKB": 128, "state":
+      "Disabled"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy custom-rule create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2924'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --policy-name -n --priority --action --rule-type --rate-limit-duration
+        --rate-limit-threshold --group-by-user-session
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"03febaad-4d74-4c2a-9eb6-dea2e1a280ce\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Updating","customRules":[{"name":"rule1","priority":1,"ruleType":"MatchRule","action":"Block","matchConditions":[{"matchVariables":[{"variableName":"RemoteAddr"}],"operator":"IPMatch","negationConditon":false,"matchValues":["192.168.1.0/24","10.0.0.0/24"],"transforms":[]}],"skippedManagedRuleSets":[],"state":"Enabled"},{"name":"rule2","priority":2,"ruleType":"MatchRule","action":"Block","matchConditions":[{"matchVariables":[{"variableName":"RemoteAddr"}],"operator":"IPMatch","negationConditon":false,"matchValues":["192.168.1.0/24"],"transforms":[]},{"matchVariables":[{"variableName":"RequestHeaders","selector":"UserAgent"}],"operator":"Contains","negationConditon":false,"matchValues":["Windows"],"transforms":[]}],"skippedManagedRuleSets":[],"state":"Enabled"},{"name":"rule3","priority":3,"ruleType":"RateLimitRule","rateLimitDuration":"FiveMins","action":"Block","rateLimitThreshold":15,"matchConditions":[],"groupByUserSession":[{"groupByVariables":[{"variableName":"GeoLocation"}]}],"skippedManagedRuleSets":[],"state":"Enabled"}],"policySettings":{"requestBodyCheck":false,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","logScrubbing":{"state":"Enabled","scrubbingRules":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"Equals","selector":"test","state":"Enabled"},{"matchVariable":"RequestIPAddress","selectorMatchOperator":"EqualsAny","state":"Enabled"}]},"requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[{"ruleGroupName":"REQUEST-930-APPLICATION-ATTACK-LFI","rules":[{"ruleId":"930120"}]},{"ruleGroupName":"REQUEST-932-APPLICATION-ATTACK-RCE","rules":[]}]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"EndsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]},{"matchVariable":"RequestArgValues","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]}]}}}'
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/1458ee37-7a24-4fed-a18c-c06b2a29921b?api-version=2022-11-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '2990'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - be15212c-ac41-47cb-a11f-b72efc4cc696
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy custom-rule update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --policy-name -n --rate-limit-duration --rate-limit-threshold --group-by-user-session
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"869641ba-3f3e-43fc-aa16-33d16a457b62\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Succeeded","customRules":[{"name":"rule1","priority":1,"ruleType":"MatchRule","action":"Block","matchConditions":[{"matchVariables":[{"variableName":"RemoteAddr"}],"operator":"IPMatch","negationConditon":false,"matchValues":["192.168.1.0/24","10.0.0.0/24"],"transforms":[]}],"skippedManagedRuleSets":[],"state":"Enabled"},{"name":"rule2","priority":2,"ruleType":"MatchRule","action":"Block","matchConditions":[{"matchVariables":[{"variableName":"RemoteAddr"}],"operator":"IPMatch","negationConditon":false,"matchValues":["192.168.1.0/24"],"transforms":[]},{"matchVariables":[{"variableName":"RequestHeaders","selector":"UserAgent"}],"operator":"Contains","negationConditon":false,"matchValues":["Windows"],"transforms":[]}],"skippedManagedRuleSets":[],"state":"Enabled"},{"name":"rule3","priority":3,"ruleType":"RateLimitRule","rateLimitDuration":"FiveMins","action":"Block","rateLimitThreshold":15,"matchConditions":[],"groupByUserSession":[{"groupByVariables":[{"variableName":"GeoLocation"}]}],"skippedManagedRuleSets":[],"state":"Enabled"}],"policySettings":{"requestBodyCheck":false,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","logScrubbing":{"state":"Enabled","scrubbingRules":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"Equals","selector":"test","state":"Enabled"},{"matchVariable":"RequestIPAddress","selectorMatchOperator":"EqualsAny","state":"Enabled"}]},"requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[{"ruleGroupName":"REQUEST-930-APPLICATION-ATTACK-LFI","rules":[{"ruleId":"930120"}]},{"ruleGroupName":"REQUEST-932-APPLICATION-ATTACK-RCE","rules":[]}]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"EndsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]},{"matchVariable":"RequestArgValues","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2991'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:30 GMT
+      etag:
+      - W/"869641ba-3f3e-43fc-aa16-33d16a457b62"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - cf83d3e8-dcad-445f-aff9-7c48d7b43052
+    status:
+      code: 200
+      message: ''
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1",
+      "location": "westus", "properties": {"customRules": [{"action": "Block", "matchConditions":
+      [{"matchValues": ["192.168.1.0/24", "10.0.0.0/24"], "matchVariables": [{"variableName":
+      "RemoteAddr"}], "negationConditon": false, "operator": "IPMatch", "transforms":
+      []}], "name": "rule1", "priority": 1, "ruleType": "MatchRule", "state": "Enabled"},
+      {"action": "Block", "matchConditions": [{"matchValues": ["192.168.1.0/24"],
+      "matchVariables": [{"variableName": "RemoteAddr"}], "negationConditon": false,
+      "operator": "IPMatch", "transforms": []}, {"matchValues": ["Windows"], "matchVariables":
+      [{"selector": "UserAgent", "variableName": "RequestHeaders"}], "negationConditon":
+      false, "operator": "Contains", "transforms": []}], "name": "rule2", "priority":
+      2, "ruleType": "MatchRule", "state": "Enabled"}, {"action": "Block", "groupByUserSession":
+      [{"groupByVariables": [{"variableName": "ClientAddr"}]}], "matchConditions":
+      [], "name": "rule3", "priority": 3, "rateLimitDuration": "OneMin", "rateLimitThreshold":
+      10, "ruleType": "RateLimitRule", "state": "Enabled"}], "managedRules": {"exclusions":
+      [{"exclusionManagedRuleSets": [{"ruleGroups": [{"ruleGroupName": "REQUEST-930-APPLICATION-ATTACK-LFI",
+      "rules": [{"ruleId": "930120"}]}, {"ruleGroupName": "REQUEST-932-APPLICATION-ATTACK-RCE",
+      "rules": []}], "ruleSetType": "OWASP", "ruleSetVersion": "3.2"}], "matchVariable":
+      "RequestArgNames", "selector": "hello", "selectorMatchOperator": "StartsWith"},
+      {"exclusionManagedRuleSets": [{"ruleGroups": [], "ruleSetType": "OWASP", "ruleSetVersion":
+      "3.2"}], "matchVariable": "RequestArgNames", "selector": "hello", "selectorMatchOperator":
+      "EndsWith"}, {"exclusionManagedRuleSets": [], "matchVariable": "RequestArgNames",
+      "selector": "test", "selectorMatchOperator": "StartsWith"}, {"exclusionManagedRuleSets":
+      [], "matchVariable": "RequestArgValues", "selector": "test", "selectorMatchOperator":
+      "StartsWith"}], "managedRuleSets": [{"ruleGroupOverrides": [{"ruleGroupName":
+      "REQUEST-931-APPLICATION-ATTACK-RFI", "rules": [{"action": "Log", "ruleId":
+      "931120", "state": "Enabled"}, {"action": "AnomalyScoring", "ruleId": "931130",
+      "state": "Disabled"}]}], "ruleSetType": "OWASP", "ruleSetVersion": "3.2"}]},
+      "policySettings": {"fileUploadEnforcement": true, "fileUploadLimitInMb": 100,
+      "logScrubbing": {"scrubbingRules": [{"matchVariable": "RequestArgNames", "selector":
+      "test", "selectorMatchOperator": "Equals", "state": "Enabled"}, {"matchVariable":
+      "RequestIPAddress", "selectorMatchOperator": "EqualsAny", "state": "Enabled"}],
+      "state": "Enabled"}, "maxRequestBodySizeInKb": 128, "mode": "Detection", "requestBodyCheck":
+      false, "requestBodyEnforcement": true, "requestBodyInspectLimitInKB": 128, "state":
+      "Disabled"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy custom-rule update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2921'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --policy-name -n --rate-limit-duration --rate-limit-threshold --group-by-user-session
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"6f7e0b67-3a76-41a1-9a4a-ca763d8b92b5\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Updating","customRules":[{"name":"rule1","priority":1,"ruleType":"MatchRule","action":"Block","matchConditions":[{"matchVariables":[{"variableName":"RemoteAddr"}],"operator":"IPMatch","negationConditon":false,"matchValues":["192.168.1.0/24","10.0.0.0/24"],"transforms":[]}],"skippedManagedRuleSets":[],"state":"Enabled"},{"name":"rule2","priority":2,"ruleType":"MatchRule","action":"Block","matchConditions":[{"matchVariables":[{"variableName":"RemoteAddr"}],"operator":"IPMatch","negationConditon":false,"matchValues":["192.168.1.0/24"],"transforms":[]},{"matchVariables":[{"variableName":"RequestHeaders","selector":"UserAgent"}],"operator":"Contains","negationConditon":false,"matchValues":["Windows"],"transforms":[]}],"skippedManagedRuleSets":[],"state":"Enabled"},{"name":"rule3","priority":3,"ruleType":"RateLimitRule","rateLimitDuration":"OneMin","action":"Block","rateLimitThreshold":10,"matchConditions":[],"groupByUserSession":[{"groupByVariables":[{"variableName":"ClientAddr"}]}],"skippedManagedRuleSets":[],"state":"Enabled"}],"policySettings":{"requestBodyCheck":false,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","logScrubbing":{"state":"Enabled","scrubbingRules":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"Equals","selector":"test","state":"Enabled"},{"matchVariable":"RequestIPAddress","selectorMatchOperator":"EqualsAny","state":"Enabled"}]},"requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[{"ruleGroupName":"REQUEST-930-APPLICATION-ATTACK-LFI","rules":[{"ruleId":"930120"}]},{"ruleGroupName":"REQUEST-932-APPLICATION-ATTACK-RCE","rules":[]}]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"EndsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]},{"matchVariable":"RequestArgValues","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]}]}}}'
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b3c377a5-61cf-401d-a25d-eb3d57ab86ec?api-version=2022-11-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '2987'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - e7246d34-1d16-4a08-a9bf-6d47dc0b48e7
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy custom-rule match-condition add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --policy-name -n --negate --match-variables --operator --values
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"8457b52f-5946-4aa4-881c-792ab0540e3a\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Succeeded","customRules":[{"name":"rule1","priority":1,"ruleType":"MatchRule","action":"Block","matchConditions":[{"matchVariables":[{"variableName":"RemoteAddr"}],"operator":"IPMatch","negationConditon":false,"matchValues":["192.168.1.0/24","10.0.0.0/24"],"transforms":[]}],"skippedManagedRuleSets":[],"state":"Enabled"},{"name":"rule2","priority":2,"ruleType":"MatchRule","action":"Block","matchConditions":[{"matchVariables":[{"variableName":"RemoteAddr"}],"operator":"IPMatch","negationConditon":false,"matchValues":["192.168.1.0/24"],"transforms":[]},{"matchVariables":[{"variableName":"RequestHeaders","selector":"UserAgent"}],"operator":"Contains","negationConditon":false,"matchValues":["Windows"],"transforms":[]}],"skippedManagedRuleSets":[],"state":"Enabled"},{"name":"rule3","priority":3,"ruleType":"RateLimitRule","rateLimitDuration":"OneMin","action":"Block","rateLimitThreshold":10,"matchConditions":[],"groupByUserSession":[{"groupByVariables":[{"variableName":"ClientAddr"}]}],"skippedManagedRuleSets":[],"state":"Enabled"}],"policySettings":{"requestBodyCheck":false,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","logScrubbing":{"state":"Enabled","scrubbingRules":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"Equals","selector":"test","state":"Enabled"},{"matchVariable":"RequestIPAddress","selectorMatchOperator":"EqualsAny","state":"Enabled"}]},"requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[{"ruleGroupName":"REQUEST-930-APPLICATION-ATTACK-LFI","rules":[{"ruleId":"930120"}]},{"ruleGroupName":"REQUEST-932-APPLICATION-ATTACK-RCE","rules":[]}]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"EndsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]},{"matchVariable":"RequestArgValues","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2988'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:39 GMT
+      etag:
+      - W/"8457b52f-5946-4aa4-881c-792ab0540e3a"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 980d3433-9a62-46b1-b50d-65c0507a3e57
+    status:
+      code: 200
+      message: ''
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1",
+      "location": "westus", "properties": {"customRules": [{"action": "Block", "matchConditions":
+      [{"matchValues": ["192.168.1.0/24", "10.0.0.0/24"], "matchVariables": [{"variableName":
+      "RemoteAddr"}], "negationConditon": false, "operator": "IPMatch", "transforms":
+      []}], "name": "rule1", "priority": 1, "ruleType": "MatchRule", "state": "Enabled"},
+      {"action": "Block", "matchConditions": [{"matchValues": ["192.168.1.0/24"],
+      "matchVariables": [{"variableName": "RemoteAddr"}], "negationConditon": false,
+      "operator": "IPMatch", "transforms": []}, {"matchValues": ["Windows"], "matchVariables":
+      [{"selector": "UserAgent", "variableName": "RequestHeaders"}], "negationConditon":
+      false, "operator": "Contains", "transforms": []}], "name": "rule2", "priority":
+      2, "ruleType": "MatchRule", "state": "Enabled"}, {"action": "Block", "groupByUserSession":
+      [{"groupByVariables": [{"variableName": "ClientAddr"}]}], "matchConditions":
+      [{"matchValues": ["192.168.1.0/24", "10.0.0.0/24"], "matchVariables": [{"variableName":
+      "RemoteAddr"}], "negationConditon": true, "operator": "IPMatch"}], "name": "rule3",
+      "priority": 3, "rateLimitDuration": "OneMin", "rateLimitThreshold": 10, "ruleType":
+      "RateLimitRule", "state": "Enabled"}], "managedRules": {"exclusions": [{"exclusionManagedRuleSets":
+      [{"ruleGroups": [{"ruleGroupName": "REQUEST-930-APPLICATION-ATTACK-LFI", "rules":
+      [{"ruleId": "930120"}]}, {"ruleGroupName": "REQUEST-932-APPLICATION-ATTACK-RCE",
+      "rules": []}], "ruleSetType": "OWASP", "ruleSetVersion": "3.2"}], "matchVariable":
+      "RequestArgNames", "selector": "hello", "selectorMatchOperator": "StartsWith"},
+      {"exclusionManagedRuleSets": [{"ruleGroups": [], "ruleSetType": "OWASP", "ruleSetVersion":
+      "3.2"}], "matchVariable": "RequestArgNames", "selector": "hello", "selectorMatchOperator":
+      "EndsWith"}, {"exclusionManagedRuleSets": [], "matchVariable": "RequestArgNames",
+      "selector": "test", "selectorMatchOperator": "StartsWith"}, {"exclusionManagedRuleSets":
+      [], "matchVariable": "RequestArgValues", "selector": "test", "selectorMatchOperator":
+      "StartsWith"}], "managedRuleSets": [{"ruleGroupOverrides": [{"ruleGroupName":
+      "REQUEST-931-APPLICATION-ATTACK-RFI", "rules": [{"action": "Log", "ruleId":
+      "931120", "state": "Enabled"}, {"action": "AnomalyScoring", "ruleId": "931130",
+      "state": "Disabled"}]}], "ruleSetType": "OWASP", "ruleSetVersion": "3.2"}]},
+      "policySettings": {"fileUploadEnforcement": true, "fileUploadLimitInMb": 100,
+      "logScrubbing": {"scrubbingRules": [{"matchVariable": "RequestArgNames", "selector":
+      "test", "selectorMatchOperator": "Equals", "state": "Enabled"}, {"matchVariable":
+      "RequestIPAddress", "selectorMatchOperator": "EqualsAny", "state": "Enabled"}],
+      "state": "Enabled"}, "maxRequestBodySizeInKb": 128, "mode": "Detection", "requestBodyCheck":
+      false, "requestBodyEnforcement": true, "requestBodyInspectLimitInKB": 128, "state":
+      "Disabled"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy custom-rule match-condition add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '3072'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --policy-name -n --negate --match-variables --operator --values
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2022-11-01
+  response:
+    body:
+      string: '{"name":"agp1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_custom_rule_v2_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1","etag":"W/\"69f1a6a5-8c86-4d4e-9d26-a3ba08c996ee\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Updating","customRules":[{"name":"rule1","priority":1,"ruleType":"MatchRule","action":"Block","matchConditions":[{"matchVariables":[{"variableName":"RemoteAddr"}],"operator":"IPMatch","negationConditon":false,"matchValues":["192.168.1.0/24","10.0.0.0/24"],"transforms":[]}],"skippedManagedRuleSets":[],"state":"Enabled"},{"name":"rule2","priority":2,"ruleType":"MatchRule","action":"Block","matchConditions":[{"matchVariables":[{"variableName":"RemoteAddr"}],"operator":"IPMatch","negationConditon":false,"matchValues":["192.168.1.0/24"],"transforms":[]},{"matchVariables":[{"variableName":"RequestHeaders","selector":"UserAgent"}],"operator":"Contains","negationConditon":false,"matchValues":["Windows"],"transforms":[]}],"skippedManagedRuleSets":[],"state":"Enabled"},{"name":"rule3","priority":3,"ruleType":"RateLimitRule","rateLimitDuration":"OneMin","action":"Block","rateLimitThreshold":10,"matchConditions":[{"matchVariables":[{"variableName":"RemoteAddr"}],"operator":"IPMatch","negationConditon":true,"matchValues":["192.168.1.0/24","10.0.0.0/24"],"transforms":[]}],"groupByUserSession":[{"groupByVariables":[{"variableName":"ClientAddr"}]}],"skippedManagedRuleSets":[],"state":"Enabled"}],"policySettings":{"requestBodyCheck":false,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","logScrubbing":{"state":"Enabled","scrubbingRules":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"Equals","selector":"test","state":"Enabled"},{"matchVariable":"RequestIPAddress","selectorMatchOperator":"EqualsAny","state":"Enabled"}]},"requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroupOverrides":[{"ruleGroupName":"REQUEST-931-APPLICATION-ATTACK-RFI","rules":[{"ruleId":"931120","state":"Enabled","action":"Log"},{"ruleId":"931130","state":"Disabled","action":"AnomalyScoring"}]}]}],"exclusions":[{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[{"ruleGroupName":"REQUEST-930-APPLICATION-ATTACK-LFI","rules":[{"ruleId":"930120"}]},{"ruleGroupName":"REQUEST-932-APPLICATION-ATTACK-RCE","rules":[]}]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"EndsWith","selector":"hello","exclusionManagedRuleSets":[{"ruleSetType":"OWASP","ruleSetVersion":"3.2","ruleGroups":[]}]},{"matchVariable":"RequestArgNames","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]},{"matchVariable":"RequestArgValues","selectorMatchOperator":"StartsWith","selector":"test","exclusionManagedRuleSets":[]}]}}}'
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b6e67c8e-ec09-4240-afd1-82edde77101e?api-version=2022-11-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '3145'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 Jun 2023 03:19:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - b5c383b6-8c24-4353-bba5-89c204f76fd1
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: ''
+version: 1

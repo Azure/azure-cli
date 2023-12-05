@@ -4,15 +4,21 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import re
 from knack.util import CLIError
 from knack.log import get_logger
 from azure.cli.core.azclierror import FileOperationError, InvalidArgumentValueError
+from ._constants import ACR_NAME_VALIDATION_REGEX
 
 BAD_REPO_FQDN = "The positional parameter 'repo_id' must be a fully qualified repository specifier such"\
-                " as 'MyRegistry.azurecr.io/hello-world'."
+                " as 'myregistry.azurecr.io/hello-world'."
+BAD_PERM_REPO_FQDN = "The positional parameter 'perm_repo_id' must be a fully qualified repository specifier such"\
+                     " as 'myregistry.azurecr.io/hello-world'. It may optionally specify a"\
+                     " tag such as 'myregistry.azurecr.io/hello-world:latest'."
 BAD_MANIFEST_FQDN = "The positional parameter 'manifest_id' must be a fully qualified"\
-                    " manifest specifier such as 'MyRegistry.azurecr.io/hello-world:latest' or"\
-                    " 'MyRegistry.azurecr.io/hello-world@sha256:abc123'."
+                    " manifest specifier such as 'myregistry.azurecr.io/hello-world:latest' or"\
+                    " 'myregistry.azurecr.io/hello-world@sha256:abc123'."
+BAD_REGISTRY_NAME = "Registry names may contain only alpha numeric characters and must be between 5 and 50 characters"
 
 logger = get_logger(__name__)
 
@@ -100,6 +106,8 @@ def validate_retention_days(namespace):
 def validate_registry_name(cmd, namespace):
     """Omit login server endpoint suffix."""
     registry = namespace.registry_name
+    if registry is None:
+        return
     suffixes = cmd.cli_ctx.cloud.suffixes
     # Some clouds do not define 'acr_login_server_endpoint' (e.g. AzureGermanCloud)
     if registry and hasattr(suffixes, 'acr_login_server_endpoint'):
@@ -108,6 +116,9 @@ def validate_registry_name(cmd, namespace):
         if pos > 0:
             logger.warning("The login server endpoint suffix '%s' is automatically omitted.", acr_suffix)
             namespace.registry_name = registry[:pos]
+    registry = namespace.registry_name
+    if not re.match(ACR_NAME_VALIDATION_REGEX, registry):
+        raise InvalidArgumentValueError(BAD_REGISTRY_NAME)
 
 
 def validate_expiration_time(namespace):
@@ -126,6 +137,15 @@ def validate_repo_id(namespace):
         repo_id = namespace.repo_id[0]
         if '.' not in repo_id or '/' not in repo_id:
             raise InvalidArgumentValueError(BAD_REPO_FQDN)
+
+
+def validate_permissive_repo_id(namespace):
+    if namespace.perm_repo_id:
+        perm_repo_id = namespace.perm_repo_id[0]
+        if '.' not in perm_repo_id or '/' not in perm_repo_id:
+            raise InvalidArgumentValueError(BAD_PERM_REPO_FQDN)
+        if '@' in perm_repo_id:
+            raise InvalidArgumentValueError(BAD_PERM_REPO_FQDN)
 
 
 def validate_manifest_id(namespace):

@@ -159,6 +159,8 @@ examples:
     text: az appconfig kv export -d appconfig --endpoint https://myappconfiguration.azconfig.io --auth-mode login --dest-endpoint https://anotherappconfiguration.azconfig.io --dest-auth-mode login --key * --label * --preserve-labels
   - name: Export all keys and feature flags with label test using appconfig/kvset profile.
     text: az appconfig kv export -n MyAppConfiguration --label test -d file --path D:/abc.json --format json --profile appconfig/kvset
+  - name: Export all keys to another App Configuration from a snapshot of the source configuration
+    text: az appconfig kv export -n MyAppConfiguration -d appconfig --dest-name AnotherAppConfiguration --snapshot MySnapshot
 """
 
 helps['appconfig kv import'] = """
@@ -169,6 +171,8 @@ examples:
     text: az appconfig kv import -n MyAppConfiguration --label test -s file --path D:/abc.json --format json
   - name: Import all keys and feature flags with null label and apply new label from an App Configuration.
     text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-name AnotherAppConfiguration --label ImportedKeys
+  - name: Import all keys from a snapshot of an App Configuration.
+    text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-name AnotherAppConfiguration --src-snapshot MySnapshot
   - name: Import all keys and apply null label from an App Service application.
     text: az appconfig kv import -n MyAppConfiguration -s appservice --appservice-account MyAppService
   - name: Import all keys with label test and apply test2 label excluding feature flags from an App Configuration.
@@ -199,6 +203,8 @@ examples:
     text: az appconfig kv list --label test,prod,\\0 -n MyAppConfiguration
   - name: List all key-values with all labels using your 'az login' credentials.
     text: az appconfig kv list --endpoint https://myappconfiguration.azconfig.io --auth-mode login
+  - name: List all key-values in a given snapshot of the app configuration store.
+    text: az appconfig kv list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --snapshot MySnapshot
 """
 
 helps['appconfig kv lock'] = """
@@ -296,6 +302,43 @@ examples:
     text: az appconfig revision list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key color --datetime "2019-05-01T11:24:12Z"
   - name: List revision history for all items and query only key, value and last_modified.
     text: az appconfig revision list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --fields key value last_modified
+"""
+
+helps['appconfig replica'] = """
+type: group
+short-summary: Manage replicas of an App Configuration.
+"""
+
+helps['appconfig replica list'] = """
+type: command
+short-summary: List replicas of an App Configuration.
+examples:
+  - name: List replicas of an App Configuration.
+    text: az appconfig replica list --store-name MyAppConfiguration
+"""
+
+helps['appconfig replica show'] = """
+type: command
+short-summary: Show details of a replica of an App Configuration.
+examples:
+  - name: Show details of a replica of an App Configuration.
+    text: az appconfig replica show --store-name MyAppConfiguration --name MyReplicaName
+"""
+
+helps['appconfig replica create'] = """
+type: command
+short-summary: Create a new replica of an App Configuration.
+examples:
+  - name: Create a new replica of an App Configuration at a location.
+    text: az appconfig replica create --store-name MyAppConfiguration --name MyReplicaName --location westus
+"""
+
+helps['appconfig replica delete'] = """
+type: command
+short-summary: Delete a replica of an App Configuration.
+examples:
+  - name: Delete a replica of an App Configuration.
+    text: az appconfig replica delete --store-name MyAppConfiguration --name MyReplicaName
 """
 
 helps['appconfig show'] = """
@@ -494,6 +537,24 @@ helps['appconfig feature filter add'] = """
             az appconfig feature filter add -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter --filter-parameters ArrayParam=[1,2,3]
     """
 
+helps['appconfig feature filter update'] = """
+  type: command
+  short-summary: Update a filter in a feature flag.
+  examples:
+      - name: Update the filter for feature 'color' with label MyLabel with name 'MyFilter' and 2 parameters.
+        text:
+          az appconfig feature filter update -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter --filter-parameters Name=\\"Value\\" Name2=\\"Value2\\"
+      - name: Update the filter at index 2 (zero-based index) for feature 'color' with label MyLabel with name 'MyFilter' and 2 parameters.
+        text:
+          az appconfig feature filter update -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter --filter-parameters Name=\\"Value\\" Name2=\\"Value2\\" --index 2
+      - name: Update a filter for feature 'color' with label MyLabel and filter name 'MyFilter' with no parameters
+        text:
+          az appconfig feature filter update -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter
+      - name: Update the filter for feature 'color' with label MyLabel with name 'MyFilter' and array parameters.
+        text:
+          az appconfig feature filter update -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter --filter-parameters ArrayParam=[1,2,3]
+  """
+
 helps['appconfig feature filter delete'] = """
     type: command
     short-summary: Delete a filter from a feature flag.
@@ -534,4 +595,70 @@ helps['appconfig feature filter list'] = """
         - name: List all filters for feature flag 'color' using your 'az login' credentials.
           text:
             az appconfig feature filter list --endpoint https://myappconfiguration.azconfig.io --feature color --all --auth-mode login
+    """
+
+
+helps['appconfig snapshot'] = """
+    type: group
+    short-summary: Manage snapshots associated with an app configuration store.
+    """
+
+helps['appconfig snapshot create'] = """
+    type: command
+    short-summary: Create an app configuration snapshot.
+    examples:
+        - name: Create a snapshot MySnapshot of all keys starting with 'Test' in configuration store MyAppConfiguration.
+          text:
+            az appconfig snapshot create -s MySnapshot -n MyAppConfiguration --filters '{\\"key\\":\\"Test*\\"}'
+        - name: Create a snapshot MySnapshot of all keys starting with 'abc' and a retention period of 1 hour.
+          text:
+            az appconfig snapshot create -s MySnapshot -n MyAppConfiguration --filters '{\\"key\\":\\"abc*\\"}' --retention-period 3600
+        - name: Create a snapshot of all keys starting with 'app/' and no label as default, then override the key-values with keys with the label 'prod' if they exist.
+          text:
+            az appconfig snapshot create -s MySnapshot -n MyAppConfiguration --filters '{\\"key\\":\\"app/*\\"}' '{\\"key\\":\\"app/*\\", \\"label\\":\\"prod\\"}' --composition-type 'key'
+    """
+
+helps['appconfig snapshot show'] = """
+    type: command
+    short-summary: Show all attributes of an app configuration snapshot.
+    examples:
+        - name: Show an app configuration snapshot with name MySnapshot in configuration store MyAppConfiguration.
+          text:
+            az appconfig snapshot show -s MySnapshot -n MyAppConfiguration
+    """
+
+helps['appconfig snapshot list'] = """
+    type: command
+    short-summary: List snapshots.
+    examples:
+        - name: List all snapshots with names starting with the prefix 'abc'.
+          text:
+            az appconfig snapshot list -s abc* -n MyAppConfiguration
+        - name: List all archived snapshots.
+          text:
+            az appconfig snapshot list --status archived -n MyAppConfiguration
+        - name: List all provisioning snapshots with names starting with the prefix 'app'.
+          text:
+            az appconfig snapshot list -s app* --status provisioning -n MyAppConfiguration
+        - name: List all failed and provisioning snapshots.
+          text:
+            az appconfig snapshot list --status failed provisioning -n MyAppConfiguration
+    """
+
+helps['appconfig snapshot archive'] = """
+    type: command
+    short-summary: Archive a snapshot.
+    examples:
+        - name: Archive snapshot MySnapshot in configuration store MyAppConfiguration.
+          text:
+            az appconfig snapshot archive -s MySnapshot -n MyAppConfiguration
+    """
+
+helps['appconfig snapshot recover'] = """
+    type: command
+    short-summary: Recover an archived snapshot.
+    examples:
+        - name: Recover snapshot MySnapshot in configuration store MyAppConfiguration.
+          text:
+            az appconfig snapshot recover -s MySnapshot -n MyAppConfiguration
     """

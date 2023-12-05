@@ -8,7 +8,7 @@ import base64
 from knack.introspection import extract_full_summary_from_signature, extract_args_from_signature
 from knack.util import CLIError
 
-from azure.cli.core.commands import LongRunningOperation, AzCommandGroup, AzArgumentContext
+from azure.cli.core.commands import LongRunningOperation, AzCommandGroup
 
 
 def _encode_hex(item):
@@ -155,26 +155,3 @@ class KeyVaultCommandGroup(AzCommandGroup):
         if command_type:
             kwargs[command_type_name] = command_type
         self._create_keyvault_command(name, method_name, command_type_name, **kwargs)
-
-
-class KeyVaultArgumentContext(AzArgumentContext):
-
-    def attributes_argument(self, name, attr_class, create=False, ignore=None):
-        from azure.cli.command_modules.keyvault._validators import get_attribute_validator, datetime_type
-        from azure.cli.core.commands.parameters import get_three_state_flag
-
-        from knack.arguments import ignore_type
-
-        ignore = ignore or []
-        self.argument('{}_attributes'.format(name), ignore_type,
-                      validator=get_attribute_validator(name, attr_class, create))
-        if create:
-            self.extra('disabled', help='Create {} in disabled state.'.format(name), arg_type=get_three_state_flag())
-        else:
-            self.extra('enabled', help='Enable the {}.'.format(name), arg_type=get_three_state_flag())
-        if 'expires' not in ignore:
-            self.extra('expires', default=None, help='Expiration UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').',
-                       type=datetime_type)
-        if 'not_before' not in ignore:
-            self.extra('not_before', default=None, type=datetime_type,
-                       help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').')

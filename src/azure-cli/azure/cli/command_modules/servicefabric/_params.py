@@ -12,7 +12,8 @@ from azure.cli.command_modules.servicefabric._validators import (
     validate_create_service, validate_update_application,
     validate_update_managed_application, validate_update_managed_service,
     validate_create_managed_service_correlation, validate_create_managed_service_load_metric,
-    validate_update_managed_service_load_metric, validate_update_managed_service_correlation)
+    validate_update_managed_service_load_metric, validate_update_managed_service_correlation,
+    validate_add_network_security_rule)
 from azure.cli.core.commands.parameters import (get_enum_type,
                                                 get_three_state_flag,
                                                 resource_group_name_type,
@@ -278,8 +279,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('thumbprint', nargs='+', help='A single or Space-separated list of client certificate thumbprint(s) to be remove.')
         c.argument('common_name', nargs='+', help='A single or Space-separated list of client certificate common name(s) to be remove.')
 
-    # managed node type
+    with self.argument_context('sf managed-cluster network-security-rule add', validator=validate_add_network_security_rule) as c:
+        c.argument('name', help='Network security rule name')
+        c.argument('access', arg_type=get_enum_type(['allow', 'deny']), help='Allows or denies network traffic')
+        c.argument('direction', arg_type=get_enum_type(['inbound', 'outbound']), help='Network security rule direction')
+        c.argument('description', help='Network security rule description')
+        c.argument('priority', type=int, help='Integer that shows priority for rule')
+        c.argument('protocol', arg_type=get_enum_type(['tcp', 'https', 'http', 'udp', 'icmp', 'ah', 'esp', 'any']), help='Network protocol')
+        c.argument('source_port_ranges', nargs='+', help='A single or space separated list of source port ranges')
+        c.argument('dest_port_ranges', nargs='+', help='A single or space separated list of destination port ranges')
+        c.argument('source_addr_prefixes', nargs='+', help='The CIDR or source IP ranges. A single or space separated list of source address prefixes')
+        c.argument('dest_addr_prefixes', nargs='+', help='CIDR or destination IP ranges. A single or space separated list of destination address prefixes')
 
+    # managed node type
     capacity = CLIArgumentType(
         options_list=['--capacity'],
         action=AddNodeTypeCapacityAction,

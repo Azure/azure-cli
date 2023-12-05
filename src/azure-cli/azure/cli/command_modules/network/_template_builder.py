@@ -3,6 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=unused-argument
+
+AG_VERSION = "2022-05-01"
+LB_VERSION = "2022-05-01"
+IP_VERSION = "2022-05-01"
+
 
 def _build_frontend_ip_config(cmd, name, public_ip_id=None, subnet_id=None, private_ip_address=None,
                               private_ip_allocation=None, zone=None, private_ip_address_version=None,
@@ -27,13 +33,13 @@ def _build_frontend_ip_config(cmd, name, public_ip_id=None, subnet_id=None, priv
             }
         })
 
-    if zone and cmd.supported_api_version(min_api='2017-06-01'):
+    if zone:
         frontend_ip_config['zones'] = zone
 
-    if private_ip_address_version and cmd.supported_api_version(min_api='2019-04-01'):
+    if private_ip_address_version:
         frontend_ip_config['properties']['privateIPAddressVersion'] = private_ip_address_version
 
-    if enable_private_link is True and cmd.supported_api_version(min_api='2020-05-01'):
+    if enable_private_link is True:
         frontend_ip_config['properties'].update({
             'privateLinkConfiguration': {'id': private_link_configuration_id}
         })
@@ -107,7 +113,7 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
 
     private_link_configuration_id = None
     privateLinkConfigurations = []
-    if cmd.supported_api_version(min_api='2020-05-01') and enable_private_link:
+    if enable_private_link:
         private_link_configuration_id = _ag_subresource_id('privateLinkConfigurations',
                                                            private_link_name)
 
@@ -202,7 +208,7 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
                 'keyVaultSecretId': key_vault_secret_id,
             }
         }
-    if ssl_profile_id and cmd.supported_api_version(min_api='2020-06-01'):
+    if ssl_profile_id:
         http_listener['properties'].update({'sslProfile': {'id': ssl_profile_id}})
 
     backend_http_settings = {
@@ -213,11 +219,10 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
             'CookieBasedAffinity': cookie_based_affinity
         }
     }
-    if cmd.supported_api_version(min_api='2016-12-01'):
-        backend_http_settings['properties']['connectionDraining'] = {
-            'enabled': bool(connection_draining_timeout),
-            'drainTimeoutInSec': connection_draining_timeout if connection_draining_timeout else 1
-        }
+    backend_http_settings['properties']['connectionDraining'] = {
+        'enabled': bool(connection_draining_timeout),
+        'drainTimeoutInSec': connection_draining_timeout if connection_draining_timeout else 1
+    }
 
     ag_properties = {
         'backendAddressPools': [backend_address_pool],
@@ -259,29 +264,29 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
         'privateLinkConfigurations': privateLinkConfigurations,
     }
     if sku_name.lower() == 'standard_v2' or sku_name.lower() == 'waf_v2':
-        if cmd.supported_api_version(min_api='2021-08-01') and priority:
+        if priority:
             ag_properties['requestRoutingRules'][0]['properties'].update({'priority': priority})
     if ssl_cert:
         ag_properties.update({'sslCertificates': [ssl_cert]})
-    if enable_http2 and cmd.supported_api_version(min_api='2017-10-01'):
+    if enable_http2:
         ag_properties.update({'enableHttp2': enable_http2})
-    if min_capacity and cmd.supported_api_version(min_api='2018-07-01'):
+    if min_capacity:
         if 'autoscaleConfiguration' not in ag_properties:
             ag_properties['autoscaleConfiguration'] = {}
         ag_properties['autoscaleConfiguration'].update({'minCapacity': min_capacity})
         ag_properties['sku'].pop('capacity', None)
-    if max_capacity and cmd.supported_api_version(min_api='2018-12-01'):
+    if max_capacity:
         if 'autoscaleConfiguration' not in ag_properties:
             ag_properties['autoscaleConfiguration'] = {}
         ag_properties['autoscaleConfiguration'].update({'maxCapacity': max_capacity})
         ag_properties['sku'].pop('capacity', None)
-    if custom_error_pages and cmd.supported_api_version(min_api='2018-08-01'):
+    if custom_error_pages:
         ag_properties.update({'customErrorConfigurations': custom_error_pages})
-    if firewall_policy and cmd.supported_api_version(min_api='2018-12-01'):
+    if firewall_policy:
         ag_properties.update({'firewallPolicy': {'id': firewall_policy}})
 
     # mutual authentication support
-    if cmd.supported_api_version(min_api='2020-06-01') and trusted_client_certificates:
+    if trusted_client_certificates:
         parameters = []
         for item in trusted_client_certificates:
             parameters.append(
@@ -295,7 +300,7 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
         ag_properties.update({"trustedClientCertificates": parameters})
 
     # ssl profiles
-    if cmd.supported_api_version(min_api='2020-06-01') and ssl_profile:
+    if ssl_profile:
         parameters = []
         for item in ssl_profile:
             parameter = {
@@ -328,13 +333,12 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': cmd.get_api_version(),
+        'apiVersion': AG_VERSION,
         'dependsOn': [],
         'properties': ag_properties
     }
-    if cmd.supported_api_version(min_api='2018-08-01'):
-        ag.update({'zones': zones})
-    if user_assigned_identity and cmd.supported_api_version(min_api='2018-12-01'):
+    ag.update({'zones': zones})
+    if user_assigned_identity:
         ag.update(
             {
                 "identity": {
@@ -366,7 +370,7 @@ def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, f
     }
 
     # when sku is 'gateway', 'tunnelInterfaces' can't be None. Otherwise service will response error
-    if cmd.supported_api_version(min_api='2021-02-01') and sku and str(sku).lower() == 'gateway':
+    if sku and str(sku).lower() == 'gateway':
         lb_properties['backendAddressPools'][0]['properties'] = {
             'tunnelInterfaces': [{'protocol': 'VXLAN',
                                   'type': 'Internal',
@@ -377,13 +381,13 @@ def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, f
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': cmd.get_api_version(),
+        'apiVersion': LB_VERSION,
         'dependsOn': [],
         'properties': lb_properties
     }
-    if sku and cmd.supported_api_version(min_api='2017-08-01'):
+    if sku:
         lb['sku'] = {'name': sku}
-    if tier and cmd.supported_api_version(min_api='2020-07-01'):
+    if tier:
         lb['sku'].update({'tier': tier})
     if edge_zone and edge_zone_type:
         lb['extendedLocation'] = {'name': edge_zone, 'type': edge_zone_type}
@@ -398,7 +402,7 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
         public_ip_properties['dnsSettings'] = {'domainNameLabel': dns_name}
 
     public_ip = {
-        'apiVersion': cmd.get_api_version(),
+        'apiVersion': IP_VERSION,
         'type': 'Microsoft.Network/publicIPAddresses',
         'name': name,
         'location': location,
@@ -406,13 +410,13 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
         'dependsOn': [],
         'properties': public_ip_properties
     }
-    if sku and cmd.supported_api_version(min_api='2017-08-01'):
+    if sku:
         public_ip['sku'] = {'name': sku}
-    if tier and cmd.supported_api_version(min_api='2020-07-01'):
+    if tier:
         if not sku:
             public_ip['sku'] = {'name': 'Basic'}
         public_ip['sku'].update({'tier': tier})
-    if zone and cmd.supported_api_version(min_api='2017-06-01'):
+    if zone:
         public_ip['zones'] = zone
     if edge_zone and edge_zone_type:
         public_ip['extendedLocation'] = {'name': edge_zone, 'type': edge_zone_type}
@@ -467,10 +471,8 @@ def build_vpn_connection_resource(cmd, name, location, tags, gateway1, gateway2,
     }
     if authorization_key:
         vpn_properties['authorizationKey'] = "[parameters('authorizationKey')]"
-    if cmd.supported_api_version(min_api='2017-03-01'):
-        vpn_properties['usePolicyBasedTrafficSelectors'] = use_policy_based_traffic_selectors
-    if cmd.supported_api_version(min_api='2018-07-01'):
-        vpn_properties['expressRouteGatewayBypass'] = express_route_gateway_bypass
+    vpn_properties['usePolicyBasedTrafficSelectors'] = use_policy_based_traffic_selectors
+    vpn_properties['expressRouteGatewayBypass'] = express_route_gateway_bypass
 
     # add scenario specific properties
     if shared_key:

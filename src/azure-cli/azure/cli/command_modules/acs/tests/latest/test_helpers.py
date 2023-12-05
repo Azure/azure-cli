@@ -199,29 +199,29 @@ class GetSnapShotTestCase(unittest.TestCase):
                 "/subscriptions/test_sub/resourcegroups/test_rg/providers/microsoft.containerservice/snapshots/test_snapshot",
             )
             self.assertEqual(snapshot, mock_snapshot)
-            mock_get_snapshot.assert_called_once_with("mock_cli_ctx", "test_rg", "test_snapshot")
+            mock_get_snapshot.assert_called_once_with("mock_cli_ctx", "test_sub", "test_rg", "test_snapshot")
 
     def test_get_snapshot(self):
         mock_snapshot = Mock()
         mock_snapshot_operations = Mock(get=Mock(return_value=mock_snapshot))
-        with patch("azure.cli.command_modules.acs._helpers.cf_snapshots", return_value=mock_snapshot_operations):
-            snapshot = get_snapshot("mock_cli_ctx", "mock_rg", "mock_snapshot_name")
+        with patch("azure.cli.command_modules.acs._helpers.get_snapshots_client", return_value=mock_snapshot_operations):
+            snapshot = get_snapshot("mock_cli_ctx", "test_sub", "mock_rg", "mock_snapshot_name")
             self.assertEqual(snapshot, mock_snapshot)
 
         mock_snapshot_operations_2 = Mock(get=Mock(side_effect=AzureError("mock snapshot was not found")))
         with patch(
-            "azure.cli.command_modules.acs._helpers.cf_snapshots", return_value=mock_snapshot_operations_2
+            "azure.cli.command_modules.acs._helpers.get_snapshots_client", return_value=mock_snapshot_operations_2
         ), self.assertRaises(ResourceNotFoundError):
-            get_snapshot("mock_cli_ctx", "mock_rg", "mock_snapshot_name")
+            get_snapshot("mock_cli_ctx", "test_sub", "mock_rg", "mock_snapshot_name")
 
         http_response_error = HttpResponseError()
         http_response_error.status_code = 400
         http_response_error.message = "test_error_msg"
         mock_snapshot_operations_3 = Mock(get=Mock(side_effect=http_response_error))
         with patch(
-            "azure.cli.command_modules.acs._helpers.cf_snapshots", return_value=mock_snapshot_operations_3
+            "azure.cli.command_modules.acs._helpers.get_snapshots_client", return_value=mock_snapshot_operations_3
         ), self.assertRaises(BadRequestError):
-            get_snapshot("mock_cli_ctx", "mock_rg", "mock_snapshot_name")
+            get_snapshot("mock_cli_ctx", "test_sub", "mock_rg", "mock_snapshot_name")
 
 
 class GetUserAssignedIdentityTestCase(unittest.TestCase):

@@ -25,6 +25,7 @@ from azure.cli.command_modules.backup._client_factory import (
     backup_crr_job_details_cf, crr_operation_status_cf, resource_guard_proxies_cf, resource_guard_proxy_cf)
 from azure.cli.core.azclierror import ResourceNotFoundError, ValidationError, InvalidArgumentValueError
 
+import azure.cli.command_modules.backup._params as params
 
 logger = get_logger(__name__)
 
@@ -219,6 +220,17 @@ def get_sub_protection_policy(policy, sub_policy_type):
         if sub_protection_policy.policy_type == sub_policy_type:
             return sub_protection_policy
     return None
+
+
+def replace_min_value_in_subtask(response):
+    # For a task in progress: replace min_value in start and end times with null.
+    tasks_list = response.properties.extended_info.tasks_list
+    for task in tasks_list:
+        if task.start_time == datetime.min:
+            task.start_time = None
+        if task.end_time == datetime.min:
+            task.end_time = None
+    return response
 
 
 def validate_container(container):
@@ -510,6 +522,14 @@ def get_resource_group_from_id(arm_id):
     return m.group(0)
 
 
+def get_subscription_from_id(arm_id):
+    # Search for the pattern following "/subscriptions/" in the ARM ID
+    # (?<=/subscriptions/)   Positive lookbehind: Match the pattern after "/subscriptions/"
+    # [^/]+                  Match one or more characters that are not a forward slash
+    m = re.search('(?<=/subscriptions/)[^/]+', arm_id)
+    return m.group(0)
+
+
 def get_operation_id_from_header(header):
     parse_object = urlparse(header)
     return parse_object.path.split("/")[-1]
@@ -532,7 +552,7 @@ def validate_and_extract_container_type(container_name, backup_management_type):
     container_type = container_name.split(";")[0].lower()
     container_type_mappings = {"iaasvmcontainer": "AzureIaasVM", "storagecontainer": "AzureStorage",
                                "vmappcontainer": "AzureWorkload", "windows": "MAB",
-                               "sqlagworkloadcontainer": "AzureWorkload"}
+                               "sqlagworkloadcontainer": "AzureWorkload", "hanahsrcontainer": "AzureWorkload"}
 
     if container_type in container_type_mappings:
         return container_type_mappings[container_type]
@@ -549,3 +569,21 @@ def validate_update_policy_request(existing_policy, new_policy):
     new_backup_management_type = new_policy.properties.backup_management_type
     if existing_backup_management_type != new_backup_management_type:
         raise CLIError("BackupManagementType cannot be different than the existing type.")
+
+
+def transform_softdelete_parameters(parameter):
+    if parameter in params.allowed_softdelete_options:
+        if parameter in ('Enable', 'Disable', 'Enabled', 'Disabled'):
+            return transform_enable_parameters(parameter)
+        return parameter
+    error_message = "Please provide a valid soft-delete state. Allowed values: "
+    error_message += ', '.join(state for state in params.allowed_softdelete_options)
+    raise CLIError(error_message)
+
+
+def transform_enable_parameters(parameter):
+    if parameter in ('Enable', 'Disable', 'PermanentlyDisable'):
+        return parameter + 'd'
+    if parameter in ('Enabled', 'Disabled', 'PermanentlyDisabled'):
+        return parameter[:-1]
+    raise CLIError("Please provide a valid parameter.")

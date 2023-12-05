@@ -4,9 +4,9 @@
 # --------------------------------------------------------------------------------------------
 import os
 from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, JMESPathCheckExists, ResourceGroupPreparer,
-                               StorageAccountPreparer, api_version_constraint)
+                               StorageAccountPreparer, api_version_constraint, live_only)
 from azure.cli.core.profiles import ResourceType
-from ..storage_test_util import StorageScenarioMixin
+from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
 
 
 class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
@@ -130,6 +130,51 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
+    def test_storage_append_blob_upload_oauth(self, resource_group, storage_account_info):
+        account_info = storage_account_info
+        self.kwargs = {
+            'account': storage_account_info[0],
+            'container': self.create_container(account_info),
+            'local_file': self.create_temp_file(1, full_random=False),
+            'blob': self.create_random_name('blob', 16)
+        }
+
+        # create an append blob with pre-condition
+        self.oauth_cmd('storage blob upload -c {container} -f "{local_file}" -n {blob} --type append --if-none-match * '
+                       '--account-name {account} ')
+        result = self.oauth_cmd('storage blob show -n {blob} -c {container} --account-name {account}')\
+            .get_output_in_json()
+        self.assertEqual(result['properties']['blobType'], 'AppendBlob')
+        length = int(result['properties']['contentLength'])
+
+        # append if-none-match should throw exception
+        with self.assertRaises(Exception):
+            self.oauth_cmd('storage blob upload -c {container} -f "{local_file}" -n {blob} --type append '
+                           '--if-none-match * --account-name {} ')
+
+        # append an append blob
+        self.oauth_cmd('storage blob upload -c {container} -f "{local_file}" -n {blob} --type append '
+                       '--account-name {account} ')
+        self.oauth_cmd('storage blob show -n {blob} -c {container} --account-name {account}').assert_with_checks(
+            JMESPathCheck('properties.contentLength', length * 2),
+            JMESPathCheck('properties.blobType', 'AppendBlob')
+        )
+
+        # append an append blob with maxsize_condition
+        with self.assertRaises(Exception):
+            self.oauth_cmd('storage blob upload -c {container} -f "{local_file}" -n {blob} --type append '
+                           '--maxsize-condition 1000 --account-name {account} ')
+
+        # append an append blob with overwrite
+        self.oauth_cmd('storage blob upload -c {container} -f "{local_file}" -n {blob} --type append '
+                       '--overwrite --account-name {account} ')
+        self.oauth_cmd('storage blob show -n {blob} -c {container} --account-name {account}').assert_with_checks(
+            JMESPathCheck('properties.contentLength', length),
+            JMESPathCheck('properties.blobType', 'AppendBlob')
+        )
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
     def test_storage_blob_show_oauth(self, resource_group, storage_account_info):
         storage_account, account_key = storage_account_info
 
@@ -240,6 +285,76 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('properties.contentLength', 128 * 1024),
                                 JMESPathCheck('properties.contentSettings.contentType', 'application/octet-stream'),
                                 JMESPathCheck('properties.pageRanges', None))
+
+    @ResourceGroupPreparer(name_prefix='clitest')
+    @StorageAccountPreparer(kind='StorageV2', name_prefix='clitest', location='eastus2euap')
+    def test_storage_container_soft_delete_oauth(self, resource_group, storage_account):
+        import time
+        account_info = self.get_account_info(resource_group, storage_account)
+        container = self.create_container(account_info, prefix="con1")
+        self.cmd('storage account blob-service-properties update -n {sa} -g {rg} --container-delete-retention-days 7 '
+                 '--enable-container-delete-retention',
+                 checks={
+                     JMESPathCheck('containerDeleteRetentionPolicy.days', 7),
+                     JMESPathCheck('containerDeleteRetentionPolicy.enabled', True)
+                 })
+        self.oauth_cmd('storage container list --account-name {} '.format(storage_account)) \
+            .assert_with_checks(JMESPathCheck('length(@)', 1))
+
+        self.oauth_cmd('storage container delete -n {} --account-name {} '.format(container, storage_account))
+        self.oauth_cmd('storage container list --account-name {} '.format(storage_account)) \
+            .assert_with_checks(JMESPathCheck('length(@)', 0))
+        self.oauth_cmd('storage container list --include-deleted --account-name {} '.format(storage_account))\
+            .assert_with_checks(JMESPathCheck('length(@)', 1),
+                                JMESPathCheck('[0].deleted', True))
+
+        time.sleep(30)
+        version = self.oauth_cmd('storage container list --include-deleted --query [0].version -o tsv --account-name {}'
+                                 .format(storage_account)).output.strip('\n')
+        self.oauth_cmd('storage container restore -n {} --deleted-version {} --account-name {} '.format(
+            container, version, storage_account))\
+            .assert_with_checks(JMESPathCheck('containerName', container))
+
+        self.oauth_cmd('storage container list --account-name {} '.format(storage_account)) \
+            .assert_with_checks(JMESPathCheck('length(@)', 1))
+        self.oauth_cmd('storage container list --include-deleted --account-name {} '.format(storage_account)) \
+            .assert_with_checks(JMESPathCheck('length(@)', 1))
+
+    @live_only()
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    @StorageTestFilesPreparer()
+    def test_storage_blob_batch_oauth_scenarios(self, test_dir, resource_group, storage_account):
+        storage_account_info = self.get_account_info(resource_group, storage_account)
+        src_container = self.create_container(storage_account_info)
+
+        # upload test files to storage account when precondition failed
+        self.oauth_cmd('storage blob list -c {} --account-name {} '.format(src_container, storage_account))\
+            .assert_with_checks(JMESPathCheck('length(@)', 0))
+        self.oauth_cmd('storage blob upload-batch -s "{}" -d {} --max-connections 3 --if-match * '
+                       '--if-unmodified-since "2020-06-29T06:32Z" --account-name {} '.format(test_dir, src_container,
+                                                                                             storage_account))
+        self.oauth_cmd('storage blob list -c {} --account-name {} '.format(src_container, storage_account))\
+            .assert_with_checks(JMESPathCheck('length(@)', 0))
+
+        # upload test files to storage account
+        self.oauth_cmd('storage blob upload-batch -s "{}" -d {} --max-connections 3 --account-name {} '.format(
+                       test_dir, src_container, storage_account))
+        self.oauth_cmd(
+            'storage blob list -c {} --account-name {} '.format(src_container, storage_account)).assert_with_checks(
+                JMESPathCheck('length(@)', 41))
+
+        # download recursively without pattern
+        local_folder = self.create_temp_dir()
+        self.oauth_cmd('storage blob download-batch -s {} -d "{}" --account-name {} '.format(
+            src_container, local_folder, storage_account))
+        self.assertEqual(41, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+        # delete recursively without pattern
+        self.oauth_cmd('storage blob delete-batch -s {} --account-name {} '.format(src_container, storage_account))
+        self.oauth_cmd(
+            'storage blob list -c {} --account-name {} '.format(src_container, storage_account)).assert_with_checks(
+                JMESPathCheck('length(@)', 0))
 
     @ResourceGroupPreparer(name_prefix='clitest')
     @StorageAccountPreparer(name_prefix='storage', kind='StorageV2', location='eastus2', sku='Standard_RAGRS')

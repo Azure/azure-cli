@@ -27,7 +27,7 @@ class EHNamespaceMSITesting(ScenarioTest):
             'namespacename1': self.create_random_name(prefix='eventhubs-nscli', length=20),
             'namespacename2': self.create_random_name(prefix='eventhubs-nscli', length=20),
             'namespacename3': self.create_random_name(prefix='eventhubs-nscli', length=20),
-            'namespacename5': self.create_random_name(prefix='eventhubs-nscli', length=20),
+            'namespacename4': self.create_random_name(prefix='eventhubs-nscli', length=20),
             'namespacename6': self.create_random_name(prefix='eventhubs-nscli', length=20),
             'identity1': self.create_random_name(prefix='eh-identity1', length=20),
             'identity2': self.create_random_name(prefix='eh-identity2', length=20),
@@ -44,11 +44,10 @@ class EHNamespaceMSITesting(ScenarioTest):
             'key3': 'key3',
             'key4': 'key4',
             'key5': 'key5',
-            'kv_name': self.create_random_name(prefix='eventhubs-kv', length=20)
+            'kv_name': self.create_random_name(prefix='eventhubs-kg', length=20)
         })
 
-        identity1 = self.cmd('identity create --name {identity1} '+
-                             '--resource-group {rg}').get_output_in_json()
+        identity1 = self.cmd('identity create --name {identity1} --resource-group {rg}').get_output_in_json()
         self.assertEqual(identity1['name'], self.kwargs['identity1'])
         self.kwargs.update({'id1':identity1['id']})
 
@@ -61,7 +60,7 @@ class EHNamespaceMSITesting(ScenarioTest):
         identity4 = self.cmd('identity create --name {identity4} --resource-group {rg}').get_output_in_json()
         self.kwargs.update({'id4': identity4['id']})
 
-        keyvaultcreate = self.cmd('keyvault create --resource-group {rg} --name {kv_name} --location {loc} --enable-soft-delete --enable-purge-protection').get_output_in_json()
+        keyvaultcreate = self.cmd('keyvault create --resource-group {rg} --name {kv_name} --location {loc} --enable-purge-protection --retention-days 7').get_output_in_json()
 
         self.kwargs.update({
             'id1object': identity1['principalId'],
@@ -73,13 +72,13 @@ class EHNamespaceMSITesting(ScenarioTest):
 
 
         self.cmd(
-            'keyvault set-policy -n {kv_name} -g {rg} --object-id {id1object} --key-permissions  all')
+            'keyvault set-policy -n {kv_name} -g {rg} --object-id {id1object} --key-permissions  all --secret-permission all')
         self.cmd(
-            'keyvault set-policy -n {kv_name} -g {rg} --object-id {id2object} --key-permissions  all')
+            'keyvault set-policy -n {kv_name} -g {rg} --object-id {id2object} --key-permissions  all --secret-permission all')
         self.cmd(
-            'keyvault set-policy -n {kv_name} -g {rg} --object-id {id3object} --key-permissions  all')
+            'keyvault set-policy -n {kv_name} -g {rg} --object-id {id3object} --key-permissions  all --secret-permission all')
         self.cmd(
-            'keyvault set-policy -n {kv_name} -g {rg} --object-id {id3object} --key-permissions  all')
+            'keyvault set-policy -n {kv_name} -g {rg} --object-id {id4object} --key-permissions  all --secret-permission all')
         self.cmd('keyvault key create -n {key1} --vault-name {kv_name}')
         self.cmd('keyvault key create -n {key2} --vault-name {kv_name}')
         self.cmd('keyvault key create -n {key3} --vault-name {kv_name}')
@@ -96,6 +95,7 @@ class EHNamespaceMSITesting(ScenarioTest):
         assert len(n) == 2
         n = [i for i in namespace['encryption']['keyVaultProperties']]
         assert len(n) == 3
+        self.assertEqual(False, namespace['encryption']['requireInfrastructureEncryption'])
 
         namespace = self.cmd('eventhubs namespace encryption remove --resource-group {rg} --namespace-name {namespacename}' +
                              ' --encryption-config key-name={key1} key-vault-uri={key_uri} user-assigned-identity={id1}').get_output_in_json()
@@ -105,6 +105,7 @@ class EHNamespaceMSITesting(ScenarioTest):
         assert len(n) == 2
         n = [i for i in namespace['encryption']['keyVaultProperties']]
         assert len(n) == 2
+        self.assertEqual(False, namespace['encryption']['requireInfrastructureEncryption'])
 
         namespace = self.cmd('eventhubs namespace encryption add --resource-group {rg} --namespace-name {namespacename}' +
                              ' --encryption-config key-name={key1} key-vault-uri={key_uri} user-assigned-identity={id1}').get_output_in_json()
@@ -114,6 +115,7 @@ class EHNamespaceMSITesting(ScenarioTest):
         assert len(n) == 2
         n = [i for i in namespace['encryption']['keyVaultProperties']]
         assert len(n) == 3
+        self.assertEqual(False, namespace['encryption']['requireInfrastructureEncryption'])
 
         namespace = self.cmd('eventhubs namespace encryption remove --resource-group {rg} --namespace-name {namespacename}' +
                              ' --encryption-config key-name={key2} key-vault-uri={key_uri} user-assigned-identity={id1}' +
@@ -124,6 +126,7 @@ class EHNamespaceMSITesting(ScenarioTest):
         assert len(n) == 2
         n = [i for i in namespace['encryption']['keyVaultProperties']]
         assert len(n) == 1
+        self.assertEqual(False, namespace['encryption']['requireInfrastructureEncryption'])
 
         namespace = self.cmd('eventhubs namespace encryption add --resource-group {rg} --namespace-name {namespacename}' +
                              ' --encryption-config key-name={key2} key-vault-uri={key_uri} user-assigned-identity={id1}' +
@@ -134,6 +137,104 @@ class EHNamespaceMSITesting(ScenarioTest):
         assert len(n) == 2
         n = [i for i in namespace['encryption']['keyVaultProperties']]
         assert len(n) == 3
+        self.assertEqual(False, namespace['encryption']['requireInfrastructureEncryption'])
 
 
+        namespace = self.cmd(
+            'eventhubs namespace create --resource-group {rg} --name {namespacename2} --sku {sku} --location {loc} --mi-system-assigned --mi-user-assigned {id1} {id2}' +
+            ' --encryption-config key-name={key1} key-vault-uri={key_uri} user-assigned-identity={id1}' +
+            ' --encryption-config key-name={key2} key-vault-uri={key_uri} user-assigned-identity={id1}' +
+            ' --encryption-config key-name={key3} key-vault-uri={key_uri} user-assigned-identity={id1}' +
+            ' --infra-encryption'
+        ).get_output_in_json()
 
+        self.assertEqual(namespace['identity']['type'], self.kwargs['systemuser'])
+        n = [i for i in namespace['identity']['userAssignedIdentities']]
+        assert len(n) == 2
+        n = [i for i in namespace['encryption']['keyVaultProperties']]
+        assert len(n) == 3
+        self.assertEqual(True, namespace['encryption']['requireInfrastructureEncryption'])
+
+        namespace = self.cmd(
+            'eventhubs namespace encryption remove --resource-group {rg} --namespace-name {namespacename2}' +
+            ' --encryption-config key-name={key1} key-vault-uri={key_uri} user-assigned-identity={id1}').get_output_in_json()
+
+        self.assertEqual(namespace['identity']['type'], self.kwargs['systemuser'])
+        n = [i for i in namespace['identity']['userAssignedIdentities']]
+        assert len(n) == 2
+        n = [i for i in namespace['encryption']['keyVaultProperties']]
+        assert len(n) == 2
+        self.assertEqual(True, namespace['encryption']['requireInfrastructureEncryption'])
+
+
+        namespace = self.cmd(
+            'eventhubs namespace encryption add --resource-group {rg} --namespace-name {namespacename2}' +
+            ' --encryption-config key-name={key1} key-vault-uri={key_uri} user-assigned-identity={id1}').get_output_in_json()
+
+        self.assertEqual(namespace['identity']['type'], self.kwargs['systemuser'])
+        n = [i for i in namespace['identity']['userAssignedIdentities']]
+        assert len(n) == 2
+        n = [i for i in namespace['encryption']['keyVaultProperties']]
+        assert len(n) == 3
+        self.assertEqual(True, namespace['encryption']['requireInfrastructureEncryption'])
+        namespace = self.cmd(
+            'eventhubs namespace create --resource-group {rg} --name {namespacename3} --sku {sku} --location {loc} --mi-system-assigned --mi-user-assigned {id1} {id2}'
+        ).get_output_in_json()
+
+        self.assertEqual(namespace['identity']['type'], self.kwargs['systemuser'])
+        n = [i for i in namespace['identity']['userAssignedIdentities']]
+        assert len(n) == 2
+
+        namespace = self.cmd(
+            'eventhubs namespace encryption add --resource-group {rg} --namespace-name {namespacename3}' +
+            ' --encryption-config key-name={key1} key-vault-uri={key_uri} user-assigned-identity={id1} --infra-encryption').get_output_in_json()
+
+        self.assertEqual(namespace['identity']['type'], self.kwargs['systemuser'])
+        n = [i for i in namespace['identity']['userAssignedIdentities']]
+        assert len(n) == 2
+        n = [i for i in namespace['encryption']['keyVaultProperties']]
+        assert len(n) == 1
+        self.assertEqual(True, namespace['encryption']['requireInfrastructureEncryption'])
+
+        namespace = self.cmd(
+            'eventhubs namespace encryption add --resource-group {rg} --namespace-name {namespacename3}' +
+            ' --encryption-config key-name={key2} key-vault-uri={key_uri} user-assigned-identity={id1}').get_output_in_json()
+
+        self.assertEqual(namespace['identity']['type'], self.kwargs['systemuser'])
+        n = [i for i in namespace['identity']['userAssignedIdentities']]
+        assert len(n) == 2
+        n = [i for i in namespace['encryption']['keyVaultProperties']]
+        assert len(n) == 2
+        self.assertEqual(True, namespace['encryption']['requireInfrastructureEncryption'])
+
+        namespace = self.cmd(
+            'eventhubs namespace encryption remove --resource-group {rg} --namespace-name {namespacename3}' +
+            ' --encryption-config key-name={key2} key-vault-uri={key_uri} user-assigned-identity={id1}').get_output_in_json()
+
+        self.assertEqual(namespace['identity']['type'], self.kwargs['systemuser'])
+        n = [i for i in namespace['identity']['userAssignedIdentities']]
+        assert len(n) == 2
+        n = [i for i in namespace['encryption']['keyVaultProperties']]
+        assert len(n) == 1
+        self.assertEqual(True, namespace['encryption']['requireInfrastructureEncryption'])
+
+        namespace = self.cmd(
+            'eventhubs namespace create --resource-group {rg} --name {namespacename4} --sku {sku} --location {loc} --mi-system-assigned'
+        ).get_output_in_json()
+
+        self.kwargs.update({'pId': namespace['identity']['principalId']})
+
+        self.cmd(
+            'keyvault set-policy -n {kv_name} -g {rg} --object-id {pId} --key-permissions  all')
+        namespace = self.cmd(
+            'eventhubs namespace encryption add --resource-group {rg} --namespace-name {namespacename4}' +
+            ' --encryption-config key-name={key1} key-vault-uri={key_uri}'
+            ' --encryption-config key-name={key2} key-vault-uri={key_uri} ').get_output_in_json()
+        self.assertEqual(namespace['identity']['type'], self.kwargs['system'])
+        n = [i for i in namespace['encryption']['keyVaultProperties']]
+        assert len(n) == 2
+
+        self.cmd('eventhubs namespace delete --resource-group {rg} --name {namespacename}')
+        self.cmd('eventhubs namespace delete --resource-group {rg} --name {namespacename2}')
+        self.cmd('eventhubs namespace delete --resource-group {rg} --name {namespacename3}')
+        self.cmd('eventhubs namespace delete --resource-group {rg} --name {namespacename4}')

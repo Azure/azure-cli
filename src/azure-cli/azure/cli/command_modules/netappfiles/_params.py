@@ -5,6 +5,7 @@
 
 # pylint: disable=line-too-long, disable=too-many-statements
 from azure.cli.core.commands.parameters import tags_type, resource_group_name_type, get_enum_type, get_three_state_flag
+from azure.mgmt.netapp.models._net_app_management_client_enums import EncryptionKeySource, SmbAccessBasedEnumeration, SmbNonBrowsable, ManagedServiceIdentityType, SecurityStyle
 from knack.arguments import CLIArgumentType
 
 
@@ -28,6 +29,15 @@ def load_arguments(self, _):
     with self.argument_context('netappfiles account') as c:
         c.argument('account_name', account_name_type, options_list=['--name', '--account-name', '-n', '-a'])
 
+    with self.argument_context('netappfiles account', arg_group='CMK Encryption') as c:
+        c.argument('key_source', arg_type=get_enum_type(EncryptionKeySource), options_list=['--key-source'], help='The encryption keySource (provider).', is_preview=True)
+        c.argument('key_vault_uri', options_list=['--key-vault-uri', '-v'], help='The Uri of KeyVault.', is_preview=True)
+        c.argument('key_name', options_list=['--key-name'], help='The name of KeyVault key.', is_preview=True)
+        c.argument('key_vault_resource_id', options_list=['--keyvault-resource-id'], help='The resource ID of KeyVault.', is_preview=True)
+        c.argument('user_assigned_identity', arg_group='Identity', options_list=['--user-assigned-identity', '-u'], help='The ARM resource identifier of the user assigned identity used to authenticate with key vault. Applicable if identity.type has ''UserAssigned''. It should match key of identity.userAssignedIdentities.', is_preview=True)
+        c.argument('encryption', help='This argument will be deprecated, please use --key-source instead', deprecate_info=c.deprecate(hide=False, redirect='--key-source'))
+        c.argument('identity_type', arg_type=get_enum_type(ManagedServiceIdentityType), arg_group='Identity', help='The identity type.')
+
     with self.argument_context('netappfiles account list') as c:
         c.argument('account_name', help='The name of the ANF account', id_part=None)
 
@@ -39,6 +49,7 @@ def load_arguments(self, _):
         c.argument('encrypt_dc_conn', options_list=['--encrypt-dc-conn'], arg_type=get_three_state_flag())
         c.argument('ldap_signing', arg_type=get_three_state_flag())
         c.argument('aes_encryption', arg_type=get_three_state_flag())
+        c.argument('preferred_servers_for_ldap_client', nargs="+", options_list=['--preferred-servers-for-ldap-client', '-p'], help='Comma separated list of IPv4 addresses of preferred servers for LDAP client. At most two comma separated IPv4 addresses can be passed.')
 
     with self.argument_context('netappfiles account ad list') as c:
         c.argument('account_name', help='The name of the ANF account', id_part=None)
@@ -63,6 +74,7 @@ def load_arguments(self, _):
     load_vault_arguments(self, account_name_type)
     load_subvolume_arguments(self, account_name_type, pool_name_type, volume_name_type)
     load_volume_groups_arguments(self, account_name_type, pool_name_type)
+    load_volume_quota_rules_arguments(self, account_name_type, pool_name_type, volume_name_type)
 
 
 def load_pool_arguments(self, account_name_type, pool_name_type):
@@ -91,6 +103,18 @@ def load_volume_arguments(self, account_name_type, pool_name_type, volume_name_t
         c.argument('ldap_enabled', arg_type=get_three_state_flag())
         c.argument('cool_access', arg_type=get_three_state_flag())
         c.argument('is_def_quota_enabled', arg_type=get_three_state_flag())
+        c.argument('has_root_access', help="Vol Has root access to volume", arg_type=get_three_state_flag())
+        c.argument('snapshot_dir_visible', arg_type=get_three_state_flag())
+        c.argument('security_style', arg_type=get_enum_type(SecurityStyle), help='The security style of volume, default unix, defaults to ntfs for dual protocol or CIFS protocol')
+        c.argument('encryption_key_source', arg_group='CMK Encryption', arg_type=get_enum_type(EncryptionKeySource))
+        c.argument('kv_private_endpoint_id', arg_group='CMK Encryption')
+
+    with self.argument_context('netappfiles volume create') as c:
+        c.argument('zones', nargs="+")
+        c.argument('smb_access_based_enumeration', arg_type=get_enum_type(SmbAccessBasedEnumeration), options_list=['--smb-access'], help='Enables access based enumeration share property for SMB Shares. Only applicable for SMB/DualProtocol volume')
+        c.argument('smb_non_browsable', arg_type=get_enum_type(SmbNonBrowsable), options_list=['--smb-browsable'], help='Enables non browsable property for SMB Shares. Only applicable for SMB/DualProtocol volume')
+        c.argument('delete_base_snapshot', arg_type=get_three_state_flag(), help='If enabled (true) the snapshot the volume was created from will be automatically deleted after the volume create operation has finished.  Defaults to false')
+        c.argument('is_large_volume', arg_type=get_three_state_flag(), help='Specifies whether volume is a Large Volume or Regular Volume.')
 
     with self.argument_context('netappfiles volume delete') as c:
         c.argument('force_delete', arg_type=get_three_state_flag())
@@ -104,6 +128,9 @@ def load_volume_arguments(self, account_name_type, pool_name_type, volume_name_t
         c.argument('pool_name', pool_name_type, id_part=None)
         c.argument('volume_name', volume_name_type, options_list=['--volume-name', '-v', '--name', '-n'], id_part=None)
         c.argument('snapshot_id', options_list=['--snapshot-id', '-s'], help='Resource id of the snapshot', id_part=None)
+
+    with self.argument_context('netappfiles volume break-file-locks') as c:
+        c.argument('client_ip', options_list=['--client-ip', '-i'], help='To clear file locks on a volume for a particular client', id_part=None)
 
     with self.argument_context('netappfiles volume pool-change') as c:
         c.argument('new_pool_resource_id', options_list=['--new-pool-resource-id', '-d'], help='Resource id of the new pool')
@@ -135,13 +162,17 @@ def load_volume_arguments(self, account_name_type, pool_name_type, volume_name_t
         c.argument('nfsv41', help="Indication that NFSv4.1 protocol is allowed", arg_type=get_three_state_flag())
 
     with self.argument_context('netappfiles volume backup') as c:
-        c.argument('backup_name', options_list=['--backup-name', '-b'], id_part='child_name_3')
+        c.argument('backup_name', options_list=['--backup-name', '-b'], help='The name of the backup', id_part='child_name_3')
         c.argument('use_existing_snapshot', arg_type=get_three_state_flag())
+        c.argument('file_paths', nargs="+")
 
     with self.argument_context('netappfiles volume backup list') as c:
         c.argument('account_name', id_part=None)
         c.argument('pool_name', pool_name_type, id_part=None)
         c.argument('backup_name', options_list=['--backup-name', '-b'], id_part=None)
+
+    with self.argument_context('netappfiles volume get-groupid-list-for-ldapuser') as c:
+        c.argument('username', options_list=['--username', '-u'], help='username is required to fetch the group to which user is part of')
 
 
 def load_snapshot_arguments(self, account_name_type, pool_name_type, volume_name_type):
@@ -172,6 +203,7 @@ def load_snapshot_arguments(self, account_name_type, pool_name_type, volume_name
 def load_vault_arguments(self, account_name_type):
     with self.argument_context('netappfiles vault list') as c:
         c.argument('account_name', account_name_type, id_part=None)
+        c.argument('loc', deprecate_info=c.deprecate(hide=False))
 
 
 def load_subvolume_arguments(self, account_name_type, pool_name_type, volume_name_type):
@@ -186,6 +218,20 @@ def load_subvolume_arguments(self, account_name_type, pool_name_type, volume_nam
         c.argument('pool_name', id_part=None)
         c.argument('volume_name', id_part=None)
         c.argument('subvolume_name', id_part=None)
+
+
+def load_volume_quota_rules_arguments(self, account_name_type, pool_name_type, volume_name_type):
+    with self.argument_context('netappfiles volume quota-rule') as c:
+        c.argument('account_name', account_name_type)
+        c.argument('pool_name', pool_name_type)
+        c.argument('volume_name', volume_name_type)
+        c.argument('volume_quota_rule_name', options_list=['--quota-rule-name'], help='The name of the quota rule')
+        c.argument('quota_size', options_list=['--quota-size'], help='Size of quota')
+
+    with self.argument_context('netappfiles volume quota-rule list') as c:
+        c.argument('account_name', id_part=None)
+        c.argument('pool_name', pool_name_type, id_part=None)
+        c.argument('volume_name', volume_name_type, options_list=['--volume-name', '-v', '--name', '-n'], id_part=None)
 
 
 def load_volume_groups_arguments(self, account_name_type, pool_name_type):
@@ -218,6 +264,8 @@ def load_volume_groups_arguments(self, account_name_type, pool_name_type):
         c.argument('data_backup_throughput', type=int, help="Throughput in MiB/s for data backup volumes. If not provided size will automatically be calculated")
         c.argument('log_backup_size', type=int, help="Capacity (in GiB) for log backup volumes. If not provided size will automatically be calculated")
         c.argument('log_backup_throughput', type=int, help="Throughput in MiB/s for log backup volumes. If not provided size will automatically be calculated")
+        c.argument('smb_access_based_enumeration', arg_type=get_enum_type(SmbAccessBasedEnumeration), options_list=['--smb-access'], help='Enables access based enumeration share property for SMB Shares. Only applicable for SMB/DualProtocol volume')
+        c.argument('smb_non_browsable', arg_type=get_enum_type(SmbNonBrowsable), options_list=['--smb-browsable'], help='Enables non browsable property for SMB Shares. Only applicable for SMB/DualProtocol volume')
 
     with self.argument_context('netappfiles volume-group list') as c:
         c.argument('account_name', id_part=None)

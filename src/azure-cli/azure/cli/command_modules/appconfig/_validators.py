@@ -9,12 +9,20 @@ import json
 import re
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, MutuallyExclusiveArgumentError
+from azure.cli.core.azclierror import (InvalidArgumentValueError,
+                                       RequiredArgumentMissingError,
+                                       MutuallyExclusiveArgumentError,
+                                       ArgumentUsageError)
 
-from ._utils import is_valid_connection_string, resolve_store_metadata, get_store_name_from_connection_string
+from ._utils import (is_valid_connection_string,
+                     resolve_store_metadata,
+                     get_store_name_from_connection_string,
+                     validate_feature_flag_name,
+                     validate_feature_flag_key)
 from ._models import QueryFields
-from ._constants import FeatureFlagConstants, ImportExportProfiles
+from ._constants import ImportExportProfiles
 from ._featuremodels import FeatureQueryFields
+from ._snapshotmodels import SnapshotQueryFields
 
 logger = get_logger(__name__)
 
@@ -27,8 +35,13 @@ def validate_datetime(namespace):
             'The input datetime is invalid. Correct format should be YYYY-MM-DDThh:mm:ssZ ')
 
 
-def validate_connection_string(namespace):
+def validate_connection_string(cmd, namespace):
     ''' Endpoint=https://example.azconfig.io;Id=xxxxx;Secret=xxxx'''
+    # Only use defaults when both name and connection string not specified
+    if not (namespace.connection_string or namespace.name):
+        namespace.connection_string = cmd.cli_ctx.config.get('defaults', 'appconfig_connection_string', None) or cmd.cli_ctx.config.get('appconfig', 'connection_string', None)
+        namespace.name = cmd.cli_ctx.config.get('defaults', 'app_configuration_store', None)
+
     connection_string = namespace.connection_string
     if connection_string:
         if not is_valid_connection_string(connection_string):
@@ -51,18 +64,18 @@ def validate_import_depth(namespace):
         try:
             depth = int(depth)
             if depth < 1:
-                raise CLIError('Depth should be at least 1.')
+                raise InvalidArgumentValueError('Depth should be at least 1.')
         except ValueError:
-            raise CLIError("Depth is not a number.")
+            raise InvalidArgumentValueError("Depth is not a number.")
 
 
 def validate_separator(namespace):
     if namespace.separator is not None:
         if namespace.format_ == "properties":
-            raise CLIError("Separator is not needed for properties file.")
+            raise ArgumentUsageError("Separator is not needed for properties file.")
         valid_separators = ['.', ',', ';', '-', '_', '__', '/', ':']
         if namespace.separator not in valid_separators:
-            raise CLIError(
+            raise InvalidArgumentValueError(
                 "Unsupported separator, allowed values: '.', ',', ';', '-', '_', '__', '/', ':'.")
 
 
@@ -139,6 +152,16 @@ def validate_feature_query_fields(namespace):
         namespace.fields = fields
 
 
+def validate_snapshot_query_fields(namespace):
+    if namespace.fields:
+        fields = []
+        for field in namespace.fields:
+            for snapshot_query_field in SnapshotQueryFields:
+                if field.lower() == snapshot_query_field.name.lower():
+                    fields.append(snapshot_query_field)
+        namespace.fields = fields
+
+
 def validate_filter_parameters(namespace):
     """ Extracts multiple space-separated filter paramters in name[=value] format """
     if isinstance(namespace.filter_parameters, list):
@@ -172,13 +195,13 @@ def validate_filter_parameter(string):
                     # Ensure that provided value of this filter parameter is valid JSON. Error out if value is invalid JSON.
                     filter_param_value = json.loads(filter_param_value)
                 except ValueError:
-                    raise CLIError('Filter parameter value must be a JSON escaped string. "{}" is not a valid JSON object.'.format(filter_param_value))
+                    raise InvalidArgumentValueError('Filter parameter value must be a JSON escaped string. "{}" is not a valid JSON object.'.format(filter_param_value))
                 result = (comps[0], filter_param_value)
             else:
                 result = (string, '')
         else:
             # Error out on invalid arguments like '=value' or '='
-            raise CLIError('Invalid filter parameter "{}". Parameter name cannot be empty.'.format(string))
+            raise InvalidArgumentValueError('Invalid filter parameter "{}". Parameter name cannot be empty.'.format(string))
     return result
 
 
@@ -199,12 +222,12 @@ def validate_identity(namespace):
             continue
 
         if identity != '[system]' and not is_valid_resource_id(identity):
-            raise CLIError("Invalid identity '{}'. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity.".format(identity))
+            raise InvalidArgumentValueError("Invalid identity '{}'. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity.".format(identity))
 
 
 def validate_secret_identifier(namespace):
     """ Validate the format of keyvault reference secret identifier """
-    from azure.keyvault.key_vault_id import KeyVaultIdentifier
+    from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1.key_vault_id import KeyVaultIdentifier
 
     identifier = getattr(namespace, 'secret_identifier', None)
     try:
@@ -215,38 +238,29 @@ def validate_secret_identifier(namespace):
 
 
 def validate_key(namespace):
-    if namespace.key:
-        input_key = str(namespace.key).lower()
-        if input_key == '.' or input_key == '..' or '%' in input_key:
-            raise CLIError("Key is invalid. Key cannot be a '.' or '..', or contain the '%' character.")
-    else:
-        raise CLIError("Key cannot be empty.")
+    if not namespace.key or str(namespace.key).isspace():
+        raise RequiredArgumentMissingError("Key cannot be empty.")
+
+    input_key = str(namespace.key).lower()
+    if input_key == '.' or input_key == '..' or '%' in input_key:
+        raise InvalidArgumentValueError("Key is invalid. Key cannot be a '.' or '..', or contain the '%' character.")
 
 
 def validate_resolve_keyvault(namespace):
     if namespace.resolve_keyvault:
         identifier = getattr(namespace, 'destination', None)
         if identifier and identifier != "file":
-            raise CLIError("--resolve-keyvault is only applicable for exporting to file.")
+            raise InvalidArgumentValueError("--resolve-keyvault is only applicable for exporting to file.")
 
 
 def validate_feature(namespace):
     if namespace.feature is not None:
-        if '%' in namespace.feature:
-            raise InvalidArgumentValueError("Feature name cannot contain the '%' character.")
-        if not namespace.feature:
-            raise InvalidArgumentValueError("Feature name cannot be empty.")
+        validate_feature_flag_name(namespace.feature)
 
 
 def validate_feature_key(namespace):
     if namespace.key is not None:
-        input_key = str(namespace.key).lower()
-        if '%' in input_key:
-            raise InvalidArgumentValueError("Feature flag key cannot contain the '%' character.")
-        if not input_key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX):
-            raise InvalidArgumentValueError("Feature flag key must start with the reserved prefix '{0}'.".format(FeatureFlagConstants.FEATURE_FLAG_PREFIX))
-        if len(input_key) == len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):
-            raise InvalidArgumentValueError("Feature flag key must contain more characters after the reserved prefix '{0}'.".format(FeatureFlagConstants.FEATURE_FLAG_PREFIX))
+        validate_feature_flag_key(namespace.key)
 
 
 def validate_import_profile(namespace):
@@ -274,7 +288,7 @@ def validate_export_profile(namespace):
         if namespace.destination != 'file':
             raise InvalidArgumentValueError("The profile '{}' only supports exporting to a file.".format(ImportExportProfiles.KVSET))
         if namespace.format_ != 'json':
-            raise CLIError("The profile '{}' only supports exporting in the JSON format".format(ImportExportProfiles.KVSET))
+            raise InvalidArgumentValueError("The profile '{}' only supports exporting in the JSON format".format(ImportExportProfiles.KVSET))
         if namespace.prefix is not None and namespace.prefix != '':
             raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='prefix')
         if namespace.dest_label is not None:
@@ -293,6 +307,67 @@ def validate_strict_import(namespace):
             raise InvalidArgumentValueError("The option '--strict' can only be used when importing from a file.")
 
 
+def validate_export_as_reference(namespace):
+    if namespace.export_as_reference:
+        if namespace.destination != 'appservice':
+            raise InvalidArgumentValueError("The option '--export-as-reference' can only be used when exporting to app service.")
+
+        if namespace.snapshot:
+            raise MutuallyExclusiveArgumentError("Cannot export snapshot key-values as references to App Service.")
+
+
 def __construct_kvset_invalid_argument_error(is_exporting, argument):
     action = 'exporting' if is_exporting else 'importing'
     return InvalidArgumentValueError("The option '{0}' is not supported when {1} using '{2}' profile".format(argument, action, ImportExportProfiles.KVSET))
+
+
+def validate_snapshot_filters(namespace):
+    if not namespace.filters:
+        raise RequiredArgumentMissingError("A list of at least one filter is required.")
+
+    if isinstance(namespace.filters, list):
+        if len(namespace.filters) < 1:
+            raise InvalidArgumentValueError("At least one filter is required.")
+
+        if len(namespace.filters) > 3:
+            raise InvalidArgumentValueError("Too many filters supplied. A maximum of 3 filters allowed.")
+
+        filter_parameters = []
+
+        for filter_param in namespace.filters:
+            try:
+                parsed_filter = json.loads(filter_param)
+                if not isinstance(parsed_filter, dict):
+                    raise InvalidArgumentValueError('Parameter must be an escaped JSON object. Value of type {} was supplied.'.format(type(parsed_filter).__name__))
+
+                key_filter_value = parsed_filter.get("key", None)
+
+                if not key_filter_value:
+                    raise InvalidArgumentValueError("Key filter value required.")
+
+                if not isinstance(key_filter_value, str) or len(key_filter_value) < 1:
+                    raise InvalidArgumentValueError("Invalid key filter value. Value must be a non-empty string.")
+
+                if parsed_filter.get("label", None) and not isinstance(parsed_filter["label"], str):
+                    raise InvalidArgumentValueError("Label filter must be a string if specified.")
+
+                filter_parameters.append(parsed_filter)
+
+            except ValueError:
+                raise InvalidArgumentValueError("Parameter must be an escaped JSON object. {} is not a valid JSON object.".format(filter_param))
+
+        namespace.filters = filter_parameters
+
+
+def validate_snapshot_export(namespace):
+    if namespace.snapshot:
+        if any([namespace.key, namespace.label, namespace.skip_features, namespace.skip_keyvault]):
+            raise MutuallyExclusiveArgumentError("'--snapshot' cannot be specified with '--key',  '--label', '--skip-keyvault' or '--skip-features' arguments.")
+
+
+def validate_snapshot_import(namespace):
+    if namespace.src_snapshot:
+        if namespace.source != 'appconfig':
+            raise InvalidArgumentValueError("--src-snapshot is only applicable when importing from a configuration store.")
+        if any([namespace.src_key, namespace.src_label, namespace.skip_features]):
+            raise MutuallyExclusiveArgumentError("'--src-snapshot' cannot be specified with '--src-key', '--src-label', or '--skip-features' arguments.")

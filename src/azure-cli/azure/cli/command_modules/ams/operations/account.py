@@ -13,6 +13,8 @@ from azure.mgmt.media.models import (MediaService, MediaServiceIdentity, Storage
 
 
 def get_mediaservice(client, account_name, resource_group_name=None):
+    if account_name is not None and resource_group_name is None:
+        raise ValidationError('Please specify the account-name and resource-group-name')
     return client.get(resource_group_name,
                       account_name) if resource_group_name else client.get_by_subscription(account_name)
 

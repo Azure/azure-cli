@@ -58,6 +58,8 @@ class AAZBearerTokenCredentialPolicy(HTTPPolicy):
 
     @property
     def _need_new_aux_tokens(self):
+        if not hasattr(self._credential, 'get_auxiliary_tokens'):
+            return False
         if not self._aux_tokens:
             return True
         for token in self._aux_tokens:
@@ -91,8 +93,11 @@ class AAZBearerTokenCredentialPolicy(HTTPPolicy):
         :param ~azure.core.pipeline.PipelineRequest request: the request
         :param str scopes: required scopes of authentication
         """
-        self._token = self._credential.get_token(*scopes, **kwargs)
-        self._aux_tokens = self._credential.get_auxiliary_tokens(*self._scopes)
+        if self._need_new_token:
+            self._token = self._credential.get_token(*scopes, **kwargs)
+
+        if self._need_new_aux_tokens:
+            self._aux_tokens = self._credential.get_auxiliary_tokens(*self._scopes)
 
         self._update_headers(request.http_request.headers)
 

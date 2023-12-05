@@ -3,9 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import unittest
+from unittest.mock import Mock
+from types import SimpleNamespace
 
 from azure.cli.command_modules.acs import _validators as validators
-from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.azclierror import (
+    InvalidArgumentValueError,
+    MutuallyExclusiveArgumentError,
+)
 from azure.cli.core.util import CLIError
 
 
@@ -431,6 +436,307 @@ class TestValidateKubernetesVersion(unittest.TestCase):
             validators.validate_k8s_version(namespace)
         self.assertEqual(str(cm.exception), err)
 
+
+class TestKeyVaultSecretsProviderAddon(unittest.TestCase):
+    def test_invalid_keyvault_secret_provider_parameters(self):
+        namespace = SimpleNamespace(
+            **{
+                "disable_secret_rotation": True,
+                "enable_secret_rotation": True,
+            }
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            validators.validate_keyvault_secrets_provider_disable_and_enable_parameters(
+                namespace
+            )
+
+    def test_valid_keyvault_secret_provider_parameters(self):
+        namespace_1 = SimpleNamespace(
+            **{
+                "disable_secret_rotation": True,
+                "enable_secret_rotation": False,
+            }
+        )
+        validators.validate_keyvault_secrets_provider_disable_and_enable_parameters(namespace_1)
+
+        namespace_2 = SimpleNamespace(
+            **{
+                "disable_secret_rotation": False,
+                "enable_secret_rotation": True,
+            }
+        )
+        validators.validate_keyvault_secrets_provider_disable_and_enable_parameters(namespace_2)
+
+        namespace_3 = SimpleNamespace(
+            **{
+                "disable_secret_rotation": False,
+                "enable_secret_rotation": False,
+            }
+        )
+        validators.validate_keyvault_secrets_provider_disable_and_enable_parameters(namespace_3)
+
+
+class HostGroupIDNamespace:
+    def __init__(self, host_group_id):
+        self.host_group_id = host_group_id
+
+
+class TestValidateHostGroupID(unittest.TestCase):
+    def test_invalid_host_group_id(self):
+        invalid_host_group_id = "dummy group id"
+        namespace = HostGroupIDNamespace(host_group_id=invalid_host_group_id)
+        err = ("--host-group-id is not a valid Azure resource ID.")
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_host_group_id(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+
+class AzureKeyVaultKmsKeyIdNamespace:
+
+    def __init__(self, azure_keyvault_kms_key_id):
+        self.azure_keyvault_kms_key_id = azure_keyvault_kms_key_id
+
+
+class TestValidateAzureKeyVaultKmsKeyId(unittest.TestCase):
+    def test_invalid_azure_keyvault_kms_key_id_without_https(self):
+        invalid_azure_keyvault_kms_key_id = "dummy key id"
+        namespace = AzureKeyVaultKmsKeyIdNamespace(azure_keyvault_kms_key_id=invalid_azure_keyvault_kms_key_id)
+        err = '--azure-keyvault-kms-key-id is not a valid Key Vault key ID. ' \
+              'See https://docs.microsoft.com/en-us/azure/key-vault/general/about-keys-secrets-certificates#vault-name-and-object-name'
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_azure_keyvault_kms_key_id(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_invalid_azure_keyvault_kms_key_id_without_key_version(self):
+        invalid_azure_keyvault_kms_key_id = "https://fakekeyvault.vault.azure.net/keys/fakekeyname"
+        namespace = AzureKeyVaultKmsKeyIdNamespace(azure_keyvault_kms_key_id=invalid_azure_keyvault_kms_key_id)
+        err = '--azure-keyvault-kms-key-id is not a valid Key Vault key ID. ' \
+              'See https://docs.microsoft.com/en-us/azure/key-vault/general/about-keys-secrets-certificates#vault-name-and-object-name'
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_azure_keyvault_kms_key_id(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_invalid_azure_keyvault_kms_key_id_with_wrong_object_type(self):
+        invalid_azure_keyvault_kms_key_id = "https://fakekeyvault.vault.azure.net/secrets/fakesecretname/fakesecretversion"
+        namespace = AzureKeyVaultKmsKeyIdNamespace(azure_keyvault_kms_key_id=invalid_azure_keyvault_kms_key_id)
+        err = '--azure-keyvault-kms-key-id is not a valid Key Vault key ID. ' \
+              'See https://docs.microsoft.com/en-us/azure/key-vault/general/about-keys-secrets-certificates#vault-name-and-object-name'
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_azure_keyvault_kms_key_id(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+class ImageCleanerNamespace:
+    def __init__(
+        self,
+        enable_image_cleaner=False,
+        disable_image_cleaner=False,
+        image_cleaner_interval_hours=None,
+    ):
+        self.enable_image_cleaner = enable_image_cleaner
+        self.disable_image_cleaner = disable_image_cleaner
+        self.image_cleaner_interval_hours = image_cleaner_interval_hours
+
+class TestValidateImageCleanerEnableDiasble(unittest.TestCase):
+    def test_invalid_image_cleaner_enable_disable_not_existing_together(self):
+        namespace = ImageCleanerNamespace(
+            enable_image_cleaner=True,
+            disable_image_cleaner=True,
+        )
+        err = 'Cannot specify --enable-image-cleaner and --disable-image-cleaner at the same time.'
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_image_cleaner_enable_disable_mutually_exclusive(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+class ForceUpgradeNamespace:
+    def __init__(
+        self,
+        enable_force_upgrade=False,
+        disable_force_upgrade=False,
+    ):
+        self.enable_force_upgrade = enable_force_upgrade
+        self.disable_force_upgrade = disable_force_upgrade
+
+class TestValidateForceUpgradeEnableDiasble(unittest.TestCase):
+    def test_invalid_force_upgrade_enable_disable_not_existing_together(self):
+        namespace = ForceUpgradeNamespace(
+            enable_force_upgrade=True,
+            disable_force_upgrade=True,
+        )
+        err = 'Providing both --disable-force-upgrade and --enable-force-upgrade flags is invalid'
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_force_upgrade_disable_and_enable_parameters(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+class AzureKeyVaultKmsKeyVaultResourceIdNamespace:
+
+    def __init__(self, azure_keyvault_kms_key_vault_resource_id):
+        self.azure_keyvault_kms_key_vault_resource_id = azure_keyvault_kms_key_vault_resource_id
+
+
+class TestValidateAzureKeyVaultKmsKeyVaultResourceId(unittest.TestCase):
+    def test_invalid_azure_keyvault_kms_key_vault_resource_id(self):
+        invalid_azure_keyvault_kms_key_vault_resource_id = "invalid"
+        namespace = AzureKeyVaultKmsKeyVaultResourceIdNamespace(azure_keyvault_kms_key_vault_resource_id=invalid_azure_keyvault_kms_key_vault_resource_id)
+        err = '--azure-keyvault-kms-key-vault-resource-id is not a valid Azure resource ID.'
+
+        with self.assertRaises(InvalidArgumentValueError) as cm:
+            validators.validate_azure_keyvault_kms_key_vault_resource_id(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_valid_azure_keyvault_kms_key_vault_resource_id(self):
+        valid_azure_keyvault_kms_key_vault_resource_id = "/subscriptions/8ecadfc9-d1a3-4ea4-b844-0d9f87e4d7c8/resourceGroups/foo/providers/Microsoft.KeyVault/vaults/foo"
+        namespace = AzureKeyVaultKmsKeyVaultResourceIdNamespace(azure_keyvault_kms_key_vault_resource_id=valid_azure_keyvault_kms_key_vault_resource_id)
+
+        validators.validate_azure_keyvault_kms_key_vault_resource_id(namespace)
+
+
+class TestValidateNodepoolName(unittest.TestCase):
+    def test_invalid_nodepool_name_too_long(self):
+        namespace = SimpleNamespace(
+            **{
+                "nodepool_name": "tooLongNodepoolName",
+            }
+        )
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.validate_nodepool_name(
+                namespace
+            )
+
+    def test_invalid_agent_pool_name_too_long(self):
+        namespace = SimpleNamespace(
+            **{
+                "agent_pool_name": "tooLongNodepoolName",
+            }
+        )
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.validate_agent_pool_name(
+                namespace
+            )
+
+    def test_invalid_nodepool_name_not_alnum(self):
+        namespace = SimpleNamespace(
+            **{
+                "nodepool_name": "invalid-np*",
+            }
+        )
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.validate_nodepool_name(
+                namespace
+            )
+
+    def test_invalid_agent_pool_name_not_alnum(self):
+        namespace = SimpleNamespace(
+            **{
+                "agent_pool_name": "invalid-np*",
+            }
+        )
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.validate_agent_pool_name(
+                namespace
+            )
+
+    def test_valid_nodepool_name(self):
+        namespace = SimpleNamespace(
+            **{
+                "nodepool_name": "np100",
+            }
+        )
+        validators.validate_nodepool_name(
+            namespace
+        )
+
+    def test_valid_agent_pool_name(self):
+        namespace = SimpleNamespace(
+            **{
+                "agent_pool_name": "np100",
+            }
+        )
+        validators.validate_agent_pool_name(
+            namespace
+        )
+
+
+class TestValidateRegistryName(unittest.TestCase):
+    def test_append_suffix(self):
+        from azure.cli.core.cloud import HARD_CODED_CLOUD_LIST, CloudSuffixNotSetException
+        for hard_coded_cloud in HARD_CODED_CLOUD_LIST:
+            namespace = SimpleNamespace(
+                **{
+                    "acr": "myacr",
+                }
+            )
+            try:
+                acr_suffix = hard_coded_cloud.suffixes.acr_login_server_endpoint
+            except CloudSuffixNotSetException:
+                acr_suffix = ""
+            cmd = Mock(cli_ctx=Mock(cloud=hard_coded_cloud))
+            validators.validate_registry_name(cmd, namespace)
+            self.assertEqual(namespace.acr, "myacr" + acr_suffix)
+
+class TestValidateAllowedHostPorts(unittest.TestCase):
+    def test_invalid_allowed_host_ports(self):
+        namespace = SimpleNamespace(
+            **{
+                "allowed_host_ports": ["80"],
+            }
+        )
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.validate_allowed_host_ports(
+                namespace
+            )
+
+    def test_valid_allowed_host_ports(self):
+        namespace = SimpleNamespace(
+            **{
+                "allowed_host_ports": ["80/tcp", "443/tcp", "8080-8090/tcp", "53/udp"],
+            }
+        )
+        validators.validate_allowed_host_ports(
+            namespace
+        )
+
+
+class TestValidateApplicationSecurityGroups(unittest.TestCase):
+    def test_invalid_application_security_groups(self):
+        namespace = SimpleNamespace(
+            **{
+                "asg_ids": "invalid",
+            }
+        )
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.validate_application_security_groups(
+                namespace
+            )
+
+    def test_empty_application_security_groups(self):
+        namespace = SimpleNamespace(
+            **{
+                "asg_ids": "",
+            }
+        )
+        validators.validate_application_security_groups(
+            namespace
+        )
+
+    def test_multiple_application_security_groups(self):
+        asg_ids = [
+            "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.Network/applicationSecurityGroups/asg1",
+            "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg2/providers/Microsoft.Network/applicationSecurityGroups/asg2",
+        ]
+        namespace = SimpleNamespace(
+            **{
+                "asg_ids": asg_ids,
+            }
+        )
+        validators.validate_application_security_groups(
+            namespace
+        )
 
 if __name__ == "__main__":
     unittest.main()

@@ -16,7 +16,12 @@ class FeatureFlagConstants:
 
 class KeyVaultConstants:
     KEYVAULT_CONTENT_TYPE = "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
+
+
+class AppServiceConstants:
+    APPSVC_CONFIG_REFERENCE_PREFIX = "@Microsoft.AppConfiguration"
     APPSVC_KEYVAULT_PREFIX = "@Microsoft.KeyVault"
+    APPSVC_SLOT_SETTING_KEY = "AppService:SlotSetting"
 
 
 class SearchFilterOptions:
@@ -67,3 +72,36 @@ class KVSetConstants:
 class ImportExportProfiles:
     KVSET = "appconfig/kvset"
     DEFAULT = "appconfig/default"
+
+
+class SnapshotConstants:
+    API_VERSION = "2023-10-01"
+
+
+class JsonDiff:
+    ADD = "add"
+    DELETE = "delete"
+    UPDATE = "update"
+
+
+class CompareFields:
+    KEY = "key"
+    LABEL = "label"
+    VALUE = "value"
+    CONTENT_TYPE = "content_type"
+    LOCKED = "locked"
+    TAGS = "tags"
+
+
+CompareFieldsMap = {
+    "appconfig": (CompareFields.CONTENT_TYPE, CompareFields.VALUE, CompareFields.TAGS),
+    "appservice": (CompareFields.VALUE, CompareFields.TAGS),
+    "file": (CompareFields.CONTENT_TYPE, CompareFields.VALUE),
+    "kvset": (CompareFields.CONTENT_TYPE, CompareFields.VALUE, CompareFields.TAGS),
+    "restore": (CompareFields.VALUE, CompareFields.CONTENT_TYPE, CompareFields.LOCKED, CompareFields.TAGS)
+}
+
+
+class ImportMode:
+    ALL = "all"
+    IGNORE_MATCH = "ignore-match"

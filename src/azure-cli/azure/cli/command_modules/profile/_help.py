@@ -48,11 +48,6 @@ short-summary: >-
     cloud is shown.
 """
 
-helps['account list-locations'] = """
-type: command
-short-summary: List supported regions for the current subscription.
-"""
-
 helps['account show'] = """
 type: command
 short-summary: Get the details of a subscription.
@@ -67,14 +62,7 @@ short-summary: Set a subscription to be the current active subscription.
 helps['account show'] = """
 type: command
 short-summary: Get the details of a subscription.
-long-summary: >-
-    If the subscription isn't specified, shows the details of the default subscription.
-
-
-    When --sdk-auth is used,
-    the output includes credentials that you must protect. Be sure that you do not include these credentials
-    in your code or check the credentials into your source control. As an alternative, consider using
-    [managed identities](https://aka.ms/azadsp-managed-identities) if available to avoid the need to use credentials.
+long-summary: If the subscription isn't specified, shows the details of the default subscription.
 """
 
 helps['account get-access-token'] = """
@@ -83,6 +71,10 @@ short-summary: Get a token for utilities to access Azure.
 long-summary: >
     The token will be valid for at least 5 minutes with the maximum at 60 minutes.
     If the subscription argument isn't specified, the current account is used.
+
+
+    In the output, `expires_on` represents a POSIX timestamp and `expiresOn` represents a local datetime.
+    It is recommended for downstream applications to use `expires_on` because it is in UTC.
 examples:
     - name: Get an access token for the current account
       text: >

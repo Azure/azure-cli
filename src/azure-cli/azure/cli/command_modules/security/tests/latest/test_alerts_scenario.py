@@ -6,12 +6,14 @@
 from azure.cli.testsdk import ScenarioTest, record_only
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 import re
+import time
 
 
 # TODO: revert when #9406 is addressed
 class SecurityCenterAlertsTests(ScenarioTest):
 
     @record_only()  # this test relies on existing security alerts in resource groups
+    @AllowLargeResponse()
     def test_security_alerts(self):
 
         alerts = self.cmd('az security alert list').get_output_in_json()
@@ -36,46 +38,76 @@ class SecurityCenterAlertsTests(ScenarioTest):
 
         self.cmd('az security alert update -g {} -l {} -n {} --status Activate'.format(rg, location, alertName))
 
+        time.sleep(5)
+
         alert = self.cmd('az security alert show -g {} -l {} -n {}'.format(rg, location, alertName)).get_output_in_json()
 
         assert alert["status"] == "Active"
 
         self.cmd('az security alert update -g {} -l {} -n {} --status Dismiss'.format(rg, location, alertName))
 
+        time.sleep(5)
+        
         alert = self.cmd('az security alert show -g {} -l {} -n {}'.format(rg, location, alertName)).get_output_in_json()
 
         assert alert["status"] == "Dismissed"
 
         self.cmd('az security alert update -g {} -l {} -n {} --status Resolve'.format(rg, location, alertName))
 
+        time.sleep(6)
+        
         alert = self.cmd('az security alert show -g {} -l {} -n {}'.format(rg, location, alertName)).get_output_in_json()
 
         assert alert["status"] == "Resolved"
+
+        self.cmd('az security alert update -g {} -l {} -n {} --status InProgress'.format(rg, location, alertName))
+
+        time.sleep(6)
+        
+        alert = self.cmd('az security alert show -g {} -l {} -n {}'.format(rg, location, alertName)).get_output_in_json()
+
+        assert alert["status"] == "InProgress"
 
         # check subscription level
 
         self.cmd('az security alert update -l {} -n {} --status Activate'.format(location, alertName))
 
+        time.sleep(6)
+        
         alert = self.cmd('az security alert show -l {} -n {}'.format(location, alertName)).get_output_in_json()
 
         assert alert["status"] == "Active"
 
         self.cmd('az security alert update -l {} -n {} --status Dismiss'.format(location, alertName))
 
+        time.sleep(6)
+        
         alert = self.cmd('az security alert show -l {} -n {}'.format(location, alertName)).get_output_in_json()
 
         assert alert["status"] == "Dismissed"
 
         self.cmd('az security alert update -l {} -n {} --status Resolve'.format(location, alertName))
 
+        time.sleep(6)
+        
         alert = self.cmd('az security alert show -l {} -n {}'.format(location, alertName)).get_output_in_json()
 
         assert alert["status"] == "Resolved"
+
+        self.cmd('az security alert update -l {} -n {} --status InProgress'.format(location, alertName))
+
+        time.sleep(6)
+        
+        alert = self.cmd('az security alert show -l {} -n {}'.format(location, alertName)).get_output_in_json()
+
+        assert alert["status"] == "InProgress"
 
         # reset alert to active
 
         self.cmd('az security alert update -l {} -n {} --status Activate'.format(location, alertName))
 
+        time.sleep(6)
+        
         alert = self.cmd('az security alert show -l {} -n {}'.format(location, alertName)).get_output_in_json()
 
         assert alert["status"] == "Active"

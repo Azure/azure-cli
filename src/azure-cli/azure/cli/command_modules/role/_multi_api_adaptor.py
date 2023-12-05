@@ -46,15 +46,14 @@ class MultiAPIAdaptor:
             self.cli_ctx, ResourceType.MGMT_AUTHORIZATION,
             'RoleAssignmentProperties' if self.old_api else 'RoleAssignmentCreateParameters',
             mod='models', operation_group='role_assignments')
-        parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=object_id)
-        if assignee_principal_type:
-            parameters.principal_type = assignee_principal_type
-        if description:
-            parameters.description = description
-        if condition:
-            parameters.condition = condition
-        if condition_version:
-            parameters.condition_version = condition_version
+
+        # In 2022-04-01 API, principal_type is by default 'User', so we have to explicitly set it to None if we can't
+        # resolve principal type from Graph
+        # https://github.com/Azure/azure-rest-api-specs/issues/21664
+        parameters = RoleAssignmentCreateParameters(
+            role_definition_id=role_id, principal_id=object_id, principal_type=assignee_principal_type,
+            description=description, condition=condition, condition_version=condition_version)
+
         return client.create(scope, assignment_name, parameters)
 
     def get_role_property(self, obj, property_name):  # pylint: disable=no-self-use
@@ -62,6 +61,7 @@ class MultiAPIAdaptor:
         # 2015-07-01          RoleDefinition: flattened, RoleAssignment: unflattened
         # 2018-01-01-preview  RoleDefinition: flattened
         # 2020-04-01-preview                             RoleAssignment: flattened
+        # 2022-04-01          RoleDefinition: flattened  RoleAssignment: flattened
         # Get property_name from properties if the model is unflattened.
         if isinstance(obj, dict):
             if 'properties' in obj:

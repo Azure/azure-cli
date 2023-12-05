@@ -1,30 +1,19 @@
 {
     "properties": {
-        "SourceDBServerResourceId": "subscriptions/6a37df99-a9de-48c4-91e5-7e6ab00b2362/resourceGroups/raganesa-s-s-pg-1/providers/Microsoft.DBforPostgreSQL/servers/raganesa-s-s-pg-1",
-        "SecretParameters":
-        {
-            "AdminCredentials":
-            {
-                "SourceServerPassword": "xxxx",
-                "TargetServerPassword": "xxxx"
+        "sourceDbServerResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/servers/source-server-longhaul",
+        "secretParameters": {
+            "adminCredentials": {
+                "sourceServerPassword": "XXXXXXXXX",
+                "targetServerPassword": "XXXXXXXXX"
             },
-            "AADApp":
-            {
-                "ClientId": "xxxxxx",
-                "TenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
-                "AadSecret": "xxxxx"
-            }
+            "sourceServerUsername": "migration_user@source-server-longhaul",
+            "targetServerUsername": "target_user"
         },
-        "DBsToMigrate": [
+        "dbsToMigrate": [
             "dvdrental"
         ],
-        "MigrationResourceGroup":
-        {
-            "ResourceId": "subscriptions/6a37df99-a9de-48c4-91e5-7e6ab00b2362/resourceGroups/raganesa-DMSBuddy-Demo",
-            "Location": "West US 2"
-        },
-        "SetupLogicalReplicationOnSourceDBIfNeeded": "true",
-        "OverwriteDBsinTarget": "true",
-        "TriggerCutover": "true"
-    }
+        "setupLogicalReplicationOnSourceDbIfNeeded": "false",
+        "overwriteDbsinTarget": "true"
+    },
+    "location": "eastus"
 }

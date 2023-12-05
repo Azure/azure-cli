@@ -6,6 +6,7 @@
 
 from enum import Enum
 
+from knack.log import get_logger
 from knack.util import CLIError
 
 from azure.cli.core.azclierror import ValidationError, InvalidArgumentValueError
@@ -14,6 +15,8 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.arm import ArmTemplateBuilder
 
 from azure.cli.command_modules.vm._vm_utils import get_target_network_api
+
+logger = get_logger(__name__)
 
 
 # pylint: disable=too-few-public-methods
@@ -160,7 +163,7 @@ def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_a
 
     api_version = '2015-06-15'
     if application_security_groups:
-        asg_ids = [{'id': x.id} for x in application_security_groups]
+        asg_ids = [{'id': x['id']} for x in application_security_groups]
         nic_properties['ipConfigurations'][0]['properties']['applicationSecurityGroups'] = asg_ids
         api_version = '2017-09-01'
 
@@ -303,7 +306,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
         enable_vtpm=None, count=None, edge_zone=None, os_disk_delete_option=None, user_data=None,
         capacity_reservation_group=None, enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None,
-        os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None):
+        os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None, disk_controller_type=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -556,6 +559,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         if disk_info['os'].get('diffDiskSettings'):
             profile['osDisk']['diffDiskSettings'] = disk_info['os']['diffDiskSettings']
 
+        if disk_controller_type is not None:
+            profile['diskControllerType'] = disk_controller_type
+
         return profile
 
     vm_properties = {'hardwareProfile': {'vmSize': size}, 'networkProfile': {'networkInterfaces': nics},
@@ -623,7 +629,10 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
     if encryption_at_host is not None:
         vm_properties['securityProfile']['encryptionAtHost'] = encryption_at_host
 
-    if security_type is not None:
+    # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
+    # after changing the default values to Trusted Launch VMs in the future.
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
+    if security_type is not None and security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
         vm_properties['securityProfile']['securityType'] = security_type
 
     if enable_secure_boot is not None or enable_vtpm is not None:
@@ -864,6 +873,38 @@ def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, n
     return lb
 
 
+def build_nat_rule_v2(cmd, name, location, lb_name, frontend_ip_name, backend_pool_name, backend_port, instance_count,
+                      disable_overprovision):
+    lb_id = "resourceId('Microsoft.Network/loadBalancers', '{}')".format(lb_name)
+
+    nat_rule = {
+        "type": "Microsoft.Network/loadBalancers/inboundNatRules",
+        "apiVersion": get_target_network_api(cmd.cli_ctx),
+        "name": name,
+        "location": location,
+        "properties": {
+            "frontendIPConfiguration": {
+                'id': "[concat({}, '/frontendIPConfigurations/', '{}')]".format(lb_id, frontend_ip_name)
+            },
+            "backendAddressPool": {
+                "id": "[concat({}, '/backendAddressPools/', '{}')]".format(lb_id, backend_pool_name)
+            },
+            "backendPort": backend_port,
+            "frontendPortRangeStart": "50000",
+            # This logic comes from the template of `inboundNatPools` to keep consistent with NAT pool
+            # keep 50119 as minimum for backward compat, and ensure over-provision is taken care of
+            "frontendPortRangeEnd": str(max(50119, 49999 + instance_count * (1 if disable_overprovision else 2))),
+            "protocol": "tcp",
+            "idleTimeoutInMinutes": 5
+        },
+        "dependsOn": [
+            "[concat('Microsoft.Network/loadBalancers/', '{}')]".format(lb_name)
+        ]
+    }
+
+    return nat_rule
+
+
 def build_vmss_storage_account_pool_resource(_, loop_name, location, tags, storage_sku, edge_zone=None):
 
     storage_resource = {
@@ -911,7 +952,9 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         enable_auto_update=None, patch_mode=None, enable_agent=None, security_type=None,
                         enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None,
                         v_cpus_per_core=None, os_disk_security_encryption_type=None,
-                        os_disk_secure_vm_disk_encryption_set=None):
+                        os_disk_secure_vm_disk_encryption_set=None, os_disk_delete_option=None,
+                        regular_priority_count=None, regular_priority_percentage=None, disk_controller_type=None,
+                        enable_osimage_notification=None, max_surge=None, enable_hibernation=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -946,7 +989,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
 
     if application_security_groups and cmd.supported_api_version(min_api='2018-06-01',
                                                                  operation_group='virtual_machine_scale_sets'):
-        ip_config_properties['applicationSecurityGroups'] = [{'id': x.id} for x in application_security_groups]
+        ip_config_properties['applicationSecurityGroups'] = [{'id': x['id']} for x in application_security_groups]
 
     if ip_config_properties:
         ip_configuration = {
@@ -978,6 +1021,9 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
 
         if os_disk_size_gb is not None:
             storage_properties['osDisk']['diskSizeGB'] = os_disk_size_gb
+        if os_disk_delete_option is not None:
+            storage_properties['osDisk']['deleteOption'] = os_disk_delete_option
+
     elif storage_profile in [StorageProfile.ManagedPirImage, StorageProfile.ManagedCustomImage]:
         storage_properties['osDisk'] = {
             'createOption': 'FromImage',
@@ -1005,6 +1051,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
 
         if os_disk_size_gb is not None:
             storage_properties['osDisk']['diskSizeGB'] = os_disk_size_gb
+        if os_disk_delete_option is not None:
+            storage_properties['osDisk']['deleteOption'] = os_disk_delete_option
 
     if storage_profile in [StorageProfile.SAPirImage, StorageProfile.ManagedPirImage]:
         storage_properties['imageReference'] = {
@@ -1043,6 +1091,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         'id': os_disk_secure_vm_disk_encryption_set
                     }
                 })
+        if os_disk_delete_option is not None:
+            storage_properties['osDisk']['deleteOption'] = os_disk_delete_option
     if storage_profile == StorageProfile.CommunityGalleryImage:
         storage_properties['osDisk'] = {
             'caching': os_caching,
@@ -1069,6 +1119,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         'id': os_disk_secure_vm_disk_encryption_set
                     }
                 })
+        if os_disk_delete_option is not None:
+            storage_properties['osDisk']['deleteOption'] = os_disk_delete_option
 
     if disk_info:
         data_disks = [v for k, v in disk_info.items() if k != 'os']
@@ -1093,6 +1145,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
             data_disk['diskMBpsReadWrite'] = data_disk_mbps[i]
     if data_disks:
         storage_properties['dataDisks'] = data_disks
+    if disk_controller_type is not None:
+        storage_properties['diskControllerType'] = disk_controller_type
 
     # Build OS Profile
     os_profile = {}
@@ -1236,6 +1290,9 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         if prioritize_unhealthy_instances is not None:
             rolling_upgrade_policy['prioritizeUnhealthyInstances'] = prioritize_unhealthy_instances
 
+        if max_surge is not None:
+            rolling_upgrade_policy['maxSurge'] = max_surge
+
         if not rolling_upgrade_policy:
             del rolling_upgrade_policy
 
@@ -1247,6 +1304,14 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
 
         if spot_restore_timeout:
             vmss_properties['spotRestorePolicy']['restoreTimeout'] = spot_restore_timeout
+
+    if regular_priority_count is not None or regular_priority_percentage is not None:
+        priority_mix_policy = {}
+        if regular_priority_count is not None:
+            priority_mix_policy['baseRegularPriorityCount'] = regular_priority_count
+        if regular_priority_percentage is not None:
+            priority_mix_policy['regularPriorityPercentageAboveBase'] = regular_priority_percentage
+        vmss_properties['priorityMixPolicy'] = priority_mix_policy
 
     if license_type:
         virtual_machine_profile['licenseType'] = license_type
@@ -1285,13 +1350,22 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if proximity_placement_group:
         vmss_properties['proximityPlacementGroup'] = {'id': proximity_placement_group}
 
+    scheduled_events_profile = {}
     if terminate_notification_time is not None:
-        scheduled_events_profile = {
+        scheduled_events_profile.update({
             'terminateNotificationProfile': {
                 'notBeforeTimeout': terminate_notification_time,
                 'enable': 'true'
             }
-        }
+        })
+        virtual_machine_profile['scheduledEventsProfile'] = scheduled_events_profile
+
+    if enable_osimage_notification is not None:
+        scheduled_events_profile.update({
+            'osImageNotificationProfile': {
+                'enable': enable_osimage_notification
+            }
+        })
         virtual_machine_profile['scheduledEventsProfile'] = scheduled_events_profile
 
     if automatic_repairs_grace_period is not None or automatic_repairs_action is not None:
@@ -1309,7 +1383,10 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if encryption_at_host:
         security_profile['encryptionAtHost'] = encryption_at_host
 
-    if security_type is not None:
+    # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
+    # after changing the default values to Trusted Launch VMs in the future.
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
+    if security_type is not None and security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
         security_profile['securityType'] = security_type
 
     if enable_secure_boot is not None or enable_vtpm is not None:
@@ -1343,6 +1420,11 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if orchestration_mode and cmd.supported_api_version(min_api='2020-06-01',
                                                         operation_group='virtual_machine_scale_sets'):
         vmss_properties['orchestrationMode'] = orchestration_mode
+
+    if enable_hibernation is not None:
+        if not vmss_properties.get('additionalCapabilities'):
+            vmss_properties['additionalCapabilities'] = {}
+        vmss_properties['additionalCapabilities']['hibernationEnabled'] = enable_hibernation
 
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',

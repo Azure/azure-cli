@@ -45,6 +45,17 @@ class Create(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
+        _args_schema.location = AAZResourceLocationArg(
+            help="Resource location",
+            required=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        _args_schema.tags = AAZDictArg(
+            options=["--tags"],
+            help="Resource tags",
+        )
         _args_schema.query_pack_name = AAZStrArg(
             options=["-n", "--name", "--query-pack-name"],
             help="The name of the log analytics query pack.",
@@ -55,26 +66,22 @@ class Create(AAZCommand):
             required=True,
         )
 
-        # define Arg Group "Properties"
-
-        _args_schema = cls._args_schema
-        _args_schema.location = AAZResourceLocationArg(
-            arg_group="Properties",
-            help="Resource location",
-            required=True,
-        )
-        _args_schema.tags = AAZDictArg(
-            options=["--tags"],
-            arg_group="Properties",
-            help="Resource tags",
-        )
-
         tags = cls._args_schema.tags
         tags.Element = AAZStrArg()
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         self.QueryPacksCreateOrUpdate(ctx=self.ctx)()
+        self.post_operations()
+
+    # @register_callback
+    def pre_operations(self):
+        pass
+
+    # @register_callback
+    def post_operations(self):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)

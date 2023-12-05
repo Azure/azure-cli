@@ -5,15 +5,14 @@
 
 import json
 
-from knack.prompting import prompt_y_n
 from knack.util import CLIError
 from knack.log import get_logger
 
-from azure.mgmt.cognitiveservices.models import Account as CognitiveServicesAccount, Sku,\
-    VirtualNetworkRule, IpRule, NetworkRuleSet, NetworkRuleAction,\
-    AccountProperties as CognitiveServicesAccountProperties, ApiProperties as CognitiveServicesAccountApiProperties,\
-    Identity, ResourceIdentityType as IdentityType,\
-    Deployment, DeploymentModel, DeploymentScaleSettings, DeploymentProperties,\
+from azure.mgmt.cognitiveservices.models import Account as CognitiveServicesAccount, Sku, \
+    VirtualNetworkRule, IpRule, NetworkRuleSet, NetworkRuleAction, \
+    AccountProperties as CognitiveServicesAccountProperties, ApiProperties as CognitiveServicesAccountApiProperties, \
+    Identity, ResourceIdentityType as IdentityType, \
+    Deployment, DeploymentModel, DeploymentScaleSettings, DeploymentProperties, \
     CommitmentPlan, CommitmentPlanProperties, CommitmentPeriod
 from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus
 
@@ -89,45 +88,11 @@ def list_skus(cmd, kind=None, location=None, resource_group_name=None, account_n
 
 def create(
         client, resource_group_name, account_name, sku_name, kind, location, custom_domain=None,
-        tags=None, api_properties=None, assign_identity=False, storage=None, encryption=None, yes=None):
+        tags=None, api_properties=None, assign_identity=False, storage=None, encryption=None,
+        yes=None):  # pylint: disable=unused-argument
     """
     Create an Azure Cognitive Services account.
     """
-
-    terms = 'Notice\nMicrosoft will use data you send to Bing Search Services'\
-        ' to improve Microsoft products and services.'\
-        'Where you send personal data to these Cognitive Services, you are responsible '\
-        'for obtaining sufficient consent from the data subjects.'\
-        'The General Privacy and Security Terms in the Online Services Terms '\
-        'do not apply to these Cognitive Services.'\
-        'Please refer to the Microsoft Cognitive Services section in the Online '\
-        'Services Terms'\
-        ' (https://www.microsoft.com/Licensing/product-licensing/products.aspx)'\
-        ' for details.'\
-        'Microsoft offers policy controls that may be used to disable new Cognitive'\
-        ' Services deployments (https://docs.microsoft.com/azure/cognitive-servic'\
-        'es/cognitive-services-apis-create-account).'
-    terms_not_police = 'Notice\n' \
-                       'I certify that use of this service is not by or for a police department in the United States.'
-    hint = 'Please select'
-    import re
-    pattern = re.compile("^[Bb]ing\\..*$")
-    if pattern.match(kind):
-        if yes:
-            logger.warning(terms)
-        else:
-            logger.warning(terms)
-            option = prompt_y_n(hint)
-            if not option:
-                raise CLIError('Operation cancelled.')
-    if kind.lower() == 'face' or kind.lower() == 'cognitiveservices':
-        if yes:
-            logger.warning(terms_not_police)
-        else:
-            logger.warning(terms_not_police)
-            option = prompt_y_n(hint)
-            if not option:
-                raise CLIError('Operation cancelled.')
 
     sku = Sku(name=sku_name)
 
@@ -281,8 +246,9 @@ def identity_show(client, resource_group_name, account_name):
 
 def deployment_begin_create_or_update(
         client, resource_group_name, account_name, deployment_name,
-        model_format, model_name, model_version,
-        scale_settings_scale_type, scale_settings_capacity=None):
+        model_format, model_name, model_version, model_source=None,
+        sku_name=None, sku_capacity=None,
+        scale_settings_scale_type=None, scale_settings_capacity=None):
     """
     Create a deployment for Azure Cognitive Services account.
     """
@@ -292,9 +258,14 @@ def deployment_begin_create_or_update(
     dpy.properties.model.format = model_format
     dpy.properties.model.name = model_name
     dpy.properties.model.version = model_version
-    dpy.properties.scale_settings = DeploymentScaleSettings()
-    dpy.properties.scale_settings.scale_type = scale_settings_scale_type
-    if scale_settings_capacity is not None:
+    if model_source is not None:
+        dpy.properties.model.source = model_source
+    if sku_name is not None:
+        dpy.sku = Sku(name=sku_name)
+        dpy.sku.capacity = sku_capacity
+    if scale_settings_scale_type is not None:
+        dpy.properties.scale_settings = DeploymentScaleSettings()
+        dpy.properties.scale_settings.scale_type = scale_settings_scale_type
         dpy.properties.scale_settings.capacity = scale_settings_capacity
 
     return client.begin_create_or_update(resource_group_name, account_name, deployment_name, dpy, polling=False)

@@ -35,10 +35,25 @@ vmss create:
         disable_integrity_monitoring:
             rule_exclusions:
             - option_length_too_long
+        enable_integrity_monitoring:
+            rule_exclusions:
+            - option_length_too_long
         os_disk_security_encryption_type:
             rule_exclusions:
                 - option_length_too_long
         os_disk_secure_vm_disk_encryption_set:
+            rule_exclusions:
+                - option_length_too_long
+        data_disk_delete_option:
+            rule_exclusions:
+                - option_length_too_long
+        regular_priority_percentage:
+            rule_exclusions:
+                - option_length_too_long
+        enable_osimage_notification:
+            rule_exclusions:
+                - option_length_too_long
+        disable_integrity_monitoring_autoupgrade:
             rule_exclusions:
                 - option_length_too_long
 vmss update:
@@ -61,6 +76,12 @@ vmss update:
         prioritize_unhealthy_instances:
             rule_exclusions:
             - option_length_too_long
+        regular_priority_percentage:
+            rule_exclusions:
+                - option_length_too_long
+        enable_osimage_notification:
+            rule_exclusions:
+                - option_length_too_long
 vmss encryption enable:
     parameters:
         key_encryption_algorithm:
@@ -79,10 +100,16 @@ vm create:
         disable_integrity_monitoring:
             rule_exclusions:
                 - option_length_too_long
+        enable_integrity_monitoring:
+            rule_exclusions:
+                - option_length_too_long
         os_disk_security_encryption_type:
             rule_exclusions:
                 - option_length_too_long
         os_disk_secure_vm_disk_encryption_set:
+            rule_exclusions:
+                - option_length_too_long
+        disable_integrity_monitoring_autoupgrade:
             rule_exclusions:
                 - option_length_too_long
 vm unmanaged-disk attach:
@@ -95,6 +122,9 @@ vm encryption enable:
         key_encryption_algorithm:
             rule_exclusions:
             - missing_parameter_help
+vm extension list:
+    rule_exclusions:
+        - no_ids_for_list_commands
 vm install-patches:
     parameters:
         classifications_to_include_win:
@@ -130,6 +160,41 @@ snapshot update:
 sig image-version create:
     parameters:
         target_region_cvm_encryption:
+            rule_exclusions:
+            - option_length_too_long
+        allow_replicated_location_deletion:
+            rule_exclusions:
+            - option_length_too_long
+sig image-version update:
+    parameters:
+        allow_replicated_location_deletion:
+            rule_exclusions:
+            - option_length_too_long
+sig image-version undelete:
+    parameters:
+        allow_replicated_location_deletion:
+            rule_exclusions:
+            - option_length_too_long
+restore-point create:
+    parameters:
+        data_disk_restore_point_encryption_set:
+            rule_exclusions:
+                - option_length_too_long
+        data_disk_restore_point_encryption_type:
+            rule_exclusions:
+                - option_length_too_long
+        os_restore_point_encryption_set:
+            rule_exclusions:
+                - option_length_too_long
+        os_restore_point_encryption_type:
+            rule_exclusions:
+                - option_length_too_long
+        source_data_disk_resource:
+            rule_exclusions:
+                - option_length_too_long
+disk create:
+    parameters:
+        optimized_for_frequent_attach:
             rule_exclusions:
             - option_length_too_long
 ...

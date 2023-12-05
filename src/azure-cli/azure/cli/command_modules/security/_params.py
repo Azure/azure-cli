@@ -10,20 +10,20 @@
 from azure.cli.core.commands.parameters import (get_three_state_flag,
                                                 get_enum_type,
                                                 resource_group_name_type)
-from azure.mgmt.security.models._security_center_enums import Enum69
+from azure.mgmt.security.models import SettingName
 from knack.arguments import CLIArgumentType
 from ._validators import (validate_alert_status,
                           validate_auto_provisioning_toggle,
                           validate_pricing_tier,
                           validate_assessment_status_code)
-from .actions import AppendBaselines, AppendBaseline
+from .actions import AppendBaselines, AppendBaseline, GetExtension
 
 name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME', help='name of the resource to be fetched')
 home_region_arg_type = CLIArgumentType(options_list=('--home-region', '-hr'), metavar='HOMEREGION', help='home region that was selected for the subscription')
 location_arg_type = CLIArgumentType(options_list=('--location', '-l'), metavar='LOCATION', help='location of the resource')
 
 # Alerts
-alert_status_arg_type = CLIArgumentType(options_list=('--status'), metavar='STATUS', help='target status of the alert. possible values are "dismiss" and "activate"')
+alert_status_arg_type = CLIArgumentType(options_list=('--status'), metavar='STATUS', help='target status of the alert. possible values are "dismiss", "activate", "resolve" and "inprogress"')
 
 
 # Alerts Suppression Rules
@@ -66,6 +66,8 @@ contact_alerts_admins_arg_type = CLIArgumentType(options_list=('--alerts-admins'
 
 # Pricing
 pricing_tier_arg_type = CLIArgumentType(options_list=('--tier'), metavar='TIER', help='pricing tier type')
+pricing_tier_subplan_arg_type = CLIArgumentType(options_list=('--subplan'), metavar='SUBPLAN', help='bundle suplan', required=False)
+pricing_tier_extensions_arg_type = CLIArgumentType(options_list=('--extensions'), metavar='EXTENSIONS', help='pricing extensions', required=False, action=GetExtension, nargs='*')
 
 # Workspace settings
 workspace_setting_target_workspace_arg_type = CLIArgumentType(options_list=('--target-workspace'), metavar='TARGETWORKSPACE', help='An ID of the workspace resource that will hold the security data')
@@ -103,6 +105,7 @@ adaptive_network_hardenings_resource_adaptive_network_hardenings_resource_name =
 
 # Adaptive Application Controls
 adaptive_application_controls_group_name = CLIArgumentType(option_list=('--group-name'), metave='GROUPNAME', help='Name of an application control VM/server group')
+adaptive_application_controls_location = CLIArgumentType(options_list=('--location', '-l'), metavar='LOCATION', help='Location of the resource. Possible values are "centralsus", "westeurope". Please use "list" operation to get all resources and locations')
 
 # Automations
 automation_scopes_arg_type = CLIArgumentType(options_list=('--scopes'), metavar='SCOPES', help='A collection of scopes on which the security automations logic is applied')
@@ -162,6 +165,7 @@ def load_arguments(self, _):
                   'secure-scores',
                   'secure-score-controls',
                   'secure-score-control-definitions',
+                  'security_solutions_reference_data',
                   'setting',
                   'automation'
                   ]:
@@ -344,6 +348,16 @@ def load_arguments(self, _):
                 validator=validate_pricing_tier,
                 arg_type=pricing_tier_arg_type)
 
+            c.argument(
+                'subplan',
+                arg_type=pricing_tier_subplan_arg_type)
+
+            c.argument('baseline', arg_type=va_sql_baseline_multiple_arg_type)
+
+            c.argument(
+                'extensions',
+                arg_type=pricing_tier_extensions_arg_type)
+
     for scope in ['workspace-setting create']:
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument(
@@ -446,10 +460,13 @@ def load_arguments(self, _):
             c.argument(
                 'group_name',
                 arg_type=adaptive_application_controls_group_name)
+            c.argument(
+                'location',
+                arg_type=adaptive_application_controls_location)
 
     for scope in ['setting']:
         with self.argument_context('security {}'.format(scope)) as c:
-            c.argument('setting_name', options_list=['--name', '-n'], help='The name of the setting', arg_type=get_enum_type(Enum69))
+            c.argument('setting_name', options_list=['--name', '-n'], help='The name of the setting', arg_type=get_enum_type(SettingName))
             c.argument('enabled', help='Enable or disable the setting status.', arg_type=get_three_state_flag())
 
     for scope in ['automation create_or_update', 'automation validate']:

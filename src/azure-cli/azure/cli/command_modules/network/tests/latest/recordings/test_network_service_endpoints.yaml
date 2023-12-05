@@ -13,7 +13,7 @@ interactions:
       ParameterSetName:
       - -l
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/virtualNetworkAvailableEndpointServices?api-version=2021-08-01
   response:
@@ -47,17 +47,19 @@ interactions:
         \     \"type\": \"Microsoft.Network/virtualNetworkEndpointServices\"\r\n    },\r\n
         \   {\r\n      \"name\": \"Microsoft.CosmosDBManagedInstance\",\r\n      \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/virtualNetworkEndpointServices/Microsoft.CosmosDBManagedInstance\",\r\n
+        \     \"type\": \"Microsoft.Network/virtualNetworkEndpointServices\"\r\n    },\r\n
+        \   {\r\n      \"name\": \"Microsoft.Storage.Global\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/virtualNetworkEndpointServices/Microsoft.Storage.Global\",\r\n
         \     \"type\": \"Microsoft.Network/virtualNetworkEndpointServices\"\r\n    }\r\n
         \ ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3302'
+      - '3578'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:51:38 GMT
+      - Fri, 08 Sep 2023 06:18:04 GMT
       expires:
       - '-1'
       pragma:
@@ -74,10 +76,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f9cb33fa-86be-4b71-ad18-a70f70817c9a
+      - 136876ca-ddea-4a09-8b1c-f0017bf891ee
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -92,21 +94,21 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/network_service_endpoint_scenario_test000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/network_service_endpoint_scenario_test000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001","name":"network_service_endpoint_scenario_test000001","type":"Microsoft.Resources/resourceGroups","location":"westcentralus","tags":{"product":"azurecli","cause":"automation","date":"2022-05-26T08:51:32Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001","name":"network_service_endpoint_scenario_test000001","type":"Microsoft.Resources/resourceGroups","location":"westcentralus","tags":{"product":"azurecli","cause":"automation","test":"test_network_service_endpoints","date":"2023-09-08T06:17:58Z","module":"network"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '373'
+      - '432'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:51:39 GMT
+      - Fri, 08 Sep 2023 06:18:04 GMT
       expires:
       - '-1'
       pragma:
@@ -138,22 +140,22 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"policy1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1\",\r\n
-        \ \"etag\": \"W/\\\"86cc03fe-7fc6-47f1-96b5-67693d9c7dc3\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"242e6204-5575-4ffe-b5c5-b61d9a6374d1\\\"\",\r\n  \"type\":
         \"Microsoft.Network/serviceEndpointPolicies\",\r\n  \"location\": \"westcentralus\",\r\n
         \ \"tags\": {\r\n    \"test\": \"best\"\r\n  },\r\n  \"properties\": {\r\n
-        \   \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\": \"0c3979d1-8b0d-4fff-97e7-5d68afbb9bcb\",\r\n
+        \   \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\": \"05e51d8b-dfd5-409a-ab18-7c215b39ee39\",\r\n
         \   \"serviceEndpointPolicyDefinitions\": []\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/0ddfd457-104b-49f4-9b43-0cba2b2c1e4f?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/2e0794cd-d456-4ec9-9a30-00b8733d3c4e?api-version=2021-08-01
       cache-control:
       - no-cache
       content-length:
@@ -161,7 +163,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:51:48 GMT
+      - Fri, 08 Sep 2023 06:18:12 GMT
       expires:
       - '-1'
       pragma:
@@ -174,12 +176,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 9ef3b093-f9b2-4403-81d6-faaa6275c011
+      - 7eca885d-939b-4971-acd5-043be23d2929
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1192'
+      - '1198'
     status:
       code: 201
-      message: ''
+      message: Created
 - request:
     body: null
     headers:
@@ -194,9 +196,9 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/0ddfd457-104b-49f4-9b43-0cba2b2c1e4f?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/2e0794cd-d456-4ec9-9a30-00b8733d3c4e?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -208,7 +210,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:51:57 GMT
+      - Fri, 08 Sep 2023 06:18:12 GMT
       expires:
       - '-1'
       pragma:
@@ -225,10 +227,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0fe5d7ee-0e60-4a02-8670-eff725b64896
+      - 64e141e1-fd08-419f-9006-5041e95afe79
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -243,16 +245,16 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"policy1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1\",\r\n
-        \ \"etag\": \"W/\\\"58f6373a-0496-4a8a-8610-720ffdf7f9ab\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"2c415aa3-edc9-4084-83bb-9de40fe0460e\\\"\",\r\n  \"type\":
         \"Microsoft.Network/serviceEndpointPolicies\",\r\n  \"location\": \"westcentralus\",\r\n
         \ \"tags\": {\r\n    \"test\": \"best\"\r\n  },\r\n  \"properties\": {\r\n
-        \   \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"0c3979d1-8b0d-4fff-97e7-5d68afbb9bcb\",\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"05e51d8b-dfd5-409a-ab18-7c215b39ee39\",\r\n
         \   \"serviceEndpointPolicyDefinitions\": []\r\n  }\r\n}"
     headers:
       cache-control:
@@ -262,9 +264,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:51:58 GMT
+      - Fri, 08 Sep 2023 06:18:13 GMT
       etag:
-      - W/"58f6373a-0496-4a8a-8610-720ffdf7f9ab"
+      - W/"2c415aa3-edc9-4084-83bb-9de40fe0460e"
       expires:
       - '-1'
       pragma:
@@ -281,10 +283,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 2c0494cc-9895-4858-9747-60ff42db792f
+      - f2344c99-c4a2-4503-a769-22ef9ce2aa14
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -299,16 +301,16 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"policy1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1\",\r\n
-        \ \"etag\": \"W/\\\"58f6373a-0496-4a8a-8610-720ffdf7f9ab\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"2c415aa3-edc9-4084-83bb-9de40fe0460e\\\"\",\r\n  \"type\":
         \"Microsoft.Network/serviceEndpointPolicies\",\r\n  \"location\": \"westcentralus\",\r\n
         \ \"tags\": {\r\n    \"test\": \"best\"\r\n  },\r\n  \"properties\": {\r\n
-        \   \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"0c3979d1-8b0d-4fff-97e7-5d68afbb9bcb\",\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"05e51d8b-dfd5-409a-ab18-7c215b39ee39\",\r\n
         \   \"serviceEndpointPolicyDefinitions\": []\r\n  }\r\n}"
     headers:
       cache-control:
@@ -318,9 +320,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:52:00 GMT
+      - Fri, 08 Sep 2023 06:18:15 GMT
       etag:
-      - W/"58f6373a-0496-4a8a-8610-720ffdf7f9ab"
+      - W/"2c415aa3-edc9-4084-83bb-9de40fe0460e"
       expires:
       - '-1'
       pragma:
@@ -337,14 +339,14 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 6605d4e3-81b8-47e6-9ec0-a07694f685fa
+      - 3002a861-a805-4a5e-873c-4c1a3703e8d1
     status:
       code: 200
       message: OK
 - request:
     body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1",
-      "location": "westcentralus", "tags": {"test": "nest"}, "properties": {"serviceEndpointPolicyDefinitions":
-      []}}'
+      "location": "westcentralus", "properties": {"serviceEndpointPolicyDefinitions":
+      []}, "tags": {"test": "nest"}}'
     headers:
       Accept:
       - application/json
@@ -361,22 +363,22 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"policy1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1\",\r\n
-        \ \"etag\": \"W/\\\"5ba5cc79-8950-4211-8e4e-e21c7310a885\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"431139cc-cc95-4f80-ae7f-ad12c6a8bc2c\\\"\",\r\n  \"type\":
         \"Microsoft.Network/serviceEndpointPolicies\",\r\n  \"location\": \"westcentralus\",\r\n
         \ \"tags\": {\r\n    \"test\": \"nest\"\r\n  },\r\n  \"properties\": {\r\n
-        \   \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"0c3979d1-8b0d-4fff-97e7-5d68afbb9bcb\",\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"05e51d8b-dfd5-409a-ab18-7c215b39ee39\",\r\n
         \   \"serviceEndpointPolicyDefinitions\": []\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/156ca9d5-65d8-425c-a6bd-4cf900df986a?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/19e5f3ac-b501-4b30-8311-533ac6a31174?api-version=2021-08-01
       cache-control:
       - no-cache
       content-length:
@@ -384,7 +386,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:52:05 GMT
+      - Fri, 08 Sep 2023 06:18:19 GMT
       expires:
       - '-1'
       pragma:
@@ -401,12 +403,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 63c930fa-9fd8-407a-a76a-6dae6fecd041
+      - 7121e6c8-da76-4c4e-a557-3fed1aba2a9c
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1192'
+      - '1199'
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -421,9 +423,9 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/156ca9d5-65d8-425c-a6bd-4cf900df986a?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/19e5f3ac-b501-4b30-8311-533ac6a31174?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -435,7 +437,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:52:36 GMT
+      - Fri, 08 Sep 2023 06:18:20 GMT
       expires:
       - '-1'
       pragma:
@@ -452,10 +454,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b5044510-5a05-406a-99bf-f269c001bcb3
+      - 82d59389-6dd1-41b9-89d8-80799235ef14
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -470,16 +472,16 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"policy1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1\",\r\n
-        \ \"etag\": \"W/\\\"5ba5cc79-8950-4211-8e4e-e21c7310a885\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"431139cc-cc95-4f80-ae7f-ad12c6a8bc2c\\\"\",\r\n  \"type\":
         \"Microsoft.Network/serviceEndpointPolicies\",\r\n  \"location\": \"westcentralus\",\r\n
         \ \"tags\": {\r\n    \"test\": \"nest\"\r\n  },\r\n  \"properties\": {\r\n
-        \   \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"0c3979d1-8b0d-4fff-97e7-5d68afbb9bcb\",\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"05e51d8b-dfd5-409a-ab18-7c215b39ee39\",\r\n
         \   \"serviceEndpointPolicyDefinitions\": []\r\n  }\r\n}"
     headers:
       cache-control:
@@ -489,9 +491,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:52:36 GMT
+      - Fri, 08 Sep 2023 06:18:20 GMT
       etag:
-      - W/"5ba5cc79-8950-4211-8e4e-e21c7310a885"
+      - W/"431139cc-cc95-4f80-ae7f-ad12c6a8bc2c"
       expires:
       - '-1'
       pragma:
@@ -508,10 +510,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d1391986-b424-4e7d-b1c1-8b97c123bff4
+      - f0a89c17-5da9-47e2-8104-2fc949d0c459
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -526,18 +528,18 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"policy1\",\r\n      \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1\",\r\n
-        \     \"etag\": \"W/\\\"5ba5cc79-8950-4211-8e4e-e21c7310a885\\\"\",\r\n      \"type\":
+        \     \"etag\": \"W/\\\"431139cc-cc95-4f80-ae7f-ad12c6a8bc2c\\\"\",\r\n      \"type\":
         \"Microsoft.Network/serviceEndpointPolicies\",\r\n      \"location\": \"westcentralus\",\r\n
         \     \"tags\": {\r\n        \"test\": \"nest\"\r\n      },\r\n      \"properties\":
         {\r\n        \"provisioningState\": \"Succeeded\",\r\n        \"resourceGuid\":
-        \"0c3979d1-8b0d-4fff-97e7-5d68afbb9bcb\",\r\n        \"serviceEndpointPolicyDefinitions\":
+        \"05e51d8b-dfd5-409a-ab18-7c215b39ee39\",\r\n        \"serviceEndpointPolicyDefinitions\":
         []\r\n      }\r\n    }\r\n  ]\r\n}"
     headers:
       cache-control:
@@ -547,7 +549,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:52:37 GMT
+      - Fri, 08 Sep 2023 06:18:22 GMT
       expires:
       - '-1'
       pragma:
@@ -564,7 +566,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 8700869a-098b-499d-95b6-4e394d453017
+      - fe03cb21-54bb-4fad-83d0-20fdee7344d0
     status:
       code: 200
       message: OK
@@ -582,16 +584,16 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"policy1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1\",\r\n
-        \ \"etag\": \"W/\\\"5ba5cc79-8950-4211-8e4e-e21c7310a885\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"431139cc-cc95-4f80-ae7f-ad12c6a8bc2c\\\"\",\r\n  \"type\":
         \"Microsoft.Network/serviceEndpointPolicies\",\r\n  \"location\": \"westcentralus\",\r\n
         \ \"tags\": {\r\n    \"test\": \"nest\"\r\n  },\r\n  \"properties\": {\r\n
-        \   \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"0c3979d1-8b0d-4fff-97e7-5d68afbb9bcb\",\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"05e51d8b-dfd5-409a-ab18-7c215b39ee39\",\r\n
         \   \"serviceEndpointPolicyDefinitions\": []\r\n  }\r\n}"
     headers:
       cache-control:
@@ -601,9 +603,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:52:39 GMT
+      - Fri, 08 Sep 2023 06:18:25 GMT
       etag:
-      - W/"5ba5cc79-8950-4211-8e4e-e21c7310a885"
+      - W/"431139cc-cc95-4f80-ae7f-ad12c6a8bc2c"
       expires:
       - '-1'
       pragma:
@@ -620,15 +622,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0c3e4c67-99a8-43d3-9901-84b9097148e5
+      - b959b268-6fbe-4074-9313-86b85bbd7349
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -640,7 +642,7 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1?api-version=2021-08-01
   response:
@@ -650,17 +652,17 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/eab0b9a8-07ad-4b44-8d32-e410c3d31952?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/f39398a7-9ada-4fbf-b48e-9859b2f7490c?api-version=2021-08-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Thu, 26 May 2022 08:52:41 GMT
+      - Fri, 08 Sep 2023 06:18:28 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operationResults/eab0b9a8-07ad-4b44-8d32-e410c3d31952?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operationResults/f39398a7-9ada-4fbf-b48e-9859b2f7490c?api-version=2021-08-01
       pragma:
       - no-cache
       server:
@@ -671,9 +673,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f01380a8-af73-4fb9-90b8-47355c4706dd
+      - 174089e9-f5d2-486e-a3f2-d99448a19c5d
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14995'
+      - '14998'
     status:
       code: 202
       message: Accepted
@@ -691,9 +693,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/eab0b9a8-07ad-4b44-8d32-e410c3d31952?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/f39398a7-9ada-4fbf-b48e-9859b2f7490c?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -705,7 +707,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:52:52 GMT
+      - Fri, 08 Sep 2023 06:18:28 GMT
       expires:
       - '-1'
       pragma:
@@ -722,7 +724,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 929c5f44-af25-477b-910d-fd8b9e06ed97
+      - 1f65148e-304b-4e53-afb5-ef26890a72a7
     status:
       code: 200
       message: OK
@@ -740,9 +742,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operationResults/eab0b9a8-07ad-4b44-8d32-e410c3d31952?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operationResults/f39398a7-9ada-4fbf-b48e-9859b2f7490c?api-version=2021-08-01
   response:
     body:
       string: ''
@@ -750,17 +752,17 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/eab0b9a8-07ad-4b44-8d32-e410c3d31952?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/f39398a7-9ada-4fbf-b48e-9859b2f7490c?api-version=2021-08-01
       cache-control:
       - no-cache
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:52:52 GMT
+      - Fri, 08 Sep 2023 06:18:29 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operationResults/eab0b9a8-07ad-4b44-8d32-e410c3d31952?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operationResults/f39398a7-9ada-4fbf-b48e-9859b2f7490c?api-version=2021-08-01
       pragma:
       - no-cache
       server:
@@ -771,7 +773,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f01380a8-af73-4fb9-90b8-47355c4706dd
+      - 174089e9-f5d2-486e-a3f2-d99448a19c5d
     status:
       code: 204
       message: No Content
@@ -789,31 +791,38 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies?api-version=2021-08-01
   response:
     body:
-      string: '{"value":[]}'
+      string: "{\r\n  \"value\": []\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '12'
+      - '19'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:52:53 GMT
+      - Fri, 08 Sep 2023 06:18:31 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
       vary:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - e4ae89af-339f-45e0-ad70-005274ba9424
     status:
       code: 200
       message: OK
@@ -831,21 +840,21 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/network_service_endpoint_scenario_test000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/network_service_endpoint_scenario_test000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001","name":"network_service_endpoint_scenario_test000001","type":"Microsoft.Resources/resourceGroups","location":"westcentralus","tags":{"product":"azurecli","cause":"automation","date":"2022-05-26T08:51:32Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001","name":"network_service_endpoint_scenario_test000001","type":"Microsoft.Resources/resourceGroups","location":"westcentralus","tags":{"product":"azurecli","cause":"automation","test":"test_network_service_endpoints","date":"2023-09-08T06:17:58Z","module":"network"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '373'
+      - '432'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:52:53 GMT
+      - Fri, 08 Sep 2023 06:18:31 GMT
       expires:
       - '-1'
       pragma:
@@ -877,22 +886,22 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"policy1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1\",\r\n
-        \ \"etag\": \"W/\\\"91721ffa-e648-440d-b910-0022f115fe2f\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"7ee35172-90d1-4e79-98d2-7c94e59f67e6\\\"\",\r\n  \"type\":
         \"Microsoft.Network/serviceEndpointPolicies\",\r\n  \"location\": \"westcentralus\",\r\n
         \ \"tags\": {\r\n    \"test\": \"best\"\r\n  },\r\n  \"properties\": {\r\n
-        \   \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\": \"860750f6-4dc0-41b7-aab5-896a432627de\",\r\n
+        \   \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\": \"98717b6b-9ea5-45d3-b68d-d0d84084c298\",\r\n
         \   \"serviceEndpointPolicyDefinitions\": []\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/5ed5895b-b1c3-40aa-b7ce-819098043884?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/42c49f71-f953-495b-b1eb-0eca34623f69?api-version=2021-08-01
       cache-control:
       - no-cache
       content-length:
@@ -900,7 +909,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:53:01 GMT
+      - Fri, 08 Sep 2023 06:18:39 GMT
       expires:
       - '-1'
       pragma:
@@ -913,9 +922,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e15c3a7f-90bc-45ea-896c-73d75615c0e1
+      - b0d191ff-8812-4caa-9b45-5ddf245d21a7
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1158'
+      - '1197'
     status:
       code: 201
       message: Created
@@ -933,9 +942,9 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/5ed5895b-b1c3-40aa-b7ce-819098043884?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/42c49f71-f953-495b-b1eb-0eca34623f69?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -947,7 +956,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:53:11 GMT
+      - Fri, 08 Sep 2023 06:18:39 GMT
       expires:
       - '-1'
       pragma:
@@ -964,7 +973,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d006c6e4-3a64-4fc6-9353-2400acf51ca0
+      - 7919d59e-fb00-41e6-af6e-13c590012cd9
     status:
       code: 200
       message: OK
@@ -982,16 +991,16 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"policy1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1\",\r\n
-        \ \"etag\": \"W/\\\"ff6f0853-4612-4654-8c74-bd6c63229e69\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"e6e7c7aa-8294-408b-93f8-8b1be7a0a5f5\\\"\",\r\n  \"type\":
         \"Microsoft.Network/serviceEndpointPolicies\",\r\n  \"location\": \"westcentralus\",\r\n
         \ \"tags\": {\r\n    \"test\": \"best\"\r\n  },\r\n  \"properties\": {\r\n
-        \   \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"860750f6-4dc0-41b7-aab5-896a432627de\",\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"98717b6b-9ea5-45d3-b68d-d0d84084c298\",\r\n
         \   \"serviceEndpointPolicyDefinitions\": []\r\n  }\r\n}"
     headers:
       cache-control:
@@ -1001,9 +1010,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:53:11 GMT
+      - Fri, 08 Sep 2023 06:18:40 GMT
       etag:
-      - W/"ff6f0853-4612-4654-8c74-bd6c63229e69"
+      - W/"e6e7c7aa-8294-408b-93f8-8b1be7a0a5f5"
       expires:
       - '-1'
       pragma:
@@ -1020,13 +1029,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 8df7222a-30a3-4805-b865-7e81a82064f6
+      - 692a1eb6-c781-4351-8063-eae3cbc02b55
     status:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"description": "Test Def", "service": "Microsoft.Storage",
-      "serviceResources": ["/subscriptions/00000000-0000-0000-0000-000000000000"]}}'
+    body: '{"name": "storage-def", "properties": {"description": "Test Def", "service":
+      "Microsoft.Storage", "serviceResources": ["/subscriptions/00000000-0000-0000-0000-000000000000"]}}'
     headers:
       Accept:
       - application/json
@@ -1037,25 +1046,27 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '152'
+      - '175'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g --policy-name -n --service --description --service-resources
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1/serviceEndpointPolicyDefinitions/storage-def?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"storage-def\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1/serviceEndpointPolicyDefinitions/storage-def\",\r\n
-        \ \"etag\": \"W/\\\"5519bf4c-c9d1-4ce8-85f6-9932ad00a185\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"6c088767-783a-4ded-9ff2-d1a80ec30f2a\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"service\": \"Microsoft.Storage\",\r\n
         \   \"description\": \"Test Def\",\r\n    \"serviceResources\": [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000\"\r\n
         \   ]\r\n  },\r\n  \"type\": \"Microsoft.Network/serviceEndpointPolicies/serviceEndpointPolicyDefinitions\"\r\n}"
     headers:
+      azure-asyncnotification:
+      - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/6b3c7ac0-db25-460d-9fe4-609f884983ce?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/2f09e3af-6390-4932-9a50-39ac8006a999?api-version=2021-08-01
       cache-control:
       - no-cache
       content-length:
@@ -1063,7 +1074,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:53:13 GMT
+      - Fri, 08 Sep 2023 06:18:41 GMT
       expires:
       - '-1'
       pragma:
@@ -1076,12 +1087,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f78ebece-4f22-4faa-8c83-be4e8e1a6fd1
+      - 83a48060-c246-488f-990a-1477810a0895
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1155'
+      - '1197'
     status:
       code: 201
-      message: ''
+      message: Created
 - request:
     body: null
     headers:
@@ -1096,9 +1107,9 @@ interactions:
       ParameterSetName:
       - -g --policy-name -n --service --description --service-resources
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/6b3c7ac0-db25-460d-9fe4-609f884983ce?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/2f09e3af-6390-4932-9a50-39ac8006a999?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1110,7 +1121,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:53:23 GMT
+      - Fri, 08 Sep 2023 06:18:41 GMT
       expires:
       - '-1'
       pragma:
@@ -1127,10 +1138,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 1d972a2e-6350-436e-a7d9-836238102487
+      - 119ef7d4-20cc-408d-98af-897ea43580c1
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -1145,13 +1156,13 @@ interactions:
       ParameterSetName:
       - -g --policy-name -n --service --description --service-resources
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1/serviceEndpointPolicyDefinitions/storage-def?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"storage-def\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1/serviceEndpointPolicyDefinitions/storage-def\",\r\n
-        \ \"etag\": \"W/\\\"d2f98ab7-6816-47cf-9418-c78ba5932136\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"5e7b78db-20a0-4e64-bfbd-878db0ec5ee5\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"service\": \"Microsoft.Storage\",\r\n
         \   \"description\": \"Test Def\",\r\n    \"serviceResources\": [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000\"\r\n
         \   ]\r\n  },\r\n  \"type\": \"Microsoft.Network/serviceEndpointPolicies/serviceEndpointPolicyDefinitions\"\r\n}"
@@ -1163,9 +1174,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:53:23 GMT
+      - Fri, 08 Sep 2023 06:18:41 GMT
       etag:
-      - W/"d2f98ab7-6816-47cf-9418-c78ba5932136"
+      - W/"5e7b78db-20a0-4e64-bfbd-878db0ec5ee5"
       expires:
       - '-1'
       pragma:
@@ -1182,10 +1193,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - fd5b3900-37c4-410c-bb5d-17d151a0a7bb
+      - bb697e8d-3df1-4e04-abb8-d2990f1d018b
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -1200,13 +1211,13 @@ interactions:
       ParameterSetName:
       - -g --policy-name -n --description
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1/serviceEndpointPolicyDefinitions/storage-def?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"storage-def\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1/serviceEndpointPolicyDefinitions/storage-def\",\r\n
-        \ \"etag\": \"W/\\\"d2f98ab7-6816-47cf-9418-c78ba5932136\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"5e7b78db-20a0-4e64-bfbd-878db0ec5ee5\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"service\": \"Microsoft.Storage\",\r\n
         \   \"description\": \"Test Def\",\r\n    \"serviceResources\": [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000\"\r\n
         \   ]\r\n  },\r\n  \"type\": \"Microsoft.Network/serviceEndpointPolicies/serviceEndpointPolicyDefinitions\"\r\n}"
@@ -1218,9 +1229,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:53:25 GMT
+      - Fri, 08 Sep 2023 06:18:44 GMT
       etag:
-      - W/"d2f98ab7-6816-47cf-9418-c78ba5932136"
+      - W/"5e7b78db-20a0-4e64-bfbd-878db0ec5ee5"
       expires:
       - '-1'
       pragma:
@@ -1237,15 +1248,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e2c0d418-a557-4ccc-bd29-d26120f548b9
+      - 02aa3fd0-0d5d-4697-999b-2263e18fe15b
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1/serviceEndpointPolicyDefinitions/storage-def",
-      "name": "storage-def", "type": "Microsoft.Network/serviceEndpointPolicies/serviceEndpointPolicyDefinitions",
-      "properties": {"description": "Better description", "service": "Microsoft.Storage",
-      "serviceResources": ["/subscriptions/00000000-0000-0000-0000-000000000000"]}}'
+      "name": "storage-def", "properties": {"description": "Better description", "service":
+      "Microsoft.Storage", "serviceResources": ["/subscriptions/00000000-0000-0000-0000-000000000000"]},
+      "type": "Microsoft.Network/serviceEndpointPolicies/serviceEndpointPolicyDefinitions"}'
     headers:
       Accept:
       - application/json
@@ -1262,20 +1273,22 @@ interactions:
       ParameterSetName:
       - -g --policy-name -n --description
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1/serviceEndpointPolicyDefinitions/storage-def?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"storage-def\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1/serviceEndpointPolicyDefinitions/storage-def\",\r\n
-        \ \"etag\": \"W/\\\"6bfb29a7-d418-4b84-a21c-ddeb2c5edd55\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"c5024dc8-0eee-41d4-acd9-e8f63cc24632\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"service\": \"Microsoft.Storage\",\r\n
         \   \"description\": \"Better description\",\r\n    \"serviceResources\":
         [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000\"\r\n    ]\r\n
         \ },\r\n  \"type\": \"Microsoft.Network/serviceEndpointPolicies/serviceEndpointPolicyDefinitions\"\r\n}"
     headers:
+      azure-asyncnotification:
+      - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/dc377c5d-1a88-4cd6-bff9-db3834799df8?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/6cea773d-5eca-4126-81bb-e9b1c249ca8f?api-version=2021-08-01
       cache-control:
       - no-cache
       content-length:
@@ -1283,7 +1296,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:53:26 GMT
+      - Fri, 08 Sep 2023 06:18:45 GMT
       expires:
       - '-1'
       pragma:
@@ -1300,12 +1313,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 29cb89e8-c189-4b4d-af1a-66fdce425e36
+      - 2b53f60f-9fb6-4c0f-916a-c1f779b1c409
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1149'
+      - '1197'
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -1320,9 +1333,9 @@ interactions:
       ParameterSetName:
       - -g --policy-name -n --description
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/dc377c5d-1a88-4cd6-bff9-db3834799df8?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/6cea773d-5eca-4126-81bb-e9b1c249ca8f?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1334,7 +1347,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:53:36 GMT
+      - Fri, 08 Sep 2023 06:18:45 GMT
       expires:
       - '-1'
       pragma:
@@ -1351,10 +1364,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0b79c164-3faa-4a47-a5d3-aa600bfe4406
+      - c1b2b508-ae04-46ed-a7dd-459d24f75bf7
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -1369,13 +1382,13 @@ interactions:
       ParameterSetName:
       - -g --policy-name -n --description
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1/serviceEndpointPolicyDefinitions/storage-def?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"storage-def\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1/serviceEndpointPolicyDefinitions/storage-def\",\r\n
-        \ \"etag\": \"W/\\\"860e2e0d-6456-4c68-b2b6-57961727c163\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"285f51e1-bec7-45de-905f-f5be979c3cf7\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"service\": \"Microsoft.Storage\",\r\n
         \   \"description\": \"Better description\",\r\n    \"serviceResources\":
         [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000\"\r\n    ]\r\n
@@ -1388,9 +1401,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:53:36 GMT
+      - Fri, 08 Sep 2023 06:18:46 GMT
       etag:
-      - W/"860e2e0d-6456-4c68-b2b6-57961727c163"
+      - W/"285f51e1-bec7-45de-905f-f5be979c3cf7"
       expires:
       - '-1'
       pragma:
@@ -1407,10 +1420,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 281e257c-a04e-4fd6-a591-422644433d6d
+      - 6d409e91-d5d3-4de6-bd2c-c02fac84ca1a
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -1425,14 +1438,14 @@ interactions:
       ParameterSetName:
       - -g --policy-name
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1/serviceEndpointPolicyDefinitions?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"storage-def\",\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1/serviceEndpointPolicyDefinitions/storage-def\",\r\n
-        \     \"etag\": \"W/\\\"860e2e0d-6456-4c68-b2b6-57961727c163\\\"\",\r\n      \"properties\":
+        \     \"etag\": \"W/\\\"285f51e1-bec7-45de-905f-f5be979c3cf7\\\"\",\r\n      \"properties\":
         {\r\n        \"provisioningState\": \"Succeeded\",\r\n        \"service\":
         \"Microsoft.Storage\",\r\n        \"description\": \"Better description\",\r\n
         \       \"serviceResources\": [\r\n          \"/subscriptions/00000000-0000-0000-0000-000000000000\"\r\n
@@ -1446,7 +1459,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:53:38 GMT
+      - Fri, 08 Sep 2023 06:18:49 GMT
       expires:
       - '-1'
       pragma:
@@ -1463,7 +1476,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 9d099884-c6ab-4512-abe3-529d0e1cca8c
+      - 8f916d39-a27b-4746-a53e-b0eb327563a5
     status:
       code: 200
       message: OK
@@ -1481,13 +1494,13 @@ interactions:
       ParameterSetName:
       - -g --policy-name -n
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1/serviceEndpointPolicyDefinitions/storage-def?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"storage-def\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1/serviceEndpointPolicyDefinitions/storage-def\",\r\n
-        \ \"etag\": \"W/\\\"860e2e0d-6456-4c68-b2b6-57961727c163\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"285f51e1-bec7-45de-905f-f5be979c3cf7\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"service\": \"Microsoft.Storage\",\r\n
         \   \"description\": \"Better description\",\r\n    \"serviceResources\":
         [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000\"\r\n    ]\r\n
@@ -1500,9 +1513,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:53:40 GMT
+      - Fri, 08 Sep 2023 06:18:50 GMT
       etag:
-      - W/"860e2e0d-6456-4c68-b2b6-57961727c163"
+      - W/"285f51e1-bec7-45de-905f-f5be979c3cf7"
       expires:
       - '-1'
       pragma:
@@ -1519,15 +1532,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d813ee83-8083-444d-9ec9-6f5657e65a50
+      - 545689ac-e893-46be-96af-df30b66f3596
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1539,25 +1552,27 @@ interactions:
       ParameterSetName:
       - -g --policy-name -n
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1/serviceEndpointPolicyDefinitions/storage-def?api-version=2021-08-01
   response:
     body:
       string: ''
     headers:
+      azure-asyncnotification:
+      - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/d442dae4-f5f8-48be-a644-885079ab8a83?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/8d9ed864-86d7-4bd7-9679-40b863a087c7?api-version=2021-08-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Thu, 26 May 2022 08:53:40 GMT
+      - Fri, 08 Sep 2023 06:18:52 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operationResults/d442dae4-f5f8-48be-a644-885079ab8a83?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operationResults/8d9ed864-86d7-4bd7-9679-40b863a087c7?api-version=2021-08-01
       pragma:
       - no-cache
       server:
@@ -1568,12 +1583,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 62fbd028-8023-431b-9003-541c1eb0c2e0
+      - ceb1f485-2069-4664-a5e4-f4e332fce8b2
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14986'
+      - '14999'
     status:
       code: 202
-      message: ''
+      message: Accepted
 - request:
     body: null
     headers:
@@ -1588,9 +1603,9 @@ interactions:
       ParameterSetName:
       - -g --policy-name -n
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/d442dae4-f5f8-48be-a644-885079ab8a83?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/8d9ed864-86d7-4bd7-9679-40b863a087c7?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1602,7 +1617,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:53:51 GMT
+      - Fri, 08 Sep 2023 06:18:52 GMT
       expires:
       - '-1'
       pragma:
@@ -1619,10 +1634,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b9d7f64e-f76e-4cfc-a425-1e393317a7b0
+      - da2be41f-6dda-48a7-ba8f-53bd16d07c7e
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -1637,25 +1652,27 @@ interactions:
       ParameterSetName:
       - -g --policy-name -n
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operationResults/d442dae4-f5f8-48be-a644-885079ab8a83?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operationResults/8d9ed864-86d7-4bd7-9679-40b863a087c7?api-version=2021-08-01
   response:
     body:
       string: ''
     headers:
+      azure-asyncnotification:
+      - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/d442dae4-f5f8-48be-a644-885079ab8a83?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/8d9ed864-86d7-4bd7-9679-40b863a087c7?api-version=2021-08-01
       cache-control:
       - no-cache
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:53:51 GMT
+      - Fri, 08 Sep 2023 06:18:53 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operationResults/d442dae4-f5f8-48be-a644-885079ab8a83?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operationResults/8d9ed864-86d7-4bd7-9679-40b863a087c7?api-version=2021-08-01
       pragma:
       - no-cache
       server:
@@ -1666,7 +1683,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 62fbd028-8023-431b-9003-541c1eb0c2e0
+      - ceb1f485-2069-4664-a5e4-f4e332fce8b2
     status:
       code: 204
       message: No Content
@@ -1684,7 +1701,7 @@ interactions:
       ParameterSetName:
       - -g --policy-name
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1/serviceEndpointPolicyDefinitions?api-version=2021-08-01
   response:
@@ -1698,7 +1715,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:53:52 GMT
+      - Fri, 08 Sep 2023 06:18:54 GMT
       expires:
       - '-1'
       pragma:
@@ -1715,12 +1732,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 481ade6b-16b4-4908-bf01-fc12ac24cfbc
+      - f5653d99-7c2b-4e38-ada5-28992f1fccfc
     status:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"service": "Microsoft.Storage", "serviceResources": ["/subscriptions/00000000-0000-0000-0000-000000000000"]}}'
+    body: '{"name": "storage-def", "properties": {"service": "Microsoft.Storage",
+      "serviceResources": ["/subscriptions/00000000-0000-0000-0000-000000000000"]}}'
     headers:
       Accept:
       - application/json
@@ -1731,25 +1749,27 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '125'
+      - '148'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g --policy-name -n --service --service-resources
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1/serviceEndpointPolicyDefinitions/storage-def?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"storage-def\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1/serviceEndpointPolicyDefinitions/storage-def\",\r\n
-        \ \"etag\": \"W/\\\"976549fc-d19f-4167-8821-b5f0e0eb67d4\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"1c1832f8-8ed8-4ff1-9900-0b108b2c9446\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"service\": \"Microsoft.Storage\",\r\n
         \   \"serviceResources\": [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000\"\r\n
         \   ]\r\n  },\r\n  \"type\": \"Microsoft.Network/serviceEndpointPolicies/serviceEndpointPolicyDefinitions\"\r\n}"
     headers:
+      azure-asyncnotification:
+      - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/9947eaf6-40f4-4005-90e6-cd993066bf89?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/f8af6e25-26a8-4cd7-880d-6f7cb238866c?api-version=2021-08-01
       cache-control:
       - no-cache
       content-length:
@@ -1757,7 +1777,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:53:54 GMT
+      - Fri, 08 Sep 2023 06:18:57 GMT
       expires:
       - '-1'
       pragma:
@@ -1770,9 +1790,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e944cd28-8650-401b-80a5-0b8b8c3ad12c
+      - 342f927b-6a4c-4b65-aeb8-46a8759a92d5
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1155'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -1790,9 +1810,9 @@ interactions:
       ParameterSetName:
       - -g --policy-name -n --service --service-resources
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/9947eaf6-40f4-4005-90e6-cd993066bf89?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/f8af6e25-26a8-4cd7-880d-6f7cb238866c?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1804,7 +1824,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:54:04 GMT
+      - Fri, 08 Sep 2023 06:18:57 GMT
       expires:
       - '-1'
       pragma:
@@ -1821,7 +1841,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0e555fa4-60bd-43c9-b3e1-ef49dcf9e648
+      - e284975f-880f-4e98-865a-2e07965e2424
     status:
       code: 200
       message: OK
@@ -1839,13 +1859,13 @@ interactions:
       ParameterSetName:
       - -g --policy-name -n --service --service-resources
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1/serviceEndpointPolicyDefinitions/storage-def?api-version=2021-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"storage-def\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1/serviceEndpointPolicyDefinitions/storage-def\",\r\n
-        \ \"etag\": \"W/\\\"d9e0958a-a5c8-41b6-a071-6ddb97c45726\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"0f6c8965-e0f6-436b-8f48-8abbcf3d1fbb\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"service\": \"Microsoft.Storage\",\r\n
         \   \"serviceResources\": [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000\"\r\n
         \   ]\r\n  },\r\n  \"type\": \"Microsoft.Network/serviceEndpointPolicies/serviceEndpointPolicyDefinitions\"\r\n}"
@@ -1857,9 +1877,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:54:04 GMT
+      - Fri, 08 Sep 2023 06:18:57 GMT
       etag:
-      - W/"d9e0958a-a5c8-41b6-a071-6ddb97c45726"
+      - W/"0f6c8965-e0f6-436b-8f48-8abbcf3d1fbb"
       expires:
       - '-1'
       pragma:
@@ -1876,7 +1896,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - de120a42-9d25-4e6f-b6e9-dbd9c766c156
+      - 98c3c0eb-d02a-45ae-81d3-750d3c3f37dd
     status:
       code: 200
       message: OK
@@ -1894,21 +1914,21 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/network_service_endpoint_scenario_test000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/network_service_endpoint_scenario_test000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001","name":"network_service_endpoint_scenario_test000001","type":"Microsoft.Resources/resourceGroups","location":"westcentralus","tags":{"product":"azurecli","cause":"automation","date":"2022-05-26T08:51:32Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001","name":"network_service_endpoint_scenario_test000001","type":"Microsoft.Resources/resourceGroups","location":"westcentralus","tags":{"product":"azurecli","cause":"automation","test":"test_network_service_endpoints","date":"2023-09-08T06:17:58Z","module":"network"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '373'
+      - '432'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:54:05 GMT
+      - Fri, 08 Sep 2023 06:18:59 GMT
       expires:
       - '-1'
       pragma:
@@ -1923,8 +1943,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westcentralus", "tags": {}, "properties": {"addressSpace":
-      {"addressPrefixes": ["10.0.0.0/16"]}, "dhcpOptions": {}}}'
+    body: '{"location": "westcentralus", "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "enableDdosProtection": false, "enableVmProtection": false}}'
     headers:
       Accept:
       - application/json
@@ -1935,39 +1955,38 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '130'
+      - '159'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
-        \ \"etag\": \"W/\\\"dc2b4749-c98e-43e1-b477-979934d5a476\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"895da311-24cd-49ad-b223-8b5ab50a3668\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westcentralus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"32daa6df-97d9-413a-9b1b-48aad7faa2dc\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"a9ee9beb-fa5e-4784-b3ad-9c95b2150bb7\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [],\r\n
+        \   \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\": false\r\n
+        \ }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/6f6c59a7-e9d3-4eb0-b40e-ab673bd6d691?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/5030ba90-4cbf-4f9c-93a1-01b73961c053?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '708'
+      - '639'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:54:11 GMT
+      - Fri, 08 Sep 2023 06:19:06 GMT
       expires:
       - '-1'
       pragma:
@@ -1980,9 +1999,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7a3bdc30-be44-4f44-8715-be77d5c62165
+      - c54c4004-8337-4178-9c59-d132cc54abd5
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1156'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -2000,21 +2019,21 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/6f6c59a7-e9d3-4eb0-b40e-ab673bd6d691?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/5030ba90-4cbf-4f9c-93a1-01b73961c053?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '29'
+      - '30'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:54:14 GMT
+      - Fri, 08 Sep 2023 06:19:06 GMT
       expires:
       - '-1'
       pragma:
@@ -2031,7 +2050,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4c26d9b2-203b-4dea-935c-3c1e47e6fd7c
+      - c9c6398b-8924-4af0-a054-12b0dec751d6
     status:
       code: 200
       message: OK
@@ -2049,212 +2068,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2021-08-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
-        \ \"etag\": \"W/\\\"0186868e-b7ca-4602-9b6f-b656f5943015\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westcentralus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"32daa6df-97d9-413a-9b1b-48aad7faa2dc\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '709'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 26 May 2022 08:54:14 GMT
-      etag:
-      - W/"0186868e-b7ca-4602-9b6f-b656f5943015"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 6d2b7433-66dc-44a8-85c6-56739510f12f
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet subnet create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --vnet-name -n --address-prefix --service-endpoints --service-endpoint-policy
-      User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2021-08-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
-        \ \"etag\": \"W/\\\"0186868e-b7ca-4602-9b6f-b656f5943015\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westcentralus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"32daa6df-97d9-413a-9b1b-48aad7faa2dc\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '709'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 26 May 2022 08:54:15 GMT
-      etag:
-      - W/"0186868e-b7ca-4602-9b6f-b656f5943015"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 35ff1df4-eb9c-48ee-bf9c-7f6e508aebca
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/virtualNetworks/vnet1",
-      "location": "westcentralus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
-      ["10.0.0.0/16"]}, "dhcpOptions": {"dnsServers": []}, "subnets": [{"name": "subnet1",
-      "properties": {"addressPrefix": "10.0.0.0/24", "serviceEndpoints": [{"service":
-      "Microsoft.Storage"}], "serviceEndpointPolicies": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1"}],
-      "privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
-      "Enabled"}}], "virtualNetworkPeerings": [], "enableDdosProtection": false}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet subnet create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '821'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - -g --vnet-name -n --address-prefix --service-endpoints --service-endpoint-policy
-      User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2021-08-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
-        \ \"etag\": \"W/\\\"41dc8c67-770d-48a1-a355-47a18ba86696\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westcentralus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"32daa6df-97d9-413a-9b1b-48aad7faa2dc\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n        \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\",\r\n
-        \       \"etag\": \"W/\\\"41dc8c67-770d-48a1-a355-47a18ba86696\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
-        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"serviceEndpointPolicies\":
-        [\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1\"\r\n
-        \           }\r\n          ],\r\n          \"serviceEndpoints\": [\r\n            {\r\n
-        \             \"provisioningState\": \"Updating\",\r\n              \"service\":
-        \"Microsoft.Storage\",\r\n              \"locations\": [\r\n                \"*\"\r\n
-        \             ]\r\n            }\r\n          ],\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
-        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
-        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
-    headers:
-      azure-asyncnotification:
-      - Enabled
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/40e733bf-1ab2-4201-8f0e-86cd4713f5ad?api-version=2021-08-01
-      cache-control:
-      - no-cache
-      content-length:
-      - '1867'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 26 May 2022 08:54:16 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 8ad36f47-79f8-4dc1-8264-e6ae0a0bca3b
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1139'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet subnet create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --vnet-name -n --address-prefix --service-endpoints --service-endpoint-policy
-      User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/40e733bf-1ab2-4201-8f0e-86cd4713f5ad?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/5030ba90-4cbf-4f9c-93a1-01b73961c053?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -2266,7 +2082,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:54:20 GMT
+      - Fri, 08 Sep 2023 06:19:16 GMT
       expires:
       - '-1'
       pragma:
@@ -2283,7 +2099,171 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f49efbda-7869-4a65-9183-e7137a24c830
+      - bd770036-1cdf-4ed4-b114-5fa41c7dbcd7
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
+        \ \"etag\": \"W/\\\"b77d2c71-66c2-4fe5-8290-8a4a7456ec9d\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westcentralus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"a9ee9beb-fa5e-4784-b3ad-9c95b2150bb7\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [],\r\n
+        \   \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\": false\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '640'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 08 Sep 2023 06:19:16 GMT
+      etag:
+      - W/"b77d2c71-66c2-4fe5-8290-8a4a7456ec9d"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 8f017e30-3de9-4005-81bf-fe9b504afeca
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"name": "subnet1", "properties": {"addressPrefix": "10.0.0.0/24", "defaultOutboundAccess":
+      true, "serviceEndpointPolicies": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1"}],
+      "serviceEndpoints": [{"service": "Microsoft.Storage"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '366'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --vnet-name -n --address-prefix --service-endpoints --service-endpoint-policy
+      User-Agent:
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1?api-version=2023-05-01
+  response:
+    body:
+      string: '{"name":"subnet1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1","etag":"W/\"25a64490-d26a-41fa-8cd6-3f6b397f980d\"","properties":{"provisioningState":"Updating","addressPrefix":"10.0.0.0/24","serviceEndpointPolicies":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1"}],"serviceEndpoints":[{"provisioningState":"Updating","service":"Microsoft.Storage","locations":["*"]}],"delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled","defaultOutboundAccess":true},"type":"Microsoft.Network/virtualNetworks/subnets"}'
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/68d9ec3a-45a1-4286-9b65-f998363e5f1b?api-version=2023-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '829'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 08 Sep 2023 06:19:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - dfc2dfde-29d5-4b89-b21b-c58bfafe1ed3
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vnet-name -n --address-prefix --service-endpoints --service-endpoint-policy
+      User-Agent:
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/68d9ec3a-45a1-4286-9b65-f998363e5f1b?api-version=2023-05-01
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 08 Sep 2023 06:19:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - dc879b9b-e1b6-4406-810b-651fcf0f6c0a
     status:
       code: 200
       message: OK
@@ -2301,43 +2281,21 @@ interactions:
       ParameterSetName:
       - -g --vnet-name -n --address-prefix --service-endpoints --service-endpoint-policy
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/68d9ec3a-45a1-4286-9b65-f998363e5f1b?api-version=2023-05-01
   response:
     body:
-      string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
-        \ \"etag\": \"W/\\\"d4006e38-5263-4267-9f3b-ff1a547b667d\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westcentralus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"32daa6df-97d9-413a-9b1b-48aad7faa2dc\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n        \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\",\r\n
-        \       \"etag\": \"W/\\\"d4006e38-5263-4267-9f3b-ff1a547b667d\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"serviceEndpointPolicies\":
-        [\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1\"\r\n
-        \           }\r\n          ],\r\n          \"serviceEndpoints\": [\r\n            {\r\n
-        \             \"provisioningState\": \"Succeeded\",\r\n              \"service\":
-        \"Microsoft.Storage\",\r\n              \"locations\": [\r\n                \"*\"\r\n
-        \             ]\r\n            }\r\n          ],\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
-        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
-        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
+      string: '{"status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1870'
+      - '22'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 08:54:20 GMT
-      etag:
-      - W/"d4006e38-5263-4267-9f3b-ff1a547b667d"
+      - Fri, 08 Sep 2023 06:19:31 GMT
       expires:
       - '-1'
       pragma:
@@ -2354,7 +2312,58 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ddcae5a3-b996-4e44-b40c-1d2ac8f093a7
+      - ebaa7261-3d82-4615-a94a-7d86a340db75
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vnet-name -n --address-prefix --service-endpoints --service-endpoint-policy
+      User-Agent:
+      - AZURECLI/2.52.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1?api-version=2023-05-01
+  response:
+    body:
+      string: '{"name":"subnet1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1","etag":"W/\"c2c4c41d-a40a-4c2b-a356-a9512d807044\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","serviceEndpointPolicies":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/network_service_endpoint_scenario_test000001/providers/Microsoft.Network/serviceEndpointPolicies/policy1"}],"serviceEndpoints":[{"provisioningState":"Succeeded","service":"Microsoft.Storage","locations":["*"]}],"delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled","defaultOutboundAccess":true},"type":"Microsoft.Network/virtualNetworks/subnets"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '831'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 08 Sep 2023 06:19:31 GMT
+      etag:
+      - W/"c2c4c41d-a40a-4c2b-a356-a9512d807044"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - ef5d01ad-5ea1-42ed-b800-7ac79c9737dc
     status:
       code: 200
       message: OK

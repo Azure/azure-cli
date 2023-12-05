@@ -3,16 +3,16 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import unittest
-from unittest import mock
 
 from knack import CLI
 
 from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
 from azure.cli.core.cloud import get_active_cloud
-from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
+from azure.cli.core.profiles import get_sdk, ResourceType
 
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.acs import _validators as validators
+
 
 class MockCLI(CLI):
     def __init__(self):

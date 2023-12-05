@@ -12,24 +12,6 @@ def _compute_client_factory(cli_ctx, **kwargs):
                                    aux_subscriptions=kwargs.get('aux_subscriptions'))
 
 
-def cf_ni(cli_ctx, _):
-    from azure.cli.core.profiles import ResourceType
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    # TODO: Remove hard coded api-version once
-    # https://github.com/Azure/azure-rest-api-specs/issues/570
-    # is fixed.
-    ni = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK).network_interfaces
-    ni.api_version = '2016-03-30'
-    return ni
-
-
-def cf_public_ip_addresses(cli_ctx):
-    from azure.cli.core.profiles import ResourceType
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    public_ip_ops = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK).public_ip_addresses
-    return public_ip_ops
-
-
 def cf_avail_set(cli_ctx, _):
     return _compute_client_factory(cli_ctx).availability_sets
 

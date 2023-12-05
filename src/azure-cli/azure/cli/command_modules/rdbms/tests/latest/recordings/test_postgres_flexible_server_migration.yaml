@@ -1,11 +1,9 @@
 interactions:
 - request:
-    body: "{\r\n        \"name\"\
-      : \"xxxxxxxxxxxxxx\"\
-      ,\r\n        \"type\": \"Microsoft.DBforPostgreSQL/flexibleServers/migrations\"     \r\n}"
+    body: '{"name": "00000000-0000-0000-0000-000000000000", "type": "Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -13,25 +11,27 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '0'
+      - '112'
+      Content-Type:
+      - application/json
       ParameterSetName:
       - --subscription --resource-group --name --migration-name
       User-Agent:
-      - python/3.9.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.24.0
+      - AZURECLI/2.54.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/raganesa-t-m-pg-1/providers/Microsoft.DBforPostgreSQL/flexibleServers/raganesa-t-m-pg-1-vnet/checkMigrationNameAvailability?api-version=2020-02-14-privatepreview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul/checkMigrationNameAvailability?api-version=2023-06-01-preview
   response:
     body:
-      string: '{"name":"xxxxxxxxxxxxxx","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations","nameAvailable":true}'
+      string: '{"name":"00000000-0000-0000-0000-000000000000","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations","nameAvailable":true}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1117'
+      - '130'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 27 May 2021 23:07:01 GMT
+      - Wed, 22 Nov 2023 05:29:18 GMT
       expires:
       - '-1'
       pragma:
@@ -46,32 +46,101 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
     status:
       code: 200
       message: OK
 - request:
-    body: "{\r\n    \"properties\": {\r\n        \"SourceDBServerResourceId\": \"\
-      subscriptions/6a37df99-a9de-48c4-91e5-7e6ab00b2362/resourceGroups/raganesa-s-s-pg-1/providers/Microsoft.DBforPostgreSQL/servers/raganesa-s-s-pg-1-vnet-1\"\
-      ,\r\n        \"SecretParameters\":\r\n        {\r\n            \"AdminCredentials\"\
-      :\r\n            {\r\n                \"SourceServerPassword\": \"xxxx\"\
-      ,\r\n                \"TargetServerPassword\": \"xxxx\"\r\n           \
-      \ },\r\n            \"AADApp\":\r\n            {\r\n                \"ClientId\"\
-      : \"xxxxxx\",\r\n                \"TenantId\"\
-      : \"72f988bf-86f1-41af-91ab-2d7cd011db47\",\r\n                \"AadSecret\"\
-      : \"xxxxx\"\r\n            }\r\n        },\r\n\
-      \        \"DBsToMigrate\": [\r\n            \"dvdrental\"\r\n        ],\r\n\
-      \        \"MigrationResourceGroup\":\r\n        {\r\n            \"ResourceId\"\
-      : \"subscriptions/6a37df99-a9de-48c4-91e5-7e6ab00b2362/resourceGroups/raganesa-DMSBuddy-Demo\"\
-      ,\r\n            \"Location\": \"West US 2\"\r\n        },\r\n        \"TargetDBServerSubnetResourceId\"\
-      : \"subscriptions/6a37df99-a9de-48c4-91e5-7e6ab00b2362/resourceGroups/raganesa-s-s-pg-1/providers/Microsoft.Network/virtualNetworks/raganesa-s-s-pg-1-vnet/subnets/raganesa-s-s-pg-1-vnet-s-s-subnet\"\
-      ,\r\n        \"SetupLogicalReplicationOnSourceDBIfNeeded\": \"true\",\r\n  \
-      \      \"OverwriteDBsInTarget\": \"true\",\r\n        \"TriggerCutover\": \"\
-      true\"\r\n    }\r\n}"
+    body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server migration create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription --resource-group --name --migration-name --properties
+      User-Agent:
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: HEAD
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/Sterling2MeruRG?api-version=2022-09-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 22 Nov 2023 05:29:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server migration create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription --resource-group --name --migration-name --properties
+      User-Agent:
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/Sterling2MeruRG?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG","name":"Sterling2MeruRG","type":"Microsoft.Resources/resourceGroups","location":"northeurope","properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '232'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 22 Nov 2023 05:29:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "northeurope", "properties": {"migrationMode": "offline",
+      "sourceDbServerResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/servers/source-server-longhaul",
+      "secretParameters": {"adminCredentials": {"sourceServerPassword": "XXXXXXXXX",
+      "targetServerPassword": "XXXXXXXXX"}, "sourceServerUsername": "migration_user@source-server-longhaul",
+      "targetServerUsername": "target_user"}, "dbsToMigrate": ["dvdrental"], "setupLogicalReplicationOnSourceDbIfNeeded":
+      "False", "overwriteDbsInTarget": "True"}}'
+    headers:
+      Accept:
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -79,29 +148,27 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1360'
+      - '591'
       Content-Type:
       - application/json
       ParameterSetName:
       - --subscription --resource-group --name --migration-name --properties
       User-Agent:
-      - python/3.9.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.24.0
+      - AZURECLI/2.54.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/raganesa-t-m-pg-1/providers/Microsoft.DBforPostgreSQL/flexibleServers/raganesa-t-m-pg-1-vnet/migrations/00000000-0000-0000-0000-000000000000?api-version=2020-02-14-privatepreview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul/migrations/00000000-0000-0000-0000-000000000000?api-version=2023-06-01-preview
   response:
     body:
-      string: '{"properties":{"sourceDBServerResourceId":"subscriptions/6a37df99-a9de-48c4-91e5-7e6ab00b2362/resourceGroups/raganesa-s-s-pg-1/providers/Microsoft.DBforPostgreSQL/servers/raganesa-s-s-pg-1-vnet-1","targetDBServerSubnetResourceId":"subscriptions/6a37df99-a9de-48c4-91e5-7e6ab00b2362/resourceGroups/raganesa-s-s-pg-1/providers/Microsoft.Network/virtualNetworks/raganesa-s-s-pg-1-vnet/subnets/raganesa-s-s-pg-1-vnet-s-s-subnet","dBsToMigrate":["dvdrental"],"migrationResourceGroup":{"resourceId":"subscriptions/6a37df99-a9de-48c4-91e5-7e6ab00b2362/resourceGroups/raganesa-DMSBuddy-Demo","location":"West
-        US 2"},"setupLogicalReplicationOnSourceDBIfNeeded":true,"overwriteDBsInTarget":true,"triggerCutover":true},"location":"West
-        US 2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/raganesa-t-m-pg-1/providers/Microsoft.DBforPostgreSQL/flexibleServers/raganesa-t-m-pg-1-vnet/migrations/00000000-0000-0000-0000-000000000000","name":"00000000-0000-0000-0000-000000000000","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
+      string: '{"properties":{"migrationId":"769a1f16-53c3-47e2-af78-1927279d4e5a","currentStatus":{"state":"InProgress"},"migrationMode":"Offline","sourceDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/servers/source-server-longhaul","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul","dbsToMigrate":["dvdrental"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2023-11-22T05:29:20.9330871Z","triggerCutover":"True","migrationOption":"ValidateAndMigrate","sourceType":"None","sslMode":"VerifyFull"},"location":"northeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul/migrations/00000000-0000-0000-0000-000000000000","name":"00000000-0000-0000-0000-000000000000","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1054'
+      - '1126'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 27 May 2021 23:06:59 GMT
+      - Wed, 22 Nov 2023 05:29:20 GMT
       expires:
       - '-1'
       pragma:
@@ -113,7 +180,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1197'
     status:
       code: 201
       message: Created
@@ -121,7 +188,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -131,21 +198,21 @@ interactions:
       ParameterSetName:
       - --subscription --resource-group --name --filter
       User-Agent:
-      - python/3.9.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.24.0
+      - AZURECLI/2.54.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/raganesa-t-m-pg-1/providers/Microsoft.DBforPostgreSQL/flexibleServers/raganesa-t-m-pg-1-vnet/migrations?migrationListFilter=Active&api-version=2020-02-14-privatepreview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul/migrations?api-version=2023-06-01-preview&migrationListFilter=Active
   response:
     body:
-      string: '[{"properties":{"migrationId":"00000000-0000-0000-0000-000000000000","migrationDetailsLevel":"Full","currentStatus":{"state":"InProgress","currentSubStateDetails":{"currentSubState":"PerformingPreRequisiteSteps"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/raganesa-t-m-pg-1/providers/Microsoft.DBforPostgreSQL/flexibleServers/raganesa-t-m-pg-1-vnet/migrations/00000000-0000-0000-0000-000000000000","name":"00000000-0000-0000-0000-000000000000","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}]'
+      string: '{"value":[]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '539'
+      - '12'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 27 May 2021 23:06:59 GMT
+      - Wed, 22 Nov 2023 05:29:22 GMT
       expires:
       - '-1'
       pragma:
@@ -167,7 +234,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -177,21 +244,21 @@ interactions:
       ParameterSetName:
       - --subscription --resource-group --name
       User-Agent:
-      - python/3.9.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.24.0
+      - AZURECLI/2.54.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/raganesa-t-m-pg-1/providers/Microsoft.DBforPostgreSQL/flexibleServers/raganesa-t-m-pg-1-vnet/migrations?migrationListFilter=Active&api-version=2020-02-14-privatepreview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul/migrations?api-version=2023-06-01-preview&migrationListFilter=Active
   response:
     body:
-      string: '[{"properties":{"migrationId":"00000000-0000-0000-0000-000000000000","migrationDetailsLevel":"Full","currentStatus":{"state":"InProgress","currentSubStateDetails":{"currentSubState":"PerformingPreRequisiteSteps"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/raganesa-t-m-pg-1/providers/Microsoft.DBforPostgreSQL/flexibleServers/raganesa-t-m-pg-1-vnet/migrations/00000000-0000-0000-0000-000000000000","name":"00000000-0000-0000-0000-000000000000","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}]'
+      string: '{"value":[]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '539'
+      - '12'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 27 May 2021 23:07:00 GMT
+      - Wed, 22 Nov 2023 05:29:23 GMT
       expires:
       - '-1'
       pragma:
@@ -213,7 +280,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -223,22 +290,25 @@ interactions:
       ParameterSetName:
       - --subscription --resource-group --name --migration-name
       User-Agent:
-      - python/3.9.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.24.0
+      - AZURECLI/2.54.0 azsdk-python-mgmt-rdbms/10.2.0b12 Python/3.10.11 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/raganesa-t-m-pg-1/providers/Microsoft.DBforPostgreSQL/flexibleServers/raganesa-t-m-pg-1-vnet/migrations/00000000-0000-0000-0000-000000000000?level=Default&api-version=2020-02-14-privatepreview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul/migrations/00000000-0000-0000-0000-000000000000?api-version=2023-06-01-preview
   response:
     body:
-      string: '{"properties":{"migrationId":"00000000-0000-0000-0000-000000000000","migrationDetailsLevel":"Default","currentStatus":{"state":"InProgress","currentSubStateDetails":{"currentSubState":"PerformingPreRequisiteSteps"}},"migrationCreateFullRequest":{"sourceDBServerResourceId":"subscriptions/6a37df99-a9de-48c4-91e5-7e6ab00b2362/resourceGroups/raganesa-s-s-pg-1/providers/Microsoft.DBforPostgreSQL/servers/raganesa-s-s-pg-1-vnet-1","targetDBServerResourceId":"subscriptions/6a37df99-a9de-48c4-91e5-7e6ab00b2362/resourceGroups/raganesa-t-m-pg-1/providers/Microsoft.DBforPostgreSQL/flexibleServers/raganesa-t-m-pg-1-vnet","targetDBServerSubnetResourceId":"subscriptions/6a37df99-a9de-48c4-91e5-7e6ab00b2362/resourceGroups/raganesa-s-s-pg-1/providers/Microsoft.Network/virtualNetworks/raganesa-s-s-pg-1-vnet/subnets/raganesa-s-s-pg-1-vnet-s-s-subnet","dBsToMigrate":["dvdrental"],"migrationResourceGroup":{"resourceId":"subscriptions/6a37df99-a9de-48c4-91e5-7e6ab00b2362/resourceGroups/raganesa-DMSBuddy-Demo","location":"West
-        US 2"},"setupLogicalReplicationOnSourceDBIfNeeded":true,"overwriteDBsInTarget":true,"migrationWindowStartTimeInUtc":"2021-05-27T23:07:00.0345809Z","triggerCutover":true}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/raganesa-t-m-pg-1/providers/Microsoft.DBforPostgreSQL/flexibleServers/raganesa-t-m-pg-1-vnet/migrations/00000000-0000-0000-0000-000000000000","name":"00000000-0000-0000-0000-000000000000","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
+      string: '{"properties":{"migrationId":"769a1f16-53c3-47e2-af78-1927279d4e5a","currentStatus":{"state":"Failed","error":"ST001:
+        The source server does not exist or source and target server are not in the
+        same region (Cross region migration is not supported). Please make sure the
+        source server exists and is present in the same region as that of target server.","currentSubStateDetails":{"currentSubState":"Completed","dbDetails":{}}},"migrationMode":"Offline","migrationWindowEndTimeInUtc":"2023-11-22T05:29:21.2768504Z","sourceDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/servers/source-server-longhaul","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul","dbsToMigrate":["dvdrental"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2023-11-22T05:29:20.9330871Z","triggerCutover":"True","migrationOption":"ValidateAndMigrate","sourceType":"None","sslMode":"VerifyFull"},"location":"East
+        US","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul/migrations/00000000-0000-0000-0000-000000000000","name":"00000000-0000-0000-0000-000000000000","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1514'
+      - '1501'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 27 May 2021 23:07:01 GMT
+      - Wed, 22 Nov 2023 05:29:24 GMT
       expires:
       - '-1'
       pragma:
@@ -253,58 +323,6 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - postgres flexible-server migration delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - --subscription --resource-group --name --migration-name --yes
-      User-Agent:
-      - python/3.9.4 (Windows-10-10.0.19041-SP0) AZURECLI/2.24.0
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/raganesa-t-m-pg-1/providers/Microsoft.DBforPostgreSQL/flexibleServers/raganesa-t-m-pg-1-vnet/migrations/00000000-0000-0000-0000-000000000000?api-version=2020-02-14-privatepreview
-  response:
-    body:
-      string: '{"properties":{"sourceDBServerResourceId":"subscriptions/6a37df99-a9de-48c4-91e5-7e6ab00b2362/resourceGroups/raganesa-s-s-pg-1/providers/Microsoft.DBforPostgreSQL/servers/raganesa-s-s-pg-1-vnet-1","targetDBServerSubnetResourceId":"subscriptions/6a37df99-a9de-48c4-91e5-7e6ab00b2362/resourceGroups/raganesa-s-s-pg-1/providers/Microsoft.Network/virtualNetworks/raganesa-s-s-pg-1-vnet/subnets/raganesa-s-s-pg-1-vnet-s-s-subnet","dBsToMigrate":["dvdrental"],"migrationResourceGroup":{"resourceId":"subscriptions/6a37df99-a9de-48c4-91e5-7e6ab00b2362/resourceGroups/raganesa-DMSBuddy-Demo","location":"West
-        US 2"},"setupLogicalReplicationOnSourceDBIfNeeded":true,"overwriteDBsInTarget":true,"migrationWindowStartTimeInUtc":"2021-05-27T23:07:00.0345809Z","triggerCutover":true},"location":"West
-        US 2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/raganesa-t-m-pg-1/providers/Microsoft.DBforPostgreSQL/flexibleServers/raganesa-t-m-pg-1-vnet/migrations/00000000-0000-0000-0000-000000000000","name":"00000000-0000-0000-0000-000000000000","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1117'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 27 May 2021 23:07:01 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
     status:
       code: 200
       message: OK

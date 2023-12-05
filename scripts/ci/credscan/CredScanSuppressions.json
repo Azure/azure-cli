@@ -43,6 +43,7 @@
         "src\\azure-cli\\azure\\cli\\command_modules\\appservice\\tests\\latest\\recordings\\test_webapp_show_deployment_logs.yaml",
         "src\\azure-cli\\azure\\cli\\command_modules\\appservice\\tests\\latest\\recordings\\test_deploy_zip.yaml",
         "src\\azure-cli\\azure\\cli\\command_modules\\appservice\\tests\\latest\\recordings\\test_webapp_ssl.yaml",
+        "src\\azure-cli\\azure\\cli\\command_modules\\appservice\\tests\\latest\\recordings\\test_webapp_ssl_specify_hostname.yaml",
         "src\\azure-cli\\azure\\cli\\command_modules\\appservice\\tests\\latest\\recordings\\test_webapp_ssl_import_crossrg.yaml",
         "src\\azure-cli\\azure\\cli\\command_modules\\appservice\\tests\\latest\\recordings\\test_webapp_ssl_import.yaml",
         "src\\azure-cli\\azure\\cli\\command_modules\\appservice\\tests\\latest\\recordings\\test_linux_to_windows_fail.yaml",
@@ -139,10 +140,19 @@
         "src\\azure-cli\\azure\\cli\\command_modules\\iot\\tests\\latest\\recordings\\test_iot_hub.yaml",
         "src\\azure-cli\\azure\\cli\\command_modules\\iot\\tests\\latest\\recordings\\test_iot_pnp.yaml",
         "src\\azure-cli\\azure\\cli\\command_modules\\iot\\tests\\latest\\recordings\\test_dps_lifecycle.yaml",
+        "src\\azure-cli\\azure\\cli\\command_modules\\iot\\tests\\latest\\recordings\\test_hub_file_upload.yaml",
+        "src\\azure-cli\\azure\\cli\\command_modules\\iot\\tests\\latest\\recordings\\test_identity_hub.yaml",
         "src\\azure-cli\\azure\\cli\\command_modules\\iot\\tests\\hybrid_2019_03_01\\recordings\\test_iot_hub.yaml",
         "src\\azure-cli\\azure\\cli\\command_modules\\iot\\tests\\hybrid_2020_09_01\\recordings\\test_dps_lifecycle.yaml"
       ],
       "_justification": "[IoT] response body contains random value recognized as secret"
+    },
+    {
+      "file": [
+        "src\\azure-cli\\azure\\cli\\command_modules\\iot\\tests\\latest\\recordings\\test_hub_file_upload.yaml",
+        "src\\azure-cli\\azure\\cli\\command_modules\\iot\\tests\\latest\\recordings\\test_identity_hub.yaml"
+      ],
+      "_justification": "[IoT] One-off access key"
     },
     {
       "placeholder": "+XLy+MVZ+aTeOnVzN2kLeB16O+kSxmz6g3rS6fAf6rw=",
@@ -179,6 +189,9 @@
     },
     {
       "file": [
+        "src\\azure-cli\\azure\\cli\\command_modules\\vm\\tests\\hybrid_2018_03_01\\recordings\\test_snapshot_access.yaml",
+        "src\\azure-cli\\azure\\cli\\command_modules\\vm\\tests\\hybrid_2019_03_01\\recordings\\test_snapshot_access.yaml",
+        "src\\azure-cli\\azure\\cli\\command_modules\\vm\\tests\\hybrid_2020_09_01\\recordings\\test_snapshot_access.yaml",
         "src\\azure-cli\\azure\\cli\\command_modules\\vm\\tests\\latest\\recordings\\test_snapshot_access.yaml"
       ],
       "_justification": "[Snapshot] response body contains the expired SAS token from the snapshot that will be removed after the test is completed"
@@ -385,14 +398,12 @@
       ],
       "_justification": "[Network] Ignore test certs."
     },
-
     {
       "file": [
         "src/azure-cli/azure/cli/command_modules/network/tests/latest/recordings/test_vpn_client_package.yaml"
       ],
       "_justification": "[Network] response body contains random value recognized as secret"
     },
-
     {
       "file": [
         "src\\azure-cli\\azure\\cli\\command_modules\\keyvault\\tests\\hybrid_2018_03_01\\ec256.pem",
@@ -559,6 +570,36 @@
         "src\\azure-cli\\azure\\cli\\command_modules\\vm\\tests\\latest\\recordings\\test_vm_trusted_launch_os_disk_secure_upload.yaml"
       ],
       "_justification": "[VM] the SAS tokens come from the temporary test resources"
+    },
+    {
+      "file": [
+        "src\\azure-cli\\azure\\cli\\command_modules\\acs\\tests\\latest\\data\\setup_proxy.sh"
+      ],
+      "_justification": "Dummy self-signed certificate + private key used for testing only."
+    },
+    {
+      "placeholder": "\"sharedKey\":\"abc123\"",
+      "_justification": "[containerapp] request body for create containerapp environment contains property sharedKey recognized as secret"
+    },
+    {
+      "placeholder": "\"primarySharedKey\":\"abc123\"",
+      "_justification": "[containerapp] Get log workspace primary sharedkey, response body contains sharedKey recognized as secret"
+    },
+    {
+      "placeholder": "abc123",
+      "_justification": "[containerapp] request body contains sharedKey recognized as secret"
+    },
+    {
+      "placeholder": "test12",
+      "_justification": "[containerapp] certificate password for load certificate file"
+    },
+    {
+      "file": [
+        "src\\azure-cli\\azure\\cli\\command_modules\\containerapp\\tests\\latest\\data\\cert.pfx",
+        "src\\azure-cli\\azure\\cli\\command_modules\\containerapp\\tests\\latest\\data\\cert.pem",
+        "src\\azure-cli\\azure\\cli\\command_modules\\containerapp\\tests\\latest\\data\\cert.txt"
+      ],
+      "_justification": "[containerapp] Test certs"
     }
   ]
 }

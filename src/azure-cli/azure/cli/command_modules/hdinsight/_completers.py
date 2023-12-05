@@ -7,7 +7,7 @@ import threading
 
 from azure.cli.core.commands.parameters import get_resources_in_subscription
 from azure.cli.core.decorators import Completer
-from ._client_factory import cf_network, cf_graph
+from ._client_factory import cf_graph
 
 
 COMPLETION_TIME_OUT = 10
@@ -19,17 +19,20 @@ def subnet_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable
 
     def worker(cmd, prefix, namespace):  # pylint: disable=unused-argument
         from msrestazure.tools import parse_resource_id
-        client = cf_network(cmd.cli_ctx)
+        from .aaz.latest.network.vnet.subnet import List
+
         subnets = []
         vnets = get_resources_in_subscription(cmd.cli_ctx, 'Microsoft.Network/virtualNetworks')
         if namespace.vnet_name and vnets:
             vnets = [r for r in vnets if r.name.lower() == namespace.vnet_name.lower()]
             for vnet in vnets:
                 vnet_resource_group = parse_resource_id(vnet.id)['resource_group']
-                for subnet in client.subnets.list(
-                        resource_group_name=vnet_resource_group,
-                        virtual_network_name=namespace.vnet_name):
-                    subnets.append(subnet.name)
+                subnet_list = List(cli_ctx=cmd.cli_ctx)(command_args={
+                    "vnet_name": namespace.vnet_name,
+                    "resource_group": vnet_resource_group
+                })
+                for subnet in subnet_list:
+                    subnets.append(subnet["name"])
         return subnets
 
     return HDInsightCompleter(worker=worker).complete(cmd, prefix, namespace)

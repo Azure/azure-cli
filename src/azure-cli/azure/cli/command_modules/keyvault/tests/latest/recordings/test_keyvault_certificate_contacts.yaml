@@ -9,207 +9,22 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-graphrbac/0.60.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
+      - azsdk-python-keyvault-certificates/4.7.0 Python/3.9.6 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/me?api-version=1.6
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.4
   response:
     body:
-      string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects/@Element","odata.type":"Microsoft.DirectoryServices.User","objectType":"User","objectId":"f3ea48f6-a16e-4b37-8260-f69cf2200525","deletionTimestamp":null,"accountEnabled":true,"ageGroup":null,"assignedLicenses":[],"assignedPlans":[],"city":null,"companyName":null,"consentProvidedForMinor":null,"country":null,"createdDateTime":"2020-04-07T09:37:40Z","creationType":"Invitation","department":null,"dirSyncEnabled":null,"displayName":"Houk
-        Chen","employeeId":null,"facsimileTelephoneNumber":null,"givenName":null,"immutableId":null,"isCompromised":null,"jobTitle":null,"lastDirSyncTime":null,"legalAgeGroupClassification":null,"mail":"honc@microsoft.com","mailNickname":"honc_microsoft.com#EXT#","mobile":null,"onPremisesDistinguishedName":null,"onPremisesSecurityIdentifier":null,"otherMails":["honc@microsoft.com"],"passwordPolicies":null,"passwordProfile":null,"physicalDeliveryOfficeName":null,"postalCode":null,"preferredLanguage":null,"provisionedPlans":[],"provisioningErrors":[],"proxyAddresses":["SMTP:honc@microsoft.com"],"refreshTokensValidFromDateTime":"2020-04-07T09:37:40Z","showInAddressList":false,"signInNames":[],"sipProxyAddress":null,"state":null,"streetAddress":null,"surname":null,"telephoneNumber":null,"thumbnailPhoto@odata.mediaEditLink":"directoryObjects/f3ea48f6-a16e-4b37-8260-f69cf2200525/Microsoft.DirectoryServices.User/thumbnailPhoto","usageLocation":null,"userIdentities":[],"userPrincipalName":"honc_microsoft.com#EXT#@AzureSDKTeam.onmicrosoft.com","userState":"Accepted","userStateChangedOn":"2020-04-10T09:25:17Z","userType":"Guest"}'
-    headers:
-      access-control-allow-origin:
-      - '*'
-      cache-control:
-      - no-cache
-      content-length:
-      - '1676'
-      content-type:
-      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
-      dataserviceversion:
-      - 3.0;
-      date:
-      - Wed, 14 Apr 2021 05:25:28 GMT
-      duration:
-      - '3657224'
-      expires:
-      - '-1'
-      ocp-aad-diagnostics-server-name:
-      - ZjuI3FJCgNGmVkN+0xJvbfaFTnHq19kNXWvAnzvpkDI=
-      ocp-aad-session-key:
-      - Za3Xt2UuKD3o7IfvQ9mrnS06R1K-_cMO5ZcfEx0AIGokGXFMe4JDiOb-XgrNv0b9l9XyLKahAEBIA72qbIwaebSi4dxf8dDBnClSLfh4fFlaRF6DZAjdbCN47XEGoFbZ.9PRakpc2bnqoVUEn__y_4xZDUBgsl30nQCyPG3PzN7k
-      pragma:
-      - no-cache
-      request-id:
-      - 7b63c56c-0781-46c0-b882-38975ed52105
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-aspnet-version:
-      - 4.0.30319
-      x-ms-dirapi-data-contract-version:
-      - '1.6'
-      x-ms-resource-unit:
-      - '1'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "westus", "properties": {"tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
-      "sku": {"family": "A", "name": "premium"}, "accessPolicies": [{"tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
-      "objectId": "f3ea48f6-a16e-4b37-8260-f69cf2200525", "permissions": {"keys":
-      ["get", "create", "delete", "list", "update", "import", "backup", "restore",
-      "recover"], "secrets": ["get", "list", "set", "delete", "backup", "restore",
-      "recover"], "certificates": ["get", "list", "delete", "create", "import", "update",
-      "managecontacts", "getissuers", "listissuers", "setissuers", "deleteissuers",
-      "manageissuers", "recover"], "storage": ["get", "list", "delete", "set", "update",
-      "regeneratekey", "setsas", "listsas", "getsas", "deletesas"]}}], "enableSoftDelete":
-      true, "softDeleteRetentionInDays": 7, "networkAcls": {"bypass": "AzureServices",
-      "defaultAction": "Allow"}}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - keyvault create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '873'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - -g -n -l --sku --retention-days --enable-soft-delete
-      User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_contacts000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-ct-co-000002?api-version=2021-04-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_contacts000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-ct-co-000002","name":"cli-test-kv-ct-co-000002","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{},"systemData":{"createdBy":"honc@microsoft.com","createdByType":"User","createdAt":"1970-01-19T17:32:57.932Z","lastModifiedBy":"honc@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"1970-01-19T17:32:57.932Z"},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"f3ea48f6-a16e-4b37-8260-f69cf2200525","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"vaultUri":"https://cli-test-kv-ct-co-000002.vault.azure.net","provisioningState":"RegisteringDns"}}'
+      string: '{"error":{"code":"Unauthorized","message":"AKV10000: Request is missing
+        a Bearer or PoP token."}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1379'
+      - '97'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 14 Apr 2021 05:25:35 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-keyvault-service-version:
-      - 1.1.292.0
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - keyvault create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l --sku --retention-days --enable-soft-delete
-      User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-keyvault/9.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_contacts000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-ct-co-000002?api-version=2021-04-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_contacts000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-ct-co-000002","name":"cli-test-kv-ct-co-000002","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{},"systemData":{"createdBy":"honc@microsoft.com","createdByType":"User","createdAt":"1970-01-19T17:32:57.932Z","lastModifiedBy":"honc@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"1970-01-19T17:32:57.932Z"},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"f3ea48f6-a16e-4b37-8260-f69cf2200525","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"vaultUri":"https://cli-test-kv-ct-co-000002.vault.azure.net/","provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1375'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 14 Apr 2021 05:26:05 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-keyvault-service-version:
-      - 1.1.292.0
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: ''
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Length:
-      - 0
-      Content-Type:
-      - application/json; charset=utf-8
-      User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.0
-  response:
-    body:
-      string: '{"error":{"code":"Unauthorized","message":"Request is missing a Bearer
-        or PoP token."}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '87'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 14 Apr 2021 05:26:07 GMT
+      - Tue, 16 May 2023 02:05:23 GMT
       expires:
       - '-1'
       pragma:
@@ -217,23 +32,21 @@ interactions:
       strict-transport-security:
       - max-age=31536000;includeSubDomains
       www-authenticate:
-      - Bearer authorization="https://login.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
+      - Bearer authorization="https://login.microsoftonline.com/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
         resource="https://vault.azure.net"
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.22;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=167.220.255.72;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - westus
       x-ms-keyvault-service-version:
-      - 1.2.236.0
-      x-powered-by:
-      - ASP.NET
+      - 1.9.787.1
     status:
       code: 401
       message: Unauthorized
 - request:
-    body: ''
+    body: null
     headers:
       Accept:
       - application/json
@@ -241,17 +54,10 @@ interactions:
       - gzip, deflate
       Connection:
       - keep-alive
-      Content-Length:
-      - 0
-      Content-Type:
-      - application/json; charset=utf-8
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
+      - azsdk-python-keyvault-certificates/4.7.0 Python/3.9.6 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.0
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.4
   response:
     body:
       string: '{"error":{"code":"ContactsNotFound","message":"Contacts not found"}}'
@@ -263,7 +69,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 14 Apr 2021 05:26:07 GMT
+      - Tue, 16 May 2023 02:05:23 GMT
       expires:
       - '-1'
       pragma:
@@ -273,13 +79,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.22;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=167.220.255.72;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - westus
       x-ms-keyvault-service-version:
-      - 1.2.236.0
-      x-powered-by:
-      - ASP.NET
+      - 1.9.787.1
     status:
       code: 404
       message: Not Found
@@ -296,14 +100,11 @@ interactions:
       Content-Length:
       - '91'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
+      - azsdk-python-keyvault-certificates/4.7.0 Python/3.9.6 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.0
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.4
   response:
     body:
       string: '{"id":"https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
@@ -316,7 +117,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 14 Apr 2021 05:26:08 GMT
+      - Tue, 16 May 2023 02:05:23 GMT
       expires:
       - '-1'
       pragma:
@@ -326,13 +127,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.22;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=167.220.255.72;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - westus
       x-ms-keyvault-service-version:
-      - 1.2.236.0
-      x-powered-by:
-      - ASP.NET
+      - 1.9.787.1
     status:
       code: 200
       message: OK
@@ -345,15 +144,10 @@ interactions:
       - gzip, deflate
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
+      - azsdk-python-keyvault-certificates/4.7.0 Python/3.9.6 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.0
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.4
   response:
     body:
       string: '{"id":"https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
@@ -366,7 +160,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 14 Apr 2021 05:26:10 GMT
+      - Tue, 16 May 2023 02:05:24 GMT
       expires:
       - '-1'
       pragma:
@@ -376,13 +170,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.22;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=167.220.255.72;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - westus
       x-ms-keyvault-service-version:
-      - 1.2.236.0
-      x-powered-by:
-      - ASP.NET
+      - 1.9.787.1
     status:
       code: 200
       message: OK
@@ -399,14 +191,11 @@ interactions:
       Content-Length:
       - '123'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
+      - azsdk-python-keyvault-certificates/4.7.0 Python/3.9.6 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.0
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.4
   response:
     body:
       string: '{"id":"https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
@@ -419,7 +208,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 14 Apr 2021 05:26:11 GMT
+      - Tue, 16 May 2023 02:05:25 GMT
       expires:
       - '-1'
       pragma:
@@ -429,13 +218,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.22;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=167.220.255.72;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - westus
       x-ms-keyvault-service-version:
-      - 1.2.236.0
-      x-powered-by:
-      - ASP.NET
+      - 1.9.787.1
     status:
       code: 200
       message: OK
@@ -448,15 +235,10 @@ interactions:
       - gzip, deflate
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
+      - azsdk-python-keyvault-certificates/4.7.0 Python/3.9.6 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.0
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.4
   response:
     body:
       string: '{"id":"https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
@@ -469,7 +251,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 14 Apr 2021 05:26:12 GMT
+      - Tue, 16 May 2023 02:05:25 GMT
       expires:
       - '-1'
       pragma:
@@ -479,13 +261,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.22;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=167.220.255.72;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - westus
       x-ms-keyvault-service-version:
-      - 1.2.236.0
-      x-powered-by:
-      - ASP.NET
+      - 1.9.787.1
     status:
       code: 200
       message: OK
@@ -498,15 +278,10 @@ interactions:
       - gzip, deflate
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
+      - azsdk-python-keyvault-certificates/4.7.0 Python/3.9.6 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.0
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.4
   response:
     body:
       string: '{"id":"https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
@@ -519,7 +294,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 14 Apr 2021 05:26:13 GMT
+      - Tue, 16 May 2023 02:05:26 GMT
       expires:
       - '-1'
       pragma:
@@ -529,63 +304,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.22;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=167.220.255.72;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - westus
       x-ms-keyvault-service-version:
-      - 1.2.236.0
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
-      User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.0
-  response:
-    body:
-      string: '{"id":"https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
-        Doe","phone":"123-456-7890"},{"email":"other@contoso.com"}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '193'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 14 Apr 2021 05:26:14 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000;includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.22;act_addr_fam=InterNetwork;
-      x-ms-keyvault-region:
-      - westus
-      x-ms-keyvault-service-version:
-      - 1.2.236.0
-      x-powered-by:
-      - ASP.NET
+      - 1.9.787.1
     status:
       code: 200
       message: OK
@@ -601,14 +324,11 @@ interactions:
       Content-Length:
       - '46'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
+      - azsdk-python-keyvault-certificates/4.7.0 Python/3.9.6 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.0
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.4
   response:
     body:
       string: '{"id":"https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"other@contoso.com"}]}'
@@ -620,7 +340,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 14 Apr 2021 05:26:16 GMT
+      - Tue, 16 May 2023 02:05:26 GMT
       expires:
       - '-1'
       pragma:
@@ -630,13 +350,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.22;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=167.220.255.72;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - westus
       x-ms-keyvault-service-version:
-      - 1.2.236.0
-      x-powered-by:
-      - ASP.NET
+      - 1.9.787.1
     status:
       code: 200
       message: OK
@@ -649,15 +367,10 @@ interactions:
       - gzip, deflate
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
+      - azsdk-python-keyvault-certificates/4.7.0 Python/3.9.6 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.0
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.4
   response:
     body:
       string: '{"id":"https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"other@contoso.com"}]}'
@@ -669,7 +382,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 14 Apr 2021 05:26:17 GMT
+      - Tue, 16 May 2023 02:05:27 GMT
       expires:
       - '-1'
       pragma:
@@ -679,13 +392,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.22;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=167.220.255.72;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - westus
       x-ms-keyvault-service-version:
-      - 1.2.236.0
-      x-powered-by:
-      - ASP.NET
+      - 1.9.787.1
     status:
       code: 200
       message: OK

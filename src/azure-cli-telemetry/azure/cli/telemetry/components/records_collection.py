@@ -35,8 +35,10 @@ class RecordsCollection:
         if not os.path.isdir(folder):
             return
 
+        # Collect all cache/cache.x files
+        candidates = [(fn, os.stat(os.path.join(folder, fn))) for fn in os.listdir(folder)]
+
         # sort the cache files base on their last modification time.
-        candidates = [(fn, os.stat(os.path.join(folder, fn))) for fn in os.listdir(folder) if fn != 'cache']
         candidates = [(fn, file_stat) for fn, file_stat in candidates if stat.S_ISREG(file_stat.st_mode)]
         candidates.sort(key=lambda pair: pair[1].st_mtime, reverse=True)  # move the newer cache file first
 

@@ -17,7 +17,7 @@ EXTENSION = False
 
 
 def main():
-    env = Environment(loader=FileSystemLoader('/home/vsts/work/1/s/scripts/live_test/'))
+    env = Environment(loader=FileSystemLoader('/mnt/vss/_work/1/s/scripts/live_test/'))
     template = env.get_template('template.yml')
     config = {}
     config['modules'] = get_modules()

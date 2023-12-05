@@ -37,7 +37,9 @@ from ._client_factory import (cf_security_tasks,
                               cf_security_secure_scores,
                               cf_security_secure_score_controls,
                               cf_security_secure_score_control_definitions,
-                              cf_security_automations)
+                              cf_security_automations,
+                              cf_security_security_solutions,
+                              cf_security_security_solutions_reference_data)
 
 
 # pylint: disable=line-too-long
@@ -73,6 +75,11 @@ def load_command_table(self, _):
     security_regulatory_compliance_assessment_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.security.operations#RegulatoryComplianceAssessmentsOperations.{}',
         client_factory=cf_security_regulatory_compliance_assessment
+    )
+
+    security_security_solutions_reference_data_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#SecuritySolutionsReferenceDataOperations.{}',
+        client_factory=cf_security_security_solutions_reference_data
     )
 
     security_tasks_sdk = CliCommandType(
@@ -232,6 +239,11 @@ def load_command_table(self, _):
         operation_group='security_automations'
     )
 
+    security_solutions_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#SecuritySolutionsOperations.{}',
+        client_factory=cf_security_security_solutions
+    )
+
     with self.command_group('security secure-scores',
                             security_secure_scores_sdk,
                             client_factory=cf_security_secure_scores) as g:
@@ -254,6 +266,11 @@ def load_command_table(self, _):
                             client_factory=cf_security_regulatory_compliance_standards) as g:
         g.custom_command('list', 'list_regulatory_compliance_standards')
         g.custom_show_command('show', 'get_regulatory_compliance_standard')
+
+    with self.command_group('security security-solutions-reference-data',
+                            security_security_solutions_reference_data_sdk,
+                            client_factory=cf_security_security_solutions_reference_data) as g:
+        g.custom_command('list', 'list_security_solutions_reference_data')
 
     with self.command_group('security regulatory-compliance-controls',
                             security_regulatory_compliance_controls_sdk,
@@ -485,15 +502,22 @@ def load_command_table(self, _):
     with self.command_group('security automation-action-logic-app',
                             security_automations_sdk,
                             client_factory=cf_security_automations) as g:
+
         g.custom_command('create', 'create_security_automation_action_logic_app')
     with self.command_group('security automation-action-event-hub',
                             security_automations_sdk,
                             client_factory=cf_security_automations) as g:
+
         g.custom_command('create', 'create_security_automation_action_event_hub')
     with self.command_group('security automation-action-workspace',
                             security_automations_sdk,
                             client_factory=cf_security_automations) as g:
         g.custom_command('create', 'create_security_automation_action_workspace')
+
+    with self.command_group('security security-solutions',
+                            security_solutions_sdk,
+                            client_factory=cf_security_security_solutions) as g:
+        g.custom_command('list', 'list_security_security_solutions')
 
     with self.command_group('security'):
         pass

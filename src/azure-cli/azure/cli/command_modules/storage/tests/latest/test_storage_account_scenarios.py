@@ -8,7 +8,7 @@ import unittest
 
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, JMESPathCheck, ResourceGroupPreparer,
                                StorageAccountPreparer, api_version_constraint, live_only, LiveScenarioTest,
-                               record_only, KeyVaultPreparer)
+                               record_only, KeyVaultPreparer, JMESPathCheckExists)
 from azure.cli.testsdk.decorators import serial_test
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
@@ -26,7 +26,10 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             'rg': resource_group,
             'acc': self.create_random_name(prefix='cli', length=24),
             'vnet': 'vnet1',
-            'subnet': 'subnet1'
+            'subnet': 'subnet1',
+            'ip1': '25.1.2.3',
+            'ip2': '25.2.0.0/24',
+            'ip3': '25.1.2.3/32'
         }
         self.cmd('storage account create -g {rg} -n {acc} --bypass Metrics --default-action Deny --https-only'.format(**kwargs),
                  checks=[
@@ -46,11 +49,14 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints Microsoft.Storage'.format(
                 **kwargs))
 
-        self.cmd('storage account network-rule add -g {rg} --account-name {acc} --ip-address 25.1.2.3'.format(**kwargs))
+        self.cmd('storage account network-rule add -g {rg} --account-name {acc} --ip-address {ip1}'.format(**kwargs))
         # test network-rule add idempotent
-        self.cmd('storage account network-rule add -g {rg} --account-name {acc} --ip-address 25.1.2.3'.format(**kwargs))
+        self.cmd('storage account network-rule add -g {rg} --account-name {acc} --ip-address {ip1}'.format(**kwargs))
         self.cmd(
-            'storage account network-rule add -g {rg} --account-name {acc} --ip-address 25.2.0.0/24'.format(**kwargs))
+            'storage account network-rule add -g {rg} --account-name {acc} --ip-address {ip2}'.format(**kwargs))
+        # test add multiple ip addresses
+        self.cmd(
+            'storage account network-rule add -g {rg} --account-name {acc} --ip-address {ip1} {ip2}'.format(**kwargs))
         self.cmd(
             'storage account network-rule add -g {rg} --account-name {acc} --vnet-name {vnet} --subnet {subnet}'.format(
                 **kwargs))
@@ -66,13 +72,30 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('length(ipRules)', 2),
             JMESPathCheck('length(virtualNetworkRules)', 1)
         ])
+        # test add multiple ip addresses with overlaps between them
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd(
+                'storage account network-rule add -g {rg} --account-name {acc} --ip-address {ip1} {ip3}'.format(
+                    **kwargs))
+        # test add multiple ip addresses with some overlaps with the server
         self.cmd(
-            'storage account network-rule remove -g {rg} --account-name {acc} --ip-address 25.1.2.3'.format(**kwargs))
+            'storage account network-rule add -g {rg} --account-name {acc} --ip-address {ip2} {ip3}'.format(
+                **kwargs))
+        self.cmd('storage account network-rule list -g {rg} --account-name {acc}'.format(**kwargs), checks=[
+            JMESPathCheck('length(ipRules)', 2),
+            JMESPathCheck('length(virtualNetworkRules)', 1)
+        ])
+        self.cmd(
+            'storage account network-rule remove -g {rg} --account-name {acc} --ip-address {ip1}'.format(**kwargs))
+        # test remove multiple ip addresses
+        self.cmd(
+            'storage account network-rule remove -g {rg} --account-name {acc} --ip-address {ip1} {ip2}'.format(**kwargs))
         self.cmd(
             'storage account network-rule remove -g {rg} --account-name {acc} --vnet-name {vnet} --subnet {subnet}'.format(
                 **kwargs))
         self.cmd('storage account network-rule list -g {rg} --account-name {acc}'.format(**kwargs), checks=[
-            JMESPathCheck('length(ipRules)', 1),
+            JMESPathCheck('length(ipRules)', 0),
             JMESPathCheck('length(virtualNetworkRules)', 0)
         ])
 
@@ -186,6 +209,21 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
         self.assertIn('publicNetworkAccess', result)
         self.assertTrue(result['publicNetworkAccess'] == 'Disabled')
+
+    @AllowLargeResponse()
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-09-01')
+    @ResourceGroupPreparer(name_prefix='cli_test_storage_account_dns')
+    def test_create_storage_account_with_dns_endpoint_type(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'sa1': self.create_random_name(prefix='cli', length=24),
+            'sa2': self.create_random_name(prefix='cli', length=24),
+            'loc': 'eastus'
+        })
+        self.cmd('storage account create -n {sa1} -g {rg} -l {loc} --hns true --dns-endpoint-type Standard',
+                 checks=[JMESPathCheck('dnsEndpointType', 'Standard')])
+        self.cmd('storage account create -n {sa2} -g {rg} -l {loc} --hns true --dns-endpoint-type AzureDnsZone',
+                 checks=[JMESPathCheck('dnsEndpointType', 'AzureDnsZone')])
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -610,6 +648,23 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         with self.assertRaises(HttpResponseError):
             self.cmd('storage account update -n {name1} --allow-append')
 
+    @AllowLargeResponse()
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-08-01')
+    @ResourceGroupPreparer(name_prefix='cli_test_storage_account_sftp')
+    def test_storage_account_sftp(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'sa': self.create_random_name(prefix='cli', length=24),
+            'loc': 'centraluseuap'
+        })
+        self.cmd('storage account create -n {sa} -g {rg} -l {loc} --sku Standard_LRS --hns true '
+                 '--enable-sftp true --enable-nfs-v3 false --enable-local-user true',
+                 checks=[JMESPathCheck('isSftpEnabled', True), JMESPathCheck('isLocalUserEnabled', True)])
+        self.cmd('storage account update -n {sa} --enable-sftp false',
+                 checks=[JMESPathCheck('isSftpEnabled', False), JMESPathCheck('isLocalUserEnabled', True)])
+        self.cmd('storage account update -n {sa} --enable-local-user false',
+                 checks=[JMESPathCheck('isSftpEnabled', False), JMESPathCheck('isLocalUserEnabled', False)])
+
     def test_show_usage(self):
         self.cmd('storage account show-usage -l westus', checks=JMESPathCheck('name.value', 'StorageAccounts'))
 
@@ -889,6 +944,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
         self.assertEqual(result['encryption']['keySource'], "Microsoft.Storage")
 
+    @unittest.skip('Failure due to service behavior change')
     @ResourceGroupPreparer(location='eastus2euap')
     @KeyVaultPreparer(location='eastus2euap')
     def test_user_assigned_identity(self, resource_group, key_vault):
@@ -1531,13 +1587,185 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(activeDirectoryProperties['forestName'], self.kwargs['forest_name'])
         self.assertEqual(activeDirectoryProperties['netBiosDomainName'], self.kwargs['net_bios_domain_name'])
 
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2022-05-01')
+    @ResourceGroupPreparer()
+    def test_create_storage_account_with_files_aadkerb(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        self.kwargs.update({
+            'rg': resource_group,
+            'sc': name,
+            'domain_name': 'mydomain.com',
+            'domain_guid': '12345678-1234-1234-1234-123456789012'
+        })
+        create_cmd = 'storage account create -n {sc} -g {rg} -l eastus2euap --sku Standard_LRS ' \
+                     '--enable-files-aadkerb --domain-name {domain_name} --domain-guid {domain_guid}'
+        result = self.cmd(create_cmd).get_output_in_json()
+
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AADKERB')
+        activeDirectoryProperties = result['azureFilesIdentityBasedAuthentication']['activeDirectoryProperties']
+        self.assertEqual(activeDirectoryProperties['domainGuid'], self.kwargs['domain_guid'])
+        self.assertEqual(activeDirectoryProperties['domainName'], self.kwargs['domain_name'])
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2022-05-01')
+    @ResourceGroupPreparer()
+    def test_create_storage_account_with_files_aadkerb_false(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        self.kwargs.update({
+            'rg': resource_group,
+            'sc': name
+        })
+        result = self.cmd(
+            "storage account create -n {sc} -g {rg} -l eastus2euap --enable-files-aadkerb false").get_output_in_json()
+
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'None')
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2022-05-01')
+    @ResourceGroupPreparer()
+    def test_create_storage_account_with_files_aadkerb_true(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        self.kwargs.update({
+            'rg': resource_group,
+            'sc': name,
+            'domain_name': 'mydomain.com',
+            'domain_guid': '12345678-1234-1234-1234-123456789012'
+        })
+        create_cmd = 'storage account create -n {sc} -g {rg} -l eastus2euap --sku Standard_LRS ' \
+                     '--enable-files-aadkerb true --domain-name {domain_name} --domain-guid {domain_guid}'
+        result = self.cmd(create_cmd).get_output_in_json()
+
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AADKERB')
+        activeDirectoryProperties = result['azureFilesIdentityBasedAuthentication']['activeDirectoryProperties']
+        self.assertEqual(activeDirectoryProperties['domainGuid'], self.kwargs['domain_guid'])
+        self.assertEqual(activeDirectoryProperties['domainName'], self.kwargs['domain_name'])
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2022-05-01')
+    @ResourceGroupPreparer()
+    def test_update_storage_account_with_files_aadkerb(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        create_cmd = 'az storage account create -n {} -g {} -l eastus2euap'.format(name, resource_group)
+        self.cmd(create_cmd, checks=[JMESPathCheck('azureFilesIdentityBasedAuthentication', None)])
+        self.kwargs.update({
+            'rg': resource_group,
+            'sc': name,
+            'domain_name': 'mydomain.com',
+            'domain_guid': '12345678-1234-1234-1234-123456789012'
+        })
+        update_cmd = 'storage account update -n {sc} -g {rg} --enable-files-aadkerb'
+        result = self.cmd(update_cmd).get_output_in_json()
+
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AADKERB')
+
+        update_cmd = 'storage account update -n {sc} -g {rg} --enable-files-aadkerb ' \
+                     '--domain-name {domain_name} --domain-guid {domain_guid}'
+        result = self.cmd(update_cmd).get_output_in_json()
+
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AADKERB')
+        activeDirectoryProperties = result['azureFilesIdentityBasedAuthentication']['activeDirectoryProperties']
+        self.assertEqual(activeDirectoryProperties['domainGuid'], self.kwargs['domain_guid'])
+        self.assertEqual(activeDirectoryProperties['domainName'], self.kwargs['domain_name'])
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2022-05-01')
+    @ResourceGroupPreparer()
+    def test_update_storage_account_with_files_aadkerb_false(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        create_cmd = 'az storage account create -n {} -g {} -l eastus2euap'.format(name, resource_group)
+        self.cmd(create_cmd, checks=[JMESPathCheck('azureFilesIdentityBasedAuthentication', None)])
+
+        update_cmd = 'az storage account update -n {} -g {} --enable-files-aadkerb false'.format(name, resource_group)
+        result = self.cmd(update_cmd).get_output_in_json()
+
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'None')
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+    @ResourceGroupPreparer()
+    def test_update_storage_account_with_files_aadkerb_true(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        create_cmd = 'az storage account create -n {} -g {} -l eastus2euap'.format(name, resource_group)
+        self.cmd(create_cmd, checks=[JMESPathCheck('azureFilesIdentityBasedAuthentication', None)])
+        self.kwargs.update({
+            'rg': resource_group,
+            'sc': name,
+            'domain_name': 'mydomain.com',
+            'domain_guid': '12345678-1234-1234-1234-123456789012'
+        })
+        update_cmd = 'storage account update -n {sc} -g {rg} --enable-files-aadkerb true ' \
+                     '--domain-name {domain_name} --domain-guid {domain_guid}'
+        result = self.cmd(update_cmd).get_output_in_json()
+
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AADKERB')
+        activeDirectoryProperties = result['azureFilesIdentityBasedAuthentication']['activeDirectoryProperties']
+        self.assertEqual(activeDirectoryProperties['domainGuid'], self.kwargs['domain_guid'])
+        self.assertEqual(activeDirectoryProperties['domainName'], self.kwargs['domain_name'])
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-08-01')
+    @ResourceGroupPreparer()
+    def test_storage_account_with_files_adds_sam_account_name(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        self.kwargs.update({
+            'rg': resource_group,
+            'sc': name,
+            'domain_name': 'mydomain.com',
+            'net_bios_domain_name': 'mydomain.com',
+            'forest_name': 'mydomain.com',
+            'domain_guid': '12345678-1234-1234-1234-123456789012',
+            'domain_sid': 'S-1-5-21-1234567890-1234567890-1234567890',
+            'azure_storage_sid': 'S-1-5-21-1234567890-1234567890-1234567890-1234',
+            'sam_account_name': self.create_random_name(prefix='samaccount', length=48)
+        })
+        create_cmd = """storage account create -n {sc} -g {rg} -l eastus2euap --enable-files-adds --domain-name
+            {domain_name} --net-bios-domain-name {net_bios_domain_name} --forest-name {forest_name} --domain-guid
+            {domain_guid} --domain-sid {domain_sid} --azure-storage-sid {azure_storage_sid} 
+            --sam-account-name {sam_account_name} --account-type User"""
+        result = self.cmd(create_cmd).get_output_in_json()
+
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AD')
+        activeDirectoryProperties = result['azureFilesIdentityBasedAuthentication']['activeDirectoryProperties']
+        self.assertEqual(activeDirectoryProperties['samAccountName'], self.kwargs['sam_account_name'])
+        self.assertEqual(activeDirectoryProperties['accountType'], "User")
+        self.assertEqual(activeDirectoryProperties['azureStorageSid'], self.kwargs['azure_storage_sid'])
+        self.assertEqual(activeDirectoryProperties['domainGuid'], self.kwargs['domain_guid'])
+        self.assertEqual(activeDirectoryProperties['domainName'], self.kwargs['domain_name'])
+        self.assertEqual(activeDirectoryProperties['domainSid'], self.kwargs['domain_sid'])
+        self.assertEqual(activeDirectoryProperties['forestName'], self.kwargs['forest_name'])
+        self.assertEqual(activeDirectoryProperties['netBiosDomainName'], self.kwargs['net_bios_domain_name'])
+
+        self.kwargs.update({
+            'sam_account_name': self.create_random_name(prefix='newsamaccount', length=48)
+        })
+        update_cmd = """storage account update -n {sc} -g {rg} --enable-files-adds --domain-name {domain_name}
+            --net-bios-domain-name {net_bios_domain_name} --forest-name {forest_name} --domain-guid {domain_guid}
+            --domain-sid {domain_sid} --azure-storage-sid {azure_storage_sid} 
+            --sam-account-name {sam_account_name} --account-type Computer"""
+        result = self.cmd(update_cmd).get_output_in_json()
+
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AD')
+        activeDirectoryProperties = result['azureFilesIdentityBasedAuthentication']['activeDirectoryProperties']
+        self.assertEqual(activeDirectoryProperties['samAccountName'], self.kwargs['sam_account_name'])
+        self.assertEqual(activeDirectoryProperties['accountType'], "Computer")
+        self.assertEqual(activeDirectoryProperties['azureStorageSid'], self.kwargs['azure_storage_sid'])
+        self.assertEqual(activeDirectoryProperties['domainGuid'], self.kwargs['domain_guid'])
+        self.assertEqual(activeDirectoryProperties['domainName'], self.kwargs['domain_name'])
+        self.assertEqual(activeDirectoryProperties['domainSid'], self.kwargs['domain_sid'])
+        self.assertEqual(activeDirectoryProperties['forestName'], self.kwargs['forest_name'])
+        self.assertEqual(activeDirectoryProperties['netBiosDomainName'], self.kwargs['net_bios_domain_name'])
+
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2020-08-01-preview')
     @ResourceGroupPreparer(location='westus', name_prefix='cliedgezone')
     def test_storage_account_extended_location(self, resource_group):
         self.kwargs = {
             'sa1': self.create_random_name(prefix='edge1', length=12),
             'sa2': self.create_random_name(prefix='edge2', length=12),
-            'rg': resource_group
+            'rg': resource_group,
+            'container': self.create_random_name(prefix='container', length=24),
         }
         self.cmd('storage account create -n {sa1} -g {rg} --edge-zone microsoftrrdclab1 -l eastus2euap --sku Premium_LRS',
                  checks=[
@@ -1549,6 +1777,23 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
                      JMESPathCheck('extendedLocation.name', 'microsoftlosangeles1'),
                      JMESPathCheck('extendedLocation.type', 'EdgeZone')
                  ])
+
+        endpoint = self.cmd('storage account show -n {sa1} -g {rg}').get_output_in_json()['primaryEndpoints']['blob']
+        self.kwargs['endpoint'] = endpoint
+        self.kwargs['storage_key'] = str(self.cmd('az storage account keys list -n {sa1} -g {rg} --query "[0].value"').output)
+        self.cmd('storage container create -n {container} --account-name {sa1} --blob-endpoint {endpoint} --account-key {storage_key}') \
+            .assert_with_checks(self.check('created', True))
+
+    @ResourceGroupPreparer(location='eastus2euap')
+    @StorageAccountPreparer(location='eastus2euap', kind='StorageV2')
+    def test_storage_account_migration(self, resource_group, storage_account):
+        self.kwargs.update({
+            'sa': storage_account
+        })
+        self.cmd('az storage account migration start --account-name {sa} -g {rg} --sku Standard_ZRS --no-wait')
+        # other status would take days to months
+        self.cmd('az storage account migration show -n default -g {rg} --account-name {sa}',
+                 checks=[JMESPathCheck('migrationStatus', 'SubmittedForConversion')])
 
 
 class RoleScenarioTest(LiveScenarioTest):
@@ -1794,6 +2039,33 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
         result = self.cmd('storage account blob-service-properties show -n {sa} -g {rg}').get_output_in_json()
         self.assertEqual(result['lastAccessTimeTrackingPolicy']['enable'], True)
 
+    @ResourceGroupPreparer(name_prefix="cli_test_sa_blob_cors")
+    @StorageAccountPreparer(location="eastus2", kind="StorageV2")
+    def test_storage_account_blob_cors_rule(self, resource_group, storage_account):
+        self.kwargs.update({
+            'sa': storage_account,
+            'rg': resource_group
+        })
+
+        self.cmd('storage account blob-service-properties cors-rule add -n {sa} -g {rg} '
+                 '--allowed-origins "http://*.contoso.com" "http://www.fabrikam.com" --allowed-methods PUT GET '
+                 '--allowed-headers x-ms-meta-data* --max-age 200')\
+            .assert_with_checks(
+                        JMESPathCheck('length(@)', 1),
+                        JMESPathCheck('[0].allowedOrigins', ['http://*.contoso.com', 'http://www.fabrikam.com']),
+                        JMESPathCheck('[0].allowedMethods', ['PUT', 'GET']),
+                        JMESPathCheck('[0].allowedHeaders', ['x-ms-meta-data*']),
+                        JMESPathCheck('[0].exposedHeaders', []),
+                        JMESPathCheck('[0].maxAgeInSeconds', 200))
+
+        self.cmd('storage account blob-service-properties cors-rule list -n {sa} -g {rg}') \
+            .assert_with_checks(JMESPathCheck('length(@)', 1))
+
+        self.cmd('storage account blob-service-properties cors-rule clear -n {sa} -g {rg}')\
+            .assert_with_checks(JMESPathCheck('length(@)', 0))
+        self.cmd('storage account blob-service-properties cors-rule list -n {sa} -g {rg}')\
+            .assert_with_checks(JMESPathCheck('length(@)', 0))
+
 
 class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_file_soft_delete')
@@ -2034,7 +2306,7 @@ class StorageAccountSkuScenarioTest(ScenarioTest):
 
 
 class StorageAccountFailoverScenarioTest(ScenarioTest):
-    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2022-09-01')
     @ResourceGroupPreparer(name_prefix='clistorage', location='westus2')
     def test_storage_account_failover(self, resource_group):
         self.kwargs = {
@@ -2058,7 +2330,7 @@ class StorageAccountFailoverScenarioTest(ScenarioTest):
         ])
 
         time.sleep(900)
-        self.cmd('storage account failover -n {sa} -g {rg} --no-wait -y')
+        self.cmd('storage account failover -n {sa} -g {rg} --failover-type Planned --no-wait -y')
 
         self.cmd('storage account show -n {sa} -g {rg} --expand geoReplicationStats', checks=[
             self.check('name', '{sa}'),
@@ -2194,10 +2466,11 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result['rules'][0]['destinationContainer'], dest_container)
         self.assertEqual(result['rules'][0]['filters']['minCreationTime'], '2020-02-19T16:05:00Z')
 
-        # Update ORS policy
-        result = self.cmd('storage account or-policy update -g {} -n {} --policy-id {} --source-account {}'.format(
-            resource_group, self.kwargs["dest_sc"], self.kwargs["policy_id"], self.kwargs['new_sc'])).get_output_in_json()
-        self.assertIn(self.kwargs['new_sc'], result['sourceAccount'])
+        # Service behavior change: (InvalidObjectReplicationPolicy) SourceAccount can not be overwritten
+        # # Update ORS policy
+        # result = self.cmd('storage account or-policy update -g {} -n {} --policy-id {} --source-account {}'.format(
+        #     resource_group, self.kwargs["dest_sc"], self.kwargs["policy_id"], self.kwargs['new_sc'])).get_output_in_json()
+        # self.assertIn(self.kwargs['new_sc'], result['sourceAccount'])
 
         # Delete policy from destination and source account
         self.cmd('storage account or-policy delete -g {rg} -n {src_sc} --policy-id {policy_id}')
@@ -2323,6 +2596,7 @@ class StorageAccountBlobInventoryScenarioTest(StorageScenarioMixin, ScenarioTest
                          JMESPathCheck("policy.rules[0].definition.filters.includeSnapshots", True),
                          JMESPathCheck("policy.rules[0].definition.filters.prefixMatch[0]", "inventoryprefix1"),
                          JMESPathCheck("policy.rules[0].definition.filters.prefixMatch[1]", "inventoryprefix2"),
+                         JMESPathCheck("policy.rules[0].definition.filters.creationTime.lastNDays", 3),
                          JMESPathCheck("policy.rules[0].definition.format", "Csv"),
                          JMESPathCheck("policy.rules[0].definition.objectType", "Blob"),
                          JMESPathCheck("policy.rules[0].definition.schedule", "Daily"),
@@ -2455,3 +2729,73 @@ class StorageAccountHNSMigrationScenarioTest(StorageScenarioMixin, ScenarioTest)
                 if ex.reason == 'Hns migration for the account: {} is not found.'.format(storage_account2):
                     retry += 1
                     time.sleep(30)
+
+class StorageAccountLocalUserTests(StorageScenarioMixin, ScenarioTest):
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_storage_account_local_user')
+    @StorageAccountPreparer(name_prefix='storagelocaluser', kind='StorageV2', location='eastus2euap')
+    def test_storage_account_local_user(self, resource_group, storage_account):
+        username = self.create_random_name(prefix='cli', length=24)
+        self.kwargs.update({
+            'sa': storage_account,
+            'rg': resource_group,
+            'cmd': 'storage account local-user',
+            'username': username
+        })
+
+        self.cmd('{cmd} create --account-name {sa} -g {rg} -n {username} --home-directory home '
+                 '--permission-scope permissions=r service=blob resource-name=container1 '
+                 '--permission-scope permissions=rw service=file resource-name=share2 '
+                 '--has-ssh-key false --has-shared-key false').assert_with_checks(
+            JMESPathCheck('hasSharedKey', False),
+            JMESPathCheck('hasSshKey', False),
+            JMESPathCheck('hasSshPassword', None),
+            JMESPathCheck('homeDirectory', 'home'),
+            JMESPathCheck('name', username),
+            JMESPathCheck('length(permissionScopes)', 2),
+            JMESPathCheck('permissionScopes[0].permissions', 'r'),
+            JMESPathCheck('permissionScopes[0].service', 'blob'),
+            JMESPathCheck('permissionScopes[0].resourceName', 'container1')
+        )
+
+        self.cmd('{cmd} update --account-name {sa} -g {rg} -n {username} --home-directory home2 '
+                 '--permission-scope permissions=rw service=file resource-name=share2').assert_with_checks(
+            JMESPathCheck('homeDirectory', 'home2'),
+            JMESPathCheck('length(permissionScopes)', 1),
+            JMESPathCheck('permissionScopes[0].permissions', 'rw'),
+            JMESPathCheck('permissionScopes[0].service', 'file'),
+            JMESPathCheck('permissionScopes[0].resourceName', 'share2')
+        )
+
+        self.cmd('{cmd} list --account-name {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('[0].hasSshKey', False),
+            JMESPathCheck('[0].hasSshPassword', False),
+            JMESPathCheck('[0].homeDirectory', 'home2'),
+            JMESPathCheck('[0].length(permissionScopes)', 1),
+            JMESPathCheck('[0].sshAuthorizedKeys', None)
+        )
+
+        self.cmd('{cmd} show --account-name {sa} -g {rg} -n {username}').assert_with_checks(
+            JMESPathCheck('hasSshKey', False),
+            JMESPathCheck('hasSshPassword', False),
+            JMESPathCheck('homeDirectory', 'home2'),
+            JMESPathCheck('length(permissionScopes)', 1),
+            JMESPathCheck('permissionScopes[0].permissions', 'rw'),
+            JMESPathCheck('permissionScopes[0].service', 'file'),
+            JMESPathCheck('permissionScopes[0].resourceName', 'share2'),
+            JMESPathCheck('sshAuthorizedKeys', None)
+        )
+
+        self.cmd('{cmd} update --account-name {sa} -g {rg} -n {username} '
+                 '--ssh-authorized-key key="ssh-rsa a2V5" ')
+
+        self.cmd('{cmd} list-keys --account-name {sa} -g {rg} -n {username}').assert_with_checks(
+            JMESPathCheck('sshAuthorizedKeys', None)
+        )
+
+        self.cmd('{cmd} regenerate-password --account-name {sa} -g {rg} -n {username}').assert_with_checks(
+            JMESPathCheck('sshAuthorizedKeys', None),
+            JMESPathCheckExists('sshPassword')
+        )
+
+        self.cmd('{cmd} delete --account-name {sa} -g {rg} -n {username}')

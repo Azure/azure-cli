@@ -13,7 +13,8 @@ from azure.cli.command_modules.appservice.static_sites import \
     set_staticsite_app_settings, delete_staticsite_app_settings, list_staticsite_users, \
     invite_staticsite_users, update_staticsite_users, update_staticsite, list_staticsite_secrets, \
     reset_staticsite_api_key, delete_staticsite_environment, link_user_function, unlink_user_function, get_user_function, \
-    assign_identity, remove_identity, show_identity, enable_staticwebapp_enterprise_edge, disable_staticwebapp_enterprise_edge, show_staticwebapp_enterprise_edge_status
+    assign_identity, remove_identity, show_identity, enable_staticwebapp_enterprise_edge, disable_staticwebapp_enterprise_edge, \
+    show_staticwebapp_enterprise_edge_status, validate_backend, link_backend, get_backend, unlink_backend
 from azure.core.exceptions import ResourceNotFoundError
 
 
@@ -123,6 +124,27 @@ class TestStaticAppCommands(unittest.TestCase):
             app_location=app_location, api_location=api_location, output_location=output_location,
             tags=tags)
         self.staticapp_client.begin_create_or_update_static_site.assert_called_once()
+
+
+    @mock.patch('azure.cli.core.util', autospec=True)
+    def test_create_staticapp_azure_devops(self, util):
+        from azure.mgmt.web.models import StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
+        self.mock_cmd.get_models.return_value = StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
+
+        with mock.patch("azure.cli.command_modules.appservice.static_sites.show_staticsite", side_effect=[ResourceNotFoundError("msg"), None]):
+            with mock.patch('azure.cli.command_modules.appservice.static_sites._get_ado_token', autospec=True):
+                create_staticsites(
+                    self.mock_cmd, self.rg1, self.name1, self.location1,
+                    self.source_ado, self.branch1, login_with_ado=True)
+
+        self.staticapp_client.begin_create_or_update_static_site.assert_called_once()
+        arg_list = self.staticapp_client.begin_create_or_update_static_site.call_args[1]
+        self.assertEqual(self.name1, arg_list["name"])
+        self.assertEqual(self.rg1, arg_list["resource_group_name"])
+        self.assertEqual(self.location1, arg_list["static_site_envelope"].location)
+        self.assertEqual(self.source_ado, arg_list["static_site_envelope"].repository_url)
+        self.assertEqual(self.branch1, arg_list["static_site_envelope"].branch)
+        self.assertEqual('Free', arg_list["static_site_envelope"].sku.name)
 
 
     def test_create_staticapp_with_standard_sku(self):
@@ -382,6 +404,39 @@ class TestStaticAppCommands(unittest.TestCase):
         # validate
         self.staticapp_client.create_or_update_static_site_app_settings.assert_called_once()
 
+    def test_list_staticsite_app_settings_with_resourcegroup_with_environment(self):
+        list_staticsite_app_settings(self.mock_cmd, self.name1, self.rg1, self.environment1)
+
+        self.staticapp_client.list_static_site_build_app_settings.assert_called_once_with(
+            self.rg1, self.name1, self.environment1)
+
+    def test_set_staticsite_app_settings_with_resourcegroup_with_environment(self):
+        from azure.mgmt.web.models import StringDictionary
+
+        app_settings1_input = ['key1=val1', 'key2=val2==', 'key3=val3=']
+
+        self.staticapp_client.list_static_site_build_app_settings.return_value = StringDictionary(properties={})
+
+        set_staticsite_app_settings(self.mock_cmd, self.name1, app_settings1_input, self.rg1, self.environment1)
+
+        self.staticapp_client.create_or_update_static_site_build_app_settings.assert_called_once()
+
+    def test_delete_staticsite_app_settings_with_resourcegroup_with_environment(self):
+        # setup
+        current_app_settings = {'key1': 'val1', 'key2': 'val2'}
+        app_settings_keys_to_delete = ['key1']
+
+        class AppSettings:
+            properties = current_app_settings
+
+        self.staticapp_client.list_static_site_build_app_settings.return_value = AppSettings
+
+        # action
+        delete_staticsite_app_settings(self.mock_cmd, self.name1, app_settings_keys_to_delete, self.rg1, self.environment1)
+
+        # validate
+        self.staticapp_client.create_or_update_static_site_build_app_settings.assert_called_once()
+
     def test_list_staticsite_users_with_resourcegroup(self):
         authentication_provider = 'GitHub'
 
@@ -597,9 +652,19 @@ class TestStaticAppCommands(unittest.TestCase):
         functionapp_resource_id = "/subscriptions/sub/resourceGroups/{}/providers/Microsoft.Web/sites/{}".format(
             self.rg1, functionapp_name
         )
-        link_user_function(self.mock_cmd, self.name1, self.rg1, functionapp_resource_id)
+        link_user_function(self.mock_cmd, self.name1, self.rg1, functionapp_resource_id, None)
 
         self.staticapp_client.begin_register_user_provided_function_app_with_static_site.assert_called_once()
+
+    @mock.patch("azure.cli.command_modules.appservice.static_sites.show_app")
+    def test_functions_link_with_environment(self, *args, **kwargs):
+        functionapp_name = "functionapp"
+        functionapp_resource_id = "/subscriptions/sub/resourceGroups/{}/providers/Microsoft.Web/sites/{}".format(
+            self.rg1, functionapp_name
+        )
+        link_user_function(self.mock_cmd, self.name1, self.rg1, functionapp_resource_id, self.environment1)
+
+        self.staticapp_client.begin_register_user_provided_function_app_with_static_site_build.assert_called_once()
 
     @mock.patch("azure.cli.command_modules.appservice.static_sites.get_user_function", return_value=[mock.MagicMock()])
     def test_functions_unlink(self, *args, **kwargs):
@@ -611,6 +676,35 @@ class TestStaticAppCommands(unittest.TestCase):
         get_user_function(self.mock_cmd, self.name1, self.rg1)
 
         self.staticapp_client.get_user_provided_function_apps_for_static_site.assert_called_once()
+
+    def test_backends_validate(self, *args, **kwargs):
+        backend_name = "backend"
+        backend_resource_id = "/subscriptions/sub/resourceGroups/{}/providers/Microsoft.App/containerApps/{}".format(
+            self.rg1, backend_name
+        )
+        validate_backend(self.mock_cmd, self.name1, self.rg1, backend_resource_id)
+
+        self.staticapp_client.begin_validate_backend_for_build.assert_called_once()
+
+    def test_backends_link(self, *args, **kwargs):
+        backend_name = "backend"
+        backend_resource_id = "/subscriptions/sub/resourceGroups/{}/providers/Microsoft.Web/sites/{}".format(
+            self.rg1, backend_name
+        )
+        link_backend(self.mock_cmd, self.name1, self.rg1, backend_resource_id)
+
+        self.staticapp_client.begin_link_backend_to_build.assert_called_once()
+
+    @mock.patch("azure.cli.command_modules.appservice.static_sites.get_backend", return_value=[mock.MagicMock()])
+    def test_backends_unlink(self, *args, **kwargs):
+        unlink_backend(self.mock_cmd, self.name1, self.rg1)
+
+        self.staticapp_client.unlink_backend_from_build.assert_called_once()
+
+    def test_backends_show(self, *args, **kwargs):
+        get_backend(self.mock_cmd, self.name1, self.rg1)
+
+        self.staticapp_client.get_linked_backends_for_build.assert_called_once()
 
     def test_enterprise_edge(self):
         self.staticapp_client.get_static_site.return_value = self.app1
@@ -652,6 +746,7 @@ def _set_up_fake_apps(self):
     self.name1_not_exist = 'name1_not_exist'
     self.location1 = 'location1'
     self.source1 = 'https://github.com/Contoso/My-First-Static-App'
+    self.source_ado = ' https://dev.azure.com/username/Test/_git/Test'
     self.branch1 = 'dev'
     self.token1 = 'TOKEN_1'
     self.environment1 = 'default'

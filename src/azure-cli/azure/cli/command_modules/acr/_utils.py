@@ -394,7 +394,9 @@ def is_vault_secret(cmd, credential):
         keyvault_dns = cmd.cli_ctx.cloud.suffixes.keyvault_dns
     except ResourceNotFound:
         return False
-    return keyvault_dns.upper() in credential.upper()
+    if credential is not None:
+        return keyvault_dns.upper() in credential.upper()
+    return False
 
 
 def get_task_id_from_task_name(cli_ctx, resource_group, registry_name, task_name):

@@ -6,8 +6,9 @@
 """Custom operations for storage account commands"""
 
 import os
+from ipaddress import ip_network
 from azure.cli.command_modules.storage._client_factory import storage_client_factory, cf_sa_for_keys
-from azure.cli.core.util import get_file_json, shell_safe_json_parse, find_child_item
+from azure.cli.core.util import get_file_json, shell_safe_json_parse, find_child_item, user_confirmation
 from azure.cli.core.profiles import ResourceType, get_sdk
 from knack.log import get_logger
 from knack.util import CLIError
@@ -17,7 +18,7 @@ logger = get_logger(__name__)
 
 def check_name_availability(cmd, client, name):
     StorageAccountCheckNameAvailabilityParameters = cmd.get_models('StorageAccountCheckNameAvailabilityParameters')
-    account_name = StorageAccountCheckNameAvailabilityParameters(name=name)
+    account_name = StorageAccountCheckNameAvailabilityParameters(name=name, type="Microsoft.Storage/storageAccounts")
     return client.check_name_availability(account_name)
 
 
@@ -55,7 +56,8 @@ def generate_sas(cmd, client, services, resource_types, permission, expiry, star
 def create_storage_account(cmd, resource_group_name, account_name, sku=None, location=None, kind=None,
                            tags=None, custom_domain=None, encryption_services=None, encryption_key_source=None,
                            encryption_key_name=None, encryption_key_vault=None, encryption_key_version=None,
-                           access_tier=None, https_only=None,
+                           access_tier=None, https_only=None, enable_sftp=None, enable_local_user=None,
+                           enable_files_aadkerb=None,
                            enable_files_aadds=None, bypass=None, default_action=None, assign_identity=False,
                            enable_large_file_share=None, enable_files_adds=None, domain_name=None,
                            net_bios_domain_name=None, forest_name=None, domain_guid=None, domain_sid=None,
@@ -65,21 +67,33 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            routing_choice=None, publish_microsoft_endpoints=None, publish_internet_endpoints=None,
                            require_infrastructure_encryption=None, allow_blob_public_access=None,
                            min_tls_version=None, allow_shared_key_access=None, edge_zone=None,
-                           identity_type=None, user_identity_id=None, key_vault_user_identity_id=None,
+                           identity_type=None, user_identity_id=None,
+                           key_vault_user_identity_id=None, federated_identity_client_id=None,
                            sas_expiration_period=None, key_expiration_period_in_days=None,
                            allow_cross_tenant_replication=None, default_share_permission=None,
                            enable_nfs_v3=None, subnet=None, vnet_name=None, action='Allow', enable_alw=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
-                           allow_protected_append_writes=None, public_network_access=None):
+                           allow_protected_append_writes=None, public_network_access=None, dns_endpoint_type=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
     scf = storage_client_factory(cmd.cli_ctx)
+
+    # check name availability and throw a warning if an account with the same name is found
+    # TODO throw error instead of just a warning during the next breaking change window
+    StorageAccountCheckNameAvailabilityParameters = cmd.get_models('StorageAccountCheckNameAvailabilityParameters')
+    account_name_param = StorageAccountCheckNameAvailabilityParameters(name=account_name,
+                                                                       type="Microsoft.Storage/storageAccounts")
+    name_is_available = scf.storage_accounts.check_name_availability(account_name_param)
+    if name_is_available and not name_is_available.name_available and name_is_available.reason == "AlreadyExists":
+        logger.warning("A storage account with the provided name %s is found. "
+                       "Will continue to update the existing account.", account_name)
+
     if kind is None:
         logger.warning("The default kind for created storage account will change to 'StorageV2' from 'Storage' "
                        "in the future")
     params = StorageAccountCreateParameters(sku=Sku(name=sku), kind=Kind(kind), location=location, tags=tags,
-                                            encryption=Encryption())
+                                            encryption=Encryption(key_source="Microsoft.Storage"))
     # TODO: remove this part when server side remove the constraint
     if encryption_services is None:
         params.encryption.services = {'blob': {}}
@@ -105,10 +119,12 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         params.identity = Identity(type=identity_type, user_assigned_identities={user_identity_id: {}})
     elif identity_type:
         params.identity = Identity(type=identity_type)
-    if key_vault_user_identity_id is not None:
+    if key_vault_user_identity_id is not None or federated_identity_client_id is not None:
         EncryptionIdentity = cmd.get_models('EncryptionIdentity')
         params.encryption.encryption_identity = EncryptionIdentity(
-            encryption_user_assigned_identity=key_vault_user_identity_id)
+            encryption_user_assigned_identity=key_vault_user_identity_id,
+            encryption_federated_identity_client_id=federated_identity_client_id
+        )
 
     if access_tier:
         params.access_tier = AccessTier(access_tier)
@@ -118,11 +134,29 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         params.enable_https_traffic_only = https_only
     if enable_hierarchical_namespace is not None:
         params.is_hns_enabled = enable_hierarchical_namespace
+    if enable_sftp is not None:
+        params.is_sftp_enabled = enable_sftp
+    if enable_local_user is not None:
+        params.is_local_user_enabled = enable_local_user
 
     AzureFilesIdentityBasedAuthentication = cmd.get_models('AzureFilesIdentityBasedAuthentication')
     if enable_files_aadds is not None:
         params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
             directory_service_options='AADDS' if enable_files_aadds else 'None')
+    if enable_files_aadkerb is not None:
+        if enable_files_aadkerb:
+            active_directory_properties = None
+            if domain_name or domain_guid:
+                ActiveDirectoryProperties = cmd.get_models('ActiveDirectoryProperties')
+                active_directory_properties = ActiveDirectoryProperties(domain_name=domain_name,
+                                                                        domain_guid=domain_guid)
+            params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                directory_service_options='AADKERB',
+                active_directory_properties=active_directory_properties)
+        else:
+            params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                directory_service_options='None')
+
     if enable_files_adds is not None:
         ActiveDirectoryProperties = cmd.get_models('ActiveDirectoryProperties')
         if enable_files_adds:  # enable AD
@@ -182,14 +216,22 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     if encryption_key_type_for_table is not None or encryption_key_type_for_queue is not None:
         EncryptionServices = cmd.get_models('EncryptionServices')
         EncryptionService = cmd.get_models('EncryptionService')
-        params.encryption = Encryption()
-        params.encryption.services = EncryptionServices()
+        if params.encryption is None:
+            params.encryption = Encryption()
+        if params.encryption.services is None:
+            params.encryption.services = EncryptionServices()
         if encryption_key_type_for_table is not None:
             table_encryption_service = EncryptionService(enabled=True, key_type=encryption_key_type_for_table)
-            params.encryption.services.table = table_encryption_service
+            if isinstance(params.encryption.services, dict):
+                params.encryption.services["table"] = table_encryption_service
+            else:
+                params.encryption.services.table = table_encryption_service
         if encryption_key_type_for_queue is not None:
             queue_encryption_service = EncryptionService(enabled=True, key_type=encryption_key_type_for_queue)
-            params.encryption.services.queue = queue_encryption_service
+            if isinstance(params.encryption.services, dict):
+                params.encryption.services["queue"] = queue_encryption_service
+            else:
+                params.encryption.services.queue = queue_encryption_service
 
     if any([routing_choice, publish_microsoft_endpoints, publish_internet_endpoints]):
         RoutingPreference = cmd.get_models('RoutingPreference')
@@ -248,6 +290,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     if public_network_access is not None:
         params.public_network_access = public_network_access
 
+    if dns_endpoint_type is not None:
+        params.dns_endpoint_type = dns_endpoint_type
+
     return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
 
 
@@ -262,7 +307,7 @@ def list_storage_accounts(cmd, resource_group_name=None):
 
 def show_storage_account_connection_string(cmd, resource_group_name, account_name, protocol='https', blob_endpoint=None,
                                            file_endpoint=None, queue_endpoint=None, table_endpoint=None, sas_token=None,
-                                           key_name='primary'):
+                                           key_name='key1'):
 
     endpoint_suffix = cmd.cli_ctx.cloud.suffixes.storage_endpoint
     connection_string = 'DefaultEndpointsProtocol={};EndpointSuffix={}'.format(protocol, endpoint_suffix)
@@ -289,7 +334,7 @@ def show_storage_account_connection_string(cmd, resource_group_name, account_nam
         connection_string = '{}{}{}'.format(
             connection_string,
             ';AccountName={}'.format(account_name),
-            ';AccountKey={}'.format(keys[0] if key_name == 'primary' else keys[1]))  # pylint: disable=no-member
+            ';AccountKey={}'.format(keys[0] if key_name == 'key1' else keys[1]))  # pylint: disable=no-member
 
     connection_string = '{}{}'.format(connection_string,
                                       ';BlobEndpoint={}'.format(blob_endpoint) if blob_endpoint else '')
@@ -328,14 +373,16 @@ def get_storage_account_properties(cli_ctx, account_id):
 # pylint: disable=too-many-locals, too-many-statements, too-many-branches, too-many-boolean-expressions, line-too-long
 def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=None, use_subdomain=None,
                            encryption_services=None, encryption_key_source=None, encryption_key_version=None,
-                           encryption_key_name=None, encryption_key_vault=None,
-                           access_tier=None, https_only=None, enable_files_aadds=None, assign_identity=False,
+                           encryption_key_name=None, encryption_key_vault=None, enable_files_aadkerb=None,
+                           access_tier=None, https_only=None, enable_sftp=None, enable_local_user=None,
+                           enable_files_aadds=None, assign_identity=False,
                            bypass=None, default_action=None, enable_large_file_share=None, enable_files_adds=None,
                            domain_name=None, net_bios_domain_name=None, forest_name=None, domain_guid=None,
                            domain_sid=None, azure_storage_sid=None, sam_account_name=None, account_type=None,
                            routing_choice=None, publish_microsoft_endpoints=None, publish_internet_endpoints=None,
                            allow_blob_public_access=None, min_tls_version=None, allow_shared_key_access=None,
-                           identity_type=None, user_identity_id=None, key_vault_user_identity_id=None,
+                           identity_type=None, user_identity_id=None,
+                           key_vault_user_identity_id=None, federated_identity_client_id=None,
                            sas_expiration_period=None, key_expiration_period_in_days=None,
                            allow_cross_tenant_replication=None, default_share_permission=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
@@ -397,10 +444,15 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     elif identity_type:
         params.identity = Identity(type=identity_type)
 
-    if key_vault_user_identity_id is not None:
+    if key_vault_user_identity_id is not None or federated_identity_client_id is not None:
+        original_encryption_identity = params.encryption.encryption_identity if params.encryption else None
         EncryptionIdentity = cmd.get_models('EncryptionIdentity')
+        if not original_encryption_identity:
+            original_encryption_identity = EncryptionIdentity()
         params.encryption.encryption_identity = EncryptionIdentity(
-            encryption_user_assigned_identity=key_vault_user_identity_id)
+            encryption_user_assigned_identity=key_vault_user_identity_id if key_vault_user_identity_id else original_encryption_identity.encryption_user_assigned_identity,
+            encryption_federated_identity_client_id=federated_identity_client_id if federated_identity_client_id else original_encryption_identity.encryption_federated_identity_client_id
+        )
 
     AzureFilesIdentityBasedAuthentication = cmd.get_models('AzureFilesIdentityBasedAuthentication')
     if enable_files_aadds is not None:
@@ -410,6 +462,11 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                     origin_storage_account.azure_files_identity_based_authentication.directory_service_options == 'AD':
                 raise CLIError("The Storage account already enabled ActiveDirectoryDomainServicesForFile, "
                                "please disable it by running this cmdlets with \"--enable-files-adds false\" "
+                               "before enable AzureActiveDirectoryDomainServicesForFile.")
+            if origin_storage_account.azure_files_identity_based_authentication and \
+                    origin_storage_account.azure_files_identity_based_authentication.directory_service_options == 'AADKERB':
+                raise CLIError("The Storage account already enabled AzureActiveDirectoryKerberosForFile, "
+                               "please disable it by running this cmdlets with \"--enable-files-aadkerb false\" "
                                "before enable AzureActiveDirectoryDomainServicesForFile.")
             params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
                 directory_service_options='AADDS' if enable_files_aadds else 'None')
@@ -424,20 +481,56 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                 params.azure_files_identity_based_authentication = \
                     origin_storage_account.azure_files_identity_based_authentication
 
-    if enable_files_adds is not None:
-        ActiveDirectoryProperties = cmd.get_models('ActiveDirectoryProperties')
-        if enable_files_adds:  # enable AD
-            if not(domain_name and net_bios_domain_name and forest_name and domain_guid and domain_sid and
-                   azure_storage_sid):
-                raise CLIError("To enable ActiveDirectoryDomainServicesForFile, user must specify all of: "
-                               "--domain-name, --net-bios-domain-name, --forest-name, --domain-guid, --domain-sid and "
-                               "--azure_storage_sid arguments in Azure Active Directory Properties Argument group.")
-            origin_storage_account = get_storage_account_properties(cmd.cli_ctx, instance.id)
-            if origin_storage_account.azure_files_identity_based_authentication and \
-                    origin_storage_account.azure_files_identity_based_authentication.directory_service_options \
+    if enable_files_aadkerb is not None:
+        if enable_files_aadkerb:  # enable AADKERB
+            if instance.azure_files_identity_based_authentication and \
+                    instance.azure_files_identity_based_authentication.directory_service_options \
                     == 'AADDS':
                 raise CLIError("The Storage account already enabled AzureActiveDirectoryDomainServicesForFile, "
                                "please disable it by running this cmdlets with \"--enable-files-aadds false\" "
+                               "before enable AzureActiveDirectoryKerberosForFile.")
+            if instance.azure_files_identity_based_authentication and \
+                    instance.azure_files_identity_based_authentication.directory_service_options == 'AD':
+                raise CLIError("The Storage account already enabled ActiveDirectoryDomainServicesForFile, "
+                               "please disable it by running this cmdlets with \"--enable-files-adds false\" "
+                               "before enable AzureActiveDirectoryKerberosForFile.")
+            active_directory_properties = None
+            if domain_name or domain_guid:
+                ActiveDirectoryProperties = cmd.get_models('ActiveDirectoryProperties')
+                active_directory_properties = ActiveDirectoryProperties(domain_name=domain_name,
+                                                                        domain_guid=domain_guid)
+            params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                directory_service_options='AADKERB',
+                active_directory_properties=active_directory_properties)
+
+        else:  # disable AADKERB
+            # Only disable AADKERB and keep others unchanged
+            if not instance.azure_files_identity_based_authentication or \
+                    instance.azure_files_identity_based_authentication.directory_service_options == 'AADKERB':
+                params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                    directory_service_options='None')
+            else:
+                params.azure_files_identity_based_authentication = \
+                    instance.azure_files_identity_based_authentication
+
+    if enable_files_adds is not None:
+        ActiveDirectoryProperties = cmd.get_models('ActiveDirectoryProperties')
+        if enable_files_adds:  # enable AD
+            if not (domain_name and net_bios_domain_name and forest_name and domain_guid and domain_sid and
+                    azure_storage_sid):
+                raise CLIError("To enable ActiveDirectoryDomainServicesForFile, user must specify all of: "
+                               "--domain-name, --net-bios-domain-name, --forest-name, --domain-guid, --domain-sid and "
+                               "--azure_storage_sid arguments in Azure Active Directory Properties Argument group.")
+            if instance.azure_files_identity_based_authentication and \
+                    instance.azure_files_identity_based_authentication.directory_service_options \
+                    == 'AADDS':
+                raise CLIError("The Storage account already enabled AzureActiveDirectoryDomainServicesForFile, "
+                               "please disable it by running this cmdlets with \"--enable-files-aadds false\" "
+                               "before enable ActiveDirectoryDomainServicesForFile.")
+            if instance.azure_files_identity_based_authentication and \
+                    instance.azure_files_identity_based_authentication.directory_service_options == 'AADKERB':
+                raise CLIError("The Storage account already enabled AzureActiveDirectoryKerberosForFile, "
+                               "please disable it by running this cmdlets with \"--enable-files-aadkerb false\" "
                                "before enable ActiveDirectoryDomainServicesForFile.")
             active_directory_properties = ActiveDirectoryProperties(domain_name=domain_name,
                                                                     net_bios_domain_name=net_bios_domain_name,
@@ -458,18 +551,18 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                                "--domain-name, --net-bios-domain-name, --forest-name, --domain-guid, --domain-sid and "
                                "--azure_storage_sid arguments in Azure Active Directory Properties Argument group.")
             # Only disable AD and keep others unchanged
-            origin_storage_account = get_storage_account_properties(cmd.cli_ctx, instance.id)
-            if not origin_storage_account.azure_files_identity_based_authentication or \
-                    origin_storage_account.azure_files_identity_based_authentication.directory_service_options == 'AD':
+            if not instance.azure_files_identity_based_authentication or \
+                    instance.azure_files_identity_based_authentication.directory_service_options == 'AD':
                 params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
                     directory_service_options='None')
             else:
                 params.azure_files_identity_based_authentication = \
-                    origin_storage_account.azure_files_identity_based_authentication
+                    instance.azure_files_identity_based_authentication
     if default_share_permission is not None:
         if params.azure_files_identity_based_authentication is None:
             params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
-                directory_service_options='None')
+                directory_service_options='None') if instance.azure_files_identity_based_authentication is None \
+                else instance.azure_files_identity_based_authentication
         params.azure_files_identity_based_authentication.default_share_permission = default_share_permission
 
     if assign_identity:
@@ -539,6 +632,11 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     if public_network_access is not None:
         params.public_network_access = public_network_access
 
+    if enable_sftp is not None:
+        params.is_sftp_enabled = enable_sftp
+    if enable_local_user is not None:
+        params.is_local_user_enabled = enable_local_user
+
     return params
 
 
@@ -554,6 +652,8 @@ def add_network_rule(cmd, client, resource_group_name, account_name, action='All
                      vnet_name=None, ip_address=None, tenant_id=None, resource_id=None):  # pylint: disable=unused-argument
     sa = client.get_properties(resource_group_name, account_name)
     rules = sa.network_rule_set
+    if not subnet and not ip_address:
+        logger.warning('No subnet or ip address supplied.')
     if subnet:
         from msrestazure.tools import is_valid_resource_id
         if not is_valid_resource_id(subnet):
@@ -568,8 +668,18 @@ def add_network_rule(cmd, client, resource_group_name, account_name, action='All
         IpRule = cmd.get_models('IPRule')
         if not rules.ip_rules:
             rules.ip_rules = []
-        rules.ip_rules = [r for r in rules.ip_rules if r.ip_address_or_range != ip_address]
-        rules.ip_rules.append(IpRule(ip_address_or_range=ip_address, action=action))
+        for ip in ip_address:
+            to_modify = True
+            for x in rules.ip_rules:
+                existing_ip_network = ip_network(x.ip_address_or_range)
+                new_ip_network = ip_network(ip)
+                if new_ip_network.overlaps(existing_ip_network):
+                    logger.warning("IP/CIDR %s overlaps with %s, which exists already. Not adding duplicates.",
+                                   ip, x.ip_address_or_range)
+                    to_modify = False
+                    break
+            if to_modify:
+                rules.ip_rules.append(IpRule(ip_address_or_range=ip, action=action))
     if resource_id:
         ResourceAccessRule = cmd.get_models('ResourceAccessRule')
         if not rules.resource_access_rules:
@@ -591,7 +701,9 @@ def remove_network_rule(cmd, client, resource_group_name, account_name, ip_addre
         rules.virtual_network_rules = [x for x in rules.virtual_network_rules
                                        if not x.virtual_network_resource_id.endswith(subnet)]
     if ip_address:
-        rules.ip_rules = [x for x in rules.ip_rules if x.ip_address_or_range != ip_address]
+        to_remove = [ip_network(x) for x in ip_address]
+        rules.ip_rules = list(filter(lambda x: all(ip_network(x.ip_address_or_range) != i for i in to_remove),
+                                     rules.ip_rules))
 
     if resource_id:
         rules.resource_access_rules = [x for x in rules.resource_access_rules if
@@ -805,6 +917,19 @@ def update_encryption_scope(cmd, client, resource_group_name, account_name, encr
                         encryption_scope_name=encryption_scope_name, encryption_scope=encryption_scope)
 
 
+def list_encryption_scope(client, resource_group_name, account_name,
+                          maxpagesize=None, marker=None, filter=None, include=None):  # pylint: disable=redefined-builtin
+    generator = client.list(resource_group_name, account_name, maxpagesize=maxpagesize, filter=filter, include=include)
+    pages = generator.by_page(continuation_token=marker)
+
+    result = list(next(pages))
+    if pages.continuation_token:
+        next_marker = {"nextMarker": pages.continuation_token}
+        result.append(next_marker)
+
+    return result
+
+
 # pylint: disable=no-member
 def create_or_policy(cmd, client, account_name, resource_group_name=None, properties=None, source_account=None,
                      destination_account=None, policy_id="default", rule_id=None, source_container=None,
@@ -838,6 +963,7 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
             if account_name == parse_resource_id(or_policy.source_account)['name']:
                 raise CLIError('ValueError: Please specify --policy-id with auto-generated policy id value on '
                                'destination account.')
+        raise ex
 
 
 def update_or_policy(client, parameters, resource_group_name, account_name, object_replication_policy_id=None,
@@ -962,3 +1088,90 @@ def update_blob_inventory_policy(cmd, client, resource_group_name, account_name,
     BlobInventoryPolicyName = cmd.get_models('BlobInventoryPolicyName')
     return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
                                    blob_inventory_policy_name=BlobInventoryPolicyName.DEFAULT, properties=parameters)
+
+
+def _generate_local_user(local_user, permission_scope=None, ssh_authorized_key=None,
+                         home_directory=None, has_shared_key=None, has_ssh_key=None, has_ssh_password=None):
+    if permission_scope is not None:
+        local_user.permission_scopes = permission_scope
+    if ssh_authorized_key is not None:
+        local_user.ssh_authorized_keys = ssh_authorized_key
+    if home_directory is not None:
+        local_user.home_directory = home_directory
+    if has_shared_key is not None:
+        local_user.has_shared_key = has_shared_key
+    if has_ssh_key is not None:
+        local_user.has_ssh_key = has_ssh_key
+    if has_ssh_password is not None:
+        local_user.has_ssh_password = has_ssh_password
+
+
+def create_local_user(cmd, client, resource_group_name, account_name, username, permission_scope=None, home_directory=None,
+                      has_shared_key=None, has_ssh_key=None, has_ssh_password=None, ssh_authorized_key=None, **kwargs):
+    LocalUser = cmd.get_models('LocalUser')
+    local_user = LocalUser()
+
+    _generate_local_user(local_user, permission_scope, ssh_authorized_key,
+                         home_directory, has_shared_key, has_ssh_key, has_ssh_password)
+    return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
+                                   username=username, properties=local_user)
+
+
+def update_local_user(cmd, client, resource_group_name, account_name, username, permission_scope=None,
+                      home_directory=None, has_shared_key=None, has_ssh_key=None, has_ssh_password=None,
+                      ssh_authorized_key=None, **kwargs):
+    local_user = client.get(resource_group_name, account_name, username)
+
+    _generate_local_user(local_user, permission_scope, ssh_authorized_key,
+                         home_directory, has_shared_key, has_ssh_key, has_ssh_password)
+    return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
+                                   username=username, properties=local_user)
+
+
+def begin_failover(client, resource_group_name, account_name, failover_type=None, yes=None, **kwargs):
+    if not failover_type or failover_type.lower() != "planned":
+        message = """
+        The secondary cluster will become the primary cluster after failover. Please understand the following impact to your storage account before you initiate the failover:
+            1. Please check the Last Sync Time using `az storage account show` with `--expand geoReplicationStats` and check the "geoReplicationStats" property. This is the data you may lose if you initiate the failover.
+            2. After the failover, your storage account type will be converted to locally redundant storage (LRS). You can convert your account to use geo-redundant storage (GRS).
+            3. Once you re-enable GRS/GZRS for your storage account, Microsoft will replicate data to your new secondary region. Replication time is dependent on the amount of data to replicate. Please note that there are bandwidth charges for the bootstrap. Please refer to doc: https://azure.microsoft.com/pricing/details/bandwidth/
+        """
+        user_confirmation(message, yes)
+    return client.begin_failover(resource_group_name=resource_group_name, account_name=account_name, failover_type=failover_type, **kwargs)
+
+
+def list_blob_cors_rules(client, resource_group_name, account_name):
+    blob_service_properties = client.get_service_properties(resource_group_name=resource_group_name,
+                                                            account_name=account_name)
+    if not blob_service_properties.cors or not blob_service_properties.cors.cors_rules:
+        return []
+    return blob_service_properties.cors.cors_rules
+
+
+# pylint: disable=dangerous-default-value
+def add_blob_cors_rule(cmd, client, resource_group_name, account_name, max_age_in_seconds,
+                       allowed_origins, allowed_methods, allowed_headers=[], exposed_headers=[]):
+    CorsRules, CorsRule = cmd.get_models('CorsRules', 'CorsRule')
+    blob_service_properties = client.get_service_properties(resource_group_name=resource_group_name,
+                                                            account_name=account_name)
+    if not blob_service_properties.cors or not blob_service_properties.cors.cors_rules:
+        blob_service_properties.cors = CorsRules(cors_rules=[])
+
+    new_rule = CorsRule(allowed_origins=allowed_origins, allowed_methods=allowed_methods,
+                        allowed_headers=allowed_headers, exposed_headers=exposed_headers,
+                        max_age_in_seconds=max_age_in_seconds)
+    blob_service_properties.cors.cors_rules.append(new_rule)
+    return client.set_service_properties(resource_group_name=resource_group_name,
+                                         account_name=account_name,
+                                         parameters=blob_service_properties).cors.cors_rules
+
+
+def clear_blob_cors_rules(cmd, client, resource_group_name, account_name):
+    blob_service_properties = client.get_service_properties(resource_group_name=resource_group_name,
+                                                            account_name=account_name)
+    CorsRules = cmd.get_models('CorsRules')
+    blob_service_properties.cors = CorsRules(cors_rules=[])
+    client.set_service_properties(resource_group_name=resource_group_name,
+                                  account_name=account_name,
+                                  parameters=blob_service_properties)
+    return []

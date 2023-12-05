@@ -16,7 +16,7 @@ from azure.cli.command_modules.vm.custom import (enable_boot_diagnostics, disabl
                                                  _get_extension_instance_name,
                                                  get_boot_log)
 from azure.cli.command_modules.vm.custom import \
-    (attach_unmanaged_data_disk, detach_data_disk, get_vmss_instance_view)
+    (attach_unmanaged_data_disk, detach_unmanaged_data_disk, get_vmss_instance_view)
 
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import AzCliCommand
@@ -206,7 +206,7 @@ class TestVmCustom(unittest.TestCase):
         mock_vm_get_to_update.return_value = vm
 
         # execute
-        detach_data_disk(cmd, 'rg1', 'vm1', 'd1')
+        detach_unmanaged_data_disk(cmd, 'rg1', 'vm1', 'd1')
 
         # assert
         self.assertTrue(mock_vm_get_to_update.called)
@@ -222,8 +222,9 @@ class TestVmCustom(unittest.TestCase):
         # execute
         get_vmss_instance_view(cmd, 'rg1', 'vmss1', '*')
         # assert
-        vm_client.virtual_machine_scale_set_vms.list.assert_called_once_with('rg1', 'vmss1', expand='instanceView',
-                                                                             select='instanceView')
+        vm_client.virtual_machine_scale_set_vms.list.assert_called_once_with(
+            resource_group_name='rg1', virtual_machine_scale_set_name='vmss1',
+            select='instanceView', expand='instanceView')
 
     # pylint: disable=line-too-long
     @mock.patch('azure.cli.command_modules.vm.disk_encryption._compute_client_factory', autospec=True)

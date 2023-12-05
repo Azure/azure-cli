@@ -60,9 +60,9 @@ setup() {
         if [[ ! $(curl -sL https://packages.microsoft.com/repos/azure-cli/dists/) =~ $CLI_REPO ]]; then
             DIST=$(lsb_release -is)
             if [[ $DIST =~ "Ubuntu" ]]; then
-                CLI_REPO="focal"
+                CLI_REPO="jammy"
             elif [[ $DIST =~ "Debian" ]]; then
-                CLI_REPO="bullseye"
+                CLI_REPO="bookworm"
             elif [[ $DIST =~ "LinuxMint" ]]; then
                 CLI_REPO=$(cat /etc/os-release | grep -Po 'UBUNTU_CODENAME=\K.*') || true
                 if [[ -z $CLI_REPO ]]; then
@@ -81,7 +81,7 @@ setup() {
             exit 1
         fi
     fi
-    echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ ${CLI_REPO} main" \
+    echo "deb [arch=$(dpkg --print-architecture)] https://packages.microsoft.com/repos/azure-cli/ ${CLI_REPO} main" \
         > /etc/apt/sources.list.d/azure-cli.list
     apt-get update
     set +v

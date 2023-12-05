@@ -21,6 +21,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_SCALE_SET_PRIORITY_SPOT,
     CONST_SPOT_EVICTION_POLICY_DELETE,
     CONST_VIRTUAL_MACHINE_SCALE_SETS,
+    CONST_OS_SKU_WINDOWS2019,
+    CONST_OS_SKU_WINDOWS2022,
     AgentPoolDecoratorMode,
     DecoratorEarlyExitException,
     DecoratorMode,
@@ -46,6 +48,7 @@ logger = get_logger(__name__)
 # type variables
 AgentPool = TypeVar("AgentPool")
 AgentPoolsOperations = TypeVar("AgentPoolsOperations")
+PortRange = TypeVar("PortRange")
 Snapshot = TypeVar("Snapshot")
 KubeletConfig = TypeVar("KubeletConfig")
 LinuxOSConfig = TypeVar("LinuxOSConfig")
@@ -351,6 +354,21 @@ class AKSAgentPoolContext(BaseAKSContext):
             self.set_intermediate("snapshot", snapshot, overwrite_exists=True)
         return snapshot
 
+    def get_host_group_id(self) -> Union[str, None]:
+        return self._get_host_group_id()
+
+    def _get_host_group_id(self) -> Union[str, None]:
+        raw_value = self.raw_param.get("host_group_id")
+        # try to read the property value corresponding to the parameter from the `agentpool` object
+        value_obtained_from_agentpool = None
+        if self.agentpool and hasattr(self.agentpool, "host_group_id"):
+            value_obtained_from_agentpool = self.agentpool.host_group_id
+        if value_obtained_from_agentpool is not None:
+            host_group_id = value_obtained_from_agentpool
+        else:
+            host_group_id = raw_value
+        return host_group_id
+
     def _get_kubernetes_version(self, read_only: bool = False) -> str:
         """Internal function to dynamically obtain the value of kubernetes_version according to the context.
 
@@ -462,7 +480,6 @@ class AKSAgentPoolContext(BaseAKSContext):
             snapshot = self.get_snapshot()
             if snapshot:
                 value_obtained_from_snapshot = snapshot.os_type
-
         # set default value
         if value_obtained_from_agentpool is not None:
             os_type = value_obtained_from_agentpool
@@ -472,7 +489,6 @@ class AKSAgentPoolContext(BaseAKSContext):
             os_type = value_obtained_from_snapshot
         else:
             os_type = CONST_DEFAULT_NODE_OS_TYPE
-
         # validation
         if (
             self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER and
@@ -480,6 +496,21 @@ class AKSAgentPoolContext(BaseAKSContext):
         ):
             if os_type.lower() == "windows":
                 raise InvalidArgumentValueError("System node pool must be linux.")
+        # validation of Windows OS SKU's against OS Type
+        if (
+            self.agentpool_decorator_mode == AgentPoolDecoratorMode.STANDALONE and
+            self.decorator_mode == DecoratorMode.CREATE and
+            os_type == CONST_DEFAULT_NODE_OS_TYPE
+        ):
+            # read the original value passed by the command
+            raw_os_sku = self.raw_param.get("os_sku")
+            sku_2019 = CONST_OS_SKU_WINDOWS2019
+            sku_2022 = CONST_OS_SKU_WINDOWS2022
+            if raw_os_sku == sku_2019 or raw_os_sku == sku_2022:
+                raise InvalidArgumentValueError(
+                    "OS SKU is invalid for Linux OS Type."
+                    " Please specify '--os-type Windows' for Windows SKUs"
+                )
         return os_type
 
     def get_os_type(self) -> Union[str, None]:
@@ -521,7 +552,6 @@ class AKSAgentPoolContext(BaseAKSContext):
             os_sku = value_obtained_from_snapshot
         else:
             os_sku = raw_value
-
         # this parameter does not need validation
         return os_sku
 
@@ -829,7 +859,10 @@ class AKSAgentPoolContext(BaseAKSContext):
         :return: empty list, list of strings or None
         """
         # read the original value passed by the command
-        node_taints = self.raw_param.get("node_taints")
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            node_taints = self.raw_param.get("nodepool_taints")
+        else:
+            node_taints = self.raw_param.get("node_taints")
         # normalize, default is an empty list
         if node_taints is not None:
             node_taints = [x.strip() for x in (node_taints.split(",") if node_taints else [])]
@@ -898,6 +931,26 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return max_surge
+
+    def get_drain_timeout(self):
+        """Obtain the value of drain_timeout.
+
+        :return: int
+        """
+        # read the original value passed by the command
+        drain_timeout = self.raw_param.get("drain_timeout")
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.agentpool and
+                self.agentpool.upgrade_settings and
+                self.agentpool.upgrade_settings.drain_timeout_in_minutes is not None
+            ):
+                drain_timeout = self.agentpool.upgrade_settings.drain_timeout_in_minutes
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return drain_timeout
 
     def get_vm_set_type(self) -> str:
         """Obtain the value of vm_set_type, default value is CONST_VIRTUAL_MACHINE_SCALE_SETS.
@@ -1012,16 +1065,16 @@ class AKSAgentPoolContext(BaseAKSContext):
         return zones
 
     def get_max_pods(self) -> Union[int, None]:
-        """Obtain the value of max_pods, default value is 0.
+        """Obtain the value of max_pods.
 
         This function will normalize the parameter by default. Int 0 would be converted to None.
 
         :return: int or None
         """
         # read the original value passed by the command
-        max_pods = self.raw_param.get("max_pods", 0)
+        max_pods = self.raw_param.get("max_pods")
         # normalize
-        if max_pods == 0:
+        if max_pods == 0:  # 0 is not a valid value
             max_pods = None
 
         # try to read the property value corresponding to the parameter from the `agentpool` object
@@ -1185,6 +1238,62 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need validation
         return no_wait
 
+    def get_gpu_instance_profile(self) -> Union[str, None]:
+        """Obtain the value of gpu_instance_profile.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        gpu_instance_profile = self.raw_param.get("gpu_instance_profile")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.agentpool and
+            hasattr(self.agentpool, "gpu_instance_profile") and
+            self.agentpool.gpu_instance_profile is not None
+        ):
+            gpu_instance_profile = self.agentpool.gpu_instance_profile
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return gpu_instance_profile
+
+    def get_asg_ids(self) -> Union[List[str], None]:
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            asg_ids = self.raw_param.get('nodepool_asg_ids')
+        else:
+            asg_ids = self.raw_param.get('asg_ids')
+
+        return asg_ids
+
+    def get_allowed_host_ports(self) -> Union[List[PortRange], None]:
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            ports = self.raw_param.get('nodepool_allowed_host_ports')
+        else:
+            ports = self.raw_param.get('allowed_host_ports')
+
+        if ports is None:
+            return None
+
+        port_ranges = []
+        import re
+        # Parse the port range. The format is either `<int>/<protocol>` or `<int>-<int>/<protocol>`.
+        # e.g. `80/tcp` | `22/udp` | `4000-5000/tcp`
+        regex = re.compile(r'^((\d+)|((\d+)-(\d+)))/(tcp|udp)$')
+        for port in ports:
+            r = regex.findall(port.lower())
+            if r[0][1] != '':
+                # single port
+                port_start, port_end = int(r[0][1]), int(r[0][1])
+            else:
+                # port range
+                port_start, port_end = int(r[0][3]), int(r[0][4])
+            port_ranges.append(self.models.PortRange(
+                port_start=port_start,
+                port_end=port_end,
+                protocol=r[0][5].upper(),
+            ))
+        return port_ranges
+
 
 class AKSAgentPoolAddDecorator:
     def __init__(
@@ -1325,6 +1434,16 @@ class AKSAgentPoolAddDecorator:
         agentpool.os_sku = self.context.get_os_sku()
         return agentpool
 
+    def set_up_host_group_properties(self, agentpool: AgentPool) -> AgentPool:
+        """Set up host group related properties for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        agentpool.host_group_id = self.context.get_host_group_id()
+        return agentpool
+
     def set_up_node_network_properties(self, agentpool: AgentPool) -> AgentPool:
         """Set up priority related properties for the AgentPool object.
 
@@ -1407,6 +1526,11 @@ class AKSAgentPoolAddDecorator:
         max_surge = self.context.get_max_surge()
         if max_surge:
             upgrade_settings.max_surge = max_surge
+
+        drain_timeout = self.context.get_drain_timeout()
+        if drain_timeout:
+            upgrade_settings.drain_timeout_in_minutes = drain_timeout
+
         agentpool.upgrade_settings = upgrade_settings
         return agentpool
 
@@ -1444,6 +1568,27 @@ class AKSAgentPoolAddDecorator:
         agentpool.linux_os_config = self.context.get_linux_os_config()
         return agentpool
 
+    def set_up_gpu_properties(self, agentpool: AgentPool) -> AgentPool:
+        """Set up gpu related properties for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        agentpool.gpu_instance_profile = self.context.get_gpu_instance_profile()
+        return agentpool
+
+    def set_up_agentpool_network_profile(self, agentpool: AgentPool) -> AgentPool:
+        self._ensure_agentpool(agentpool)
+
+        asg_ids = self.context.get_asg_ids()
+        allowed_host_ports = self.context.get_allowed_host_ports()
+        if allowed_host_ports is not None:
+            agentpool.network_profile = self.models.AgentPoolNetworkProfile()
+            agentpool.network_profile.allowed_host_ports = allowed_host_ports
+            agentpool.network_profile.application_security_groups = asg_ids
+        return agentpool
+
     def construct_agentpool_profile_default(self, bypass_restore_defaults: bool = False) -> AgentPool:
         """The overall controller used to construct the AgentPool profile by default.
 
@@ -1458,6 +1603,8 @@ class AKSAgentPoolAddDecorator:
         self._remove_defaults_in_agentpool(agentpool)
         # set up snapshot properties
         agentpool = self.set_up_snapshot_properties(agentpool)
+        # set up host group properties
+        agentpool = self.set_up_host_group_properties(agentpool)
         # set up node network properties
         agentpool = self.set_up_node_network_properties(agentpool)
         # set up auto scaler properties
@@ -1474,6 +1621,10 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_vm_properties(agentpool)
         # set up custom node config
         agentpool = self.set_up_custom_node_config(agentpool)
+        # set up gpu instance profile
+        agentpool = self.set_up_gpu_properties(agentpool)
+        # set up agentpool network profile
+        agentpool = self.set_up_agentpool_network_profile(agentpool)
         # restore defaults
         if not bypass_restore_defaults:
             agentpool = self._restore_defaults_in_agentpool(agentpool)
@@ -1651,7 +1802,14 @@ class AKSAgentPoolUpdateDecorator:
         max_surge = self.context.get_max_surge()
         if max_surge:
             upgrade_settings.max_surge = max_surge
+            # why not always set this? so we don't wipe out a preview feaure in upgrade settigns like NodeSoakDuration?
             agentpool.upgrade_settings = upgrade_settings
+
+        drain_timeout = self.context.get_drain_timeout()
+        if drain_timeout:
+            upgrade_settings.drain_timeout_in_minutes = drain_timeout
+            agentpool.upgrade_settings = upgrade_settings
+
         return agentpool
 
     def update_vm_properties(self, agentpool: AgentPool) -> AgentPool:
@@ -1668,6 +1826,19 @@ class AKSAgentPoolUpdateDecorator:
         mode = self.context.get_mode()
         if mode is not None:
             agentpool.mode = mode
+        return agentpool
+
+    def update_network_profile(self, agentpool: AgentPool) -> AgentPool:
+        self._ensure_agentpool(agentpool)
+
+        asg_ids = self.context.get_asg_ids()
+        allowed_host_ports = self.context.get_allowed_host_ports()
+        if asg_ids or allowed_host_ports:
+            agentpool.network_profile = self.models.AgentPoolNetworkProfile()
+        if asg_ids is not None:
+            agentpool.network_profile.application_security_groups = asg_ids
+        if allowed_host_ports is not None:
+            agentpool.network_profile.allowed_host_ports = allowed_host_ports
         return agentpool
 
     def update_agentpool_profile_default(self, agentpools: List[AgentPool] = None) -> AgentPool:
@@ -1688,6 +1859,8 @@ class AKSAgentPoolUpdateDecorator:
         agentpool = self.update_upgrade_settings(agentpool)
         # update misc vm properties
         agentpool = self.update_vm_properties(agentpool)
+        # update network profile
+        agentpool = self.update_network_profile(agentpool)
         return agentpool
 
     def update_agentpool(self, agentpool: AgentPool) -> AgentPool:

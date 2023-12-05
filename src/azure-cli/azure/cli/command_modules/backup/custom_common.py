@@ -10,7 +10,7 @@ from azure.cli.command_modules.backup._client_factory import backup_protected_it
 from azure.cli.core.util import CLIError
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
 from azure.mgmt.recoveryservicesbackup.activestamp.models import RecoveryPointTierStatus, RecoveryPointTierType, \
-    UnlockDeleteRequest
+    UnlockDeleteRequest, TieringMode
 from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 # pylint: disable=import-error
@@ -25,6 +25,11 @@ workload_type_map = {'MSSQL': 'SQLDataBase',
                      'SAPHanaDatabase': 'SAPHanaDatabase',
                      'VM': 'VM',
                      'AzureFileShare': 'AzureFileShare'}
+
+workload_bmt_map = {'SQLDataBase': 'AzureWorkload',
+                    'SAPHanaDatabase': 'AzureWorkload',
+                    'VM': 'AzureIaasVM',
+                    'AzureFileShare': 'AzureStorage'}
 
 tier_type_map = {'VaultStandard': 'HardenedRP',
                  'VaultArchive': 'ArchivedRP',
@@ -62,8 +67,10 @@ def show_policy(client, resource_group_name, vault_name, name):
 
 
 def list_policies(client, resource_group_name, vault_name, workload_type=None, backup_management_type=None,
-                  policy_sub_type=None):
+                  policy_sub_type=None, move_to_archive_tier='All'):
     workload_type = _check_map(workload_type, workload_type_map)
+    if workload_type:
+        backup_management_type = workload_bmt_map[workload_type]
     filter_string = custom_help.get_filter_string({
         'backupManagementType': backup_management_type,
         'workloadType': workload_type})
@@ -79,7 +86,24 @@ def list_policies(client, resource_group_name, vault_name, workload_type=None, b
             paged_policies = [policy for policy in paged_policies if (not hasattr(policy.properties, 'policy_type') or
                                                                       policy.properties.policy_type is None or
                                                                       policy.properties.policy_type == 'V1')]
-    return paged_policies
+
+    filtered_paged_policies = []
+    for policy in paged_policies:
+        tiering_policy = None
+        if policy.properties.backup_management_type == "AzureIaasVM":
+            tiering_policy = policy.properties.tiering_policy
+        if policy.properties.backup_management_type == "AzureWorkload":
+            tiering_policy = policy.properties.sub_protection_policy[0].tiering_policy
+        if (move_to_archive_tier in ['Disabled', 'All'] and
+            (tiering_policy is None or
+             tiering_policy['ArchivedRP'].tiering_mode in [TieringMode.INVALID, TieringMode.DO_NOT_TIER])):
+            filtered_paged_policies.append(policy)
+        if (move_to_archive_tier in ['Enabled', 'All'] and
+            (tiering_policy is not None and
+             tiering_policy['ArchivedRP'].tiering_mode in [TieringMode.TIER_RECOMMENDED, TieringMode.TIER_AFTER])):
+            filtered_paged_policies.append(policy)
+
+    return filtered_paged_policies
 
 
 def show_item(cmd, client, resource_group_name, vault_name, container_name, name, backup_management_type=None,

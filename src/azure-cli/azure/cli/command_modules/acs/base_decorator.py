@@ -12,7 +12,6 @@ from azure.cli.core.azclierror import CLIInternalError
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles import ResourceType
 from knack.log import get_logger
-from msrest import Serializer
 
 logger = get_logger(__name__)
 
@@ -87,16 +86,6 @@ class BaseAKSModels:
         for model_name, model_class in self.models_dict.items():
             setattr(self, model_name, model_class)
 
-    def serialize(self, data: Any, model_type: str) -> Dict:
-        """Serialize the data according to the provided model type.
-
-        :return: dictionary
-        """
-        if self.__serializer is None:
-            self.__serializer = Serializer(self.models_dict)
-        # will also perfrom client side validation
-        return self.__serializer.body(data, model_type)
-
 
 class BaseAKSParamDict:
     """A base class for storing the original parameters passed in by the aks commands as an internal dictionary.
@@ -133,7 +122,7 @@ class BaseAKSParamDict:
         return self.__store.items()
 
     def __format_count(self):
-        untouched_keys = [x for x in self.__store.keys() if x not in self.__count.keys()]
+        untouched_keys = [x for x in self.__store if x not in self.__count]
         for k in untouched_keys:
             self.__count[k] = 0
 

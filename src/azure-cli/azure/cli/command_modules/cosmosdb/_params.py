@@ -24,13 +24,18 @@ from azure.cli.command_modules.cosmosdb._validators import (
     validate_client_certificates,
     validate_seednodes,
     validate_node_count,
-    validate_client_encryption_policy)
+    validate_client_encryption_policy,
+    validate_mongo_role_definition_body,
+    validate_mongo_role_definition_id,
+    validate_mongo_user_definition_body,
+    validate_mongo_user_definition_id)
 
 from azure.cli.command_modules.cosmosdb.actions import (
-    CreateLocation, CreateDatabaseRestoreResource, UtcDatetimeAction, InvokeCommandArgumentsAddAction)
+    CreateLocation, CreateDatabaseRestoreResource, CreateGremlinDatabaseRestoreResource, CreateTableRestoreResource, UtcDatetimeAction, InvokeCommandArgumentsAddAction)
 from azure.cli.command_modules.cosmosdb.custom import (
     CosmosKeyTypes)
-
+from azure.mgmt.cosmosdb.models import (
+    ContinuousTier, MinimalTlsVersion)
 
 SQL_GREMLIN_INDEXING_POLICY_EXAMPLE = """--idx "{\\"indexingMode\\": \\"consistent\\", \\"automatic\\": true, \\"includedPaths\\": [{\\"path\\": \\"/*\\"}], \\"excludedPaths\\": [{ \\"path\\": \\"/headquarters/employees/?\\"}, { \\"path\\": \\"/\\\\"_etag\\\\"/?\\"}]}"
 """
@@ -53,6 +58,12 @@ CASSANDRA_SCHEMA_EXAMPLE = """--schema "{\\"columns\\": [{\\"name\\": \\"columnA
 SQL_ROLE_DEFINITION_EXAMPLE = """--body "{ \\"Id\\": \\"be79875a-2cc4-40d5-8958-566017875b39\\", \\"RoleName\\": \\"My Read Write Role\\", \\"Type\\": \\"CustomRole\\", \\"AssignableScopes\\": [ \\"/\\" ], \\"DataActions\\": [ \\"Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/create\\", \\"Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/read\\" ]}"
 """
 
+MONGO_ROLE_DEFINITION_EXAMPLE = """--body "{\\"Id\\": \\"be79875a-2cc4-40d5-8958-566017875b39\\",\\"RoleName\\": \\"MyRWRole\\",\\"Type\\": \\"CustomRole\\"\\"DatabaseName\\": \\"MyDb\\",\\"Privileges\\": [ {\\"Resource\\": {\\"Db\\": \\"MyDB\\",\\"Collection\\": \\"MyCol\\"},\\"Actions\\": [\\"insert\\",\\"find\\"]}],\\"Roles\\": [ {\\"Role\\": \\"myInheritedRole\\",\\"Db\\": \\"MyTestDb\\"}]}"
+"""
+
+MONGO_USER_DEFINITION_EXAMPLE = """--body "{\\"Id\\": \\"be79875a-2cc4-40d5-8958-566017875b39\\",\\"UserName\\": \\"MyUserName\\",\\"Password\\": \\"MyPass\\",\\"CustomData\\": \\"MyCustomData\\",\\"Mechanisms\\": \\"SCRAM-SHA-256\\"\\"DatabaseName\\": \\"MyDb\\",\\"Roles\\": [ {\\"Role\\": \\"myReadRole\\",\\"Db\\": \\"MyDb\\"}]}"
+"""
+
 
 class ThroughputTypes(str, Enum):
     autoscale = "autoscale"
@@ -70,11 +81,16 @@ def load_arguments(self, _):
     with self.argument_context('cosmosdb create') as c:
         c.argument('account_name', completer=None)
         c.argument('enable_free_tier', arg_type=get_three_state_flag(), help="If enabled the account is free-tier.", is_preview=True)
-        c.argument('assign_identity', nargs='*', help="Assign system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity.", is_preview=True)
-        c.argument('is_restore_request', options_list=['--is-restore-request', '-r'], arg_type=get_three_state_flag(), help="Restore from an existing/deleted account.", is_preview=True, arg_group='Restore')
-        c.argument('restore_source', help="The restorable-database-account Id of the source account from which the account has to be restored. Required if --is-restore-request is set to true.", is_preview=True, arg_group='Restore')
-        c.argument('restore_timestamp', action=UtcDatetimeAction, help="The timestamp to which the account has to be restored to. Required if --is-restore-request is set to true.", is_preview=True, arg_group='Restore')
-        c.argument('databases_to_restore', nargs='+', action=CreateDatabaseRestoreResource, is_preview=True, arg_group='Restore')
+        c.argument('assign_identity', nargs='*', help="Assign system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity.")
+        c.argument('is_restore_request', options_list=['--is-restore-request', '-r'], arg_type=get_three_state_flag(), help="Restore from an existing/deleted account.", arg_group='Restore')
+        c.argument('restore_source', help="The restorable-database-account Id of the source account from which the account has to be restored. Required if --is-restore-request is set to true.", arg_group='Restore')
+        c.argument('restore_timestamp', action=UtcDatetimeAction, help="The timestamp to which the account has to be restored to. Required if --is-restore-request is set to true.", arg_group='Restore')
+        c.argument('databases_to_restore', nargs='+', action=CreateDatabaseRestoreResource, arg_group='Restore')
+        c.argument('gremlin_databases_to_restore', nargs='+', action=CreateGremlinDatabaseRestoreResource, arg_group='Restore')
+        c.argument('tables_to_restore', nargs='+', action=CreateTableRestoreResource, arg_group='Restore')
+        c.argument('enable_partition_merge', arg_type=get_three_state_flag(), help="Flag to enable partition merge on the account.")
+        c.argument('enable_burst_capacity', arg_type=get_three_state_flag(), help="Flag to enable burst capacity on the account.")
+        c.argument('key_uri', help="The URI of the key vault")
 
     for scope in ['cosmosdb create', 'cosmosdb update']:
         with self.argument_context(scope) as c:
@@ -92,18 +108,24 @@ def load_arguments(self, _):
             c.argument('virtual_network_rules', nargs='+', validator=validate_virtual_network_rules, help='ACL\'s for virtual network')
             c.argument('enable_multiple_write_locations', arg_type=get_three_state_flag(), help="Enable Multiple Write Locations")
             c.argument('disable_key_based_metadata_write_access', arg_type=get_three_state_flag(), help="Disable write operations on metadata resources (databases, containers, throughput) via account keys")
-            c.argument('key_uri', help="The URI of the key vault", is_preview=True)
-            c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(), help="Enable or disable public network access to server.")
+            c.argument('public_network_access', options_list=['--public-network-access', '-p'], arg_type=get_enum_type(['ENABLED', 'DISABLED', 'SECUREDBYPERIMETER']), help="Sets public network access in server to either Enabled, Disabled, or SecuredByPerimeter.")
             c.argument('enable_analytical_storage', arg_type=get_three_state_flag(), help="Flag to enable log storage on the account.")
             c.argument('network_acl_bypass', arg_type=get_enum_type(NetworkAclBypass), options_list=['--network-acl-bypass'], help="Flag to enable or disable Network Acl Bypass.")
             c.argument('network_acl_bypass_resource_ids', nargs='+', options_list=['--network-acl-bypass-resource-ids', '-i'], help="List of Resource Ids to allow Network Acl Bypass.")
             c.argument('backup_interval', type=int, help="the frequency(in minutes) with which backups are taken (only for accounts with periodic mode backups)", arg_group='Backup Policy')
             c.argument('backup_retention', type=int, help="the time(in hours) for which each backup is retained (only for accounts with periodic mode backups)", arg_group='Backup Policy')
             c.argument('backup_redundancy', arg_type=get_enum_type(BackupStorageRedundancy), help="The redundancy type of the backup Storage account", arg_group='Backup Policy')
-            c.argument('server_version', arg_type=get_enum_type(ServerVersion), help="Valid only for MongoDB accounts.", is_preview=True)
-            c.argument('default_identity', help="The primary identity to access key vault in CMK related features. e.g. 'FirstPartyIdentity', 'SystemAssignedIdentity' and more.", is_preview=True)
+            c.argument('server_version', arg_type=get_enum_type(ServerVersion), help="Valid only for MongoDB accounts.")
+            c.argument('default_identity', help="The primary identity to access key vault in CMK related features. e.g. 'FirstPartyIdentity', 'SystemAssignedIdentity' and more. User-assigned identities are specified in format 'UserAssignedIdentity=<resource ID of the user-assigned identity>'.")
             c.argument('analytical_storage_schema_type', options_list=['--analytical-storage-schema-type', '--as-schema'], arg_type=get_enum_type(AnalyticalStorageSchemaType), help="Schema type for analytical storage.", arg_group='Analytical Storage Configuration')
             c.argument('backup_policy_type', arg_type=get_enum_type(BackupPolicyType), help="The type of backup policy of the account to create", arg_group='Backup Policy')
+            c.argument('enable_partition_merge', arg_type=get_three_state_flag(), help="Flag to enable partition merge on the account.")
+            c.argument('enable_burst_capacity', arg_type=get_three_state_flag(), help="Flag to enable burst capacity on the account.")
+            c.argument('continuous_tier', arg_type=get_enum_type(ContinuousTier), help="The tier of Continuous backup", arg_group='Backup Policy')
+            c.argument('minimal_tls_version', arg_type=get_enum_type(MinimalTlsVersion), help="Indicates the minimum allowed TLS version")
+
+    with self.argument_context('cosmosdb update') as c:
+        c.argument('key_uri', help="The URI of the key vault", is_preview=True)
 
     for scope in ['cosmosdb regenerate-key', 'cosmosdb keys regenerate']:
         with self.argument_context(scope) as c:
@@ -271,6 +293,7 @@ def load_arguments(self, _):
         c.argument('conflict_resolution_policy', options_list=['--conflict-resolution-policy', '-c'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Conflict Resolution Policy, you can enter it as a string or as a file, e.g., --conflict-resolution-policy @policy-file.json or ' + SQL_GREMLIN_CONFLICT_RESOLUTION_POLICY_EXAMPLE)
         c.argument('max_throughput', max_throughput_type)
         c.argument('throughput', help='The throughput of Gremlin graph (RU/s). Default value is 400. Omit this parameter if the database has shared throughput unless the graph should have dedicated throughput.')
+        c.argument('analytical_storage_ttl', type=int, help='Analytical TTL, when analytical storage is enabled.')
 
 # Table
     with self.argument_context('cosmosdb table') as c:
@@ -369,6 +392,23 @@ def load_arguments(self, _):
         c.argument('restore_timestamp', options_list=['--restore-timestamp', '-t'], action=UtcDatetimeAction, help="The timestamp to which the account has to be restored to.")
         c.argument('location', arg_type=get_location_type(self.cli_ctx), help="The location of the source account from which restore is triggered. This will also be the write region of the restored account")
         c.argument('databases_to_restore', nargs='+', action=CreateDatabaseRestoreResource)
+        c.argument('gremlin_databases_to_restore', nargs='+', action=CreateGremlinDatabaseRestoreResource)
+        c.argument('tables_to_restore', nargs='+', action=CreateTableRestoreResource)
+        c.argument('assign_identity', nargs='*', help="Assign system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity.")
+        c.argument('default_identity', help="The primary identity to access key vault in CMK related features. e.g. 'FirstPartyIdentity', 'SystemAssignedIdentity' and more.")
+        c.argument('public_network_access', options_list=['--public-network-access', '-p'], arg_type=get_enum_type(['ENABLED', 'DISABLED']), help="Sets public network access in server to either Enabled or Disabled.")
+
+    # Mongo role definition
+    with self.argument_context('cosmosdb mongodb role definition') as c:
+        c.argument('account_name', account_name_type, id_part=None)
+        c.argument('mongo_role_definition_id', options_list=['--id', '-i'], validator=validate_mongo_role_definition_id, help="Unique ID for the Mongo Role Definition.")
+        c.argument('mongo_role_definition_body', options_list=['--body', '-b'], validator=validate_mongo_role_definition_body, completer=FilesCompleter(), help="Role Definition body with Id (Optional for create), Type (Default is CustomRole), DatabaseName, Privileges, Roles.  You can enter it as a string or as a file, e.g., --body @mongo-role_definition-body-file.json or " + MONGO_ROLE_DEFINITION_EXAMPLE)
+
+    # Mongo user definition
+    with self.argument_context('cosmosdb mongodb user definition') as c:
+        c.argument('account_name', account_name_type, id_part=None)
+        c.argument('mongo_user_definition_id', options_list=['--id', '-i'], validator=validate_mongo_user_definition_id, help="Unique ID for the Mongo User Definition.")
+        c.argument('mongo_user_definition_body', options_list=['--body', '-b'], validator=validate_mongo_user_definition_body, completer=FilesCompleter(), help="User Definition body with Id (Optional for create), UserName, Password, DatabaseName, CustomData, Mechanisms, Roles.  You can enter it as a string or as a file, e.g., --body @mongo-user_definition-body-file.json or " + MONGO_USER_DEFINITION_EXAMPLE)
 
     # Retrive Sql Container Backup Info
     with self.argument_context('cosmosdb sql retrieve-latest-backup-time') as c:
@@ -403,6 +443,8 @@ def load_arguments(self, _):
         c.argument('location', options_list=['--location', '-l'], help="Location", required=True)
         c.argument('instance_id', options_list=['--instance-id', '-i'], help="InstanceId of the Account", required=True)
         c.argument('restorable_sql_database_rid', options_list=['--database-rid', '-d'], help="Rid of the database", required=True)
+        c.argument('start_time', options_list=['--start-time', '-s'], help="Start time of restorable Sql container event feed", required=False)
+        c.argument('end_time', options_list=['--end-time', '-e'], help="End time of restorable Sql container event feed", required=False)
 
     # Restorable Sql Resources
     with self.argument_context('cosmosdb sql restorable-resource') as c:
@@ -410,6 +452,8 @@ def load_arguments(self, _):
         c.argument('instance_id', options_list=['--instance-id', '-i'], help="InstanceId of the Account", required=True)
         c.argument('restore_location', options_list=['--restore-location', '-r'], help="The region of the restore.", required=True)
         c.argument('restore_timestamp_in_utc', options_list=['--restore-timestamp', '-t'], help="The timestamp of the restore", required=True)
+        c.argument('start_time', options_list=['--start-time', '-s'], help="Start time of restorable MongoDB collections event feed", required=False)
+        c.argument('end_time', options_list=['--end-time', '-e'], help="End time of restorable MongoDB collections event feed", required=False)
 
     # Restorable Mongodb Databases
     with self.argument_context('cosmosdb mongodb restorable-database') as c:
@@ -421,6 +465,8 @@ def load_arguments(self, _):
         c.argument('location', options_list=['--location', '-l'], help="Location", required=True)
         c.argument('instance_id', options_list=['--instance-id', '-i'], help="InstanceId of the Account", required=True)
         c.argument('restorable_mongodb_database_rid', options_list=['--database-rid', '-d'], help="Rid of the database", required=True)
+        c.argument('start_time', options_list=['--start-time', '-s'], help="Start time of restorable MongoDB collections event feed", required=False)
+        c.argument('end_time', options_list=['--end-time', '-e'], help="End time of restorable MongoDB collections event feed", required=False)
 
     # Restorable mongodb Resources
     with self.argument_context('cosmosdb mongodb restorable-resource') as c:
@@ -428,6 +474,54 @@ def load_arguments(self, _):
         c.argument('instance_id', options_list=['--instance-id', '-i'], help="InstanceId of the Account", required=True)
         c.argument('restore_location', options_list=['--restore-location', '-r'], help="The region of the restore.", required=True)
         c.argument('restore_timestamp_in_utc', options_list=['--restore-timestamp', '-t'], help="The timestamp of the restore", required=True)
+
+    # Restorable Gremlin Databases
+    with self.argument_context('cosmosdb gremlin restorable-database') as c:
+        c.argument('location', options_list=['--location', '-l'], help="Location", required=True)
+        c.argument('instance_id', options_list=['--instance-id', '-i'], help="InstanceId of the Account", required=True)
+
+    # Restorable Gremlin Graphs
+    with self.argument_context('cosmosdb gremlin restorable-graph') as c:
+        c.argument('location', options_list=['--location', '-l'], help="Location", required=True)
+        c.argument('instance_id', options_list=['--instance-id', '-i'], help="InstanceId of the Account", required=True)
+        c.argument('restorable_gremlin_database_rid', options_list=['--database-rid', '-d'], help="Rid of the gremlin database", required=True)
+        c.argument('start_time', options_list=['--start-time', '-s'], help="Start time of restorable Gremlin graph event feed", required=False)
+        c.argument('end_time', options_list=['--end-time', '-e'], help="End time of restorable Gremlin graph event feed", required=False)
+
+    # Restorable Gremlin Resources
+    with self.argument_context('cosmosdb gremlin restorable-resource') as c:
+        c.argument('location', options_list=['--location', '-l'], help="Azure Location of the account", required=True)
+        c.argument('instance_id', options_list=['--instance-id', '-i'], help="InstanceId of the Account", required=True)
+        c.argument('restore_location', options_list=['--restore-location', '-r'], help="The region of the restore.", required=True)
+        c.argument('restore_timestamp_in_utc', options_list=['--restore-timestamp', '-t'], help="The timestamp of the restore", required=True)
+
+    # Restorable Tables
+    with self.argument_context('cosmosdb table restorable-table') as c:
+        c.argument('location', options_list=['--location', '-l'], help="Location", required=True)
+        c.argument('instance_id', options_list=['--instance-id', '-i'], help="InstanceId of the Account", required=True)
+        c.argument('start_time', options_list=['--start-time', '-s'], help="Start time of restorable tables event feed", required=False)
+        c.argument('end_time', options_list=['--end-time', '-e'], help="End time of restorable tables event feed", required=False)
+
+    # Restorable table Resources
+    with self.argument_context('cosmosdb table restorable-resource') as c:
+        c.argument('location', options_list=['--location', '-l'], help="Azure Location of the account", required=True)
+        c.argument('instance_id', options_list=['--instance-id', '-i'], help="InstanceId of the Account", required=True)
+        c.argument('restore_location', options_list=['--restore-location', '-r'], help="The region of the restore.", required=True)
+        c.argument('restore_timestamp_in_utc', options_list=['--restore-timestamp', '-t'], help="The timestamp of the restore", required=True)
+
+    # Retrive Gremlin Graph Backup Info
+    database_name_type = CLIArgumentType(options_list=['--database-name', '-d'], help='Database name.')
+    with self.argument_context('cosmosdb gremlin retrieve-latest-backup-time') as c:
+        c.argument('account_name', account_name_type, id_part=None, required=True, help='Name of the CosmosDB database account')
+        c.argument('database_name', database_name_type, required=True, help='Name of the CosmosDB Gremlin database name')
+        c.argument('graph_name', options_list=['--graph-name', '-n'], required=True, help='Name of the CosmosDB Gremlin graph name')
+        c.argument('location', options_list=['--location', '-l'], help="Location of the account", required=True)
+
+    # Retrive Table Backup Info
+    with self.argument_context('cosmosdb table retrieve-latest-backup-time') as c:
+        c.argument('account_name', account_name_type, id_part=None, required=True, help='Name of the CosmosDB database account')
+        c.argument('table_name', options_list=['--table-name', '-n'], required=True, help='Name of the CosmosDB Table name')
+        c.argument('location', options_list=['--location', '-l'], help="Location of the account", required=True)
 
     # Account locations
     with self.argument_context('cosmosdb locations show') as c:
@@ -495,6 +589,7 @@ def load_arguments(self, _):
             'managed-cassandra datacenter update']:
         with self.argument_context(scope) as c:
             c.argument('node_count', options_list=['--node-count', '-n'], validator=validate_node_count, help="The number of Cassandra virtual machines in this data center. The minimum value is 3.")
+            c.argument('sku', options_list=['--sku'], help="Virtual Machine SKU used for data centers. Default value is Standard_DS14_v2")
             c.argument('base64_encoded_cassandra_yaml_fragment', options_list=['--base64-encoded-cassandra-yaml-fragment', '-b'], help="This is a Base64 encoded yaml file that is a subset of cassandra.yaml.  Supported fields will be honored and others will be ignored.")
             c.argument('data_center_location', options_list=['--data-center-location', '-l'], help="The region where the virtual machine for this data center will be located.")
             c.argument('delegated_subnet_id', options_list=['--delegated-subnet-id', '-s'], help="The resource id of a subnet where ip addresses of the Cassandra virtual machines will be allocated. This must be in the same region as data_center_location.")
@@ -506,7 +601,6 @@ def load_arguments(self, _):
         c.argument('data_center_location', options_list=['--data-center-location', '-l'], help="Azure Location of the Datacenter", required=True)
         c.argument('delegated_subnet_id', options_list=['--delegated-subnet-id', '-s'], help="The resource id of a subnet where ip addresses of the Cassandra virtual machines will be allocated. This must be in the same region as data_center_location.", required=True)
         c.argument('node_count', options_list=['--node-count', '-n'], validator=validate_node_count, help="The number of Cassandra virtual machines in this data center. The minimum value is 3.", required=True)
-        c.argument('sku', options_list=['--sku'], help="Virtual Machine SKU used for data centers. Default value is Standard_DS14_v2")
         c.argument('disk_sku', options_list=['--disk-sku'], help="Disk SKU used for data centers. Default value is P30.")
         c.argument('disk_capacity', options_list=['--disk-capacity'], help="Number of disk used for data centers. Default value is 4.")
         c.argument('availability_zone', options_list=['--availability-zone', '-z'], arg_type=get_three_state_flag(), help="If the data center haves Availability Zone feature, apply it to the Virtual Machine ScaleSet that host the data center virtual machines.")
@@ -559,3 +653,12 @@ def load_arguments(self, _):
         c.argument('account_name', account_name_type, id_part=None, required=True)
         c.argument('table_name', options_list=['--table-name', '-n'], required=True, help='Name of the CosmosDB Table name')
         c.argument('restore_timestamp', options_list=['--restore-timestamp', '-t'], action=UtcDatetimeAction, help="The timestamp to which the Table needs to be restored to.", required=True)
+
+    # ComputeV2 Services
+    with self.argument_context('cosmosdb service') as c:
+        c.argument('account_name', completer=None, options_list=['--account-name', '-a'], help='Name of the Cosmos DB database account.', id_part=None)
+        c.argument('resource_group_name', completer=None, options_list=['--resource-group-name', '-g'], help='Name of the resource group of the database account.', id_part=None)
+        c.argument('service_kind', options_list=['--kind', '-k'], help="Service kind")
+        c.argument('service_name', options_list=['--name', '-n'], help="Service Name.")
+        c.argument('instance_count', options_list=['--count', '-c'], help="Instance Count.")
+        c.argument('instance_size', options_list=['--size'], help="Instance Size. Possible values are: Cosmos.D4s, Cosmos.D8s, Cosmos.D16s etc")

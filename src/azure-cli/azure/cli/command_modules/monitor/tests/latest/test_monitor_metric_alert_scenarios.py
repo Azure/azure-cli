@@ -39,18 +39,18 @@ class MonitorTests(ScenarioTest):
             self.check('description', 'Test'),
             self.check('severity', 2),
             self.check('autoMitigate', None),
-            self.check('windowSize', '0:05:00'),
-            self.check('evaluationFrequency', '0:01:00'),
+            self.check('windowSize', 'PT5M'),
+            self.check('evaluationFrequency', 'PT1M'),
             self.check('length(criteria.allOf)', 2),
             self.check('length(criteria.allOf[0].dimensions)', 2),
             self.check('length(criteria.allOf[1].dimensions)', 1)
         ])
-        self.cmd('monitor metrics alert update -g {rg} -n {alert} --severity 3 --description "alt desc" --add-action ag2 test=best --remove-action ag1 --remove-conditions cond0 --evaluation-frequency 5m --window-size 15m --tags foo=boo --auto-mitigate', checks=[
+        self.cmd('monitor metrics alert update -g {rg} -n {alert} --severity 3 --description "alt desc" --add-action "ag2 test=best" --remove-action ag1 --remove-conditions cond0 --evaluation-frequency 5m --window-size 15m --tags foo=boo --auto-mitigate', checks=[
             self.check('description', 'alt desc'),
             self.check('severity', 3),
             self.check('autoMitigate', True),
-            self.check('windowSize', '0:15:00'),
-            self.check('evaluationFrequency', '0:05:00'),
+            self.check('windowSize', 'PT15M'),
+            self.check('evaluationFrequency', 'PT5M'),
             self.check('length(criteria.allOf)', 1),
             self.check('length(criteria.allOf[0].dimensions)', 1),
             self.check("contains(actions[0].actionGroupId, 'actionGroups/ag2')", True),
@@ -117,7 +117,7 @@ class MonitorTests(ScenarioTest):
         self.kwargs.update({
             'alert': 'alert1',
         })
-        self.cmd('network application-gateway create -g {rg} -n ag1 --public-ip-address ip1')
+        self.cmd('network application-gateway create -g {rg} -n ag1 --public-ip-address ip1 --priority 1001')
         gateway_json = self.cmd('network application-gateway show -g {rg} -n ag1').get_output_in_json()
         self.kwargs.update({
             'ag_id': gateway_json['id'],
@@ -128,8 +128,8 @@ class MonitorTests(ScenarioTest):
                      self.check('description', 'Test'),
                      self.check('severity', 2),
                      self.check('autoMitigate', None),
-                     self.check('windowSize', '0:05:00'),
-                     self.check('evaluationFrequency', '0:01:00'),
+                     self.check('windowSize', 'PT5M'),
+                     self.check('evaluationFrequency', 'PT1M'),
                      self.check('length(criteria.allOf)', 1),
                      self.check('length(criteria.allOf[0].dimensions)', 1),
                      self.check('criteria.allOf[0].dimensions[0].values[0]', 'address-pool-dcc-blue~backendHttpSettings')
@@ -139,7 +139,7 @@ class MonitorTests(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_monitor')
     def test_metric_alert_basic_scenarios(self, resource_group):
         vm = 'vm1'
-        vm_json = self.cmd('vm create -g {} -n {} --image UbuntuLTS --admin-password TestPassword11!! --admin-username '
+        vm_json = self.cmd('vm create -g {} -n {} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-password TestPassword11!! --admin-username '
                            'testadmin --authentication-type password'.format(resource_group, vm)).get_output_in_json()
         vm_id = vm_json['id']
 
@@ -260,13 +260,13 @@ class MonitorTests(ScenarioTest):
                      self.check('description', 'High CPU'),
                      self.check('severity', 2),
                      self.check('autoMitigate', None),
-                     self.check('windowSize', '0:05:00'),
-                     self.check('evaluationFrequency', '0:01:00'),
+                     self.check('windowSize', 'PT5M'),
+                     self.check('evaluationFrequency', 'PT1M'),
                      self.check('length(scopes)', 1),
                  ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v1_2')
-    @SqlServerPreparer(name_prefix='clitestservermatricalertA', parameter_name='server1')
+    @SqlServerPreparer(name_prefix='clitestservermatricalertA', parameter_name='server1', location='eastus')
     def test_metric_alert_for_sql_database_scope(self, resource_group, resource_group_location, server1):
         self.kwargs.update({
             'alert': 'alert1',
@@ -292,8 +292,8 @@ class MonitorTests(ScenarioTest):
                      self.check('description', 'High CPU'),
                      self.check('severity', 2),
                      self.check('autoMitigate', None),
-                     self.check('windowSize', '0:05:00'),
-                     self.check('evaluationFrequency', '0:01:00'),
+                     self.check('windowSize', 'PT5M'),
+                     self.check('evaluationFrequency', 'PT1M'),
                      self.check('length(scopes)', 1),
                  ])
 
@@ -330,8 +330,8 @@ class MonitorTests(ScenarioTest):
                      self.check('description', 'High CPU'),
                      self.check('severity', 2),
                      self.check('autoMitigate', None),
-                     self.check('windowSize', '0:05:00'),
-                     self.check('evaluationFrequency', '0:01:00'),
+                     self.check('windowSize', 'PT5M'),
+                     self.check('evaluationFrequency', 'PT1M'),
                      self.check('length(scopes)', 2)
                  ])
 
@@ -360,15 +360,15 @@ class MonitorTests(ScenarioTest):
                 self.check('description', 'High CPU'),
                 self.check('severity', 2),
                 self.check('autoMitigate', None),
-                self.check('windowSize', '0:05:00'),
-                self.check('evaluationFrequency', '0:01:00'),
+                self.check('windowSize', 'PT5M'),
+                self.check('evaluationFrequency', 'PT1M'),
                 self.check('length(scopes)', 1),
                 self.check('criteria.allOf[0].alertSensitivity', 'Low'),
                 self.check('criteria.allOf[0].criterionType', 'DynamicThresholdCriterion'),
                 self.check('criteria.allOf[0].failingPeriods.minFailingPeriodsToAlert', 2.0),
                 self.check('criteria.allOf[0].failingPeriods.numberOfEvaluationPeriods', 4.0),
                 self.check('criteria.allOf[0].operator', 'GreaterThan'),
-                self.check('criteria.allOf[0].ignoreDataBefore', '2020-11-01T16:00:00+00:00')
+                self.check('criteria.allOf[0].ignoreDataBefore', '2020-11-01T16:00:00.000Z')
             ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_dynamic_metric_alert_v2')
@@ -405,15 +405,15 @@ class MonitorTests(ScenarioTest):
                 self.check('description', 'High CPU'),
                 self.check('severity', 2),
                 self.check('autoMitigate', None),
-                self.check('windowSize', '0:05:00'),
-                self.check('evaluationFrequency', '0:01:00'),
+                self.check('windowSize', 'PT5M'),
+                self.check('evaluationFrequency', 'PT1M'),
                 self.check('length(scopes)', 2),
                 self.check('criteria.allOf[0].alertSensitivity', 'Low'),
                 self.check('criteria.allOf[0].criterionType', 'DynamicThresholdCriterion'),
                 self.check('criteria.allOf[0].failingPeriods.minFailingPeriodsToAlert', 2.0),
                 self.check('criteria.allOf[0].failingPeriods.numberOfEvaluationPeriods', 4.0),
                 self.check('criteria.allOf[0].operator', 'GreaterThan'),
-                self.check('criteria.allOf[0].ignoreDataBefore', '2020-11-01T16:00:00+00:00')
+                self.check('criteria.allOf[0].ignoreDataBefore', '2020-11-01T16:00:00.000Z')
             ])
 
         self.cmd(
@@ -422,8 +422,8 @@ class MonitorTests(ScenarioTest):
                 self.check('description', 'High Or Low CPU'),
                 self.check('severity', 3),
                 self.check('autoMitigate', True),
-                self.check('windowSize', '0:15:00'),
-                self.check('evaluationFrequency', '0:05:00'),
+                self.check('windowSize', 'PT15M'),
+                self.check('evaluationFrequency', 'PT5M'),
                 self.check('length(criteria.allOf)', 1),
                 self.check('length(scopes)', 2),
                 self.check('criteria.allOf[0].alertSensitivity', 'Medium'),
@@ -431,7 +431,7 @@ class MonitorTests(ScenarioTest):
                 self.check('criteria.allOf[0].failingPeriods.minFailingPeriodsToAlert', 1.0),
                 self.check('criteria.allOf[0].failingPeriods.numberOfEvaluationPeriods', 6.0),
                 self.check('criteria.allOf[0].operator', 'GreaterOrLessThan'),
-                self.check('criteria.allOf[0].ignoreDataBefore', '2020-10-01T10:23:00+00:00')
+                self.check('criteria.allOf[0].ignoreDataBefore', '2020-10-01T10:23:00.000Z')
             ])
 
         self.cmd('monitor metrics alert list -g {rg}',
@@ -495,15 +495,15 @@ class MonitorTests(ScenarioTest):
                 self.check('description', 'High CPU'),
                 self.check('severity', 2),
                 self.check('autoMitigate', None),
-                self.check('windowSize', '0:05:00'),
-                self.check('evaluationFrequency', '0:01:00'),
+                self.check('windowSize', 'PT5M'),
+                self.check('evaluationFrequency', 'PT1M'),
                 self.check('length(scopes)', 2),
                 self.check('criteria.allOf[0].alertSensitivity', 'Medium'),
                 self.check('criteria.allOf[0].criterionType', 'DynamicThresholdCriterion'),
                 self.check('criteria.allOf[0].failingPeriods.minFailingPeriodsToAlert', 1.0),
                 self.check('criteria.allOf[0].failingPeriods.numberOfEvaluationPeriods', 6.0),
                 self.check('criteria.allOf[0].operator', 'GreaterOrLessThan'),
-                self.check('criteria.allOf[0].ignoreDataBefore', '2020-11-02T12:11:11+00:00')
+                self.check('criteria.allOf[0].ignoreDataBefore', '2020-11-02T12:11:11.000Z')
             ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v2', parameter_name='resource_group')
@@ -536,8 +536,8 @@ class MonitorTests(ScenarioTest):
                      self.check('description', 'High CPU'),
                      self.check('severity', 2),
                      self.check('autoMitigate', None),
-                     self.check('windowSize', '0:05:00'),
-                     self.check('evaluationFrequency', '0:01:00'),
+                     self.check('windowSize', 'PT5M'),
+                     self.check('evaluationFrequency', 'PT1M'),
                      self.check('length(scopes)', 1),
                  ])
         self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {rg_id_1} {rg_id_2} '
@@ -547,8 +547,8 @@ class MonitorTests(ScenarioTest):
                      self.check('description', 'High CPU'),
                      self.check('severity', 2),
                      self.check('autoMitigate', None),
-                     self.check('windowSize', '0:05:00'),
-                     self.check('evaluationFrequency', '0:01:00'),
+                     self.check('windowSize', 'PT5M'),
+                     self.check('evaluationFrequency', 'PT1M'),
                      self.check('length(scopes)', 2),
                  ])
 
@@ -572,6 +572,41 @@ class MonitorTests(ScenarioTest):
                      self.check('length(criteria.allOf)', 1),
                      self.check('criteria.allOf[0].skipMetricValidation', True)
                  ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_metric_namespace_special_character')
+    @StorageAccountPreparer()
+    def test_metric_namespace_special_character(self, resource_group, storage_account):
+        from azure.mgmt.core.tools import resource_id
+        self.kwargs.update({
+            'alert': 'alert1',
+            'alert2': 'alert2',
+            'sa_id': resource_id(
+                resource_group=resource_group,
+                subscription=self.get_subscription_id(),
+                name=storage_account,
+                namespace='Microsoft.Storage',
+                type='storageAccounts')
+        })
+        self.cmd(
+            'monitor metrics alert create -g {rg} -n {alert} --scopes {sa_id} --region westus --description "Test"'
+            ' --condition "avg My-Ns.UnemittedMetric >= 10 with skipMetricValidation"',
+            checks=[
+                self.check('description', 'Test'),
+                self.check('length(criteria.allOf)', 1),
+                self.check('criteria.allOf[0].metricNamespace', 'My-Ns'),
+                self.check('criteria.allOf[0].metricName', 'UnemittedMetric'),
+                self.check('criteria.allOf[0].skipMetricValidation', True)
+            ])
+        self.cmd(
+            'monitor metrics alert create -g {rg} -n {alert2} --scopes {sa_id} --region westus --description "Test"'
+            ' --condition "avg My-Ns.\\LogicalDisk(C:)\% Free Space = 1 with skipMetricValidation"',
+            checks=[
+                self.check('description', 'Test'),
+                self.check('length(criteria.allOf)', 1),
+                self.check('criteria.allOf[0].metricNamespace', 'My-Ns'),
+                self.check('criteria.allOf[0].metricName', '\\LogicalDisk(C:)\% Free Space'),
+                self.check('criteria.allOf[0].skipMetricValidation', True)
+            ])
 
 
 if __name__ == '__main__':

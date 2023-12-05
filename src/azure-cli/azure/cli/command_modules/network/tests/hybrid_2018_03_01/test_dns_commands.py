@@ -8,7 +8,7 @@ import unittest
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
-from azure.cli.command_modules.network.zone_file import parse_zone_file
+from azure.cli.command_modules.network.azure_stack.zone_file import parse_zone_file
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 

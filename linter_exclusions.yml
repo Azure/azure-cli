@@ -38,6 +38,16 @@ acr manifest list:
     repo_id:
       rule_exclusions:
       - no_positional_parameters
+acr manifest list-deleted:
+  parameters:
+    repo_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest list-deleted-tags:
+  parameters:
+    perm_repo_id:
+      rule_exclusions:
+      - no_positional_parameters
 acr manifest list-referrers:
   parameters:
     manifest_id:
@@ -59,6 +69,11 @@ acr manifest metadata show:
       rule_exclusions:
       - no_positional_parameters
 acr manifest metadata update:
+  parameters:
+    manifest_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest restore:
   parameters:
     manifest_id:
       rule_exclusions:
@@ -312,6 +327,12 @@ aks create:
     enable_msi_auth_for_monitoring:
       rule_exclusions:
       - option_length_too_long
+    enable_syslog:
+      rule_exclusions:
+      - option_length_too_long
+    data_collection_settings:
+      rule_exclusions:
+      - option_length_too_long
     node_osdisk_diskencryptionset_id:
       rule_exclusions:
       - option_length_too_long
@@ -321,12 +342,30 @@ aks create:
     assign_kubelet_identity:
       rule_exclusions:
       - option_length_too_long
+    enable_azure_keyvault_kms:
+      rule_exclusions:
+        - option_length_too_long
+    azure_keyvault_kms_key_id:
+      rule_exclusions:
+        - option_length_too_long
+    azure_keyvault_kms_key_vault_network_access:
+      rule_exclusions:
+        - option_length_too_long
+    azure_keyvault_kms_key_vault_resource_id:
+      rule_exclusions:
+        - option_length_too_long
 aks enable-addons:
   parameters:
     workspace_resource_id:
       rule_exclusions:
       - option_length_too_long
     enable_msi_auth_for_monitoring:
+      rule_exclusions:
+      - option_length_too_long
+    enable_syslog:
+      rule_exclusions:
+      - option_length_too_long
+    data_collection_settings:
       rule_exclusions:
       - option_length_too_long
 aks install-cli:
@@ -371,6 +410,21 @@ aks update:
     enable_managed_identity:
       rule_exclusions:
       - option_length_too_long
+    enable_azure_keyvault_kms:
+      rule_exclusions:
+        - option_length_too_long
+    disable_azure_keyvault_kms:
+      rule_exclusions:
+        - option_length_too_long
+    azure_keyvault_kms_key_id:
+      rule_exclusions:
+        - option_length_too_long
+    azure_keyvault_kms_key_vault_network_access:
+      rule_exclusions:
+        - option_length_too_long
+    azure_keyvault_kms_key_vault_resource_id:
+      rule_exclusions:
+        - option_length_too_long
 aks update-credentials:
   parameters:
     aad_server_app_secret:
@@ -696,9 +750,24 @@ aro create:
     cluster_resource_group:
       rule_exclusions:
       - option_length_too_long
+      - parameter_should_not_end_in_resource_group
     worker_vm_disk_size_gb:
       rule_exclusions:
       - option_length_too_long
+    vnet_resource_group_name:
+      rule_exclusions:
+      - parameter_should_not_end_in_resource_group
+    enable_preconfigured_nsg:
+      rule_exclusions:
+      - option_length_too_long
+aro validate:
+  parameters:
+    cluster_resource_group:
+      rule_exclusions:
+      - parameter_should_not_end_in_resource_group
+    vnet_resource_group_name:
+      rule_exclusions:
+      - parameter_should_not_end_in_resource_group
 backup container list:
   parameters:
     backup_management_type:
@@ -868,6 +937,19 @@ backup restore restore-disks:
       rule_exclusions:
       - option_length_too_long
     target_vnet_resource_group:
+      rule_exclusions:
+      - option_length_too_long
+    storage_account_resource_group:
+      rule_exclusions:
+      - option_length_too_long
+backup vault update:
+  parameters:
+    cross_subscription_restore_state:
+      rule_exclusions:
+      - option_length_too_long
+backup vault create:
+  parameters:
+    cross_subscription_restore_state:
       rule_exclusions:
       - option_length_too_long
 backup vault backup-properties set:
@@ -1374,6 +1456,14 @@ cosmosdb create:
     virtual_network_rules:
       rule_exclusions:
       - option_length_too_long
+    gremlin_databases_to_restore:
+      rule_exclusions:
+      - option_length_too_long
+cosmosdb restore:
+  parameters:
+    gremlin_databases_to_restore:
+      rule_exclusions:
+      - option_length_too_long
 cosmosdb mongodb collection create:
   parameters:
     analytical_storage_ttl:
@@ -1427,71 +1517,6 @@ cosmosdb collection:
     db_resource_group_name:
       rule_exclusions:
         - parameter_should_not_end_in_resource_group
-deploymentmanager service create:
-  parameters:
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-    target_subscription_id:
-      rule_exclusions:
-      - option_length_too_long
-deploymentmanager service delete:
-  parameters:
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-deploymentmanager service list:
-  parameters:
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-deploymentmanager service show:
-  parameters:
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-deploymentmanager service update:
-  parameters:
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-    target_subscription_id:
-      rule_exclusions:
-      - option_length_too_long
-deploymentmanager service-unit create:
-  parameters:
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-    target_resource_group:
-      rule_exclusions:
-      - option_length_too_long
-deploymentmanager service-unit delete:
-  parameters:
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-deploymentmanager service-unit list:
-  parameters:
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-deploymentmanager service-unit show:
-  parameters:
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-deploymentmanager service-unit update:
-  parameters:
-    deployment_mode:
-      rule_exclusions:
-      - no_parameter_defaults_for_update_commands
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-    target_resource_group:
-      rule_exclusions:
-      - option_length_too_long
 disk create:
   parameters:
     gallery_image_reference:
@@ -2856,6 +2881,16 @@ openshift create:
     customer_admin_group_id:
       rule_exclusions:
       - option_length_too_long
+policy attestation create:
+  parameters:
+    definition_reference_id:
+      rule_exclusions:
+        - option_length_too_long
+policy attestation update:
+  parameters:
+    definition_reference_id:
+      rule_exclusions:
+        - option_length_too_long
 policy assignment list:
   parameters:
     disable_scope_strict_match:
@@ -2973,21 +3008,6 @@ relay wcfrelay update:
     relay_type:
       rule_exclusions:
       - no_parameter_defaults_for_update_commands
-reservations catalog show:
-  parameters:
-    reserved_resource_type:
-      rule_exclusions:
-      - option_length_too_long
-reservations reservation-order calculate:
-  parameters:
-    reserved_resource_type:
-      rule_exclusions:
-      - option_length_too_long
-reservations reservation-order purchase:
-  parameters:
-    reserved_resource_type:
-      rule_exclusions:
-      - option_length_too_long
 resource move:
   parameters:
     destination_subscription_id:
@@ -3449,6 +3469,9 @@ sql vm update:
     prompt:
       rule_exclusions:
       - no_parameter_defaults_for_update_commands
+    workspace_sub:
+      rule_exclusions:
+      - missing_parameter_test_coverage
 staticwebapp create:
   parameters:
     app_artifact_location:

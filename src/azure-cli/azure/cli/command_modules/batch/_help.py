@@ -7,6 +7,13 @@
 from knack.help_files import helps  # pylint: disable=unused-import
 # pylint: disable=line-too-long, too-many-lines
 
+OUTPUT_WITH_SECRET = (
+    'The output includes secrets that you must protect. Be sure that you do not include these secrets in your '
+    'source control. Also verify that no secrets are present in the logs of your command or script. '
+    'For additional information, see http://aka.ms/clisecrets.')
+
+OUTPUT_WITH_SECRET_HELP = f'[WARNING] {OUTPUT_WITH_SECRET}'
+
 helps['batch'] = """
 type: group
 short-summary: Manage Azure Batch.
@@ -51,12 +58,25 @@ examples:
     crafted: true
 """
 
-helps['batch account keys renew'] = """
+helps['batch account keys renew'] = f"""
 type: command
 short-summary: Renew keys for a Batch account.
+long-summary: >
+    {OUTPUT_WITH_SECRET_HELP}
 examples:
   - name: Renew keys for a Batch account.
     text: az batch account keys renew --name MyBatchAccount --resource-group MyResourceGroup --key-name primary
+"""
+
+helps['batch account keys list'] = f"""
+type: command
+short-summary: Gets the account keys for the specified Batch account.
+        This operation applies only to Batch accounts with allowedAuthenticationModes containing
+        'SharedKey'. If the Batch account doesn't contain 'SharedKey' in its
+        allowedAuthenticationMode, clients cannot use shared keys to authenticate, and must use
+        another allowedAuthenticationModes instead. In this case, getting the keys will fail.
+long-summary: >
+    {OUTPUT_WITH_SECRET_HELP}
 """
 
 helps['batch account show'] = """
@@ -73,6 +93,105 @@ type: command
 short-summary: List an account's outbound network dependencies.
 long-summary: List the endpoints that a Batch Compute Node under this Batch Account may call as part of Batch service administration. If you are deploying a Pool inside of a virtual network that you specify, you must make sure your network allows outbound access to these endpoints. Failure to allow access to these endpoints may cause Batch to mark the affected nodes as unusable. For more information about creating a pool inside of a virtual network, see https://docs.microsoft.com/azure/batch/batch-virtual-network."
 """
+
+helps['batch account identity'] = """
+type: group
+short-summary: Manage identities of a batch account.
+"""
+
+helps['batch account identity assign'] = """
+type: command
+short-summary: Add managed identities to an existing batch account.
+examples:
+  - name: Add a system assigned managed identity to an existing batch account.
+    text: >
+        az batch account identity assign --name MyBatchAccount --resource-group MyResourceGroup --system-assigned
+  - name: Add a user assigned managed identity to an existing batch account.
+    text: >
+        az batch account identity assign --name MyBatchAccount --resource-group MyResourceGroup --user-assigned MyAssignedId
+"""
+
+helps['batch account identity remove'] = """
+type: command
+short-summary: Remove managed identities from an existing batch account.
+examples:
+  - name: Remove a system assigned managed identity from an existing batch account.
+    text: >
+        az batch account identity remove --name MyBatchAccount --resource-group MyResourceGroup --system-assigned
+  - name: Remove a user assigned managed identity from an existing batch account.
+    text: >
+        az batch account identity remove --name MyBatchAccount --resource-group MyResourceGroup --user-assigned MyAssignedId
+  - name: Remove all user assigned managed identities from an existing batch account.
+    text: >
+        az batch account identity remove --name MyBatchAccount --resource-group MyResourceGroup --user-assigned
+"""
+
+helps['batch account identity show'] = f"""
+type: command
+short-summary: Display managed identities of a batch account.
+long-summary: >
+    {OUTPUT_WITH_SECRET_HELP}
+examples:
+  - name: Display managed identities of a batch account.
+    text: |
+        az batch account identity show --name MyBatchAccount --resource-group MyResourceGroup
+"""
+
+helps['batch account network-profile'] = """
+type: group
+short-summary: Manage Batch account Network profiles.
+"""
+
+helps['batch account network-profile show'] = """
+type: command
+short-summary: Get information about the Network profile for Batch account.
+examples:
+  - name: Show the network-profile for both BatchAccount and NodeManagement
+    text: >
+        az batch account network-profile show -g MyResourceGroup -n MyBatchAccount
+"""
+
+helps['batch account network-profile set'] = """
+type: command
+short-summary: Set the Network profile for Batch account.
+examples:
+  - name: Set the BatchAccount network-profile to the Allow
+    text: >
+        az batch account network-profile set -g MyResourceGroup -n MyBatchAccount --profile BatchAccount --default-action Allow
+"""
+
+helps['batch account network-profile network-rule'] = """
+type: group
+short-summary: Manage Batch account Network rules in Network Profile.
+"""
+
+helps['batch account network-profile network-rule list'] = """
+type: command
+short-summary: List the Network rules from a Network Profile.
+examples:
+  - name: List the Batch Accounts network profile
+    text: >
+        az batch account network-profile network-rule list -g MyResourceGroup -n MyBatchAccount
+"""
+
+helps['batch account network-profile network-rule add'] = """
+type: command
+short-summary: Add a Network rule from a Network Profile.
+examples:
+  - name: Add ip address to BatchAccount network rule
+    text: >
+        az batch account network-profile network-rule add -g MyResourceGroup -n MyBatchAccount --profile BatchAccount --ip-address 1.2.3.4
+"""
+
+helps['batch account network-profile network-rule delete'] = """
+type: command
+short-summary: Delete a Network rule from a Network Profile.
+examples:
+  - name: Delete ip address from BatchAccount network rule
+    text: >
+        az batch account network-profile network-rule delete -g MyResourceGroup -n MyBatchAccount --profile BatchAccount --ip-address 1.2.3.4
+"""
+
 
 helps['batch application'] = """
 type: group
@@ -135,17 +254,6 @@ short-summary: Delete a certificate from a Batch account.
 helps['batch job'] = """
 type: group
 short-summary: Manage Batch jobs.
-"""
-
-helps['batch job all-statistics'] = """
-type: group
-short-summary: View statistics of all jobs under a Batch account.
-"""
-
-helps['batch job all-statistics show'] = """
-type: command
-short-summary: Get lifetime summary statistics for all of the jobs in a Batch account.
-long-summary: Statistics are aggregated across all jobs that have ever existed in the account, from account creation to the last update time of the statistics.
 """
 
 helps['batch job create'] = """
@@ -309,17 +417,6 @@ short-summary: Update the properties of a user account on a Batch compute node. 
 helps['batch pool'] = """
 type: group
 short-summary: Manage Batch pools.
-"""
-
-helps['batch pool all-statistics'] = """
-type: group
-short-summary: View statistics of all pools under a Batch account.
-"""
-
-helps['batch pool all-statistics show'] = """
-type: command
-short-summary: Get lifetime summary statistics for all of the pools in a Batch account.
-long-summary: Statistics are aggregated across all pools that have ever existed in the account, from account creation to the last update time of the statistics.
 """
 
 helps['batch pool autoscale'] = """

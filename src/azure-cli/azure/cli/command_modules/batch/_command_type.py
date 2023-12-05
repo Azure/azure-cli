@@ -294,9 +294,8 @@ class BatchArgumentTree:
         except DeserializationError as error:
             message += f": {error}"
             raise ValueError(message.format(self._request_param['model']))
-        else:
-            if kwargs[self._request_param['name']] is None:
-                raise ValueError(message.format(self._request_param['model']))
+        if kwargs[self._request_param['name']] is None:
+            raise ValueError(message.format(self._request_param['model']))
 
     def queue_argument(self, name=None, path=None, root=None,
                        options=None, type=None,  # pylint: disable=redefined-builtin
@@ -766,7 +765,7 @@ class AzureBatchDataPlaneCommand:
                 param = 'json_file'
                 docstring = f"A file containing the {arg[0].replace('_', ' ')} specification in JSON " \
                             "(formatted to match the respective REST API body). " \
-                            "If this parameter is specified, all '{group_title(arg[0])} Arguments'" \
+                            f"If this parameter is specified, all '{group_title(arg[0])} Arguments'" \
                             " are ignored."
                 args.append((param, CLICommandArgument(param,
                                                        options_list=[arg_name(param)],

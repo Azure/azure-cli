@@ -7,8 +7,7 @@ from msrestazure.tools import is_valid_resource_id, resource_id
 
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import sdk_no_wait
-
-from knack.util import CLIError
+from azure.cli.core.azclierror import ResourceNotFoundError, ArgumentUsageError
 
 
 def list_policy_events(
@@ -31,7 +30,7 @@ def list_policy_events(
         filter_clause=None,
         apply_clause=None):
 
-    from azure.mgmt.policyinsights.models import QueryOptions
+    from azure.mgmt.policyinsights.models import QueryOptions, PolicyEventsResourceType
 
     query_options = QueryOptions(
         top=top_value,
@@ -47,30 +46,36 @@ def list_policy_events(
     if policy_assignment_name:
         if resource_group_name:
             events = client.list_query_results_for_resource_group_level_policy_assignment(
-                subscription_id,
-                resource_group_name,
-                policy_assignment_name,
-                query_options)
+                subscription_id=subscription_id,
+                resource_group_name=resource_group_name,
+                policy_assignment_name=policy_assignment_name,
+                query_options=query_options,
+                policy_events_resource=PolicyEventsResourceType.DEFAULT)
         else:
             events = client.list_query_results_for_subscription_level_policy_assignment(
-                subscription_id,
-                policy_assignment_name,
-                query_options)
+                subscription_id=subscription_id,
+                policy_assignment_name=policy_assignment_name,
+                query_options=query_options,
+                policy_events_resource=PolicyEventsResourceType.DEFAULT)
     elif policy_definition_name:
         events = client.list_query_results_for_policy_definition(
-            subscription_id,
-            policy_definition_name,
-            query_options)
+            subscription_id=subscription_id,
+            policy_definition_name=policy_definition_name,
+            query_options=query_options,
+            policy_events_resource=PolicyEventsResourceType.DEFAULT)
     elif policy_set_definition_name:
         events = client.list_query_results_for_policy_set_definition(
-            subscription_id,
-            policy_set_definition_name,
-            query_options)
+            subscription_id=subscription_id,
+            policy_set_definition_name=policy_set_definition_name,
+            query_options=query_options,
+            policy_events_resource=PolicyEventsResourceType.DEFAULT)
     elif resource:
         if not is_valid_resource_id(resource):
             if resource_type_parent:
-                resource_type_parent = _remove_leading_and_trailing_slash(resource_type_parent)
-                resource_type = "{}/{}".format(resource_type_parent, resource_type)
+                resource_type_parent = _remove_leading_and_trailing_slash(
+                    resource_type_parent)
+                resource_type = "{}/{}".format(resource_type_parent,
+                                               resource_type)
             resource = resource_id(
                 subscription=subscription_id,
                 resource_group=resource_group_name,
@@ -78,21 +83,25 @@ def list_policy_events(
                 type=resource_type,
                 name=resource)
         events = client.list_query_results_for_resource(
-            resource,
-            query_options)
+            resource_id=resource,
+            query_options=query_options,
+            policy_events_resource=PolicyEventsResourceType.DEFAULT)
     elif resource_group_name:
         events = client.list_query_results_for_resource_group(
-            subscription_id,
-            resource_group_name,
-            query_options)
+            subscription_id=subscription_id,
+            resource_group_name=resource_group_name,
+            query_options=query_options,
+            policy_events_resource=PolicyEventsResourceType.DEFAULT)
     elif management_group_name:
         events = client.list_query_results_for_management_group(
-            management_group_name,
-            query_options)
+            management_group_name=management_group_name,
+            query_options=query_options,
+            policy_events_resource=PolicyEventsResourceType.DEFAULT)
     else:
         events = client.list_query_results_for_subscription(
-            subscription_id,
-            query_options)
+            subscription_id=subscription_id,
+            query_options=query_options,
+            policy_events_resource=PolicyEventsResourceType.DEFAULT)
 
     return events
 
@@ -166,8 +175,10 @@ def list_policy_states(
     elif resource:
         if not is_valid_resource_id(resource):
             if resource_type_parent:
-                resource_type_parent = _remove_leading_and_trailing_slash(resource_type_parent)
-                resource_type = "{}/{}".format(resource_type_parent, resource_type)
+                resource_type_parent = _remove_leading_and_trailing_slash(
+                    resource_type_parent)
+                resource_type = "{}/{}".format(resource_type_parent,
+                                               resource_type)
             resource = resource_id(
                 subscription=subscription_id,
                 resource_group=resource_group_name,
@@ -215,7 +226,7 @@ def summarize_policy_states(
         top_value=None,
         filter_clause=None):
 
-    from azure.mgmt.policyinsights.models import QueryOptions
+    from azure.mgmt.policyinsights.models import QueryOptions, PolicyStatesSummaryResourceType
 
     query_options = QueryOptions(
         top=top_value,
@@ -228,25 +239,29 @@ def summarize_policy_states(
     if policy_assignment_name:
         if resource_group_name:
             summary = client.summarize_for_resource_group_level_policy_assignment(
-                subscription_id,
-                resource_group_name,
-                policy_assignment_name,
-                query_options)
+                subscription_id=subscription_id,
+                resource_group_name=resource_group_name,
+                policy_assignment_name=policy_assignment_name,
+                query_options=query_options,
+                policy_states_summary_resource=PolicyStatesSummaryResourceType.LATEST)
         else:
             summary = client.summarize_for_subscription_level_policy_assignment(
-                subscription_id,
-                policy_assignment_name,
-                query_options)
+                subscription_id=subscription_id,
+                policy_assignment_name=policy_assignment_name,
+                query_options=query_options,
+                policy_states_summary_resource=PolicyStatesSummaryResourceType.LATEST)
     elif policy_definition_name:
         summary = client.summarize_for_policy_definition(
-            subscription_id,
-            policy_definition_name,
-            query_options)
+            subscription_id=subscription_id,
+            policy_definition_name=policy_definition_name,
+            query_options=query_options,
+            policy_states_summary_resource=PolicyStatesSummaryResourceType.LATEST)
     elif policy_set_definition_name:
         summary = client.summarize_for_policy_set_definition(
-            subscription_id,
-            policy_set_definition_name,
-            query_options)
+            subscription_id=subscription_id,
+            policy_set_definition_name=policy_set_definition_name,
+            query_options=query_options,
+            policy_states_summary_resource=PolicyStatesSummaryResourceType.LATEST)
     elif resource:
         resource = _build_resource_id(
             subscription_id,
@@ -256,21 +271,25 @@ def summarize_policy_states(
             resource_type_parent,
             resource_type)
         summary = client.summarize_for_resource(
-            resource,
-            query_options)
+            resource_id=resource,
+            query_options=query_options,
+            policy_states_summary_resource=PolicyStatesSummaryResourceType.LATEST)
     elif resource_group_name:
         summary = client.summarize_for_resource_group(
-            subscription_id,
-            resource_group_name,
-            query_options)
+            subscription_id=subscription_id,
+            resource_group_name=resource_group_name,
+            query_options=query_options,
+            policy_states_summary_resource=PolicyStatesSummaryResourceType.LATEST)
     elif management_group_name:
         summary = client.summarize_for_management_group(
-            management_group_name,
-            query_options)
+            management_group_name=management_group_name,
+            query_options=query_options,
+            policy_states_summary_resource=PolicyStatesSummaryResourceType.LATEST)
     else:
         summary = client.summarize_for_subscription(
-            subscription_id,
-            query_options)
+            subscription_id=subscription_id,
+            query_options=query_options,
+            policy_states_summary_resource=PolicyStatesSummaryResourceType.LATEST)
 
     return summary.value[0]
 
@@ -424,7 +443,7 @@ def create_policy_remediation(
         resource_discovery_mode=None):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
-    scope = _build_remediation_scope(
+    scope = _build_policy_object_scope(
         management_group_name,
         subscription_id,
         resource_group_name,
@@ -434,22 +453,12 @@ def create_policy_remediation(
         namespace)
 
     from azure.mgmt.policyinsights.models import Remediation
-    remediation = Remediation(policy_definition_reference_id=definition_reference_id)
+    remediation = Remediation(
+        policy_definition_reference_id=definition_reference_id)
 
     # Get the full resource ID of the referenced policy assignment
-    if (not is_valid_resource_id(policy_assignment) and
-            not policy_assignment.lower().startswith("/providers/microsoft.management/managementgroups/")):
-        from ._client_factory import cf_policy
-        policy_assignment_client = cf_policy(cmd.cli_ctx).policy_assignments
-        policy_assignments = policy_assignment_client.list()
-        policy_assignment_ids = [p.id for p in policy_assignments if p.name.lower() == policy_assignment.lower()]
-        if not policy_assignment_ids:
-            raise CLIError("No policy assignment with the name '{}' found.".format(policy_assignment))
-        if len(policy_assignment_ids) > 1:
-            raise CLIError("Multiple policy assignment with the name '{}' found. "
-                           "Specify the policy assignment ID.".format(policy_assignment))
-        policy_assignment = policy_assignment_ids[0]
-    remediation.policy_assignment_id = policy_assignment
+    remediation.policy_assignment_id = _get_policy_assignment_id(
+        cmd, policy_assignment=policy_assignment)
 
     # Ensure locations in the location filters are using their short name
     if location_filters:
@@ -483,10 +492,181 @@ def list_policy_metadata(cmd, client, top_value=None):   # pylint: disable=unuse
                 results += list(next(page_iter))
             except StopIteration:
                 break
-
         return results[:top_value]
-
     return list(client.list())
+
+# pylint: disable=no-else-return
+
+
+def create_policy_attestation(
+        cmd,
+        attestation_name,
+        policy_assignment_id,
+        assessment_date=None,
+        comments=None,
+        compliance_state=None,
+        evidence=None,
+        expires_on=None,
+        metadata=None,
+        owner=None,
+        definition_reference_id=None,
+        namespace=None,
+        resource=None,
+        resource_group_name=None,
+        resource_type_parent=None,
+        resource_type=None):
+
+    policy_assignment_id = _get_policy_assignment_id(
+        cmd, policy_assignment=policy_assignment_id)
+    attestation_args = {
+        "attestation_name": attestation_name,
+        "policy_assignment_id": policy_assignment_id,
+        "assessment_date": assessment_date,
+        "comments": comments,
+        "compliance_state": compliance_state,
+        "evidence": evidence,
+        "expires_on": expires_on,
+        "metadata": metadata,
+        "owner": owner,
+        "policy_definition_reference_id": definition_reference_id
+    }
+    from .aaz.latest.policy_insights.attestation import Create, CreateByRg, CreateBySubscription
+
+    if resource:
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+        scope = _build_policy_object_scope(
+            subscription=subscription_id,
+            resource_group_name=resource_group_name,
+            resource=resource,
+            resource_type_parent=resource_type_parent,
+            resource_type=resource_type,
+            namespace=namespace)
+        attestation_args["resource_id"] = scope
+        return Create(cli_ctx=cmd.cli_ctx)(command_args=attestation_args)
+    elif resource_group_name:
+        attestation_args["resource_group"] = resource_group_name
+        return CreateByRg(cli_ctx=cmd.cli_ctx)(command_args=attestation_args)
+    else:
+        return CreateBySubscription(cli_ctx=cmd.cli_ctx)(command_args=attestation_args)
+
+# pylint: disable=no-else-return
+
+
+def update_policy_attestation(
+        cmd,
+        attestation_name,
+        policy_assignment_id=None,
+        assessment_date=None,
+        comments=None,
+        compliance_state=None,
+        evidence=None,
+        expires_on=None,
+        metadata=None,
+        owner=None,
+        definition_reference_id=None,
+        namespace=None,
+        resource=None,
+        resource_group_name=None,
+        resource_type_parent=None,
+        resource_type=None):
+
+    attestation_args = {
+        "attestation_name": attestation_name,
+        "policy_assignment_id": policy_assignment_id,
+        "assessment_date": assessment_date,
+        "comments": comments,
+        "compliance_state": compliance_state,
+        "evidence": evidence,
+        "expires_on": expires_on,
+        "metadata": metadata,
+        "owner": owner,
+        "policy_definition_reference_id": definition_reference_id
+    }
+    from .aaz.latest.policy_insights.attestation import Update, UpdateByRg, UpdateBySubscription
+
+    if resource:
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+        scope = _build_policy_object_scope(
+            subscription=subscription_id,
+            resource_group_name=resource_group_name,
+            resource=resource,
+            resource_type_parent=resource_type_parent,
+            resource_type=resource_type,
+            namespace=namespace)
+        attestation_args["resource_id"] = scope
+        return Update(cli_ctx=cmd.cli_ctx)(command_args=attestation_args)
+    elif resource_group_name:
+        attestation_args["resource_group"] = resource_group_name
+        return UpdateByRg(cli_ctx=cmd.cli_ctx)(command_args=attestation_args)
+    else:
+        return UpdateBySubscription(cli_ctx=cmd.cli_ctx)(command_args=attestation_args)
+
+# pylint: disable=no-else-return
+
+
+def delete_policy_attestation(
+    cmd,
+    attestation_name,
+    namespace=None,
+    resource=None,
+    resource_group_name=None,
+    resource_type_parent=None,
+    resource_type=None
+):
+
+    attestation_args = {
+        "attestation_name": attestation_name,
+    }
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+
+    from .aaz.latest.policy_insights.attestation import Delete, DeleteByRg, DeleteBySubscription
+    if resource:
+        scope = _build_policy_object_scope(
+            subscription=subscription_id,
+            resource_group_name=resource_group_name,
+            resource=resource,
+            resource_type_parent=resource_type_parent,
+            resource_type=resource_type,
+            namespace=namespace)
+        attestation_args["resource_id"] = scope
+        return Delete(cli_ctx=cmd.cli_ctx)(command_args=attestation_args)
+    elif resource_group_name:
+        attestation_args["resource_group"] = resource_group_name
+        return DeleteByRg(cli_ctx=cmd.cli_ctx)(command_args=attestation_args)
+    else:
+        return DeleteBySubscription(cli_ctx=cmd.cli_ctx)(command_args=attestation_args)
+
+
+def show_policy_attestation(
+    cmd,
+    attestation_name,
+    namespace=None,
+    resource=None,
+    resource_group_name=None,
+    resource_type_parent=None,
+    resource_type=None
+):
+    attestation_args = {
+        "attestation_name": attestation_name,
+    }
+    from .aaz.latest.policy_insights.attestation import Show, ShowByRg, ShowBySubscription
+    if resource:
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+        scope = _build_policy_object_scope(
+            subscription=subscription_id,
+            resource_group_name=resource_group_name,
+            resource=resource,
+            resource_type_parent=resource_type_parent,
+            resource_type=resource_type,
+            namespace=namespace)
+        attestation_args["resource_id"] = scope
+        return Show(cli_ctx=cmd.cli_ctx)(command_args=attestation_args)
+    elif resource_group_name:
+        attestation_args["resource_group"] = resource_group_name
+        return ShowByRg(cli_ctx=cmd.cli_ctx)(command_args=attestation_args)
+    else:
+        return ShowBySubscription(cli_ctx=cmd.cli_ctx)(command_args=attestation_args)
 
 
 def _execute_remediation_operation(
@@ -502,7 +682,7 @@ def _execute_remediation_operation(
         remediation_name=None):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
-    scope = _build_remediation_scope(
+    scope = _build_policy_object_scope(
         management_group_name,
         subscription_id,
         resource_group_name,
@@ -527,7 +707,8 @@ def _build_resource_id(
 
     if not is_valid_resource_id(resource):
         if resource_type_parent:
-            resource_type_parent = _remove_leading_and_trailing_slash(resource_type_parent)
+            resource_type_parent = _remove_leading_and_trailing_slash(
+                resource_type_parent)
             resource_type = "{}/{}".format(resource_type_parent, resource_type)
 
         resource = resource_id(
@@ -540,7 +721,7 @@ def _build_resource_id(
     return resource
 
 
-def _build_remediation_scope(
+def _build_policy_object_scope(
         management_group=None,
         subscription=None,
         resource_group_name=None,
@@ -565,3 +746,22 @@ def _remove_leading_and_trailing_slash(s):
             s = s[:-1]
 
     return s
+
+
+def _get_policy_assignment_id(cmd, policy_assignment):
+    # Get the full resource ID of the referenced policy assignment
+    if (not is_valid_resource_id(policy_assignment) and
+            not policy_assignment.lower().startswith("/providers/microsoft.management/managementgroups/")):
+        from ._client_factory import cf_policy
+        policy_assignment_client = cf_policy(cmd.cli_ctx).policy_assignments
+        policy_assignments = policy_assignment_client.list()
+        policy_assignment_ids = [
+            p.id for p in policy_assignments if p.name.lower() == policy_assignment.lower()]
+        if not policy_assignment_ids:
+            raise ResourceNotFoundError(
+                "No policy assignment with the name '{}' found.".format(policy_assignment))
+        if len(policy_assignment_ids) > 1:
+            raise ArgumentUsageError("Multiple policy assignment with the name '{}' found. "
+                                     "Specify the policy assignment ID.".format(policy_assignment))
+        return policy_assignment_ids[0]
+    return policy_assignment

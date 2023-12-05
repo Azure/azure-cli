@@ -7,7 +7,7 @@
 from azure.cli.core.commands.transform import build_table_output
 
 
-def transform_secret_list(result):
+def transform_secret_list_table(result):
     return build_table_output(result, [
         ('Name', 'name'),
         ('Id', 'id'),

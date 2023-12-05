@@ -4,6 +4,7 @@
 # license information.
 # --------------------------------------------------------------------------
 
+import unittest
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.testsdk import (
     ScenarioTest,
@@ -35,14 +36,14 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'config_store': 'servicelinker-app-configuration'
         })
 
-        # prepare params
+        # prepare params        
         name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.AppConfig).format(**self.kwargs)
 
         # create connection
         self.cmd('webapp connection create appconfig --connection {} --source-id {} --target-id {} '
-                 '--system-identity --client-type python'.format(name, source_id, target_id))
+                 '--system-identity --client-type python --customized-keys AZURE_APPCONFIGURATION_ENDPOINT=test_endpoint'.format(name, source_id, target_id))
 
         # list connection
         connections = self.cmd(
@@ -60,8 +61,9 @@ class WebAppConnectionScenarioTest(ScenarioTest):
                  checks = [ self.check('clientType', 'dotnet') ])
 
         # list configuration
-        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
-
+        configs = self.cmd('webapp connection list-configuration --id {}'.format(connection_id)).get_output_in_json()
+        self.assertTrue(any(x.get('name') == 'test_endpoint' for x in configs.get('configurations')))
+        
         # validate connection
         self.cmd('webapp connection validate --id {}'.format(connection_id))
 
@@ -79,7 +81,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'source_resource_group': 'servicelinker-test-win-group',
             'target_resource_group': 'servicelinker-test-win-group',
             'site': 'servicelinker-cassandra-cosmos-asp-app',
-            'account': 'servicelinker-cassandra-cosmos',
+            'account': 'servicelinker-cassandra-cosmos1',
             'key_space': 'coredb'
         })
 
@@ -215,7 +217,6 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
         # delete connection
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
-
 
     @record_only()
     def test_webapp_cosmossql_e2e(self):
@@ -556,7 +557,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'target_resource_group': 'servicelinker-test-linux-group',
             'site': 'servicelinker-flexiblepostgresql-app',
             'server': 'servicelinker-flexiblepostgresql',
-            'database': 'test'
+            'database': 'testdb'
         })
 
         # prepare password
@@ -751,8 +752,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
-
-    # @record_only()
+    @record_only()
     def test_webapp_mysqlflexible_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -768,7 +768,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         password = self.cmd('keyvault secret show --vault-name cupertino-kv-test -n TestDbPassword')\
             .get_output_in_json().get('value')
         keyvaultUri = "https://cupertino-kv-test.vault.azure.net/secrets/TestDbPassword"
-        
+
         # prepare params
         name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
@@ -815,7 +815,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'target_resource_group': 'servicelinker-test-linux-group',
             'site': 'servicelinker-postgresql-app',
             'server': 'servicelinker-postgresql',
-            'database': 'test'
+            'database': 'testdb'
         })
 
         # prepare password
@@ -910,6 +910,51 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
         # show connection
         self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    @record_only()
+    def test_webapp_sql_connection_string(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'site': 'servicelinker-sql-app',
+            'server': 'servicelinker-sql',
+            'database': 'handler-test'
+        })
+
+        # prepare password
+        user = 'servicelinker'
+        password = self.cmd('keyvault secret show --vault-name cupertino-kv-test -n TestDbPassword')\
+            .get_output_in_json().get('value')
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.Sql).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create sql --connection {} --source-id {} --target-id {} --secret name={} secret={} '
+                 '--client-type dotnet --config-connstr'.format(name, source_id, target_id, user, password))
+
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'secret'),
+                self.check('[0].clientType', 'dotnet-connectionString')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update sql --id {} --client-type dotnet --config-connstr '
+                 '--secret name={} secret={}'.format(connection_id, user, password),
+                 checks = [ self.check('clientType', 'dotnet-connectionString') ])
 
         # delete connection
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
@@ -1309,12 +1354,12 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
         # update connection
         self.cmd('webapp connection update confluent-cloud --connection {} '
-                 '--source-id {} --client-type dotnet --kafka-secret Secret'.format(name, source_id),
+                 '--source-id {} --client-type dotnet --kafka-secret Secret --customized-keys CONFLUENTCLOUD_KAFKA_BOOTSTRAPSERVER=test_server'.format(name, source_id),
                  checks = [ self.check('clientType', 'dotnet') ])
 
         # list configuration
-        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
-
+        configs = self.cmd('webapp connection list-configuration --id {}'.format(connection_id)).get_output_in_json()
+        self.assertTrue(any(x.get('name') == 'test_server' for x in configs.get('configurations')))
         # validate connection
         self.cmd('webapp connection validate --id {}'.format(connection_id))
 
@@ -1383,3 +1428,51 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
         for conn in self.cmd('webapp connection list --source-id {}'.format(source_id)).get_output_in_json():
             self.cmd('webapp connection delete --id {} --yes'.format(conn.get('id')))
+
+    @record_only()
+    def test_webappslot_storageblob_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'site': 'servicelinker-storageblob-app',
+            'slot': 'slot1',
+            'account': 'servicelinkerstorage'
+        })
+
+        # prepare params
+        webAppSlotResourceIdFormat = '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.Web/sites/{site}/slots/{slot}'
+        name = 'testconnslot1'
+        source_id = webAppSlotResourceIdFormat.format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.StorageBlob).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create storage-blob --connection {} --source-id {} --target-id {} '
+                 '--system-identity --client-type python'.format(name, source_id, target_id))
+
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
+                self.check('[0].clientType', 'python')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update storage-blob --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ self.check('clientType', 'dotnet') ])
+
+        # list configuration
+        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('webapp connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))

@@ -13,6 +13,7 @@ from ipaddress import ip_network
 
 from enum import Enum
 from knack.deprecation import Deprecated
+from knack.log import get_logger
 from knack.util import CLIError
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -21,9 +22,68 @@ from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgum
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
+logger = get_logger(__name__)
 
 secret_text_encoding_values = ['utf-8', 'utf-16le', 'utf-16be', 'ascii']
 secret_binary_encoding_values = ['base64', 'hex']
+default_cvm_policy_url = "https://raw.githubusercontent.com/Azure/confidential-computing-cvm/main/cvm_deployment/key/skr-policy.json"  # pylint: disable=line-too-long
+fallback_cvm_policy = {
+    'version': '1.0.0',
+    'anyOf': [
+        {
+            'authority': 'https://sharedeus.eus.attest.azure.net/',
+            'allOf': [
+                {
+                    'claim': 'x-ms-attestation-type',
+                    'equals': 'sevsnpvm'
+                },
+                {
+                    'claim': 'x-ms-compliance-status',
+                    'equals': 'azure-compliant-cvm'
+                }
+            ]
+        },
+        {
+            'authority': 'https://sharedwus.wus.attest.azure.net/',
+            'allOf': [
+                {
+                    'claim': 'x-ms-attestation-type',
+                    'equals': 'sevsnpvm'
+                },
+                {
+                    'claim': 'x-ms-compliance-status',
+                    'equals': 'azure-compliant-cvm'
+                }
+            ]
+        },
+        {
+            'authority': 'https://sharedneu.neu.attest.azure.net/',
+            'allOf': [
+                {
+                    'claim': 'x-ms-attestation-type',
+                    'equals': 'sevsnpvm'
+                },
+                {
+                    'claim': 'x-ms-compliance-status',
+                    'equals': 'azure-compliant-cvm'
+                }
+            ]
+        },
+        {
+            'authority': 'https://sharedweu.weu.attest.azure.net/',
+            'allOf': [
+                {
+                    'claim': 'x-ms-attestation-type',
+                    'equals': 'sevsnpvm'
+                },
+                {
+                    'claim': 'x-ms-compliance-status',
+                    'equals': 'azure-compliant-cvm'
+                }
+            ]
+        }
+    ]
+}
 
 
 class KeyEncryptionDataType(str, Enum):
@@ -47,7 +107,7 @@ def _get_resource_group_from_resource_name(cli_ctx, vault_name, hsm_name=None):
 
     if vault_name:
         client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
-        for vault in client.list():
+        for vault in client.list(filter=f"resourceType eq 'Microsoft.KeyVault/vaults' and name eq '{vault_name}'"):
             id_comps = parse_resource_id(vault.id)
             if id_comps.get('name', None) and id_comps['name'].lower() == vault_name.lower():
                 return id_comps['resource_group']
@@ -66,13 +126,7 @@ def _get_resource_group_from_resource_name(cli_ctx, vault_name, hsm_name=None):
 
 
 # COMMAND NAMESPACE VALIDATORS
-
-
-def process_certificate_cancel_namespace(namespace):
-    namespace.cancellation_requested = True
-
-
-def process_secret_set_namespace(cmd, namespace):
+def process_secret_set_namespace(namespace):
     validate_tags(namespace)
 
     content = namespace.value
@@ -85,14 +139,10 @@ def process_secret_set_namespace(cmd, namespace):
     if (content and file_path) or (not content and not file_path):
         raise use_error
 
-    SecretAttributes = cmd.get_models('SecretAttributes', resource_type=ResourceType.DATA_KEYVAULT)
-    namespace.secret_attributes = SecretAttributes()
-    if namespace.expires:
-        namespace.secret_attributes.expires = namespace.expires
-    if namespace.disabled:
-        namespace.secret_attributes.enabled = not namespace.disabled
-    if namespace.not_before:
-        namespace.secret_attributes.not_before = namespace.not_before
+    namespace.enabled = not namespace.disabled if namespace.disabled is not None else None
+    del namespace.file_path
+    del namespace.encoding
+    del namespace.disabled
 
     encoding = encoding or 'utf-8'
     if file_path:
@@ -156,6 +206,18 @@ def validate_vault_name_and_hsm_name(ns):
 # PARAMETER NAMESPACE VALIDATORS
 
 
+def validate_retention_days_on_creation(ns):
+    # If customer has specified retention days, nothing to do
+    if ns.retention_days:
+        return
+    # If customer has not specified retention days,
+    # ask for mandatory retention days for MHSM creation, else set to default '90' for keyvault creation
+    if getattr(ns, 'hsm_name', None):
+        raise RequiredArgumentMissingError("--retention-days is required for MHSM creation.")
+    if getattr(ns, 'vault_name', None):
+        ns.retention_days = '90'
+
+
 def get_attribute_validator(name, attribute_class, create=False):
     def validator(ns):
         ns_dict = ns.__dict__
@@ -209,6 +271,18 @@ def validate_key_type(ns):
     setattr(ns, 'kty', kty)
 
 
+def _fetch_default_cvm_policy():
+    try:
+        import requests
+        import json
+        policy = requests.get(default_cvm_policy_url)
+        return json.loads(policy.content)
+    except Exception:  # pylint: disable=broad-except
+        logger.debug("Fail to fetch default cvm policy from %s,use local cvm policy as fallback",
+                     default_cvm_policy_url)
+    return fallback_cvm_policy
+
+
 def process_key_release_policy(cmd, ns):
     default_cvm_policy = None
     if hasattr(ns, 'default_cvm_policy'):
@@ -232,63 +306,7 @@ def process_key_release_policy(cmd, ns):
     KeyReleasePolicy = cmd.loader.get_sdk('KeyReleasePolicy', mod='_models',
                                           resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     if default_cvm_policy:
-        policy = {
-            'version': '1.0.0',
-            'anyOf': [
-                {
-                    'authority': 'https://sharedeus.eus.attest.azure.net/',
-                    'allOf': [
-                        {
-                            'claim': 'x-ms-attestation-type',
-                            'equals': 'sevsnpvm'
-                        },
-                        {
-                            'claim': 'x-ms-compliance-status',
-                            'equals': 'azure-compliant-cvm'
-                        }
-                    ]
-                },
-                {
-                    'authority': 'https://sharedwus.wus.attest.azure.net/',
-                    'allOf': [
-                        {
-                            'claim': 'x-ms-attestation-type',
-                            'equals': 'sevsnpvm'
-                        },
-                        {
-                            'claim': 'x-ms-compliance-status',
-                            'equals': 'azure-compliant-cvm'
-                        }
-                    ]
-                },
-                {
-                    'authority': 'https://sharedneu.neu.attest.azure.net/',
-                    'allOf': [
-                        {
-                            'claim': 'x-ms-attestation-type',
-                            'equals': 'sevsnpvm'
-                        },
-                        {
-                            'claim': 'x-ms-compliance-status',
-                            'equals': 'azure-compliant-cvm'
-                        }
-                    ]
-                },
-                {
-                    'authority': 'https://sharedweu.weu.attest.azure.net/',
-                    'allOf': [
-                        {
-                            'claim': 'x-ms-attestation-type',
-                            'equals': 'sevsnpvm'
-                        },
-                        {
-                            'claim': 'x-ms-compliance-status',
-                            'equals': 'azure-compliant-cvm'
-                        }
-                    ]
-                }
-            ]
-        }
+        policy = _fetch_default_cvm_policy()
         ns.release_policy = KeyReleasePolicy(encoded_policy=json.dumps(policy).encode('utf-8'),
                                              immutable=immutable)
         return
@@ -355,7 +373,7 @@ def validate_resource_group_name(cmd, ns):
 
     vault_name = getattr(ns, 'vault_name', None)
     hsm_name = getattr(ns, 'hsm_name', None)
-    if 'keyvault update-hsm' in cmd.name:
+    if 'keyvault update-hsm' in cmd.name or 'keyvault region' in cmd.name:
         hsm_name = getattr(ns, 'name', None)
 
     if vault_name and hsm_name:
@@ -613,7 +631,7 @@ def set_vault_base_url(ns):
 
 def validate_key_id(entity_type):
     def _validate(ns):
-        from azure.keyvault.key_vault_id import KeyVaultIdentifier
+        from .vendored_sdks.azure_keyvault_t1.key_vault_id import KeyVaultIdentifier
 
         pure_entity_type = entity_type.replace('deleted', '')
         name = getattr(ns, pure_entity_type + '_name', None)
@@ -644,7 +662,7 @@ def validate_key_id(entity_type):
 
 def validate_keyvault_resource_id(entity_type):
     def _validate(ns):
-        from azure.keyvault.key_vault_id import KeyVaultIdentifier
+        from azure.keyvault.keys._shared import parse_key_vault_id
 
         pure_entity_type = entity_type.replace('deleted', '')
         name = getattr(ns, pure_entity_type + '_name', None) or getattr(ns, 'name', None)
@@ -661,56 +679,20 @@ def validate_keyvault_resource_id(entity_type):
             if hsm_name:
                 raise CLIError('--hsm-name and --id are mutually exclusive.')
 
-            ident = KeyVaultIdentifier(uri=identifier, collection=entity_type + 's')
+            kv_resource_id = parse_key_vault_id(identifier)
             if getattr(ns, 'command', None) and 'key rotation-policy' in ns.command:
-                setattr(ns, 'key_name', ident.name)
+                setattr(ns, 'key_name', kv_resource_id.name)
+            elif getattr(ns, 'command', None) and 'certificate' in ns.command:
+                setattr(ns, 'certificate_name', kv_resource_id.name)
             else:
-                setattr(ns, 'name', ident.name)
-            setattr(ns, 'vault_base_url', ident.vault)
-            if ident.version and (hasattr(ns, pure_entity_type + '_version') or hasattr(ns, 'version')):
-                setattr(ns, 'version', ident.version)
+                setattr(ns, 'name', kv_resource_id.name)
+            setattr(ns, 'vault_base_url', kv_resource_id.vault_url)
+            if kv_resource_id.version and (hasattr(ns, pure_entity_type + '_version') or hasattr(ns, 'version')):
+                setattr(ns, 'version', kv_resource_id.version)
         elif not (name and vault):
             raise CLIError('incorrect usage: --id ID | --vault-name/--hsm-name VAULT/HSM '
                            '--name/-n NAME [--version VERSION]')
 
-    return _validate
-
-
-def validate_sas_definition_id(ns):
-    from azure.keyvault import StorageSasDefinitionId
-    acct_name = getattr(ns, 'storage_account_name', None)
-    sas_name = getattr(ns, 'sas_definition_name', None)
-    vault = getattr(ns, 'vault_base_url', None)
-    identifier = getattr(ns, 'identifier', None)
-
-    if identifier:
-        ident = StorageSasDefinitionId(uri=identifier)
-        setattr(ns, 'sas_definition_name', getattr(ident, 'sas_definition'))
-        setattr(ns, 'storage_account_name', getattr(ident, 'account_name'))
-        setattr(ns, 'vault_base_url', ident.vault)
-    elif not (acct_name and sas_name and vault):
-        raise CLIError('incorrect usage: --id ID | --vault-name VAULT --account-name --name NAME')
-
-
-def validate_storage_account_id(ns):
-    from azure.keyvault import StorageAccountId
-    acct_name = getattr(ns, 'storage_account_name', None)
-    vault = getattr(ns, 'vault_base_url', None)
-    identifier = getattr(ns, 'identifier', None)
-
-    if identifier:
-        ident = StorageAccountId(uri=identifier)
-        setattr(ns, 'storage_account_name', ident.name)
-        setattr(ns, 'vault_base_url', ident.vault)
-    elif not (acct_name and vault):
-        raise CLIError('incorrect usage: --id ID | --vault-name VAULT --name NAME')
-
-
-def validate_storage_disabled_attribute(attr_arg_name, attr_type):
-    def _validate(ns):
-        disabled = getattr(ns, 'disabled', None)
-        attr_arg = attr_type(enabled=(not disabled))
-        setattr(ns, attr_arg_name, attr_arg)
     return _validate
 
 
@@ -724,3 +706,100 @@ def validate_encryption(ns):
 
 def validate_decryption(ns):
     ns.value = base64.b64decode(ns.value)
+
+
+# pylint: disable=line-too-long, too-many-locals
+def process_certificate_policy(cmd, ns):
+    policy = getattr(ns, 'policy', None)
+    if policy is None:
+        return
+    CertificatePolicy = cmd.loader.get_sdk('CertificatePolicy', mod='_models',
+                                           resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES)
+    CertificateAttributes = cmd.loader.get_sdk('CertificateAttributes', mod='_generated_models',
+                                               resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES)
+    LifetimeAction = cmd.loader.get_sdk('LifetimeAction', mod='_models',
+                                        resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES)
+    if not isinstance(policy, dict):
+        raise CLIError('incorrect usage: policy should be an JSON encoded string '
+                       'or can use @{file} to load from a file(e.g.@my_policy.json).')
+
+    issuer_name = subject = exportable = key_type = key_size = reuse_key = key_curve_name = enhanced_key_usage \
+        = key_usage = content_type = validity_in_months = issuer_certificate_type = certificate_transparency = san_emails \
+        = san_dns_names = san_user_principal_names = None
+
+    attributes = policy.get('attributes')
+    if attributes:
+        attributes = CertificateAttributes(
+            enabled=attributes.get('enabled'),
+            not_before=attributes.get('not_before'),
+            expires=attributes.get('expires_on'),
+        )
+
+    issuer_parameters = policy.get('issuer_parameters')
+    if issuer_parameters:
+        issuer_name = issuer_parameters.get('name')
+        issuer_certificate_type = issuer_parameters.get('certificate_type')
+        certificate_transparency = issuer_parameters.get('certificate_transparency')
+
+    key_properties = policy.get('key_properties')
+    if key_properties:
+        exportable = key_properties.get('exportable')
+        key_type = key_properties.get('key_type')
+        key_size = key_properties.get('key_size')
+        reuse_key = key_properties.get('reuse_key')
+        key_curve_name = key_properties.get('curve')
+
+    lifetime_actions = policy.get('lifetime_actions')
+    if lifetime_actions:
+        lifetime_actions = [
+            LifetimeAction(
+                action=item['action'].get('action_type') if item.get('action') else None,
+                lifetime_percentage=item['trigger'].get('lifetime_percentage') if item.get('trigger') else None,
+                days_before_expiry=item['trigger'].get('days_before_expiry') if item.get('trigger') else None
+            )
+            for item in lifetime_actions]
+
+    secret_properties = policy.get('secret_properties')
+    if secret_properties:
+        content_type = secret_properties.get('content_type')
+
+    if not content_type and hasattr(ns, 'certificate_bytes') and ns.certificate_bytes:
+        from OpenSSL import crypto
+        try:
+            crypto.load_certificate(crypto.FILETYPE_PEM, ns.certificate_bytes)
+            # if we get here, we know it was a PEM file
+            content_type = 'application/x-pem-file'
+        except (ValueError, crypto.Error):
+            # else it should be a pfx file
+            content_type = 'application/x-pkcs12'
+
+    x509_certificate_properties = policy.get('x509_certificate_properties')
+    if x509_certificate_properties:
+        subject = x509_certificate_properties.get('subject')
+        enhanced_key_usage = x509_certificate_properties.get('ekus')
+        subject_alternative_names = x509_certificate_properties.get('subject_alternative_names')
+        if subject_alternative_names:
+            san_emails = subject_alternative_names.get('emails')
+            san_user_principal_names = subject_alternative_names.get('upns')
+            san_dns_names = subject_alternative_names.get('dns_names')
+        key_usage = x509_certificate_properties.get('key_usage')
+        validity_in_months = x509_certificate_properties.get('validity_in_months')
+
+    if hasattr(ns, 'validity'):
+        validity_in_months = ns.validity if ns.validity else validity_in_months
+        del ns.validity
+
+    policyObj = CertificatePolicy(issuer_name=issuer_name, subject=subject, attributes=attributes,
+                                  exportable=exportable, key_type=key_type, key_size=key_size, reuse_key=reuse_key,
+                                  key_curve_name=key_curve_name, enhanced_key_usage=enhanced_key_usage,
+                                  key_usage=key_usage, content_type=content_type, validity_in_months=validity_in_months,
+                                  lifetime_actions=lifetime_actions, certificate_type=issuer_certificate_type,
+                                  certificate_transparency=certificate_transparency, san_emails=san_emails,
+                                  san_dns_names=san_dns_names, san_user_principal_names=san_user_principal_names)
+    ns.policy = policyObj
+
+
+def process_certificate_import(ns):
+    if ns.disabled is not None:
+        ns.enabled = not ns.disabled
+    del ns.disabled

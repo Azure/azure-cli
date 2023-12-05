@@ -23,8 +23,9 @@ class IotHubCertificateTest(ScenarioTest):
         self.hub_name = 'iot-hub-for-cert-test'
         _create_test_cert(CERT_FILE, KEY_FILE, self.create_random_name(prefix='TESTCERT', length=24), 3, random.randint(0, MAX_INT))
 
-    def __del__(self):
+    def tearDown(self):
         _delete_test_cert(CERT_FILE, KEY_FILE, VERIFICATION_FILE)
+        super(IotHubCertificateTest, self).tearDown()
 
     @ResourceGroupPreparer()
     def test_certificate_lifecycle(self, resource_group):

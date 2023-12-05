@@ -97,7 +97,7 @@ def generate_sas_directory_uri(client, cmd, file_system_name, directory_name, pe
                                expiry=None, start=None, id=None, ip=None,  # pylint: disable=redefined-builtin
                                protocol=None, cache_control=None, content_disposition=None,
                                content_encoding=None, content_language=None,
-                               content_type=None, full_uri=False, as_user=False, ):
+                               content_type=None, full_uri=False, as_user=False, encryption_scope=None):
     from urllib.parse import quote
     generate_directory_sas = cmd.get_models('_shared_access_signature#generate_directory_sas')
 
@@ -114,7 +114,7 @@ def generate_sas_directory_uri(client, cmd, file_system_name, directory_name, pe
                                        ip=ip, protocol=protocol,
                                        cache_control=cache_control, content_disposition=content_disposition,
                                        content_encoding=content_encoding, content_language=content_language,
-                                       content_type=content_type, **sas_kwargs)
+                                       content_type=content_type, encryption_scope=encryption_scope, **sas_kwargs)
     sas_token = quote(sas_token, safe='&%()$=\',~')
     if full_uri:
         t_directory_client = cmd.get_models('_data_lake_directory_client#DataLakeDirectoryClient')

@@ -37,6 +37,9 @@ examples:
   - name: Create a SQL virtual machine with specific sku type and license type.
     text: >
         az sql vm create -n sqlvm -g myresourcegroup -l eastus --image-sku Enterprise --license-type AHUB
+  - name: Create a SQL virtual machine with least privilege mode enabled.
+    text: >
+        az sql vm create -n sqlvm -g myresourcegroup -l eastus --least-privilege-mode Enabled --sql-mgmt-type Full
   - name: Create a SQL virtual machine with NoAgent type, only valid for EOS SQL 2008 and SQL 2008 R2.
     text: >
         az sql vm create -n sqlvm -g myresourcegroup -l eastus --license-type AHUB --sql-mgmt-type NoAgent --image-sku Enterprise --image-offer SQL2008-WS2008R2
@@ -92,6 +95,9 @@ examples:
   - name: Create a SQL virtual machine group for SQL2016-WS2016 Enterprise virtual machines.
     text: >
         az sql vm group create -n sqlvmgroup -l eastus -g myresourcegroup --image-offer SQL2016-WS2016 --image-sku Enterprise --domain-fqdn Domain.com --operator-acc testop --service-acc testservice --sa-key {PublicKey} --storage-account 'https://storacc.blob.core.windows.net/'
+  - name: Create a SQL virtual machine group for SQL2019-WS2022 Enterprise virtual machines with MultiSubnet.
+    text: >
+        az sql vm group create -n sqlvmgroup -l eastus -g myresourcegroup --image-offer SQL2019-WS2022 --image-sku Enterprise --cluster-subnet-type MultiSubnet --domain-fqdn Domain.com --operator-acc testop --service-acc testservice --sa-key {PublicKey} --storage-account 'https://storacc.blob.core.windows.net/'
 """
 
 helps['sql vm group update'] = """
@@ -139,7 +145,10 @@ examples:
         az sql vm update -n sqlvm -g myresourcegroup --image-sku Enterprise
   - name: Update a SQL virtual machine manageability from LightWeight to Full.
     text: >
-        az sql vm update -n sqlvm -g myresourcegroup --sql-mgmt-type Full --yes
+        az sql vm update -n sqlvm -g myresourcegroup --sql-mgmt-type Full
+  - name: Update a SQL virtual machine to least privilege mode.
+    text: >
+        az sql vm update -n sqlvm -g myresourcegroup --least-privilege-mode Enabled --sql-mgmt-type Full
   - name: Update SQL virtual machine auto backup settings.
     text: >
         az sql vm update -n sqlvm -g myresourcegroup --backup-schedule-type manual --full-backup-frequency Weekly --full-backup-start-hour 2 --full-backup-duration 2 --sa-key {storageKey} --storage-account 'https://storageacc.blob.core.windows.net/' --retention-period 30 --log-backup-frequency 60
@@ -167,10 +176,43 @@ examples:
   - name: Update a SQL virtual machine to enable schedule with weekly interval for SQL best practice assessment when VM is already associated with a Log Analytics workspace.
     text: >
         az sql vm update -n sqlvm -g myresourcegroup --assessment-weekly-interval 1 --assessment-day-of-week monday --assessment-start-time-local '19:30'
-  - name: Update a SQL virtual machine to enable schedule with monthly occurrence for SQL best practice assessment while associating with a Log Analytics workspace.
+  - name: Update a SQL virtual machine to enable schedule with monthly occurrence for SQL best practice assessment while associating with a Log Analytics workspace and assigning a Resource group for the Agent resources.
     text: >
-        az sql vm update -n sqlvm -g myresourcegroup --workspace-name myLogAnalyticsWorkspace --workspace-rg myRg --assessment-monthly-occurrence 1 --assessment-day-of-week monday --assessment-start-time-local '19:30'
-  - name: Update a SQL virtual machine to enable SQL best practices assessment without setting a schedule for running assessment on-demand
+        az sql vm update -n sqlvm -g myresourcegroup --workspace-name myLogAnalyticsWorkspace --workspace-rg myRg --agent-rg myRg2 --assessment-monthly-occurrence 1 --assessment-day-of-week monday --assessment-start-time-local '19:30'
+  - name: Update a SQL virtual machine to enable SQL best practices assessment without setting a schedule for running assessment on-demand. Must provide Log Analytics workspace and a Resource group for deploying the Agent resources.
     text: >
-        az sql vm update -n sqlvm -g myresourcegroup --enable-assessment true
+        az sql vm update -n sqlvm -g myresourcegroup --enable-assessment true --workspace-name myLogAnalyticsWorkspace --workspace-rg myRg --agent-rg myRg2
+  - name: Update a SQL virtual machine to enable SQL best practices assessment while associating with a Log Analytics Workspace in a different subscription
+    text: >
+        az sql vm update -n sqlvm -g myresourcegroup --enable-assessment true --workspace-name myLogAnalyticsWorkspace --workspace-rg myRg --workspace-sub myLogAnalyticsWorkspaceSubName --agent-rg myRg2
+"""
+
+helps['sql vm enable-azure-ad-auth'] = """
+type: command
+short-summary: Enable Azure AD authentication of a SQL virtual machine.
+examples:
+  - name: Enable Azure AD authentication with system-assigned managed identity with client side validation.
+    text: >
+        az sql vm enable-azure-ad-auth -n sqlvm -g myresourcegroup
+  - name: Enable Azure AD authentication with user-assigned managed identity with client side validation.
+    text: >
+        az sql vm enable-azure-ad-auth -n sqlvm -g myresourcegroup --msi-client-id 12345678
+  - name: Enable Azure AD authentication with system-assigned managed identity skipping client side validation. The server side validation always happens.
+    text: >
+        az sql vm enable-azure-ad-auth -n sqlvm -g myresourcegroup --skip-client-validation
+  - name: Enable Azure AD authentication with user-assigned managed identity skipping client side validation. The server side validation always happens.
+    text: >
+        az sql vm enable-azure-ad-auth -n sqlvm -g myresourcegroup --msi-client-id 12345678 --skip-client-validation
+"""
+
+helps['sql vm validate-azure-ad-auth'] = """
+type: command
+short-summary: Validate Azure AD authentication of a SQL virtual machine at the client side without enabling it.
+examples:
+  - name: Validate Azure AD authentication with system-assigned managed identity at the client side.
+    text: >
+        az sql vm validate-azure-ad-auth -n sqlvm -g myresourcegroup
+  - name: Validate Azure AD authentication with user-assigned managed identity at the client side.
+    text: >
+        az sql vm validate-azure-ad-auth -n sqlvm -g myresourcegroup --msi-client-id 12345678
 """

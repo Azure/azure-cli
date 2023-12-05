@@ -58,12 +58,6 @@ def storage_client_factory(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_STORAGE)
 
 
-def network_client_factory(cli_ctx, **_):
-    from azure.cli.core.profiles import ResourceType
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK)
-
-
 # Managed clusters
 
 def servicefabric_managed_client_factory(cli_ctx, **_):

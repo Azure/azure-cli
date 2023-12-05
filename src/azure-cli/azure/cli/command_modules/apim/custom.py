@@ -21,6 +21,8 @@ except ImportError:
 
 import uuid
 import re
+from urllib.parse import urlparse
+
 from azure.cli.command_modules.apim._params import ImportFormat
 from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.azclierror import (RequiredArgumentMissingError, MutuallyExclusiveArgumentError,
@@ -35,7 +37,7 @@ from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiMa
                                              OpenIdAuthenticationSettingsContract, ProductContract, ProductState,
                                              NamedValueCreateContract, VersioningScheme, ApiVersionSetContract,
                                              OperationContract, ApiManagementServiceCheckNameAvailabilityParameters,
-                                             ApiReleaseContract, SchemaContract)
+                                             ApiReleaseContract, SchemaContract, ResolverContract, PolicyContract)
 
 
 # Helpers
@@ -72,7 +74,8 @@ def _get_subscription_key_parameter_names(subscription_key_query_param_name=None
 
 def apim_create(client, resource_group_name, name, publisher_email, sku_name=SkuType.developer.value,
                 sku_capacity=1, virtual_network_type=VirtualNetworkType.none.value, enable_managed_identity=False,
-                enable_client_certificate=None, publisher_name=None, location=None, tags=None, no_wait=False):
+                public_network_access=None, disable_gateway=None, enable_client_certificate=None,
+                publisher_name=None, location=None, tags=None, no_wait=False):
 
     parameters = ApiManagementServiceResource(
         location=location,
@@ -83,11 +86,14 @@ def apim_create(client, resource_group_name, name, publisher_email, sku_name=Sku
             name=sku_name, capacity=sku_capacity),
         enable_client_certificate=enable_client_certificate,
         virtual_network_type=VirtualNetworkType(virtual_network_type),
+        public_network_access=public_network_access,
+        disable_gateway=disable_gateway,
         tags=tags
     )
 
     if enable_managed_identity:
-        parameters.identity = ApiManagementServiceIdentity(type="SystemAssigned")
+        parameters.identity = ApiManagementServiceIdentity(
+            type="SystemAssigned")
 
     if parameters.sku.name == SkuType.consumption.value:
         parameters.sku.capacity = 0
@@ -99,7 +105,8 @@ def apim_create(client, resource_group_name, name, publisher_email, sku_name=Sku
 
 def apim_update(instance, publisher_email=None, sku_name=None, sku_capacity=None,
                 virtual_network_type=None, publisher_name=None, enable_managed_identity=None,
-                enable_client_certificate=None, tags=None):
+                public_network_access=None, disable_gateway=None, enable_client_certificate=None,
+                tags=None):
 
     if publisher_email is not None:
         instance.publisher_email = publisher_email
@@ -131,6 +138,15 @@ def apim_update(instance, publisher_email=None, sku_name=None, sku_capacity=None
 
     if tags is not None:
         instance.tags = tags
+
+    if public_network_access is not None:
+        if public_network_access:
+            instance.public_network_access = "Enabled"
+        else:
+            instance.public_network_access = "Disabled"
+
+    if disable_gateway is not None:
+        instance.disable_gateway = disable_gateway
 
     return instance
 
@@ -269,7 +285,7 @@ def apim_api_create(client, resource_group_name, service_name, api_id, descripti
                     api_type=None, subscription_required=False, no_wait=False):
     """Creates a new API. """
 
-    if authorization_server_id is not None and authorization_scope is not None:
+    if authorization_server_id is not None:
         o_auth2 = OAuth2AuthenticationSettingsContract(
             authorization_server_id=authorization_server_id,
             scope=authorization_scope
@@ -290,6 +306,19 @@ def apim_api_create(client, resource_group_name, service_name, api_id, descripti
     else:
         authentication_settings = None
 
+    parsed_url = urlparse(service_url)
+    if protocols is None:
+        if parsed_url.scheme in (Protocol.WS.value, Protocol.WSS.value):
+            protocols = [Protocol.WSS.value]
+        else:
+            protocols = [Protocol.HTTPS.value]
+
+    if api_type is None:
+        if parsed_url.scheme in (Protocol.WS.value, Protocol.WSS.value):
+            api_type = ApiType.WEBSOCKET.value
+        else:
+            api_type = ApiType.HTTP.value
+
     parameters = ApiContract(
         api_id=api_id,
         description=description,
@@ -299,10 +328,9 @@ def apim_api_create(client, resource_group_name, service_name, api_id, descripti
             subscription_key_header_name),
         display_name=display_name,
         service_url=service_url,
-        protocols=protocols if protocols is not None else [
-            Protocol.https.value],
+        protocols=protocols,
         path=path,
-        api_type=api_type if api_type is not None else ApiType.http.value,
+        api_type=api_type,
         subscription_required=subscription_required
     )
 
@@ -450,6 +478,10 @@ def apim_api_import(
         ImportFormat.Wsdl.value: {
             True: ContentFormat.WSDL.value,
             False: ContentFormat.WSDL_LINK.value
+        },
+        ImportFormat.GraphQL.value: {
+            True: ContentFormat.GRAPHQL_LINK.value,
+            False: ContentFormat.GRAPHQL_LINK.value
         }
     }
 
@@ -759,7 +791,8 @@ def apim_api_release_create(
 
     api_id_extended_with_revision = "/apis/" + api_id + ";rev=" + api_revision
 
-    parameter = ApiReleaseContract(notes=notes, api_id=api_id_extended_with_revision)
+    parameter = ApiReleaseContract(
+        notes=notes, api_id=api_id_extended_with_revision)
 
     return client.api_release.create_or_update(
         resource_group_name, service_name, api_id,
@@ -921,3 +954,101 @@ def apim_ds_purge(client, service_name, location, no_wait=False):
         client.deleted_services.begin_purge,
         service_name=service_name,
         location=location)
+
+# Graphql Resolver Operations
+
+
+def apim_graphql_resolver_create(
+        client, resource_group_name, service_name, api_id, resolver_id, display_name,
+        path, description=None, no_wait=False):
+    """Creates a new Resolver. """
+    parameters = ResolverContract(
+        display_name=display_name,
+        path=path,
+        description=description
+    )
+
+    return sdk_no_wait(no_wait, client.graph_ql_api_resolver.create_or_update,
+                       resource_group_name=resource_group_name,
+                       service_name=service_name,
+                       api_id=api_id,
+                       resolver_id=resolver_id,
+                       parameters=parameters)
+
+
+def apim_graphql_resolver_delete(
+        client, resource_group_name, service_name, api_id, resolver_id, no_wait=False, if_match=None):
+
+    return sdk_no_wait(no_wait, client.graph_ql_api_resolver.delete,
+                       resource_group_name=resource_group_name,
+                       service_name=service_name,
+                       api_id=api_id,
+                       resolver_id=resolver_id,
+                       if_match="*" if if_match is None else if_match)
+
+
+def apim_graphql_resolver_show(client, resource_group_name, service_name, api_id, resolver_id):
+    """Shows details of a Resolver. """
+    return client.graph_ql_api_resolver.get(
+        resource_group_name=resource_group_name,
+        service_name=service_name,
+        api_id=api_id,
+        resolver_id=resolver_id)
+
+
+def apim_graphql_resolver_list(client, resource_group_name, service_name, api_id):
+    """Lists a collection of Resolver. """
+    return client.graph_ql_api_resolver.list_by_api(resource_group_name, service_name, api_id)
+
+
+# Graphql Resolver Policy Operations
+def apim_graphql_resolver_policy_create(
+        client, resource_group_name, service_name, api_id, resolver_id, value_path, policy_format=None, no_wait=False):
+    """Creates a new Resolver policy. """
+    api_file = open(value_path, 'r')
+    content_value = api_file.read()
+    value = content_value
+
+    parameters = PolicyContract(
+        format=policy_format,
+        value=value
+    )
+
+    return sdk_no_wait(no_wait, client.graph_ql_api_resolver_policy.create_or_update,
+                       resource_group_name=resource_group_name,
+                       service_name=service_name,
+                       api_id=api_id,
+                       resolver_id=resolver_id,
+                       policy_id="policy",
+                       parameters=parameters)
+
+
+def apim_graphql_resolver_policy_show(client, resource_group_name, service_name, api_id, resolver_id):
+
+    return client.graph_ql_api_resolver_policy.get(
+        resource_group_name=resource_group_name,
+        service_name=service_name,
+        api_id=api_id,
+        resolver_id=resolver_id,
+        policy_id="policy")
+
+
+def apim_graphql_resolver_policy_list(client, resource_group_name, service_name, api_id, resolver_id):
+
+    return client.graph_ql_api_resolver_policy.list_by_resolver(
+        resource_group_name=resource_group_name,
+        service_name=service_name,
+        api_id=api_id,
+        resolver_id=resolver_id)
+
+
+def apim_graphql_resolver_policy_delete(
+        client, resource_group_name, service_name, api_id, resolver_id, no_wait=False, if_match=None):
+
+    return sdk_no_wait(no_wait, client.graph_ql_api_resolver_policy.delete,
+                       resource_group_name=resource_group_name,
+                       service_name=service_name,
+                       api_id=api_id,
+                       resolver_id=resolver_id,
+                       policy_id="policy",
+                       if_match="*" if if_match is None else if_match)

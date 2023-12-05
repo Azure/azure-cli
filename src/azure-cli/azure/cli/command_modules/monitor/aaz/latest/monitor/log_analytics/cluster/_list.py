@@ -51,12 +51,22 @@ class List(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         condition_0 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
         condition_1 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
         if condition_0:
             self.ClustersListByResourceGroup(ctx=self.ctx)()
         if condition_1:
             self.ClustersList(ctx=self.ctx)()
+        self.post_operations()
+
+    # @register_callback
+    def pre_operations(self):
+        pass
+
+    # @register_callback
+    def post_operations(self):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
@@ -232,7 +242,9 @@ class List(AAZCommand):
             )
 
             associated_workspaces = cls._schema_on_200.value.Element.properties.associated_workspaces
-            associated_workspaces.Element = AAZObjectType()
+            associated_workspaces.Element = AAZObjectType(
+                flags={"read_only": True},
+            )
 
             _element = cls._schema_on_200.value.Element.properties.associated_workspaces.Element
             _element.associate_date = AAZStrType(
@@ -450,7 +462,9 @@ class List(AAZCommand):
             )
 
             associated_workspaces = cls._schema_on_200.value.Element.properties.associated_workspaces
-            associated_workspaces.Element = AAZObjectType()
+            associated_workspaces.Element = AAZObjectType(
+                flags={"read_only": True},
+            )
 
             _element = cls._schema_on_200.value.Element.properties.associated_workspaces.Element
             _element.associate_date = AAZStrType(

@@ -18,6 +18,7 @@ pip install wheel
 ./scripts/ci/build.sh
 pip install pytest --prefix $AZ_BASE
 pip install pytest-xdist --prefix $AZ_BASE
+pip install pytest-forked --prefix $AZ_BASE
 
 find ./artifacts/build -name "azure_cli_testsdk*" | xargs pip install --prefix $AZ_BASE --upgrade --ignore-installed
 find ./artifacts/build -name "azure_cli_fulltest*" | xargs pip install --prefix $AZ_BASE --upgrade --ignore-installed --no-deps

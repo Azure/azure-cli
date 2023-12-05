@@ -1102,7 +1102,6 @@ class SynapseScenarioTests(ScenarioTest):
         time.sleep(20)
         self.cmd('az synapse kql-script show --workspace-name {workspace} --name {scriptName}', expect_failure=True)
 
-    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_workspaces(self, resource_group, storage_account):
@@ -1156,7 +1155,6 @@ class SynapseScenarioTests(ScenarioTest):
             self.check('managedVirtualNetwork', 'default')
         ])
 
-    #@record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_spark_pool(self):
@@ -1177,7 +1175,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # create spark pool
         spark_pool = self.cmd('az synapse spark pool create --name {spark-pool} --spark-version {spark-version}'
-                              ' --workspace {workspace} --resource-group {rg} --node-count 3 --node-size Medium'
+                              ' --workspace {workspace} --resource-group {rg} --node-count 3 --node-size XLarge'
                               ' --spark-config-file-path "{file}"',
                               checks=[
                                   self.check('name', self.kwargs['spark-pool']),
@@ -1203,14 +1201,22 @@ class SynapseScenarioTests(ScenarioTest):
 
         # update spark pool
         self.cmd('az synapse spark pool update --ids {pool-id} --tags key1=value1'
-                 ' --spark-config-file-path "{file}"',
+                 ' --spark-config-file-path "{file}"'
+                 ' --enable-dynamic-exec --min-executors 1 --max-executors 2',
                  checks=[
                     self.check('tags.key1', 'value1'),
                     self.check('name', self.kwargs['spark-pool']),
                     self.check('type', 'Microsoft.Synapse/workspaces/bigDataPools'),
                     self.check('provisioningState', 'Succeeded'),
-                    self.check('sparkConfigProperties.filename','sparkconfigfile')
+                    self.check('sparkConfigProperties.filename','sparkconfigfile'),
+                    self.check('dynamicExecutorAllocation.maxExecutors',2)
                  ])
+        
+        # create a existing spark pool
+        spark_pool = self.cmd('az synapse spark pool create --name {spark-pool} --spark-version {spark-version}'
+                              ' --workspace {workspace} --resource-group {rg} --node-count 3 --node-size Medium'
+                              ' --spark-config-file-path "{file}"',
+                              expect_failure=True)
 
         # delete spark pool with spark pool name
         self.cmd(
@@ -2171,16 +2177,40 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check('state', 'killed')
                  ])
 
-    @record_only()
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_access_control(self):
         self.kwargs.update({
-            'workspace': 'clitestsynapseworkspace',
             'role': 'Synapse Contributor',
             'userPrincipal': 'username@contoso.com',
             'servicePrincipal': 'testsynapsecli',
+            'sparkpool': 'test',
+            'sparkversion': '2.4',
+            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'sparkconfigfile.txt'),
             'scopeName': 'workspaces/{workspaceName}/bigDataPools/{bigDataPoolName}',
             'itemType': 'bigDataPools',
-            'item': 'testitem'})
+            'item': 'test'})
+
+         # create a workspace
+        self._create_workspace()
+
+        # create firewall rule
+        self.cmd(
+            'az synapse workspace firewall-rule create --resource-group {rg} --name allowAll --workspace-name {workspace} '
+            '--start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255', checks=[
+                self.check('provisioningState', 'Succeeded')
+            ]
+        )
+        import time
+        time.sleep(20)
+
+        #create spark pool
+        self.cmd('az synapse spark pool create --name {sparkpool} --spark-version {sparkversion}'
+                 ' --workspace {workspace} --resource-group {rg} --node-count 3 --node-size Medium'
+                 ' --spark-config-file-path "{file}"',
+                 checks=[self.check('name', self.kwargs['sparkpool']),
+                         self.check('type', 'Microsoft.Synapse/workspaces/bigDataPools'),
+                         self.check('provisioningState', 'Succeeded')])
 
         self.cmd(
             'az synapse role scope list --workspace-name {workspace} ',
@@ -2197,7 +2227,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # get role definition
         role_definition_get = self.cmd(
-            'az synapse role definition show --workspace-name {workspace} --role "{role}" ',
+            'az synapse role definition show --workspace-name {workspace} --role "{role}"',
             checks=[
                 self.check('name', self.kwargs['role'])
             ]).get_output_in_json()
@@ -2632,7 +2662,6 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse notebook show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
-    @unittest.skip('UnicodeDecodeError')
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_workspace_package(self):
@@ -2809,7 +2838,7 @@ class SynapseScenarioTests(ScenarioTest):
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_managed_private_endpoints(self):
         self.kwargs.update({
-            'name': 'AzureDataLakeStoragePE',
+            'name': 'myPrivateLinkService',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'managedprivateendpoints.json')})
 
         # create a workspace
@@ -2835,7 +2864,7 @@ class SynapseScenarioTests(ScenarioTest):
         # wait some time to improve robustness
         if self.is_live or self.in_recording:
             import time
-            time.sleep(90)
+            time.sleep(240)
         # get managed private endpoint
         self.cmd(
             'az synapse  managed-private-endpoints show --workspace-name {workspace} --pe-name {name}',
@@ -2855,7 +2884,7 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse  managed-private-endpoints delete --workspace-name {workspace} --pe-name {name} -y')
         if self.is_live or self.in_recording:
             import time
-            time.sleep(60)    
+            time.sleep(120)
         self.cmd(
             'az synapse managed-private-endpoints show --workspace-name {workspace} --pe-name {name}',
             expect_failure=True)
@@ -2987,6 +3016,36 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse sql-script show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
+    def test_ad_only_auth(self):
+        self.kwargs.update({
+        })
+
+        # create a workspace
+        self._create_workspace()
+
+        self.cmd(
+            'az synapse ad-only-auth get --resource-group {rg} --workspace-name {workspace}',
+            checks=[
+                self.check('[0].type', 'Microsoft.Synapse/workspaces/azureADOnlyAuthentications')
+            ]
+        )
+
+        self.cmd(
+            'az synapse ad-only-auth disable --resource-group {rg} --workspace-name {workspace}',
+            checks=[
+                self.check('azureAdOnlyAuthentication', False)
+            ]
+        )
+
+        self.cmd(
+            'az synapse ad-only-auth enable --resource-group {rg} --workspace-name {workspace}',
+            checks=[
+                self.check('azureAdOnlyAuthentication', True)
+            ]
+        )
+
     @record_only()
     def test_link_connection(self):
         self.kwargs.update({
@@ -3033,6 +3092,7 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('status', 'Starting')
             ])
 
+        time.sleep(120)
         # stop a link connnection
         self.cmd(
             'az synapse link-connection stop --workspace-name {workspace_name} --name {link_connection_name}')
@@ -3056,4 +3116,64 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd(
             'az synapse link-connection show --workspace-name {workspace_name} --name {link_connection_name}',
             expect_failure=True)
+        
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
+    def test_user_assigned_identity_id_workspace(self):
+        self.kwargs.update({
+            'uami_name1': 'autotestuami1',
+            'uami_name2': 'autotestuami2',
+            'workspace': self.create_random_name(prefix='clitest', length=16),
+            'location': self.location,
+            'file-system': 'testfilesystem',
+            'login-user': 'cliuser1',
+            'login-password': self.create_random_name(prefix='Pswd1', length=16)
+        })
+
+        # create identity
+        self.cmd('az identity create --name {uami_name1} --resource-group {rg}')
+        self.cmd('az identity create --name {uami_name2} --resource-group {rg}')
+        uami1 = self.cmd('az identity show --name {uami_name1} --resource-group {rg}').get_output_in_json()
+        uami2 = self.cmd('az identity show --name {uami_name2} --resource-group {rg}').get_output_in_json()
+        self.kwargs['uami_id1'] = uami1['id']
+        self.kwargs['uami_id2'] = uami2['id']
+        
+        # create synapse workspace
+        self.cmd(
+            'az synapse workspace create --name {workspace} --resource-group {rg} --storage-account {storage-account} '
+            '--file-system {file-system} --sql-admin-login-user {login-user} '
+            '--sql-admin-login-password {login-password} '
+            '--location {location} --uami-id "{uami_id1}" "{uami_id2}"', checks=[
+                self.check('name', self.kwargs['workspace']),
+                self.check('type', 'Microsoft.Synapse/workspaces'),
+                self.check('provisioningState', 'Succeeded'),
+                self.check('identity.type','SystemAssigned,UserAssigned'),
+                self.check('keys(identity.userAssignedIdentities)[0]', '{uami_id1}'),
+                self.check('keys(identity.userAssignedIdentities)[1]', '{uami_id2}')
+            ])
+
+        self.cmd('az synapse workspace update --name {workspace} --resource-group {rg} '
+                 '--uami-action Remove --uami-id "{uami_id2}" "{uami_id1}"', checks=[
+            self.check('name', self.kwargs['workspace']),
+            self.check('type', 'Microsoft.Synapse/workspaces'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('identity.userAssignedIdentities', None)
+        ])
+
+        self.cmd('az synapse workspace update --name {workspace} --resource-group {rg} '
+                 '--uami-action Add --uami-id "{uami_id2}"', checks=[
+            self.check('name', self.kwargs['workspace']),
+            self.check('type', 'Microsoft.Synapse/workspaces'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('keys(identity.userAssignedIdentities)[0]', '{uami_id2}')
+        ])
+
+        self.cmd('az synapse workspace update --name {workspace} --resource-group {rg} '
+                 '--uami-action Set --uami-id "{uami_id1}"', checks=[
+            self.check('name', self.kwargs['workspace']),
+            self.check('type', 'Microsoft.Synapse/workspaces'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('keys(identity.userAssignedIdentities)[0]', '{uami_id1}'),
+            self.not_exists('identity.userAssignedIdentities[1]')
+        ])
 
