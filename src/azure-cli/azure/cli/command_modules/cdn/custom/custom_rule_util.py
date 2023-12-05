@@ -9,7 +9,8 @@ from azure.mgmt.cdn.models import (
 from azure.cli.core.aaz._base import has_value
 from msrestazure.tools import is_valid_resource_id
 
-def create_condition(match_variable, 
+
+def create_condition(match_variable,
                      operator, match_values=None, selector=None, negate_condition=None, transforms=None):
     if match_variable == 'RemoteAddress':
         condition = {
@@ -20,9 +21,9 @@ def create_condition(match_variable,
                     "negate_condition": negate_condition,
                     "operator": operator,
                     "transforms": transforms
-                    }
                 }
             }
+        }
     if match_variable == 'RequestMethod':
         condition = {
             "request_method": {
@@ -30,10 +31,10 @@ def create_condition(match_variable,
                     "type_name": "DeliveryRuleRequestMethodConditionParameters",
                     "match_values": match_values,
                     "negate_condition": negate_condition,
-                    "operator": operator if has_value(operator) else RequestMethodOperator.EQUAL, 
-                    }
+                    "operator": operator if has_value(operator) else RequestMethodOperator.EQUAL,
                 }
             }
+        }
     if match_variable == 'QueryString':
         condition = {
             "query_string": {
@@ -43,9 +44,9 @@ def create_condition(match_variable,
                     "negate_condition": negate_condition,
                     "operator": operator,
                     "transforms": transforms
-                    }
                 }
             }
+        }
     if match_variable == 'PostArgs':
         condition = {
             "post_args": {
@@ -56,9 +57,9 @@ def create_condition(match_variable,
                     "operator": operator,
                     "transforms": transforms,
                     "selector": selector
-                    }
                 }
             }
+        }
     if match_variable == 'RequestHeader':
         condition = {
             "request_header": {
@@ -69,9 +70,9 @@ def create_condition(match_variable,
                     "operator": operator,
                     "transforms": transforms,
                     "selector": selector
-                    }
                 }
             }
+        }
     if match_variable == 'RequestUri':
         condition = {
             "request_uri": {
@@ -81,9 +82,9 @@ def create_condition(match_variable,
                     "negate_condition": negate_condition,
                     "operator": operator,
                     "transforms": transforms
-                    }
                 }
             }
+        }
     if match_variable == 'RequestBody':
         condition = {
             "request_body": {
@@ -93,9 +94,9 @@ def create_condition(match_variable,
                     "negate_condition": negate_condition,
                     "operator": operator,
                     "transforms": transforms
-                    }
                 }
             }
+        }
     if match_variable == 'RequestScheme':
         condition = {
             "request_scheme": {
@@ -104,9 +105,9 @@ def create_condition(match_variable,
                     "match_values": match_values,
                     "negate_condition": negate_condition,
                     "operator": operator if has_value(operator) else RequestMethodOperator.EQUAL
-                    }
                 }
             }
+        }
     if match_variable == 'UrlPath':
         condition = {
             "url_path": {
@@ -116,9 +117,9 @@ def create_condition(match_variable,
                     "negate_condition": negate_condition,
                     "operator": operator,
                     "transforms": transforms
-                    }
                 }
             }
+        }
     if match_variable == 'UrlFileExtension':
         condition = {
             "url_file_extension": {
@@ -128,9 +129,9 @@ def create_condition(match_variable,
                     "negate_condition": negate_condition,
                     "operator": operator,
                     "transforms": transforms
-                    }
                 }
             }
+        }
     if match_variable == 'UrlFileName':
         condition = {
             "url_file_name": {
@@ -140,9 +141,9 @@ def create_condition(match_variable,
                     "negate_condition": negate_condition,
                     "operator": operator,
                     "transforms": transforms
-                    }
                 }
             }
+        }
     if match_variable == 'HttpVersion':
         condition = {
             "http_version": {
@@ -151,9 +152,9 @@ def create_condition(match_variable,
                     "match_values": match_values,
                     "negate_condition": negate_condition,
                     "operator": operator
-                    }
                 }
             }
+        }
     if match_variable == 'IsDevice':
         condition = {
             "is_device": {
@@ -163,9 +164,9 @@ def create_condition(match_variable,
                     "negate_condition": negate_condition,
                     "operator": operator,
                     "transforms": transforms
-                    }
                 }
             }
+        }
     if match_variable == 'Cookies':
         condition = {
             "cookies": {
@@ -176,9 +177,9 @@ def create_condition(match_variable,
                     "operator": operator,
                     "transforms": transforms,
                     "selector": selector
-                    }
                 }
             }
+        }
     if match_variable == 'SocketAddr':
         condition = {
             "socket_addr": {
@@ -188,9 +189,9 @@ def create_condition(match_variable,
                     "negate_condition": negate_condition,
                     "operator": operator,
                     "transforms": transforms
-                    }
                 }
             }
+        }
     if match_variable == 'ClientPort':
         condition = {
             "client_port": {
@@ -200,9 +201,9 @@ def create_condition(match_variable,
                     "negate_condition": negate_condition,
                     "operator": operator,
                     "transforms": transforms
-                    }
                 }
             }
+        }
     if match_variable == 'ServerPort':
         condition = {
             "server_port": {
@@ -212,9 +213,9 @@ def create_condition(match_variable,
                     "negate_condition": negate_condition,
                     "operator": operator,
                     "transforms": transforms
-                    }
                 }
             }
+        }
     if match_variable == 'HostName':
         condition = {
             "host_name": {
@@ -224,9 +225,9 @@ def create_condition(match_variable,
                     "negate_condition": negate_condition,
                     "operator": operator,
                     "transforms": transforms
-                    }
                 }
             }
+        }
     if match_variable == 'SslProtocol':
         condition = {
             "ssl_protocol": {
@@ -236,10 +237,11 @@ def create_condition(match_variable,
                     "negate_condition": negate_condition,
                     "operator": operator,
                     "transforms": transforms,
-                    }
                 }
             }
+        }
     return condition
+
 
 def create_action(action_name, cache_behavior=None, cache_duration=None, header_action=None,
                   header_name=None, header_value=None, query_string_behavior=None, query_parameters=None,
@@ -250,7 +252,7 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
                   enable_compression=None, enable_caching=None, forwarding_protocol=None):
     if action_name == "CacheExpiration":
         action = {
-            "cache_expiration" : {
+            "cache_expiration": {
                 "parameters": {
                     "type_name": "DeliveryRuleCacheExpirationActionParameters",
                     "cache_behavior": cache_behavior,
@@ -332,9 +334,9 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
         if not is_valid_resource_id(formatetd_origin_group):
             # Ideally we should use resource_id but Auzre FrontDoor portal extension has some case-sensitive issues
             # that prevent it from displaying correctly in portal.
-            origin_group = f'/subscriptions/{sub_id}/resourcegroups/{resource_group_name}' \
-                           f'/providers/Microsoft.Cdn/profiles/{profile_name}/endpoints/{endpoint_name}' \
-                           f'/origingroups/{origin_group}'            
+            origin_group = f'/subscriptions/{sub_id}/resourcegroups/{resource_group_name}'
+            f'/providers/Microsoft.Cdn/profiles/{profile_name}/endpoints/{endpoint_name}'
+            f'/origingroups/{origin_group}'
         action = {
             "origin_group_override": {
                 "parameters": {
@@ -362,15 +364,15 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
                     "forwarding_protocol": forwarding_protocol
                 }
             else:
-                origin_group_refernce = f'/subscriptions/{sub_id}/resourcegroups/' \
-                                        f'{resource_group_name}/providers/Microsoft.Cdn/profiles/{profile_name}/' \
-                                        f'origingroups/{origin_group}'
+                origin_group_refernce = f'/subscriptions/{sub_id}/resourcegroups/'
+                f'{resource_group_name}/providers/Microsoft.Cdn/profiles/{profile_name}/'
+                f'origingroups/{origin_group}'
                 origin_group_override = {
                     "origin_group": {
                         "id": origin_group_refernce
                     },
                     "forwarding_protocol": forwarding_protocol
-                }           
+                }
         action = {
             "route_configuration_override": {
                 "parameters": {
@@ -381,13 +383,14 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
                         "query_parameters": query_parameters,
                         "cache_behavior": cache_behavior,
                         "cache_duration": cache_duration,
-                        "is_compression_enabled": RuleIsCompressionEnabled.ENABLED.value if enable_compression 
+                        "is_compression_enabled": RuleIsCompressionEnabled.ENABLED.value if enable_compression
                         else RuleIsCompressionEnabled.DISABLED.value
-                        } if enable_caching else None
-                    },
-                }
+                    } if enable_caching else None
+                },
             }
+        }
         return action
+
 
 def create_actions_from_existing(existing_actions):
     parsed_actions = []
@@ -464,20 +467,22 @@ def create_actions_from_existing(existing_actions):
                                                 enable_compression=True if 'cacheConfiguration' in action['parameters'] and
                                                 'isCompressionEnabled' in action['parameters']['cacheConfiguration'] and
                                                 action['parameters']['cacheConfiguration']['isCompressionEnabled'] == RuleIsCompressionEnabled.ENABLED.value
-                                                else False, 
+                                                else False,
                                                 enable_caching=enable_caching))
     if len(parsed_actions) == 0:
         return []
     return parsed_actions
 
+
 def create_conditions_from_existing(existing_conditions):
     parsed_conditions = []
     for condition in existing_conditions:
-        parsed_conditions.append(create_condition(condition['name'], match_values=condition['parameters']['matchValues'] if 'matchValues' in condition['parameters'] else None,
-                                                      negate_condition=condition['parameters']['negateCondition'] if 'negateCondition' in condition['parameters'] else None,
-                                                      operator=condition['parameters']['operator'] if 'operator' in condition['parameters'] else None,
-                                                      transforms=condition['parameters']['transforms'] if 'transforms' in condition['parameters'] else None,
-                                                      selector=condition['parameters']['selector'] if 'selector' in condition['parameters'] else None))
+        parsed_conditions.append(create_condition(
+            condition['name'], match_values=condition['parameters']['matchValues'] if 'matchValues' in condition['parameters'] else None,
+            negate_condition=condition['parameters']['negateCondition'] if 'negateCondition' in condition['parameters'] else None,
+            operator=condition['parameters']['operator'] if 'operator' in condition['parameters'] else None,
+            transforms=condition['parameters']['transforms'] if 'transforms' in condition['parameters'] else None,
+            selector=condition['parameters']['selector'] if 'selector' in condition['parameters'] else None))
     if len(parsed_conditions) == 0:
         return []
     return parsed_conditions
