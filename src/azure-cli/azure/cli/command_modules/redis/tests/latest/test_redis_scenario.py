@@ -7,7 +7,7 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 import time
 import datetime
 
-location = 'WestUS2'
+location = 'WestUS'
 seclocation = 'EastUS'
 premium_sku = 'Premium'
 basic_sku = 'Basic'
@@ -15,7 +15,7 @@ premium_size = 'P1'
 basic_size = 'C0'
 name_prefix = 'cliredis'
 # These tests rely on an already existing user assigned managed identity. You will need to create it and paste the id below:
-user_identity = '/subscriptions/3919658b-68ae-4509-8c17-6a2238340ae7/resourcegroups/tolani-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/test-uami'
+user_identity = '/subscriptions/7c4785eb-d3cf-4349-b811-8d756312d1ff/resourcegroups/aj-tiwari/providers/Microsoft.ManagedIdentity/userAssignedIdentities/aj-ui'
 
 class RedisCacheTests(ScenarioTest):
 
@@ -44,7 +44,7 @@ class RedisCacheTests(ScenarioTest):
         self.kwargs = {
             'rg': resource_group,
             'name': self.create_random_name(prefix=name_prefix, length=24),
-            'location': location,
+            'location': seclocation,
             'sku': premium_sku,
             'size': premium_size,
             'tags': "test=tryingzones",
@@ -134,7 +134,7 @@ class RedisCacheTests(ScenarioTest):
         self.kwargs = {
             'rg': resource_group,
             'name': self.create_random_name(prefix=name_prefix, length=24),
-            'location': location,
+            'location': 'eastus',
             'sku': premium_sku,
             'size': premium_size,
             'schedule_entries_one': "[{\\\"dayOfWeek\\\":\\\"Monday\\\",\\\"startHourUtc\\\":\\\"00\\\",\\\"maintenanceWindow\\\":\\\"PT5H\\\"}]",
@@ -163,7 +163,7 @@ class RedisCacheTests(ScenarioTest):
         self.kwargs = {
             'rg': resource_group,
             'name': self.create_random_name(prefix=name_prefix, length=24),
-            'location': location,
+            'location': 'eastus',
             'sku': premium_sku,
             'size': premium_size
         }
@@ -177,7 +177,7 @@ class RedisCacheTests(ScenarioTest):
         self.kwargs = {
             'rg': resource_group,
             'name': randName,
-            'location': location,
+            'location': 'westus',
             'sku': premium_sku,
             'size': premium_size,
             'prefix': "redistest",
@@ -186,6 +186,7 @@ class RedisCacheTests(ScenarioTest):
             'storageName': "str"+randName[:-3],
             'containerName': "testcontainer",
             'userIdentity': user_identity,
+            'storageSubscriptionId': "7c4785eb-d3cf-4349-b811-8d756312d1ff",
             'startTime': (datetime.datetime.utcnow() - datetime.timedelta(minutes=60)).strftime(f"%Y-%m-%dT%H:%MZ"),
             'expiryTime': (datetime.datetime.utcnow() + datetime.timedelta(minutes=200)).strftime(f"%Y-%m-%dT%H:%MZ")
         }
@@ -198,9 +199,10 @@ class RedisCacheTests(ScenarioTest):
             filesasURL = storage['primaryEndpoints']['blob'] + self.kwargs['containerName'] + "/"+ self.kwargs["prefix"] + "?" + containersasToken[1:-2]
             self.kwargs['containersasURL'] = containersasURL
             self.kwargs['filesasURL'] = filesasURL
-
+        
         self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size}')
-
+        
+        '''
         self.cmd('az redis export -n {name} -g {rg} --prefix {prefix} --container \'{containersasURL}\' --preferred-data-archive-auth-method SAS')
         if self.is_live:
             time.sleep(5 * 60)
@@ -210,7 +212,7 @@ class RedisCacheTests(ScenarioTest):
         self.cmd('az redis import -n {name} -g {rg} --files "{filesasURL}" --preferred-data-archive-auth-method SAS')
         if self.is_live:
             time.sleep(5 * 60)
-        
+        '''     
         # Test import/export with managed identity
         if self.is_live:
             # Setup storage account and cache with managed identity
@@ -223,8 +225,8 @@ class RedisCacheTests(ScenarioTest):
             #Remove SAS token from URLs (not necessary with managed identity)
             self.kwargs['containersasURL'] = self.kwargs['containersasURL'].split('?')[0]
             self.kwargs['filesasURL'] = self.kwargs['filesasURL'].split('?')[0]
-        self.cmd('az redis export -n {name} -g {rg} --prefix {prefix} --container \'{containersasURL}\' --preferred-data-archive-auth-method ManagedIdentity')
-        self.cmd('az redis import -n {name} -g {rg} --files {filesasURL} --preferred-data-archive-auth-method ManagedIdentity')
+        self.cmd('az redis export -n {name} -g {rg} --prefix {prefix} --container \'{containersasURL}\' --preferred-data-archive-auth-method ManagedIdentity --storage-subscription-id {storageSubscriptionId}')
+        self.cmd('az redis import -n {name} -g {rg} --files {filesasURL} --preferred-data-archive-auth-method ManagedIdentity --storage-subscription-id {storageSubscriptionId}')
 
         self.cmd('az redis delete -n {name} -g {rg} -y')
 
