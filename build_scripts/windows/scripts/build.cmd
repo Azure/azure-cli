@@ -217,7 +217,8 @@ if "%TARGET%"=="msi" (
     echo Building ZIP...
     REM Rename zip root folder to "Azure CLI"
     ren %BUILDING_DIR% "Azure CLI"
-    "%ProgramFiles%\7-Zip\7z.exe" a -tzip "%OUTPUT_DIR%\Microsoft Azure CLI.zip" "%ZIP_DIR%"
+    REM Use LZMA compression to reduce the size of the zip file.
+    "%ProgramFiles%\7-Zip\7z.exe" a -tzip -m0=LZMA "%OUTPUT_DIR%\Microsoft Azure CLI.zip" "%ZIP_DIR%"
 )
 
 if %errorlevel% neq 0 goto ERROR
