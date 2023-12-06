@@ -120,7 +120,7 @@ def transform_nsg_rule_table_output(result):
     item['Direction'] = result['direction']
     item['DestinationPortRanges'] = result.get('destinationPortRange', None) or ' '.join(result['destinationPortRanges'])
     item['DestinationAddressPrefixes'] = result.get('destinationAddressPrefix', None) or \
-                                         ' '.join(result['destinationAddressPrefixes'])
+        ' '.join(result['destinationAddressPrefixes'])
     item['DestinationASG'] = result.get('destinationApplicationSecurityGroups', None) or 'None'
     return item
 
