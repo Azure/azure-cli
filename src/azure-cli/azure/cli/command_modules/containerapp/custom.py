@@ -392,7 +392,7 @@ def update_containerapp_logic(cmd,
                         e["value"] = ""
 
     update_map = {}
-    update_map['scale'] = min_replicas or max_replicas or scale_rule_name
+    update_map['scale'] = min_replicas is not None or max_replicas is not None or scale_rule_name
     update_map['container'] = image or container_name or set_env_vars is not None or remove_env_vars is not None or replace_env_vars is not None or remove_all_env_vars or cpu or memory or startup_command is not None or args is not None or secret_volume_mount is not None
     update_map['ingress'] = ingress or target_port
     update_map['registry'] = registry_server or registry_user or registry_pass
@@ -2702,13 +2702,27 @@ def enable_cors_policy(cmd, name, resource_group_name, allowed_origins, allowed_
     if not containerapp_def:
         raise ResourceNotFoundError(f"The containerapp '{name}' does not exist in group '{resource_group_name}'")
 
+    reset_max_age = False
+    if max_age == "":
+        reset_max_age = True
+
     containerapp_patch = {}
-    safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowedOrigins", value=allowed_origins)
-    safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowedMethods", value=allowed_methods)
-    safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowedHeaders", value=allowed_headers)
-    safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "exposeHeaders", value=expose_headers)
-    safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowCredentials", value=allow_credentials)
-    safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "maxAge", value=max_age)
+    if allowed_origins is not None:
+        safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowedOrigins", value=allowed_origins)
+    if allowed_methods is not None:
+        safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowedMethods", value=allowed_methods)
+    if allowed_headers is not None:
+        safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowedHeaders", value=allowed_headers)
+    if expose_headers is not None:
+        safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "exposeHeaders", value=expose_headers)
+    if allow_credentials is not None:
+        safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "allowCredentials", value=allow_credentials)
+    if max_age is not None:
+        if reset_max_age:
+            safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "maxAge", value=None)
+        else:
+            safe_set(containerapp_patch, "properties", "configuration", "ingress", "corsPolicy", "maxAge", value=max_age)
+
     try:
         r = ContainerAppClient.update(
             cmd=cmd, resource_group_name=resource_group_name, name=name, container_app_envelope=containerapp_patch, no_wait=no_wait)

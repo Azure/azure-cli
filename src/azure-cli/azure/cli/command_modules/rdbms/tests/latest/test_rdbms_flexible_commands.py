@@ -1146,6 +1146,75 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                  .format(database_engine, resource_group, replicas[1]), checks=NoneCheck())
 
 
+class FlexibleServerVirtualEndpointSwitchoverMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
+
+    postgres_location = 'eastus'
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_flexible_server_virtual_endpoint_mgmt(self, resource_group):
+        self._test_flexible_server_virtual_endpoint_mgmt('postgres', resource_group)
+
+    def _test_flexible_server_virtual_endpoint_mgmt(self, database_engine, resource_group):
+        location = self.postgres_location
+        primary_role = 'Primary'
+        replica_role = 'AsyncReplica'
+        master_server = self.create_random_name(SERVER_NAME_PREFIX, 32)
+        replica = self.create_random_name(F'azuredbclirep', SERVER_NAME_MAX_LENGTH)
+        master_vnet_args = '--public-access none'
+        virtual_endpoint_name = self.create_random_name(F'virtual-endpoint', 32)
+        read_write_endpoint_type = 'ReadWrite'
+
+        # create a server
+        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} {} --tier GeneralPurpose --sku-name Standard_D2s_v3 --yes'
+                 .format(database_engine, resource_group, master_server, location, 256, master_vnet_args))
+        primary_result = self.cmd('{} flexible-server show -g {} --name {} '
+                          .format(database_engine, resource_group, master_server),
+                          checks=[JMESPathCheck('name', master_server)]).get_output_in_json()
+        self.assertEqual(primary_result['replica']['role'], primary_role)
+
+        # create replica
+        replica_result = self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
+                 .format(database_engine, resource_group, replica, master_server),
+                 checks=[
+                     JMESPathCheck('name', replica),
+                     JMESPathCheck('sourceServerResourceId', primary_result['id'])]).get_output_in_json()
+        self.assertEqual(replica_result['replica']['role'], replica_role)
+
+        # test virtual-endpoint create
+        self.cmd('{} flexible-server virtual-endpoint create -g {} --server-name {} --name {} --endpoint-type {} --members {}'
+                 .format(database_engine, resource_group, master_server, virtual_endpoint_name, read_write_endpoint_type, replica),
+                 checks=[
+                     JMESPathCheck('endpointType', read_write_endpoint_type),
+                     JMESPathCheck('name', virtual_endpoint_name),
+                     JMESPathCheck('length(virtualEndpoints)', 2)])
+
+        # test virtual-endpoint update
+        update_check = self.cmd('{} flexible-server virtual-endpoint update -g {} --server-name {} --name {} --endpoint-type {} --members {}'
+                 .format(database_engine, resource_group, master_server, virtual_endpoint_name, read_write_endpoint_type, master_server),
+                 checks=[JMESPathCheck('length(members)', 1)]).get_output_in_json()
+
+        # test virtual-endpoint show
+        self.cmd('{} flexible-server virtual-endpoint show -g {} --server-name {} --name {}'
+                 .format(database_engine, resource_group, master_server, virtual_endpoint_name),
+                 checks=[JMESPathCheck('members', update_check['members'])])
+
+        # test virtual-endpoint delete
+        self.cmd('{} flexible-server virtual-endpoint delete -g {} --server-name {} --name {} --yes'
+                 .format(database_engine, resource_group, master_server, virtual_endpoint_name))
+
+        # test virtual-endpoint list
+        self.cmd('{} flexible-server virtual-endpoint list -g {} --server-name {}'
+                 .format(database_engine, resource_group, master_server),
+                 checks=[JMESPathCheck('length(@)', 0)])
+
+        # clean up - in postgres we can't delete master server if it has replicas
+        self.cmd('{} flexible-server delete -g {} --name {} --yes'
+                    .format(database_engine, resource_group, replica))
+        self.cmd('{} flexible-server delete -g {} --name {} --yes'
+                    .format(database_engine, resource_group, master_server))
+
+
 class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
     postgres_location = 'eastus'
@@ -2068,5 +2137,51 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
         # delete everything
         for server_name in [replica[0], replica[1], server]:
             self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
+
+
+class FlexibleServerAdvancedThreatProtectionSettingMgmtScenarioTest(ScenarioTest):
+    postgres_location = 'eastus'
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    @ServerPreparer(engine_type='postgres', location=postgres_location)
+    def test_postgres_flexible_server_advanced_threat_protection_setting_mgmt(self, resource_group, server):
+        self._test_advanced_threat_protection_setting_mgmt('postgres', resource_group, server)
+
+
+    def _test_advanced_threat_protection_setting_mgmt(self, database_engine, resource_group, server):
+        location = self.postgres_location
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, 32)
+
+        # create a server
+        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --public-access none '
+                 '--tier GeneralPurpose --sku-name Standard_D2s_v3 --yes'
+                 .format(database_engine, resource_group, server_name, location, 128))
+        
+        # show advanced threat protection setting for server
+        self.cmd('{} flexible-server advanced-threat-protection-setting show -g {} --server-name {} '
+                    .format(database_engine, resource_group, server_name),
+                    checks=[JMESPathCheck('state', "Disabled")]).get_output_in_json()
+        
+        # Enable advanced threat protection setting for server
+        self.cmd('{} flexible-server advanced-threat-protection-setting update -g {} --server-name {} --state Enabled'
+                    .format(database_engine, resource_group, server_name))
+        
+        # show advanced threat protection setting for server
+        self.cmd('{} flexible-server advanced-threat-protection-setting show -g {} --server-name {} '
+                    .format(database_engine, resource_group, server_name),
+                    checks=[JMESPathCheck('state', "Enabled")]).get_output_in_json()
+        
+        # Disable advanced threat protection setting for server
+        self.cmd('{} flexible-server advanced-threat-protection-setting update -g {} --server-name {} --state Disabled'
+                    .format(database_engine, resource_group, server_name))
+        
+        # show advanced threat protection setting for server
+        self.cmd('{} flexible-server advanced-threat-protection-setting show -g {} --server-name {} '
+                    .format(database_engine, resource_group, server_name),
+                    checks=[JMESPathCheck('state', "Disabled")]).get_output_in_json()
+
+        # delete everything
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
 
 
