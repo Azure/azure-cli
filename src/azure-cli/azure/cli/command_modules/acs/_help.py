@@ -183,7 +183,7 @@ parameters:
   - name: --load-balancer-backend-pool-type
     type: string
     short-summary: Load balancer backend pool type.
-    long-summary: Defines the LoadBalancer backend pool type of managed inbound backend pool. nodeIP means the VMs will be attached to the LoadBalancer by adding its private IP address to the backend pool. nodeIPConfiguration means the VMs will be attached to the LoadBalancer by referencing the backend pool ID in the VM's NIC.
+    long-summary: Define the LoadBalancer backend pool type of managed inbound backend pool. nodeIP means the VMs will be attached to the LoadBalancer by adding its private IP address to the backend pool. nodeIPConfiguration means the VMs will be attached to the LoadBalancer by referencing the backend pool ID in the VM's NIC.
   - name: --nat-gateway-managed-outbound-ip-count
     type: int
     short-summary: NAT gateway managed outbound IP count.
