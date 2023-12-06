@@ -1220,7 +1220,8 @@ def load_arguments(self, _):
                 'weekly_retention',
                 'monthly_retention',
                 'yearly_retention',
-                'week_of_year'])
+                'week_of_year',
+                'make_backups_immutable'])
 
         c.argument('weekly_retention',
                    help='Retention for the weekly backup. '
@@ -1239,6 +1240,10 @@ def load_arguments(self, _):
 
         c.argument('week_of_year',
                    help='The Week of Year, 1 to 52, in which to take the yearly LTR backup.')
+
+        c.argument('make_backups_immutable',
+                   help='Whether to make the LTR backups immutable.',
+                   arg_type=get_three_state_flag())
 
     with self.argument_context('sql db ltr-backup') as c:
         c.argument('location_name',
