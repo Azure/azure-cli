@@ -679,8 +679,18 @@ def __export_features(retrieved_features, naming_convention):
                 feature_state = {feature_reserved_keywords.enabled_for: []}
 
                 for condition_key, condition in feature.conditions.items():
-                    if condition_key == FeatureFlagConstants.CLIENT_FILTERS:
-                        feature_state[feature_reserved_keywords.enabled_for] = [filter_.to_dict() for filter_ in condition]
+
+                    # client filters
+                    if condition_key == FeatureFlagConstants.CLIENT_FILTERS and condition is not None:
+                        for filter_ in condition:
+                            feature_filter = {"Name": filter_.name}
+
+                            if filter_.parameters:
+                                feature_filter["Parameters"] = filter_.parameters
+
+                            feature_state[feature_reserved_keywords.enabled_for].append(feature_filter)
+
+                    # requirement type
                     elif condition_key == FeatureFlagConstants.REQUIREMENT_TYPE:
                         feature_state[feature_reserved_keywords.requirement_type] = condition
                     else:
