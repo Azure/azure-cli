@@ -45,6 +45,7 @@ def set_feature(cmd,
                 name=None,
                 label=None,
                 description=None,
+                requirement_type=None,
                 yes=False,
                 connection_string=None,
                 auth_mode="key",
@@ -67,6 +68,9 @@ def set_feature(cmd,
     tags = {}
     default_conditions = {'client_filters': []}
 
+    if requirement_type:
+        default_conditions["requirement_type"] = requirement_type #TODO: Update to use feature flag constants.
+    
     default_value = {
         "id": feature,
         "description": "" if description is None else description,
