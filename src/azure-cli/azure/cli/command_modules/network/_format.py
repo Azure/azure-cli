@@ -2,8 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
-
+#
+# pylint: disable=line-too-long
 from collections import OrderedDict
 
 
@@ -119,8 +119,7 @@ def transform_nsg_rule_table_output(result):
     item['Protocol'] = result['protocol']
     item['Direction'] = result['direction']
     item['DestinationPortRanges'] = result.get('destinationPortRange', None) or ' '.join(result['destinationPortRanges'])
-    item['DestinationAddressPrefixes'] = result.get('destinationAddressPrefix', None) or \
-        ' '.join(result['destinationAddressPrefixes'])
+    item['DestinationAddressPrefixes'] = result.get('destinationAddressPrefix', None) or ' '.join(result['destinationAddressPrefixes'])
     item['DestinationASG'] = result.get('destinationApplicationSecurityGroups', None) or 'None'
     return item
 
