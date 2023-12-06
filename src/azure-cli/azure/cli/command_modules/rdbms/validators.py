@@ -532,6 +532,14 @@ def _valid_range(addr_range):
     return False
 
 
+def virtual_endpoint_name_validator(ns):
+    if not re.search(r'^(?=[a-z0-9].*)(?=.*[a-z-])(?!.*[^a-z0-9-])(?=.*[a-z0-9]$)', ns.virtual_endpoint_name):
+        raise ValidationError("The virtual endpoint name can only contain 0-9, a-z, and \'-\'. "
+                              "The virtual endpoint name must not start or end in a hyphen. "
+                              "Additionally, the name of the virtual endpoint must be at least 3 characters "
+                              "and no more than 63 characters in length. ")
+
+
 def firewall_rule_name_validator(ns):
     if not re.search(r'^[a-zA-Z0-9][-_a-zA-Z0-9]{1,126}[_a-zA-Z0-9]$', ns.firewall_rule_name):
         raise ValidationError("The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. "
