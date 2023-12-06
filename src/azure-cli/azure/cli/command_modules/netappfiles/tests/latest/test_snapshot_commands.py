@@ -5,7 +5,7 @@
 import time
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk.decorators import serial_test
-from knack.util import CLIError
+from azure.core.exceptions import HttpResponseError
 
 POOL_DEFAULT = "--service-level 'Premium' --size 4"
 VOLUME_DEFAULT = "--service-level 'Premium' --usage-threshold 100"
@@ -68,7 +68,7 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         assert len(snapshot_list) == 1
 
         # delete snapshot
-        self.cmd("az netappfiles snapshot delete -g {rg} -a %s -p %s -v %s -s %s" %
+        self.cmd("az netappfiles snapshot delete -g {rg} -a %s -p %s -v %s -s %s --yes" %
                  (account_name, pool_name, volume_name, snapshot_name))
         snapshot_list = self.cmd("az netappfiles snapshot list -g {rg} -a %s -p %s -v %s" %
                                  (account_name, pool_name, volume_name)).get_output_in_json()
@@ -190,6 +190,9 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
 
         snapshot_file_path = "'/snap_file_path_1.txt' '/snap_file_path_2.txt'"
 
-        with self.assertRaisesRegex(CLIError, "The specified filePath /snap_file_path_1.txt does not exist"):
+        #with self.assertRaisesRegex(HttpResponseError, "The specified filePath /snap_file_path_1.txt does not exist"):
+        with self.assertRaises(HttpResponseError) as cm:
             self.cmd("az netappfiles snapshot restore-files -g {rg} -a %s -p %s -v %s -s %s --file-paths %s" %
                      (account_name, pool_name, volume_name, snapshot_name, snapshot_file_path))
+        self.assertIn('FilePath', str(
+            cm.exception))

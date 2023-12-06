@@ -111,7 +111,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         assert len(volume['protocolTypes']) == 1
         assert volume['protocolTypes'][0] == 'NFSv3'
         # replication
-        # due to a rp bug we dont get the full resource atm        
+        # due to a rp bug we dont get the full resource atm
         # assert volume['dataProtection'] is None
 
         assert volume['kerberosEnabled'] is False
@@ -123,7 +123,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         self.cmd("az netappfiles volume delete --resource-group {rg} --account-name %s --pool-name %s --volume-name %s --force --yes" % (account_name, pool_name, volume_name))
         volume_list = self.cmd("netappfiles volume list --resource-group {rg} -a %s -p %s" % (account_name, pool_name)).get_output_in_json()
         assert len(volume_list) == 0
-    
+
     @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
     def test_create_volume_with_subnet_in_different_rg(self):
@@ -254,7 +254,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
 
         volume_from_id = self.cmd("az netappfiles volume show --ids %s" % volume['id']).get_output_in_json()
         assert volume_from_id['name'] == account_name + '/' + pool_name + '/' + volume_name
-    
+
     @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
     def test_update_volume(self):
@@ -403,7 +403,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         assert volume['exportPolicy']['rules'][0]['nfsv3'] == nfsv3
         assert volume['exportPolicy']['rules'][0]['cifs'] == cifs
         assert volume['exportPolicy']['rules'][0]['allowedClients'] == allowed_clients
-    
+
     @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
     def test_change_pool(self):
@@ -523,7 +523,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
     def test_break_file_locks(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
         pool_name = self.create_random_name(prefix='cli-pool-', length=24)
-        volume_name = self.create_random_name(prefix='cli-vol-', length=24)        
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
 
         volume = self.create_volume(account_name, pool_name, volume_name, '{rg}')
         assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
@@ -546,4 +546,4 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         with self.assertRaises(HttpResponseError) as cm:
             self.cmd("az netappfiles volume get-groupid-list-for-ldapuser -g {rg} -a %s -p %s -v %s --username %s" % (account_name, pool_name, volume_name, username))
         self.assertIn('GroupIdListForLDAPUserNotSupportedVolumes', str(
-            cm.exception))                 
+            cm.exception))
