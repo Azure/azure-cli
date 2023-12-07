@@ -282,22 +282,22 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         )
         self.assertEqual(ctx_1.get_host_group_id(), "test_host_group_id")
 
-    def common_get_capacity_reservation_group_id(self):
+    def common_get_crg_id(self):
         # default
         ctx_1 = AKSAgentPoolContext(
             self.cmd,
-            AKSAgentPoolParamDict({"capacity_reservation_group_id": None}),
+            AKSAgentPoolParamDict({"crg_id": None}),
             self.models,
             DecoratorMode.CREATE,
             self.agentpool_decorator_mode,
         )
-        self.assertEqual(ctx_1.get_capacity_reservation_group_id(), None)
+        self.assertEqual(ctx_1.get_crg_id(), None)
         # custom
         agentpool_1 = self.create_initialized_agentpool_instance(
             capacity_reservation_group_id="test_crg_id"
         )
         ctx_1.attach_agentpool(agentpool_1)
-        self.assertEqual(ctx_1.get_capacity_reservation_group_id(), "test_crg_id")
+        self.assertEqual(ctx_1.get_crg_id(), "test_crg_id")
 
     def common_get_kubernetes_version(self):
         # default
@@ -1522,8 +1522,8 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
     def test_get_drain_timeout(self):
         self.common_get_drain_timeout()
 
-    def test_get_capacity_reservation_group_id(self):
-        self.common_get_capacity_reservation_group_id()
+    def test_get_crg_id(self):
+        self.common_get_crg_id()
 
 class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTestCase):
     def setUp(self):
@@ -1682,8 +1682,8 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
     def test_get_drain_timeout(self):
         self.common_get_drain_timeout()
 
-    def test_get_capacity_reservation_group_id(self):
-        self.common_get_capacity_reservation_group_id()
+    def test_get_crg_id(self):
+        self.common_get_crg_id()
 
 class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
     def _remove_defaults_in_agentpool(self, agentpool):

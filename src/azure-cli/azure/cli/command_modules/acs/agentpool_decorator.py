@@ -369,24 +369,23 @@ class AKSAgentPoolContext(BaseAKSContext):
             host_group_id = raw_value
         return host_group_id
 
-    def get_capacity_reservation_group_id(self) -> Union[str, None]:
-        return self._get_capacity_reservation_group_id()
+    def get_crg_id(self) -> Union[str, None]:
+        return self._get_crg_id()
 
-    def _get_capacity_reservation_group_id(self) -> Union[str, None]:
+    def _get_crg_id(self) -> Union[str, None]:
         """Obtain the value of crg_id.
 
         :return: string or None
         """
-        crg_id = self.raw_param.get("crg_id")
+        raw_value = self.raw_param.get("crg_id")
         # try to read the property value corresponding to the parameter from the `agentpool` object
-        if (
-                self.agentpool and
-                self.agentpool.capacity_reservation_group_id is not None
-        ):
-            crg_id = self.agentpool.capacity_reservation_group_id
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
+        value_from_agentpool = None
+        if self.agentpool and hasattr(self.agentpool, "capacity_reservation_group_id"):
+            value_from_agentpool = self.agentpool.capacity_reservation_group_id
+        if value_from_agentpool is not None:
+            crg_id = value_from_agentpool
+        else:
+            crg_id = raw_value
         return crg_id
 
     def _get_kubernetes_version(self, read_only: bool = False) -> str:
@@ -1598,15 +1597,13 @@ class AKSAgentPoolAddDecorator:
         agentpool.gpu_instance_profile = self.context.get_gpu_instance_profile()
         return agentpool
 
-    def set_up_capacity_reservation_group_id(self, agentpool: AgentPool) -> AgentPool:
+    def set_up_crg_id(self, agentpool: AgentPool) -> AgentPool:
         """Set up crg related properties for the AgentPool object.
 
         :return: the AgentPool object
         """
         self._ensure_agentpool(agentpool)
-        crg_id = self.context.get_capacity_reservation_group_id()
-        if crg_id is not None:
-            agentpool.capacity_reservation_group_id = crg_id
+        agentpool.capacity_reservation_group_id = self.context.get_crg_id()
         return agentpool
 
     def set_up_agentpool_network_profile(self, agentpool: AgentPool) -> AgentPool:
@@ -1657,7 +1654,7 @@ class AKSAgentPoolAddDecorator:
         # set up agentpool network profile
         agentpool = self.set_up_agentpool_network_profile(agentpool)
         # set up crg id
-        agentpool = self.set_up_capacity_reservation_group_id(agentpool)
+        agentpool = self.set_up_crg_id(agentpool)
         # restore defaults
         if not bypass_restore_defaults:
             agentpool = self._restore_defaults_in_agentpool(agentpool)

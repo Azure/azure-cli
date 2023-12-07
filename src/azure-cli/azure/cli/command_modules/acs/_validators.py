@@ -504,7 +504,7 @@ def validate_host_group_id(namespace):
             raise InvalidArgumentValueError("--host-group-id is not a valid Azure resource ID.")
 
 
-def validate_capacity_reservation_group_id(namespace):
+def validate_crg_id(namespace):
     if namespace.crg_id is None:
         return
     from msrestazure.tools import is_valid_resource_id
