@@ -101,7 +101,7 @@ class Extension:
         """
         try:
             if not isinstance(self._preview, bool):
-                self._preview = bool(self.metadata.get(EXT_METADATA_ISPREVIEW))
+                self._preview = is_preview_from_extension_meta(self.metadata)
         except Exception:  # pylint: disable=broad-except
             logger.debug("Unable to get extension preview status: %s", traceback.format_exc())
         return self._preview
@@ -109,15 +109,9 @@ class Extension:
     @property
     def experimental(self):
         """
-        Lazy load experimental status.
-        Returns the experimental status of the extension.
+        In extension semantic versioning, experimental = preview, experimental deprecated
         """
-        try:
-            if not isinstance(self._experimental, bool):
-                self._experimental = bool(self.metadata.get(EXT_METADATA_ISEXPERIMENTAL))
-        except Exception:  # pylint: disable=broad-except
-            logger.debug("Unable to get extension experimental status: %s", traceback.format_exc())
-        return self._experimental
+        return False
 
     def get_version(self):
         raise NotImplementedError()
@@ -359,3 +353,24 @@ def get_extension_names(ext_type=None):
     Returns the extension names of extensions installed in the extensions directory.
     """
     return [ext.name for ext in get_extensions(ext_type=ext_type)]
+
+
+def is_preview_from_extension_meta(extension_meta):
+    return (bool(extension_meta.get(EXT_METADATA_ISPREVIEW, False)) or
+            bool(extension_meta.get(EXT_METADATA_ISEXPERIMENTAL, False)) or
+            is_preview_from_semantic_version(extension_meta.get('version')))
+
+
+def is_preview_from_semantic_version(version):
+    """
+    pre = [a, b] -> preview
+    >>> print(parse("1.2.3").pre)
+    None
+    >>> parse("1.2.3a1").pre
+    ('a', 1)
+    >>> parse("1.2.3b1").pre
+    ('b', 1)
+    """
+    from packaging.version import parse
+    parsed_version = parse(version)
+    return bool(parsed_version.pre and parsed_version.pre[0] in ["a", "b"])

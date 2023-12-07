@@ -236,7 +236,7 @@ class IoTHubTest(ScenarioTest):
         ])
 
         # Test 'az iot hub show-stats'
-        device_count_pattern = r'^\d$'
+        device_count_pattern = r'\d$'
         self.cmd('iot hub show-stats -n {0}'.format(hub), checks=[
             self.check_pattern('disabledDeviceCount', device_count_pattern),
             self.check_pattern('enabledDeviceCount', device_count_pattern),

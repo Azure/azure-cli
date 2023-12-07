@@ -808,6 +808,28 @@ def _get_managed_instance_resource_id(
         name=managed_instance_name))
 
 
+def _get_managed_instance_pool_resource_id(
+        cli_ctx,
+        resource_group_name,
+        instance_pool_name,
+        subscription_id=None):
+    '''
+    Gets instance pool resource id in this Azure environment.
+    '''
+
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import resource_id
+
+    if instance_pool_name:
+        return (resource_id(
+            subscription=subscription_id if subscription_id else get_subscription_id(cli_ctx),
+            resource_group=resource_group_name,
+            namespace='Microsoft.Sql', type='instancePools',
+            name=instance_pool_name))
+
+    return instance_pool_name
+
+
 def db_show_conn_str(
         cmd,
         client_provider,
@@ -3909,6 +3931,9 @@ def instance_pool_create(
     kwargs['sku'] = _find_instance_pool_sku_from_capabilities(
         cmd.cli_ctx, kwargs['location'], sku)
 
+    kwargs['maintenance_configuration_id'] = _complete_maintenance_configuration_id(
+        cmd.cli_ctx, kwargs['maintenance_configuration_id'])
+
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        instance_pool_name=instance_pool_name,
                        resource_group_name=resource_group_name,
@@ -3916,13 +3941,33 @@ def instance_pool_create(
 
 
 def instance_pool_update(
+        cmd,
         instance,
+        vcores=None,
+        tier=None,
+        family=None,
+        maintenance_configuration_id=None,
+        license_type=None,
         tags=None):
     '''
     Updates a instance pool
     '''
 
-    instance.tags = tags
+    instance.tags = (tags or instance.tags)
+    instance.maintenance_configuration_id = _complete_maintenance_configuration_id(
+        cmd.cli_ctx, maintenance_configuration_id or instance.maintenance_configuration_id)
+
+    instance.v_cores = (vcores or instance.v_cores)
+    instance.license_type = (license_type or instance.license_type)
+
+    instance.sku.name = None
+    instance.sku.tier = (tier or instance.sku.tier)
+    instance.sku.family = (family or instance.sku.family)
+
+    instance.sku = _find_instance_pool_sku_from_capabilities(
+        cmd.cli_ctx,
+        instance.location,
+        instance.sku)
 
     return instance
 
@@ -4860,6 +4905,7 @@ def managed_instance_create(
         external_admin_name=None,
         service_principal_type=None,
         zone_redundant=None,
+        instance_pool_name=None,
         **kwargs):
     '''
     Creates a managed instance.
@@ -4914,6 +4960,8 @@ def managed_instance_create(
         azure_ad_only_authentication=ad_only,
         tenant_id=tenant_id)
 
+    kwargs['instance_pool_id'] = _get_managed_instance_pool_resource_id(cmd.cli_ctx, resource_group_name, instance_pool_name)
+
     # Create
     return client.begin_create_or_update(
         managed_instance_name=managed_instance_name,
@@ -4958,9 +5006,10 @@ def managed_instance_get(
     return client.get(resource_group_name, managed_instance_name, expand)
 
 
-def managed_instance_update(
+def managed_instance_update(  # pylint: disable=too-many-locals
         cmd,
         instance,
+        resource_group_name,
         administrator_login_password=None,
         license_type=None,
         vcores=None,
@@ -4981,7 +5030,8 @@ def managed_instance_update(
         virtual_network_subnet_id=None,
         yes=None,
         service_principal_type=None,
-        zone_redundant=None):
+        zone_redundant=None,
+        instance_pool_name=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -5050,6 +5100,9 @@ def managed_instance_update(
 
     if zone_redundant is not None:
         instance.zone_redundant = zone_redundant
+
+    if instance_pool_name is not None:
+        instance.instance_pool_id = _get_managed_instance_pool_resource_id(cmd.cli_ctx, resource_group_name, instance_pool_name)
 
     return instance
 
