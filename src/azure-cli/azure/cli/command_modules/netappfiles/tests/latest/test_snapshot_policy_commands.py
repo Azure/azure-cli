@@ -130,7 +130,7 @@ class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
         assert snapshot_policy['tags']['Tag1'] == 'Value1'
 
         # delete snapshot policy
-        self.cmd("az netappfiles snapshot policy delete -g {rg} -a %s --snapshot-policy-name %s policy -y" %
+        self.cmd("az netappfiles snapshot policy delete -g {rg} -a %s --snapshot-policy-name %s -y" %
                  (account_name, snapshot_policy_name))
 
         # validate snapshot policy doesn't exist
