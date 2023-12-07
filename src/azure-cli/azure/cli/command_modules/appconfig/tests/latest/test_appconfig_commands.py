@@ -909,7 +909,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         })
 
         # Invalid requirement type should fail import
-        with self.assertRaisesRegex(CLIError, "Feature 'Timestamp' must have an Any/All requirement type"):
+        with self.assertRaisesRegex(CLIError, "Feature 'Timestamp' must have an any/all requirement type"):
             self.cmd(
             'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
 

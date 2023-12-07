@@ -187,7 +187,7 @@ def __read_features_from_file(file_path, format_):
     config_data = {}
     features_dict = {}
     # Default is PascalCase, but it will always be overwritten as long as there is a feature section in file
-    feature_management_keywords = FeatureManagementReservedKeywords.get_keywords()
+    feature_management_keywords = FeatureManagementReservedKeywords.get_keywords('pascal')
 
     if format_ == 'properties':
         logger.warning("Importing feature flags from a properties file is not supported. If properties file contains feature flags, they will be imported as regular key-values.")
@@ -196,14 +196,14 @@ def __read_features_from_file(file_path, format_):
     try:
         config_data = __read_with_appropriate_encoding(file_path, format_)
         found_feature_section = False
-        for keywords in FeatureManagementReservedKeywords.ALL:
+        for keywordset in FeatureManagementReservedKeywords.ALL:
             # find the first occurrence of feature management section in file.
             # Enforce the same naming convention for 'EnabledFor' keyword
             # If there are multiple feature sections, we will error out here.
-            if keywords.feature_management in config_data:
+            if keywordset.feature_management in config_data:
                 if not found_feature_section:
-                    features_dict = config_data[keywords.feature_management]
-                    feature_management_keywords = keywords
+                    features_dict = config_data[keywordset.feature_management]
+                    feature_management_keywords = keywordset
                     found_feature_section = True
                 else:
                     raise FileOperationError('Unable to proceed because file contains multiple sections corresponding to "Feature Management".')
@@ -728,9 +728,9 @@ def __convert_feature_dict_to_keyvalue_list(features_dict, feature_management_ke
                         if condition == feature_management_keywords.enabled_for:
                             feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS] = condition_value
                             enabled_for_found = True
-                        elif condition == feature_management_keywords.requirement_type:
-                            if condition_value not in ("All", "Any"):
-                                raise ValidationError("Feature '{0}' must have an Any/All requirement type. \n".format(str(k)))
+                        elif condition == feature_management_keywords.requirement_type and condition_value:
+                            if condition_value.lower() not in ("all", "any"):
+                                raise ValidationError("Feature '{0}' must have an any/all requirement type. \n".format(str(k)))
                             feature_flag_value.conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = condition_value
                         else:
                             feature_flag_value.conditions[condition] = condition_value
