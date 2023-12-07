@@ -3,10 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.mgmt.cdn.models import (
-    RuleIsCompressionEnabled, RequestMethodOperator
-)
 from azure.cli.core.aaz._base import has_value
+from azure.mgmt.cdn.models import (
+    RequestMethodOperator, RuleIsCompressionEnabled
+)
 from msrestazure.tools import is_valid_resource_id
 
 
