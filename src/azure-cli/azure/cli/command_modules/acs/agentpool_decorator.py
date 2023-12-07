@@ -377,17 +377,17 @@ class AKSAgentPoolContext(BaseAKSContext):
 
         :return: string or None
         """
-        capacity_reservation_group_id = self.raw_param.get("capacity_reservation_group_id")
+        crg_id = self.raw_param.get("crg_id")
         # try to read the property value corresponding to the parameter from the `agentpool` object
         if (
                 self.agentpool and
                 self.agentpool.capacity_reservation_group_id is not None
         ):
-            capacity_reservation_group_id = self.agentpool.capacity_reservation_group_id
+            crg_id = self.agentpool.capacity_reservation_group_id
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
-        return capacity_reservation_group_id
+        return crg_id
 
     def _get_kubernetes_version(self, read_only: bool = False) -> str:
         """Internal function to dynamically obtain the value of kubernetes_version according to the context.
@@ -1604,9 +1604,9 @@ class AKSAgentPoolAddDecorator:
         :return: the AgentPool object
         """
         self._ensure_agentpool(agentpool)
-        capacity_reservation_group_id = self.context.get_capacity_reservation_group_id()
-        if capacity_reservation_group_id is not None:
-            agentpool.capacity_reservation_group_id = capacity_reservation_group_id
+        crg_id = self.context.get_capacity_reservation_group_id()
+        if crg_id is not None:
+            agentpool.capacity_reservation_group_id = crg_id
         return agentpool
 
     def set_up_agentpool_network_profile(self, agentpool: AgentPool) -> AgentPool:

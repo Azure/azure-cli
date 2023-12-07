@@ -343,7 +343,7 @@ def load_arguments(self, _):
         c.argument('load_balancer_managed_outbound_ipv6_count', type=int)
         c.argument('load_balancer_outbound_ips', validator=validate_load_balancer_outbound_ips)
         c.argument('load_balancer_outbound_ip_prefixes', validator=validate_load_balancer_outbound_ip_prefixes)
-        c.argument('load_balancer_outbound_portassign_identitys', type=int, validator=validate_load_balancer_outbound_ports)
+        c.argument('load_balancer_outbound_ports', type=int, validator=validate_load_balancer_outbound_ports)
         c.argument('load_balancer_idle_timeout', type=int, validator=validate_load_balancer_idle_timeout)
         c.argument('nat_gateway_managed_outbound_ip_count', type=int, validator=validate_nat_gateway_managed_outbound_ip_count)
         c.argument('nat_gateway_idle_timeout', type=int, validator=validate_nat_gateway_idle_timeout)

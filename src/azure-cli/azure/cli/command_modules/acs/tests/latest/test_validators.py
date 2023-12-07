@@ -476,14 +476,14 @@ class TestKeyVaultSecretsProviderAddon(unittest.TestCase):
         validators.validate_keyvault_secrets_provider_disable_and_enable_parameters(namespace_3)
 
 class CapacityReservationGroupIDNamespace:
-    def __init__(self, capacity_reservation_group_id):
-        self.capacity_reservation_group_id = capacity_reservation_group_id
+    def __init__(self, crg_id):
+        self.crg_id = crg_id
 
 class TestValidateCapacityReservationGroupID(unittest.TestCase):
     def test_invalid_capacity_reservation_group_id(self):
-        invalid_capacity_reservation_group_id = "dummy group id"
-        namespace = CapacityReservationGroupIDNamespace(capacity_reservation_group_id=invalid_capacity_reservation_group_id)
-        err = ("--capacity-reservation-group-id is not a valid Azure resource ID.")
+        invalid_crg_id = "dummy crg id"
+        namespace = CapacityReservationGroupIDNamespace(crg_id=invalid_crg_id)
+        err = ("--crg-id is not a valid Azure resource ID.")
 
         with self.assertRaises(CLIError) as cm:
             validators.validate_capacity_reservation_group_id(namespace)

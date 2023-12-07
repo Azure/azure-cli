@@ -505,12 +505,12 @@ def validate_host_group_id(namespace):
 
 
 def validate_capacity_reservation_group_id(namespace):
-    if namespace.capacity_reservation_group_id is None:
+    if namespace.crg_id is None:
         return
     from msrestazure.tools import is_valid_resource_id
-    if not is_valid_resource_id(namespace.capacity_reservation_group_id):
+    if not is_valid_resource_id(namespace.crg_id):
         raise InvalidArgumentValueError(
-            "--capacity-reservation-group-id is not a valid Azure resource ID.")
+            "--crg-id is not a valid Azure resource ID.")
 
 
 def extract_comma_separated_string(
