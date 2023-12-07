@@ -9,7 +9,8 @@ from azure.core.polling.base_polling import LocationPolling, StatusCheckPolling
 from abc import abstractmethod
 
 from ._poller import AAZNoPolling, AAZBasePolling
-from azure.cli.core.cloud import CloudEndpointNotSetException, CloudNameEnum as _CloudNameEnum
+from azure.cli.core.cloud import (CloudEndpointNotSetException, CloudSuffixNotSetException,
+                                  CloudNameEnum as _CloudNameEnum)
 
 
 logger = get_logger(__name__)
@@ -130,7 +131,7 @@ class AAZBaseClient(PipelineClient):
 
     @classmethod
     def get_cloud_endpoint(cls, ctx, arm_idx):
-        from azure.cli.core.cloud import CloudEndpoints, CloudEndpointNotSetException
+        from azure.cli.core.cloud import CloudEndpoints
         endpoints = None
         # retrieve by indexes mapping
         for property_name, value in CloudEndpoints.ARM_METADATA_INDEX.items():
@@ -147,7 +148,7 @@ class AAZBaseClient(PipelineClient):
 
     @classmethod
     def get_cloud_suffix(cls, ctx, arm_idx):
-        from azure.cli.core.cloud import CloudSuffixes, CloudSuffixNotSetException
+        from azure.cli.core.cloud import CloudSuffixes
         # retrieve by indexes mapping
         suffixes = None
         for property_name, value in CloudSuffixes.ARM_METADATA_INDEX.items():
