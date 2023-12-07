@@ -286,7 +286,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         # default
         ctx_1 = AKSAgentPoolContext(
             self.cmd,
-            AKSAgentPoolParamDict({"crg_id": None}),
+            AKSAgentPoolParamDict({"capacity_reservation_group_id": None}),
             self.models,
             DecoratorMode.CREATE,
             self.agentpool_decorator_mode,
@@ -294,7 +294,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         self.assertEqual(ctx_1.get_capacity_reservation_group_id(), None)
         # custom
         agentpool_1 = self.create_initialized_agentpool_instance(
-            crg_id="test_crg_id"
+            capacity_reservation_group_id="test_crg_id"
         )
         ctx_1.attach_agentpool(agentpool_1)
         self.assertEqual(ctx_1.get_capacity_reservation_group_id(), "test_crg_id")
@@ -2207,7 +2207,7 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
             mode=CONST_NODEPOOL_MODE_USER,
             scale_down_mode=CONST_SCALE_DOWN_MODE_DELETE,
             host_group_id=None,
-            crg_id=None,
+            capacity_reservation_group_id=None,
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
@@ -2351,7 +2351,7 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
             enable_fips=False,
             mode=CONST_NODEPOOL_MODE_SYSTEM,
             host_group_id=None,
-            crg_id=None,
+            capacity_reservation_group_id=None,
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
