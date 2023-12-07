@@ -94,6 +94,7 @@ class Update(AAZCommand):
             options=["-e", "--enabled"],
             arg_group="Properties",
             help="The property to decide policy is enabled or not",
+            default=True,
             nullable=True,
         )
         _args_schema.monthly_backups = AAZIntArg(

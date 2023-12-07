@@ -153,6 +153,7 @@ class Update(AAZCommand):
             options=["-e", "--enabled"],
             arg_group="Properties",
             help="The property to decide policy is enabled or not",
+            default=True,
             nullable=True,
         )
 
@@ -417,11 +418,11 @@ class Update(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("dailySchedule", AAZObjectType)
+                properties.set_prop("dailySchedule", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("enabled", AAZBoolType, ".enabled")
-                properties.set_prop("hourlySchedule", AAZObjectType)
-                properties.set_prop("monthlySchedule", AAZObjectType)
-                properties.set_prop("weeklySchedule", AAZObjectType)
+                properties.set_prop("hourlySchedule", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("monthlySchedule", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("weeklySchedule", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
 
             daily_schedule = _builder.get(".properties.dailySchedule")
             if daily_schedule is not None:
@@ -511,13 +512,16 @@ class _UpdateHelper:
         properties = _schema_snapshot_policy_read.properties
         properties.daily_schedule = AAZObjectType(
             serialized_name="dailySchedule",
+            flags={"required": True},
         )
         properties.enabled = AAZBoolType()
         properties.hourly_schedule = AAZObjectType(
             serialized_name="hourlySchedule",
+            flags={"required": True},
         )
         properties.monthly_schedule = AAZObjectType(
             serialized_name="monthlySchedule",
+            flags={"required": True},
         )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
@@ -525,6 +529,7 @@ class _UpdateHelper:
         )
         properties.weekly_schedule = AAZObjectType(
             serialized_name="weeklySchedule",
+            flags={"required": True},
         )
 
         daily_schedule = _schema_snapshot_policy_read.properties.daily_schedule

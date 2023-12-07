@@ -189,13 +189,16 @@ class Wait(AAZWaitCommand):
             properties = cls._schema_on_200.properties
             properties.daily_schedule = AAZObjectType(
                 serialized_name="dailySchedule",
+                flags={"required": True},
             )
             properties.enabled = AAZBoolType()
             properties.hourly_schedule = AAZObjectType(
                 serialized_name="hourlySchedule",
+                flags={"required": True},
             )
             properties.monthly_schedule = AAZObjectType(
                 serialized_name="monthlySchedule",
+                flags={"required": True},
             )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -203,6 +206,7 @@ class Wait(AAZWaitCommand):
             )
             properties.weekly_schedule = AAZObjectType(
                 serialized_name="weeklySchedule",
+                flags={"required": True},
             )
 
             daily_schedule = cls._schema_on_200.properties.daily_schedule

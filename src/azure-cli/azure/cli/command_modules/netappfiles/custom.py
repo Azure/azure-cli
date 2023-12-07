@@ -16,6 +16,7 @@ from .aaz.latest.netappfiles.account.ad import Add as _ActiveDirectoryAdd, List 
 from .aaz.latest.netappfiles.volume import Create as _VolumeCreate, Update as _VolumeUpdate, BreakFileLocks as _BreakFileLocks
 from .aaz.latest.netappfiles.volume_group import Create as _VolumeGroupCreate
 from .aaz.latest.netappfiles.volume.export_policy import List as _ExportPolicyList, Add as _ExportPolicyAdd, Remove as _ExportPolicyRemove
+from .aaz.latest.netappfiles.snapshot.policy import Create as _SnapshotPolicyCreate
 from .aaz.latest.netappfiles.volume.replication import Resume as _ReplicationResume
 from .aaz.latest.netappfiles.pool import Create as _PoolCreate, Update as _PoolUpdate
 
@@ -545,15 +546,14 @@ class ExportPolicyRemove(_ExportPolicyRemove):
 class ReplicationResume(_ReplicationResume):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        logger.debug("ANF log: ExportPolicyRemove _build_arguments_schema")
+        logger.debug("ANF log: ReplicationResume _build_arguments_schema")
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         return args_schema
 
     def pre_operations(self):
         # RP expects bytes but CLI allows integer TiBs for ease of use
         logger.debug("ANF log: ReplicationResume pre_operations")
-        logger.warning("\nIf any quota rules exists on destination volume they will be overwritten\
-with source volume's quota rules.")
+        logger.warning("\nIf any quota rules exists on destination volume they will be overwritten with source volume's quota rules.")
 
 # endregion
 
@@ -1224,4 +1224,27 @@ class VolumeType(Enum):
     LOG_BACKUP = "log-backup"
 
 
+# endregion
+
+# region snapshotPolicy
+class SnapshotPolicyCreate(_SnapshotPolicyCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        logger.debug("ANF-Extension log: SnapshotPolicyCreate pre_operations")
+        # if not has_value(args.snapshots_to_keep):
+        #     args.snapshots_to_keep = 1
+
+        # if not has_value(args.hourly_snapshots):
+        #     args.hourly_snapshots = 1
+
+        # if not has_value(args.weekly_snapshots):
+        #     args.weekly_snapshots = 1
+
+        # if not has_value(args.monthly_snapshots):
+        #     args.monthly_snapshots = 1
 # endregion
