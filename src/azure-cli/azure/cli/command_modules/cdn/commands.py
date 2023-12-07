@@ -245,6 +245,9 @@ def load_command_table(self, _):
                          doc_string_source='azure.mgmt.cdn.models#Rule')
         g.custom_command('list', 'list_afd_rule_action')
 
+    from .custom.custom_afdx import AFDProfileUpdate
+    self.command_table['afd profile update'] = AFDProfileUpdate(loader=self)
+
     from .custom.custom_afdx import AFDOriginCreate
     self.command_table['afd origin create'] = AFDOriginCreate(loader=self)
 

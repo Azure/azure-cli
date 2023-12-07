@@ -18,6 +18,8 @@ from azure.cli.command_modules.cdn.aaz.latest.afd.secret import Show as _AFDSecr
     Create as _AFDSecretCreate, Update as _AFDSecretUpdate
 from azure.cli.command_modules.cdn.aaz.latest.afd.security_policy import Show as _AFDSecurityPolicyShow, \
     Create as _AFDSecurityPolicyCreate, Update as _AFDSecurityPolicyUpdate
+from azure.cli.command_modules.cdn.aaz.latest.afd.profile import Show as _AFDProfileShow, \
+    Update as _AFDProfileUpdate
 from azure.cli.core.aaz import AAZStrArg, AAZBoolArg, AAZListArg, AAZDateArg
 
 logger = get_logger(__name__)
@@ -65,6 +67,24 @@ def default_content_types():
             'text/x-script',
             'text/x-component',
             'text/x-java-source']
+
+
+class AFDProfileUpdate(_AFDProfileUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        existing = _AFDProfileShow(cli_ctx=self.cli_ctx)(command_args={
+            'resource_group': args.resource_group,
+            'profile_name': args.profile_name
+        })
+        existing_location = None if 'location' not in existing else existing['location']
+        args.location = existing_location
+        print(args.tags)
+        args.tags = args.tags if has_value(args.tags) else existing['tags']
 
 
 class AFDOriginCreate(_AFDOriginCreate):
@@ -183,7 +203,8 @@ class AFDOriginUpdate(_AFDOriginUpdate):
         args.host_name = args.host_name if args.host_name is not None else existing['hostName']
         args.http_port = args.http_port if args.http_port is not None else existing['httpPort']
         args.https_port = args.https_port if args.https_port is not None else existing['httpsPort']
-        args.origin_host_header = args.origin_host_header if args.origin_host_header is not None else existing['originHostHeader']
+        args.origin_host_header = args.origin_host_header if args.origin_host_header is not None \
+            else existing['originHostHeader']
         args.priority = args.priority if args.priority is not None else existing['priority']
         args.weight = args.weight if args.weight is not None else existing['weight']
         args.enabled_state = args.enabled_state if args.enabled_state is not None else existing['enabledState']
