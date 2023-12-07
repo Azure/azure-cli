@@ -18,10 +18,6 @@ def load_command_table(self, _):
         self.command_table["netappfiles account ad update"] = ActiveDirectoryUpdate(loader=self)
         self.command_table["netappfiles account ad list"] = ActiveDirectoryList(loader=self)
 
-    with self.command_group('netappfiles snapshot policy'):
-        from .custom import SnapshotPolicyCreate
-        self.command_table["netappfiles snapshot policy create"] = SnapshotPolicyCreate(loader=self)
-
     with self.command_group('netappfiles pool'):
         from .custom import PoolCreate, PoolUpdate
         self.command_table["netappfiles pool create"] = PoolCreate(loader=self)

@@ -16,7 +16,6 @@ from .aaz.latest.netappfiles.account.ad import Add as _ActiveDirectoryAdd, List 
 from .aaz.latest.netappfiles.volume import Create as _VolumeCreate, Update as _VolumeUpdate, BreakFileLocks as _BreakFileLocks
 from .aaz.latest.netappfiles.volume_group import Create as _VolumeGroupCreate
 from .aaz.latest.netappfiles.volume.export_policy import List as _ExportPolicyList, Add as _ExportPolicyAdd, Remove as _ExportPolicyRemove
-from .aaz.latest.netappfiles.snapshot.policy import Create as _SnapshotPolicyCreate
 from .aaz.latest.netappfiles.volume.replication import Resume as _ReplicationResume
 from .aaz.latest.netappfiles.pool import Create as _PoolCreate, Update as _PoolUpdate
 
@@ -1223,28 +1222,4 @@ class VolumeType(Enum):
     DATA_BACKUP = "data-backup"
     LOG_BACKUP = "log-backup"
 
-
-# endregion
-
-# region snapshotPolicy
-class SnapshotPolicyCreate(_SnapshotPolicyCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        logger.debug("ANF-Extension log: SnapshotPolicyCreate pre_operations")
-        # if not has_value(args.snapshots_to_keep):
-        #     args.snapshots_to_keep = 1
-
-        # if not has_value(args.hourly_snapshots):
-        #     args.hourly_snapshots = 1
-
-        # if not has_value(args.weekly_snapshots):
-        #     args.weekly_snapshots = 1
-
-        # if not has_value(args.monthly_snapshots):
-        #     args.monthly_snapshots = 1
 # endregion
