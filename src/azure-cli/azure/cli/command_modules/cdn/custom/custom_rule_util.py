@@ -328,15 +328,15 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
         formatetd_origin_group = None
         try:
             formatetd_origin_group = origin_group.to_serialized_data()
-        except:
+        except AttributeError:
             formatetd_origin_group = origin_group
 
         if not is_valid_resource_id(formatetd_origin_group):
             # Ideally we should use resource_id but Auzre FrontDoor portal extension has some case-sensitive issues
             # that prevent it from displaying correctly in portal.
-            origin_group = f'/subscriptions/{sub_id}/resourcegroups/{resource_group_name}'
-            f'/providers/Microsoft.Cdn/profiles/{profile_name}/endpoints/{endpoint_name}'
-            f'/origingroups/{origin_group}'
+            origin_group = f'/subscriptions/{sub_id}/resourcegroups/{resource_group_name}' \
+                f'/providers/Microsoft.Cdn/profiles/{profile_name}/endpoints/{endpoint_name}' \
+                f'/origingroups/{origin_group}'
         action = {
             "origin_group_override": {
                 "parameters": {
@@ -350,12 +350,11 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
         return action
     if action_name == "RouteConfigurationOverride":
         origin_group_override = None
-
         try:
             formatetd_origin_group = origin_group.to_serialized_data()
-        except:
+        except AttributeError:
             formatetd_origin_group = origin_group
-        if has_value(origin_group) and origin_group is not None:
+        if formatetd_origin_group is not None:
             if is_valid_resource_id(formatetd_origin_group):
                 origin_group_override = {
                     "origin_group": {
@@ -364,9 +363,9 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
                     "forwarding_protocol": forwarding_protocol
                 }
             else:
-                origin_group_refernce = f'/subscriptions/{sub_id}/resourcegroups/'
-                f'{resource_group_name}/providers/Microsoft.Cdn/profiles/{profile_name}/'
-                f'origingroups/{origin_group}'
+                origin_group_refernce = f'/subscriptions/{sub_id}/resourcegroups/' \
+                    f'{resource_group_name}/providers/Microsoft.Cdn/profiles/{profile_name}/' \
+                    f'origingroups/{origin_group}'
                 origin_group_override = {
                     "origin_group": {
                         "id": origin_group_refernce

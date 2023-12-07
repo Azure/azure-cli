@@ -235,8 +235,8 @@ class AFDRouteCreate(_AFDRouteCreate):
         if has_value(args.custom_domains):
             for custom_domain in args.custom_domains:
                 if '/customdomains/' not in custom_domain.to_serialized_data().lower():
-                    custom_domain = f'/subscriptions/{self.ctx.subscription_id}/resourceGroups/{args.resource_group}'
-                    f'/providers/Microsoft.Cdn/profiles/{args.profile_name}/customDomains/{custom_domain}'
+                    custom_domain = f'/subscriptions/{self.ctx.subscription_id}/resourceGroups/{args.resource_group}' \
+                        f'/providers/Microsoft.Cdn/profiles/{args.profile_name}/customDomains/{custom_domain}'
                     item = {
                         'id': custom_domain,
                     }
@@ -244,8 +244,8 @@ class AFDRouteCreate(_AFDRouteCreate):
             args.formatted_custom_domains = custom_domains
 
         if has_value(args.origin_group) and '/origingroups/' not in args.origin_group.to_serialized_data().lower():
-            args.origin_group = f'/subscriptions/{self.ctx.subscription_id}/resourceGroups/{args.resource_group}'
-            f'/providers/Microsoft.Cdn/profiles/{args.profile_name}/originGroups/{args.origin_group}'
+            args.origin_group = f'/subscriptions/{self.ctx.subscription_id}/resourceGroups/{args.resource_group}' \
+                f'/providers/Microsoft.Cdn/profiles/{args.profile_name}/originGroups/{args.origin_group}'
 
         cache_configuration = {
             'query_string_caching_behavior': args.query_string_caching_behavior,
@@ -269,8 +269,8 @@ class AFDRouteCreate(_AFDRouteCreate):
         if has_value(args.rule_sets):
             for rule_set in args.rule_sets:
                 if '/rulesets/' not in rule_set.to_serialized_data().lower():
-                    rule_set = f'/subscriptions/{self.ctx.subscription_id}/resourceGroups/{args.resource_group}'
-                    f'/providers/Microsoft.Cdn/profiles/{args.profile_name}/ruleSets/{rule_set}'
+                    rule_set = f'/subscriptions/{self.ctx.subscription_id}/resourceGroups/{args.resource_group}' \
+                        f'/providers/Microsoft.Cdn/profiles/{args.profile_name}/ruleSets/{rule_set}'
                     item = {
                         'id': rule_set,
                     }
@@ -328,8 +328,8 @@ class AFDRouteUpdate(_AFDRouteUpdate):
         if has_value(args.custom_domains):
             for custom_domain in args.custom_domains:
                 if '/customdomains/' not in custom_domain.to_serialized_data().lower():
-                    custom_domain = f'/subscriptions/{self.ctx.subscription_id}/resourceGroups/{args.resource_group}'
-                    f'/providers/Microsoft.Cdn/profiles/{args.profile_name}/customDomains/{custom_domain}'
+                    custom_domain = f'/subscriptions/{self.ctx.subscription_id}/resourceGroups/{args.resource_group}' \
+                        f'/providers/Microsoft.Cdn/profiles/{args.profile_name}/customDomains/{custom_domain}'
                     item = {
                         'id': custom_domain,
                     }
@@ -337,8 +337,8 @@ class AFDRouteUpdate(_AFDRouteUpdate):
             args.formatted_custom_domains = custom_domains
 
         if has_value(args.origin_group) and '/origingroups/' not in args.origin_group.to_serialized_data().lower():
-            args.origin_group = f'/subscriptions/{self.ctx.subscription_id}/resourceGroups/{args.resource_group}'
-            f'/providers/Microsoft.Cdn/profiles/{args.profile_name}/originGroups/{args.origin_group}'
+            args.origin_group = f'/subscriptions/{self.ctx.subscription_id}/resourceGroups/{args.resource_group}' \
+                f'/providers/Microsoft.Cdn/profiles/{args.profile_name}/originGroups/{args.origin_group}'
 
         existing = _AFDRouteShow(cli_ctx=self.cli_ctx)(command_args={
             'resource_group': args.resource_group,
@@ -388,8 +388,8 @@ class AFDRouteUpdate(_AFDRouteUpdate):
         if has_value(args.rule_sets):
             for rule_set in args.rule_sets:
                 if '/rulesets/' not in rule_set.to_serialized_data().lower():
-                    rule_set = f'/subscriptions/{self.ctx.subscription_id}/resourceGroups/{args.resource_group}'
-                    f'/providers/Microsoft.Cdn/profiles/{args.profile_name}/ruleSets/{rule_set}'
+                    rule_set = f'/subscriptions/{self.ctx.subscription_id}/resourceGroups/{args.resource_group}' \
+                        f'/providers/Microsoft.Cdn/profiles/{args.profile_name}/ruleSets/{rule_set}'
                     item = {
                         'id': rule_set,
                     }
