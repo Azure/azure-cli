@@ -7,12 +7,17 @@ from azure.mgmt.cdn.models import (ForwardingProtocol, AfdQueryStringCachingBeha
 from knack.log import get_logger
 from azure.cli.core.aaz._base import has_value
 from azure.cli.core.commands.client_factory import get_subscription_id
-from .custom_rule_util import (create_condition, create_action, create_conditions_from_existing, create_actions_from_existing)
+from .custom_rule_util import (create_condition, create_action,
+                               create_conditions_from_existing, create_actions_from_existing)
 from azure.cli.command_modules.cdn.aaz.latest.afd.origin import Create as _AFDOriginCreate, Update as _AFDOriginUpdate
-from azure.cli.command_modules.cdn.aaz.latest.afd.route import Show as _AFDRouteShow, Create as _AFDRouteCreate, Update as _AFDRouteUpdate
-from azure.cli.command_modules.cdn.aaz.latest.afd.rule import Show as _RuleShow, Create as _AFDRuleCreate, Update as _AFDRuleUpdate
-from azure.cli.command_modules.cdn.aaz.latest.afd.secret import Show as _AFDSecretShow, Create as _AFDSecretCreate, Update as _AFDSecretUpdate
-from azure.cli.command_modules.cdn.aaz.latest.afd.security_policy import Show as _AFDSecurityPolicyShow, Create as _AFDSecurityPolicyCreate, Update as _AFDSecurityPolicyUpdate
+from azure.cli.command_modules.cdn.aaz.latest.afd.route import Show as _AFDRouteShow, \
+    Create as _AFDRouteCreate, Update as _AFDRouteUpdate
+from azure.cli.command_modules.cdn.aaz.latest.afd.rule import Show as _RuleShow, \
+    Create as _AFDRuleCreate, Update as _AFDRuleUpdate
+from azure.cli.command_modules.cdn.aaz.latest.afd.secret import Show as _AFDSecretShow, \
+    Create as _AFDSecretCreate, Update as _AFDSecretUpdate
+from azure.cli.command_modules.cdn.aaz.latest.afd.security_policy import Show as _AFDSecurityPolicyShow, \
+    Create as _AFDSecurityPolicyCreate, Update as _AFDSecurityPolicyUpdate
 from azure.cli.core.aaz import AAZStrArg, AAZBoolArg, AAZListArg, AAZDateArg
 
 logger = get_logger(__name__)
@@ -143,11 +148,12 @@ class AFDOriginUpdate(_AFDOriginUpdate):
         if (not has_value(args.enable_private_link) and 'sharedPrivateLinkResource' not in existing) or \
                 (has_value(args.enable_private_link) and args.enable_private_link.to_serialized_data() is False):
             shared_private_link_resource = None
-        elif (has_value(args.private_link_location) or
+        elif ((has_value(args.private_link_location) or
               has_value(args.private_link_resource) or
               has_value(args.private_link_request_message) or
-              has_value(args.private_link_sub_resource_type)) or args.enable_private_link.to_serialized_data() is True or \
-                'sharedPrivateLinkResource' in existing:
+              has_value(args.private_link_sub_resource_type)) or
+              args.enable_private_link.to_serialized_data() is True or
+              'sharedPrivateLinkResource' in existing):
             existing_private_link_location = None if 'sharedPrivateLinkResource' not in existing or \
                 'privateLinkLocation' not in existing['sharedPrivateLinkResource'] \
                 else existing['sharedPrivateLinkResource']['privateLinkLocation']
@@ -181,7 +187,8 @@ class AFDOriginUpdate(_AFDOriginUpdate):
         args.priority = args.priority if args.priority is not None else existing['priority']
         args.weight = args.weight if args.weight is not None else existing['weight']
         args.enabled_state = args.enabled_state if args.enabled_state is not None else existing['enabledState']
-        args.enforce_certificate_name_check = args.enforce_certificate_name_check if args.enforce_certificate_name_check is not None \
+        args.enforce_certificate_name_check = \
+            args.enforce_certificate_name_check if args.enforce_certificate_name_check is not None \
             else existing['enforceCertificateNameCheck']
 
 
@@ -208,7 +215,8 @@ class AFDRouteCreate(_AFDRouteCreate):
         args_schema.query_string_caching_behavior = AAZStrArg(
             options=['--query-string-caching-behavior'],
             help='Defines how Frontdoor caches requests that include query strings.'
-            'You can ignore any query strings when caching, ignore specific query strings, cache every request with a unique URL, or cache specific query strings',
+            'You can ignore any query strings when caching, ignore specific query strings,'
+            'cache every request with a unique URL, or cache specific query strings',
         )
         args_schema.query_parameters = AAZListArg(
             options=['--query-parameters'],
@@ -223,8 +231,10 @@ class AFDRouteCreate(_AFDRouteCreate):
         args_schema.enable_compression = AAZBoolArg(
             options=['--enable-compression'],
             help='Indicates whether content compression is enabled on AzureFrontDoor. '
-            'Default value is false. If compression is enabled, content will be served as compressed if user requests for a compressed version.'
-            'Content won\'t be compressed on AzureFrontDoor when requested content is smaller than 1 byte or larger than 1 MB.',
+            'Default value is false. If compression is enabled,'
+            'content will be served as compressed if user requests for a compressed version.'
+            'Content won\'t be compressed on AzureFrontDoor'
+            'when requested content is smaller than 1 byte or larger than 1 MB.',
         )
         return args_schema
 
@@ -249,7 +259,9 @@ class AFDRouteCreate(_AFDRouteCreate):
 
         cache_configuration = {
             'query_string_caching_behavior': args.query_string_caching_behavior,
-            'query_parameters': None if not has_value(args.query_parameters) or args.query_parameters is None else ",".join(args.query_parameters.to_serialized_data()),
+            'query_parameters': None if (not has_value(args.query_parameters) or
+                                         args.query_parameters is None)
+            else ",".join(args.query_parameters.to_serialized_data()),
             'compression_settings': {
                 'is_compression_enabled': args.enable_compression,
                 'content_types_to_compress': args.content_types_to_compress
@@ -301,7 +313,8 @@ class AFDRouteUpdate(_AFDRouteUpdate):
         args_schema.query_string_caching_behavior = AAZStrArg(
             options=['--query-string-caching-behavior'],
             help='Defines how Frontdoor caches requests that include query strings.'
-            'You can ignore any query strings when caching, ignore specific query strings, cache every request with a unique URL, or cache specific query strings',
+            'You can ignore any query strings when caching, ignore specific query strings,'
+            'cache every request with a unique URL, or cache specific query strings',
         )
         args_schema.query_parameters = AAZListArg(
             options=['--query-parameters'],
@@ -317,7 +330,8 @@ class AFDRouteUpdate(_AFDRouteUpdate):
             options=['--enable-compression'],
             help='Indicates whether content compression is enabled on AzureFrontDoor. Default value is false.'
             'If compression is enabled, content will be served as compressed if user requests for a compressed version.'
-            'Content won\'t be compressed on AzureFrontDoor when requested content is smaller than 1 byte or larger than 1 MB.',
+            'Content won\'t be compressed on AzureFrontDoor'
+            'when requested content is smaller than 1 byte or larger than 1 MB.',
         )
         return args_schema
 
@@ -349,7 +363,9 @@ class AFDRouteUpdate(_AFDRouteUpdate):
 
         cache_configuration = {
             'query_string_caching_behavior': args.query_string_caching_behavior,
-            'query_parameters': None if not has_value(args.query_parameters) or args.query_parameters is None else ",".join(args.query_parameters.to_serialized_data()),
+            'query_parameters': None if (not has_value(args.query_parameters) or
+                                         args.query_parameters is None)
+            else ",".join(args.query_parameters.to_serialized_data()),
             'compression_settings': {
                 'is_compression_enabled': args.enable_compression,
                 'content_types_to_compress': args.content_types_to_compress,
@@ -361,26 +377,38 @@ class AFDRouteUpdate(_AFDRouteUpdate):
                 cache_configuration = None
             else:
                 if not has_value(args.query_string_caching_behavior):
-                    if 'cacheConfiguration' in existing and 'queryStringCachingBehavior' in existing['cacheConfiguration']:
-                        cache_configuration['query_string_caching_behavior'] = existing['cacheConfiguration']['queryStringCachingBehavior']
+                    if ('cacheConfiguration' in existing and
+                            'queryStringCachingBehavior' in existing['cacheConfiguration']):
+                        cache_configuration['query_string_caching_behavior'] = \
+                            existing['cacheConfiguration']['queryStringCachingBehavior']
                 if not has_value(args.query_parameters):
                     if 'cacheConfiguration' in existing and 'queryParameters' in existing['cacheConfiguration']:
                         cache_configuration['query_parameters'] = existing['cacheConfiguration']['queryParameters']
                 if not has_value(args.content_types_to_compress):
-                    if 'cacheConfiguration' in existing and 'compressionSettings' in existing['cacheConfiguration'] and 'contentTypesToCompress' in existing['cacheConfiguration']['compressionSettings']:
-                        cache_configuration['compression_settings']['content_types_to_compress'] = existing['cacheConfiguration']['compressionSettings']['contentTypesToCompress']
+                    if ('cacheConfiguration' in existing and
+                            'compressionSettings' in existing['cacheConfiguration'] and
+                            'contentTypesToCompress' in existing['cacheConfiguration']['compressionSettings']):
+                        cache_configuration['compression_settings']['content_types_to_compress'] = \
+                            existing['cacheConfiguration']['compressionSettings']['contentTypesToCompress']
                 if not has_value(args.enable_compression):
-                    if 'cacheConfiguration' in existing and 'compressionSettings' in existing['cacheConfiguration'] and 'isCompressionEnabled' in existing['cacheConfiguration']['compressionSettings']:
-                        cache_configuration['compression_settings']['is_compression_enabled'] = existing['cacheConfiguration']['compressionSettings']['isCompressionEnabled']
+                    if ('cacheConfiguration' in existing and
+                            'compressionSettings' in existing['cacheConfiguration'] and
+                            'isCompressionEnabled' in existing['cacheConfiguration']['compressionSettings']):
+                        cache_configuration['compression_settings']['is_compression_enabled'] = \
+                            existing['cacheConfiguration']['compressionSettings']['isCompressionEnabled']
         elif args.enable_caching.to_serialized_data() is False:
             cache_configuration = None
         else:
-            if not has_value(args.enable_compression) and 'cacheConfiguration' in existing and 'compressionSettings' in existing['cacheConfiguration'] and 'contentTypesToCompress' in existing['cacheConfiguration']['compressionSettings']:
-                cache_configuration['compression_settings']['content_types_to_compress'] = existing['cacheConfiguration']['compressionSettings']['contentTypesToCompress']
+            if (not has_value(args.enable_compression) and 'cacheConfiguration' in existing and
+                    'compressionSettings' in existing['cacheConfiguration'] and
+                    'contentTypesToCompress' in existing['cacheConfiguration']['compressionSettings']):
+                cache_configuration['compression_settings']['content_types_to_compress'] = \
+                    existing['cacheConfiguration']['compressionSettings']['contentTypesToCompress']
             elif args.enable_compression.to_serialized_data() is False:
                 cache_configuration['compression_settings']['content_types_to_compress'] = []
             else:
-                if not has_value(args.content_types_to_compress) or args.content_types_to_compress.to_serialized_data() is None:
+                if (not has_value(args.content_types_to_compress) or
+                        args.content_types_to_compress.to_serialized_data()) is None:
                     cache_configuration['compression_settings']['content_types_to_compress'] = default_content_types()
         args.cache_configuration = cache_configuration
 
@@ -403,7 +431,8 @@ class AFDRuleCreate(_AFDRuleCreate):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.action_name = AAZStrArg(
             options=['--action-name'],
-            help='The name of the action for the delivery rule: https://docs.microsoft.com/en-us/azure/frontdoor/front-door-rules-engine-actions.',
+            help='The name of the action for the delivery rule: '
+            'https://docs.microsoft.com/en-us/azure/frontdoor/front-door-rules-engine-actions.',
         )
         args_schema.cache_behavior = AAZStrArg(
             options=['--cache-behavior'],
@@ -423,11 +452,13 @@ class AFDRuleCreate(_AFDRuleCreate):
         )
         args_schema.custom_path = AAZStrArg(
             options=['--custom-path'],
-            help='The full path to redirect. Path cannot be empty and must start with /. Leave empty to use the incoming path as destination pat',
+            help='The full path to redirect. Path cannot be empty and must start with /.'
+            'Leave empty to use the incoming path as destination pat',
         )
         args_schema.custom_querystring = AAZStrArg(
             options=['--custom-querystring'],
-            help='The set of query strings to be placed in the redirect URL. leave empty to preserve the incoming query string.',
+            help='The set of query strings to be placed in the redirect URL.'
+            'leave empty to preserve the incoming query string.',
         )
         args_schema.destination = AAZStrArg(
             options=['--destination'],
@@ -441,7 +472,8 @@ class AFDRuleCreate(_AFDRuleCreate):
             options=['--enable-compression'],
             help='Indicates whether content compression is enabled on AzureFrontDoor. Default value is false.'
             'If compression is enabled, content will be served as compressed if user requests for a compressed version.'
-            'Content won\'t be compressed on AzureFrontDoor when requested content is smaller than 1 byte or larger than 1 MB.',
+            'Content won\'t be compressed on AzureFrontDoor'
+            'when requested content is smaller than 1 byte or larger than 1 MB.',
         )
         args_schema.forwarding_protocol = AAZStrArg(
             options=['--forwarding-protocol'],
@@ -466,7 +498,8 @@ class AFDRuleCreate(_AFDRuleCreate):
         args_schema.match_values.Element = AAZStrArg()
         args_schema.match_variable = AAZStrArg(
             options=['--match-variable'],
-            help='Name of the match condition: https://docs.microsoft.com/en-us/azure/frontdoor/rules-match-conditions.',
+            help='Name of the match condition: '
+            'https://docs.microsoft.com/en-us/azure/frontdoor/rules-match-conditions.',
         )
         args_schema.negate_condition = AAZBoolArg(
             options=['--negate-condition'],
@@ -492,7 +525,8 @@ class AFDRuleCreate(_AFDRuleCreate):
         args_schema.query_string_caching_behavior = AAZStrArg(
             options=['--query-string-caching-behavior'],
             help='Defines how CDN caches requests that include query strings.'
-            'You can ignore any query strings when caching, bypass caching to prevent requests that contain query strings from being cached,'
+            'You can ignore any query strings when caching,'
+            'bypass caching to prevent requests that contain query strings from being cached,'
             'or cache every request with a unique URL.',
         )
         args_schema.redirect_protocol = AAZStrArg(
@@ -522,7 +556,8 @@ class AFDRuleCreate(_AFDRuleCreate):
         args = self.ctx.args
         # conditions
         conditions = []
-        condition = create_condition(args.match_variable, args.operator, args.match_values, args.selector, args.negate_condition, args.transforms)
+        condition = create_condition(args.match_variable, args.operator,
+                                     args.match_values, args.selector, args.negate_condition, args.transforms)
         if condition is not None:
             conditions.append(condition)
         args.conditions = conditions
@@ -531,7 +566,8 @@ class AFDRuleCreate(_AFDRuleCreate):
         actions = []
         action = create_action(
             args.action_name, args.cache_behavior, args.cache_duration, args.header_action,
-            args.header_name, args.header_value, None, None if args.query_parameters is None else ','.join(args.query_parameters),
+            args.header_name, args.header_value, None,
+            None if args.query_parameters is None else ','.join(args.query_parameters),
             args.redirect_type, args.redirect_protocol, args.custom_hostname,
             args.custom_path, args.custom_querystring, args.custom_fragment, args.source_pattern,
             args.destination, args.preserve_unmatched_path,
@@ -571,7 +607,9 @@ def add_afd_rule_condition(cmd, resource_group_name, profile_name, rule_set_name
         'rule_name': rule_name,
         'conditions': conditions,
         'actions': existing_actions,
-        'match_processing_behavior': None if 'matchProcessingBehavior' not in existing else existing['matchProcessingBehavior'],
+        'match_processing_behavior': None
+        if 'matchProcessingBehavior' not in existing
+        else existing['matchProcessingBehavior'],
         'order': None if 'order' not in existing else existing['order']
     })
 
@@ -615,7 +653,9 @@ def add_afd_rule_action(cmd, resource_group_name, profile_name, rule_set_name,
         'rule_name': rule_name,
         'conditions': existing_conditions,
         'actions': actions,
-        'match_processing_behavior': None if 'matchProcessingBehavior' not in existing else existing['matchProcessingBehavior'],
+        'match_processing_behavior': None
+        if 'matchProcessingBehavior' not in existing
+        else existing['matchProcessingBehavior'],
         'order': None if 'order' not in existing else existing['order']
     })
 
@@ -644,7 +684,9 @@ def remove_afd_rule_condition(cmd, resource_group_name, profile_name,
         'rule_name': rule_name,
         'conditions': conditions,
         'actions': existing_actions,
-        'match_processing_behavior': None if 'matchProcessingBehavior' not in existing else existing['matchProcessingBehavior'],
+        'match_processing_behavior': None
+        if 'matchProcessingBehavior' not in existing
+        else existing['matchProcessingBehavior'],
         'order': None if 'order' not in existing else existing['order']
     })
 
@@ -672,7 +714,9 @@ def remove_afd_rule_action(cmd, resource_group_name, profile_name, rule_set_name
         'rule_name': rule_name,
         'actions': actions,
         'conditions': existing_conditions,
-        'match_processing_behavior': None if 'matchProcessingBehavior' not in existing else existing['matchProcessingBehavior'],
+        'match_processing_behavior': None
+        if 'matchProcessingBehavior' not in existing
+        else existing['matchProcessingBehavior'],
         'order': None if 'order' not in existing else existing['order']
     })
 
@@ -772,14 +816,19 @@ class AFDSecretUpdate(_AFDSecretUpdate):
             'secret_name': args.secret_name
         })
 
-        secret_source = args.secret_source if has_value(args.secret_source) else existing['parameters']['secretSource']['id']
-        if 'secretVersion' in existing['parameters'] and existing['parameters']['secretVersion'] in args.secret_source.to_serialized_data():
-            existing_secret_version = existing['parameters']['secretVersion']
+        para = existing['parameters']
+        secret_source = args.secret_source if has_value(args.secret_source) else para['secretSource']['id']
+        if 'secretVersion' in para and para['secretVersion'] in args.secret_source.to_serialized_data():
+            existing_secret_version = para['secretVersion']
             version_start = args.secret_source.to_serialized_data().lower().rindex(f'/{existing_secret_version}')
             secret_source = args.secret_source.to_serialized_data()[0:version_start]
 
-        secret_version = args.secret_version if has_value(args.secret_version) and args.secret_version is not None else existing['parameters']['secretVersion']
-        use_latest_version = args.use_latest_version if has_value(args.use_latest_version) and args.use_latest_version is not None else existing['parameters']['useLatestVersion']
+        secret_version = args.secret_version \
+            if has_value(args.secret_version) and args.secret_version is not None \
+            else para['secretVersion']
+        use_latest_version = args.use_latest_version \
+            if has_value(args.use_latest_version) and args.use_latest_version is not None \
+            else para['useLatestVersion']
 
         parameters = {
             'customer-certificate': {
@@ -869,6 +918,7 @@ class AFDSecurityPolicyUpdate(_AFDSecurityPolicyUpdate):
             }]
 
         args.web_application_firewall = {
-            'waf_policy': args.waf_policy if has_value(args.waf_policy) else existing_security_policy['parameters']['wafPolicy'],
+            'waf_policy': args.waf_policy if has_value(args.waf_policy)
+            else existing_security_policy['parameters']['wafPolicy'],
             'associations': associations
         }

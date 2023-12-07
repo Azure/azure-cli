@@ -394,78 +394,90 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
 def create_actions_from_existing(existing_actions):
     parsed_actions = []
     for action in existing_actions:
-        if action['name'] == 'CacheExpiration':
-            parsed_actions.append(create_action(action['name'], cache_behavior=action['parameters']['cacheBehavior']
-                                                if 'cacheBehavior' in action['parameters'] else None,
-                                                cache_duration=action['parameters']['cacheDuration']
-                                                if 'cacheDuration' in action['parameters'] else None))
-        if action['name'] == 'ModifyRequestHeader':
-            parsed_actions.append(create_action(action['name'], header_action=action['parameters']['headerAction']
-                                                if 'headerAction' in action['parameters'] else None,
-                                                header_name=action['parameters']['headerName']
-                                                if 'headerName' in action['parameters'] else None,
-                                                header_value=action['parameters']['value']
-                                                if 'value' in action['parameters'] else None))
-        if action['name'] == 'ModifyResponseHeader':
-            parsed_actions.append(create_action(action['name'], header_action=action['parameters']['headerAction']
-                                                if 'headerAction' in action['parameters'] else None,
-                                                header_name=action['parameters']['headerName']
-                                                if 'headerName' in action['parameters'] else None,
-                                                header_value=action['parameters']['value']
-                                                if 'value' in action['parameters'] else None))
-        if action['name'] == 'CacheKeyQueryString':
-            parsed_actions.append(create_action(action['name'], query_string_behavior=action['parameters']['queryStringBehavior']
-                                                if 'queryStringBehavior' in action['parameters'] else None,
-                                                query_parameters=action['parameters']['queryParameters']
-                                                if 'queryParameters' in action['parameters'] else None))
-        if action['name'] == 'UrlRedirect':
-            parsed_actions.append(create_action(action['name'], custom_fragment=action['parameters']['customFragment']
-                                                if 'customFragment' in action['parameters'] else None,
-                                                custom_hostname=action['parameters']['customHostname']
-                                                if 'customHostname' in action['parameters'] else None,
-                                                custom_path=action['parameters']['customPath']
-                                                if 'customPath' in action['parameters'] else None,
-                                                custom_querystring=action['parameters']['customQueryString']
-                                                if 'customQueryString' in action['parameters'] else None,
-                                                redirect_protocol=action['parameters']['destinationProtocol']
-                                                if 'destinationProtocol' in action['parameters'] else None,
-                                                redirect_type=action['parameters']['redirectType']
-                                                if 'redirectType' in action['parameters'] else None))
-        if action['name'] == 'UrlRewrite':
-            parsed_actions.append(create_action(action['name'], destination=action['parameters']['destination']
-                                                if 'destination' in action['parameters'] else None,
-                                                preserve_unmatched_path=action['parameters']['preserveUnmatchedPath']
-                                                if 'preserveUnmatchedPath' in action['parameters'] else None,
-                                                source_pattern=action['parameters']['sourcePattern']
-                                                if 'sourcePattern' in action['parameters'] else None))
-        if action['name'] == 'OriginGroupOverride':
-            parsed_actions.append(create_action(action['name'], origin_group=action['parameters']['originGroup']['id']
-                                                if 'originGroup' in action['parameters'] else None))
-        if action['name'] == 'RouteConfigurationOverride':
+        name = action['name']
+        para = action['parameters']
+        if name == 'CacheExpiration':
+            parsed_actions.append(create_action(name, cache_behavior=para['cacheBehavior']
+                                                if 'cacheBehavior' in para else None,
+                                                cache_duration=para['cacheDuration']
+                                                if 'cacheDuration' in para else None))
+        if name == 'ModifyRequestHeader':
+            parsed_actions.append(create_action(name, header_action=para['headerAction']
+                                                if 'headerAction' in para else None,
+                                                header_name=para['headerName']
+                                                if 'headerName' in para else None,
+                                                header_value=para['value']
+                                                if 'value' in para else None))
+        if name == 'ModifyResponseHeader':
+            parsed_actions.append(create_action(name, header_action=para['headerAction']
+                                                if 'headerAction' in para else None,
+                                                header_name=para['headerName']
+                                                if 'headerName' in para else None,
+                                                header_value=para['value']
+                                                if 'value' in para else None))
+        if name == 'CacheKeyQueryString':
+            parsed_actions.append(create_action(name, query_string_behavior=para['queryStringBehavior']
+                                                if 'queryStringBehavior' in para else None,
+                                                query_parameters=para['queryParameters']
+                                                if 'queryParameters' in para else None))
+        if name == 'UrlRedirect':
+            parsed_actions.append(create_action(name, custom_fragment=para['customFragment']
+                                                if 'customFragment' in para else None,
+                                                custom_hostname=para['customHostname']
+                                                if 'customHostname' in para else None,
+                                                custom_path=para['customPath']
+                                                if 'customPath' in para else None,
+                                                custom_querystring=para['customQueryString']
+                                                if 'customQueryString' in para else None,
+                                                redirect_protocol=para['destinationProtocol']
+                                                if 'destinationProtocol' in para else None,
+                                                redirect_type=para['redirectType']
+                                                if 'redirectType' in para else None))
+        if name == 'UrlRewrite':
+            parsed_actions.append(create_action(name, destination=para['destination']
+                                                if 'destination' in para else None,
+                                                preserve_unmatched_path=para['preserveUnmatchedPath']
+                                                if 'preserveUnmatchedPath' in para else None,
+                                                source_pattern=para['sourcePattern']
+                                                if 'sourcePattern' in para else None))
+        if name == 'OriginGroupOverride':
+            parsed_actions.append(create_action(name, origin_group=para['originGroup']['id']
+                                                if 'originGroup' in para else None))
+        if name == 'RouteConfigurationOverride':
             enable_caching = False
-            if 'cacheConfiguration' in action['parameters']:
+            if 'cacheConfiguration' in para:
                 enable_caching = True
-            parsed_actions.append(create_action(action['name'], origin_group=action['parameters']['originGroupOverride']['originGroup']['id']
-                                                if 'originGroupOverride' in action['parameters'] and
-                                                'originGroup' in action['parameters']['originGroupOverride']['originGroup'] else None,
-                                                forwarding_protocol=action['parameters']['originGroupOverride']['forwardingProtocol']
-                                                if 'originGroupOverride' in action['parameters'] and
-                                                'forwardingProtocol' in action['parameters']['originGroupOverride'] else None,
-                                                query_string_caching_behavior=action['parameters']['cacheConfiguration']['queryStringCachingBehavior']
-                                                if 'cacheConfiguration' in action['parameters'] and
-                                                'queryStringCachingBehavior' in action['parameters']['cacheConfiguration'] else None,
-                                                query_parameters=action['parameters']['cacheConfiguration']['queryParameters']
-                                                if 'cacheConfiguration' in action['parameters'] and
-                                                'queryParameters' in action['parameters']['cacheConfiguration'] else None,
-                                                cache_behavior=action['parameters']['cacheConfiguration']['cacheBehavior']
-                                                if 'cacheConfiguration' in action['parameters'] and
-                                                'cacheBehavior' in action['parameters']['cacheConfiguration'] else None,
-                                                cache_duration=action['parameters']['cacheConfiguration']['cacheDuration']
-                                                if 'cacheConfiguration' in action['parameters'] and
-                                                'cacheDuration' in action['parameters']['cacheConfiguration'] else None,
-                                                enable_compression=True if 'cacheConfiguration' in action['parameters'] and
-                                                'isCompressionEnabled' in action['parameters']['cacheConfiguration'] and
-                                                action['parameters']['cacheConfiguration']['isCompressionEnabled'] == RuleIsCompressionEnabled.ENABLED.value
+            parsed_actions.append(create_action(name,
+                                                origin_group=para['originGroupOverride']['originGroup']['id']
+                                                if 'originGroupOverride' in para and
+                                                'originGroup' in para['originGroupOverride']['originGroup']
+                                                else None,
+                                                forwarding_protocol=para['originGroupOverride']['forwardingProtocol']
+                                                if 'originGroupOverride' in para and
+                                                'forwardingProtocol' in para['originGroupOverride']
+                                                else None,
+                                                query_string_caching_behavior=para
+                                                ['cacheConfiguration']['queryStringCachingBehavior']
+                                                if 'cacheConfiguration' in para and
+                                                'queryStringCachingBehavior' in para['cacheConfiguration']
+                                                else None,
+                                                query_parameters=para['cacheConfiguration']['queryParameters']
+                                                if 'cacheConfiguration' in para and
+                                                'queryParameters' in para['cacheConfiguration']
+                                                else None,
+                                                cache_behavior=para['cacheConfiguration']['cacheBehavior']
+                                                if 'cacheConfiguration' in para and
+                                                'cacheBehavior' in para['cacheConfiguration']
+                                                else None,
+                                                cache_duration=para['cacheConfiguration']['cacheDuration']
+                                                if 'cacheConfiguration' in para and
+                                                'cacheDuration' in para['cacheConfiguration']
+                                                else None,
+                                                enable_compression=True
+                                                if 'cacheConfiguration' in para and
+                                                'isCompressionEnabled' in para['cacheConfiguration'] and
+                                                para['cacheConfiguration']['isCompressionEnabled'] ==
+                                                RuleIsCompressionEnabled.ENABLED.value
                                                 else False,
                                                 enable_caching=enable_caching))
     if len(parsed_actions) == 0:
@@ -477,11 +489,16 @@ def create_conditions_from_existing(existing_conditions):
     parsed_conditions = []
     for condition in existing_conditions:
         parsed_conditions.append(create_condition(
-            condition['name'], match_values=condition['parameters']['matchValues'] if 'matchValues' in condition['parameters'] else None,
-            negate_condition=condition['parameters']['negateCondition'] if 'negateCondition' in condition['parameters'] else None,
-            operator=condition['parameters']['operator'] if 'operator' in condition['parameters'] else None,
-            transforms=condition['parameters']['transforms'] if 'transforms' in condition['parameters'] else None,
-            selector=condition['parameters']['selector'] if 'selector' in condition['parameters'] else None))
+            condition['name'], match_values=condition['parameters']['matchValues']
+            if 'matchValues' in condition['parameters'] else None,
+            negate_condition=condition['parameters']['negateCondition']
+            if 'negateCondition' in condition['parameters'] else None,
+            operator=condition['parameters']['operator']
+            if 'operator' in condition['parameters'] else None,
+            transforms=condition['parameters']['transforms']
+            if 'transforms' in condition['parameters'] else None,
+            selector=condition['parameters']['selector']
+            if 'selector' in condition['parameters'] else None))
     if len(parsed_conditions) == 0:
         return []
     return parsed_conditions
