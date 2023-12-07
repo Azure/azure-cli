@@ -9263,17 +9263,17 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         aks_name = self.create_random_name('cliakstest', 16)
         node_pool_name = self.create_random_name('c', 6)
         node_pool_name_second = self.create_random_name('c', 6)
-        capacity_reservation_group_id = '/subscriptions/26fe00f8-9173-4872-9134-bb1d2e00343a/resourceGroups/staging-crg-rg/providers/Microsoft.Compute/capacityReservationGroups/crg-3'
-        vm_size = 'Standard_D4s_v3'
+        crg_id = '/subscriptions/26fe00f8-9173-4872-9134-bb1d2e00343a/resourceGroups/staging-crg-rg/providers/Microsoft.Compute/capacityReservationGroups/crg-1'
+        vm_size = 'Standard_D2s_v3'
         count = 1
-        identity = '/subscriptions/26fe00f8-9173-4872-9134-bb1d2e00343a/resourceGroups/staging-crg-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/crg-rg-id'
+        identity = '/subscriptions/26fe00f8-9173-4872-9134-bb1d2e00343a/resourceGroups/staging-crg-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/crg-1-id'
 
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
             'count': count,
             'location': resource_group_location,
-            'capacity_reservation_group_id': capacity_reservation_group_id,
+            'crg_id': crg_id,
             'vm_size': vm_size,
             'identity': identity,
             'node_pool_name': node_pool_name,
@@ -9287,7 +9287,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      '--nodepool-name {node_pool_name} -c 1 ' \
                      '--enable-managed-identity ' \
                      '--assign-identity {identity} ' \
-                     '--crg-id={capacity_reservation_group_id} ' \
+                     '--crg-id={crg_id} ' \
                      '--ssh-key-value={ssh_key_value}'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -9299,7 +9299,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                  '--cluster-name={name} '
                  '--name={node_pool_name_second} '
                  '--node-vm-size {vm_size} '
-                 '--crg-id={capacity_reservation_group_id} '
+                 '--crg-id={crg_id} '
                  '-c 1 ',
                  checks=[
                      self.check('provisioningState', 'Succeeded'),
