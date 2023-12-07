@@ -59,7 +59,7 @@ class CloudSuffixNotSetException(CLIError):
 
 class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instance-attributes
 
-    ARM_INDEXES = {
+    ARM_METADATA_INDEX = {
         "active_directory": "authentication.loginEndpoint",
         "active_directory_data_lake_resource_id": "activeDirectoryDataLake",
         "active_directory_graph_resource_id": "graphAudience",
@@ -79,7 +79,7 @@ class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instanc
         "resource_manager": "resourceManager",
         "sql_management": "sqlManagement",
         "synapse_analytics_resource_id": "synapseAnalyticsResourceId",
-        "vm_image_alias_doc": "vmImageAliasDoc"
+        "vm_image_alias_doc": "vmImageAliasDoc",
     }  # Please keep the endpoints in alphabetical order
 
     def __init__(self,  # pylint: disable=unused-argument
@@ -149,7 +149,7 @@ class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instanc
 
 class CloudSuffixes:  # pylint: disable=too-few-public-methods,too-many-instance-attributes
 
-    ARM_INDEXES = {
+    ARM_METADATA_INDEX = {
         "acr_login_server_endpoint": "suffixes.acrLoginServer",
         "attestation_endpoint": "suffixes.attestationEndpoint",
         "azure_datalake_analytics_catalog_and_job_endpoint": "suffixes.azureDataLakeAnalyticsCatalogAndJob",

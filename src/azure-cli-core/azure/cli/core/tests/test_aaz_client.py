@@ -102,14 +102,14 @@ class TestAAZCommandCtx(unittest.TestCase):
         with self.assertRaises(exceptions.AAZInvalidShorthandSyntaxError):
             AAZBaseClient._retrieve_value_in_arm_cloud_metadata(ctx, "authentication.audiences[0")
 
-        for arm_idx in CloudSuffixes.ARM_INDEXES.values():
+        for arm_idx in CloudSuffixes.ARM_METADATA_INDEX.values():
             value = AAZBaseClient.get_cloud_suffix(ctx, arm_idx)
             self.assertTrue(value is None or value.startswith("."))
 
         self.assertEqual(AAZBaseClient.get_cloud_suffix(ctx, "suffixes.notExist"),
                          ".notExistSuffix.test")
 
-        for arm_idx in CloudEndpoints.ARM_INDEXES.values():
+        for arm_idx in CloudEndpoints.ARM_METADATA_INDEX.values():
             value = AAZBaseClient.get_cloud_endpoint(ctx, arm_idx)
             self.assertTrue(value is None or value.startswith("https://"))
 

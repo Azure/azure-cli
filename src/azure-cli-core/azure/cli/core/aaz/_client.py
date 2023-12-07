@@ -9,7 +9,7 @@ from azure.core.polling.base_polling import LocationPolling, StatusCheckPolling
 from abc import abstractmethod
 
 from ._poller import AAZNoPolling, AAZBasePolling
-from azure.cli.core.cloud import CloudNameEnum as _CloudNameEnum
+from azure.cli.core.cloud import CloudEndpointNotSetException, CloudNameEnum as _CloudNameEnum
 
 
 logger = get_logger(__name__)
@@ -69,8 +69,11 @@ class AAZBaseClient(PipelineClient):
     """Base Client"""
 
     def __init__(self, ctx, credential, **kwargs):
+        base_url = self._build_base_url(ctx, **kwargs)
+        if not base_url:
+            raise CloudEndpointNotSetException()
         super().__init__(
-            base_url=self._build_base_url(ctx, **kwargs),
+            base_url=base_url,
             config=self._build_configuration(ctx, credential, **kwargs),
             per_call_policies=self._build_per_call_policies(ctx, **kwargs)
         )
@@ -130,7 +133,7 @@ class AAZBaseClient(PipelineClient):
         from azure.cli.core.cloud import CloudEndpoints, CloudEndpointNotSetException
         endpoints = None
         # retrieve by indexes mapping
-        for property_name, value in CloudEndpoints.ARM_INDEXES.items():
+        for property_name, value in CloudEndpoints.ARM_METADATA_INDEX.items():
             if value == arm_idx:
                 try:
                     endpoints = getattr(ctx.cli_ctx.cloud.endpoints, property_name)
@@ -147,7 +150,7 @@ class AAZBaseClient(PipelineClient):
         from azure.cli.core.cloud import CloudSuffixes, CloudSuffixNotSetException
         # retrieve by indexes mapping
         suffixes = None
-        for property_name, value in CloudSuffixes.ARM_INDEXES.items():
+        for property_name, value in CloudSuffixes.ARM_METADATA_INDEX.items():
             if value == arm_idx:
                 try:
                     suffixes = getattr(ctx.cli_ctx.cloud.suffixes, property_name)
