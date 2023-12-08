@@ -3023,17 +3023,14 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
     kv_secret_name = None
     cloud_type = cmd.cli_ctx.cloud.name
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from azure.cli.core.profiles import AD_HOC_API_VERSIONS
     subscription_id = get_subscription_id(cmd.cli_ctx)
     if cloud_type.lower() == PUBLIC_CLOUD.lower():
         if kv_subscription.lower() != subscription_id.lower():
             diff_subscription_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_APPSERVICE,
                                                                subscription_id=kv_subscription)
-            ascs = diff_subscription_client.app_service_certificate_orders.list(
-                api_version=AD_HOC_API_VERSIONS[ResourceType.MGMT_APPSERVICE]['app_service_certificate_orders'])
+            ascs = diff_subscription_client.app_service_certificate_orders.list(api_version='2022-09-01')
         else:
-            ascs = client.app_service_certificate_orders.list(
-                api_version=AD_HOC_API_VERSIONS[ResourceType.MGMT_APPSERVICE]['app_service_certificate_orders'])
+            ascs = client.app_service_certificate_orders.list('2022-09-01')
 
         kv_secret_name = None
         for asc in ascs:
