@@ -15,7 +15,8 @@ from azure.cli.command_modules.appservice._appservice_utils import MSI_LOCAL_ID
 from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider, AzureStorageType
 
 from ._completers import get_hostname_completion_list
-from ._constants import (FUNCTIONS_VERSIONS, LOGICAPPS_NODE_RUNTIME_VERSIONS, WINDOWS_OS_NAME, LINUX_OS_NAME)
+from ._constants import (FUNCTIONS_VERSIONS, LOGICAPPS_NODE_RUNTIME_VERSIONS, WINDOWS_OS_NAME, LINUX_OS_NAME,
+                         DEPLOYMENT_STORAGE_AUTH_TYPES)
 
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
                           validate_front_end_scale_factor, validate_ase_create, validate_ip_address,
@@ -781,6 +782,10 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('workload_profile_name', help="The workload profile name to run the container app on.", is_preview=True)
         c.argument('cpu', type=float, help="The CPU in cores of the container app. e.g 0.75", is_preview=True)
         c.argument('memory', help="The memory size of the container app. e.g. 1.0Gi, ", is_preview=True)
+        c.argument('deployment_storage_name', help="The deployment storage account name.", is_preview=True)
+        c.argument('deployment_storage_container_name', help="The deployment storage account container name.", is_preview=True)
+        c.argument('deployment_storage_auth_type', arg_type=get_enum_type(DEPLOYMENT_STORAGE_AUTH_TYPES), default='systemAssignedIdentity', help="The deployment storage account authentication type.", is_preview=True)
+        c.argument('deployment_storage_auth_value', help="The deployment storage account authentication value. This is only applicable for the user-assigned managed identity authentication type.", is_preview=True)
 
     with self.argument_context('functionapp cors credentials') as c:
         c.argument('enable', help='enable/disable access-control-allow-credentials', arg_type=get_three_state_flag())

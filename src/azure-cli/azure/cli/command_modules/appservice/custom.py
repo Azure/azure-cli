@@ -84,7 +84,8 @@ from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERS
                          WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, DEFAULT_CENTAURI_IMAGE,
                          VERSION_2022_09_01,
                          RUNTIME_STATUS_TEXT_MAP, LANGUAGE_EOL_DEPRECATION_NOTICES,
-                         FLEX_RUNTIMES, FLEX_SUBNET_DELEGATION, DEFAULT_INSTANCE_SIZE)
+                         FLEX_RUNTIMES, FLEX_SUBNET_DELEGATION, DEFAULT_INSTANCE_SIZE,
+                         STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID)
 from ._github_oauth import (get_github_access_token, cache_github_token)
 from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
 
@@ -4150,7 +4151,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        dapr_http_read_buffer_size=None, dapr_log_level=None, dapr_enable_api_logging=False,
                        workload_profile_name=None, cpu=None, memory=None,
                        always_ready_instances=None, maximum_instances=None, instance_size=None,
-                       flexconsumption_location=None):
+                       flexconsumption_location=None, deployment_storage_name=None,
+                       deployment_storage_container_name=None, deployment_storage_auth_type=None,
+                       deployment_storage_auth_value=None):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 4.")
@@ -4319,6 +4322,49 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             cmd, resource_group_name, plan_name, flexconsumption_location)
         functionapp_def.server_farm_id = plan_info.id
         functionapp_def.location = flexconsumption_location
+
+        if not deployment_storage_name:
+            deployment_storage_name = storage_account
+        deployment_storage = _validate_and_get_deployment_storage(cmd.cli_ctx, resource_group_name, deployment_storage_name)
+
+        deployment_storage_container = _get_or_create_deployment_storage_container(cmd, resource_group_name, name, deployment_storage_name, deployment_storage_container_name)
+        deployment_storage_container_name = deployment_storage_container.name
+
+        deployment_config_storage_value = getattr(deployment_storage.primary_endpoints, 'blob') + deployment_storage_container_name
+
+        deployment_storage_auth_type = deployment_storage_auth_type or 'systemAssignedIdentity'
+
+        if deployment_storage_auth_value and deployment_storage_auth_type != 'userAssignedIdentity':
+            raise ArgumentUsageError(
+                '--deployment-storage-auth-value is only a valid input for --deployment-storage-auth-type set to userAssignedIdentity. '
+                'Please try again with --deployment-storage-auth-type set to userAssignedIdentity.'
+            )
+
+        if deployment_storage_auth_type == 'userAssignedIdentity':
+            deployment_storage_user_assigned_identity = _get_or_create_user_assigned_identity(cmd, resource_group_name, name, deployment_storage_auth_value, flexconsumption_location)
+            deployment_storage_auth_value = deployment_storage_user_assigned_identity.id
+        elif deployment_storage_auth_type == 'storageAccountAccessKey':
+            deployment_storage_access_key = _get_storage_access_key(cmd.cli_ctx, deployment_storage)
+            site_config.app_settings.append(NameValuePair(name='DeploymentStorageAccountAccessKey',
+                                                          value=deployment_storage_access_key))
+            deployment_storage_auth_value = 'DeploymentStorageAccountAccessKey'
+
+        functionapp_config = {} # TODO: replace with actual model when api version is relesed
+        functionapp_config['deployment'] = {}
+        functionapp_config['deployment']['storage'] = {}
+        functionapp_config['deployment']['storage']['type'] = 'blobContainer'
+        functionapp_config['deployment']['storage']['value'] = deployment_config_storage_value
+        functionapp_config['deployment']['storage']['authentication'] = {}
+        functionapp_config['deployment']['storage']['authentication']['type'] = deployment_storage_auth_type
+        functionapp_config['deployment']['storage']['authentication']['value'] = deployment_storage_auth_value
+
+        logger.warning(functionapp_config) # TODO: remove - just for testing at the moment
+
+        if deployment_storage_auth_type == 'userAssignedIdentity':
+            assign_identities = [deployment_storage_auth_value]
+            _assign_deployment_storage_managed_identity_role(cmd.cli_ctx, deployment_storage, deployment_storage_user_assigned_identity.principal_id)
+        elif deployment_storage_auth_type == 'systemAssignedIdentity':
+            assign_identities = ['[system]']
 
     if environment is not None:
         if consumption_plan_location is not None:
@@ -4569,6 +4615,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                    role, None, scope)
         functionapp.identity = identity
 
+    if deployment_storage_auth_type == 'systemAssignedIdentity':
+        _assign_deployment_storage_managed_identity_role(cmd.cli_ctx, deployment_storage, functionapp.identity.principal_id)
+
     return functionapp
 
 
@@ -4729,6 +4778,84 @@ def _set_remote_or_local_git(cmd, webapp, resource_group_name, name, deployment_
         local_git_info = enable_local_git(cmd, resource_group_name, name)
         logger.warning("Local git is configured with url of '%s'", local_git_info['url'])
         setattr(webapp, 'deploymentLocalGitUrl', local_git_info['url'])
+
+
+def _validate_and_get_deployment_storage(cli_ctx, resource_group_name, deployment_storage_name):
+    sa_resource_group = resource_group_name
+    
+    if is_valid_resource_id(deployment_storage_name):
+        sa_resource_group = parse_resource_id(deployment_storage_name)['resource_group']
+        deployment_storage_name = parse_resource_id(deployment_storage_name)['name']
+
+    storage_client = get_mgmt_service_client(cli_ctx, StorageManagementClient)
+    storage_properties = storage_client.storage_accounts.get_properties(sa_resource_group, deployment_storage_name)
+    
+    endpoints = storage_properties.primary_endpoints
+    sku = storage_properties.sku.name
+    allowed_storage_types = ['Standard_GRS', 'Standard_RAGRS', 'Standard_LRS', 'Standard_ZRS', 'Premium_LRS', 'Standard_GZRS']
+    
+    if not getattr(endpoints, 'blob', None):
+        raise CLIError("Deployment storage account '{}' has no 'blob' endpoint. It must have blob endpoints enabled".format(deployment_storage_name))
+    
+    if sku not in allowed_storage_types:
+        raise CLIError("Storage type {} is not allowed".format(sku))
+
+    return storage_properties
+
+
+def _get_or_create_deployment_storage_container(cmd, resource_group_name, functionapp_name, deployment_storage_name, deployment_storage_container_name):
+    storage_client = get_mgmt_service_client(cmd.cli_ctx, StorageManagementClient)
+    if deployment_storage_container_name:
+        storage_container = storage_client.blob_containers.get(resource_group_name, deployment_storage_name, deployment_storage_container_name)
+    else:
+        deployment_storage_container_name = "packagecontainer-{}".format(functionapp_name)[:63]
+        logger.warning("Creating deployment storage account container '%s' ...", deployment_storage_container_name)
+        
+        from azure.mgmt.storage.models import BlobContainer
+
+        storage_container = storage_client.blob_containers.create(resource_group_name, deployment_storage_name, deployment_storage_container_name, BlobContainer())
+
+    logger.warning(storage_container)
+    return storage_container
+
+
+def _get_or_create_user_assigned_identity(cmd, resource_group_name, functionapp_name, user_assigned_identity, location):
+    from azure.mgmt.msi import ManagedServiceIdentityClient
+    msi_client = get_mgmt_service_client(cmd.cli_ctx, ManagedServiceIdentityClient)
+    if user_assigned_identity:
+        identity = msi_client.user_assigned_identities.get(resource_group_name=resource_group_name, resource_name=user_assigned_identity)
+    else:
+        user_assigned_identity_name = "useridentity-{}".format(functionapp_name)
+        logger.warning("Creating user assigned managed identity '%s' ...", user_assigned_identity_name)
+        
+        from azure.mgmt.msi.models import Identity
+
+        identity = msi_client.user_assigned_identities.create_or_update(resource_group_name, user_assigned_identity_name, Identity(location=location))
+
+    return identity
+
+
+def _get_storage_access_key(cli_ctx, deployment_storage_account):
+    resource_group_name = parse_resource_id(deployment_storage_account.id)['resource_group']
+    deployment_storage_name = deployment_storage_account.name
+    storage_client = get_mgmt_service_client(cli_ctx, StorageManagementClient)
+    access_keys = storage_client.storage_accounts.list_keys(resource_group_name, deployment_storage_name)
+    try:
+        return access_keys.keys[0].value
+    except AttributeError:
+        # Older API versions have a slightly different structure
+        return access_keys.key1
+
+
+def _assign_deployment_storage_managed_identity_role(cli_ctx, deployment_storage_account, principal_id):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    sub_id = get_subscription_id(cli_ctx)
+    role_definition_id = "/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/{}".format(sub_id, STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID)
+    auth_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION)
+    RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION, 'RoleAssignmentCreateParameters', mod='models', operation_group='role_assignments')
+    parameters = RoleAssignmentCreateParameters(role_definition_id=role_definition_id, principal_id=principal_id, principal_type='ServicePrincipal')
+    auth_client.role_assignments.create(scope=deployment_storage_account.id, role_assignment_name=str(uuid.uuid4()), parameters=parameters)
 
 
 def _validate_and_get_connection_string(cli_ctx, resource_group_name, storage_account):
