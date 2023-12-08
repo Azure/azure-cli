@@ -1476,3 +1476,54 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
         # delete connection
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+    # @record_only
+    def test_webapp_cosmospostgresql_secret_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-win-group',
+            'site': 'servicelinkertest-euap-app',
+            'cluster': 'servicelinker-postgresql-cosmos',
+            'database': 'citus'
+        })
+
+        # prepare params
+        webAppResourceIdFormat = '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.Web/sites/{site}'
+        name = 'testconn'
+        source_id = webAppResourceIdFormat.format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.CosmosPostgreSql).format(**self.kwargs)
+        user = 'citus'
+        password = self.cmd('keyvault secret show --vault-name cupertino-kv-test -n TestDbPassword')\
+            .get_output_in_json().get('value')
+
+        # create connection
+        self.cmd('webapp connection create cosmos-postgresql --connection {} --source-id {} --target-id {} '
+                 '--secret name={} secret={} --client-type dotnet'.format(name, source_id, target_id, user, password))
+
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'secret'),
+                self.check('[0].clientType', 'dotnet')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update cosmos-postgresql --id {} --client-type python --secret name={} secret={}'.format(connection_id, user, password),
+                 checks = [ self.check('clientType', 'python') ])
+
+        # list configuration
+        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('webapp connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
