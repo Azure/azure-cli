@@ -44,4 +44,4 @@ Doc Sections
 
 - [Extension Metadata](metadata.md) - How to add additional extension metadata
 
-- [FAQ](faq.md) - Commonly asked questions
+- [FAQ](faq.md) - Frequently asked questions
