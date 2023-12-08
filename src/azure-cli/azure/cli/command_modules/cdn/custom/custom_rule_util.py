@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=too-many-locals, too-many-statements
+# pylint: disable=too-many-locals, too-many-statements too-many-return-statements simplifiable-if-expression
 
 from azure.cli.core.aaz._base import has_value
 from azure.mgmt.cdn.models import (RequestMethodOperator, RuleIsCompressionEnabled)

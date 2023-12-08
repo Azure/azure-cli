@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=too-many-locals, too-many-statements
+# pylint: disable=too-many-locals, too-many-statements too-many-boolean-expressions too-many-branches ungrouped-imports
 
 from azure.mgmt.cdn.models import (ForwardingProtocol, AfdQueryStringCachingBehavior)
 from knack.log import get_logger
