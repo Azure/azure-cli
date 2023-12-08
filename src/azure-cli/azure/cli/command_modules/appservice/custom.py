@@ -3030,7 +3030,7 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
                                                                subscription_id=kv_subscription)
             ascs = diff_subscription_client.app_service_certificate_orders.list(api_version='2022-09-01')
         else:
-            ascs = client.app_service_certificate_orders.list('2022-09-01')
+            ascs = client.app_service_certificate_orders.list(api_version='2022-09-01')
 
         kv_secret_name = None
         for asc in ascs:
