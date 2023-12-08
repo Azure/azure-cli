@@ -45,7 +45,7 @@ class CdnAfdScenarioMixin:
         return self.cmd(command, checks)
 
     def afd_profile_delete_cmd(self, group, name, checks=None):
-        command = 'afd profile delete -g {} --profile-name {}'.format(group, name)
+        command = 'afd profile delete -g {} --profile-name {} -y'.format(group, name)
         return self.cmd(command, checks)
 
     def afd_endpoint_create_cmd(self, resource_group_name, profile_name, endpoint_name,

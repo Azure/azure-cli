@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=too-many-locals, too-many-statements
 
 from azure.mgmt.cdn.models import (ForwardingProtocol, AfdQueryStringCachingBehavior)
 from knack.log import get_logger
@@ -83,8 +84,6 @@ class AFDProfileUpdate(_AFDProfileUpdate):
         })
         existing_location = None if 'location' not in existing else existing['location']
         args.location = existing_location
-        print(args.tags)
-        args.tags = args.tags if has_value(args.tags) else existing['tags']
 
 
 class AFDOriginCreate(_AFDOriginCreate):
