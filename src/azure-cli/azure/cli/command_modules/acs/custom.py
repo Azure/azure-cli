@@ -62,7 +62,7 @@ from azure.cli.command_modules.acs._consts import (
     DecoratorEarlyExitException,
 )
 
-from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id
+from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id, check_is_private_link_cluster
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.command_modules.acs.addonconfiguration import (
@@ -898,6 +898,16 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name=
 def aks_show(cmd, client, resource_group_name, name):
     mc = client.get(resource_group_name, name)
     return _remove_nulls([mc])[0]
+
+
+def aks_stop(cmd, client, resource_group_name, name, no_wait=False):
+    instance = client.get(resource_group_name, name)
+    # print warning when stopping a private link cluster
+    if check_is_private_link_cluster(instance):
+        logger.warning('Your private cluster apiserver IP might get changed when it\'s stopped and started.\n'
+                       'Any user provisioned private endpoints linked to this private cluster will need to be deleted and created again. '
+                       'Any user managed DNS record also needs to be updated with the new IP.')
+    return sdk_no_wait(no_wait, client.begin_stop, resource_group_name, name)
 
 
 def aks_list(cmd, client, resource_group_name=None):
