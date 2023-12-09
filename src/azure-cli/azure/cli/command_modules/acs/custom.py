@@ -60,7 +60,6 @@ from azure.cli.command_modules.acs._consts import (
     CONST_VIRTUAL_NODE_ADDON_NAME,
     CONST_VIRTUAL_NODE_SUBNET_NAME,
     DecoratorEarlyExitException,
-    CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME,
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_START,
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE,
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK,
@@ -2658,7 +2657,6 @@ def aks_mesh_enable_ingress_gateway(
         client,
         resource_group_name,
         name,
-        enable_azure_service_mesh=True,
         enable_ingress_gateway=True,
         ingress_gateway_type=ingress_gateway_type)
 
@@ -2684,7 +2682,18 @@ def aks_mesh_get_revisions(
         client,
         location
 ):
-    return client.list_mesh_revision_profiles(location)
+        revisonProfiles = client.list_mesh_revision_profiles(location)
+        # 'revisonProfiles' is an ItemPaged object
+        revisions = []
+        # Iterate over items within pages
+        for page in revisonProfiles.by_page():
+            for item in page:
+                revisions.append(item)
+
+        if revisions:
+            return revisions[0].properties
+        else:
+            return None
 
 
 def aks_mesh_get_upgrades(
@@ -2693,7 +2702,18 @@ def aks_mesh_get_upgrades(
         resource_group_name,
         name
 ):
-    return client.list_mesh_upgrade_profiles(resource_group_name, name)
+        upgradeProfiles = client.list_mesh_upgrade_profiles(resource_group_name, name)
+        # 'upgradeProfiles' is an ItemPaged object
+        upgrades = []
+        # Iterate over items within pages
+        for page in upgradeProfiles.by_page():
+            for item in page:
+                upgrades.append(item)
+
+        if upgrades:
+            return upgrades[0].properties
+        else:
+            return None
 
 
 def aks_mesh_upgrade_start(

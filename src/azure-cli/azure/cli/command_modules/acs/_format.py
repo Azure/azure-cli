@@ -192,7 +192,7 @@ def _custom_functions(preview_versions):
 
 def aks_mesh_revisions_table_format(result):
     """Format a list of mesh revisions as summary results for display with "-o table". """
-    revision_table = flatten_mesh_revision_table(result[0]['properties']['meshRevisions'])
+    revision_table = flatten_mesh_revision_table(result['meshRevisions'])
     parsed = compile_jmes("""[].{
         revision: revision,
         upgrades: upgrades || [`None available`] | sort_versions(@) | join(`, `, @),
@@ -217,7 +217,7 @@ def flatten_mesh_revision_table(revision_info):
 
 def aks_mesh_upgrades_table_format(result):
     """Format a list of mesh upgrades as summary results for display with "-o table". """
-    upgrades_table = _format_mesh_revision_entry(result[0]['properties'])
+    upgrades_table = _format_mesh_revision_entry(result)
     parsed = compile_jmes("""[].{
         revision: revision,
         upgrades: upgrades || [`None available`] | sort_versions(@) | join(`, `, @),
