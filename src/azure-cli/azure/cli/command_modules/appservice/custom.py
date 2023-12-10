@@ -4315,11 +4315,11 @@ def _get_latest_deployment_id(cmd, rg_name, name, deployment_status_url, slot):
 
 
 def _track_deployment_runtime_status(params, deploymentstatusapi_url, deployment_id, timeout=None):
-    total_trials = 200
-    num_trials = 0
+    max_time_sec = int(timeout) if timeout else 1000
     start_time = time.time()
+    time_elapsed = 0
     deployment_status = None
-    while num_trials < total_trials:
+    while time_elapsed < max_time_sec:
         response_body = send_raw_request(params.cmd.cli_ctx, "GET", deploymentstatusapi_url,
                                          disable_request_response_logging=True).json()
         deployment_properties = response_body.get('properties')
@@ -4369,27 +4369,25 @@ def _track_deployment_runtime_status(params, deploymentstatusapi_url, deployment
             logger.error("Please check the build logs for more info: %s",
                          deployment_logs)
             raise CLIError
-        if timeout and time_elapsed > int(timeout):
-            break
-        num_trials = num_trials + 1
         time.sleep(5)
-    if num_trials >= total_trials or deployment_status != "RuntimeSuccessful":
+
+    if time_elapsed >= max_time_sec or deployment_status != "RuntimeSuccessful":
         scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
         if deployment_status == "BuildInProgress":
             deployments_log_url = scm_url + f"/api/deployments/{deployment_id}/log"
             raise CLIError("Timeout reached while build was still in progress. "
-                            "Navigate to {} to check the build logs for your app.".format(
-                                deployments_log_url))
-        else:
-            latest_deployment_url = scm_url + "/api/deployments/latest"
-            raise CLIError("Timeout reached while tracking deployment status, however,"
-                        "the deployment operation is still on-going. "
-                        "Navigate to {} to check the deployment status of your app. "
-                        "InprogressInstances: {}, SuccessfulInstances: {}, FailedInstances: {}".format(
-                            latest_deployment_url,
-                            deployment_properties.get('numberOfInstancesInProgress'),
-                            deployment_properties.get('numberOfInstancesSuccessful'),
-                            deployment_properties.get('numberOfInstancesFailed')))
+                           "Navigate to {} to check the build logs for your app.".format(
+                               deployments_log_url))
+        # For any other status, redirect user to /deployments/latest endpoint
+        latest_deployment_url = scm_url + "/api/deployments/latest"
+        raise CLIError("Timeout reached while tracking deployment status, however,"
+                       "the deployment operation is still on-going. "
+                       "Navigate to {} to check the deployment status of your app. "
+                       "InprogressInstances: {}, SuccessfulInstances: {}, FailedInstances: {}".format(
+                           latest_deployment_url,
+                           deployment_properties.get('numberOfInstancesInProgress'),
+                           deployment_properties.get('numberOfInstancesSuccessful'),
+                           deployment_properties.get('numberOfInstancesFailed')))
     return response_body
 
 
@@ -5517,8 +5515,11 @@ def _make_onedeploy_request(params):
 
     # check if an error occured during deployment
     if response.status_code:
-        raise CLIError("An error occured during deployment. Status Code: {}, Details: {}"
-                       .format(response.status_code, response.text))
+        scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+        latest_deployment_url = scm_url + "/api/deployments/latest"
+        raise CLIError("An error occured during deployment. Status Code: {}, Details: {}, Please visit {}"
+                       " to get more information about your deployment"
+                       .format(response.status_code, response.text, latest_deployment_url))
 
 
 # OneDeploy
