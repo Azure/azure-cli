@@ -9644,10 +9644,10 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         aks_name = self.create_random_name('cliakstest', 16)
         node_pool_name = self.create_random_name('c', 6)
         node_pool_name_second = self.create_random_name('c', 6)
-        crg_id = '/subscriptions/26fe00f8-9173-4872-9134-bb1d2e00343a/resourceGroups/staging-crg-rg/providers/Microsoft.Compute/capacityReservationGroups/crg-1'
+        crg_id = '/subscriptions/26fe00f8-9173-4872-9134-bb1d2e00343a/resourceGroups/STAGING-CRG-RG/providers/Microsoft.Compute/capacityReservationGroups/crg-1'
         vm_size = 'Standard_D2s_v3'
         count = 1
-        identity = '/subscriptions/26fe00f8-9173-4872-9134-bb1d2e00343a/resourceGroups/staging-crg-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/crg-1-id'
+        identity = '/subscriptions/26fe00f8-9173-4872-9134-bb1d2e00343a/resourceGroups/STAGING-CRG-RG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/crg-1-id'
 
         self.kwargs.update({
             'resource_group': resource_group,
