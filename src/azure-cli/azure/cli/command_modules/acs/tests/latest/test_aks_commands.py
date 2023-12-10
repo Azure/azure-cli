@@ -9544,6 +9544,97 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.is_empty(),
         ])
 
+    # TODO(nilo19): uncomment this when the RP API is ready. The newly added field `backendPoolType` cannot be shown
+    # in the response body but the feature works.
+    # @AllowLargeResponse()
+    # @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    # def test_aks_create_or_update_with_load_balancer_backend_pool_type(self, resource_group, resource_group_location):
+    #     _, create_version = self._get_versions(resource_group_location)
+    #     aks_name = self.create_random_name('cliakstest', 16)
+    #     self.kwargs.update({
+    #         'resource_group': resource_group,
+    #         'name': aks_name,
+    #         'location': resource_group_location,
+    #         'k8s_version': create_version,
+    #         'ssh_key_value': self.generate_ssh_keys(),
+    #     })
+    #
+    #     # create
+    #     create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+    #                  '--ssh-key-value={ssh_key_value} ' \
+    #                  '--kubernetes-version={k8s_version} ' \
+    #                  '--load-balancer-backend-pool-type=nodeIP'
+    #     self.cmd(create_cmd, checks=[
+    #         self.check('networkProfile.loadBalancerProfile.backendPoolType', 'nodeIP'),
+    #     ])
+    #
+    #     # update
+    #     update_cmd = 'aks update -g {resource_group} -n {name} --load-balancer-backend-pool-type=nodeIPConfiguration'
+    #     self.cmd(update_cmd, checks=[
+    #         self.check('networkProfile.loadBalancerProfile.backendPoolType', 'nodeIPConfiguration'),
+    #     ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_node_public_ip_tags(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        nodepool_name = self.create_random_name('n', 6)
+        nodepool_name_1 = self.create_random_name('n', 6)
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'node_pool_name': nodepool_name,
+            'node_vm_size': 'standard_d2a_v4',
+            "node_public_ip_tags": "RoutingPreference=Internet"
+        })
+
+        self.cmd(
+            'aks create '
+            '--resource-group={resource_group} '
+            '--name={name} '
+            '--location={location} '
+            '--ssh-key-value={ssh_key_value} '
+            '--nodepool-name={node_pool_name} '
+            '--node-count=1 '
+            '--node-vm-size={node_vm_size} '
+            '--enable-node-public-ip '
+            '--node-public-ip-tags={node_public_ip_tags} ',
+            checks=[
+                self.check('provisioningState', 'Succeeded'),
+                self.check('agentPoolProfiles[0].networkProfile.nodePublicIpTags[0].ipTagType', "RoutingPreference"),
+                self.check('agentPoolProfiles[0].networkProfile.nodePublicIpTags[0].tag', "Internet"),
+            ],
+        )
+
+        self.kwargs.update({
+            'node_pool_name': nodepool_name_1,
+        })
+
+        self.cmd(
+            'aks nodepool add '
+            '--resource-group={resource_group} '
+            '--cluster-name={name} '
+            '--name={node_pool_name} '
+            '--node-vm-size={node_vm_size} '
+            '--enable-node-public-ip '
+            '--node-public-ip-tags={node_public_ip_tags} '
+            '--aks-custom-headers=AKSHTTPCustomFeatures=Microsoft.ContainerService/NodePublicIPTagsPreview',
+            checks=[
+                self.check('provisioningState', 'Succeeded'),
+                self.check('networkProfile.nodePublicIpTags[0].ipTagType', "RoutingPreference"),
+                self.check('networkProfile.nodePublicIpTags[0].tag', "Internet"),
+            ],
+        )
+
+        # delete
+        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])
+
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_with_crg_id(self, resource_group, resource_group_location):
@@ -9593,9 +9684,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                  '-c 1 ',
                  checks=[
                      self.check('provisioningState', 'Succeeded'),
-                 ])
+        ])
 
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty(),
-                                                                  ])
+        ])
