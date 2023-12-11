@@ -667,7 +667,7 @@ class IdentityAssign(_IdentityAssign):
         args_schema.identity = AAZResourceIdArg(
             options=["--identity"],
             help="Name or ID of the ManagedIdentity Resource.",
-            required=False,
+            required=True,
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.ManagedIdentity"
                          "/userAssignedIdentities/{}",
