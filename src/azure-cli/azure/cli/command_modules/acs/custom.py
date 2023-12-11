@@ -498,6 +498,7 @@ def aks_create(
     load_balancer_outbound_ip_prefixes=None,
     load_balancer_outbound_ports=None,
     load_balancer_idle_timeout=None,
+    load_balancer_backend_pool_type=None,
     nat_gateway_managed_outbound_ip_count=None,
     nat_gateway_idle_timeout=None,
     outbound_type=None,
@@ -611,6 +612,7 @@ def aks_create(
     yes=False,
     no_wait=False,
     aks_custom_headers=None,
+    node_public_ip_tags=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -665,6 +667,7 @@ def aks_update(
     load_balancer_outbound_ip_prefixes=None,
     load_balancer_outbound_ports=None,
     load_balancer_idle_timeout=None,
+    load_balancer_backend_pool_type=None,
     nat_gateway_managed_outbound_ip_count=None,
     nat_gateway_idle_timeout=None,
     outbound_type=None,
@@ -2198,6 +2201,7 @@ def aks_agentpool_add(
     gpu_instance_profile=None,
     allowed_host_ports=None,
     asg_ids=None,
+    node_public_ip_tags=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
