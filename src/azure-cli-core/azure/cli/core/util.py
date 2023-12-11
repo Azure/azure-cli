@@ -67,7 +67,11 @@ def handle_exception(ex, cli_ctx=None):  # pylint: disable=too-many-locals, too-
     error_msg = getattr(ex, 'message', str(ex))
     exit_code = 1
     az_error = None
-    command = cli_ctx.invocation.parser.full_command
+
+    command = None
+
+    if cli_ctx and cli_ctx.invocation and cli_ctx.invocation.parser and cli_ctx.invocation.parser.full_command:
+        command = cli_ctx.invocation.parser.full_command
 
     if isinstance(ex, azclierror.AzCLIError):
         az_error = ex
