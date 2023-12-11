@@ -20,7 +20,7 @@ from azure.cli.command_modules.cdn.aaz.latest.afd.secret import Show as _AFDSecr
 from azure.cli.command_modules.cdn.aaz.latest.afd.security_policy import Show as _AFDSecurityPolicyShow, \
     Create as _AFDSecurityPolicyCreate, Update as _AFDSecurityPolicyUpdate
 from azure.cli.command_modules.cdn.aaz.latest.afd.profile import Show as _AFDProfileShow, \
-    Update as _AFDProfileUpdate
+    Create as _AFDProfileCreate, Update as _AFDProfileUpdate
 from azure.cli.core.aaz import AAZStrArg, AAZBoolArg, AAZListArg, AAZDateArg
 
 logger = get_logger(__name__)
@@ -68,6 +68,17 @@ def default_content_types():
             'text/x-script',
             'text/x-component',
             'text/x-java-source']
+
+
+class AFDProfileUpdate(_AFDProfileUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        args.location = 'global'
 
 
 class AFDProfileUpdate(_AFDProfileUpdate):

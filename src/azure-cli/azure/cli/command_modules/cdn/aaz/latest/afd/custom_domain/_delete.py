@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "afd custom-domain delete",
-    confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
     """Delete an existing AzureFrontDoor domain with the specified domain name under the specified subscription, resource group and profile.

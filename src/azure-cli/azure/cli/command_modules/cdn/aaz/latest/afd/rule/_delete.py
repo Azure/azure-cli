@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "afd rule delete",
-    confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
     """Delete an existing delivery rule within a rule set.

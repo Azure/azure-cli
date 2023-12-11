@@ -18,7 +18,7 @@ def _add_paramter_if_needed(command, paramter_name, parameter_value):
 class CdnAfdScenarioMixin:
     def afd_profile_create_cmd(self, resource_group_name, profile_name, tags=None, checks=None, options=None,
                                sku="Standard_AzureFrontDoor", expect_failure=False):
-        command = f'afd profile create -g {resource_group_name} --profile-name {profile_name} --sku {sku} --location global'
+        command = f'afd profile create -g {resource_group_name} --profile-name {profile_name} --sku {sku}'
         if tags:
             command = command + ' --tags {}'.format(tags)
         if options:
