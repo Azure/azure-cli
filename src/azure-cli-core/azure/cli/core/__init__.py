@@ -122,9 +122,9 @@ class AzCli(CLI):
         print(ver_string)
         show_updates(updates_available_components)
 
-    def exception_handler(self, ex, command=None):  # pylint: disable=no-self-use
+    def exception_handler(self, ex):
         from azure.cli.core.util import handle_exception
-        return handle_exception(ex, self, command)
+        return handle_exception(ex, self)
 
     def save_local_context(self, parsed_args, argument_definitions, specified_arguments):
         """ Local Context Attribute arguments

@@ -53,7 +53,7 @@ DISALLOWED_USER_NAMES = [
 ]
 
 
-def handle_exception(ex, cli_ctx=None, command=None):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
+def handle_exception(ex, cli_ctx=None):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
     from jmespath.exceptions import JMESPathError
     from msrestazure.azure_exceptions import CloudError
@@ -67,11 +67,7 @@ def handle_exception(ex, cli_ctx=None, command=None):  # pylint: disable=too-man
     error_msg = getattr(ex, 'message', str(ex))
     exit_code = 1
     az_error = None
-
-    command_string = None
-
-    if command:
-        command_string = " ".join(command)
+    command = cli_ctx.invocation.parser.full_command
 
     if isinstance(ex, azclierror.AzCLIError):
         az_error = ex
@@ -79,11 +75,11 @@ def handle_exception(ex, cli_ctx=None, command=None):  # pylint: disable=too-man
         # The `command` may not always be set when a `AzCLIError` is created. In that case, we set it to the command
         # from the invocation.
         if not az_error.command:
-            az_error.command = command_string
+            az_error.command = command
 
     elif isinstance(ex, JMESPathError):
         error_msg = "Invalid jmespath query supplied for `--query`: {}".format(error_msg)
-        az_error = azclierror.InvalidArgumentValueError(error_msg, command=command_string)
+        az_error = azclierror.InvalidArgumentValueError(error_msg, command=command)
         az_error.set_recommendation(QUERY_REFERENCE)
 
     # SSLError is raised when making HTTP requests with 'requests' lib behind a proxy that intercepts HTTPS traffic.
@@ -91,7 +87,7 @@ def handle_exception(ex, cli_ctx=None, command=None):  # pylint: disable=too-man
     # - azure.core.exceptions.ServiceRequestError is raised when indirectly calling 'requests' lib with azure.core,
     #   which wraps the original SSLError
     elif isinstance(ex, SSLError) or isinstance(ex, ServiceRequestError) and isinstance(ex.inner_exception, SSLError):
-        az_error = azclierror.AzureConnectionError(error_msg, command=command_string)
+        az_error = azclierror.AzureConnectionError(error_msg, command=command)
         az_error.set_recommendation(SSLERROR_TEMPLATE)
 
     elif isinstance(ex, CloudError):
@@ -99,45 +95,45 @@ def handle_exception(ex, cli_ctx=None, command=None):  # pylint: disable=too-man
             error_msg = extract_common_error_message(ex)
         status_code = str(getattr(ex, 'status_code', 'Unknown Code'))
         AzCLIErrorType = get_error_type_by_status_code(status_code)
-        az_error = AzCLIErrorType(error_msg, command=command_string)
+        az_error = AzCLIErrorType(error_msg, command=command)
 
     elif isinstance(ex, ValidationError):
-        az_error = azclierror.ValidationError(error_msg, command=command_string)
+        az_error = azclierror.ValidationError(error_msg, command=command)
 
     elif isinstance(ex, azclierror.HTTPError):
         # For resources that don't support CAE - 401 can't be handled
         if ex.response.status_code == 401 and 'WWW-Authenticate' in ex.response.headers:
-            az_error = azclierror.AuthenticationError(ex, command=command_string)
+            az_error = azclierror.AuthenticationError(ex, command=command)
             az_error.set_recommendation("Interactive authentication is needed. Please run:\naz logout\naz login")
         else:
-            az_error = azclierror.UnclassifiedUserFault(ex, command=command_string)
+            az_error = azclierror.UnclassifiedUserFault(ex, command=command)
 
     elif isinstance(ex, CLIError):
         # TODO: Fine-grained analysis here
-        az_error = azclierror.UnclassifiedUserFault(error_msg, command=command_string)
+        az_error = azclierror.UnclassifiedUserFault(error_msg, command=command)
 
     elif isinstance(ex, AzureError):
         if extract_common_error_message(ex):
             error_msg = extract_common_error_message(ex)
         AzCLIErrorType = get_error_type_by_azure_error(ex)
-        az_error = AzCLIErrorType(error_msg, command=command_string)
+        az_error = AzCLIErrorType(error_msg, command=command)
 
     elif isinstance(ex, AzureException):
         if is_azure_connection_error(error_msg):
-            az_error = azclierror.AzureConnectionError(error_msg, command=command_string)
+            az_error = azclierror.AzureConnectionError(error_msg, command=command)
         else:
             # TODO: Fine-grained analysis here for Unknown error
-            az_error = azclierror.UnknownError(error_msg, command=command_string)
+            az_error = azclierror.UnknownError(error_msg, command=command)
 
     elif isinstance(ex, ClientRequestError):
         if is_azure_connection_error(error_msg):
-            az_error = azclierror.AzureConnectionError(error_msg, command=command_string)
+            az_error = azclierror.AzureConnectionError(error_msg, command=command)
         elif isinstance(ex.inner_exception, SSLError):
             # When msrest encounters SSLError, msrest wraps SSLError in ClientRequestError
-            az_error = azclierror.AzureConnectionError(error_msg, command=command_string)
+            az_error = azclierror.AzureConnectionError(error_msg, command=command)
             az_error.set_recommendation(SSLERROR_TEMPLATE)
         else:
-            az_error = azclierror.ClientRequestError(error_msg, command=command_string)
+            az_error = azclierror.ClientRequestError(error_msg, command=command)
 
     elif isinstance(ex, HttpOperationError):
         message, _ = extract_http_operation_error(ex)
@@ -145,12 +141,12 @@ def handle_exception(ex, cli_ctx=None, command=None):  # pylint: disable=too-man
             error_msg = message
         status_code = str(getattr(ex.response, 'status_code', 'Unknown Code'))
         AzCLIErrorType = get_error_type_by_status_code(status_code)
-        az_error = AzCLIErrorType(error_msg, command=command_string)
+        az_error = AzCLIErrorType(error_msg, command=command)
 
     elif isinstance(ex, HTTPError):
         status_code = str(getattr(ex.response, 'status_code', 'Unknown Code'))
         AzCLIErrorType = get_error_type_by_status_code(status_code)
-        az_error = AzCLIErrorType(error_msg, command=command_string)
+        az_error = AzCLIErrorType(error_msg, command=command)
 
     elif isinstance(ex, KeyboardInterrupt):
         error_msg = 'Keyboard interrupt is captured.'
@@ -158,7 +154,7 @@ def handle_exception(ex, cli_ctx=None, command=None):  # pylint: disable=too-man
 
     elif isinstance(ex, PersistenceError):
         # errno is already in strerror. str(ex) gives duplicated errno.
-        az_error = azclierror.CLIInternalError(ex.strerror, command=command_string)
+        az_error = azclierror.CLIInternalError(ex.strerror, command=command)
 
         if ex.errno == 0:
             az_error.set_recommendation(
@@ -172,7 +168,7 @@ def handle_exception(ex, cli_ctx=None, command=None):  # pylint: disable=too-man
 
     else:
         error_msg = "The command failed with an unexpected error. Here is the traceback:"
-        az_error = azclierror.CLIInternalError(error_msg, command=command_string)
+        az_error = azclierror.CLIInternalError(error_msg, command=command)
         az_error.set_exception_trace(ex)
         az_error.set_recommendation(
             "To check existing issues, please visit: https://github.com/Azure/azure-cli/issues")
