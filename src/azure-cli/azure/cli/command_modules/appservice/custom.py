@@ -4232,10 +4232,13 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
         flexconsumption_location = _normalize_flex_location(flexconsumption_location)
 
-    if ((always_ready_instances is not None or maximum_instances is not None or instance_size is not None) and
-            flexconsumption_location is None):
-        raise RequiredArgumentMissingError("usage error: parameters --always-ready-instances, --maximum-instances "
-                                           "and --instance-size must be used with parameter "
+    if (any([always_ready_instances, maximum_instances, instance_size, deployment_storage_name,
+        deployment_storage_container_name, deployment_storage_auth_type, deployment_storage_auth_value]) and
+        flexconsumption_location is None):
+        raise RequiredArgumentMissingError("usage error: parameters --always-ready-instances, --maximum-instances, "
+                                           "--instance-size, --deployment-storage-name, "
+                                           "--deployment-storage-container-name, --deployment-storage-auth-type "
+                                           "and --deployment-storage-auth-value must be used with parameter "
                                            "--flexconsumption-location, please provide the name of the flex plan "
                                            "location using --flexconsumption-location.")
 
@@ -4343,11 +4346,11 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         if deployment_storage_auth_type == 'userAssignedIdentity':
             deployment_storage_user_assigned_identity = _get_or_create_user_assigned_identity(cmd, resource_group_name, name, deployment_storage_auth_value, flexconsumption_location)
             deployment_storage_auth_value = deployment_storage_user_assigned_identity.id
-        elif deployment_storage_auth_type == 'storageAccountAccessKey':
-            deployment_storage_access_key = _get_storage_access_key(cmd.cli_ctx, deployment_storage)
-            site_config.app_settings.append(NameValuePair(name='DeploymentStorageAccountAccessKey',
-                                                          value=deployment_storage_access_key))
-            deployment_storage_auth_value = 'DeploymentStorageAccountAccessKey'
+        elif deployment_storage_auth_type == 'storageAccountConnectionString':
+            deployment_storage_conn_string = _get_storage_connection_string(cmd.cli_ctx, deployment_storage)
+            site_config.app_settings.append(NameValuePair(name='DEPLOYMENT_STORAGE_CONNECTION_STRING',
+                                                          value=deployment_storage_conn_string))
+            deployment_storage_auth_value = 'DEPLOYMENT_STORAGE_CONNECTION_STRING'
 
         functionapp_config = {} # TODO: replace with actual model when api version is relesed
         functionapp_config['deployment'] = {}
@@ -4803,12 +4806,18 @@ def _validate_and_get_deployment_storage(cli_ctx, resource_group_name, deploymen
     return storage_properties
 
 
+def _normalize_functionapp_name(functionapp_name):
+    import re, string
+    return re.sub(r"[^a-zA-Z0-9]", '', functionapp_name).lower()
+
+
 def _get_or_create_deployment_storage_container(cmd, resource_group_name, functionapp_name, deployment_storage_name, deployment_storage_container_name):
     storage_client = get_mgmt_service_client(cmd.cli_ctx, StorageManagementClient)
     if deployment_storage_container_name:
         storage_container = storage_client.blob_containers.get(resource_group_name, deployment_storage_name, deployment_storage_container_name)
     else:
-        deployment_storage_container_name = "packagecontainer-{}".format(functionapp_name)[:63]
+        from random import randint
+        deployment_storage_container_name = "released-package{}{:07}".format(_normalize_functionapp_name(functionapp_name)[:30], randint(0, 9999999))
         logger.warning("Creating deployment storage account container '%s' ...", deployment_storage_container_name)
         
         from azure.mgmt.storage.models import BlobContainer
@@ -4823,9 +4832,11 @@ def _get_or_create_user_assigned_identity(cmd, resource_group_name, functionapp_
     from azure.mgmt.msi import ManagedServiceIdentityClient
     msi_client = get_mgmt_service_client(cmd.cli_ctx, ManagedServiceIdentityClient)
     if user_assigned_identity:
+        if is_valid_resource_id(user_assigned_identity):
+            user_assigned_identity = parse_resource_id(user_assigned_identity)['name']
         identity = msi_client.user_assigned_identities.get(resource_group_name=resource_group_name, resource_name=user_assigned_identity)
     else:
-        user_assigned_identity_name = "useridentity-{}".format(functionapp_name)
+        user_assigned_identity_name = _normalize_functionapp_name(functionapp_name)[:24]
         logger.warning("Creating user assigned managed identity '%s' ...", user_assigned_identity_name)
         
         from azure.mgmt.msi.models import Identity
@@ -4835,16 +4846,25 @@ def _get_or_create_user_assigned_identity(cmd, resource_group_name, functionapp_
     return identity
 
 
-def _get_storage_access_key(cli_ctx, deployment_storage_account):
+def _get_storage_connection_string(cli_ctx, deployment_storage_account):
     resource_group_name = parse_resource_id(deployment_storage_account.id)['resource_group']
     deployment_storage_name = deployment_storage_account.name
     storage_client = get_mgmt_service_client(cli_ctx, StorageManagementClient)
     access_keys = storage_client.storage_accounts.list_keys(resource_group_name, deployment_storage_name)
     try:
-        return access_keys.keys[0].value
+        key = access_keys.keys[0].value
     except AttributeError:
         # Older API versions have a slightly different structure
-        return access_keys.key1
+        key = access_keys.key1
+
+    endpoint_suffix = cli_ctx.cloud.suffixes.storage_endpoint
+    connection_string = 'DefaultEndpointsProtocol={};EndpointSuffix={};AccountName={};AccountKey={}'.format(
+        "https",
+        endpoint_suffix,
+        deployment_storage_name,
+        key)
+
+    return connection_string
 
 
 def _assign_deployment_storage_managed_identity_role(cli_ctx, deployment_storage_account, principal_id):
