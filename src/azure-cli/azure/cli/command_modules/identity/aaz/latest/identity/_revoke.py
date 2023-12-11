@@ -44,8 +44,8 @@ class Revoke(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.revoke_token_resource_name = AAZStrArg(
-            options=["--revoke-token-resource-name"],
+        _args_schema.resource_name = AAZStrArg(
+            options=["--resource-name"],
             help="The name of the identity resource for revoking token",
             required=True,
             id_part="name",
@@ -102,7 +102,7 @@ class Revoke(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "revokeTokenResourceName", self.ctx.args.revoke_token_resource_name,
+                    "revokeTokenResourceName", self.ctx.args.resource_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
