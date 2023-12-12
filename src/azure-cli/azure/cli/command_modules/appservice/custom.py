@@ -3954,7 +3954,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             site_config.function_app_scale_limit = max_replicas
 
         managed_environment = get_managed_environment(cmd, resource_group_name, environment)
-        location = "East Asia (Stage)" #managed_environment.location
+        location = managed_environment.location
         functionapp_def.location = location
 
         functionapp_def.enable_additional_properties_sending()

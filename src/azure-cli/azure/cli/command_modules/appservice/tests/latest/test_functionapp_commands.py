@@ -456,6 +456,8 @@ class FunctionWorkloadProfile(ScenarioTest):
     @ResourceGroupPreparer(location="eastasia")
     @StorageAccountPreparer()
     def test_functionapp_workloadprofiles(self, resource_group, storage_account):
+        
+        location = "eastasia"
         functionapp_name = self.create_random_name(
             'functionapp', 32)
         managed_environment_name = self.create_random_name(
@@ -465,10 +467,10 @@ class FunctionWorkloadProfile(ScenarioTest):
             'wlp', 15
         )
 
-        self.cmd('containerapp env create --name {} --resource-group {} --location {} --enable-workload-profiles'.format(
+        self.cmd('containerapp env create --name {} --resource-group {} --location {} --enable-workload-profiles  --logs-destination none'.format(
             managed_environment_name,
             resource_group,
-            "eastasia"
+            location,
         ))
         
         self.cmd('containerapp env workload-profile add --name {} --resource-group {} --workload-profile-type D4 -w {} --min-nodes 3 --max-nodes 6'.format(
