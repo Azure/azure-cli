@@ -455,7 +455,27 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
 
     return _build_app_settings_output(result.properties, app_settings_slot_cfg_names, redact=True)
 
+def update_generic_site_ops_polling(cmd, resource_group_name, name, config_name, slot, configs):
+    try:
+        return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, config_name, slot, configs)
+    except Exception as ex:  # pylint: disable=broad-except
+        if not is_centauri_functionapp(cmd, resource_group_name, name):
+            raise CLIError(ex)
+        else:
+            poll_url = ex.response.headers['Location'] if 'Location' in ex.response.headers else None
+            if ex.response.status_code == 202 and poll_url:
+                r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+                poll_timeout = time.time() + 60 * 2  # 2 minute timeout
 
+                while r.status_code != 200 and time.time() < poll_timeout:
+                    time.sleep(5)
+                    r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+                return r.cors    
+            else:
+                raise CLIError(ex)
+        
+        return result.cors
+    
 # TODO: Update manual polling to use LongRunningOperation once backend API & new SDK supports polling
 def update_application_settings_polling(cmd, resource_group_name, name, app_settings, slot, client):
     try:
@@ -2781,7 +2801,8 @@ def enable_credentials(cmd, resource_group_name, name, enable, slot=None):
     if not configs.cors:
         configs.cors = CorsSettings()
     configs.cors.support_credentials = enable
-    result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+    result = update_generic_site_ops_polling(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+    #result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
     return result.cors
 
 
@@ -2791,24 +2812,9 @@ def add_cors(cmd, resource_group_name, name, allowed_origins, slot=None):
     if not configs.cors:
         configs.cors = CorsSettings()
     configs.cors.allowed_origins = (configs.cors.allowed_origins or []) + allowed_origins
-    try:
-        result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
-    except Exception as ex:  # pylint: disable=broad-except
-        poll_url = ex.response.headers['Location'] if 'Location' in ex.response.headers else None
-        if ex.response.status_code == 202 and poll_url:
-            r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
-            poll_timeout = time.time() + 60 * 2  # 2 minute timeout
-
-            while r.status_code != 200 and time.time() < poll_timeout:
-                time.sleep(5)
-                r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
-            return r.cors    
-        else:
-            raise CLIError(ex)
-        
-    # result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+    result = update_generic_site_ops_polling(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+    #result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
     return result.cors
-
 
 def remove_cors(cmd, resource_group_name, name, allowed_origins, slot=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
@@ -2817,21 +2823,9 @@ def remove_cors(cmd, resource_group_name, name, allowed_origins, slot=None):
             configs.cors.allowed_origins = [x for x in (configs.cors.allowed_origins or []) if x not in allowed_origins]
         else:
             configs.cors.allowed_origins = []
-        try:
-            configs = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
-        except Exception as ex:  # pylint: disable=broad-except
-           poll_url = ex.response.headers['Location'] if 'Location' in ex.response.headers else None
-           if ex.response.status_code == 202 and poll_url:
-               r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
-               poll_timeout = time.time() + 60 * 2  # 2 minute timeout
-
-               while r.status_code != 200 and time.time() < poll_timeout:
-                   time.sleep(5)
-                   r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
-               return r.cors    
-        else:
-            raise CLIError(ex)
-    return configs.cors
+        
+    result = update_generic_site_ops_polling(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+    return result.cors
 
 
 def show_cors(cmd, resource_group_name, name, slot=None):
