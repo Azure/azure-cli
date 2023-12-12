@@ -3799,7 +3799,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        image=None, tags=None, assign_identities=None,
                        role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
                        environment=None, min_replicas=None, max_replicas=None, workspace=None,
-                       workload_profile_name=None,cpu=None, memory=None):
+                       workload_profile_name=None, cpu=None, memory=None):
 
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
