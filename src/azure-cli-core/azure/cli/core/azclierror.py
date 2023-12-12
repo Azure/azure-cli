@@ -45,7 +45,14 @@ class AzCLIError(CLIError):
 
     def request_error_assistance(self, cli_ctx=None) -> None:
         # Get error reason from LLM
-        self.error_suggestion = request_error_assistance(command=self.command, error=self.error_msg, cli_ctx=cli_ctx)
+
+        error_msg = self.error_msg
+        # We always set the same message for CLIInternalError but it takes an exception as exception_trace.
+        # So we'll use the message from exception_trace as the underlying error.
+        if isinstance(self, CLIInternalError) and self.exception_trace is not None:
+            error_msg = str(self.exception_trace)
+
+        self.error_suggestion = request_error_assistance(command=self.command, error=error_msg, cli_ctx=cli_ctx)
 
     def set_recommendation(self, recommendation):
         """" Set manual recommendations for the error.
