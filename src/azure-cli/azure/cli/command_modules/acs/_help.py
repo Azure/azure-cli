@@ -527,7 +527,7 @@ parameters:
     short-summary: The ipTags of the node public IPs.
   - name: --crg-id
     type: string
-    short-summary: The crg-id used to associate the new cluster with the existed Capacity Reservation Group resource.
+    short-summary: The crg id used to associate the new cluster with the existed Capacity Reservation Group resource.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
