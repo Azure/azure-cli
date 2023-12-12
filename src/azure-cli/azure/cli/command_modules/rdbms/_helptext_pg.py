@@ -676,9 +676,11 @@ short-summary: Stop replication of a read replica and promote it to a standalone
 examples:
   - name: Stop replication to 'testReplicaServer' and promote it a standalone read/write server.
     text: az postgres flexible-server replica promote -g testGroup -n testReplicaServer
-  - name: Stop replication to 'testReplicaServer' and promote it a standalone read/write server with with forced data sync.
+  - name: Stop replication to 'testReplicaServer' and promote it a standalone read/write server with forced data sync.
     text: az postgres flexible-server replica promote -g testGroup -n testReplicaServer --promote-mode standalone --promote-option forced
-  - name: Stop replication to 'testReplicaServer' and promote it a switchover read/write server.
+  - name: >
+      Stop replication to 'testReplicaServer' and promote it to primary server with planned data sync. \
+      The replica you are promoting must have the reader virtual endpoint assigned, or you will receive an error on promotion.
     text: az postgres flexible-server replica promote -g testGroup -n testReplicaServer --promote-mode switchover --promote-option planned
 """
 
